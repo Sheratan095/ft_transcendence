@@ -1,5 +1,5 @@
 {
-  "watch": ["auth.js", ".env"],
+  "watch": ["**.js", ".env"],
   "ignore": ["node_modules", "*.log", "*.json"],
   "ext": "js,json,env",
   "env": {

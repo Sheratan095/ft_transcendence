@@ -27,6 +27,7 @@ async function	validateApiKey(request, reply)
 
 let	refreshTokens = []
 
+
 fastify.post('/token', { preHandler: validateApiKey }, async (request, reply) =>
 {
 	const	refreshToken = request.body.token

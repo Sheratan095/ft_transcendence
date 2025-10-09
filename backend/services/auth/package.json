@@ -2,10 +2,10 @@
   "name": "auth",
   "version": "1.0.0",
   "description": "",
-  "main": "auth.js",
+  "main": "src/auth.js",
   "scripts": {
-    "start": "node auth.js",
-    "dev": "nodemon auth.js",
+    "start": "node src/auth.js",
+    "dev": "nodemon src/auth.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
