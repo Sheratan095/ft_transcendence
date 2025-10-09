@@ -1,9 +1,9 @@
 GET http://localhost:3000/posts
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSmltIiwiaWF0IjoxNTY4NzU5ODEyLCJleHAiOjE1Njg3NTk4Mjd9.0i6Im2gKz7jj8wM7aZZzOPaBS_xHoZWAqBwnldn-lQQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSmltIiwiaWF0IjoxNzYwMDM3MjgwLCJleHAiOjE3NjAwMzcyOTV9.GUzEiSkbVTV1e_WCnyeRWHYuicDvHQFEJSULBg-Vo8k
 
 ###
 
-DELETE http://localhost:4000/logout
+DELETE http://localhost:3000/logout
 Content-Type: application/json
 
 {
@@ -12,7 +12,7 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:4000/token
+POST http://localhost:3000/token
 Content-Type: application/json
 
 {
@@ -20,8 +20,8 @@ Content-Type: application/json
 }
 
 ###
-
-POST http://localhost:4000/login
+#return token and refresh token
+POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {

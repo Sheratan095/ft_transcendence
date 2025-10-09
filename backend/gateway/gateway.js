@@ -26,6 +26,29 @@ fastify.get('/posts', { preHandler: authenticateToken }, async (request, reply) 
 	return (reply.send(userPosts))
 })
 
+// This doesn't need to authenticate the token beacause, before login the user doesn't have a token
+fastify.post('/auth/login', async (request, reply) =>
+{
+	// Redirect login requests to auth service
+	try
+	{
+		const	response = await axios.post(`${AUTH_SERVICE_URL}/login`, request.body,
+		{
+			headers: {
+				'x-api-key': process.env.INTERNAL_API_KEY
+			}
+		})
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('Auth service error:', err.message)
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+})
+
 // Authentication middleware that validates JWT tokens via auth service
 // This function is called before protected routes to verify user authentication
 async function	authenticateToken(request, reply)
@@ -40,8 +63,15 @@ async function	authenticateToken(request, reply)
 
 	try
 	{
-		// Call auth service to validate the token
-		const	response = await axios.post(`${AUTH_SERVICE_URL}/validate-token`, {token: token})
+		// Call auth service to validate the token with API key
+		const	response = await axios.post(`${AUTH_SERVICE_URL}/validate-token`, 
+			{token: token},
+			{
+				headers: {
+					'x-api-key': process.env.INTERNAL_API_KEY
+				}
+			}
+		)
 
 		// If token is valid, attach user data to request object
 		if (response.data.valid)

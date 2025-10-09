@@ -2,23 +2,42 @@
 GATEWAY_PORT=3000
 AUTH_PORT=4000
 
-# Default target
+# Default target (production mode)
 .PHONY: start
 start: start-auth start-gateway
 	@echo "All services started successfully!"
 
-# Start Auth service
+# Development mode with auto-restart by nodemon
+.PHONY: dev
+dev: dev-auth dev-gateway
+	@echo "All services started in development mode with auto-restart!"
+
+# Start Auth service (production)
 .PHONY: start-auth
 start-auth:
 	@echo "Starting Auth Service on port $(AUTH_PORT)..."
 	@cd backend/services/auth && node auth.js &
 	@sleep 2
 
-# Start Gateway
+# Start Auth service (development with auto-restart)
+.PHONY: dev-auth
+dev-auth:
+	@echo "Starting Auth Service in dev mode on port $(AUTH_PORT)..."
+	@cd backend/services/auth && npm run dev &
+	@sleep 2
+
+# Start Gateway (production)
 .PHONY: start-gateway
 start-gateway:
 	@echo "Starting Gateway on port $(GATEWAY_PORT)..."  
 	@cd backend/gateway && node gateway.js &
+	@sleep 2
+
+# Start Gateway (development with auto-restart)
+.PHONY: dev-gateway
+dev-gateway:
+	@echo "Starting Gateway in dev mode on port $(GATEWAY_PORT)..."
+	@cd backend/gateway && npm run dev &
 	@sleep 2
 
 # Stop all Node services
@@ -66,9 +85,17 @@ logs:
 .PHONY: help
 help:
 	@echo "Available commands:"
-	@echo "  make start    - Start all services"
-	@echo "  make stop     - Stop all services" 
-	@echo "  make restart  - Restart all services"
-	@echo "  make status   - Check service status"
-	@echo "  make install  - Install dependencies"
-	@echo "  make help     - Show this help"
+	@echo "  Production mode:"
+	@echo "    make start    - Start all services"
+	@echo "    make stop     - Stop all services" 
+	@echo "    make restart  - Restart all services"
+	@echo ""
+	@echo "  Development mode (auto-restart on file changes):"
+	@echo "    make dev      - Start all services in dev mode"
+	@echo "    make dev-auth - Start only auth service in dev mode"  
+	@echo "    make dev-gateway - Start only gateway in dev mode"
+	@echo ""
+	@echo "  Utilities:"
+	@echo "    make status   - Check service status"
+	@echo "    make install  - Install dependencies"
+	@echo "    make help     - Show this help"

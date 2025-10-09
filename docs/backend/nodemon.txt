@@ -1,0 +1,33 @@
+nodemon (short for node monitor) is a development utility that automatically restarts your Node.js application when files change.
+So, instead of running:
+	node index.js
+and manually restarting the server each time you edit a file, you just do:
+	nodemon index.js
+and it watches your files, restarting automatically whenever you save changes.
+
+	npm install --save-dev nodemon
+
+In package.json add:
+"scripts":
+{
+  "dev": "nodemon index.js",
+  "start": "node index.js"
+}
+
+and then run 
+	npm run dev
+
+nodemon.json configuration file:
+"watch"	Directories or files to watch for changes
+"ext"	:	File extensions that trigger a restart
+"ignore":	Paths or patterns to ignore
+"exec"	:	Command to run when nodemon starts
+"env"	:	Environment variables available in the process
+
+example:
+{
+  "watch": ["src"],
+  "ext": "js,json",
+  "ignore": ["node_modules"],
+  "exec": "node src/index.js"
+}
