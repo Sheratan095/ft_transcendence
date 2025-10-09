@@ -1,10 +1,11 @@
-require('dotenv').config()
+import dotenv from 'dotenv';
+dotenv.config();
+import { AuthDatabase } from './authdb.js';
+import Fastify from 'fastify';
+import jwt from 'jsonwebtoken';
 
-const	fastify = require('fastify')({ logger: true })
-const	jwt = require('jsonwebtoken')
-
-// Register JSON parser
-fastify.register(require('@fastify/jwt'), {secret: process.env.ACCESS_TOKEN_SECRET})
+const	fastify = Fastify({ logger: true });
+let		authDatabase;
 
 
 // Middleware to validate API key for inter-service communication
@@ -12,6 +13,8 @@ fastify.register(require('@fastify/jwt'), {secret: process.env.ACCESS_TOKEN_SECR
 //	this ensures that only internal services can access protected endpoints
 async function	validateApiKey(request, reply)
 {
+	console.log('Register request received in gateway:', request.body)
+
 	const	apiKey = request.headers['x-api-key']
 	const	expectedApiKey = process.env.INTERNAL_API_KEY
 	
@@ -60,6 +63,7 @@ fastify.post('/login', { preHandler: validateApiKey }, async (request, reply) =>
 {
 	// Authenticate User
 
+
 	const	username = request.body.username
 	const	user = { name: username }
 
@@ -68,6 +72,30 @@ fastify.post('/login', { preHandler: validateApiKey }, async (request, reply) =>
 	refreshTokens.push(refreshToken)
 
 	return (reply.send({ accessToken: accessToken, refreshToken: refreshToken }))
+})
+
+fastify.post('/register', { preHandler: validateApiKey }, async (request, reply) =>
+{	
+
+
+	const	username = request.body.username
+	const	password = request.body.password
+
+	if (!username || !password)
+		return (reply.code(400).send({ error: 'Username and password are required' }))
+
+	try
+	{
+		// TO DO hash password before storing and check if the query was successful
+		const	userId = await authDatabase.createUser(username, password)
+		return (reply.code(201).send({ message: 'User registered successfully', userId: userId }))
+	}
+	catch (err)
+	{
+		if (err.code === 'SQLITE_CONSTRAINT_UNIQUE')
+			return (reply.code(409).send({ error: 'Username already exists' }))
+		return (reply.code(500).send({ error: 'Internal server error' }))
+	}
 })
 
 // This endpoint should only be called by the gateway
@@ -97,6 +125,12 @@ function	generateAccessToken(user)
 const	start = async () => {
 	try
 	{
+		// // Register JSON parser
+		// await fastify.register(import('@fastify/jwt'), {secret: process.env.ACCESS_TOKEN_SECRET});
+
+		authDatabase = new AuthDatabase()
+		await authDatabase.initialize()
+
 		await fastify.listen({ port: 4000, host: '0.0.0.0' })
 		console.log('Server is running on port 4000')
 	}

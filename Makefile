@@ -16,7 +16,7 @@ dev: dev-auth dev-gateway
 .PHONY: start-auth
 start-auth:
 	@echo "Starting Auth Service on port $(AUTH_PORT)..."
-	@cd backend/services/auth && node auth.js &
+	@cd backend/services/auth && node src/auth.js &
 	@sleep 2
 
 # Start Auth service (development with auto-restart)

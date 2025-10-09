@@ -38,6 +38,32 @@ fastify.post('/auth/login', async (request, reply) =>
 				'x-api-key': process.env.INTERNAL_API_KEY
 			}
 		})
+		console.log('Register request received in gateway:', request.body)
+
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('Auth service error:', err.message)
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+})
+
+fastify.post('/auth/register', async (request, reply) =>
+{
+	console.log('Register request received in gateway:', request.body)
+
+	// Redirect registration requests to auth service
+	try
+	{
+		const	response = await axios.post(`${AUTH_SERVICE_URL}/register`, request.body,
+		{
+			headers: {
+				'x-api-key': process.env.INTERNAL_API_KEY
+			}
+		})
 		return (reply.send(response.data))
 	}
 	catch (err)
