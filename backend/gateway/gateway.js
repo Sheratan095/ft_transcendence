@@ -1,0 +1,85 @@
+// Initialize Fastify instance with built-in logging
+const fastify = require('fastify')({ logger: true })
+// HTTP client for making requests to other services
+const axios = require('axios')
+
+const	AUTH_SERVICE_URL = 'http://localhost:4000'
+
+const posts = [
+	{
+		username: 'Kyle',
+		title: 'Post 1'
+	},
+	{
+		username: 'Jim',
+		title: 'Post 2'
+	}
+]
+
+// Protected route to get posts for authenticated user
+// Uses authenticateToken as preHandler to validate JWT before processing request
+fastify.get('/posts', { preHandler: authenticateToken }, async (request, reply) =>
+{
+	// Filter posts to only return posts belonging to the authenticated user
+	const	userPosts = posts.filter(post => post.username === request.user.name)
+
+	return (reply.send(userPosts))
+})
+
+// Authentication middleware that validates JWT tokens via auth service
+// This function is called before protected routes to verify user authentication
+async function	authenticateToken(request, reply)
+{
+	// Extract Authorization header and parse Bearer token
+	const	authHeader = request.headers['authorization']
+	const	token = authHeader && authHeader.split(' ')[1]
+	
+	// Return 401 if no token provided
+	if (token == null)
+		return (reply.code(401).send({ error: 'Authorization header required' }))
+
+	try
+	{
+		// Call auth service to validate the token
+		const	response = await axios.post(`${AUTH_SERVICE_URL}/validate-token`, {token: token})
+
+		// If token is valid, attach user data to request object
+		if (response.data.valid)
+			request.user = response.data.user
+		else
+			return (reply.code(403).send({ error: 'Invalid token' }))
+
+	}
+	catch (err)
+	{
+		// Log authentication errors for debugging
+		console.log('Auth service error:', err.message)
+
+		// Handle specific auth service responses
+		if (err.response && err.response.status === 403)
+			return (reply.code(403).send({ error: 'Invalid token' }))
+
+		// Handle auth service unavailability or network errors
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+}
+
+// Server startup function with error handling
+const	start = async () =>
+{
+	try
+	{
+		// Start server on port 3000, listening on all interfaces
+		await fastify.listen({ port: 3000})
+		console.log('Gateway server is running on port 3000')
+
+	}
+	catch (err)
+	{
+		// Log startup errors and exit process
+		fastify.log.error(err)
+		process.exit(1)
+	}
+}
+// Initialize the server
+start()
