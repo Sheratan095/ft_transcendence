@@ -1,0 +1,12 @@
+High-level flow (what happens and who does what)
+User clicks “Sign in with GitHub” in frontend.
+Frontend → GET /auth/github/login (Auth Gateway routes to Auth Service).
+Auth Service builds GitHub authorize URL with client_id, redirect_uri, state (and optionally PKCE) and redirects the browser to GitHub.
+User authenticates at GitHub and consents to scopes.
+GitHub redirects browser → GET /auth/github/callback?code=...&state=... (your Auth Service).
+Auth Service verifies state, exchanges code for an access token (server-to-server POST to GitHub).
+Auth Service calls GitHub API /user (and /user/emails if needed) to get user info.
+Auth Service creates/updates a local user (store GitHub id, email) in its DB.
+Auth Service issues your own JWT (short-lived access token) and optionally a refresh token, stores refresh token hashed.
+Auth Service responses: set secure HttpOnly cookie with JWT (or redirect back with token safe delivery), then redirect the browser to the frontend app.
+Frontend uses the JWT (from cookie or stored) for subsequent API calls (API Gateway verifies JWT
