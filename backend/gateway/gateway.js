@@ -1,5 +1,8 @@
+// Load environment variables
+require('dotenv').config()
+
 // Initialize Fastify instance with built-in logging
-const fastify = require('fastify')({ logger: true })
+const fastify = require('fastify')({ logger: false })
 // HTTP client for making requests to other services
 const axios = require('axios')
 
@@ -38,7 +41,6 @@ fastify.post('/auth/login', async (request, reply) =>
 				'x-api-key': process.env.INTERNAL_API_KEY
 			}
 		})
-		console.log('Register request received in gateway:', request.body)
 
 		return (reply.send(response.data))
 	}
@@ -53,7 +55,7 @@ fastify.post('/auth/login', async (request, reply) =>
 
 fastify.post('/auth/register', async (request, reply) =>
 {
-	console.log('Register request received in gateway:', request.body)
+	console.log('Api key in register before: ', process.env.INTERNAL_API_KEY)
 
 	// Redirect registration requests to auth service
 	try
@@ -64,6 +66,8 @@ fastify.post('/auth/register', async (request, reply) =>
 				'x-api-key': process.env.INTERNAL_API_KEY
 			}
 		})
+		console.log('Api key in register: ', process.env.INTERNAL_API_KEY)
+
 		return (reply.send(response.data))
 	}
 	catch (err)

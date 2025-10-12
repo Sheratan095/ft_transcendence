@@ -16,28 +16,28 @@ dev: dev-auth dev-gateway
 .PHONY: start-auth
 start-auth:
 	@echo "Starting Auth Service on port $(AUTH_PORT)..."
-	@cd backend/services/auth && node src/auth.js &
+	@cd services/auth && node src/auth.js &
 	@sleep 2
 
 # Start Auth service (development with auto-restart)
 .PHONY: dev-auth
 dev-auth:
 	@echo "Starting Auth Service in dev mode on port $(AUTH_PORT)..."
-	@cd backend/services/auth && npm run dev &
+	@cd services/auth && npm run dev &
 	@sleep 2
 
 # Start Gateway (production)
 .PHONY: start-gateway
 start-gateway:
 	@echo "Starting Gateway on port $(GATEWAY_PORT)..."  
-	@cd backend/gateway && node gateway.js &
+	@cd gateway && node gateway.js &
 	@sleep 2
 
 # Start Gateway (development with auto-restart)
 .PHONY: dev-gateway
 dev-gateway:
 	@echo "Starting Gateway in dev mode on port $(GATEWAY_PORT)..."
-	@cd backend/gateway && npm run dev &
+	@cd gateway && npm run dev &
 	@sleep 2
 
 # Stop all Node services
@@ -68,8 +68,8 @@ restart: stop
 .PHONY: install
 install:
 	@echo "Installing dependencies..."
-	@cd backend/services/auth && npm install
-	@cd backend/gateway && npm install
+	@cd services/auth && npm install
+	@cd gateway && npm install
 	@echo "Dependencies installed!"
 
 # Show logs (requires services to be running)
@@ -77,9 +77,9 @@ install:
 logs:
 	@echo "Use Ctrl+C to stop viewing logs"
 	@echo "=== Auth Service Logs ==="
-	@tail -f backend/services/auth/auth.log 2>/dev/null || echo "No auth logs found"
+	@tail -f services/auth/auth.log 2>/dev/null || echo "No auth logs found"
 	@echo "=== Gateway Logs ==="  
-	@tail -f backend/gateway/gateway.log 2>/dev/null || echo "No gateway logs found"
+	@tail -f gateway/gateway.log 2>/dev/null || echo "No gateway logs found"
 
 # Help
 .PHONY: help

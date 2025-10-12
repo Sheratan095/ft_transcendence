@@ -2,6 +2,7 @@
   "name": "auth",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "main": "src/auth.js",
   "scripts": {
     "start": "node src/auth.js",
@@ -10,7 +11,6 @@
   },
   "keywords": [],
   "author": "",
-  "type": "module",
   "license": "ISC",
   "dependencies": {
     "@fastify/jwt": "^10.0.0",
