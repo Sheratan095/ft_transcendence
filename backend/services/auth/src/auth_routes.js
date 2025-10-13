@@ -6,6 +6,8 @@ import {
 	// validateToken
 } from './auth_controllers.js';
 
+import { validateApiKey } from './auth_help.js';
+
 const	registerOpts = 
 {
 	schema: 
@@ -21,6 +23,7 @@ const	registerOpts =
 			}
 		}
 	},
+	preHandler: validateApiKey,
 	handler: register
 }
 
@@ -39,6 +42,7 @@ const loginOpts =
 			}
 		}
 	},
+	preHandler: validateApiKey,
 	handler: login
 }
 

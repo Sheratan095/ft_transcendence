@@ -1,20 +1,19 @@
 import Fastify from 'fastify';
-import dotenv from 'dotenv';
+const	fastify = Fastify({ logger: false });
 
+// Load environment variables from .env file
+import dotenv from 'dotenv';
 dotenv.config();
 
 import { AuthDatabase } from './auth_db.js';
-
-import { checkEnvVariables } from './auth_help.js';
-import { authRoutes } from './auth_routes.js';
-
-// Validate required environment variables
-checkEnvVariables(['ACCESS_TOKEN_SECRET', 'REFRESH_TOKEN_SECRET', 'INTERNAL_API_KEY']);
-
-const	fastify = Fastify({ logger: false });
 let		authDatabase;
 
+// Validate required environment variables
+import { checkEnvVariables } from './auth_help.js';
+checkEnvVariables(['ACCESS_TOKEN_SECRET', 'REFRESH_TOKEN_SECRET', 'INTERNAL_API_KEY']);
+
 // Setup routes
+import { authRoutes } from './auth_routes.js';
 fastify.register(authRoutes)
 
 const	start = async () =>
@@ -37,5 +36,4 @@ const	start = async () =>
 		process.exit(1)
 	}
 }
-
 start()
