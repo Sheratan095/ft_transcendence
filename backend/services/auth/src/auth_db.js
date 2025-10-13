@@ -1,4 +1,7 @@
 import sqlite3 from "sqlite3";
+
+import { v4 as uuidv4 } from 'uuid';
+
 import { promisify } from "util";
 import { mkdir } from "fs/promises";
 import path from "path";
@@ -38,23 +41,44 @@ export class AuthDatabase
 	}
 
 	// Private method (#) to create tables
-	async #createTables()
+	async	#createTables()
 	{
+		// TO DO remove it
+		await this.db.run('DROP TABLE IF EXISTS users');
+
 		await this.db.run(`
 			CREATE TABLE IF NOT EXISTS users (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				id TEXT PRIMARY KEY,
 				username TEXT UNIQUE,
 				password TEXT
 			)
 		`);
 	}
 
+	// Make sure the generated UUID is unique, this chance is very low but possible
+	async	#generateUUID()
+	{
+		const	id = uuidv4();
+		while (await this.db.get("SELECT id FROM users WHERE id = ?", [id]))
+			id = uuidv4();
+
+		return (id);
+	}
+
   // -------- CRUD METHODS --------
 
-	async createUser(username, password)
+	async	createUser(username, password)
 	{
-		const result = await this.db.run("INSERT INTO users (username, password) VALUES (?, ?)", [username, password]);
-		return (result.lastID);
+		const	id = await this.#generateUUID();
+
+		await this.db.run("INSERT INTO users (id, username, password) VALUES (?, ?, ?)", [id, username, password]);
+
+		return (id);
+	}
+
+	async getAllUsers()
+	{
+		return (await this.db.all("SELECT * FROM users"));
 	}
 
 	async getUserByUsername(username)
@@ -62,9 +86,15 @@ export class AuthDatabase
 		return (await this.db.get("SELECT * FROM users WHERE username = ?", [username]));
 	}
 
+	async deleteUserById(userId)
+	{
+		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);
+	}
+
 	async close()
 	{
-		if (this.db) {
+		if (this.db)
+		{
 			this.db.close();
 			this.db = null;
 		}

@@ -55,8 +55,6 @@ fastify.post('/auth/login', async (request, reply) =>
 
 fastify.post('/auth/register', async (request, reply) =>
 {
-	console.log('Api key in register before: ', process.env.INTERNAL_API_KEY)
-
 	// Redirect registration requests to auth service
 	try
 	{
@@ -66,7 +64,6 @@ fastify.post('/auth/register', async (request, reply) =>
 				'x-api-key': process.env.INTERNAL_API_KEY
 			}
 		})
-		console.log('Api key in register: ', process.env.INTERNAL_API_KEY)
 
 		return (reply.send(response.data))
 	}

@@ -14,7 +14,6 @@ checkEnvVariables(['ACCESS_TOKEN_SECRET', 'REFRESH_TOKEN_SECRET', 'INTERNAL_API_
 
 // Setup routes
 import { authRoutes } from './auth_routes.js';
-fastify.register(authRoutes)
 
 const	start = async () =>
 {
@@ -23,6 +22,12 @@ const	start = async () =>
 		// Initialize database
 		authDatabase = new AuthDatabase()
 		await authDatabase.initialize()
+
+		// Make database available to all routes
+		fastify.decorate('authDb', authDatabase)
+
+		// Setup routes after database is initialized
+		fastify.register(authRoutes)
 
 		const port = process.env.PORT || 4000;
 		const host = process.env.HOST || '0.0.0.0';
