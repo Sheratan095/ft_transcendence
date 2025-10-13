@@ -10,8 +10,8 @@ and it watches your files, restarting automatically whenever you save changes.
 In package.json add:
 "scripts":
 {
-  "dev": "nodemon index.js",
-  "start": "node index.js"
+	"dev": "nodemon index.js",
+	"start": "node index.js"
 }
 
 and then run 
@@ -23,11 +23,13 @@ nodemon.json configuration file:
 "ignore":	Paths or patterns to ignore
 "exec"	:	Command to run when nodemon starts
 "env"	:	Environment variables available in the process
+"verbose"	:	Controls how much detail nodemon prints to the console (log)
+"delay"	:	Defines how long nodemon waits after detecting a file change before restarting your app
 
 example:
 {
-  "watch": ["src"],
-  "ext": "js,json",
-  "ignore": ["node_modules"],
-  "exec": "node src/index.js"
+	"watch": ["src"],
+	"ext": "js,json",
+	"ignore": ["node_modules"],
+	"exec": "node src/index.js"
 }
