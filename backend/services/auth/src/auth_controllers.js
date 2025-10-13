@@ -9,8 +9,9 @@ export const	register = async (req, reply) =>
 	const	username = req.body.username
 	const	password = req.body.password
 
-	if (!username || !password)
-		return (reply.code(400).send({ error: 'Username and password are required' }))
+	// ALL STANDARD VALIDATIONS ARE DONE IN THE SCHEMA OF THE ROUTE
+	// if (!username || !password)
+	// 	return (reply.code(400).send({ error: 'Username and password are required' }))
 
 	try
 	{
