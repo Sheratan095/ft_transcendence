@@ -55,7 +55,7 @@ export class AuthDatabase
 
 			CREATE TABLE IF NOT EXISTS refresh_tokens (
 				id TEXT PRIMARY KEY,
-				user_id TEXT,
+				user_id TEXT UNIQUE,
 				token TEXT,
 				created_at INTEGER,
 				expires_at INTEGER,
@@ -102,6 +102,19 @@ export class AuthDatabase
 	}
 
 	// -------- REFRESH TOKENS METHODS --------
+
+	async	addRefreshToken(userId, token, expiresAt)
+	{
+		const	id = uuidv4();
+		const	createdAt = Date.now();
+
+		await this.db.run(
+			"INSERT INTO refresh_tokens (id, user_id, token, created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
+			[id, userId, token, createdAt, expiresAt]
+		);
+
+		return (id);
+	}
 
 	async close()
 	{
