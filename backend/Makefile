@@ -44,8 +44,10 @@ dev-gateway:
 .PHONY: stop
 stop:
 	@echo "Stopping all Node services..."
-	@-lsof -ti:$(AUTH_PORT) | xargs -r kill
-	@-lsof -ti:$(GATEWAY_PORT) | xargs -r kill
+	@-ss -tlnp | grep ":$(AUTH_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
+	@-ss -tlnp | grep ":$(GATEWAY_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
+	@-pkill -f "nodemon.*auth\.js" 2>/dev/null || true
+	@-pkill -f "nodemon.*gateway\.js" 2>/dev/null || true
 	@sleep 1
 	@echo "All services stopped"
 
@@ -54,9 +56,9 @@ stop:
 status:
 	@echo "Checking service status..."
 	@echo "Auth Service (port $(AUTH_PORT)):"
-	@lsof -ti:$(AUTH_PORT) && echo "  ✅ Running" || echo "  ❌ Not running"
+	@ss -tlnp | grep -q ":$(AUTH_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
 	@echo "Gateway (port $(GATEWAY_PORT)):"
-	@lsof -ti:$(GATEWAY_PORT) && echo "  ✅ Running" || echo "  ❌ Not running"
+	@ss -tlnp | grep -q ":$(GATEWAY_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
 
 # Restart all services
 .PHONY: restart
