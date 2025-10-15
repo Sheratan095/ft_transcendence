@@ -52,6 +52,7 @@ export class AuthDatabase
 		await this.db.run(`
 			CREATE TABLE IF NOT EXISTS users (
 				id TEXT PRIMARY KEY,
+				email TEXT UNIQUE NOT NULL,
 				username TEXT UNIQUE NOT NULL,
 				password TEXT NOT NULL,
 				created_at TEXT DEFAULT (datetime('now')),
@@ -86,11 +87,11 @@ export class AuthDatabase
   // -------- USERS METHODS --------
 
 	// Return the created user object
-	async	createUser(username, password)
+	async	createUser(username, password, email)
 	{
 		const	id = await this.#generateUUID();
 
-		await this.db.run("INSERT INTO users (id, username, password) VALUES (?, ?, ?)", [id, username, password]);
+		await this.db.run("INSERT INTO users (id, username, password, email) VALUES (?, ?, ?, ?)", [id, username, password, email]);
 
 		return (await this.db.get("SELECT * FROM users WHERE id = ?", [id]));
 	}

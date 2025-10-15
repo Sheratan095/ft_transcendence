@@ -1,36 +1,34 @@
 import jwt from 'jsonwebtoken';
 import { generateAccessToken } from './auth_help.js';
 import { getExpirationDate } from './auth_help.js';
+import bcrypt from 'bcrypt';
+
 
 export const	register = async (req, reply) =>
 {
 	const	username = req.body.username
-	const	password = req.body.password
+	const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 
 	// ALL STANDARD VALIDATIONS ARE DONE IN THE SCHEMA OF THE ROUTE
-	// if (!username || !password)
-	// 	return (reply.code(400).send({ error: 'Username and password are required' }))
+	// if (!username || !password || !email)
+	// 	return (reply.code(400).send({ error: 'Username, email and password are required' }))
 
 	try
 	{
 		const	authDb = req.server.authDb;
 
-		// TO DO: hash password before storing
-		const	user = await authDb.createUser(username, password)
+		const	user = await authDb.createUser(username, hashedpassword, req.body.email)
 
 		console.log('User registered: ', user.id)
 
-		// generate tokens upon registration
-		console.log('Before creating:', await authDb.getTokens());
+		// generate access and refresh tokens
+		const	accessToken = generateAccessToken({ id: user.id, email: user.email });
 
-		const	accessToken = generateAccessToken({ id: user.id, username: user.username });
-		const	refreshToken = jwt.sign({ id: user.id, username: user.username }, process.env.REFRESH_TOKEN_SECRET);
+		const	refreshToken = jwt.sign({ id: user.id, email: user.email }, process.env.REFRESH_TOKEN_SECRET);
 
-		// Set expiration to 7 days from now
+		// Set expiration
 		const	expiresAt = getExpirationDate(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
 		authDb.insertRefreshToken(user.id, refreshToken, expiresAt);
-
-		console.log('after creating:', await authDb.getTokens());
 
 		return (reply.code(201).send(
 			{

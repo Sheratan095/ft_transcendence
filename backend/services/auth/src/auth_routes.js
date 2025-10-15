@@ -15,11 +15,12 @@ const	registerOpts =
 		body: 
 		{
 			type: 'object',
-			required: ['username', 'password'],
+			required: ['username', 'password', 'email'],
 			properties: 
 			{
 				username: { type: 'string' },
-				password: { type: 'string' }
+				password: { type: 'string' },
+				email: { type: 'string', format: 'email' }
 			}
 		}
 	},
@@ -27,6 +28,7 @@ const	registerOpts =
 	handler: register
 }
 
+// TO DO make username or email
 const loginOpts = 
 {
 	schema: 
@@ -34,10 +36,11 @@ const loginOpts =
 		body: 
 		{
 			type: 'object',
-			required: ['username', 'password'],
+			required: ['username', 'password' || 'email'],
 			properties: 
 			{
 				username: { type: 'string' },
+				email: { type: 'string', format: 'email' },
 				password: { type: 'string' }
 			}
 		}
