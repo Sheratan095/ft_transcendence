@@ -51,8 +51,18 @@ export class AuthDatabase
 				id TEXT PRIMARY KEY,
 				username TEXT UNIQUE,
 				password TEXT
-			)
+			);
+
+			CREATE TABLE IF NOT EXISTS refresh_tokens (
+				id TEXT PRIMARY KEY,
+				user_id TEXT,
+				token TEXT,
+				created_at INTEGER,
+				expires_at INTEGER,
+				FOREIGN KEY (user_id) REFERENCES users (id)
+			);
 		`);
+
 	}
 
 	// Make sure the generated UUID is unique, this chance is very low but possible

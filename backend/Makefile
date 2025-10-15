@@ -1,6 +1,6 @@
 # Ports
 GATEWAY_PORT=3000
-AUTH_PORT=4000
+AUTH_PORT=3001
 
 # Default target (production mode)
 .PHONY: start
