@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { generateAccessToken } from './auth_help.js';
-
-// Store refresh tokens (in production, use a database)
-const refreshTokens = [];
+import { getExpirationDate } from './auth_help.js';
 
 export const	register = async (req, reply) =>
 {
@@ -15,15 +13,33 @@ export const	register = async (req, reply) =>
 
 	try
 	{
-		// Access database through Fastify instance
 		const	authDb = req.server.authDb;
 
 		// TO DO: hash password before storing
-		const	userId = await authDb.createUser(username, password)
+		const	user = await authDb.createUser(username, password)
 
-		console.log('User registered: ', userId)
+		console.log('User registered: ', user.id)
 
-		return (reply.code(201).send({ message: 'User registered successfully', userId: userId }))
+		// generate tokens upon registration
+		console.log('Before creating:', await authDb.getTokens());
+
+		const	accessToken = generateAccessToken({ id: user.id, username: user.username });
+		const	refreshToken = jwt.sign({ id: user.id, username: user.username }, process.env.REFRESH_TOKEN_SECRET);
+
+		// Set expiration to 7 days from now
+		const	expiresAt = getExpirationDate(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
+		authDb.insertRefreshToken(user.id, refreshToken, expiresAt);
+
+		console.log('after creating:', await authDb.getTokens());
+
+		return (reply.code(201).send(
+			{
+				message: 'User registered successfully',
+				userId: user.id,
+				accessToken: accessToken,
+				refreshToken: refreshToken
+			}
+		));
 	}
 	catch (err)
 	{

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { promisify } from "util";
 import { mkdir } from "fs/promises";
+import {formatExpirationDate} from "./auth_help.js";
 import path from "path";
 
 export class AuthDatabase
@@ -43,47 +44,55 @@ export class AuthDatabase
 	// Private method (#) to create tables
 	async	#createTables()
 	{
-		// TO DO remove it
+		// TO DO remove it - Drop tables in correct order (child first due to foreign key)
+		await this.db.run('DROP TABLE IF EXISTS refresh_tokens');
 		await this.db.run('DROP TABLE IF EXISTS users');
 
+		// Create users table
 		await this.db.run(`
 			CREATE TABLE IF NOT EXISTS users (
 				id TEXT PRIMARY KEY,
-				username TEXT UNIQUE,
-				password TEXT
-			);
-
-			CREATE TABLE IF NOT EXISTS refresh_tokens (
-				id TEXT PRIMARY KEY,
-				user_id TEXT UNIQUE,
-				token TEXT,
-				created_at INTEGER,
-				expires_at INTEGER,
-				FOREIGN KEY (user_id) REFERENCES users (id)
-			);
+				username TEXT UNIQUE NOT NULL,
+				password TEXT NOT NULL,
+				created_at TEXT DEFAULT (datetime('now')),
+				updated_at TEXT DEFAULT (datetime('now'))
+			)
 		`);
 
+		// Create refresh_tokens table
+		await this.db.run(`
+			CREATE TABLE IF NOT EXISTS refresh_tokens (
+				id TEXT PRIMARY KEY,
+				user_id TEXT NOT NULL,
+				refresh_token TEXT NOT NULL,
+				created_at TEXT DEFAULT (datetime('now')),
+				expires_at TEXT NOT NULL,
+				FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+			)
+		`);
 	}
 
+	// TO DO check it
 	// Make sure the generated UUID is unique, this chance is very low but possible
 	async	#generateUUID()
 	{
 		const	id = uuidv4();
-		while (await this.db.get("SELECT id FROM users WHERE id = ?", [id]))
-			id = uuidv4();
+		// while (await this.db.get("SELECT id FROM users WHERE id = ?", [id]))
+		// 	id = uuidv4();
 
 		return (id);
 	}
 
   // -------- USERS METHODS --------
 
+	// Return the created user object
 	async	createUser(username, password)
 	{
 		const	id = await this.#generateUUID();
 
 		await this.db.run("INSERT INTO users (id, username, password) VALUES (?, ?, ?)", [id, username, password]);
 
-		return (id);
+		return (await this.db.get("SELECT * FROM users WHERE id = ?", [id]));
 	}
 
 	async getAllUsers()
@@ -103,17 +112,36 @@ export class AuthDatabase
 
 	// -------- REFRESH TOKENS METHODS --------
 
-	async	addRefreshToken(userId, token, expiresAt)
+	// expiresAt: Date object
+	async	insertRefreshToken(userId, refresh_token, expiresAt)
 	{
 		const	id = uuidv4();
-		const	createdAt = Date.now();
+
+		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
+		const	expiresAtStr = formatExpirationDate(expiresAt);
 
 		await this.db.run(
-			"INSERT INTO refresh_tokens (id, user_id, token, created_at, expires_at) VALUES (?, ?, ?, ?, ?)",
-			[id, userId, token, createdAt, expiresAt]
+			"INSERT INTO refresh_tokens (id, user_id, refresh_token, expires_at) VALUES (?, ?, ?, ?)",
+			[id, userId, refresh_token, expiresAtStr]
 		);
 
 		return (id);
+	}
+
+	// expiresAt: Date object
+	async	updateRefreshToken(userId, new_refresh_token, expiresAt)
+	{
+		const	expiresAtStr = formatExpirationDate(expiresAt);
+
+		await this.db.run(
+			"UPDATE refresh_tokens SET refresh_token = ?, expires_at = ?, created_at = datetime('now') WHERE user_id = ?",
+			[refresh_token, expiresAtStr, userId]
+		);
+	}
+
+	async	getTokens()
+	{
+		return (await this.db.all("SELECT * FROM refresh_tokens"));
 	}
 
 	async close()

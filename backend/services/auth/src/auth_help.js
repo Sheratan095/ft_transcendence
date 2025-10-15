@@ -34,3 +34,18 @@ export function	checkEnvVariables(requiredEnvVars)
 		}
 	}
 }
+
+export function	getExpirationDate(days)
+{
+	//												hours min sec  ms
+	const	expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+	return (expiresAt);
+}
+
+export function	formatExpirationDate(date)
+{
+	const	expiresAtStr = date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
+
+	return (expiresAtStr);
+}
