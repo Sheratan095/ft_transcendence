@@ -14,11 +14,11 @@ export class AuthDatabase
 		this.db = null;
 	}
 
-	async initialize()
+	async	initialize()
 	{
 		try {
 			// Create data directory if it doesn't exist
-			const dir = path.dirname(this.dbPath);
+			const	dir = path.dirname(this.dbPath);
 			await mkdir(dir, { recursive: true });
 
 			// Open database connection
@@ -75,7 +75,7 @@ export class AuthDatabase
 		return (id);
 	}
 
-  // -------- CRUD METHODS --------
+  // -------- USERS METHODS --------
 
 	async	createUser(username, password)
 	{
@@ -100,6 +100,8 @@ export class AuthDatabase
 	{
 		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);
 	}
+
+	// -------- REFRESH TOKENS METHODS --------
 
 	async close()
 	{
