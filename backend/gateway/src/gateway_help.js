@@ -48,3 +48,15 @@ export async function	authenticateToken(request, reply)
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
 }
+
+export function	checkEnvVariables(requiredEnvVars)
+{
+	for (const envVar of requiredEnvVars)
+	{
+		if (!process.env[envVar])
+		{
+			console.error(`Missing required environment variable: ${envVar}`);
+			process.exit(1);
+		}
+	}
+}

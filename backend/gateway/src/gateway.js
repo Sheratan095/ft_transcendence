@@ -6,6 +6,10 @@ import Fastify from 'fastify'
 import dotenv from 'dotenv'
 dotenv.config()
 
+// Validate required environment variables
+import { checkEnvVariables } from './gateway_help.js';
+checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'PORT']);
+
 // Initialize Fastify instance with built-in logging
 const fastify = Fastify({ logger: false })
 
