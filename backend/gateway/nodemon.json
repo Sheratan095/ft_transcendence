@@ -5,6 +5,6 @@
   "env": {
     "NODE_ENV": "development"
   },
-  "verbose": true,
+  "verbose": false,
   "delay": 1000
 }

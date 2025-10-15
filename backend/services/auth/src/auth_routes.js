@@ -6,7 +6,7 @@ import {
 	// validateToken
 } from './auth_controllers.js';
 
-import { validateApiKey } from './auth_help.js';
+import { validateInternalApiKey } from './auth_help.js';
 
 const	registerOpts = 
 {
@@ -23,7 +23,7 @@ const	registerOpts =
 			}
 		}
 	},
-	preHandler: validateApiKey,
+	preHandler: validateInternalApiKey,
 	handler: register
 }
 
@@ -42,7 +42,7 @@ const loginOpts =
 			}
 		}
 	},
-	preHandler: validateApiKey,
+	preHandler: validateInternalApiKey,
 	handler: login
 }
 

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
-export async function	validateApiKey(request, reply)
+export async function	validateInternalApiKey(request, reply)
 {
 	const	apiKey = request.headers['x-api-key']
 	const	expectedApiKey = process.env.INTERNAL_API_KEY
