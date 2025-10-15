@@ -135,7 +135,7 @@ export class AuthDatabase
 
 		await this.db.run(
 			"UPDATE refresh_tokens SET refresh_token = ?, expires_at = ?, created_at = datetime('now') WHERE user_id = ?",
-			[refresh_token, expiresAtStr, userId]
+			[new_refresh_token, expiresAtStr, userId]
 		);
 	}
 
