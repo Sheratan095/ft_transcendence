@@ -29,11 +29,8 @@ const	start = async () =>
 		// Setup routes after database is initialized
 		fastify.register(authRoutes)
 
-		const port = process.env.PORT || 4000;
-		const host = process.env.HOST || '0.0.0.0';
-		
-		await fastify.listen({ port: port, host: host })
-		console.log(`Server is running on ${host}:${port}`)
+		fastify.listen({ port: process.env.PORT })
+		console.log(`Server is running on port ${process.env.PORT}`)
 	}
 	catch (err)
 	{

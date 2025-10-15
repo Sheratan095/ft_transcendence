@@ -1,7 +1,11 @@
 gateway:
     INTERNAL_API_KEY
+    AUTH_SERVICE_URL=http://auth_service:3001
+    PORT=3000
 
 auth:
     INTERNAL_API_KEY
     ACCESS_TOKEN_SECRET
     REFRESH_TOKEN_SECRET
+    PORT=3001
+
