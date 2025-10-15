@@ -28,7 +28,6 @@ const	registerOpts =
 	handler: register
 }
 
-// TO DO make username or email
 const loginOpts = 
 {
 	schema: 
@@ -36,13 +35,17 @@ const loginOpts =
 		body: 
 		{
 			type: 'object',
-			required: ['username', 'password' || 'email'],
+			required: ['password'],
 			properties: 
 			{
 				username: { type: 'string' },
 				email: { type: 'string', format: 'email' },
 				password: { type: 'string' }
-			}
+			},
+			anyOf: [
+				{ required: ['username'] },
+				{ required: ['email'] }
+			]
 		}
 	},
 	preHandler: validateInternalApiKey,

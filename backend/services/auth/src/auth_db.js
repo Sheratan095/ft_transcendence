@@ -106,6 +106,12 @@ export class AuthDatabase
 		return (await this.db.get("SELECT * FROM users WHERE username = ?", [username]));
 	}
 
+	// Get user by username OR email
+	async getUserByUsernameOrEmail(identifier)
+	{
+		return (await this.db.get("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]));
+	}
+
 	async deleteUserById(userId)
 	{
 		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);

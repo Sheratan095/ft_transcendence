@@ -49,3 +49,17 @@ export function	formatExpirationDate(date)
 
 	return (expiresAtStr);
 }
+
+export async function	generateNewTokens(user, authDb)
+{
+	const	userPayload = { id: user.id, email: user.email };
+	const	accessToken = generateAccessToken(userPayload);
+	const	refreshToken = jwt.sign(userPayload, process.env.REFRESH_TOKEN_SECRET);
+
+	// Store refresh token in database with expiration
+	const	expiresAt = getExpirationDate(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
+
+	await authDb.insertRefreshToken(user.id, refreshToken, expiresAt);
+
+	return { accessToken, refreshToken };
+}
