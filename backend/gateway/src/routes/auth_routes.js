@@ -49,3 +49,30 @@ export async function registerRoute(request, reply)
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
 }
+
+export async function logoutRoute(request, reply)
+{
+	// Redirect logout requests to auth service
+	try
+	{
+		// In Axios, during a DELETE request, the request body must be sent as the 'data' property in the config object
+		// unlike POST requests where the body is the second argument
+		const	response = await axios.delete(`${process.env.AUTH_SERVICE_URL}/logout`, 
+		{
+			headers: {
+				'x-api-key': process.env.INTERNAL_API_KEY,
+			},
+			data: request.body
+		})
+
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('Auth service error:', err.message)
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+}

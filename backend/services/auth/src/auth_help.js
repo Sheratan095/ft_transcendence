@@ -63,3 +63,8 @@ export async function	generateNewTokens(user, authDb)
 
 	return { accessToken, refreshToken };
 }
+
+export const	decodeToken = (token) =>
+{
+	return (jwt.verify(token, process.env.REFRESH_TOKEN_SECRET));
+}

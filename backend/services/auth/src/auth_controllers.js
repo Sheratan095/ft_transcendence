@@ -1,4 +1,4 @@
-import { generateNewTokens } from './auth_help.js';
+import { generateNewTokens, decodeToken } from './auth_help.js';
 import bcrypt from 'bcrypt';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
@@ -6,7 +6,7 @@ import bcrypt from 'bcrypt';
 // or crack one password and then be able to crack all other passwords with the same hash.
 // More rounds means more security but also more processing time.
 
-export const	register = async (req, reply) =>
+export const	register = async (req, reply) => 
 {
 	const	username = req.body.username
 	const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
@@ -22,7 +22,7 @@ export const	register = async (req, reply) =>
 		const	user = await authDb.createUser(username, hashedpassword, req.body.email)
 
 		console.log('User registered: ', user.id)
-
+ 
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
 
@@ -101,24 +101,35 @@ export const	login = async (req, reply) =>
 	}
 }
 
-// export const logout = async (req, reply) => {
-//   const refreshToken = req.body.refreshToken;
-//   if (!refreshToken)
-//     return reply.code(400).send({ error: 'Refresh token required' });
+// For the logout just the refresh token is needed to delete it from the database
+// Access tokens are short-lived and will expire soon anyway (yes they will be valid until expiry)
+// No need to invalidate them
+export const	logout = async (req, reply) =>
+{
+	const	refreshToken = req.body.refreshToken;
 
-//   try {
-//     const authDb = req.server.authDb;
-//     const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+	if (!refreshToken)
+		return (reply.code(400).send({ error: 'Refresh token required' }));
 
-//     // remove token from DB
-//     await authDb.deleteRefreshToken(decoded.id, refreshToken);
+	try
+	{
+		const	authDb = req.server.authDb;
 
-//     return reply.code(200).send({ message: 'Logged out successfully' });
-//   } catch (err) {
-//     console.error('Logout error:', err);
-//     return reply.code(400).send({ error: 'Invalid or expired token' });
-//   }
-// };
+		// verify and decode token
+		const	decodedToken = decodeToken(refreshToken);
+
+		// remove token from DB
+		await authDb.deleteRefreshToken(decodedToken.id, refreshToken);
+
+		return (reply.code(200).send({ message: 'Logged out successfully' }));
+	}
+	catch (err)
+	{
+		console.log('Logout error:', err.message);
+
+		return (reply.code(400).send({ error: err.message }));
+	}
+};
 
 // Goal	Recommended Action	Why
 // Logout securely	Delete refresh token from DB	Prevent reuse after logout

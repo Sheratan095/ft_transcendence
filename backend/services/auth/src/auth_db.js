@@ -151,6 +151,11 @@ export class AuthDatabase
 		return (await this.db.all("SELECT * FROM refresh_tokens"));
 	}
 
+	async	deleteRefreshToken(tokenId, userId, refresh_token)
+	{
+		await this.db.run("DELETE FROM refresh_tokens WHERE id = ? AND user_id = ? AND refresh_token = ?", [tokenId, userId, refresh_token]);
+	}
+
 	async close()
 	{
 		if (this.db)

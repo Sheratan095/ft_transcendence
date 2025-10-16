@@ -1,5 +1,3 @@
-import { authenticateToken } from './gateway_help.js'
-import { loginRoute, registerRoute } from './routes/auth_routes.js'
 import Fastify from 'fastify'
 
 // Load environment variables
@@ -10,14 +8,20 @@ dotenv.config()
 import { checkEnvVariables } from './gateway_help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'PORT']);
 
-// Initialize Fastify instance with built-in logging
-const fastify = Fastify({ logger: false })
+import {
+	loginRoute,
+	registerRoute,
+	logoutRoute
+} from './routes/auth_routes.js'
 
-//prehandler to authenticate requests: authenticateToken
+
+// Initialize Fastify instance with built-in logging
+const	fastify = Fastify({ logger: false })
 
 // Register routes
 fastify.post('/auth/login', loginRoute)
 fastify.post('/auth/register', registerRoute)
+fastify.delete('/auth/logout', logoutRoute)
 
 // Server startup function with error handling
 const	start = async () =>

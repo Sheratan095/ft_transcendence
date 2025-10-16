@@ -1,6 +1,6 @@
 import {
 	// token,
-	// logout,
+	logout,
 	login,
 	register,
 	// validateToken
@@ -28,7 +28,7 @@ const	registerOpts =
 	handler: register
 }
 
-const loginOpts = 
+const	loginOpts = 
 {
 	schema: 
 	{
@@ -52,8 +52,27 @@ const loginOpts =
 	handler: login
 }
 
-export function authRoutes(fastify, authDatabase)
+const	logoutOpts =
+{
+	schema:
+	{
+		body:
+		{
+			type: 'object',
+			required: ['refreshToken'],
+			properties:
+			{
+				refreshToken: { type: 'string' }
+			}
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: logout
+}
+
+export function	authRoutes(fastify)
 {
 	fastify.post('/register', registerOpts);
 	fastify.post('/login', loginOpts);
+	fastify.delete('/logout', logoutOpts);
 }
