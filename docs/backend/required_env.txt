@@ -1,6 +1,7 @@
 gateway:
     INTERNAL_API_KEY
     AUTH_SERVICE_URL=http://auth_service:3001
+    USERS_SERVICE_URL=http://users_service:3002
     PORT=3000
 
 auth:
@@ -10,4 +11,8 @@ auth:
     PORT=3001
     REFRESH_TOKEN_EXPIRATION_DAYS=7
     HASH_SALT_ROUNDS=10
+    ACCESS_TOKEN_EXPIRATION=5m
 
+users:
+    INTERNAL_API_KEY
+    PORT=3002

@@ -20,7 +20,7 @@ export async function	validateInternalApiKey(request, reply)
 
 export function	generateAccessToken(user)
 {
-	return (jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_MINUTES }));
+	return (jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION}));
 }
 
 export function	checkEnvVariables(requiredEnvVars)
