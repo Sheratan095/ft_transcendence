@@ -1,7 +1,7 @@
 gateway:
     INTERNAL_API_KEY
-    AUTH_SERVICE_URL=http://auth_service:3001
-    USERS_SERVICE_URL=http://users_service:3002
+    AUTH_SERVICE_URL=http://localhost:3001
+    USERS_SERVICE_URL=http://localhost:3002
     PORT=3000
 
 auth:
