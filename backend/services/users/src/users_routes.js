@@ -28,12 +28,13 @@ const	getUsersOpts =
 			},
 		},
 	},
-	handler: getUsers,
 	preHandler: validateInternalApiKey,
+	handler: getUsers,
 };
 
 
 export function	userRoutes(fastify)
 {
-	fastify.get('/users', getUsersOpts);
+	// Get all users
+	fastify.get('/', getUsersOpts);
 }

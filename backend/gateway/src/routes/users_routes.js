@@ -5,7 +5,7 @@ export const	getUsers = async (req, reply) =>
 	// Redirect login requests to auth service
 	try
 	{
-		const	response = await axios.post(`${process.env.USERS_SERVICE_URL}/login`, request.body,
+		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/`,
 		{
 			headers: {
 				'x-api-key': process.env.INTERNAL_API_KEY

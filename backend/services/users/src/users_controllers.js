@@ -6,5 +6,6 @@ let users = [
 
 export const	getUsers = async (req, reply) =>
 {
+	console.log('Fetching users');
 	return (reply.code(200).send(users));	
 } 
