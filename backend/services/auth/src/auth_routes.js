@@ -3,7 +3,7 @@ import {
 	logout,
 	login,
 	register,
-	// validateToken
+	validateToken
 } from './auth_controllers.js';
 
 import { validateInternalApiKey } from './auth_help.js';
@@ -70,9 +70,28 @@ const	logoutOpts =
 	handler: logout
 }
 
+const	validateTokenOpts =
+{
+	schema:
+	{
+		body:
+		{
+			type: 'object',
+			required: ['token'],
+			properties:
+			{
+				token: { type: 'string' }
+			}
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: validateToken
+};
+
 export function	authRoutes(fastify)
 {
 	fastify.post('/register', registerOpts);
 	fastify.post('/login', loginOpts);
+	fastify.post('/validate-token', validateTokenOpts);
 	fastify.delete('/logout', logoutOpts);
 }

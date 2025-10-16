@@ -1,4 +1,4 @@
-import { generateNewTokens, decodeToken } from './auth_help.js';
+import { generateNewTokens, decodeToken} from './auth_help.js';
 import bcrypt from 'bcrypt';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
@@ -116,7 +116,7 @@ export const	logout = async (req, reply) =>
 		const	authDb = req.server.authDb;
 
 		// verify and decode token
-		const	decodedToken = decodeToken(refreshToken);
+		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
 		// remove token from DB
 		await authDb.deleteRefreshToken(decodedToken.id, refreshToken);
@@ -126,8 +126,41 @@ export const	logout = async (req, reply) =>
 	catch (err)
 	{
 		console.log('Logout error:', err.message);
+		
+		if (err.name === 'TokenExpiredError')
+			return reply.code(401).send({ error: 'Token has expired' });
+		else if (err.name === 'JsonWebTokenError')
+			return reply.code(400).send({ error: 'Invalid token' });
+		
+		return reply.code(500).send({ error: 'Internal server error' });
+	}
+};
 
-		return (reply.code(400).send({ error: err.message }));
+// Used just to validate access to protected routes
+export const	validateToken = async (req, reply) =>
+{
+	const	token = req.body.token;
+
+	if (!token)
+		return (reply.code(400).send({ error: 'Token required' }));
+
+	try
+	{
+		// verify and decode ACCESS token (not refresh token!)
+		const	decodedToken = decodeToken(token, process.env.ACCESS_TOKEN_SECRET);
+
+		return (reply.code(200).send({ message: 'Token is valid', userId: decodedToken.id, valid: true}));
+	}
+	catch (err)
+	{
+		console.log('Token validation error:', err.message);
+		
+		if (err.name === 'TokenExpiredError')
+			return (reply.code(401).send({error: 'Token has expired' }));
+		else if (err.name === 'JsonWebTokenError')
+			return (reply.code(401).send({error: 'Invalid token' }));
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 };
 

@@ -28,11 +28,12 @@ export async function	authenticateToken(request, reply)
 			}
 		)
 
+
+		console.log('Token validation response:', response.data)
+
 		// If token is valid, attach user data to request object
 		if (response.data.valid)
 			request.user = response.data.user
-		else
-			return (reply.code(403).send({ error: 'Invalid token' }))
 
 	}
 	catch (err)
@@ -40,9 +41,9 @@ export async function	authenticateToken(request, reply)
 		// Log authentication errors for debugging
 		console.log('Auth service error:', err.message)
 
-		// Handle specific auth service responses
-		if (err.response && err.response.status === 403)
-			return (reply.code(403).send({ error: 'Invalid token' }))
+		// Forward auth service error messages if available
+		if (err.response && err.response.data)
+			return (reply.code(err.response.status).send(err.response.data))
 
 		// Handle auth service unavailability or network errors
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))

@@ -8,6 +8,9 @@ dotenv.config()
 import { checkEnvVariables } from './gateway_help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'PORT']);
 
+import {authenticateToken } from './gateway_help.js';
+
+
 import {
 	loginRoute,
 	registerRoute,
@@ -27,8 +30,8 @@ fastify.post('/auth/login', loginRoute)
 fastify.post('/auth/register', registerRoute)
 fastify.delete('/auth/logout', logoutRoute)
 
-// USERS routes
-fastify.get('/users/', getUsers)
+// USERS routes PROTECTED => require valid token
+fastify.get('/users/', { preHandler: authenticateToken }, getUsers)
 
 // Server startup function with error handling
 const	start = async () =>

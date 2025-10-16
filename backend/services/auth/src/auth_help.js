@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-// Middleware to validate API key for inter-service communication
+//inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
 export async function	validateInternalApiKey(request, reply)
@@ -20,7 +20,7 @@ export async function	validateInternalApiKey(request, reply)
 
 export function	generateAccessToken(user)
 {
-	return (jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15s' }))
+	return (jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_MINUTES }));
 }
 
 export function	checkEnvVariables(requiredEnvVars)
@@ -64,7 +64,37 @@ export async function	generateNewTokens(user, authDb)
 	return { accessToken, refreshToken };
 }
 
-export const	decodeToken = (token) =>
+
+export const decodeToken = (token, secret) =>
 {
-	return (jwt.verify(token, process.env.REFRESH_TOKEN_SECRET));
+	try
+	{
+		return (jwt.verify(token, secret));
+	}
+	catch (err)
+	{
+		if (err.name === 'TokenExpiredError')
+		{
+			const	error = new Error('Token has expired');
+			error.name = 'TokenExpiredError';
+			error.expiredAt = err.expiredAt;
+			throw (error);
+		}
+		else if (err.name === 'JsonWebTokenError')
+		{
+			const	error = new Error('Invalid token');
+			error.name = 'JsonWebTokenError';
+			throw (error);
+		}
+		else if (err.name === 'NotBeforeError')
+		{
+			const	error = new Error('Token not active yet');
+			error.name = 'NotBeforeError';
+			throw (error);
+		}
+		else
+		{
+			throw (err);
+		}
+	}
 }
