@@ -11,3 +11,4 @@
 [] JWT protocol
 	[] choose what to use as other credential, if mail or username, i suggest both
 	[] add accessToken expiration to login and registration reply, add it also in auth_api_flow.drawio
+	[] new token request
