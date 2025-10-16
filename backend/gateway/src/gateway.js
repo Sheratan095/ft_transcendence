@@ -14,14 +14,21 @@ import {
 	logoutRoute
 } from './routes/auth_routes.js'
 
+import {
+	getUsers
+} from './routes/users_routes.js'
+
 
 // Initialize Fastify instance with built-in logging
 const	fastify = Fastify({ logger: false })
 
-// Register routes
+// AUTH routes
 fastify.post('/auth/login', loginRoute)
 fastify.post('/auth/register', registerRoute)
 fastify.delete('/auth/logout', logoutRoute)
+
+// USERS routes
+fastify.get('/users/', getUsers)
 
 // Server startup function with error handling
 const	start = async () =>

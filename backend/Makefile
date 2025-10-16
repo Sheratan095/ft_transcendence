@@ -1,15 +1,16 @@
 # Ports
 GATEWAY_PORT=3000
 AUTH_PORT=3001
+USERS_PORT=3002
 
 # Default target (production mode)
 .PHONY: start
-start: start-auth start-gateway
+start: start-auth start-users start-gateway
 	@echo "All services started successfully!"
 
 # Development mode with auto-restart by nodemon
 .PHONY: dev
-dev: dev-auth dev-gateway
+dev: dev-auth dev-users dev-gateway
 	@echo "All services started in development mode with auto-restart!"
 
 # Start Auth service (production)
@@ -24,6 +25,20 @@ start-auth:
 dev-auth:
 	@echo "Starting Auth Service in dev mode on port $(AUTH_PORT)..."
 	@cd services/auth && npm run dev &
+	@sleep 2
+
+# Start Users service (production)
+.PHONY: start-users
+start-users:
+	@echo "Starting Users Service on port $(USERS_PORT)..."
+	@cd services/users && node src/users.js &
+	@sleep 2
+
+# Start Users service (development with auto-restart)
+.PHONY: dev-users
+dev-users:
+	@echo "Starting Users Service in dev mode on port $(USERS_PORT)..."
+	@cd services/users && npm run dev &
 	@sleep 2
 
 # Start Gateway (production)
@@ -45,8 +60,10 @@ dev-gateway:
 stop:
 	@echo "Stopping all Node services..."
 	@-ss -tlnp | grep ":$(AUTH_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
+	@-ss -tlnp | grep ":$(USERS_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-ss -tlnp | grep ":$(GATEWAY_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-pkill -f "nodemon.*auth\.js" 2>/dev/null || true
+	@-pkill -f "nodemon.*users\.js" 2>/dev/null || true
 	@-pkill -f "nodemon.*gateway\.js" 2>/dev/null || true
 	@sleep 1
 	@echo "All services stopped"
@@ -57,6 +74,8 @@ status:
 	@echo "Checking service status..."
 	@echo "Auth Service (port $(AUTH_PORT)):"
 	@ss -tlnp | grep -q ":$(AUTH_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
+	@echo "Users Service (port $(USERS_PORT)):"
+	@ss -tlnp | grep -q ":$(USERS_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
 	@echo "Gateway (port $(GATEWAY_PORT)):"
 	@ss -tlnp | grep -q ":$(GATEWAY_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
 
@@ -71,6 +90,7 @@ restart: stop
 install:
 	@echo "Installing dependencies..."
 	@cd services/auth && npm install
+	@cd services/users && npm install
 	@cd gateway && npm install
 	@echo "Dependencies installed!"
 
@@ -93,8 +113,9 @@ help:
 	@echo "    make restart  - Restart all services"
 	@echo ""
 	@echo "  Development mode (auto-restart on file changes):"
-	@echo "    make dev      - Start all services in dev mode"
-	@echo "    make dev-auth - Start only auth service in dev mode"  
+	@echo "    make dev         - Start all services in dev mode"
+	@echo "    make dev-auth    - Start only auth service in dev mode"
+	@echo "    make dev-users   - Start only users service in dev mode"
 	@echo "    make dev-gateway - Start only gateway in dev mode"
 	@echo ""
 	@echo "  Utilities:"
