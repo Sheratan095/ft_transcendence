@@ -54,6 +54,7 @@ const	registerOpts =
 {
 	schema: 
 	{
+		security: [{ internalApiKey: [] }],
 		body: 
 		{
 			type: 'object',
@@ -80,6 +81,7 @@ const	loginOpts =
 {
 	schema: 
 	{
+		security: [{ internalApiKey: [] }],
 		body: 
 		{
 			type: 'object',
@@ -112,6 +114,7 @@ const	logoutOpts =
 {
 	schema:
 	{
+		security: [{ internalApiKey: [] }],
 		body:
 		{
 			type: 'object',
@@ -144,6 +147,7 @@ const	validateTokenOpts =
 {
 	schema:
 	{
+		security: [{ internalApiKey: [] }],
 		body:
 		{
 			type: 'object',

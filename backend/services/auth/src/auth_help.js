@@ -5,9 +5,6 @@ import jwt from 'jsonwebtoken';
 //	this ensures that only internal services can access protected endpoints
 export async function	validateInternalApiKey(request, reply)
 {
-	console.log('Sent API Key:', request.headers['x-internal-api-key']);
-	console.log('Expected API Key:', process.env.INTERNAL_API_KEY);
-
 	const	apiKey = request.headers['x-internal-api-key']
 	const	expectedApiKey = process.env.INTERNAL_API_KEY
 	

@@ -28,7 +28,6 @@ export async function loginRoute(request, reply)
 // Register route handler
 export async function registerRoute(request, reply)
 {
-	console.log('sent api key:', process.env.INTERNAL_API_KEY);
 	// Redirect registration requests to auth service
 	try
 	{
