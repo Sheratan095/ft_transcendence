@@ -8,6 +8,48 @@ import {
 
 import { validateInternalApiKey } from './auth_help.js';
 
+const	Tokens =
+{
+	type: 'object',
+	properties:
+	{
+		accessToken: { type: 'string' },
+		refreshToken: { type: 'string' },
+	},
+}
+
+const	User = 
+{
+	type: 'object',
+	properties:
+	{
+		id: { type: 'string' },
+		username: { type: 'string' },
+		email: { type: 'string' },
+	},
+}
+
+// Reusable error response schemas
+const	ErrorResponse = 
+{
+	type: 'object',
+	properties:
+	{
+		error: { type: 'string' }
+	}
+}
+
+const	WelcomeResponse = 
+{
+	type: 'object',
+	properties:
+	{
+		message: { type: 'string' },
+		tokens: Tokens,
+		user: User
+	}
+}
+
 const	registerOpts = 
 {
 	schema: 
@@ -22,6 +64,12 @@ const	registerOpts =
 				password: { type: 'string' },
 				email: { type: 'string', format: 'email' }
 			}
+		},
+		response:
+		{
+			201: WelcomeResponse,
+			409: ErrorResponse,
+			500: ErrorResponse
 		}
 	},
 	preHandler: validateInternalApiKey,
@@ -46,6 +94,14 @@ const	loginOpts =
 				{ required: ['username'] },
 				{ required: ['email'] }
 			]
+		},
+		response:
+		{
+			200: WelcomeResponse,
+			400: ErrorResponse,
+			401: ErrorResponse,
+			409: ErrorResponse,
+			500: ErrorResponse
 		}
 	},
 	preHandler: validateInternalApiKey,
@@ -64,6 +120,20 @@ const	logoutOpts =
 			{
 				refreshToken: { type: 'string' }
 			}
+		},
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
 		}
 	},
 	preHandler: validateInternalApiKey,
@@ -82,6 +152,23 @@ const	validateTokenOpts =
 			{
 				token: { type: 'string' }
 			}
+		},
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' },
+					userId: { type: 'string' },
+					valid: { type: 'boolean' }
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			498: ErrorResponse,
+			500: ErrorResponse
 		}
 	},
 	preHandler: validateInternalApiKey,

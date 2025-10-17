@@ -8,7 +8,7 @@ export const	getUsers = async (req, reply) =>
 		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/`,
 		{
 			headers: {
-				'x-api-key': process.env.INTERNAL_API_KEY
+				'x-internal-api-key': process.env.INTERNAL_API_KEY
 			}
 		})
 

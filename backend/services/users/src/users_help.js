@@ -3,7 +3,7 @@
 //	this ensures that only internal services can access protected endpoints
 export async function	validateInternalApiKey(request, reply)
 {
-	const	apiKey = request.headers['x-api-key']
+	const	apiKey = request.headers['x-internal-api-key']
 	const	expectedApiKey = process.env.INTERNAL_API_KEY
 	
 	if (!apiKey || apiKey !== expectedApiKey)

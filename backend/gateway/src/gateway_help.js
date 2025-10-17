@@ -23,7 +23,7 @@ export async function	authenticateToken(request, reply)
 			{token: token},
 			{
 				headers: {
-					'x-api-key': process.env.INTERNAL_API_KEY
+					'x-internal-api-key': process.env.INTERNAL_API_KEY
 				}
 			}
 		)

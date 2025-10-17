@@ -4,16 +4,17 @@ DELETE http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjliNDgyZjRlLTUzMTMtNGQwZS04ZmQ5LTRhOWRmODhjM2Y5NiIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDYyMjA5MH0.vEiOH7b6X2SQ38s17CbmxEOxlwc5z0wK1Z4PrvdHh84"
+  "refreshToken": "eyJhbGciOiJIUz I1NiIsInR5cCI6IkpXVCJ9.eyJpZC6IjNjMWY4ZDAwLTkzZGEtNDgxYi1iZWY5LTI3MjcyNTFjNDNiMyIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDcwNDExMn0.SU4xPObeIkLnx44VQBX5GEyW9Ac7yOP54M1CmUX8JS0"
 }
 
 ###
 
-POST http://localhost:3000/auth/token
+POST http://localhost:3001/validate-token
 Content-Type: application/json
+x-internal-api-key: 1234
 
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSmltIiwiaWF0IjoxNTY4NzU5OTIyfQ.RT6wszuCeFLwC_6ksmNMIELxiC5s-uRivfRxyZof5ag"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNjMWY4ZDAwLTkzZGEtNDgxYi1iZWY5LTI3MjcyNTFjNDNiMyIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDcwNDMxNywiZXhwIjoxNzYwNzA1MjE3fQ.STK4bnQ1p9f7qc8KFbPCfrBDlVElnuZ02NqgWjvDSOU"
 }
 
 ###
@@ -23,7 +24,7 @@ Content-Type: application/json
 
 {
   "username": "Jimaaa",
-  "email": "dsadas@dsada.com",
+  "email": "dsadas@dsaa.com",
   "password": "password123"
 }
 

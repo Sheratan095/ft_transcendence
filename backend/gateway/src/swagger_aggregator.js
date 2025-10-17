@@ -35,7 +35,7 @@ export class SwaggerAggregator {
 						const response = await axios.get(service.url, {
 							timeout: 5000,
 							headers: {
-								'x-api-key': process.env.INTERNAL_API_KEY
+								'x-internal-api-key': process.env.INTERNAL_API_KEY
 							}
 						});
 						console.log(`✅ Successfully fetched docs from ${service.name}`);
@@ -100,7 +100,7 @@ export class SwaggerAggregator {
 				},
 				internalApiKey: {
 					type: 'apiKey',
-					name: 'x-api-key',
+					name: 'x-internal-api-key',
 					in: 'header'
 				}
 			},

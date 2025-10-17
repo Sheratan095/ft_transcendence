@@ -9,7 +9,7 @@ export async function loginRoute(request, reply)
 		const	response = await axios.post(`${process.env.AUTH_SERVICE_URL}/login`, request.body,
 		{
 			headers: {
-				'x-api-key': process.env.INTERNAL_API_KEY
+				'x-internal-api-key': process.env.INTERNAL_API_KEY
 			}
 		})
 
@@ -28,13 +28,14 @@ export async function loginRoute(request, reply)
 // Register route handler
 export async function registerRoute(request, reply)
 {
+	console.log('sent api key:', process.env.INTERNAL_API_KEY);
 	// Redirect registration requests to auth service
 	try
 	{
 		const	response = await axios.post(`${process.env.AUTH_SERVICE_URL}/register`, request.body,
 		{
 			headers: {
-				'x-api-key': process.env.INTERNAL_API_KEY
+				'x-internal-api-key': process.env.INTERNAL_API_KEY
 			}
 		})
 
@@ -60,7 +61,7 @@ export async function logoutRoute(request, reply)
 		const	response = await axios.delete(`${process.env.AUTH_SERVICE_URL}/logout`, 
 		{
 			headers: {
-				'x-api-key': process.env.INTERNAL_API_KEY,
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
 			},
 			data: request.body
 		})

@@ -32,7 +32,7 @@ await fastify.register(import('@fastify/swagger'), {
 			},
 			internalApiKey: {
 				type: 'apiKey',
-				name: 'X-Internal-API-Key',
+				name: 'x-internal-api-key',
 				in: 'header'
 			}
 		}
