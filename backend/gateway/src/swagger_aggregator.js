@@ -35,9 +35,10 @@ export class SwaggerAggregator {
 						const response = await axios.get(service.url, {
 							timeout: 5000,
 							headers: {
-								'X-Internal-API-Key': process.env.INTERNAL_API_KEY
+								'x-api-key': process.env.INTERNAL_API_KEY
 							}
 						});
+						console.log(`✅ Successfully fetched docs from ${service.name}`);
 						return { 
 							name: service.name, 
 							pathPrefix: service.pathPrefix,
@@ -63,6 +64,7 @@ export class SwaggerAggregator {
 				.map(result => result.value);
 
 			console.log(`✅ Successfully aggregated docs from ${successfulSpecs.length}/${this.services.length} services`);
+			console.log('Successful services:', successfulSpecs.map(s => s.name));
 
 			return this.mergeSpecs(successfulSpecs);
 		} catch (error) {
@@ -78,27 +80,28 @@ export class SwaggerAggregator {
 	 */
 	mergeSpecs(specs) {
 		const baseSpec = {
-			openapi: '3.0.0',
+			swagger: '2.0',
 			info: {
 				title: 'ft_transcendence API Gateway',
 				description: 'Unified API documentation for all microservices',
 				version: '1.0.0'
 			},
-			servers: [
-				{
-					url: 'http://localhost:3000',
-					description: 'Gateway Server'
-				}
-			],
+			host: 'localhost:3000',
+			schemes: ['http'],
+			consumes: ['application/json'],
+			produces: ['application/json'],
 			paths: {},
-			components: {
-				schemas: {},
-				securitySchemes: {
-					bearerAuth: {
-						type: 'http',
-						scheme: 'bearer',
-						bearerFormat: 'JWT'
-					}
+			definitions: {},
+			securityDefinitions: {
+				bearerAuth: {
+					type: 'apiKey',
+					name: 'Authorization',
+					in: 'header'
+				},
+				internalApiKey: {
+					type: 'apiKey',
+					name: 'x-api-key',
+					in: 'header'
 				}
 			},
 			tags: []
@@ -129,18 +132,18 @@ export class SwaggerAggregator {
 				});
 			}
 
-			// Merge components/schemas
-			if (spec.components?.schemas) {
-				Object.entries(spec.components.schemas).forEach(([schemaName, schema]) => {
+			// Merge definitions (Swagger 2.0 equivalent of components/schemas)
+			if (spec.definitions) {
+				Object.entries(spec.definitions).forEach(([schemaName, schema]) => {
 					// Prefix schema names to avoid conflicts
 					const prefixedName = `${name.charAt(0).toUpperCase() + name.slice(1)}${schemaName}`;
-					baseSpec.components.schemas[prefixedName] = schema;
+					baseSpec.definitions[prefixedName] = schema;
 				});
 			}
 
-			// Merge other components if needed
-			if (spec.components?.securitySchemes) {
-				Object.assign(baseSpec.components.securitySchemes, spec.components.securitySchemes);
+			// Merge security definitions
+			if (spec.securityDefinitions) {
+				Object.assign(baseSpec.securityDefinitions, spec.securityDefinitions);
 			}
 		});
 
@@ -153,18 +156,16 @@ export class SwaggerAggregator {
 	 */
 	getFallbackSpec() {
 		return {
-			openapi: '3.0.0',
+			swagger: '2.0',
 			info: {
 				title: 'ft_transcendence API Gateway',
 				description: 'API documentation (some services may be unavailable)',
 				version: '1.0.0'
 			},
-			servers: [
-				{
-					url: 'http://localhost:3000',
-					description: 'Gateway Server'
-				}
-			],
+			host: 'localhost:3000',
+			schemes: ['http'],
+			consumes: ['application/json'],
+			produces: ['application/json'],
 			paths: {
 				'/health': {
 					get: {
@@ -178,13 +179,11 @@ export class SwaggerAggregator {
 				},
 				...this.getManualServicePaths()
 			},
-			components: {
-				securitySchemes: {
-					bearerAuth: {
-						type: 'http',
-						scheme: 'bearer',
-						bearerFormat: 'JWT'
-					}
+			securityDefinitions: {
+				bearerAuth: {
+					type: 'apiKey',
+					name: 'Authorization',
+					in: 'header'
 				}
 			}
 		};
@@ -200,22 +199,20 @@ export class SwaggerAggregator {
 				post: {
 					tags: ['Auth'],
 					summary: 'Register a new user',
-					requestBody: {
+					parameters: [{
+						name: 'body',
+						in: 'body',
 						required: true,
-						content: {
-							'application/json': {
-								schema: {
-									type: 'object',
-									required: ['username', 'password', 'email'],
-									properties: {
-										username: { type: 'string' },
-										password: { type: 'string' },
-										email: { type: 'string', format: 'email' }
-									}
-								}
+						schema: {
+							type: 'object',
+							required: ['username', 'password', 'email'],
+							properties: {
+								username: { type: 'string' },
+								password: { type: 'string' },
+								email: { type: 'string', format: 'email' }
 							}
 						}
-					},
+					}],
 					responses: {
 						'201': {
 							description: 'User registered successfully'
@@ -230,22 +227,20 @@ export class SwaggerAggregator {
 				post: {
 					tags: ['Auth'],
 					summary: 'Login with username/email and password',
-					requestBody: {
+					parameters: [{
+						name: 'body',
+						in: 'body',
 						required: true,
-						content: {
-							'application/json': {
-								schema: {
-									type: 'object',
-									required: ['password'],
-									properties: {
-										username: { type: 'string' },
-										email: { type: 'string', format: 'email' },
-										password: { type: 'string' }
-									}
-								}
+						schema: {
+							type: 'object',
+							required: ['password'],
+							properties: {
+								username: { type: 'string' },
+								email: { type: 'string', format: 'email' },
+								password: { type: 'string' }
 							}
 						}
-					},
+					}],
 					responses: {
 						'200': {
 							description: 'Login successful'
@@ -279,16 +274,12 @@ export class SwaggerAggregator {
 	 * @param {Object} fastify - Fastify instance
 	 */
 	async register(fastify) {
-		// First register the base Swagger plugin
+		// Get the aggregated spec
+		const aggregatedSpec = await this.getAggregatedSpec();
+
+		// Register the Swagger plugin with the aggregated specification
 		await fastify.register(import('@fastify/swagger'), {
-			swagger: {
-				info: {
-					title: 'ft_transcendence Aggregated API',
-					description: 'Combined documentation from all microservices',
-					version: '1.0.0'
-				}
-			},
-			hide: true // Hide the default swagger routes since we're using custom aggregation
+			swagger: aggregatedSpec
 		});
 
 		// Register the unified documentation route
@@ -298,7 +289,7 @@ export class SwaggerAggregator {
 				docExpansion: 'list',
 				deepLinking: true
 			},
-			transformSpecification: async () => await this.getAggregatedSpec()
+			staticCSP: true
 		});
 
 		console.log('📚 Swagger aggregator registered at /docs');

@@ -12,6 +12,41 @@ dotenv.config();
 import { checkEnvVariables } from './users_help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
 
+// Setup Swagger documentation
+await fastify.register(import('@fastify/swagger'), {
+	swagger: {
+		info: {
+			title: 'Users Service API',
+			description: 'Users microservice API',
+			version: '1.0.0'
+		},
+		host: `localhost:${process.env.PORT}`,
+		schemes: ['http'],
+		consumes: ['application/json'],
+		produces: ['application/json'],
+		securityDefinitions: {
+			bearerAuth: {
+				type: 'apiKey',
+				name: 'Authorization',
+				in: 'header'
+			},
+			internalApiKey: {
+				type: 'apiKey',
+				name: 'X-Internal-API-Key',
+				in: 'header'
+			}
+		}
+	}
+});
+
+await fastify.register(import('@fastify/swagger-ui'), {
+	routePrefix: '/documentation',
+	uiConfig: {
+		docExpansion: 'list',
+		deepLinking: true
+	}
+});
+
 // Setup routes
 import { userRoutes } from './users_routes.js';
 
