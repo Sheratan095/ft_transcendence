@@ -28,9 +28,6 @@ export async function	authenticateToken(request, reply)
 			}
 		)
 
-
-		console.log('Token validation response:', response.data)
-
 		// If token is valid, attach user data to request object
 		if (response.data.valid)
 			request.user = response.data.user

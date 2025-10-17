@@ -15,7 +15,9 @@
   "dependencies": {
     "axios": "^1.12.2",
     "dotenv": "^16.4.5",
-    "fastify": "^5.6.1"
+    "fastify": "^4.28.1",
+    "@fastify/swagger": "^8.15.0",
+    "@fastify/swagger-ui": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
