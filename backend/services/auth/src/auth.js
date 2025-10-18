@@ -40,7 +40,7 @@ await fastify.register(import('@fastify/swagger'), {
 });
 
 await fastify.register(import('@fastify/swagger-ui'), {
-	routePrefix: '/documentation',
+	routePrefix: '/docs',
 	uiConfig: {
 		docExpansion: 'list',
 		deepLinking: true

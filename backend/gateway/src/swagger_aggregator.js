@@ -24,7 +24,7 @@ export class	SwaggerAggregator
 		{
 			services.push({
 				name: 'auth',
-				url: `${process.env.AUTH_SERVICE_URL}/documentation/json`,
+				url: `${process.env.AUTH_SERVICE_URL}/docs/json`,
 				pathPrefix: '/auth'});
 		}
 		
@@ -32,7 +32,7 @@ export class	SwaggerAggregator
 		{
 			services.push({
 				name: 'users',
-				url: `${process.env.USERS_SERVICE_URL}/documentation/json`,
+				url: `${process.env.USERS_SERVICE_URL}/docs/json`,
 				pathPrefix: '/users'});
 		}
 
@@ -293,4 +293,4 @@ export class	SwaggerAggregator
 	}
 }
 
-export default SwaggerAggregator;
+export default (SwaggerAggregator);
