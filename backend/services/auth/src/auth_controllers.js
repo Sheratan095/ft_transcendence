@@ -11,10 +11,6 @@ export const	register = async (req, reply) =>
 	const	username = req.body.username
 	const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 
-	// ALL STANDARD VALIDATIONS ARE DONE IN THE SCHEMA OF THE ROUTE
-	// if (!username || !password || !email)
-	// 	return (reply.code(400).send({ error: 'Username, email and password are required' }))
-
 	try
 	{
 		const	authDb = req.server.authDb;
@@ -56,9 +52,6 @@ export const	login = async (req, reply) =>
 {
 	const	password = req.body.password;
 	const	identifier = req.body.username || req.body.email;
-
-	if (!identifier)
-		return (reply.code(400).send({ error: 'Username or email is required' }));
 
 	try
 	{
@@ -108,9 +101,6 @@ export const	logout = async (req, reply) =>
 {
 	const	refreshToken = req.body.refreshToken;
 
-	if (!refreshToken)
-		return (reply.code(400).send({ error: 'Refresh token required' }));
-
 	try
 	{
 		const	authDb = req.server.authDb;
@@ -140,9 +130,6 @@ export const	logout = async (req, reply) =>
 export const	validateToken = async (req, reply) =>
 {
 	const	token = req.body.token;
-
-	if (!token)
-		return (reply.code(400).send({ error: 'Token required' }));
 
 	try
 	{

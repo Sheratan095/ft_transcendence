@@ -5,6 +5,12 @@
 [] move the sql scripts to another .sql and execute it in ..._db 
 [] remove guards from controllers, check if schema validation really works
 
+[] min length of username and psw (and other constraints)
+[] registration constaint, specify the errors returned by SQLITE_CONSTRAINT if user already exist, or the mail
+[] login with unknown user? 
+[] update standard_architetrure... with new Error response schema
+[x] if email "daddas@.com": Auth service error: Request failed with status code 400
+
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes
 [] check all status codes!!! also in auth_api_flow.drawio

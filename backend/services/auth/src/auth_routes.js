@@ -30,14 +30,18 @@ const	User =
 }
 
 // Reusable error response schemas
-const	ErrorResponse = 
+const	ErrorResponse =
 {
 	type: 'object',
 	properties:
 	{
-		error: { type: 'string' }
-	}
-}
+		statusCode: { type: 'integer' },
+		code: { type: 'string' },
+		error: { type: 'string' },
+		message: { type: 'string' }
+	},
+	additionalProperties: true // let Fastify include unexpected fields
+};
 
 const	WelcomeResponse = 
 {
@@ -86,16 +90,16 @@ const	loginOpts =
 		{
 			type: 'object',
 			required: ['password'],
+			anyOf: [
+				{ required: ['username'] },
+				{ required: ['email'] }
+			],
 			properties: 
 			{
 				username: { type: 'string' },
 				email: { type: 'string', format: 'email' },
 				password: { type: 'string' }
-			},
-			anyOf: [
-				{ required: ['username'] },
-				{ required: ['email'] }
-			]
+			}
 		},
 		response:
 		{
@@ -176,7 +180,7 @@ const	validateTokenOpts =
 			500: ErrorResponse
 		}
 	},
-	preHandler: validateInternalApiKey,
+	preValidation: validateInternalApiKey,
 	handler	: validateToken
 };
 

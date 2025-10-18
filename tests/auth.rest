@@ -4,11 +4,12 @@ DELETE http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUz I1NiIsInR5cCI6IkpXVCJ9.eyJpZC6IjNjMWY4ZDAwLTkzZGEtNDgxYi1iZWY5LTI3MjcyNTFjNDNiMyIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDcwNDExMn0.SU4xPObeIkLnx44VQBX5GEyW9Ac7yOP54M1CmUX8JS0"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNjMWY4ZDAwLTkzZGEtNDgxYi1iZWY5LTI3MjcyNTFjNDNiMyIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDcwNDExMn0.SU4xPObeIkLnx44VQBX5GEyW9Ac7yOP54M1CmUX8JS0"
 }
 
 ###
 
+### Valid token validation
 POST http://localhost:3001/validate-token
 Content-Type: application/json
 x-internal-api-key: 1234
@@ -17,14 +18,21 @@ x-internal-api-key: 1234
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNjMWY4ZDAwLTkzZGEtNDgxYi1iZWY5LTI3MjcyNTFjNDNiMyIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDcwNDMxNywiZXhwIjoxNzYwNzA1MjE3fQ.STK4bnQ1p9f7qc8KFbPCfrBDlVElnuZ02NqgWjvDSOU"
 }
 
+### Missing token validation (should return 400 Bad Request)
+POST http://localhost:3001/validate-token
+Content-Type: application/json
+x-internal-api-key: 1234
+
+{}
+
 ###
+
 #return token and refresh token
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "username": "Jimaaa",
-  "email": "dsadas@dsaa.com",
+  "username": "Jima",
   "password": "password123"
 }
 
@@ -33,7 +41,7 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "Jimaaa",
-  "email": "dsadas@dsada.com",
+  "username": "Jima",
+  "email": "dsadas@example.com",
   "password": "password123"
 }
