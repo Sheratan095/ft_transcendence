@@ -10,6 +10,7 @@
 [] check all status codes!!! also in auth_api_flow.drawio
 [x] update std_microsercice_architecture with new routes schemas
 [x] consider to remove api flow, and add some "tutorial" fro swagger
+[] swagger implementation.txt
 
 [] JWT protocol
 	[] choose what to use as other credential, if mail or username, i suggest both
