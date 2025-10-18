@@ -1,11 +1,15 @@
 /**
  * Swagger documentation setup for Users Service
  */
-export async function setupSwagger(fastify) {
+export async function	setupSwagger(fastify)
+{
 	// Setup Swagger documentation
-	await fastify.register(import('@fastify/swagger'), {
-		swagger: {
-			info: {
+	await fastify.register(import('@fastify/swagger'),
+	{
+		swagger:
+		{
+			info:
+			{
 				title: 'Users Service API',
 				description: 'Users microservice API',
 				version: '1.0.0'
@@ -14,13 +18,16 @@ export async function setupSwagger(fastify) {
 			schemes: ['http'],
 			consumes: ['application/json'],
 			produces: ['application/json'],
-			securityDefinitions: {
-				bearerAuth: {
+			securityDefinitions:
+			{
+				bearerAuth:
+				{
 					type: 'apiKey',
 					name: 'Authorization',
 					in: 'header'
 				},
-				internalApiKey: {
+				internalApiKey:
+				{
 					type: 'apiKey',
 					name: 'x-internal-api-key',
 					in: 'header'
@@ -29,9 +36,11 @@ export async function setupSwagger(fastify) {
 		}
 	});
 
-	await fastify.register(import('@fastify/swagger-ui'), {
+	await fastify.register(import('@fastify/swagger-ui'),
+	{
 		routePrefix: '/docs',
-		uiConfig: {
+		uiConfig:
+		{
 			docExpansion: 'list',
 			deepLinking: true
 		}
