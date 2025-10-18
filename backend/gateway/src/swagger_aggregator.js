@@ -161,7 +161,7 @@ export class	SwaggerAggregator
 				description: `${name.charAt(0).toUpperCase() + name.slice(1)} service endpoints`
 			});
 
-			// Merge paths with prefix
+			// Merge paths with prefix: /auth ("placeholder for localhost:300N") + /register (endpoint in microservice)
 			if (spec.paths)
 			{
 				Object.entries(spec.paths).forEach(([path, methods]) =>
@@ -253,10 +253,7 @@ export class	SwaggerAggregator
 		const	aggregatedSpec = await this.getAggregatedSpec();
 
 		// Register the Swagger plugin with the aggregated specification
-		await fastify.register(import('@fastify/swagger'),
-		{
-			swagger: aggregatedSpec
-		});
+		await fastify.register(import('@fastify/swagger'), { swagger: aggregatedSpec });
 
 		// Register the unified documentation route
 		await fastify.register(import('@fastify/swagger-ui'),
@@ -274,7 +271,7 @@ export class	SwaggerAggregator
 		fastify.get('/docs/refresh', async (request, reply) => {
 			try
 			{
-				const	refreshedSpec = await this.refresh();
+				await this.refresh();
 				return ({ 
 					message: 'Documentation refreshed successfully',
 					services: this.services.map(s => s.name),
