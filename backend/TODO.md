@@ -8,7 +8,7 @@
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes
 [] check all status codes!!! also in auth_api_flow.drawio
-[] update std_microsercice_architecture with new routes schemas
+[x] update std_microsercice_architecture with new routes schemas
 [x] consider to remove api flow, and add some "tutorial" fro swagger
 
 [] JWT protocol
