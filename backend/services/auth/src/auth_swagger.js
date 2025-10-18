@@ -30,8 +30,17 @@ export async function setupSwagger(fastify) {
 		}
 	});
 
+	const	docsRouteOptions =
+	{
+		schema:
+		{
+			summary: '🔒 Internal (used by swagger aggregator)',
+		}
+	}
+
 	// Manually register the JSON endpoint since we're not using swagger-ui
-	fastify.get('/docs/json', async (request, reply) => {
+	fastify.get('/docs/json', docsRouteOptions, async (request, reply) =>
+	{
 		return fastify.swagger();
 	});
 

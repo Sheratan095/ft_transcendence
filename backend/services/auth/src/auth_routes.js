@@ -147,6 +147,7 @@ const	validateTokenOpts =
 {
 	schema:
 	{
+		summary: '🔒 Internal',
 		security: [{ internalApiKey: [] }],
 		body:
 		{
