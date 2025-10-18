@@ -29,13 +29,13 @@ import {
 } from './routes/users_routes.js'
 
 
-// AUTH routes
-fastify.post('/auth/login', loginRoute)
-fastify.post('/auth/register', registerRoute)
-fastify.delete('/auth/logout', logoutRoute)
+// AUTH routes - exclude from swagger docs since they're just proxies
+fastify.post('/auth/login', { schema: { hide: true }, handler: loginRoute })
+fastify.post('/auth/register', { schema: { hide: true }, handler: registerRoute })
+fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
 
-// USERS routes PROTECTED => require valid token
-fastify.get('/users/', { preHandler: authenticateToken }, getUsers)
+// USERS routes PROTECTED => require valid token - exclude from swagger docs
+fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateToken, handler: getUsers })
 
 // Health check endpoint
 fastify.get('/health', async (request, reply) =>

@@ -5,19 +5,45 @@ import axios from 'axios';
  */
 export class SwaggerAggregator {
 	constructor() {
-		this.services = [
-			{ 
-				name: 'auth', 
+		// Automatically discover services from environment variables
+		this.services = this.discoverServices();
+	}
+
+	/**
+	 * Automatically discover microservices from environment variables
+	 * @returns {Array} Array of service configurations
+	 */
+	discoverServices() {
+		const services = [];
+		
+		// Auto-discover services based on environment variables
+		if (process.env.AUTH_SERVICE_URL) {
+			services.push({
+				name: 'auth',
 				url: `${process.env.AUTH_SERVICE_URL}/documentation/json`,
 				pathPrefix: '/auth'
-			},
-			{ 
-				name: 'users', 
+			});
+		}
+		
+		if (process.env.USERS_SERVICE_URL) {
+			services.push({
+				name: 'users',
 				url: `${process.env.USERS_SERVICE_URL}/documentation/json`,
 				pathPrefix: '/users'
-			}
-			// Add more services as needed
-		];
+			});
+		}
+
+		// Future services can be added here automatically
+		// if (process.env.GAMES_SERVICE_URL) {
+		//     services.push({
+		//         name: 'games',
+		//         url: `${process.env.GAMES_SERVICE_URL}/documentation/json`,
+		//         pathPrefix: '/games'
+		//     });
+		// }
+
+		console.log(`📡 Discovered ${services.length} microservices:`, services.map(s => s.name));
+		return services;
 	}
 
 	/**
@@ -176,8 +202,7 @@ export class SwaggerAggregator {
 							}
 						}
 					}
-				},
-				...this.getManualServicePaths()
+				}
 			},
 			securityDefinitions: {
 				bearerAuth: {
@@ -189,84 +214,16 @@ export class SwaggerAggregator {
 		};
 	}
 
+
+
 	/**
-	 * Provides manual documentation for services that don't have Swagger yet
-	 * @returns {Object} Manual API paths
+	 * Refreshes the service discovery and re-aggregates specifications
+	 * Useful when new services are added or existing ones are updated
 	 */
-	getManualServicePaths() {
-		return {
-			'/auth/register': {
-				post: {
-					tags: ['Auth'],
-					summary: 'Register a new user',
-					parameters: [{
-						name: 'body',
-						in: 'body',
-						required: true,
-						schema: {
-							type: 'object',
-							required: ['username', 'password', 'email'],
-							properties: {
-								username: { type: 'string' },
-								password: { type: 'string' },
-								email: { type: 'string', format: 'email' }
-							}
-						}
-					}],
-					responses: {
-						'201': {
-							description: 'User registered successfully'
-						},
-						'409': {
-							description: 'Username or email already exists'
-						}
-					}
-				}
-			},
-			'/auth/login': {
-				post: {
-					tags: ['Auth'],
-					summary: 'Login with username/email and password',
-					parameters: [{
-						name: 'body',
-						in: 'body',
-						required: true,
-						schema: {
-							type: 'object',
-							required: ['password'],
-							properties: {
-								username: { type: 'string' },
-								email: { type: 'string', format: 'email' },
-								password: { type: 'string' }
-							}
-						}
-					}],
-					responses: {
-						'200': {
-							description: 'Login successful'
-						},
-						'401': {
-							description: 'Invalid credentials'
-						}
-					}
-				}
-			},
-			'/users/': {
-				get: {
-					tags: ['Users'],
-					summary: 'Get all users (protected)',
-					security: [{ bearerAuth: [] }],
-					responses: {
-						'200': {
-							description: 'List of users'
-						},
-						'401': {
-							description: 'Unauthorized'
-						}
-					}
-				}
-			}
-		};
+	async refresh() {
+		console.log('🔄 Refreshing service discovery...');
+		this.services = this.discoverServices();
+		return await this.getAggregatedSpec();
 	}
 
 	/**
@@ -292,7 +249,23 @@ export class SwaggerAggregator {
 			staticCSP: true
 		});
 
+		// Add a refresh endpoint for development
+		fastify.get('/docs/refresh', async (request, reply) => {
+			try {
+				const refreshedSpec = await this.refresh();
+				return { 
+					message: 'Documentation refreshed successfully',
+					services: this.services.map(s => s.name),
+					timestamp: new Date().toISOString()
+				};
+			} catch (error) {
+				reply.code(500);
+				return { error: 'Failed to refresh documentation', details: error.message };
+			}
+		});
+
 		console.log('📚 Swagger aggregator registered at /docs');
+		console.log('🔄 Documentation refresh available at /docs/refresh');
 	}
 }
 
