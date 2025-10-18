@@ -1,5 +1,6 @@
 /**
  * Swagger documentation setup for Users Service
+ * Provides JSON spec only - UI is handled by the gateway aggregator
  */
 export async function	setupSwagger(fastify)
 {
@@ -36,15 +37,10 @@ export async function	setupSwagger(fastify)
 		}
 	});
 
-	await fastify.register(import('@fastify/swagger-ui'),
-	{
-		routePrefix: '/docs',
-		uiConfig:
-		{
-			docExpansion: 'list',
-			deepLinking: true
-		}
+	// Manually register the JSON endpoint since we're not using swagger-ui
+	fastify.get('/docs/json', async (request, reply) => {
+		return fastify.swagger();
 	});
 
-	console.log(`📚 Users Service Swagger UI available at http://localhost:${process.env.PORT}/docs`);
+	console.log(`📚 Users Service Swagger JSON spec available at http://localhost:${process.env.PORT}/docs/json`);
 }

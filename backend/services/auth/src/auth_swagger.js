@@ -1,8 +1,9 @@
 /**
  * Swagger documentation setup for Auth Service
+ * Provides JSON spec only - UI is handled by the gateway aggregator
  */
 export async function setupSwagger(fastify) {
-	// Setup Swagger documentation
+	// Setup Swagger documentation (JSON spec only)
 	await fastify.register(import('@fastify/swagger'), {
 		swagger: {
 			info: {
@@ -29,13 +30,10 @@ export async function setupSwagger(fastify) {
 		}
 	});
 
-	await fastify.register(import('@fastify/swagger-ui'), {
-		routePrefix: '/docs',
-		uiConfig: {
-			docExpansion: 'list',
-			deepLinking: true
-		}
+	// Manually register the JSON endpoint since we're not using swagger-ui
+	fastify.get('/docs/json', async (request, reply) => {
+		return fastify.swagger();
 	});
 
-	console.log(`📚 Auth Service Swagger UI available at http://localhost:${process.env.PORT}/docs`);
+	console.log(`📚 Auth Service Swagger JSON spec available at http://localhost:${process.env.PORT}/docs/json`);
 }
