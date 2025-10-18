@@ -37,19 +37,6 @@ fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
 // USERS routes PROTECTED => require valid token - exclude from swagger docs
 fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateToken, handler: getUsers })
 
-// Health check endpoint
-fastify.get('/health', async (request, reply) =>
-{
-	return ({ 
-		status: 'healthy', 
-		timestamp: new Date().toISOString(),
-		services: {
-			gateway: 'running',
-			documentation: 'available at /docs and /documentation'
-		}
-	})
-})
-
 // Server startup function with error handling
 const	start = async () =>
 {
