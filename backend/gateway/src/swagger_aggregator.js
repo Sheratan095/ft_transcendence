@@ -229,20 +229,6 @@ export class	SwaggerAggregator
 		});
 	}
 
-
-
-	/**
-	 * Refreshes the service discovery and re-aggregates specifications
-	 * Useful when new services are added or existing ones are updated
-	 */
-	async	refresh()
-	{
-		console.log('🔄 Refreshing service discovery...');
-		this.services = this.discoverServices();
-
-		return (await this.getAggregatedSpec());
-	}
-
 	/**
 	 * Registers the aggregated Swagger UI with Fastify
 	 * @param {Object} fastify - Fastify instance
@@ -267,26 +253,7 @@ export class	SwaggerAggregator
 			staticCSP: true
 		});
 
-		// Add a refresh endpoint for development
-		fastify.get('/docs/refresh', async (request, reply) => {
-			try
-			{
-				await this.refresh();
-				return ({ 
-					message: 'Documentation refreshed successfully',
-					services: this.services.map(s => s.name),
-					timestamp: new Date().toISOString()
-				});
-			}
-			catch (error)
-			{
-				reply.code(500);
-				return ({ error: 'Failed to refresh documentation', details: error.message });
-			}
-		});
-
 		console.log('📚 Swagger aggregator registered at /docs');
-		console.log('🔄 Documentation refresh available at /docs/refresh');
 	}
 }
 
