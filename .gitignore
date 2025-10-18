@@ -25,6 +25,9 @@ build/
 Thumbs.db
 ehthumbs.db
 
+# Linux
+*.Identifier
+
 # Docker
 docker-compose.override.yml
 **/Dockerfile*
