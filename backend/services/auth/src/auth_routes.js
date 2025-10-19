@@ -52,13 +52,31 @@ const	WelcomeResponse =
 		tokens: Tokens,
 		user: User
 	}
-}
+};
+
+const	withInternalAuth =
+{
+	security: [{ internalApiKey: [] }],
+
+	headers:
+	{
+		type: 'object',
+		required: ['x-internal-api-key'],
+		properties:
+		{
+			'x-internal-api-key': { type: 'string' }
+		}
+  }
+};
 
 const	registerOpts = 
 {
 	schema: 
 	{
-		security: [{ internalApiKey: [] }],
+		description: 'Register a new user',
+
+		...withInternalAuth, // <— inserts both security + headers here (spread syntax)
+
 		body: 
 		{
 			type: 'object',
@@ -70,6 +88,7 @@ const	registerOpts =
 				email: { type: 'string', format: 'email' }
 			}
 		},
+
 		response:
 		{
 			201: WelcomeResponse,
@@ -85,7 +104,10 @@ const	loginOpts =
 {
 	schema: 
 	{
-		security: [{ internalApiKey: [] }],
+		description: 'Login an existing user',
+
+		...withInternalAuth,
+
 		body: 
 		{
 			type: 'object',
@@ -101,6 +123,7 @@ const	loginOpts =
 				password: { type: 'string' }
 			}
 		},
+
 		response:
 		{
 			200: WelcomeResponse,
@@ -118,7 +141,10 @@ const	logoutOpts =
 {
 	schema:
 	{
-		security: [{ internalApiKey: [] }],
+		description: 'Logout a user by invalidating their refresh token',
+
+		...withInternalAuth,
+
 		body:
 		{
 			type: 'object',
@@ -128,6 +154,7 @@ const	logoutOpts =
 				refreshToken: { type: 'string' }
 			}
 		},
+
 		response:
 		{
 			200:
@@ -152,7 +179,10 @@ const	validateTokenOpts =
 	schema:
 	{
 		summary: '🔒 Internal',
-		security: [{ internalApiKey: [] }],
+		description: 'Validate an access token and retrieve the associated user ID',
+
+		...withInternalAuth,
+
 		body:
 		{
 			type: 'object',
@@ -162,6 +192,7 @@ const	validateTokenOpts =
 				token: { type: 'string' }
 			}
 		},
+
 		response:
 		{
 			200:

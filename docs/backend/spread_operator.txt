@@ -1,0 +1,101 @@
+The ... is called the spread operator in JavaScript
+It’s used to copy all properties from one object into another
+
+✅ Example: without spread
+
+Let’s say you have this:
+
+const withInternalAuth = {
+  security: [{ internalApiKey: [] }],
+  headers: {
+    type: 'object',
+    required: ['x-internal-api-key'],
+    properties: {
+      'x-internal-api-key': { type: 'string' }
+    }
+  }
+};
+
+
+Now when you define a route schema:
+
+const registerOpts = {
+  schema: {
+    description: 'Register a new user',
+    security: withInternalAuth.security,
+    headers: withInternalAuth.headers,
+    // other fields...
+  },
+  preHandler: validateInternalApiKey,
+  handler: register
+};
+
+
+You’re manually assigning both security and headers fields one by one.
+That’s repetitive and error-prone.
+
+
+
+✅ Example: with spread (...withInternalAuth)
+
+Instead, you can inject the whole object directly into another one using the spread operator:
+
+const registerOpts = {
+  schema: {
+    description: 'Register a new user',
+    ...withInternalAuth, // <— inserts both security + headers here
+    body: {
+      type: 'object',
+      required: ['username', 'password', 'email'],
+      properties: {
+        username: { type: 'string' },
+        password: { type: 'string' },
+        email: { type: 'string', format: 'email' }
+      }
+    },
+    response: {
+      201: WelcomeResponse
+    }
+  },
+  preHandler: validateInternalApiKey,
+  handler: register
+};
+
+
+This expands to exactly the same as writing:
+
+schema: {
+  description: 'Register a new user',
+  security: [{ internalApiKey: [] }],
+  headers: {
+    type: 'object',
+    required: ['x-internal-api-key'],
+    properties: {
+      'x-internal-api-key': { type: 'string' }
+    }
+  },
+  body: { ... },
+  response: { ... }
+}
+
+
+So ...withInternalAuth is just a shortcut that merges those properties in.
+
+
+
+🧩 How It Works Internally
+
+Given:
+
+const a = { foo: 1, bar: 2 };
+const b = { ...a, baz: 3 };
+
+
+Result:
+
+b === { foo: 1, bar: 2, baz: 3 }
+
+
+👉 The spread operator copies all key/value pairs from a into b.
+
+If a property already exists in b, it gets overwritten by the spread’s value.

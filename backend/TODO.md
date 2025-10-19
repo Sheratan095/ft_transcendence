@@ -10,6 +10,7 @@
 [] login with unknown user? 
 [] update standard_architetrure... with new Error response schema
 [x] if email "daddas@.com": Auth service error: Request failed with status code 400
+[] move swagger in another microservice?
 
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes
