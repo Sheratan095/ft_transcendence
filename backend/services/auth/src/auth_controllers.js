@@ -151,6 +151,11 @@ export const	validateToken = async (req, reply) =>
 	}
 };
 
+export const	token = async (req, reply) =>
+{
+	return reply.code(501).send({ error: 'Not implemented yet' });
+}
+
 // Goal	Recommended Action	Why
 // Logout securely	Delete refresh token from DB	Prevent reuse after logout
 // Multi-device logout	Delete token by ID or all tokens for user	Control per-device sessions

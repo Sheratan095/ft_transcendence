@@ -1,5 +1,5 @@
 import {
-	// token,
+	token,
 	logout,
 	login,
 	register,
@@ -215,10 +215,50 @@ const	validateTokenOpts =
 	handler	: validateToken
 };
 
+const	tokenOpts =
+{
+	schema:
+	{
+		description: 'Generate a new access token using a refresh token',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['refreshToken'],
+			properties:
+			{
+				refreshToken: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' },
+					tokens: Tokens
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: token
+};
+
 export function	authRoutes(fastify)
 {
 	fastify.post('/register', registerOpts);
 	fastify.post('/login', loginOpts);
 	fastify.post('/validate-token', validateTokenOpts);
+	fastify.post('/token', tokenOpts);
+
 	fastify.delete('/logout', logoutOpts);
 }
