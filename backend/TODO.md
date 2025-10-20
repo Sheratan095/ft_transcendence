@@ -6,7 +6,7 @@
 [] remove guards from controllers, check if schema validation really works
 
 [] min length of username and psw (and other constraints)
-[] registration constaint, specify the errors returned by SQLITE_CONSTRAINT if user already exist, or the mail
+[x] registration constaint, specify the errors returned by SQLITE_CONSTRAINT if user already exist, or the mail
 [x] login with unknown user? => is ok to return "Invalid credentials"
 [] update standard_architetrure... with new Error response schema
 [x] if email "daddas@.com": Auth service error: Request failed with status code 400

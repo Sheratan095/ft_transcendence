@@ -41,7 +41,12 @@ export const	register = async (req, reply) =>
 		console.log('Registration error:', err.message)
 
 		if (err.code === 'SQLITE_CONSTRAINT')
-			return (reply.code(409).send({ error: 'Username already exists' }))
+		{
+			if (err.message.includes('username'))
+				return (reply.code(409).send({ error: 'Username already exists' }))
+			if (err.message.includes('email'))
+				return (reply.code(409).send({ error: 'Email already exists' }))
+		}
 
 		return (reply.code(500).send({ error: 'Internal server error' }))
 	}
