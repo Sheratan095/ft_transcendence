@@ -77,15 +77,37 @@ const	registerOpts =
 
 		...withInternalAuth, // <— inserts both security + headers here (spread syntax)
 
-		body: 
+		body:
 		{
 			type: 'object',
-			required: ['username', 'password', 'email'],
-			properties: 
+			required: ['username', 'email', 'password'],
+			properties:
 			{
-				username: { type: 'string' },
-				password: { type: 'string' },
-				email: { type: 'string', format: 'email' }
+				username:
+				{
+					type: 'string',
+					pattern: '^[a-zA-Z][a-zA-Z0-9._]{2,19}$',
+					errorMessage: {
+						pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed.'
+					}
+				},
+				email:
+				{
+					type: 'string',
+					format: 'email',
+					maxLength: 254,
+					errorMessage: {
+						format: 'Invalid email format'
+					}
+				},
+				password:
+				{
+					type: 'string',
+					pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,64}$',
+			 		errorMessage: {
+						pattern: 'Password must be 8–64 chars long and include upper, lower, number, and symbol.'
+					}
+				}
 			}
 		},
 

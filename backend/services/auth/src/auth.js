@@ -1,5 +1,17 @@
 import Fastify from 'fastify';
-const	fastify = Fastify({ logger: false });
+import Ajv from 'ajv';
+import ajvErrors from 'ajv-errors';
+
+const	fastify = Fastify({
+	logger: false,
+	ajv:
+	{
+		plugins: [ajvErrors],
+		customOptions: { allErrors: true } // show all errors, not just the first
+	}
+});
+
+
 
 // Load environment variables from .env file
 import dotenv from 'dotenv';
