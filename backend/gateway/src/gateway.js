@@ -9,7 +9,7 @@ dotenv.config()
 // Register aggregated documentation from all microservices
 import SwaggerAggregator from './swagger_aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
-await swaggerAggregator.register(fastify);// TO DO remove register call, add fastify in construct params of aggregator
+await swaggerAggregator.register(fastify);
 
 // Validate required environment variables
 import { checkEnvVariables } from './gateway_help.js';
