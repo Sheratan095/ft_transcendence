@@ -2,9 +2,10 @@ import Fastify from 'fastify'
 // Initialize Fastify instance with built-in logging
 const	fastify = Fastify({ logger: false })
 
+// Allows to receive requests from different origins
 import cors from '@fastify/cors';
 await fastify.register(cors, {
-  origin: '*'  // for testing only; restrict to your domain in production
+  origin: '*'  // for testing only; restrict to your domain in production TO DO
 });
 
 // Load environment variables
@@ -21,7 +22,6 @@ import { checkEnvVariables } from './gateway_help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'PORT']);
 
 import { authenticateJwtToken } from './gateway_help.js';
-
 
 import {
 	loginRoute,

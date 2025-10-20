@@ -1,17 +1,14 @@
 import Fastify from 'fastify';
-import Ajv from 'ajv';
 import ajvErrors from 'ajv-errors';
 
 const	fastify = Fastify({
 	logger: false,
-	ajv:
+	ajv: // Allows to add specific reply message for each failed "validation" in route schema
 	{
 		plugins: [ajvErrors],
 		customOptions: { allErrors: true } // show all errors, not just the first
 	}
 });
-
-
 
 // Load environment variables from .env file
 import dotenv from 'dotenv';
