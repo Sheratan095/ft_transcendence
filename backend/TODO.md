@@ -18,7 +18,7 @@
 
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes
-[] check all status codes!!! 
+[x] check all status codes!!! 
 [x] update std_microsercice_architecture with new routes schemas
 [x] consider to remove api flow, and add some "tutorial" fro swagger
 [] swagger implementation.txt

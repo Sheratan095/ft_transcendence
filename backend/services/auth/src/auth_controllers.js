@@ -172,7 +172,7 @@ export const	validateToken = async (req, reply) =>
 		if (err.name === 'TokenExpiredError')
 			return (reply.code(401).send({error: 'Token has expired' }));
 		else if (err.name === 'JsonWebTokenError')
-			return (reply.code(498).send({error: 'Invalid token' }));
+			return (reply.code(401).send({error: 'Invalid token' }));
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

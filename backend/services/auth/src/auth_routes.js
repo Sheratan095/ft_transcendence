@@ -115,6 +115,7 @@ const	registerOpts =
 		response:
 		{
 			201: WelcomeResponse,
+			400: ErrorResponse,
 			409: ErrorResponse,
 			500: ErrorResponse
 		}
@@ -238,7 +239,6 @@ const	validateTokenOpts =
 			},
 			400: ErrorResponse,
 			401: ErrorResponse,
-			498: ErrorResponse,
 			500: ErrorResponse
 		}
 	},
