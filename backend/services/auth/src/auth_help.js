@@ -74,14 +74,26 @@ export async function	generateNewTokens(user, authDb)
 {
 	const	userPayload = { id: user.id, email: user.email };
 	const	accessToken = generateAccessToken(userPayload);
-	const	refreshToken = jwt.sign(userPayload, process.env.REFRESH_TOKEN_SECRET);
+	
+	// Calculate expiration date
+	const	expiration = getExpirationDate(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
+	
+	// Generate refresh token WITH expiration
+	const	refreshToken = jwt.sign(
+		userPayload, 
+		process.env.REFRESH_TOKEN_SECRET,
+		{ expiresIn: `${process.env.REFRESH_TOKEN_EXPIRATION_DAYS}d` }
+	);
 
-	// Store refresh token in database with expiration
-	const	expiresAt = getExpirationDate(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
+	// Check if user already has a refresh token
+	const	existingToken = await authDb.getRefreshTokenByUserId(user.id);
+	
+	if (existingToken) // Update existing token (token rotation)
+		await authDb.updateRefreshToken(user.id, refreshToken, expiration);
+	else	// Insert new token (first time login)
+		await authDb.insertRefreshToken(user.id, refreshToken, expiration);
 
-	await authDb.insertRefreshToken(user.id, refreshToken, expiresAt);
-
-	return { accessToken, refreshToken, expiration: expiresAt.toISOString() };
+	return { accessToken, refreshToken, expiration };
 }
 
 

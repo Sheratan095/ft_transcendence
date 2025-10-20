@@ -29,7 +29,7 @@
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT
 	[x] add accessToken expiration to login and registration reply, add it also in auth_api_flow.drawio
 	[x] new token request
-	[] solve /auth/token error
+	[x] solve /auth/token error
 
 [] SQL INJECTION PROTECTION
 [] XSS Attack

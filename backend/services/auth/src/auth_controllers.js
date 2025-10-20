@@ -180,6 +180,8 @@ export const	validateToken = async (req, reply) =>
 
 export const	token = async (req, reply) =>
 {
+	console.log('Token refresh requested: ', req.body.refreshToken);
+
 	try
 	{
 		const	refreshToken = req.body.refreshToken;
@@ -187,9 +189,10 @@ export const	token = async (req, reply) =>
 
 		// Verify JWT signature
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+		console.log('Decoded refresh token for user: ', decodedToken.id);
 
 		// Check if token exists in DB
-		const	storedToken = await authDb.getRefreshTokenByUserId(decoded.id);
+		const	storedToken = await authDb.getRefreshTokenByUserId(decodedToken.id);
 		if (!storedToken || storedToken.refresh_token !== refreshToken)
 			return (reply.code(401).send({ error: 'Refresh token not found or revoked' }));
 
@@ -220,7 +223,7 @@ export const	token = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Logout error:', err.message);
+		console.log('Token error:', err.message);
 		
 		if (err.name === 'TokenExpiredError')
 			return (reply.code(401).send({ error: 'Token has expired' }));
