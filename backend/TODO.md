@@ -14,6 +14,7 @@
 [] login when a user is already logged?
 [] when the reply is 500 (internal server error) => the error message should be deleted
 [] add user id after jwt validation in gateway (added user data )
+[] Cleanup job: periodically remove expired tokens from DB.
 
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes

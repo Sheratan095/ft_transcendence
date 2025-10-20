@@ -4,7 +4,7 @@ DELETE http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNjMWY4ZDAwLTkzZGEtNDgxYi1iZWY5LTI3MjcyNTFjNDNiMyIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDcwNDExMn0.SU4xPObeIkLnx44VQBX5GEyW9Ac7yOP54M1CmUX8JS0"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5YWYyZGI5LTRmZTEtNDAzYS05N2JjLWM0ZTA0ZWJmZGI0OSIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTUxMjI0fQ.BFyP3C7hIOkNLLtapNeI-fnbd6GHUqzWpu63Ccog4gY"
 }
 
 ###
@@ -15,7 +15,7 @@ Content-Type: application/json
 x-internal-api-key: 1234
 
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNjMWY4ZDAwLTkzZGEtNDgxYi1iZWY5LTI3MjcyNTFjNDNiMyIsImVtYWlsIjoiZHNhZGFzQGRzYWRhLmNvbSIsImlhdCI6MTc2MDcwNDMxNywiZXhwIjoxNzYwNzA1MjE3fQ.STK4bnQ1p9f7qc8KFbPCfrBDlVElnuZ02NqgWjvDSOU"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJlY2JhMTQwLTI2ODItNDZmZi05NzdkLWRiNzFlYjhkMWZhNiIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTUwMzAyfQ.GNar6nHqSWjtsV5DTvThU5mdJtmCGisLh9-DvY5y9fI"
 }
 
 ### Missing token validation (should return 400 Bad Request)
@@ -50,10 +50,9 @@ Content-Type: application/json
 
 POST http://localhost:3000/auth/token
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU3NDYwN2RkLWZlOTEtNDAyMC04NDhiLTA3MmIzODY0YjI0OCIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTQ4OTA3LCJleHAiOjE3NjA5NDk4MDd9.jmtIxglQZV_i_DPB4qK3Hg1MLsnJ1Sbdo5c2qWZ5bUg
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImU3NDYwN2RkLWZlOTEtNDAyMC04NDhiLTA3MmIzODY0YjI0OCIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTQ4OTA3fQ.qywJtRb5aelwRAFHkcON-I_ndIve-X9Zqtr9leMPG4w"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIwYjY0ODA4LWUyYjQtNDFmNy1iMzBmLTZiZDQ2NGExNDY3OSIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTQ5MzYzfQ.cWgQFFeoZ5RujQ23Zq8tTRBjdQ9NrrEU7BHP5U0Iv0M"
 }
 
 ###

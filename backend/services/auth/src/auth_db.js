@@ -106,6 +106,11 @@ export class AuthDatabase
 		return (await this.db.get("SELECT * FROM users WHERE username = ?", [username]));
 	}
 
+	async	getUserById(userId)
+	{
+		return (await this.db.get("SELECT * FROM users WHERE id = ?", [userId]));
+	}
+
 	// Get user by username OR email
 	async getUserByUsernameOrEmail(identifier)
 	{
@@ -156,9 +161,9 @@ export class AuthDatabase
 		return (await this.db.all("SELECT * FROM refresh_tokens"));
 	}
 
-	async	deleteRefreshToken(tokenId, userId, refresh_token)
+	async	deleteRefreshTokenById(tokenId,)
 	{
-		await (this.db.run("DELETE FROM refresh_tokens WHERE id = ? AND user_id = ? AND refresh_token = ?", [tokenId, userId, refresh_token]));
+		await (this.db.run("DELETE FROM refresh_tokens WHERE id = ?", [tokenId]));
 	}
 
 	async close()

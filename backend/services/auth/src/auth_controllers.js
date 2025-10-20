@@ -105,11 +105,18 @@ export const	logout = async (req, reply) =>
 	{
 		const	authDb = req.server.authDb;
 
-		// verify and decode token
+		// Verify and decode token
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-		// remove token from DB
-		await authDb.deleteRefreshToken(decodedToken.id, refreshToken);
+		const	storedToken = await authDb.getRefreshTokenByUserId(decodedToken.id);
+		
+		if (!storedToken || storedToken.refresh_token !== refreshToken)
+			return (reply.code(401).send({ error: 'Refresh token not found or already invalidated' }));
+
+		// remove token from DB - use correct parameters: tokenId, userId, refresh_token
+		await authDb.deleteRefreshTokenById(storedToken.id);
+
+		console.log('User logged out: ', decodedToken.id);
 
 		return (reply.code(200).send({ message: 'Logged out successfully' }));
 	}
@@ -159,12 +166,36 @@ export const	token = async (req, reply) =>
 	{
 		const	authDb = req.server.authDb;
 
-		// verify and decode token
+		// Verify JWT signature
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-		console.log('User ID from refresh token:', decodedToken.id);
-		console.log('Request id:', req.user);
 
-		return (reply.code(501).send({ error: 'Not implemented yet' }));
+		// Check if token exists in DB
+		const	storedToken = await authDb.getRefreshTokenByUserId(decoded.id);
+		if (!storedToken || storedToken.refresh_token !== refreshToken)
+			return (reply.code(401).send({ error: 'Refresh token not found or revoked' }));
+
+		// Check if token is expired
+		const	now = new Date();
+		const	expiresAt = new Date(storedToken.expires_at);
+		if (now > expiresAt)
+		{
+			await authDb.deleteRefreshTokenById(storedToken.id);
+			return (reply.code(401).send({ error: 'Refresh token has expired' }));
+		}
+
+		const	user = await authDb.getUserById(decodedToken.id);
+		const	newTokens = await generateNewTokens(user, authDb);
+
+		console.log('New tokens generated for user: ', user.id);
+
+		return (reply.code(200).send({
+			message: 'New tokens generated successfully',
+			tokens:
+			{
+				accessToken: newTokens.accessToken,
+				refreshToken: newTokens.refreshToken
+			}
+		}));
 
 	}
 	catch (err)
