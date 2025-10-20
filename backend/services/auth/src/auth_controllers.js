@@ -153,6 +153,14 @@ export const	validateToken = async (req, reply) =>
 
 export const	token = async (req, reply) =>
 {
+	const	refreshToken = req.body.refreshToken;
+
+	const	authDb = req.server.authDb;
+
+	console.log('Auth DB methods:', authDb.getRefreshToken(refreshToken));
+
+
+
 	return reply.code(501).send({ error: 'Not implemented yet' });
 }
 

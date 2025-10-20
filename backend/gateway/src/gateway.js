@@ -21,7 +21,8 @@ import {authenticateToken } from './gateway_help.js';
 import {
 	loginRoute,
 	registerRoute,
-	logoutRoute
+	logoutRoute,
+	tokenRoute
 } from './routes/auth_routes.js'
 
 import {
@@ -33,6 +34,7 @@ import {
 fastify.post('/auth/login', { schema: { hide: true }, handler: loginRoute })
 fastify.post('/auth/register', { schema: { hide: true }, handler: registerRoute })
 fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
+fastify.post('/auth/token', { schema: { hide: true }, handler: tokenRoute })
 
 // USERS routes PROTECTED => require valid token - exclude from swagger docs
 fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateToken, handler: getUsers })

@@ -45,3 +45,12 @@ Content-Type: application/json
   "email": "dsadas@example.com",
   "password": "password123"
 }
+
+###
+
+POST http://localhost:3000/auth/token
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM4YWZiZWRiLTc3NGMtNDBhZi04YjU3LTZkZTYzMGJkNGQ1MyIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTQ2NzgzfQ.dFWB_Yxdbcq3N5AmoHb_bvotVNGeVTs6QNUMngAdbN0"
+}

@@ -76,3 +76,26 @@ export async function logoutRoute(request, reply)
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
 }
+
+export async function	tokenRoute(request, reply)
+{
+	// Redirect token refresh requests to auth service
+	try
+	{
+		const	response = await axios.post(`${process.env.AUTH_SERVICE_URL}/token`, request.body,
+		{
+			headers: {
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		})
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('Auth service error:', err.message)
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+}
