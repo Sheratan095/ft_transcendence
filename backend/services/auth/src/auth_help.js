@@ -81,7 +81,7 @@ export async function	generateNewTokens(user, authDb)
 
 	await authDb.insertRefreshToken(user.id, refreshToken, expiresAt);
 
-	return { accessToken, refreshToken };
+	return { accessToken, refreshToken, expiration: expiresAt.toISOString() };
 }
 
 

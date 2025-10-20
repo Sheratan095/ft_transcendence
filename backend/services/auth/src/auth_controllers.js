@@ -35,7 +35,8 @@ export const	register = async (req, reply) =>
 			tokens: 
 			{
 				accessToken: newTokens.accessToken,
-				refreshToken: newTokens.refreshToken
+				refreshToken: newTokens.refreshToken,
+				expiration: newTokens.expiration
 			}
 		}));
 	}
@@ -92,7 +93,8 @@ export const	login = async (req, reply) =>
 			tokens:
 			{
 				accessToken: newTokens.accessToken,
-				refreshToken: newTokens.refreshToken
+				refreshToken: newTokens.refreshToken,
+				expiration: newTokens.expiration
 			}
 		}));
 	}
@@ -210,7 +212,8 @@ export const	token = async (req, reply) =>
 			tokens:
 			{
 				accessToken: newTokens.accessToken,
-				refreshToken: newTokens.refreshToken
+				refreshToken: newTokens.refreshToken,
+				expiration: newTokens.expiration
 			}
 		}));
 

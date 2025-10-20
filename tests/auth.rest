@@ -10,12 +10,11 @@ Content-Type: application/json
 ###
 
 ### Valid token validation
-POST http://localhost:3001/validate-token
+POST http://localhost:3000/auth/validate-token
 Content-Type: application/json
-x-internal-api-key: 1234
 
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJlY2JhMTQwLTI2ODItNDZmZi05NzdkLWRiNzFlYjhkMWZhNiIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTUwMzAyfQ.GNar6nHqSWjtsV5DTvThU5mdJtmCGisLh9-DvY5y9fI"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhiNWU3YTVkLTQ5ZjgtNDMwYi05N2JlLWNjNWZlNGU0M2NmMSIsImVtYWlsIjoiZHNhZGFAeG1wbGUuY29tIiwiaWF0IjoxNzYwOTc2MzU5fQ.7QX-FLZZwyU74C5LwIwQ0cz7IaBClLAuT2qEhwESYlM"
 }
 
 ### Missing token validation (should return 400 Bad Request)
@@ -52,7 +51,7 @@ POST http://localhost:3000/auth/token
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI3ZTM4MGE3LTFiOTItNDY4Yi1hMmM3LWRmMGU3ZmRlYTAxZiIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTY1MjM5fQ.OendX7cpTzn2e62L7hc4hY_u_vND4AEVAv7i-SCW61Y"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhiNWU3YTVkLTQ5ZjgtNDMwYi05N2JlLWNjNWZlNGU0M2NmMSIsImVtYWlsIjoiZHNhZGFAeG1wbGUuY29tIiwiaWF0IjoxNzYwOTc2MzU5fQ.7QX-FLZZwyU74C5LwIwQ0cz7IaBClLAuT2qEhwESYlM"
 }
 
 ###

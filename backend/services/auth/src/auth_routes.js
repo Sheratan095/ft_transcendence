@@ -13,6 +13,7 @@ const	Tokens =
 	type: 'object',
 	properties:
 	{
+		expiration: { type: 'string' },
 		accessToken: { type: 'string' },
 		refreshToken: { type: 'string' },
 	},
