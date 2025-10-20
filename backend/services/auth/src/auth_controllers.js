@@ -65,12 +65,19 @@ export const	login = async (req, reply) =>
 	try
 	{
 		const	password = req.body.password;
-		const	identifier = (req.body.username || req.body.email).toLowerCase();
+		const	identifier = req.body.username || req.body.email;
+		
+		// Validate that we have an identifier
+		if (!identifier || !password)
+			return (reply.code(400).send({ error: 'Username/email and password are required' }));
+		
+		const	identifierLower = identifier.toLowerCase();
+		
 		// Access database through Fastify instance
 		const	authDb = req.server.authDb;
 		
 		// Get user from database
-		const	user = await authDb.getUserByUsernameOrEmail(identifier);
+		const	user = await authDb.getUserByUsernameOrEmail(identifierLower);
 		
 		if (!user)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));

@@ -2,6 +2,11 @@ import Fastify from 'fastify'
 // Initialize Fastify instance with built-in logging
 const	fastify = Fastify({ logger: false })
 
+import cors from '@fastify/cors';
+await fastify.register(cors, {
+  origin: '*'  // for testing only; restrict to your domain in production
+});
+
 // Load environment variables
 import dotenv from 'dotenv'
 dotenv.config()
