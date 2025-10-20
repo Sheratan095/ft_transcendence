@@ -11,7 +11,7 @@
 [] update standard_architetrure... with new Error response schema
 [x] if email "daddas@.com": Auth service error: Request failed with status code 400
 [] move swagger in another microservice?
-[] login when a user is already logged?
+[x] login when a user is already logged? => just a new login (get new tokens)
 [x] when the reply is 500 (internal server error) => the error message should be deleted
 [x] add user id after jwt validation in gateway (added user data )
 [] Cleanup job: periodically remove expired tokens from DB.
