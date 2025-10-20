@@ -6,12 +6,16 @@ module by using the default backend language (as specified above in
 the mandatory part). However, this module will only be valid if you
 follow its requirements.
 
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Minor module: Use a framework or toolkit to build the front-end.
 Your frontend development must use the Tailwind CSS in addition of the Typescript, and nothing else.
 You can create a front-end without using the constraints of this
 module by using the default front-end directives (as specified above
 in the mandatory part). However, this module will only be valid if
 you follow its requirements.
+
+---------------------------------------------------------------------------------------------------------------------------------
 
 • Minor module: Use a database for the backend -and more.
 The designated database for all DB instances in your project is SQLite This choice
@@ -30,6 +34,29 @@ be a prerequisite for other modules, such as the backend Framework module.
 The management of duplicate usernames/emails is at your discretion;
 please ensure a logical solution is provided
 
+USERNAME
+Length				3–20 characters	Short but not trivial
+Allowed characters	Letters, numbers, underscores (_), and dots (.) => Avoids injection or confusion
+Must 				start with	A letter => Avoids weird formatting
+Case sensitivity	Not case-sensitive (User = user) => Better UX
+Unique				Primary identifier
+Disallowed			Spaces, special chars, reserved words => Prevent confusion or abuse
+
+PASSWORD
+Length					At least 8–12 characters	=> Base security level
+Complexity				Mix of uppercase, lowercase, numbers, symbols => Reduces brute-force risk
+Common passwords		Disallow (e.g. password, 123456, etc.)	=> Avoid known weak ones
+Username/Email reuse	Password ≠ username or email => Obvious security risk
+Hashing					Always hash with bcrypt/argon2 => protected database
+
+EMAIL
+formatting		Valid RFC 5322 email pattern => Avoid invalid addresses
+Uniqueness		Yes	Required for login
+lowercase		normalization	=> Store lowercase	Consistent lookup
+Max Length		254 characters	=> RFC limit
+
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Major module: Implement remote authentication.
 In this major module, the goal is to implement a secure external authentication
 system using OAuth 2.0 .
@@ -45,11 +72,15 @@ between the web application and the authentication provider.
 This major module aims to provide a remote user authentication, offering users a
 secure and convenient way to access the web application
 
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Major module: Remote players
 It should be possible for two players to play remotely. Each player is located on a
 separated computer, accessing the same website and playing the same Pong game.
 Consider network issues, such as unexpected disconnections or lag.
 You must offer the best user experience possible.
+
+---------------------------------------------------------------------------------------------------------------------------------
 
 • Major module: Add another game with user history and matchmaking.
 The goal of this major module, is to introduce a new game, distinct from Pong, and
@@ -68,6 +99,8 @@ This major module aims to expand your platform by introducing a new game,
 enhancing user engagement with gameplay history, and facilitating matchmaking
 for an enjoyable gaming experience.
 
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Minor module: Game customization options.
 In this minor module, the goal is to provide customization options for all available
 games on the platform. Key features and objectives include:
@@ -85,6 +118,8 @@ across all available games by providing a variety of customization options while
 also offering a default version for those who prefer a straightforward gameplay
 experience.
 
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Major module: Live Chat.
 In this module, you need to create a chat feature for users:
 ◦ The user should be able to send direct messages to other users.
@@ -95,6 +130,8 @@ chat interface.
 ◦ The tournament system should be able to notify users about the next game.
 ◦ The user should be able to access other players’ profiles through the chat
 interface.
+
+---------------------------------------------------------------------------------------------------------------------------------
 
 • Minor module: User and Game Stats Dashboards.
 In this minor module, the goal is to introduce dashboards that display statistics for
@@ -113,6 +150,8 @@ metrics conveniently.
 This minor module aims to empower users with the ability to monitor their gaming
 statistics and game session details through user-friendly dashboards, providing a
 comprehensive view of their gaming experience.
+
+---------------------------------------------------------------------------------------------------------------------------------
 
 • Minor module: GDPR compliance options with user anonymization, local data
 management, and account deletion.
@@ -143,6 +182,8 @@ If you are unfamiliar with the GDPR, please take the time to visit the provided 
 and familiarize yourself with the regulations before proceeding with this project.
 https://commission.europa.eu/law/law-topic/data-protection/data-protection-eu_en
 
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Major module: Implement Two-Factor Authentication (2FA) and JWT.
 The goal of this major module is to enhance security and user authentication
 by introducing Two-Factor Authentication (2FA) and utilizing JSON Web Tokens
@@ -159,6 +200,8 @@ codes, authenticator apps, or email-based verification.
 This major module aims to strengthen user account security by offering Two-Factor
 Authentication (2FA) and enhanci
 
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Major module: Designing the Backend as Microservices.
 The goal of this major module is to architect the backend of the system using a
 microservices approach. Key features and objectives include:
@@ -168,6 +211,8 @@ microservices approach. Key features and objectives include:
 ◦ Ensure that each microservice is responsible for a single, well-defined task or
 business capability, promoting maintainability and scalability.
 This major module aims to enhance the system’s architecture by adopting a microservices design approach, enabling greater flexibility, scalability, and maintainability of the backend components.
+
+---------------------------------------------------------------------------------------------------------------------------------
 
 • Minor module: Expanding Browser Compatibility.
 In this minor module, the objective is to enhance the compatibility of the web
@@ -185,6 +230,8 @@ This minor module aims to broaden the accessibility of the web application by
 supporting an additional web browser, providing users with more choices for their
 browsing experience
 
+---------------------------------------------------------------------------------------------------------------------------------
+
 • Minor module: Multiple language support.
 In this minor module, the objective is to ensure that your website supports multiple
 languages to cater to a diverse user base. Key features and goals include:
@@ -199,6 +246,8 @@ key information, into the supported languages.
 This minor module aims to enhance the accessibility and inclusivity of your website
 by offering content in multiple languages, making it more user-friendly for a diverse
 international audience.
+
+---------------------------------------------------------------------------------------------------------------------------------
 
 • Minor module: Add accessibility for Visually Impaired Users.
 In this minor module, the goal is to make your website more accessible for visually
