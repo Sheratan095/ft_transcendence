@@ -7,7 +7,7 @@
 
 [] min length of username and psw (and other constraints)
 [] registration constaint, specify the errors returned by SQLITE_CONSTRAINT if user already exist, or the mail
-[] login with unknown user? 
+[x] login with unknown user? => is ok to return "Invalid credentials"
 [] update standard_architetrure... with new Error response schema
 [x] if email "daddas@.com": Auth service error: Request failed with status code 400
 [] move swagger in another microservice?
