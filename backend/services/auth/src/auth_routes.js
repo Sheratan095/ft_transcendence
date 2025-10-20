@@ -103,9 +103,9 @@ const	registerOpts =
 				password:
 				{
 					type: 'string',
-					pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,64}$',
+					pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,24}$',
 			 		errorMessage: {
-						pattern: 'Password must be 8–64 chars long and include upper, lower, number, and symbol.'
+						pattern: 'Password must be 8–24 chars long and include upper, lower, number, and symbol.'
 					}
 				}
 			}

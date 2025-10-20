@@ -43,7 +43,7 @@ Unique				Primary identifier
 Disallowed			Spaces, special chars, reserved words => Prevent confusion or abuse
 
 PASSWORD
-Length					At least 8–12 characters	=> Base security level
+Length					At least 8–24 characters	=> Base security level
 Complexity				Mix of uppercase, lowercase, numbers, symbols => Reduces brute-force risk
 Common passwords		Disallow (e.g. password, 123456, etc.)	=> Avoid known weak ones
 Username/Email reuse	Password ≠ username or email => Obvious security risk
