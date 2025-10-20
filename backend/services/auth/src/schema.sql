@@ -2,11 +2,13 @@
 DROP TABLE IF EXISTS refresh_tokens;
 DROP TABLE IF EXISTS users;
 
+-- COLLATE NOCASE for case-insensitive unique constraints on email and username
+
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
 	id TEXT PRIMARY KEY,
-	email TEXT UNIQUE NOT NULL,
-	username TEXT UNIQUE NOT NULL,
+	email TEXT UNIQUE NOT NULL COLLATE NOCASE,
+	username TEXT UNIQUE NOT NULL COLLATE NOCASE,
 	password TEXT NOT NULL,
 	created_at TEXT DEFAULT (datetime('now')),
 	updated_at TEXT DEFAULT (datetime('now'))

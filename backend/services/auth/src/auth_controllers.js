@@ -12,11 +12,12 @@ export const	register = async (req, reply) =>
 	{
 		validator(req.body.username, req.body.password, req.body.email);
 
-		const	username = req.body.username
+		const	username = req.body.username.toLowerCase();
+		const	email = req.body.email.toLowerCase();
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		const	authDb = req.server.authDb;
 
-		const	user = await authDb.createUser(username, hashedpassword, req.body.email)
+		const	user = await authDb.createUser(username, hashedpassword, email)
 
 		console.log('User registered: ', user.id)
  
@@ -63,7 +64,7 @@ export const	login = async (req, reply) =>
 	try
 	{
 		const	password = req.body.password;
-		const	identifier = req.body.username || req.body.email;
+		const	identifier = (req.body.username || req.body.email).toLowerCase();
 		// Access database through Fastify instance
 		const	authDb = req.server.authDb;
 		
