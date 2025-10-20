@@ -147,7 +147,8 @@ export const	validateToken = async (req, reply) =>
 		return reply.code(200).send({
 			message: 'Token is valid', 
 			valid: true,
-			user: {
+			user:
+			{
 				id: decodedToken.id,
 				email: decodedToken.email
 			}
@@ -211,9 +212,9 @@ export const	token = async (req, reply) =>
 		console.log('Logout error:', err.message);
 		
 		if (err.name === 'TokenExpiredError')
-			return reply.code(401).send({ error: 'Token has expired' });
+			return (reply.code(401).send({ error: 'Token has expired' }));
 		else if (err.name === 'JsonWebTokenError')
-			return reply.code(401).send({ error: 'Invalid token' });
+			return (reply.code(401).send({ error: 'Invalid token' }));
 		
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

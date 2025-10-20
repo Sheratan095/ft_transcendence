@@ -7,7 +7,8 @@ export const	getUsers = async (req, reply) =>
 	{
 		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/`,
 		{
-			headers: {
+			headers:
+			{
 				'x-internal-api-key': process.env.INTERNAL_API_KEY,
 				'x-user-data': JSON.stringify(req.user) // Pass authenticated user data
 			}

@@ -4,7 +4,7 @@ DELETE http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5YWYyZGI5LTRmZTEtNDAzYS05N2JjLWM0ZTA0ZWJmZGI0OSIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTUxMjI0fQ.BFyP3C7hIOkNLLtapNeI-fnbd6GHUqzWpu63Ccog4gY"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ3OGVkYjhiLTEwYTUtNDNmZC04ZDllLTA0YjYxOTFhN2VjMiIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTU3OTkwfQ.sqhFhFL7Dbdfvhp05GdxuXPPWeU32J1AyON5BYukBjM"
 }
 
 ###

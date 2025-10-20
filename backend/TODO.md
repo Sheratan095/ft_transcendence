@@ -13,12 +13,12 @@
 [] move swagger in another microservice?
 [] login when a user is already logged?
 [] when the reply is 500 (internal server error) => the error message should be deleted
-[] add user id after jwt validation in gateway (added user data )
+[x] add user id after jwt validation in gateway (added user data )
 [] Cleanup job: periodically remove expired tokens from DB.
 
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes
-[] check all status codes!!! also in auth_api_flow.drawio
+[] check all status codes!!! 
 [x] update std_microsercice_architecture with new routes schemas
 [x] consider to remove api flow, and add some "tutorial" fro swagger
 [] swagger implementation.txt

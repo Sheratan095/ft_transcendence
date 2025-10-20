@@ -198,7 +198,7 @@ const	validateTokenOpts =
 			200:
 			{
 				type: 'object',
-				properties:
+				properties: // The user data returned will be added to the request forwarded to the requested gateway
 				{
 					message: { type: 'string' },
 					valid: { type: 'boolean' },

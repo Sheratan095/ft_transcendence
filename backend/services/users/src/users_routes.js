@@ -19,6 +19,19 @@ const	getUsersOpts =
 {
 	schema:
 	{
+		description: 'Retrieve a list of all users',
+
+		headers :
+		{
+			type: 'object',
+			properties:
+			{
+				'x-internal-api-key': { type: 'string' },
+				'x-user-data': { type: 'string' }, // The user data is extracted from the gateway JWTauthentication request
+			},
+			required: ['x-internal-api-key'],
+		},
+
 		response:
 		{
 			200:

@@ -29,9 +29,8 @@ export async function	authenticateJwtToken(request, reply)
 		)
 
 		// If token is valid, attach user data to request object
-		if (response.data.valid) {
+		if (response.data.valid)
 			request.user = response.data.user
-		}
 
 	}
 	catch (err)
