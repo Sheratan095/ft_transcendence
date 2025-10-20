@@ -1,4 +1,4 @@
-import { generateNewTokens, decodeToken} from './auth_help.js';
+import { generateNewTokens, decodeToken, validator} from './auth_help.js';
 import bcrypt from 'bcrypt';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
@@ -10,6 +10,8 @@ export const	register = async (req, reply) =>
 {
 	try
 	{
+		validator(req.body.username, req.body.password, req.body.email);
+
 		const	username = req.body.username
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		const	authDb = req.server.authDb;
@@ -39,6 +41,10 @@ export const	register = async (req, reply) =>
 	catch (err)
 	{
 		console.log('Registration error:', err.message)
+
+		// Handle validation errors from validator function
+		if (err.message.includes('Username') || err.message.includes('Password')) 
+			return (reply.code(400).send({ error: err.message }))
 
 		if (err.code === 'SQLITE_CONSTRAINT')
 		{

@@ -5,6 +5,7 @@
 [] move the sql scripts to another .sql and execute it in ..._db 
 [] remove guards from controllers, check if schema validation really works
 
+[] lowercase shit
 [x] min length of username and psw (and other constraints)
 [x] registration constaint, specify the errors returned by SQLITE_CONSTRAINT if user already exist, or the mail
 [x] login with unknown user? => is ok to return "Invalid credentials"

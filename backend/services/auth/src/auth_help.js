@@ -113,3 +113,34 @@ export const decodeToken = (token, secret) =>
 		}
 	}
 }
+
+// Standard validation are done by AJV schema validation in the routes
+// This function implements additional custom validation logic
+//	Username can't contains reserved words
+//	Password can't be too common / too weak or too similar to username/email
+export function	validator(username, password, email)
+{
+	const	psw_lower = password.toLowerCase();
+	const	username_lower = username.toLowerCase();
+	const	email_lower = email.toLowerCase();
+
+	// Check for reserved words in username
+	const	reservedWords = ['admin', 'root', 'user', 'null', 'undefined', 'system'];
+	reservedWords.forEach(element =>
+	{
+		if (username_lower.includes(element))
+			throw (new Error(`Username '${username}' is not allowed.`));
+	});
+
+	// Check password strength
+	const	commonPasswords = ['password', '123456', '123456789', 'qwerty'];
+	commonPasswords.forEach(element =>
+	{
+		if (psw_lower.includes(element))
+			throw (new Error('Password is too common.'));
+	});
+
+	if (psw_lower.includes(username_lower) || psw_lower.includes(email_lower))
+		throw (new Error('Password is too similar to username or email.'));
+
+}
