@@ -143,7 +143,15 @@ export const	validateToken = async (req, reply) =>
 		// verify and decode ACCESS token (not refresh token!)
 		const	decodedToken = decodeToken(token, process.env.ACCESS_TOKEN_SECRET);
 
-		return (reply.code(200).send({ message: 'Token is valid', userId: decodedToken.id, valid: true}));
+		// Return the complete user data from the token
+		return reply.code(200).send({
+			message: 'Token is valid', 
+			valid: true,
+			user: {
+				id: decodedToken.id,
+				email: decodedToken.email
+			}
+		});
 	}
 	catch (err)
 	{

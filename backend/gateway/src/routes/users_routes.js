@@ -2,13 +2,14 @@ import axios from 'axios'
 
 export const	getUsers = async (req, reply) =>
 {
-	// Redirect login requests to auth service
+	// Forward request to users service with user data
 	try
 	{
 		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/`,
 		{
 			headers: {
-				'x-internal-api-key': process.env.INTERNAL_API_KEY
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+				'x-user-data': JSON.stringify(req.user) // Pass authenticated user data
 			}
 		})
 

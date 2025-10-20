@@ -201,8 +201,16 @@ const	validateTokenOpts =
 				properties:
 				{
 					message: { type: 'string' },
-					userId: { type: 'string' },
-					valid: { type: 'boolean' }
+					valid: { type: 'boolean' },
+					user:
+					{
+						type: 'object',
+						properties:
+						{
+							id: { type: 'string' },
+							email: { type: 'string' }
+						}
+					}
 				}
 			},
 			400: ErrorResponse,
