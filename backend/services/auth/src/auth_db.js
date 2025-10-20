@@ -96,12 +96,12 @@ export class AuthDatabase
 		return (await this.db.get("SELECT * FROM users WHERE id = ?", [id]));
 	}
 
-	async getAllUsers()
+	async	getAllUsers()
 	{
 		return (await this.db.all("SELECT * FROM users"));
 	}
 
-	async getUserByUsername(username)
+	async	getUserByUsername(username)
 	{
 		return (await this.db.get("SELECT * FROM users WHERE username = ?", [username]));
 	}
@@ -112,12 +112,12 @@ export class AuthDatabase
 	}
 
 	// Get user by username OR email
-	async getUserByUsernameOrEmail(identifier)
+	async	getUserByUsernameOrEmail(identifier)
 	{
 		return (await this.db.get("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]));
 	}
 
-	async deleteUserById(userId)
+	async	deleteUserById(userId)
 	{
 		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);
 	}
@@ -166,7 +166,7 @@ export class AuthDatabase
 		await (this.db.run("DELETE FROM refresh_tokens WHERE id = ?", [tokenId]));
 	}
 
-	async close()
+	async	close()
 	{
 		if (this.db)
 		{

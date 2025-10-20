@@ -22,14 +22,19 @@ export async function	validateInternalApiKey(request, reply)
 // This function parses the user data passed from the gateway after JWT authentication
 export function	extractUserData(request)
 {
-	try {
-		if (request.headers['x-user-data']) {
-			return JSON.parse(request.headers['x-user-data']);
+	try
+	{
+		if (request.headers['x-user-data'])
+		{
+			return (JSON.parse(request.headers['x-user-data']));
 		}
-		return null;
-	} catch (err) {
+		return (null);
+	}
+	catch (err) 
+	{
 		console.log('Error parsing user data from headers:', err.message);
-		return null;
+	
+		return (null);
 	}
 }
 
