@@ -11,6 +11,9 @@
 [] update standard_architetrure... with new Error response schema
 [x] if email "daddas@.com": Auth service error: Request failed with status code 400
 [] move swagger in another microservice?
+[] login when a user is already logged?
+[] when the reply is 500 (internal server error) => the error message should be deleted
+[] add user id after jwt validation in gateway (added user data )
 
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes

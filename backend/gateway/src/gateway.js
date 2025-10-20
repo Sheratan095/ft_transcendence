@@ -15,7 +15,7 @@ await swaggerAggregator.register(fastify);// TO DO remove register call, add fas
 import { checkEnvVariables } from './gateway_help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'PORT']);
 
-import {authenticateToken } from './gateway_help.js';
+import { authenticateJwtToken } from './gateway_help.js';
 
 
 import {
@@ -30,14 +30,16 @@ import {
 } from './routes/users_routes.js'
 
 
-// AUTH routes - exclude from swagger docs since they're just proxies
+// Schema hiding for routes that should not appear in Swagger docs (they are just proxies)
+
+// AUTH routes do not require authentication, in logout and token refresh the user is identified via the refresh_token
 fastify.post('/auth/login', { schema: { hide: true }, handler: loginRoute })
 fastify.post('/auth/register', { schema: { hide: true }, handler: registerRoute })
 fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
 fastify.post('/auth/token', { schema: { hide: true }, handler: tokenRoute })
 
 // USERS routes PROTECTED => require valid token - exclude from swagger docs
-fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateToken, handler: getUsers })
+fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUsers })
 
 // Server startup function with error handling
 const	start = async () =>

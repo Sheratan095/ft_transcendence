@@ -118,11 +118,11 @@ export const	logout = async (req, reply) =>
 		console.log('Logout error:', err.message);
 		
 		if (err.name === 'TokenExpiredError')
-			return reply.code(401).send({ error: 'Token has expired' });
+			return (reply.code(401).send({ error: 'Token has expired' }));
 		else if (err.name === 'JsonWebTokenError')
-			return reply.code(401).send({ error: 'Invalid token' });
+			return (reply.code(401).send({ error: 'Invalid token' }));
 		
-		return reply.code(500).send({ error: 'Internal server error' });
+		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 };
 
@@ -155,13 +155,29 @@ export const	token = async (req, reply) =>
 {
 	const	refreshToken = req.body.refreshToken;
 
-	const	authDb = req.server.authDb;
+	try
+	{
+		const	authDb = req.server.authDb;
 
-	console.log('Auth DB methods:', authDb.getRefreshToken(refreshToken));
+		// verify and decode token
+		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+		console.log('User ID from refresh token:', decodedToken.id);
+		console.log('Request id:', req.user);
 
+		return (reply.code(501).send({ error: 'Not implemented yet' }));
 
-
-	return reply.code(501).send({ error: 'Not implemented yet' });
+	}
+	catch (err)
+	{
+		console.log('Logout error:', err.message);
+		
+		if (err.name === 'TokenExpiredError')
+			return reply.code(401).send({ error: 'Token has expired' });
+		else if (err.name === 'JsonWebTokenError')
+			return reply.code(401).send({ error: 'Invalid token' });
+		
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
 }
 
 // Goal	Recommended Action	Why

@@ -6,7 +6,7 @@ dotenv.config()
 
 // Authentication middleware that validates JWT tokens via auth service
 // This function is called before protected routes to verify user authentication
-export async function	authenticateToken(request, reply)
+export async function	authenticateJwtToken(request, reply)
 {
 	// Extract Authorization header and parse Bearer token
 	const	authHeader = request.headers['authorization']

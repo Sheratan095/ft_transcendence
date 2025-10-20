@@ -146,19 +146,19 @@ export class AuthDatabase
 		);
 	}
 
-	async	getTokens()
+	async	getRefreshTokenByUserId(userId)
+	{
+		return (await this.db.get("SELECT * FROM refresh_tokens WHERE user_id = ?", [userId]));
+	}
+
+	async	getRefreshTokens()
 	{
 		return (await this.db.all("SELECT * FROM refresh_tokens"));
 	}
 
-	async	getRefreshToken(token)
-	{
-		return (await this.db.get("SELECT * FROM refresh_tokens WHERE refresh_token = ?", [token]));
-	}
-
 	async	deleteRefreshToken(tokenId, userId, refresh_token)
 	{
-		await this.db.run("DELETE FROM refresh_tokens WHERE id = ? AND user_id = ? AND refresh_token = ?", [tokenId, userId, refresh_token]);
+		await (this.db.run("DELETE FROM refresh_tokens WHERE id = ? AND user_id = ? AND refresh_token = ?", [tokenId, userId, refresh_token]));
 	}
 
 	async close()
