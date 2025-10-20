@@ -1,8 +1,7 @@
 [x] std_microservice_architecture.drawio
 [] docs for microservice.db in std_microservice_architecture.drawio
 [] figure out how handle db in microservice and add it to std_microservice_architecture.drawio
-[] how can we check if a user is online? last token request?
-[] move the sql scripts to another .sql and execute it in ..._db 
+[x] move the sql scripts to another .sql and execute it in ..._db 
 [] remove guards from controllers, check if schema validation really works
 
 [] lowercase shit
@@ -23,6 +22,8 @@
 [x] update std_microsercice_architecture with new routes schemas
 [x] consider to remove api flow, and add some "tutorial" fro swagger
 [] swagger implementation.txt
+
+[] how can we check if a user is online? last token request?
 
 [] JWT protocol
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT

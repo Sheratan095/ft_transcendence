@@ -4,7 +4,7 @@ DELETE http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ3OGVkYjhiLTEwYTUtNDNmZC04ZDllLTA0YjYxOTFhN2VjMiIsImVtYWlsIjoiZHNhZGFzQGV4YW1wbGUuY29tIiwiaWF0IjoxNzYwOTU3OTkwfQ.sqhFhFL7Dbdfvhp05GdxuXPPWeU32J1AyON5BYukBjM"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIyMzc1MTBjLWM3ODEtNDRhMy1hYTMyLTQ3NTMyYmVhMjE4YiIsImVtYWlsIjoiZHNhZGFAeG1wbGUuY29tIiwiaWF0IjoxNzYwOTcyMzg0fQ.a9PX5wgFo5lzFHyjebsq5jwwp6-dvuszR6GIfeVE12A"
 }
 
 ###
@@ -32,8 +32,8 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "username": "Jima",
-  "password": "password123"
+  "username": "MARCO",
+  "password": "Mrco@123_"
 }
 
 ###
@@ -43,7 +43,7 @@ Content-Type: application/json
 {
   "username": "MARCO",
   "email": "dsada@xmple.com",
-  "password": "Marco@123_"
+  "password": "Mrco@123_"
 }
 
 ###

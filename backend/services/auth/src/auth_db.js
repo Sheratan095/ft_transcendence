@@ -3,9 +3,10 @@ import sqlite3 from "sqlite3";
 import { v4 as uuidv4 } from 'uuid';
 
 import { promisify } from "util";
-import { mkdir } from "fs/promises";
+import { mkdir, readFile } from "fs/promises";
 import {formatExpirationDate} from "./auth_help.js";
 import path from "path";
+import { fileURLToPath } from 'url';
 
 export class AuthDatabase
 {
@@ -17,7 +18,8 @@ export class AuthDatabase
 
 	async	initialize()
 	{
-		try {
+		try
+		{
 			// Create data directory if it doesn't exist
 			const	dir = path.dirname(this.dbPath);
 			await mkdir(dir, { recursive: true });
@@ -44,33 +46,31 @@ export class AuthDatabase
 	// Private method (#) to create tables
 	async	#createTables()
 	{
-		// TO DO remove it - Drop tables in correct order (child first due to foreign key)
-		await this.db.run('DROP TABLE IF EXISTS refresh_tokens');
-		await this.db.run('DROP TABLE IF EXISTS users');
+		try
+		{
+			// Get the directory name of the current module
+			const	__filename = fileURLToPath(import.meta.url);
+			const	__dirname = path.dirname(__filename);
+			const	schemaPath = path.join(__dirname, 'schema.sql');
 
-		// Create users table
-		await this.db.run(`
-			CREATE TABLE IF NOT EXISTS users (
-				id TEXT PRIMARY KEY,
-				email TEXT UNIQUE NOT NULL,
-				username TEXT UNIQUE NOT NULL,
-				password TEXT NOT NULL,
-				created_at TEXT DEFAULT (datetime('now')),
-				updated_at TEXT DEFAULT (datetime('now'))
-			)
-		`);
+			// Read the SQL schema file
+			const	schema = await readFile(schemaPath, 'utf8');
 
-		// Create refresh_tokens table
-		await this.db.run(`
-			CREATE TABLE IF NOT EXISTS refresh_tokens (
-				id TEXT PRIMARY KEY,
-				user_id TEXT NOT NULL,
-				refresh_token TEXT NOT NULL,
-				created_at TEXT DEFAULT (datetime('now')),
-				expires_at TEXT NOT NULL,
-				FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-			)
-		`);
+			// Split the schema into individual statements and execute them
+			const	statements = schema
+				.split(';')
+				.map(stmt => stmt.trim())
+				.filter(stmt => stmt.length > 0);
+
+			for (const statement of statements)
+				await this.db.run(statement);
+		}
+		catch (error)
+		{
+			console.error("❌ Error creating tables for auth_db:", error);
+
+			throw (error);
+		}
 	}
 
 	// TO DO check it
