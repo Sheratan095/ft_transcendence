@@ -25,6 +25,6 @@
 [] swagger implementation.txt
 
 [] JWT protocol
-	[] choose what to use as other credential, if mail or username, i suggest both
+	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT
 	[] add accessToken expiration to login and registration reply, add it also in auth_api_flow.drawio
-	[] new token request
+	[x] new token request
