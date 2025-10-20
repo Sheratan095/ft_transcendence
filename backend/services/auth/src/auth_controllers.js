@@ -180,8 +180,6 @@ export const	validateToken = async (req, reply) =>
 
 export const	token = async (req, reply) =>
 {
-	console.log('Token refresh requested: ', req.body.refreshToken);
-
 	try
 	{
 		const	refreshToken = req.body.refreshToken;
@@ -233,15 +231,3 @@ export const	token = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
-
-// Goal	Recommended Action	Why
-// Logout securely	Delete refresh token from DB	Prevent reuse after logout
-// Multi-device logout	Delete token by ID or all tokens for user	Control per-device sessions
-// Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
-// Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
-// Prevent token spam	Add short cooldown (optional)	Avoid repeated login requests
-//await fastify.register(import('fastify-rate-limit'), {
-//   max: 5, // requests
-//   timeWindow: '5 minutes', // time window
-//   keyGenerator: (req) => req.body.username || req.ip
-// });

@@ -2,7 +2,7 @@
 [] docs for microservice.db in std_microservice_architecture.drawio
 [] figure out how handle db in microservice and add it to std_microservice_architecture.drawio
 [x] move the sql scripts to another .sql and execute it in ..._db 
-[] remove guards from controllers, check if schema validation really works
+[x] remove guards from controllers, check if schema validation really works
 
 [x] lowercase shit
 [x] min length of username and psw (and other constraints)
@@ -33,3 +33,12 @@
 
 [] SQL INJECTION PROTECTION
 [] XSS Attack
+
+[] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
+[] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
+[] Prevent token spam	Add short cooldown (optional)	Avoid repeated login requests
+[]await fastify.register(import('fastify-rate-limit'), {
+[]   max: 5, // requests
+[]   timeWindow: '5 minutes', // time window
+[]   keyGenerator: (req) => req.body.username || req.ip
+[] });
