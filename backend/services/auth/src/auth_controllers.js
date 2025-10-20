@@ -8,11 +8,10 @@ import bcrypt from 'bcrypt';
 
 export const	register = async (req, reply) => 
 {
-	const	username = req.body.username
-	const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
-
 	try
 	{
+		const	username = req.body.username
+		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		const	authDb = req.server.authDb;
 
 		const	user = await authDb.createUser(username, hashedpassword, req.body.email)
@@ -50,11 +49,10 @@ export const	register = async (req, reply) =>
 
 export const	login = async (req, reply) =>
 {
-	const	password = req.body.password;
-	const	identifier = req.body.username || req.body.email;
-
 	try
 	{
+		const	password = req.body.password;
+		const	identifier = req.body.username || req.body.email;
 		// Access database through Fastify instance
 		const	authDb = req.server.authDb;
 		
@@ -99,10 +97,9 @@ export const	login = async (req, reply) =>
 // No need to invalidate them
 export const	logout = async (req, reply) =>
 {
-	const	refreshToken = req.body.refreshToken;
-
 	try
 	{
+		const	refreshToken = req.body.refreshToken;
 		const	authDb = req.server.authDb;
 
 		// Verify and decode token
@@ -136,10 +133,10 @@ export const	logout = async (req, reply) =>
 // Used just to validate access to protected routes
 export const	validateToken = async (req, reply) =>
 {
-	const	token = req.body.token;
-
 	try
 	{
+		const	token = req.body.token;
+
 		// verify and decode ACCESS token (not refresh token!)
 		const	decodedToken = decodeToken(token, process.env.ACCESS_TOKEN_SECRET);
 
@@ -169,10 +166,9 @@ export const	validateToken = async (req, reply) =>
 
 export const	token = async (req, reply) =>
 {
-	const	refreshToken = req.body.refreshToken;
-
 	try
 	{
+		const	refreshToken = req.body.refreshToken;
 		const	authDb = req.server.authDb;
 
 		// Verify JWT signature

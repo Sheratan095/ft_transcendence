@@ -8,11 +8,21 @@ let users = [
 
 export const	getUsers = async (req, reply) =>
 {
-	// Extract user data from gateway headers
-	const userData = extractUserData(req);
+	try
+	{
+		// Extract user data from gateway headers
+		const userData = extractUserData(req);
 
-	console.log('Authenticated user:', userData);
+		console.log('Authenticated user:', userData);
 
-	console.log('Fetching users');
-	return (reply.code(200).send(users));	
+		console.log('Fetching users');
+		return (reply.code(200).send(users));	
+	}
+	catch (err)
+	{
+		console.log('GetUsers error:', err.message);
+		
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+
 } 
