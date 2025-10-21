@@ -177,7 +177,7 @@ export class AuthDatabase
 
 	// -------- TWO-FACTOR AUTH METHODS --------
 
-	async	insertTwoFactorToken(userId, otpCode, expiresAt)
+	async	storeTwoFactorToken(userId, otpCode, expiresAt)
 	{
 		const	id = uuidv4();
 

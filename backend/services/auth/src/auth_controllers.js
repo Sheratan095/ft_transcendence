@@ -1,4 +1,5 @@
 import { generateNewTokens, decodeToken, validator} from './auth_help.js';
+import { sendTwoFactorCode, generateOTPCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
@@ -84,6 +85,15 @@ export const	login = async (req, reply) =>
 
 		if (await bcrypt.compare(password, user.password) === false)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
+
+		if (user && user.tfa_active)
+		{
+			const	otp_code = generateOTPCode();
+			sendTwoFactorCode(user.email, otp_code);
+			await (authDb.storeTwoFactorToken(user.id, otp_code));
+
+			return (reply.code(200).send({ message: 'Two-Factor Authentication required', tfaRequired: true, userId: user.id }));
+		}
 
 		const	newTokens = await generateNewTokens(user, authDb);
 

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 	username TEXT UNIQUE NOT NULL COLLATE NOCASE,
 	password TEXT NOT NULL,
 	created_at TEXT DEFAULT (datetime('now')),
-	updated_at TEXT DEFAULT (datetime('now'))
+	tfa_active BOOLEAN NOT NULL DEFAULT 0 -- Two-Factor Authentication active flag
 );
 
 -- Create refresh_tokens table
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS twofactor_tokens (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
   otp_code TEXT NOT NULL,
-  expires_at TEXT NOT NULL,
   created_at TEXT DEFAULT (datetime('now')),
+  expires_at TEXT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
