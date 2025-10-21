@@ -60,9 +60,8 @@ export function	validator(username, password, email)
 
 export function	formatExpirationDate(date)
 {
-	const	expiresAtStr = date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
-
-	return (expiresAtStr);
+	// Keep the ISO format to preserve timezone information for proper parsing
+	return (date.toISOString());
 }
 
 export function	isTokenExpired(expirationDate)

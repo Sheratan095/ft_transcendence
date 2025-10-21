@@ -7,7 +7,7 @@ gateway:
     SMTP_PORT=587
     SMTP_USER=43skhool@gmail.com
     SMTP_PASS=udkh apxb ltsl iikp
-    OTP_EXPIRATION=1m
+    OTP_EXPIRATION=5
 
 services/auth:
     INTERNAL_API_KEY=1
