@@ -181,7 +181,10 @@ export class AuthDatabase
 	{
 		const	id = uuidv4();
 
-		await this.db.run("INSERT INTO twofactor_tokens (id, user_id, otp_code, expires_at) VALUES (?, ?, ?, ?)", [id, userId, otpCode, expiresAt]);
+		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
+		const	expiresAtStr = formatExpirationDate(expiresAt);
+
+		await this.db.run("INSERT INTO twofactor_tokens (id, user_id, otp_code, expires_at) VALUES (?, ?, ?, ?)", [id, userId, otpCode, expiresAtStr]);
 
 		return (id);
 	}

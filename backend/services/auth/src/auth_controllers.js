@@ -263,7 +263,10 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 		const	now = new Date();
 		const	expiresAt = new Date(storedToken.expires_at);
 		
-		if (now > expiresAt)
+		console.log('Current time:', now.toISOString());
+		console.log('Token expiration time:', expiresAt.toISOString());
+
+		if (isTokenExpired(storedToken.expires_at))
 		{
 			// Clean up expired token
 			await authDb.deleteTwoFactorTokenById(storedToken.id);
