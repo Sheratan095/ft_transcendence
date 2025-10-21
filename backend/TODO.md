@@ -37,6 +37,7 @@
 [] XSS Attack
 
 [] Custom Otp mail
+[] Change profile image to 42 account to diplay it in to the email
 
 [] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
 [] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
