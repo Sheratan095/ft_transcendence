@@ -19,5 +19,5 @@ services/auth:
     OTP_EXPIRATION_MINUTES=1
 
 services/users:
-    INTERNAL_API_KEY=1
+    INTERNAL_API_KEY=1234
     PORT=3002
