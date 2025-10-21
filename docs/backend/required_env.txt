@@ -1,23 +1,22 @@
 gateway:
-    INTERNAL_API_KEY=1
+    INTERNAL_API_KEY=1234
     AUTH_SERVICE_URL=http://localhost:3001
     USERS_SERVICE_URL=http://localhost:3002
     PORT=3000
+
+services/auth:
+    INTERNAL_API_KEY=1234
+    ACCESS_TOKEN_SECRET=your_access_token_secret
+    ACCESS_TOKEN_EXPIRATION=15m
+    REFRESH_TOKEN_SECRET=your_refresh_token_secret
+    PORT=3001
+    REFRESH_TOKEN_EXPIRATION_DAYS=7
+    HASH_SALT_ROUNDS=10
     SMTP_HOST=smtp.gmail.com
     SMTP_PORT=587
     SMTP_USER=43skhool@gmail.com
     SMTP_PASS=udkh apxb ltsl iikp
-    OTP_EXPIRATION=5
-
-services/auth:
-    INTERNAL_API_KEY=1
-    ACCESS_TOKEN_SECRET=2
-    REFRESH_TOKEN_SECRET=3
-    PORT=3001
-    REFRESH_TOKEN_EXPIRATION_DAYS=7
-    HASH_SALT_ROUNDS=10
-    ACCESS_TOKEN_EXPIRATION=5m
-    OTP_EXPIRATION_MINUTES=5
+    OTP_EXPIRATION_MINUTES=1
 
 services/users:
     INTERNAL_API_KEY=1
