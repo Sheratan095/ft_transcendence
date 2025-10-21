@@ -90,7 +90,7 @@ export const	login = async (req, reply) =>
 		{
 			const	otp_code = generateOTPCode();
 			sendTwoFactorCode(user.email, otp_code);
-			await (authDb.storeTwoFactorToken(user.id, otp_code));
+			await (authDb.storeTwoFactorToken(user.id, otp_code, process.env.OTP_EXPIRATION));
 
 			return (reply.code(200).send({ message: 'Two-Factor Authentication required', tfaRequired: true, userId: user.id }));
 		}
