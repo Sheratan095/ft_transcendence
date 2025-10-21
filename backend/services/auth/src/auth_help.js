@@ -161,26 +161,3 @@ export function	validator(username, password, email)
 		throw (new Error('Password is too similar to username or email.'));
 
 }
-
-export async function	sendLoginResponse(reply, user, authDb)
-{
-	const	newTokens = await generateNewTokens(user, authDb);
-
-	console.log('User logged in: ', user.id);
-
-	return (reply.code(200).send({
-		message: 'Login successful',
-		user:
-		{
-			id: user.id,
-			username: user.username,
-			email: user.email
-		},
-		tokens:
-		{
-			accessToken: newTokens.accessToken,
-			refreshToken: newTokens.refreshToken,
-			expiration: newTokens.expiration
-		}
-	}));
-}

@@ -1,5 +1,4 @@
-import { generateNewTokens, decodeToken, validator, sendLoginResponse} from './auth_help.js';
-import { sendTwoFactorCode } from './2fa.js';
+import { generateNewTokens, decodeToken, validator} from './auth_help.js';
 import bcrypt from 'bcrypt';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
@@ -86,10 +85,25 @@ export const	login = async (req, reply) =>
 		if (await bcrypt.compare(password, user.password) === false)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
 
-		if (user && user.tfa_active)
-			return (sendTwoFactorCode(user, authDb, reply));
-		else
-			return (sendLoginResponse(reply, user, authDb));
+		const	newTokens = await generateNewTokens(user, authDb);
+
+		console.log('User logged in: ', user.id);
+
+		return (reply.code(200).send({
+			message: 'Login successful',
+			user:
+			{
+				id: user.id,
+				username: user.username,
+				email: user.email
+			},
+			tokens:
+			{
+				accessToken: newTokens.accessToken,
+				refreshToken: newTokens.refreshToken,
+				expiration: newTokens.expiration
+			}
+		}));
 	}
 	catch (err)
 	{
@@ -221,37 +235,6 @@ export const	token = async (req, reply) =>
 		else if (err.name === 'JsonWebTokenError')
 			return (reply.code(401).send({ error: 'Invalid token' }));
 		
-		return (reply.code(500).send({ error: 'Internal server error' }));
-	}
-}
-
-export const	verifyTwoFactorAuth = async (req, reply) =>
-{
-	try
-	{
-		const	userId = req.body.userId;
-		const	otpCode = req.body.otpCode;
-		const	authDb = req.server.authDb;
-
-		const	storedToken = await authDb.getTwoFactorTokenByUserId(userId);
-
-		console.log('storedToken', storedToken);
-		console.log('otpCode', otpCode);
-
-		if (!storedToken || await bcrypt.compare(otpCode, storedToken.otp_code) === false)
-			return (reply.code(401).send({ error: 'Invalid or expired OTP code' }));
-
-		// OTP is valid, delete it from DB
-		await authDb.deleteTwoFactorTokenByUserId(userId);
-
-		const	user = await authDb.getUserById(userId);
-
-		return (sendLoginResponse(reply, user, authDb));
-	}
-	catch (err)
-	{
-		console.log('2FA verification error:', err.message);
-
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
