@@ -3,6 +3,11 @@ gateway:
     AUTH_SERVICE_URL=http://localhost:3001
     USERS_SERVICE_URL=http://localhost:3002
     PORT=3000
+    SMTP_HOST=smtp.gmail.com
+    SMTP_PORT=587
+    SMTP_USER=43skhool@gmail.com
+    SMTP_PASS=udkh apxb ltsl iikp
+    OTP_EXPIRATION=1m
 
 services/auth:
     INTERNAL_API_KEY=1
