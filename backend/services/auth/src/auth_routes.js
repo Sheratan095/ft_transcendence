@@ -56,6 +56,31 @@ const	WelcomeResponse =
 	}
 };
 
+const	TwoFactorRequiredResponse = 
+{
+	type: 'object',
+	properties:
+	{
+		message: { type: 'string' },
+		tfaRequired: { type: 'boolean' },
+		userId: { type: 'string' }
+	}
+};
+
+const	LoginResponse = 
+{
+	type: 'object',
+	properties:
+	{
+		message: { type: 'string' },
+		tokens: Tokens,
+		user: User,
+		tfaRequired: { type: 'boolean' },
+		userId: { type: 'string' }
+	},
+	additionalProperties: true
+};
+
 const	withInternalAuth =
 {
 	security: [{ internalApiKey: [] }],
@@ -151,7 +176,7 @@ const	loginOpts =
 
 		response:
 		{
-			200: WelcomeResponse,
+			200: LoginResponse,
 			400: ErrorResponse,
 			401: ErrorResponse,
 			409: ErrorResponse,

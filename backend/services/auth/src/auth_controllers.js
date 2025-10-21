@@ -1,4 +1,5 @@
 import { generateNewTokens, decodeToken, validator} from './auth_help.js';
+import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
@@ -84,6 +85,16 @@ export const	login = async (req, reply) =>
 
 		if (await bcrypt.compare(password, user.password) === false)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
+
+		// Check if 2FA is enabled for this user
+		if (user.tfa_active)
+		{
+			// Clean up any existing 2FA tokens for this user first
+			await authDb.deleteTwoFactorTokenByUserId(user.id);
+			
+			// Send 2FA code and require verification
+			return (await sendTwoFactorCode(user, authDb, reply));
+		}
 
 		const	newTokens = await generateNewTokens(user, authDb);
 
@@ -235,6 +246,74 @@ export const	token = async (req, reply) =>
 		else if (err.name === 'JsonWebTokenError')
 			return (reply.code(401).send({ error: 'Invalid token' }));
 		
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	verifyTwoFactorAuth = async (req, reply) =>
+{
+	try
+	{
+		const	{ userId, otpCode } = req.body;
+		const	authDb = req.server.authDb;
+
+		// Get the stored 2FA token
+		const	storedToken = await authDb.getTwoFactorTokenByUserId(userId);
+		
+		if (!storedToken)
+			return (reply.code(401).send({ error: 'No 2FA token found or expired' }));
+
+		// Check if token is expired
+		const	now = new Date();
+		const	expiresAt = new Date(storedToken.expires_at);
+		
+		if (now > expiresAt)
+		{
+			// Clean up expired token
+			await authDb.deleteTwoFactorTokenById(storedToken.id);
+			return (reply.code(401).send({ error: '2FA token has expired' }));
+		}
+
+		// Verify the OTP code
+		const	isValidOtp = await bcrypt.compare(otpCode, storedToken.otp_code);
+		
+		if (!isValidOtp)
+			return (reply.code(401).send({ error: 'Invalid 2FA code' }));
+
+		// Clean up used token
+		await authDb.deleteTwoFactorTokenById(storedToken.id);
+
+		// Get user data
+		const	user = await authDb.getUserById(userId);
+		
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		// Generate tokens for successful 2FA verification
+		const	newTokens = await generateNewTokens(user, authDb);
+
+		console.log('2FA verification successful for user:', user.id);
+
+		return (reply.code(200).send({
+			message: '2FA verification successful',
+			user:
+			{
+				id: user.id,
+				username: user.username,
+				email: user.email
+			},
+			tokens:
+			{
+				accessToken: newTokens.accessToken,
+				refreshToken: newTokens.refreshToken,
+				expiration: newTokens.expiration
+			}
+		}));
+	}
+	catch (err)
+	{
+		console.log('2FA verification error:', err.message);
+
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

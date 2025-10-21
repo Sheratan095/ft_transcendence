@@ -1,12 +1,28 @@
 import nodemailer from "nodemailer";
 import bcrypt from 'bcrypt';
+import { formatExpirationDate } from './auth_help.js';
 
 export const	sendTwoFactorCode = async (user, authDb, reply) =>
 {
 	const	otp_code = generateOTPCode();
 	const	hash_optcode = bcrypt.hashSync(otp_code, parseInt(process.env.HASH_SALT_ROUNDS));
 
-	await (authDb.storeTwoFactorToken(user.id, hash_optcode, process.env.OTP_EXPIRATION));
+	// Calculate proper expiration date (configurable time from now)
+	let expirationMillis;
+	const otpExpiration = process.env.OTP_EXPIRATION || '1m';
+	
+	if (otpExpiration.endsWith('s')) {
+		expirationMillis = parseInt(otpExpiration.replace('s', '')) * 1000;
+	} else if (otpExpiration.endsWith('m')) {
+		expirationMillis = parseInt(otpExpiration.replace('m', '')) * 60 * 1000;
+	} else {
+		expirationMillis = 60 * 1000; // default 1 minute
+	}
+	
+	const	expirationDate = new Date(Date.now() + expirationMillis);
+	const	formattedExpiration = expirationDate.toISOString(); // Keep ISO format with timezone
+
+	await (authDb.storeTwoFactorToken(user.id, hash_optcode, formattedExpiration));
 
 	// In a real-world application, you would send the OTP code via email or SMS.
 	// Here, we'll just log it to the console for demonstration purposes.
@@ -16,7 +32,9 @@ export const	sendTwoFactorCode = async (user, authDb, reply) =>
 		`Your OTP code is: ${otp_code}`
 	);
 
-	reply.code(200).send({ message: 'Two-Factor Authentication required', tfaRequired: true, userId: user.id })
+	const response = { message: 'Two-Factor Authentication required', tfaRequired: true, userId: user.id };
+	
+	reply.code(200).send(response);
 }
 
 export const	generateOTPCode = () =>
