@@ -60,6 +60,6 @@ POST http://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "2b8ae3c5-fb89-4d5a-b6e6-dae24dc28765",
-  "otpCode": "588763"
+  "userId": "77aa8114-c4c8-4c06-9ef3-d422922d7b64",
+  "otpCode": "776135"
 }

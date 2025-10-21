@@ -36,6 +36,8 @@
 [] SQL INJECTION PROTECTION
 [] XSS Attack
 
+[] Custom Otp mail
+
 [] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
 [] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
 [] Prevent token spam	Add short cooldown (optional)	Avoid repeated login requests
