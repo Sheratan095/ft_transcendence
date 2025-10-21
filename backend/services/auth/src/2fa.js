@@ -1,16 +1,22 @@
 import nodemailer from "nodemailer";
+import bcrypt from 'bcrypt';
 
-export const	sendTwoFactorCode = async (userEmail, otp_code) =>
+export const	sendTwoFactorCode = async (user, authDb, reply) =>
 {
+	const	otp_code = generateOTPCode();
+	const	hash_optcode = bcrypt.hashSync(otp_code, parseInt(process.env.HASH_SALT_ROUNDS));
+
+	await (authDb.storeTwoFactorToken(user.id, hash_optcode, process.env.OTP_EXPIRATION));
+
 	// In a real-world application, you would send the OTP code via email or SMS.
 	// Here, we'll just log it to the console for demonstration purposes.
 	sendEmail(
-		userEmail,
+		user.email,
 		'Your Two-Factor Authentication Code',
 		`Your OTP code is: ${otp_code}`
 	);
 
-	console.log(`Sending 2FA code to ${userEmail}: ${otp_code}`);
+	reply.code(200).send({ message: 'Two-Factor Authentication required', tfaRequired: true, userId: user.id })
 }
 
 export const	generateOTPCode = () =>
@@ -43,7 +49,7 @@ export async function sendEmail(to, subject, text)
 	{
 		await transporter.sendMail(mailOptions);
 
-		console.log(`📧 Email sent to ${to}`);
+		console.log(`📧 2FA Email sent to ${to}`);
 	}
 	catch (error)
 	{

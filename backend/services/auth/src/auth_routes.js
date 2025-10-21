@@ -3,7 +3,8 @@ import {
 	logout,
 	login,
 	register,
-	validateToken
+	validateToken,
+	verifyTwoFactorAuth
 } from './auth_controllers.js';
 
 import { validateInternalApiKey } from './auth_help.js';
@@ -284,12 +285,44 @@ const	tokenOpts =
 	handler: token
 };
 
+const	twoFactorAuthOpts =
+{
+	schema:
+	{
+		description: 'Verify a user\'s Two-Factor Authentication (2FA) code',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId', 'otpCode'],
+			properties:
+			{
+				userId: { type: 'string' },
+				otpCode: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200: WelcomeResponse,
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: verifyTwoFactorAuth
+}
+
 export function	authRoutes(fastify)
 {
 	fastify.post('/register', registerOpts);
 	fastify.post('/login', loginOpts);
 	fastify.post('/validate-token', validateTokenOpts);
 	fastify.post('/token', tokenOpts);
+	fastify.post('/2fa', twoFactorAuthOpts);
 
 	fastify.delete('/logout', logoutOpts);
 }
