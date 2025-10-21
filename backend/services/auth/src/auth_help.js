@@ -1,5 +1,3 @@
-import jwt from 'jsonwebtoken';
-
 //inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
@@ -18,31 +16,6 @@ export async function	validateInternalApiKey(request, reply)
 	}
 }
 
-// Helper function to extract user data from gateway headers
-// This function parses the user data passed from the gateway after JWT authentication
-export function	extractUserData(request)
-{
-	try
-	{
-		if (request.headers['x-user-data'])
-		{
-			return (JSON.parse(request.headers['x-user-data']));
-		}
-		return (null);
-	}
-	catch (err) 
-	{
-		console.log('Error parsing user data from headers:', err.message);
-	
-		return (null);
-	}
-}
-
-export function	generateAccessToken(user)
-{
-	return (jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION}));
-}
-
 export function	checkEnvVariables(requiredEnvVars)
 {
 	for (const envVar of requiredEnvVars)
@@ -51,82 +24,6 @@ export function	checkEnvVariables(requiredEnvVars)
 		{
 			console.error(`Missing required environment variable: ${envVar}`);
 			process.exit(1);
-		}
-	}
-}
-
-export function	getExpirationDate(days)
-{
-	//												hours min sec  ms
-	const	expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
-
-	return (expiresAt);
-}
-
-export function	formatExpirationDate(date)
-{
-	const	expiresAtStr = date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
-
-	return (expiresAtStr);
-}
-
-export async function	generateNewTokens(user, authDb)
-{
-	const	userPayload = { id: user.id, email: user.email };
-	const	accessToken = generateAccessToken(userPayload);
-	
-	// Calculate expiration date
-	const	expiration = getExpirationDate(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
-	
-	// Generate refresh token WITH expiration
-	const	refreshToken = jwt.sign(
-		userPayload, 
-		process.env.REFRESH_TOKEN_SECRET,
-		{ expiresIn: `${process.env.REFRESH_TOKEN_EXPIRATION_DAYS}d` }
-	);
-
-	// Check if user already has a refresh token
-	const	existingToken = await authDb.getRefreshTokenByUserId(user.id);
-	
-	if (existingToken) // Update existing token (token rotation)
-		await authDb.updateRefreshToken(user.id, refreshToken, expiration);
-	else	// Insert new token (first time login)
-		await authDb.insertRefreshToken(user.id, refreshToken, expiration);
-
-	return { accessToken, refreshToken, expiration };
-}
-
-
-export const decodeToken = (token, secret) =>
-{
-	try
-	{
-		return (jwt.verify(token, secret));
-	}
-	catch (err)
-	{
-		if (err.name === 'TokenExpiredError')
-		{
-			const	error = new Error('Token has expired');
-			error.name = 'TokenExpiredError';
-			error.expiredAt = err.expiredAt;
-			throw (error);
-		}
-		else if (err.name === 'JsonWebTokenError')
-		{
-			const	error = new Error('Invalid token');
-			error.name = 'JsonWebTokenError';
-			throw (error);
-		}
-		else if (err.name === 'NotBeforeError')
-		{
-			const	error = new Error('Token not active yet');
-			error.name = 'NotBeforeError';
-			throw (error);
-		}
-		else
-		{
-			throw (err);
 		}
 	}
 }
@@ -159,5 +56,11 @@ export function	validator(username, password, email)
 
 	if (psw_lower.includes(username_lower) || psw_lower.includes(email_lower))
 		throw (new Error('Password is too similar to username or email.'));
+}
 
+export function	formatExpirationDate(date)
+{
+	const	expiresAtStr = date.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
+
+	return (expiresAtStr);
 }

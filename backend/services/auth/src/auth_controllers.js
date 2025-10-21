@@ -1,4 +1,5 @@
-import { generateNewTokens, decodeToken, validator} from './auth_help.js';
+import { generateNewTokens, decodeToken} from './jwt.js';
+import { validator } from './auth_help.js';
 import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 
@@ -274,10 +275,8 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			return (reply.code(401).send({ error: '2FA token has expired' }));
 		}
 
-		// Verify the OTP code
-		const	isValidOtp = await bcrypt.compare(otpCode, storedToken.otp_code);
-		
-		if (!isValidOtp)
+		// Verify the OTP code		
+		if (!await bcrypt.compare(otpCode, storedToken.otp_code))
 			return (reply.code(401).send({ error: 'Invalid 2FA code' }));
 
 		// Clean up used token
@@ -285,7 +284,7 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 
 		// Get user data
 		const	user = await authDb.getUserById(userId);
-		
+
 		if (!user)
 			return (reply.code(404).send({ error: 'User not found' }));
 
