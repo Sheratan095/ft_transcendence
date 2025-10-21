@@ -37,14 +37,15 @@ dev:
 	@echo "Starting dev environment (TS watch, Tailwind watch, static server)..."
 	@trap 'echo "Stopping dev processes..."; kill $$TS_PID $$CSS_PID $$SERV_PID 2>/dev/null || true; exit 0' INT TERM
 	# start TS watcher
-	@npx tsc ./src/index.ts --lib es6,dom --outDir dist --sourceMap
+	@npx tsc ./src/index.ts --lib es6,dom --outDir src/dist --sourceMap
 	# start Tailwind watcher
 	# start simple static server (python3)
 	@python3 -m http.server $(PORT) --directory $(SRC_DIR) & \
 	SERV_PID=$$!; \
 	echo "Dev server running on http://localhost:$(PORT)"; \
 	echo "PIDs: $$SERV_PID"; \
-	wait
+	read -r; \
+	kill $$SERV_PID 2>/dev/null || true
 
 serve:
 	@echo "Serving $(SRC_DIR) on http://localhost:$(PORT)"
