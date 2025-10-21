@@ -1,0 +1,103 @@
+npm install nodemailer
+
+.env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=youremail@gmail.com
+SMTP_PASS=your_app_password
+
+⚠️ IMPORTANT:
+You cannot use your regular Gmail password.
+You must create an App Password:
+1 Go to https://myaccount.google.com/security
+2 Enable 2-Step Verification
+3 Create an App Password
+4 Use that as your SMTP_PASS
+
+🔄 Typical Flow
+
+1 User logs in → server validates credentials
+2️ If credentials are valid → server sends OTP via email
+3️ User submits OTP → server verifies it
+4 If OTP is valid → server issues JWT tokens and completes login
+
+------------------------------------------------------------------------------------------
+
+Create email_service.js
+
+import nodemailer from "nodemailer";
+
+export async function sendEmail(to, subject, text)
+{
+	const transporter = nodemailer.createTransport({
+		host: process.env.SMTP_HOST,
+		port: process.env.SMTP_PORT,
+		secure: false, // true for 465, false for 587
+		auth: {
+			user: process.env.SMTP_USER,
+			pass: process.env.SMTP_PASS
+		}
+	});
+
+	const mailOptions = {
+		from: `"MyApp" <${process.env.SMTP_USER}>`,
+		to,
+		subject,
+		text
+	};
+
+	try {
+		await transporter.sendMail(mailOptions);
+		console.log(`📧 Email sent to ${to}`);
+	} catch (error) {
+		console.error("❌ Error sending email:", error.message);
+		throw error;
+	}
+}
+
+------------------------------------------------------------------------------------------
+
+Generate and send OTP (e.g., /2fa/request)
+
+import { sendEmail } from './email_service.js';
+
+export async function request2FA(req, reply)
+{
+	const { email } = req.body;
+	const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+
+	// Store temporarily in memory (for testing)
+	req.server.pendingOTPs = req.server.pendingOTPs || {};
+	req.server.pendingOTPs[email] = {
+		code: otp,
+		expires: Date.now() + 5 * 60 * 1000 // 5 minutes
+	};
+
+	await sendEmail(email, "Your verification code", `Your OTP code is: ${otp}`);
+
+	return reply.code(200).send({ message: "OTP sent to email" });
+}
+
+------------------------------------------------------------------------------------------
+
+Verify OTP (e.g., /2fa/verify)
+
+export async function verify2FA(req, reply)
+{
+	const { email, code } = req.body;
+	const record = req.server.pendingOTPs?.[email];
+
+	if (!record)
+		return reply.code(400).send({ error: "No OTP found for this email" });
+
+	if (Date.now() > record.expires)
+		return reply.code(400).send({ error: "OTP expired" });
+
+	if (record.code !== code)
+		return reply.code(401).send({ error: "Invalid OTP" });
+
+	// OTP is valid — delete and continue with login/registration
+	delete req.server.pendingOTPs[email];
+
+	return reply.code(200).send({ message: "OTP verified successfully" });
+}
