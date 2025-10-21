@@ -64,3 +64,26 @@ export function	formatExpirationDate(date)
 
 	return (expiresAtStr);
 }
+
+export function	isTokenExpired(expirationDate)
+{
+	const	now = new Date();
+	const	expiresAt = new Date(expirationDate);
+	return (now > expiresAt);
+}
+
+export function	getExpirationDateByDays(days)
+{
+	//												hours min sec  ms
+	const	expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+	return (expiresAt);
+}
+
+export function	getExpirationDateByMinutes(minutes)
+{
+	//												hours min sec  ms
+	const	expiresAt = new Date(Date.now() + minutes * 60 * 1000);
+
+	return (expiresAt);
+}

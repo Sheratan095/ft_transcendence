@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { getExpirationDateByDays } from './auth_help.js';
 
 export const decodeToken = (token, secret) =>
 {
@@ -40,7 +41,7 @@ export async function	generateNewTokens(user, authDb)
 	const	accessToken = generateAccessToken(userPayload);
 	
 	// Calculate expiration date
-	const	expiration = getExpirationDate(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
+	const	expiration = getExpirationDateByDays(process.env.REFRESH_TOKEN_EXPIRATION_DAYS);
 	
 	// Generate refresh token WITH expiration
 	const	refreshToken = jwt.sign(

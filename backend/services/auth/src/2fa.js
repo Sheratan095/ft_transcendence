@@ -1,26 +1,15 @@
 import nodemailer from "nodemailer";
 import bcrypt from 'bcrypt';
+import { getExpirationDateByMinutes } from './auth_help.js';
 
 export async function	sendTwoFactorCode(user, authDb, reply)
 {
 	const	otp_code = generateOTPCode();
 	const	hash_optcode = bcrypt.hashSync(otp_code, parseInt(process.env.HASH_SALT_ROUNDS));
 
-	// Calculate proper expiration date (configurable time from now)
-	let expirationMillis;
-	const otpExpiration = process.env.OTP_EXPIRATION || '1m';
-	
-	if (otpExpiration.endsWith('s'))
-		expirationMillis = parseInt(otpExpiration.replace('s', '')) * 1000;
-	else if (otpExpiration.endsWith('m'))
-		expirationMillis = parseInt(otpExpiration.replace('m', '')) * 60 * 1000;
-	else
-		expirationMillis = 60 * 1000; // default 1 minute
-	
-	const	expirationDate = new Date(Date.now() + expirationMillis);
-	const	formattedExpiration = expirationDate.toISOString(); // Keep ISO format with timezone
+	const	expirationDate = getExpirationDateByMinutes(process.env.OTP_EXPIRATION_MINUTES);
 
-	await (authDb.storeTwoFactorToken(user.id, hash_optcode, formattedExpiration));
+	await (authDb.storeTwoFactorToken(user.id, hash_optcode, expirationDate));
 
 	sendEmail(
 		user.email,
@@ -33,7 +22,7 @@ export async function	sendTwoFactorCode(user, authDb, reply)
 	reply.code(200).send(response);
 }
 
-export async function	generateOTPCode()
+export function	generateOTPCode()
 {
 	// Generate a 6-digit random OTP code
 	return (Math.floor(100000 + Math.random() * 900000).toString());

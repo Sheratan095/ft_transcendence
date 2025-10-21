@@ -1,5 +1,5 @@
 import { generateNewTokens, decodeToken} from './jwt.js';
-import { validator } from './auth_help.js';
+import { validator, isTokenExpired } from './auth_help.js';
 import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 
@@ -81,10 +81,7 @@ export const	login = async (req, reply) =>
 		// Get user from database
 		const	user = await authDb.getUserByUsernameOrEmail(identifierLower);
 		
-		if (!user)
-			return (reply.code(401).send({ error: 'Invalid credentials' }));
-
-		if (await bcrypt.compare(password, user.password) === false)
+		if (!user || await bcrypt.compare(password, user.password) === false)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
 
 		// Check if 2FA is enabled for this user
@@ -214,9 +211,7 @@ export const	token = async (req, reply) =>
 			return (reply.code(401).send({ error: 'Refresh token not found or revoked' }));
 
 		// Check if token is expired
-		const	now = new Date();
-		const	expiresAt = new Date(storedToken.expires_at);
-		if (now > expiresAt)
+		if (isTokenExpired(storedToken.expires_at))
 		{
 			await authDb.deleteRefreshTokenById(storedToken.id);
 			return (reply.code(401).send({ error: 'Refresh token has expired' }));
