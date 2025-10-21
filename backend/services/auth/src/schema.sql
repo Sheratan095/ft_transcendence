@@ -23,3 +23,12 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
 	expires_at TEXT NOT NULL,
 	FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS twofactor_tokens (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  otp_code TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);

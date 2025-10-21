@@ -84,6 +84,15 @@ export class AuthDatabase
 		return (id);
 	}
 
+	async	#close()
+	{
+		if (this.db)
+		{
+			this.db.close();
+			this.db = null;
+		}
+	}
+
   // -------- USERS METHODS --------
 
 	// Return the created user object
@@ -166,13 +175,35 @@ export class AuthDatabase
 		await (this.db.run("DELETE FROM refresh_tokens WHERE id = ?", [tokenId]));
 	}
 
-	async	close()
+	// -------- TWO-FACTOR AUTH METHODS --------
+
+	async	insertTwoFactorToken(userId, otpCode, expiresAt)
 	{
-		if (this.db)
-		{
-			this.db.close();
-			this.db = null;
-		}
+		const	id = uuidv4();
+
+		await this.db.run("INSERT INTO twofactor_tokens (id, user_id, otp_code, expires_at) VALUES (?, ?, ?, ?)", [id, userId, otpCode, expiresAt]);
+
+		return (id);
+	}
+
+	async	getTwoFactorTokenByUserId(userId)
+	{
+		return (await this.db.get("SELECT * FROM twofactor_tokens WHERE user_id = ?", [userId]));
+	}
+
+	async	deleteTwoFactorTokenById(tokenId)
+	{
+		await (this.db.run("DELETE FROM twofactor_tokens WHERE id = ?", [tokenId]));
+	}
+
+	async	deleteTwoFactorTokenByUserId(userId)
+	{
+		await (this.db.run("DELETE FROM twofactor_tokens WHERE user_id = ?", [userId]));
+	}
+
+	async	getTwoFactorTokens()
+	{
+		return (await this.db.all("SELECT * FROM twofactor_tokens"));
 	}
 }
 
