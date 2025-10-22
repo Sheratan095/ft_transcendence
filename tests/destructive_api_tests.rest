@@ -1,0 +1,308 @@
+### DESTRUCTIVE REST API SQL Injection Tests
+### ⚠️  WARNING: These tests attempt destructive operations through API endpoints
+### These tests verify that the entire authentication stack is secure
+
+###
+### 🗑️ MASS DELETION ATTEMPTS
+###
+
+### Attempt mass user deletion through login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' OR 1=1; DELETE FROM users; --",
+  "password": "anything"
+}
+
+###
+### Attempt to delete all users through registration
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; DELETE FROM users WHERE 1=1; --",
+  "email": "destructive@test.com",
+  "password": "Password123!"
+}
+
+###
+### 💣 TABLE DROP ATTEMPTS
+###
+
+### Attempt to drop users table through login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'; DROP TABLE users; --",
+  "password": "anything"
+}
+
+###
+### Attempt to drop refresh_tokens table
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "normaluser",
+  "email": "test'; DROP TABLE refresh_tokens; --",
+  "password": "Password123!"
+}
+
+###
+### Attempt to drop twofactor_tokens table
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "normaluser2",
+  "email": "normal@test.com",
+  "password": "Pass'; DROP TABLE twofactor_tokens; --"
+}
+
+###
+### 🏗️ SCHEMA MANIPULATION ATTEMPTS
+###
+
+### Attempt to alter table structure
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'; ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 1; --",
+  "password": "anything"
+}
+
+###
+### Attempt to create malicious table
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; CREATE TABLE hacked (id TEXT, admin_flag BOOLEAN); --",
+  "email": "schema@test.com",
+  "password": "Password123!"
+}
+
+###
+### 👑 PRIVILEGE ESCALATION ATTEMPTS
+###
+
+### Attempt to update all user passwords
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'; UPDATE users SET password='hacked' WHERE 1=1; --",
+  "password": "anything"
+}
+
+###
+### Attempt to make all users admin
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; UPDATE users SET username='admin' WHERE username != 'admin'; --",
+  "email": "privilege@test.com",
+  "password": "Password123!"
+}
+
+###
+### 🗃️ DATA CORRUPTION ATTEMPTS
+###
+
+### Attempt to corrupt all email addresses
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "user'; UPDATE users SET email='corrupted@evil.com' WHERE 1=1; --",
+  "password": "anything"
+}
+
+###
+### Attempt to nullify all passwords
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; UPDATE users SET password=NULL WHERE 1=1; --",
+  "email": "corrupt@test.com",
+  "password": "Password123!"
+}
+
+###
+### 📚 STACKED QUERY ATTEMPTS
+###
+
+### Multiple SQL statements in one injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'; CREATE TABLE evil (id TEXT); INSERT INTO evil VALUES ('pwned'); DROP TABLE users; --",
+  "password": "anything"
+}
+
+###
+### Transaction manipulation attempt
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; BEGIN TRANSACTION; DELETE FROM users; COMMIT; --",
+  "email": "transaction@test.com",
+  "password": "Password123!"
+}
+
+###
+### 🔗 UNION-BASED DATA EXTRACTION ATTEMPTS
+###
+
+### Attempt to extract all user data
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' UNION SELECT id,username,password,email,created_at,tfa_enabled FROM users --",
+  "password": "anything"
+}
+
+###
+### Attempt to extract database schema
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' UNION SELECT sql,sql,sql,sql,sql,sql FROM sqlite_master WHERE type='table' --",
+  "password": "anything"
+}
+
+###
+### 🕵️ INFORMATION DISCLOSURE ATTEMPTS
+###
+
+### Attempt to extract table names
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' UNION SELECT name,name,name,name,name,name FROM sqlite_master --",
+  "password": "anything"
+}
+
+###
+### Attempt boolean-based blind SQL injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND (SELECT COUNT(*) FROM users) > 0 --",
+  "password": "anything"
+}
+
+###
+### 💾 FILE SYSTEM ATTACKS
+###
+
+### Attempt to attach external database
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'; ATTACH DATABASE '/tmp/evil.db' AS evil; --",
+  "password": "anything"
+}
+
+###
+### Attempt to use PRAGMA commands
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; PRAGMA database_list; --",
+  "email": "pragma@test.com",
+  "password": "Password123!"
+}
+
+###
+### 🎭 ADVANCED EVASION TECHNIQUES
+###
+
+### Case variation injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' oR '1'='1",
+  "password": "anything"
+}
+
+###
+### Comment variation injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'/**/OR/**/1=1/**/--",
+  "password": "anything"
+}
+
+###
+### Encoded character injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin\\x27 OR \\x271\\x27=\\x271",
+  "password": "anything"
+}
+
+###
+### 🔄 NESTED SUBQUERY ATTACKS
+###
+
+### Complex nested query injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND (SELECT COUNT(*) FROM (SELECT * FROM users WHERE username LIKE '%admin%') AS sub WHERE 1=1) > 0; DELETE FROM users; --",
+  "password": "anything"
+}
+
+###
+### EXISTS-based injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND EXISTS(SELECT 1 FROM users WHERE username='admin' AND 1=1); DROP TABLE users; --",
+  "password": "anything"
+}
+
+###
+### 🚀 EXTREME PAYLOADS
+###
+
+### Maximum destruction attempt
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; DROP TABLE users; DROP TABLE refresh_tokens; DROP TABLE twofactor_tokens; CREATE TABLE pwned (msg TEXT); INSERT INTO pwned VALUES ('HACKED'); --",
+  "email": "extreme@test.com",
+  "password": "Password123!"
+}
+
+###
+### Kitchen sink attack (everything at once)
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' OR 1=1 UNION SELECT sql,sql,sql,sql,sql,sql FROM sqlite_master; DELETE FROM users; ALTER TABLE users ADD COLUMN hacked BOOLEAN; CREATE TABLE evil (data TEXT); INSERT INTO evil VALUES ('pwned'); --",
+  "password": "anything"
+}
