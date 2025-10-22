@@ -56,17 +56,6 @@ const	WelcomeResponse =
 	}
 };
 
-const	TwoFactorRequiredResponse = 
-{
-	type: 'object',
-	properties:
-	{
-		message: { type: 'string' },
-		tfaRequired: { type: 'boolean' },
-		userId: { type: 'string' }
-	}
-};
-
 const	LoginResponse = 
 {
 	type: 'object',

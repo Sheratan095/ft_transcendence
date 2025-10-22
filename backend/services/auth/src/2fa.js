@@ -5,8 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { getExpirationDateByMinutes } from './auth_help.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const	__filename = fileURLToPath(import.meta.url);
+const	__dirname = path.dirname(__filename);
 
 export async function	sendTwoFactorCode(user, authDb, reply)
 {

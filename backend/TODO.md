@@ -27,7 +27,7 @@
 
 [] how can we check if a user is online? last token request?
 
-[] JWT protocol
+[x] JWT protocol
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT
 	[x] add accessToken expiration to login and registration reply, add it also in auth_api_flow.drawio
 	[x] new token request
@@ -36,8 +36,11 @@
 [] SQL INJECTION PROTECTION
 [] XSS Attack
 
-[] Custom Otp mail
-[] Change profile image to 42 account to diplay it in to the email
+[] 2FA
+	[x] Custom Otp mail
+	[x] Change profile image to 42 account to diplay it in to the email
+	[x] Update login route requiring 2fa
+	[] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
 
 [] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
 [] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
