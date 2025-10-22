@@ -4,7 +4,8 @@ import {
 	login,
 	register,
 	validateToken,
-	verifyTwoFactorAuth
+	verifyTwoFactorAuth,
+	updateProfile
 } from './auth_controllers.js';
 
 import { validateInternalApiKey } from './auth_help.js';
@@ -27,8 +28,37 @@ const	User =
 	{
 		id: { type: 'string' },
 		username: { type: 'string' },
+		tfaEnabled: { type: 'boolean' },
 		email: { type: 'string' },
 	},
+}
+
+const	UsernamePolicy = 
+{
+	type: 'string',
+	pattern: '^[a-zA-Z][a-zA-Z0-9._]{2,19}$',
+	errorMessage: {
+		pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed.'
+	}
+};
+
+const	PasswordPolicy =
+{
+	type: 'string',
+	pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,24}$',
+ 		errorMessage: {
+		pattern: 'Password must be 8–24 chars long and include upper, lower, number, and symbol.'
+	}
+};
+
+const	EmailPolicy =
+{
+	type: 'string',
+	format: 'email',
+	maxLength: 254,
+	errorMessage: {
+		format: 'Invalid email format'
+	}
 }
 
 // Reusable error response schemas
@@ -99,31 +129,9 @@ const	registerOpts =
 			required: ['username', 'email', 'password'],
 			properties:
 			{
-				username:
-				{
-					type: 'string',
-					pattern: '^[a-zA-Z][a-zA-Z0-9._]{2,19}$',
-					errorMessage: {
-						pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed.'
-					}
-				},
-				email:
-				{
-					type: 'string',
-					format: 'email',
-					maxLength: 254,
-					errorMessage: {
-						format: 'Invalid email format'
-					}
-				},
-				password:
-				{
-					type: 'string',
-					pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,24}$',
-			 		errorMessage: {
-						pattern: 'Password must be 8–24 chars long and include upper, lower, number, and symbol.'
-					}
-				}
+				username: { ...UsernamePolicy },
+				email: { ...EmailPolicy },
+				password: { ...PasswordPolicy}
 			}
 		},
 
@@ -330,6 +338,50 @@ const	twoFactorAuthOpts =
 	handler: verifyTwoFactorAuth
 }
 
+const	updateProfileOpts =
+{
+	schema:
+	{
+		summary: 'Internal only 🔒 (called by user profile service)',
+		description: 'Update user profile information',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties:
+			{
+				userId: { type: 'string' },
+				username: { ...UsernamePolicy },
+				tfaEnabled: { type: 'boolean' },
+			},
+			anyOf:[
+				{ required: ['username'] },
+				{ required: ['tfaEnabled'] }
+			]
+		},
+
+		response:
+		{
+			200: {
+				type: 'object',
+				properties: {
+					message: { type: 'string' },
+					user: User
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			409: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: updateProfile
+}
+
 export function	authRoutes(fastify)
 {
 	fastify.post('/register', registerOpts);
@@ -337,6 +389,8 @@ export function	authRoutes(fastify)
 	fastify.post('/validate-token', validateTokenOpts);
 	fastify.post('/token', tokenOpts);
 	fastify.post('/2fa', twoFactorAuthOpts);
+
+	fastify.put('/update-user', updateProfileOpts);
 
 	fastify.delete('/logout', logoutOpts);
 }

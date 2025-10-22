@@ -131,6 +131,20 @@ export class AuthDatabase
 		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);
 	}
 
+	async	updateUserProfile(userId, newUsername = null, tfaEnabled = null)
+	{
+		if (newUsername !== null)
+		{
+			await this.db.run("UPDATE users SET username = ? WHERE id = ?", [newUsername, userId]);
+		}
+		if (tfaEnabled !== null)
+		{
+			await this.db.run("UPDATE users SET tfa_enabled = ? WHERE id = ?", [tfaEnabled ? 1 : 0, userId]);
+		}
+
+		return (await this.getUserById(userId));
+	}
+
 	// -------- REFRESH TOKENS METHODS --------
 
 	// expiresAt: Date object

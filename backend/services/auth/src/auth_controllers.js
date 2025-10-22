@@ -85,7 +85,7 @@ export const	login = async (req, reply) =>
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
 
 		// Check if 2FA is enabled for this user
-		if (user.tfa_active)
+		if (user.tfa_enabled)
 		{
 			// Clean up any existing 2FA tokens for this user first
 			await authDb.deleteTwoFactorTokenByUserId(user.id);
@@ -311,6 +311,52 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 	catch (err)
 	{
 		console.log('2FA verification error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	updateProfile = async (req, reply) =>
+{
+	try
+	{
+		const	{ userId, username, tfaEnabled } = req.body;
+		const	authDb = req.server.authDb;
+
+		// Prepare the individual parameters for the database method
+		const	newUsername = username ? username.toLowerCase() : null;
+		const	newTfaEnabled = tfaEnabled !== undefined ? tfaEnabled : null;
+
+		const	updatedUser = await authDb.updateUserProfile(userId, newUsername, newTfaEnabled);
+
+		console.log('Updated user:', await authDb.getUserById(userId));
+
+		if (!updatedUser)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		console.log('User profile updated: ', updatedUser.id);
+
+		return (reply.code(200).send({
+			message: 'User profile updated successfully',
+			user:
+			{
+				id: updatedUser.id,
+				username: updatedUser.username,
+				email: updatedUser.email,
+				tfaEnabled: updatedUser.tfa_enabled
+			}
+		}));
+	}
+	catch (err)
+	{
+		console.log('Update profile error:', err.message);
+
+		// Handle unique constraint violations
+		if (err.code === 'SQLITE_CONSTRAINT')
+		{
+			if (err.message.includes('username'))
+				return (reply.code(409).send({ error: 'Username already exists' }));
+		}
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

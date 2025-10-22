@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 	username TEXT UNIQUE NOT NULL COLLATE NOCASE,
 	password TEXT NOT NULL,
 	created_at TEXT DEFAULT (datetime('now')),
-	tfa_active BOOLEAN NOT NULL DEFAULT 0 -- Two-Factor Authentication active flag, TO DO default to 0 in production
+	tfa_enabled BOOLEAN NOT NULL DEFAULT 0 -- Two-Factor Authentication active flag, TO DO default to 0 in production
 );
 
 -- Create refresh_tokens table

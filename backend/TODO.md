@@ -40,7 +40,8 @@
 	[x] Custom Otp mail
 	[x] Change profile image to 42 account to diplay it in to the email
 	[x] Update login route requiring 2fa
-	[] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
+	[x] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
+	[] add endpoint to change the psw
 
 [] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
 [] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups

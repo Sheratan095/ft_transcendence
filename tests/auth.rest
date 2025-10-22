@@ -31,7 +31,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "username": "MARCo",
+  "username": "NewUsername",
   "password": "Mrco@123_"
 }
 
@@ -60,6 +60,18 @@ POST http://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "69eaca39-1800-4966-b323-750b732a2c86",
-  "otpCode": "760961"
+  "userId": "8612a985-0df8-49e3-8c41-525aff0b9b81",
+  "otpCode": "112493"
+}
+
+###
+
+PUT http://localhost:3001/update-user
+Content-Type: application/json
+x-internal-api-key: 1234
+
+{
+  "userId": "8612a985-0df8-49e3-8c41-525aff0b9b81",
+  "username": "NewUsername",
+  "tfaEnabled": false
 }
