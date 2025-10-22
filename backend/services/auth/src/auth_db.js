@@ -145,6 +145,12 @@ export class AuthDatabase
 		return (await this.getUserById(userId));
 	}
 
+	async	updateUserPassword(userId, hashedPassword)
+	{
+		await this.db.run("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, userId]);
+		return (await this.getUserById(userId));
+	}
+
 	// -------- REFRESH TOKENS METHODS --------
 
 	// expiresAt: Date object

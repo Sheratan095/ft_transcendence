@@ -28,13 +28,13 @@ import {
 	registerRoute,
 	logoutRoute,
 	tokenRoute,
-	verifyTwoFactorAuth
+	verifyTwoFactorAuth,
+	changePasswordRoute
 } from './routes/auth_routes.js'
 
 import {
 	getUsers
 } from './routes/users_routes.js'
-
 
 // Schema hiding for routes that should not appear in Swagger docs (they are just proxies)
 
@@ -44,6 +44,7 @@ fastify.post('/auth/register', { schema: { hide: true }, handler: registerRoute 
 fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
 fastify.post('/auth/token', { schema: { hide: true }, handler: tokenRoute })
 fastify.post('/auth/2fa', { schema: { hide: true }, handler: verifyTwoFactorAuth })
+fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
 
 // USERS routes PROTECTED => require valid token - exclude from swagger docs
 fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUsers })

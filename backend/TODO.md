@@ -43,7 +43,8 @@
 
 [] add welcome mail? add psw change or 2fa enabled mail notification?
 [x] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
-[] add endpoint to change the psw
+[x] add endpoint to change the psw
+[] should the language name depends on the preferred language of the user?
 
 [] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
 [] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups

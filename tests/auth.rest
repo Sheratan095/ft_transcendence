@@ -31,8 +31,8 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "username": "NewUsername",
-  "password": "Mrco@123_"
+  "username": "MARCO",
+  "password": "NewPassword456!"
 }
 
 ###
@@ -74,4 +74,15 @@ x-internal-api-key: 1234
   "userId": "8612a985-0df8-49e3-8c41-525aff0b9b81",
   "username": "NewUsername",
   "tfaEnabled": false
+}
+
+###
+
+PUT http://localhost:3000/auth/change-password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc4MDViOThjLWMzOTItNGQ4MS04ODQxLTE0ZmM4ODM4Zjk2MiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTE0MDE4NSwiZXhwIjoxNzYxMTQwMjQ1fQ.jLVLdxLldtDmWg6xn8aKuUBXMidRiIeH8Wp2m8XfOIo
+
+{
+  "oldPassword": "Mrco@123_",
+  "newPassword": "NewPassword456!"
 }

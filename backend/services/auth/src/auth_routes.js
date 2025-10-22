@@ -5,7 +5,8 @@ import {
 	register,
 	validateToken,
 	verifyTwoFactorAuth,
-	updateProfile
+	updateProfile,
+	changePassword
 } from './auth_controllers.js';
 
 import { validateInternalApiKey } from './auth_help.js';
@@ -221,54 +222,6 @@ const	logoutOpts =
 	handler: logout
 }
 
-const	validateTokenOpts =
-{
-	schema:
-	{
-		summary: '🔒 Internal',
-		description: 'Validate an access token and retrieve the associated user ID',
-
-		...withInternalAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['token'],
-			properties:
-			{
-				token: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'object',
-				properties: // The user data returned will be added to the request forwarded to the requested gateway
-				{
-					message: { type: 'string' },
-					valid: { type: 'boolean' },
-					user:
-					{
-						type: 'object',
-						properties:
-						{
-							id: { type: 'string' },
-							email: { type: 'string' }
-						}
-					}
-				}
-			},
-			400: ErrorResponse,
-			401: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-	preValidation: validateInternalApiKey,
-	handler	: validateToken
-};
-
 const	tokenOpts =
 {
 	schema:
@@ -338,26 +291,28 @@ const	twoFactorAuthOpts =
 	handler: verifyTwoFactorAuth
 }
 
+//-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
+
+// This is internal too
 const	updateProfileOpts =
 {
 	schema:
 	{
 		summary: 'Internal only 🔒 (called by user profile service)',
-		description: 'Update user profile information',
+		description: 'Update user profile information (username or 2FA settings).',
 
 		...withInternalAuth,
 
 		body:
 		{
 			type: 'object',
-			required: ['userId'],
 			properties:
 			{
-				userId: { type: 'string' },
 				username: { ...UsernamePolicy },
-				tfaEnabled: { type: 'boolean' },
+				tfaEnabled: { type: 'boolean' }
 			},
-			anyOf:[
+			anyOf:
+			[
 				{ required: ['username'] },
 				{ required: ['tfaEnabled'] }
 			]
@@ -365,9 +320,11 @@ const	updateProfileOpts =
 
 		response:
 		{
-			200: {
+			200:
+			{
 				type: 'object',
-				properties: {
+				properties:
+				{
 					message: { type: 'string' },
 					user: User
 				}
@@ -378,9 +335,100 @@ const	updateProfileOpts =
 			500: ErrorResponse
 		}
 	},
+
+	// Only internal services can call this
 	preHandler: validateInternalApiKey,
+
+	// Handler below
 	handler: updateProfile
 }
+
+const	changePasswordOpts =
+{
+	schema:
+	{
+		description: 'Change user password. userId is added in JWT validation middleware.',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['oldPassword', 'newPassword'],
+			properties:
+			{
+				oldPassword: { type: 'string' },
+				newPassword: { ...PasswordPolicy }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: changePassword
+};
+
+//-----------------------------INTERAL ROUTES-----------------------------
+
+const	validateTokenOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal',
+		description: 'Validate an access token and retrieve the associated user ID',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['token'],
+			properties:
+			{
+				token: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: // The user data returned will be added to the request forwarded to the requested gateway
+				{
+					message: { type: 'string' },
+					valid: { type: 'boolean' },
+					user:
+					{
+						type: 'object',
+						properties:
+						{
+							id: { type: 'string' },
+							email: { type: 'string' }
+						}
+					}
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preValidation: validateInternalApiKey,
+	handler	: validateToken
+};
 
 export function	authRoutes(fastify)
 {
@@ -391,6 +439,7 @@ export function	authRoutes(fastify)
 	fastify.post('/2fa', twoFactorAuthOpts);
 
 	fastify.put('/update-user', updateProfileOpts);
+	fastify.put('/change-password', changePasswordOpts);
 
 	fastify.delete('/logout', logoutOpts);
 }

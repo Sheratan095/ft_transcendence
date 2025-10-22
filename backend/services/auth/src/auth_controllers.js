@@ -1,5 +1,5 @@
 import { generateNewTokens, decodeToken} from './jwt.js';
-import { validator, isTokenExpired } from './auth_help.js';
+import { validator, isTokenExpired, extractUserData } from './auth_help.js';
 import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 
@@ -316,6 +316,7 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 	}
 }
 
+// TO UPDATE, no more userId in body, it is in req.user from gateway middleware
 export const	updateProfile = async (req, reply) =>
 {
 	try
@@ -357,6 +358,47 @@ export const	updateProfile = async (req, reply) =>
 			if (err.message.includes('username'))
 				return (reply.code(409).send({ error: 'Username already exists' }));
 		}
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	changePassword = async (req, reply) =>
+{
+	try
+	{
+		const	{ oldPassword, newPassword } = req.body;
+		const	authDb = req.server.authDb;
+
+		// Extract user data from headers (contains only id and email from JWT)
+		const	userData = extractUserData(req);
+		
+		if (!userData || !userData.id)
+			return (reply.code(401).send({ error: 'Invalid user data' }));
+
+		// Get full user data from database (including password hash)
+		const	user = await authDb.getUserById(userData.id);
+
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		// Verify old password
+		if (await bcrypt.compare(oldPassword, user.password) === false)
+			return (reply.code(401).send({ error: 'Old password is incorrect' }));
+
+		// Hash new password
+		const	hashedNewPassword = bcrypt.hashSync(newPassword, parseInt(process.env.HASH_SALT_ROUNDS));
+
+		// Update password in database
+		await authDb.updateUserPassword(user.id, hashedNewPassword);
+
+		console.log('Password changed for user:', user.id);
+
+		return (reply.code(200).send({ message: 'Password changed successfully' }));
+	}
+	catch (err)
+	{
+		console.log('Change password error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
