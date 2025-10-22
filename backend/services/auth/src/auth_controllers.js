@@ -316,21 +316,26 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 	}
 }
 
-// TO UPDATE, no more userId in body, it is in req.user from gateway middleware
-export const	updateProfile = async (req, reply) =>
+// TO DO, check if it works, shuld be called form user_profile service
+export const	updateUser = async (req, reply) =>
 {
 	try
 	{
-		const	{ userId, username, tfaEnabled } = req.body;
+		const	{username, tfaEnabled } = req.body;
 		const	authDb = req.server.authDb;
+
+		const	userData = extractUserData(req);
+		
+		if (!userData || !userData.id)
+			return (reply.code(401).send({ error: 'Invalid user data' }));
 
 		// Prepare the individual parameters for the database method
 		const	newUsername = username ? username.toLowerCase() : null;
 		const	newTfaEnabled = tfaEnabled !== undefined ? tfaEnabled : null;
 
-		const	updatedUser = await authDb.updateUserProfile(userId, newUsername, newTfaEnabled);
+		const	updatedUser = await authDb.updateUserProfile(userData.id, newUsername, newTfaEnabled);
 
-		console.log('Updated user:', await authDb.getUserById(userId));
+		console.log('Updated user:', await authDb.getUserById(userData.id));
 
 		if (!updatedUser)
 			return (reply.code(404).send({ error: 'User not found' }));

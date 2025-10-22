@@ -5,7 +5,7 @@ import {
 	register,
 	validateToken,
 	verifyTwoFactorAuth,
-	updateProfile,
+	updateUser,
 	changePassword
 } from './auth_controllers.js';
 
@@ -340,7 +340,7 @@ const	updateProfileOpts =
 	preHandler: validateInternalApiKey,
 
 	// Handler below
-	handler: updateProfile
+	handler: updateUser
 }
 
 const	changePasswordOpts =
