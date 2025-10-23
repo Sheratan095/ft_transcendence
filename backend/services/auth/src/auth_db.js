@@ -38,7 +38,7 @@ export class AuthDatabase
 		}
 		catch (error)
 		{
-			console.error("❌ Database initialization error:", error);
+			console.error("❌ AUTH Database initialization error:", error);
 			throw (error);
 		}
 	}
@@ -67,7 +67,7 @@ export class AuthDatabase
 		}
 		catch (error)
 		{
-			console.error("❌ Error creating tables for auth_db:", error);
+			console.error("❌ Error creating tables for AUTH db:", error);
 
 			throw (error);
 		}
@@ -96,11 +96,11 @@ export class AuthDatabase
   // -------- USERS METHODS --------
 
 	// Return the created user object
-	async	createUser(username, password, email)
+	async	createUser(password, email)
 	{
 		const	id = await this.#generateUUID();
 
-		await this.db.run("INSERT INTO users (id, username, password, email) VALUES (?, ?, ?, ?)", [id, username, password, email]);
+		await this.db.run("INSERT INTO users (id, password, email) VALUES (?, ?, ?)", [id, password, email]);
 
 		return (await this.db.get("SELECT * FROM users WHERE id = ?", [id]));
 	}
@@ -110,20 +110,15 @@ export class AuthDatabase
 		return (await this.db.all("SELECT * FROM users"));
 	}
 
-	async	getUserByUsername(username)
-	{
-		return (await this.db.get("SELECT * FROM users WHERE username = ?", [username]));
-	}
-
 	async	getUserById(userId)
 	{
 		return (await this.db.get("SELECT * FROM users WHERE id = ?", [userId]));
 	}
 
-	// Get user by username OR email
-	async	getUserByUsernameOrEmail(identifier)
+	// Get user by username
+	async	getUserByMail(identifier)
 	{
-		return (await this.db.get("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]));
+		return (await this.db.get("SELECT * FROM users WHERE email = ?", [identifier]));
 	}
 
 	async	deleteUserById(userId)
@@ -131,16 +126,9 @@ export class AuthDatabase
 		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);
 	}
 
-	async	updateUserProfile(userId, newUsername = null, tfaEnabled = null)
+	async	enable2FA(userId, enabled)
 	{
-		if (newUsername !== null)
-		{
-			await this.db.run("UPDATE users SET username = ? WHERE id = ?", [newUsername, userId]);
-		}
-		if (tfaEnabled !== null)
-		{
-			await this.db.run("UPDATE users SET tfa_enabled = ? WHERE id = ?", [tfaEnabled ? 1 : 0, userId]);
-		}
+		await this.db.run("UPDATE users SET tfa_enabled = ? WHERE id = ?", [enabled ? 1 : 0, userId]);
 
 		return (await this.getUserById(userId));
 	}

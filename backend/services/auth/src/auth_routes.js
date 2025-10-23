@@ -5,7 +5,7 @@ import {
 	register,
 	validateToken,
 	verifyTwoFactorAuth,
-	updateUser,
+	enable2FA,
 	changePassword
 } from './auth_controllers.js';
 
@@ -28,20 +28,10 @@ const	User =
 	properties:
 	{
 		id: { type: 'string' },
-		username: { type: 'string' },
 		tfaEnabled: { type: 'boolean' },
 		email: { type: 'string' },
 	},
 }
-
-const	UsernamePolicy = 
-{
-	type: 'string',
-	pattern: '^[a-zA-Z][a-zA-Z0-9._]{2,19}$',
-	errorMessage: {
-		pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed.'
-	}
-};
 
 const	PasswordPolicy =
 {
@@ -130,7 +120,7 @@ const	registerOpts =
 			required: ['username', 'email', 'password'],
 			properties:
 			{
-				username: { ...UsernamePolicy },
+				username: { type: 'string' },
 				email: { ...EmailPolicy },
 				password: { ...PasswordPolicy}
 			}
@@ -159,14 +149,9 @@ const	loginOpts =
 		body: 
 		{
 			type: 'object',
-			required: ['password'],
-			anyOf: [
-				{ required: ['username'] },
-				{ required: ['email'] }
-			],
+			required: ['password', 'email'],
 			properties: 
 			{
-				username: { type: 'string' },
 				email: { type: 'string', format: 'email' },
 				password: { type: 'string' }
 			}
@@ -294,28 +279,22 @@ const	twoFactorAuthOpts =
 //-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
 // This is internal too
-const	updateProfileOpts =
+const	enable2FAOpts =
 {
 	schema:
 	{
-		summary: 'Internal only 🔒 (called by user profile service)',
-		description: 'Update user profile information (username or 2FA settings).',
+		description: 'Enable or disable Two-Factor Authentication (2FA) for a user',
 
 		...withInternalAuth,
 
 		body:
 		{
 			type: 'object',
+			required: ['tfaEnabled'],
 			properties:
 			{
-				username: { ...UsernamePolicy },
 				tfaEnabled: { type: 'boolean' }
 			},
-			anyOf:
-			[
-				{ required: ['username'] },
-				{ required: ['tfaEnabled'] }
-			]
 		},
 
 		response:
@@ -336,11 +315,8 @@ const	updateProfileOpts =
 		}
 	},
 
-	// Only internal services can call this
 	preHandler: validateInternalApiKey,
-
-	// Handler below
-	handler: updateUser
+	handler: enable2FA
 }
 
 const	changePasswordOpts =
@@ -376,6 +352,7 @@ const	changePasswordOpts =
 			500: ErrorResponse
 		}
 	},
+
 	preHandler: validateInternalApiKey,
 	handler: changePassword
 };
@@ -438,7 +415,7 @@ export function	authRoutes(fastify)
 	fastify.post('/token', tokenOpts);
 	fastify.post('/2fa', twoFactorAuthOpts);
 
-	fastify.put('/update-user', updateProfileOpts);
+	fastify.put('/enable-2fa', enable2FAOpts);
 	fastify.put('/change-password', changePasswordOpts);
 
 	fastify.delete('/logout', logoutOpts);

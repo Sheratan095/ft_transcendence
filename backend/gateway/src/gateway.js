@@ -34,11 +34,13 @@ import {
 	logoutRoute,
 	tokenRoute,
 	verifyTwoFactorAuth,
-	changePasswordRoute
+	changePasswordRoute,
+	enable2FARoute
 } from './routes/auth_routes.js'
 
 import {
-	getUsers
+	getUsers,
+	getUser
 } from './routes/users_routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
@@ -91,6 +93,7 @@ await fastify.register(async function (fastify)
 	});
 
 	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
+	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: enable2FARoute })
 });
 
 // 🟢 RELAXED RATE LIMITING: General user routes (low risk, read operations)
@@ -105,6 +108,7 @@ await fastify.register(async function (fastify)
 
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUsers })
+	fastify.get('/users/:username', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUser })
 });
 
 // Server startup function with error handling

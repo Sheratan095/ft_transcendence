@@ -37,6 +37,8 @@
 [] XSS Attack
 
 [] move username handling in to the user_profile service, update the databases too
+[] rename twoFactoruAuth in to 2FA where possible
+[] check for db decoration in auth.js/start()
 
 [x] 2FA
 	[x] Custom Otp mail

@@ -2,6 +2,7 @@ import { generateNewTokens, decodeToken} from './jwt.js';
 import { validator, isTokenExpired, extractUserData } from './auth_help.js';
 import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
+import axios from 'axios'
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
 // making it more difficult for attackers to use precomputed tables (like rainbow tables) to crack passwords.
@@ -19,7 +20,23 @@ export const	register = async (req, reply) =>
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		const	authDb = req.server.authDb;
 
-		const	user = await authDb.createUser(username, hashedpassword, email)
+		// Check if the username exists with URL parameter
+		const	validUsername = await axios.get(`${process.env.USER_PROFILE_SERVICE_URL}/users/${username}`, {
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
+
+		console.log('Username check response:', validUsername.status);
+		
+		// const	response = await axios.put(`${process.env.AUTH_SERVICE_URL}/change-password`,
+		// {
+		// 	headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+		// 	body:
+		// 	{
+		// 		username: username,
+
+		// })
+
+		// TO DO check for duplicate username
+		axios.post(`${process.env.USER_PROFILE_SERVICE_URL}/users/create-profile`, { userId: user.id, email: email })
 
 		console.log('User registered: ', user.id)
  
@@ -31,7 +48,6 @@ export const	register = async (req, reply) =>
 			user:
 			{
 				id: user.id,
-				username: user.username,
 				email: user.email
 			},
 			tokens: 
@@ -67,7 +83,7 @@ export const	login = async (req, reply) =>
 	try
 	{
 		const	password = req.body.password;
-		const	identifier = req.body.username || req.body.email;
+		const	identifier = req.body.email;
 		
 		// Validate that we have an identifier
 		if (!identifier || !password)
@@ -79,7 +95,7 @@ export const	login = async (req, reply) =>
 		const	authDb = req.server.authDb;
 		
 		// Get user from database
-		const	user = await authDb.getUserByUsernameOrEmail(identifierLower);
+		const	user = await authDb.getUserByMail(identifierLower);
 		
 		if (!user || await bcrypt.compare(password, user.password) === false)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
@@ -104,7 +120,6 @@ export const	login = async (req, reply) =>
 			user:
 			{
 				id: user.id,
-				username: user.username,
 				email: user.email
 			},
 			tokens:
@@ -297,7 +312,6 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			user:
 			{
 				id: user.id,
-				username: user.username,
 				email: user.email
 			},
 			tokens:
@@ -317,11 +331,11 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 }
 
 // TO DO, check if it works, shuld be called form user_profile service
-export const	updateUser = async (req, reply) =>
+export const	enable2FA = async (req, reply) =>
 {
 	try
 	{
-		const	{username, tfaEnabled } = req.body;
+		const	tfaEnabled  = req.body.tfaEnabled;
 		const	authDb = req.server.authDb;
 
 		const	userData = extractUserData(req);
@@ -329,25 +343,18 @@ export const	updateUser = async (req, reply) =>
 		if (!userData || !userData.id)
 			return (reply.code(401).send({ error: 'Invalid user data' }));
 
-		// Prepare the individual parameters for the database method
-		const	newUsername = username ? username.toLowerCase() : null;
-		const	newTfaEnabled = tfaEnabled !== undefined ? tfaEnabled : null;
+		const	updatedUser = await authDb.enable2FA(userData.id, tfaEnabled);
 
-		const	updatedUser = await authDb.updateUserProfile(userData.id, newUsername, newTfaEnabled);
-
-		console.log('Updated user:', await authDb.getUserById(userData.id));
+		console.log('2FA activated for user:', updatedUser.id);
 
 		if (!updatedUser)
 			return (reply.code(404).send({ error: 'User not found' }));
 
-		console.log('User profile updated: ', updatedUser.id);
-
 		return (reply.code(200).send({
-			message: 'User profile updated successfully',
+			message: '2FA setting updated successfully',
 			user:
 			{
 				id: updatedUser.id,
-				username: updatedUser.username,
 				email: updatedUser.email,
 				tfaEnabled: updatedUser.tfa_enabled
 			}
@@ -355,14 +362,7 @@ export const	updateUser = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Update profile error:', err.message);
-
-		// Handle unique constraint violations
-		if (err.code === 'SQLITE_CONSTRAINT')
-		{
-			if (err.message.includes('username'))
-				return (reply.code(409).send({ error: 'Username already exists' }));
-		}
+		console.log('Update 2FA settings error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

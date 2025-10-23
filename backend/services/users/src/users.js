@@ -1,12 +1,21 @@
 import Fastify from 'fastify';
-const	fastify = Fastify({ logger: false });
+import ajvErrors from 'ajv-errors';
+
+const	fastify = Fastify({
+	logger: false,
+	ajv: // Allows to add specific reply message for each failed "validation" in route schema
+	{
+		plugins: [ajvErrors],
+		customOptions: { allErrors: true } // show all errors, not just the first
+	}
+});
 
 // Load environment variables from .env file
 import dotenv from 'dotenv';
 dotenv.config();
 
-// import { AuthDatabase } from './auth_db.js';
-// let		authDatabase;
+import { ProfilesDatabase } from './users_db.js';
+let		profilesDatabase;
 
 // Validate required environment variables
 import { checkEnvVariables } from './users_help.js';
@@ -24,11 +33,11 @@ const	start = async () =>
 	try
 	{
 		// Initialize database
-		// authDatabase = new AuthDatabase()
-		// await authDatabase.initialize()
+		profilesDatabase = new ProfilesDatabase()
+		await profilesDatabase.initialize()
 
 		// Make database available to all routes
-		// fastify.decorate('authDb', authDatabase)
+		fastify.decorate('profilesDb', profilesDatabase)
 
 		// Setup routes after database is initialized
 		fastify.register(userRoutes)
