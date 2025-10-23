@@ -46,11 +46,11 @@
 [x] add endpoint to change the psw
 [] should the language name depends on the preferred language of the user?
 
-[] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
-[] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
-[] Prevent token spam	Add short cooldown (optional)	Avoid repeated login requests
-[]await fastify.register(import('fastify-rate-limit'), {
-[]   max: 5, // requests
-[]   timeWindow: '5 minutes', // time window
-[]   keyGenerator: (req) => req.body.username || req.ip
-[] });
+[x] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
+[x] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
+[x] Prevent token spam	Add short cooldown (optional)	Avoid repeated login requests
+	await fastify.register(import('fastify-rate-limit'), {
+	max: 5, // requests
+	timeWindow: '5 minutes', // time window
+	keyGenerator: (req) => req.body.username || req.ip
+	});
