@@ -158,7 +158,7 @@ export class AuthDatabase
 	{
 		const	id = uuidv4();
 
-		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
+		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS' (ISO FORMAT)
 		const	expiresAtStr = formatExpirationDate(expiresAt);
 
 		await this.db.run(
