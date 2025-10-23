@@ -30,5 +30,5 @@ CREATE TABLE IF NOT EXISTS twofactor_tokens (
   otp_code TEXT NOT NULL,
   created_at TEXT DEFAULT (datetime('now')),
   expires_at TEXT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE -- Delete 2FA tokens when user is deleted
 );

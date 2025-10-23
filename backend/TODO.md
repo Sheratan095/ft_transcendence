@@ -1,9 +1,9 @@
 [x] std_microservice_architecture.drawio
 [x] remove guards from controllers, check if schema validation really works
 
-[] be sure to protect sql injection
-[] docs for microservice.db in std_microservice_architecture.drawio
-[] figure out how handle db in microservice and add it to std_microservice_architecture.drawio
+[x] be sure to protect sql injection
+[x] docs for microservice.db in std_microservice_architecture.drawio
+[x] figure out how handle db in microservice and add it to std_microservice_architecture.drawio
 [x] move the sql scripts to another .sql and execute it in ..._db 
 
 [x] lowercase shit
