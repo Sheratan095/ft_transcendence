@@ -13,7 +13,7 @@ const	User =
 	properties:
 	{
 		id: { type: 'string' },
-		name: { type: 'string' },
+		username: { type: 'string' },
 	},
 }
 
@@ -73,10 +73,11 @@ const	newUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['Username'],
+			required: ['Username', 'UserId'],
 			properties:
 			{
-				Username: { ...UsernamePolicy }
+				Username: { ...UsernamePolicy },
+				UserId: { type: 'string' }
 			}
 		}
 	},

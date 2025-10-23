@@ -105,5 +105,12 @@ export class ProfilesDatabase
 
 		return (await this.db.get("SELECT * FROM profiles WHERE id = ?", [id]));
 	}
+
+	// Get user profile by username
+	async	getUserByUsername(username)
+	{
+		const	query = `SELECT * FROM profiles WHERE username = ?`;
+		return (await this.db.get(query, [username]));
+	}
 }
 

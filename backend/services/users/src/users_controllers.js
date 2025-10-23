@@ -31,9 +31,13 @@ export const	createUser = async (req, reply) =>
 {
 	try
 	{
-		const	usersDb = req.server.usersDb;
+		const	profilesDb = req.server.profilesDb;
+		const	username = req.body.Username;
+		const	userId = req.body.UserId;
+		
+		const	newUser = await profilesDb.createUserProfile(userId, username);
 
-		console.log('User created:', newUser);
+		console.log('User profile created :', newUser.user_id);
 		return (reply.code(201).send(newUser));	
 	}
 	catch (err)
@@ -49,9 +53,9 @@ export const	getUser = async (req, reply) =>
 	try
 	{
 		const	username = req.params.username; // From URL parameter
-		const	usersDb = req.server.usersDb;
+		const	profilesDb = req.server.profilesDb; // Changed from usersDb to profilesDb
 
-		const	user = await usersDb.getUserByUsername(username);
+		const	user = await profilesDb.getUserByUsername(username);
 		if (!user)
 			return (reply.code(404).send({ error: 'User not found' }));
 

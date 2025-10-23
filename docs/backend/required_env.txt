@@ -17,6 +17,8 @@ services/auth:
     SMTP_USER=43skhool@gmail.com
     SMTP_PASS=udkh apxb ltsl iikp
     OTP_EXPIRATION_MINUTES=5
+    USERS_SERVICE_URL=http://localhost:3002
+
 
 services/users:
     INTERNAL_API_KEY=1234

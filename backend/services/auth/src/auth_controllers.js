@@ -20,23 +20,42 @@ export const	register = async (req, reply) =>
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		const	authDb = req.server.authDb;
 
-		// Check if the username exists with URL parameter
-		const	validUsername = await axios.get(`${process.env.USER_PROFILE_SERVICE_URL}/users/${username}`, {
-			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
-
-		console.log('Username check response:', validUsername.status);
+		// Check if the username already exists
+		try
+		{
+			const	usernameCheck = await axios.get(`${process.env.USERS_SERVICE_URL}/${username}`, {
+				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
+			
+			// If we get any response (not 404), username already exists
+			return (reply.code(409).send({ error: 'Username already exists' }));
+		}
+		catch (err)
+		{
+			// If error is NOT 404, then it's a real error
+			if (err.response && err.response.status !== 404)
+			{
+				console.log('Error checking username:', err.message);
+				return (reply.code(500).send({ error: 'Error checking username availability' }));
+			}
+			// If it's 404, username is available - continue with registration
+		}
 		
-		// const	response = await axios.put(`${process.env.AUTH_SERVICE_URL}/change-password`,
-		// {
-		// 	headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
-		// 	body:
-		// 	{
-		// 		username: username,
-
-		// })
-
-		// TO DO check for duplicate username
-		axios.post(`${process.env.USER_PROFILE_SERVICE_URL}/users/create-profile`, { userId: user.id, email: email })
+		// Create user in auth database
+		const user = await authDb.createUser(email, hashedpassword);
+		
+		// Create user profile in users service
+		try
+		{
+			await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
+				{ Username: username, UserId: user.id },
+				{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+			);
+		}
+		catch (err)
+		{
+			console.log('Error creating user profile:', err.message);
+			// Continue with registration even if profile creation fails
+		}
 
 		console.log('User registered: ', user.id)
  
