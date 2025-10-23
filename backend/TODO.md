@@ -36,6 +36,8 @@
 [] SQL INJECTION PROTECTION
 [] XSS Attack
 
+[] move username handling in to the user_profile service, update the databases too
+
 [x] 2FA
 	[x] Custom Otp mail
 	[x] Change profile image to 42 account to diplay it in to the email
