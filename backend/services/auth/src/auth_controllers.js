@@ -41,6 +41,7 @@ export const	register = async (req, reply) =>
 		
 		// Create user in auth database
 		const	user = await authDb.createUser(email, hashedpassword);
+		console.log('User registered: ', user.id);
 
 		// Create user profile in users service
 		try
@@ -56,8 +57,6 @@ export const	register = async (req, reply) =>
 			// Continue with registration even if profile creation fails
 		}
 
-		console.log('User registered: ', user.id)
- 
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
 
@@ -237,7 +236,6 @@ export const	token = async (req, reply) =>
 
 		// Verify JWT signature
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-		console.log('Decoded refresh token for user: ', decodedToken.id);
 
 		// Check if token exists in DB
 		const	storedToken = await authDb.getRefreshTokenByUserId(decodedToken.id);

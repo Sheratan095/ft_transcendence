@@ -32,7 +32,7 @@ Content-Type: application/json
 
 {
   "email": "ceccarellim7@gmail.com",
-  "password": "Mrco@123_"
+  "password": "NewPassword456!"
 }
 
 ###
@@ -51,7 +51,7 @@ POST http://localhost:3000/auth/token
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJhMWJlMWE2LTc0MGEtNGNmYi05ZDQyLTNiMjQ4OTUzYTM1NSIsImVtYWlsIjoiZHNhZGFAeG1wbGUuY29tIiwiaWF0IjoxNzYwOTc3OTMxLCJleHAiOjE3NjE1ODI3MzF9.ItGl4zSBQhqOhOKFHHPSSqWyr1zYCnJqee6Cg6Z-SNw"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViY2M3MjhhLTM4NzktNGU4OS1iNDJkLWY5NjBjOTQ0OGNmZSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NDI0MCwiZXhwIjoxNzYxODk5MDQwfQ.PvSfcWkINty1ozzylOsSK57B4FFPbQVjuSmM0rD6DDI"
 }
 
 ###
@@ -60,19 +60,18 @@ POST http://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "8612a985-0df8-49e3-8c41-525aff0b9b81",
+  "userId": "cf3696cf-7bac-4d96-be58-94e22c42880f",
   "otpCode": "112493"
 }
 
 ###
 
-PUT http://localhost:3001/update-user
+PUT http://localhost:3001/enable-2fa
 Content-Type: application/json
 x-internal-api-key: 1234
 
 {
-  "userId": "8612a985-0df8-49e3-8c41-525aff0b9b81",
-  "username": "NewUsername",
+  "userId": "cf3696cf-7bac-4d96-be58-94e22c42880f",
   "tfaEnabled": false
 }
 
@@ -80,7 +79,7 @@ x-internal-api-key: 1234
 
 PUT http://localhost:3000/auth/change-password
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc4MDViOThjLWMzOTItNGQ4MS04ODQxLTE0ZmM4ODM4Zjk2MiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTE0MDE4NSwiZXhwIjoxNzYxMTQwMjQ1fQ.jLVLdxLldtDmWg6xn8aKuUBXMidRiIeH8Wp2m8XfOIo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViY2M3MjhhLTM4NzktNGU4OS1iNDJkLWY5NjBjOTQ0OGNmZSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NDE5NiwiZXhwIjoxNzYxMjk0MjU2fQ.wO4-tSvG-I9fCGoxL2I_UUSDuaN7ABVjB4W63O5HBMo
 
 {
   "oldPassword": "Mrco@123_",
