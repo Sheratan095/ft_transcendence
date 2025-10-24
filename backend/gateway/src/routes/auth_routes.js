@@ -122,3 +122,53 @@ export async function	verifyTwoFactorAuth(request, reply)
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
 }
+
+export async function	changePasswordRoute(request, reply)
+{
+	// Redirect change password requests to auth service
+	try
+	{
+		const	response = await axios.put(`${process.env.AUTH_SERVICE_URL}/change-password`, request.body,
+		{
+			headers: {
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+				'x-user-data': JSON.stringify(request.user) // Pass authenticated user data
+			},
+		})
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('Auth service error:', err.message)
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+}
+
+export async function	enable2FARoute(request, reply)
+{
+	// Redirect enable 2FA requests to auth service
+	try
+	{
+		const	response = await axios.put(`${process.env.AUTH_SERVICE_URL}/enable-2fa`, request.body,
+		{
+			headers: {
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+				'x-user-data': JSON.stringify(request.user) // Pass authenticated user data
+			},
+		})
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('Auth service error:', err.message)
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+}

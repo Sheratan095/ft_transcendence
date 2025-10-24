@@ -1,0 +1,226 @@
+### SQL Injection Tests for Auth Database
+### These tests attempt various SQL injection attacks to verify parameterized queries are working correctly
+
+###
+### 1. SQL Injection in Login Username Field
+### Attempting to bypass authentication with OR condition
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' OR '1'='1",
+  "password": "anything"
+}
+
+###
+### 2. SQL Injection in Login Username Field - UNION Attack
+### Attempting to extract data with UNION
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' UNION SELECT 1,2,3,4,5,6--",
+  "password": "anything"
+}
+
+###
+### 3. SQL Injection in Login Username Field - Comment Bypass
+### Attempting to bypass password check with SQL comments
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'--",
+  "password": "anything"
+}
+
+###
+### 4. SQL Injection in Registration Username
+### Attempting to inject SQL in username during registration
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; DROP TABLE users; --",
+  "email": "malicious@test.com",
+  "password": "Password123!"
+}
+
+###
+### 5. SQL Injection in Registration Email
+### Attempting to inject SQL in email field
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@test.com'; DELETE FROM users WHERE '1'='1",
+  "password": "Password123!"
+}
+
+###
+### 6. SQL Injection with Stacked Queries
+### Attempting to execute multiple SQL statements
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test'; INSERT INTO users (id, username, email, password) VALUES ('hacked', 'hacker', 'hack@evil.com', 'password'); --",
+  "email": "normal@test.com",
+  "password": "Password123!"
+}
+
+###
+### 7. SQL Injection with Encoded Characters
+### Attempting injection with URL encoded characters
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin%27%20OR%20%271%27%3D%271",
+  "password": "anything"
+}
+
+###
+### 8. SQL Injection with Hex Encoding
+### Attempting injection with hex encoded strings
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin\\x27 OR \\x271\\x27=\\x271",
+  "password": "anything"
+}
+
+###
+### 9. Boolean-based Blind SQL Injection
+### Attempting to extract information through boolean responses
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND (SELECT COUNT(*) FROM users) > 0 --",
+  "password": "anything"
+}
+
+###
+### 10. Time-based Blind SQL Injection
+### Attempting to cause delays to detect injection points
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND (SELECT sqlite_version()) LIKE '%3%' --",
+  "password": "anything"
+}
+
+###
+### 11. Second-order SQL Injection
+### Register a user with malicious username, then try to trigger it in login
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test' OR (SELECT COUNT(*) FROM users WHERE username LIKE 'admin') > 0 --",
+  "email": "secondorder@test.com",
+  "password": "Password123!"
+}
+
+###
+### 12. Test Login with the malicious username from test 11
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "test' OR (SELECT COUNT(*) FROM users WHERE username LIKE 'admin') > 0 --",
+  "password": "Password123!"
+}
+
+###
+### 13. CASE manipulation injection
+### Attempting to bypass with case variations
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' OrDeR bY 1--",
+  "password": "anything"
+}
+
+###
+### 14. Nested query injection
+### Attempting to inject nested SELECT statements
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND (SELECT SUBSTR((SELECT name FROM sqlite_master WHERE type='table' LIMIT 1),1,1))='u'--",
+  "password": "anything"
+}
+
+###
+### 15. NULL byte injection
+### Attempting to use null bytes to truncate queries
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin'%00",
+  "password": "anything"
+}
+
+###
+### 16. Function-based injection
+### Attempting to use SQLite functions for injection
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' OR LENGTH(password) > 0 --",
+  "password": "anything"
+}
+
+###
+### 17. Error-based injection attempt
+### Trying to trigger SQL errors to extract information
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND (SELECT CASE WHEN (1=1) THEN 1/0 ELSE 1 END)--",
+  "password": "anything"
+}
+
+###
+### 18. Data exfiltration attempt via LIKE
+### Attempting to extract data character by character
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' AND (SELECT username FROM users LIMIT 1) LIKE 'a%'--",
+  "password": "anything"
+}
+
+###
+### 19. Schema discovery attempt
+### Trying to discover table and column names
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin' UNION SELECT sql,sql,sql,sql,sql,sql FROM sqlite_master--",
+  "password": "anything"
+}
+
+###
+### 20. Multi-line injection
+### Testing multi-line SQL injection
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test';\nDROP TABLE users;\n--",
+  "email": "multiline@test.com",
+  "password": "Password123!"
+}

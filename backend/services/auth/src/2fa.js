@@ -1,8 +1,15 @@
 import nodemailer from "nodemailer";
 import bcrypt from 'bcrypt';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getExpirationDateByMinutes } from './auth_help.js';
+import { getLanguagePack } from './email_templates/language_packs.js';
 
-export async function	sendTwoFactorCode(user, authDb, reply)
+const	__filename = fileURLToPath(import.meta.url);
+const	__dirname = path.dirname(__filename);
+
+export async function	sendTwoFactorCode(user, language, authDb, reply)
 {
 	const	otp_code = generateOTPCode();
 	const	hash_optcode = bcrypt.hashSync(otp_code, parseInt(process.env.HASH_SALT_ROUNDS));
@@ -11,10 +18,12 @@ export async function	sendTwoFactorCode(user, authDb, reply)
 
 	await (authDb.storeTwoFactorToken(user.id, hash_optcode, expirationDate));
 
-	sendEmail(
+	// Send modern HTML email with 42 styling
+	await sendOTPEmail(
 		user.email,
-		'Your Two-Factor Authentication Code',
-		`Your OTP code is: ${otp_code}`
+		otp_code,
+		language,
+		parseInt(process.env.OTP_EXPIRATION_MINUTES) || 10
 	);
 
 	const	response = { message: 'Two-Factor Authentication required', tfaRequired: true, userId: user.id };
@@ -28,7 +37,7 @@ export function	generateOTPCode()
 	return (Math.floor(100000 + Math.random() * 900000).toString());
 }
 
-export async function	sendEmail(to, subject, text)
+export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 {
 	const	transporter = nodemailer.createTransport({
 		host: process.env.SMTP_HOST,
@@ -40,23 +49,61 @@ export async function	sendEmail(to, subject, text)
 		}
 	});
 
+	// Get language pack for the specified language
+	const	langPack = getLanguagePack(language);
+
+	// Generate HTML content using single template and language pack
+	let	htmlContent;
+	try
+	{
+		// Use the single template file
+		const	templatePath = path.join(__dirname, 'email_templates', 'otp_template.html');
+		const	htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+		
+		// Generate security points HTML
+		const	securityPointsHtml = langPack.securityPoints
+			.map(point => `<li>${point.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes)}</li>`)
+			.join('');
+		
+		// Replace all placeholders with language pack values and dynamic content
+		htmlContent = htmlTemplate
+			.replace(/{{LANGUAGE}}/g, language)
+			.replace(/{{TITLE}}/g, langPack.title)
+			.replace(/{{GREETING}}/g, langPack.greeting)
+			.replace(/{{MESSAGE}}/g, langPack.message)
+			.replace(/{{OTP_LABEL}}/g, langPack.otpLabel)
+			.replace(/{{OTP_CODE}}/g, otpCode)
+			.replace(/{{EXPIRY_TEXT}}/g, langPack.expiryText.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes))
+			.replace(/{{SECURITY_TITLE}}/g, langPack.securityTitle)
+			.replace(/{{SECURITY_POINTS}}/g, securityPointsHtml)
+			.replace(/{{FOOTER_MESSAGE}}/g, langPack.footerMessage)
+			.replace(/{{FOOTER_TEXT}}/g, langPack.footerText);
+	} 
+	catch (error)
+	{
+		console.error('❌ Error loading email template:', error.message);
+	}
+
 	const	mailOptions =
 	{
-		from: `"ft_transcendence" <${process.env.SMTP_USER}>`,
+		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
 		to,
-		subject,
-		text
+		subject: langPack.subject,
+		text: langPack.plainText
+			.replace(/{{OTP_CODE}}/g, otpCode)
+			.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes),
+		html: htmlContent
 	};
 
 	try
 	{
 		await transporter.sendMail(mailOptions);
 
-		console.log(`📧 2FA Email sent to ${to}`);
+		console.log(`📧 Modern 2FA Email sent to ${to}, expires in ${expiryMinutes} minutes`);
 	}
 	catch (error)
 	{
-		console.error("❌ Error sending email:", error.message);
+		console.error("❌ Error sending OTP email:", error.message);
 
 		throw (error);
 	}

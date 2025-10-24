@@ -38,7 +38,7 @@ export class AuthDatabase
 		}
 		catch (error)
 		{
-			console.error("❌ Database initialization error:", error);
+			console.error("❌ AUTH Database initialization error:", error);
 			throw (error);
 		}
 	}
@@ -67,7 +67,7 @@ export class AuthDatabase
 		}
 		catch (error)
 		{
-			console.error("❌ Error creating tables for auth_db:", error);
+			console.error("❌ Error creating tables for AUTH db:", error);
 
 			throw (error);
 		}
@@ -78,7 +78,7 @@ export class AuthDatabase
 	async	#generateUUID()
 	{
 		const	id = uuidv4();
-		// while (await this.db.get("SELECT id FROM users WHERE id = ?", [id]))
+		// while (await this.db.get("SELECT id FROM auth_accounts WHERE id = ?", [id]))
 		// 	id = uuidv4();
 
 		return (id);
@@ -96,39 +96,47 @@ export class AuthDatabase
   // -------- USERS METHODS --------
 
 	// Return the created user object
-	async	createUser(username, password, email)
+	async	createUser(email, password)
 	{
 		const	id = await this.#generateUUID();
 
-		await this.db.run("INSERT INTO users (id, username, password, email) VALUES (?, ?, ?, ?)", [id, username, password, email]);
+		await this.db.run("INSERT INTO auth_accounts (id, password, email) VALUES (?, ?, ?)", [id, password, email]);
 
-		return (await this.db.get("SELECT * FROM users WHERE id = ?", [id]));
+		return (await this.db.get("SELECT * FROM auth_accounts WHERE id = ?", [id]));
 	}
 
 	async	getAllUsers()
 	{
-		return (await this.db.all("SELECT * FROM users"));
-	}
-
-	async	getUserByUsername(username)
-	{
-		return (await this.db.get("SELECT * FROM users WHERE username = ?", [username]));
+		return (await this.db.all("SELECT * FROM auth_accounts"));
 	}
 
 	async	getUserById(userId)
 	{
-		return (await this.db.get("SELECT * FROM users WHERE id = ?", [userId]));
+		return (await this.db.get("SELECT * FROM auth_accounts WHERE id = ?", [userId]));
 	}
 
-	// Get user by username OR email
-	async	getUserByUsernameOrEmail(identifier)
+	// Get user by username
+	async	getUserByMail(identifier)
 	{
-		return (await this.db.get("SELECT * FROM users WHERE username = ? OR email = ?", [identifier, identifier]));
+		return (await this.db.get("SELECT * FROM auth_accounts WHERE email = ?", [identifier]));
 	}
 
 	async	deleteUserById(userId)
 	{
-		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);
+		await this.db.run("DELETE FROM auth_accounts WHERE id = ?", [userId]);
+	}
+
+	async	enable2FA(userId, enabled)
+	{
+		await this.db.run("UPDATE auth_accounts SET tfa_enabled = ? WHERE id = ?", [enabled ? 1 : 0, userId]);
+
+		return (await this.getUserById(userId));
+	}
+
+	async	updateUserPassword(userId, hashedPassword)
+	{
+		await this.db.run("UPDATE auth_accounts SET password = ? WHERE id = ?", [hashedPassword, userId]);
+		return (await this.getUserById(userId));
 	}
 
 	// -------- REFRESH TOKENS METHODS --------
@@ -138,7 +146,7 @@ export class AuthDatabase
 	{
 		const	id = uuidv4();
 
-		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
+		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS' (ISO FORMAT)
 		const	expiresAtStr = formatExpirationDate(expiresAt);
 
 		await this.db.run(

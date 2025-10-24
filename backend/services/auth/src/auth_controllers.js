@@ -1,7 +1,8 @@
 import { generateNewTokens, decodeToken} from './jwt.js';
-import { validator, isTokenExpired } from './auth_help.js';
+import { validator, isTokenExpired, extractUserData, getUserLanguage } from './auth_help.js';
 import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
+import axios from 'axios'
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
 // making it more difficult for attackers to use precomputed tables (like rainbow tables) to crack passwords.
@@ -19,7 +20,42 @@ export const	register = async (req, reply) =>
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		const	authDb = req.server.authDb;
 
-		const	user = await authDb.createUser(username, hashedpassword, email)
+		// Check if the username already exists
+		try
+		{
+			const	usernameCheck = await axios.get(`${process.env.USERS_SERVICE_URL}/user?username=${username}`, {
+				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
+			
+			// If we get any response (not 404), username already exists
+			return (reply.code(409).send({ error: 'Username already exists' }));
+		}
+		catch (err)
+		{
+			// If error is NOT 404, then it's a real error
+			if (err.response && err.response.status !== 404)
+			{
+				console.log('Error checking username:', err.message);
+				return (reply.code(500).send({ error: 'Error checking username availability' }));
+			}
+			// If it's 404, username is available - continue with registration
+		}
+		
+		// Create user in auth database
+		const user = await authDb.createUser(email, hashedpassword);
+		
+		// Create user profile in users service
+		try
+		{
+			await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
+				{ Username: username, UserId: user.id },
+				{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+			);
+		}
+		catch (err)
+		{
+			console.log('Error creating user profile:', err.message);
+			// Continue with registration even if profile creation fails
+		}
 
 		console.log('User registered: ', user.id)
  
@@ -31,7 +67,6 @@ export const	register = async (req, reply) =>
 			user:
 			{
 				id: user.id,
-				username: user.username,
 				email: user.email
 			},
 			tokens: 
@@ -67,7 +102,7 @@ export const	login = async (req, reply) =>
 	try
 	{
 		const	password = req.body.password;
-		const	identifier = req.body.username || req.body.email;
+		const	identifier = req.body.email;
 		
 		// Validate that we have an identifier
 		if (!identifier || !password)
@@ -79,19 +114,21 @@ export const	login = async (req, reply) =>
 		const	authDb = req.server.authDb;
 		
 		// Get user from database
-		const	user = await authDb.getUserByUsernameOrEmail(identifierLower);
+		const	user = await authDb.getUserByMail(identifierLower);
 		
 		if (!user || await bcrypt.compare(password, user.password) === false)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
 
 		// Check if 2FA is enabled for this user
-		if (user.tfa_active)
+		if (user.tfa_enabled)
 		{
 			// Clean up any existing 2FA tokens for this user first
 			await authDb.deleteTwoFactorTokenByUserId(user.id);
+
+			const	language = await getUserLanguage(user.id);
 			
 			// Send 2FA code and require verification
-			return (await sendTwoFactorCode(user, authDb, reply));
+			return (await sendTwoFactorCode(user, language, authDb, reply));
 		}
 
 		const	newTokens = await generateNewTokens(user, authDb);
@@ -100,10 +137,10 @@ export const	login = async (req, reply) =>
 
 		return (reply.code(200).send({
 			message: 'Login successful',
+			tfaRequired: false,
 			user:
 			{
 				id: user.id,
-				username: user.username,
 				email: user.email
 			},
 			tokens:
@@ -296,7 +333,6 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			user:
 			{
 				id: user.id,
-				username: user.username,
 				email: user.email
 			},
 			tokens:
@@ -310,6 +346,85 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 	catch (err)
 	{
 		console.log('2FA verification error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+// TO DO, check if it works, shuld be called form user_profile service
+export const	enable2FA = async (req, reply) =>
+{
+	try
+	{
+		const	tfaEnabled  = req.body.tfaEnabled;
+		const	authDb = req.server.authDb;
+
+		const	userData = extractUserData(req);
+		
+		if (!userData || !userData.id)
+			return (reply.code(401).send({ error: 'Invalid user data' }));
+
+		const	updatedUser = await authDb.enable2FA(userData.id, tfaEnabled);
+
+		console.log('2FA activated for user:', updatedUser.id);
+
+		if (!updatedUser)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		return (reply.code(200).send({
+			message: '2FA setting updated successfully',
+			user:
+			{
+				id: updatedUser.id,
+				email: updatedUser.email,
+				tfaEnabled: updatedUser.tfa_enabled
+			}
+		}));
+	}
+	catch (err)
+	{
+		console.log('Update 2FA settings error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	changePassword = async (req, reply) =>
+{
+	try
+	{
+		const	{ oldPassword, newPassword } = req.body;
+		const	authDb = req.server.authDb;
+
+		// Extract user data from headers (contains only id and email from JWT)
+		const	userData = extractUserData(req);
+		
+		if (!userData || !userData.id)
+			return (reply.code(401).send({ error: 'Invalid user data' }));
+
+		// Get full user data from database (including password hash)
+		const	user = await authDb.getUserById(userData.id);
+
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		// Verify old password
+		if (await bcrypt.compare(oldPassword, user.password) === false)
+			return (reply.code(401).send({ error: 'Old password is incorrect' }));
+
+		// Hash new password
+		const	hashedNewPassword = bcrypt.hashSync(newPassword, parseInt(process.env.HASH_SALT_ROUNDS));
+
+		// Update password in database
+		await authDb.updateUserPassword(user.id, hashedNewPassword);
+
+		console.log('Password changed for user:', user.id);
+
+		return (reply.code(200).send({ message: 'Password changed successfully' }));
+	}
+	catch (err)
+	{
+		console.log('Change password error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

@@ -4,7 +4,9 @@ import {
 	login,
 	register,
 	validateToken,
-	verifyTwoFactorAuth
+	verifyTwoFactorAuth,
+	enable2FA,
+	changePassword
 } from './auth_controllers.js';
 
 import { validateInternalApiKey } from './auth_help.js';
@@ -26,9 +28,28 @@ const	User =
 	properties:
 	{
 		id: { type: 'string' },
-		username: { type: 'string' },
+		tfaEnabled: { type: 'boolean' },
 		email: { type: 'string' },
 	},
+}
+
+const	PasswordPolicy =
+{
+	type: 'string',
+	pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,24}$',
+ 		errorMessage: {
+		pattern: 'Password must be 8–24 chars long and include upper, lower, number, and symbol.'
+	}
+};
+
+const	EmailPolicy =
+{
+	type: 'string',
+	format: 'email',
+	maxLength: 254,
+	errorMessage: {
+		format: 'Invalid email format'
+	}
 }
 
 // Reusable error response schemas
@@ -53,17 +74,6 @@ const	WelcomeResponse =
 		message: { type: 'string' },
 		tokens: Tokens,
 		user: User
-	}
-};
-
-const	TwoFactorRequiredResponse = 
-{
-	type: 'object',
-	properties:
-	{
-		message: { type: 'string' },
-		tfaRequired: { type: 'boolean' },
-		userId: { type: 'string' }
 	}
 };
 
@@ -110,31 +120,9 @@ const	registerOpts =
 			required: ['username', 'email', 'password'],
 			properties:
 			{
-				username:
-				{
-					type: 'string',
-					pattern: '^[a-zA-Z][a-zA-Z0-9._]{2,19}$',
-					errorMessage: {
-						pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed.'
-					}
-				},
-				email:
-				{
-					type: 'string',
-					format: 'email',
-					maxLength: 254,
-					errorMessage: {
-						format: 'Invalid email format'
-					}
-				},
-				password:
-				{
-					type: 'string',
-					pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,24}$',
-			 		errorMessage: {
-						pattern: 'Password must be 8–24 chars long and include upper, lower, number, and symbol.'
-					}
-				}
+				username: { type: 'string' },
+				email: { ...EmailPolicy },
+				password: { ...PasswordPolicy}
 			}
 		},
 
@@ -161,14 +149,9 @@ const	loginOpts =
 		body: 
 		{
 			type: 'object',
-			required: ['password'],
-			anyOf: [
-				{ required: ['username'] },
-				{ required: ['email'] }
-			],
+			required: ['password', 'email'],
 			properties: 
 			{
-				username: { type: 'string' },
 				email: { type: 'string', format: 'email' },
 				password: { type: 'string' }
 			}
@@ -223,54 +206,6 @@ const	logoutOpts =
 	preHandler: validateInternalApiKey,
 	handler: logout
 }
-
-const	validateTokenOpts =
-{
-	schema:
-	{
-		summary: '🔒 Internal',
-		description: 'Validate an access token and retrieve the associated user ID',
-
-		...withInternalAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['token'],
-			properties:
-			{
-				token: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'object',
-				properties: // The user data returned will be added to the request forwarded to the requested gateway
-				{
-					message: { type: 'string' },
-					valid: { type: 'boolean' },
-					user:
-					{
-						type: 'object',
-						properties:
-						{
-							id: { type: 'string' },
-							email: { type: 'string' }
-						}
-					}
-				}
-			},
-			400: ErrorResponse,
-			401: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-	preValidation: validateInternalApiKey,
-	handler	: validateToken
-};
 
 const	tokenOpts =
 {
@@ -341,6 +276,137 @@ const	twoFactorAuthOpts =
 	handler: verifyTwoFactorAuth
 }
 
+//-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
+
+// This is internal too
+const	enable2FAOpts =
+{
+	schema:
+	{
+		description: 'Enable or disable Two-Factor Authentication (2FA) for a user',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['tfaEnabled'],
+			properties:
+			{
+				tfaEnabled: { type: 'boolean' }
+			},
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' },
+					user: User
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			409: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: enable2FA
+}
+
+const	changePasswordOpts =
+{
+	schema:
+	{
+		description: 'Change user password. userId is added in JWT validation middleware.',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['oldPassword', 'newPassword'],
+			properties:
+			{
+				oldPassword: { type: 'string' },
+				newPassword: { ...PasswordPolicy }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: {
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: changePassword
+};
+
+//-----------------------------INTERAL ROUTES-----------------------------
+
+const	validateTokenOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal',
+		description: 'Validate an access token and retrieve the associated user ID',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['token'],
+			properties:
+			{
+				token: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: // The user data returned will be added to the request forwarded to the requested gateway
+				{
+					message: { type: 'string' },
+					valid: { type: 'boolean' },
+					user:
+					{
+						type: 'object',
+						properties:
+						{
+							id: { type: 'string' },
+							email: { type: 'string' }
+						}
+					}
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preValidation: validateInternalApiKey,
+	handler	: validateToken
+};
+
 export function	authRoutes(fastify)
 {
 	fastify.post('/register', registerOpts);
@@ -348,6 +414,9 @@ export function	authRoutes(fastify)
 	fastify.post('/validate-token', validateTokenOpts);
 	fastify.post('/token', tokenOpts);
 	fastify.post('/2fa', twoFactorAuthOpts);
+
+	fastify.put('/enable-2fa', enable2FAOpts);
+	fastify.put('/change-password', changePasswordOpts);
 
 	fastify.delete('/logout', logoutOpts);
 }

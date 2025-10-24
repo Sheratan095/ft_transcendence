@@ -11,7 +11,7 @@ export async function	authenticateJwtToken(request, reply)
 	// Extract Authorization header and parse Bearer token
 	const	authHeader = request.headers['authorization']
 	const	token = authHeader && authHeader.split(' ')[1]
-	
+
 	// Return 401 if no token provided
 	if (token == null)
 		return (reply.code(401).send({ error: 'Authorization header required' }))

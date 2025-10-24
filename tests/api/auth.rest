@@ -1,0 +1,86 @@
+
+
+DELETE http://localhost:3000/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OTc4NzczLWRiNWUtNDEzOC04MGQxLTkzYTFlOTk3NzBjMCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5OTE0NiwiZXhwIjoxNzYxOTAzOTQ2fQ.8wmf3gWEhJucW0FSbmynom3r6vt2U4HIPWOLgpoo8dY"
+}
+
+###
+
+### Valid token validation
+POST http://localhost:3000/auth/validate-token
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhiNWU3YTVkLTQ5ZjgtNDMwYi05N2JlLWNjNWZlNGU0M2NmMSIsImVtYWlsIjoiZHNhZGFAeG1wbGUuY29tIiwiaWF0IjoxNzYwOTc2MzU5fQ.7QX-FLZZwyU74C5LwIwQ0cz7IaBClLAuT2qEhwESYlM"
+}
+
+### Missing token validation (should return 400 Bad Request)
+POST http://localhost:3001/validate-token
+Content-Type: application/json
+x-internal-api-key: 1234
+
+{}
+
+###
+
+#return token and refresh token
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "ceccarellim7@gmail.com",
+  "password": "Mrco@123_"
+}
+
+###
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "MARCO",
+  "email": "ceccarellim7@gmail.com",
+  "password": "Mrco@123_"
+}
+
+###
+
+POST http://localhost:3000/auth/token
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OTc4NzczLWRiNWUtNDEzOC04MGQxLTkzYTFlOTk3NzBjMCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5OTEzMywiZXhwIjoxNzYxOTAzOTMzfQ.Eazit1s44YyXd-WRLtqNIhUJqdt6nWyiDE30A4fQXYc"
+}
+
+###
+
+POST http://localhost:3000/auth/2fa
+Content-Type: application/json
+
+{
+  "userId": "2bbd4f64-79a8-4fb4-b6a6-8e77c5a4200c",
+  "otpCode": "834464"
+}
+
+###
+
+PUT http://localhost:3000/auth/enable-2fa
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgxYWVkMTY5LTI5ZTItNDZjNy1iYTYyLTMwODM0OGZiN2JjNiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTMwMTk1OSwiZXhwIjoxNzYxMzAyMDE5fQ.FuTe4lZQrwdoO3hExR6D9ZwlTdSAIo8Z7jgGXW6IHCw
+
+{
+  "tfaEnabled": true
+}
+
+###
+
+PUT http://localhost:3000/auth/change-password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjMjIzZTQwLWM2NzQtNGQ0ZS05ZjQ0LTlmZDkzN2JhODU5ZCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5ODYwOCwiZXhwIjoxNzYxMjk4NjY4fQ.PAiASYTBLlNNeLBWJIuvb-hXVefwUZU4f8KUDnj7XQ4
+
+{
+  "oldPassword": "Mrco@123_",
+  "newPassword": "newPassword456!"
+}

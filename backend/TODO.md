@@ -1,9 +1,9 @@
 [x] std_microservice_architecture.drawio
 [x] remove guards from controllers, check if schema validation really works
 
-[] be sure to protect sql injection
-[] docs for microservice.db in std_microservice_architecture.drawio
-[] figure out how handle db in microservice and add it to std_microservice_architecture.drawio
+[x] be sure to protect sql injection
+[x] docs for microservice.db in std_microservice_architecture.drawio
+[x] figure out how handle db in microservice and add it to std_microservice_architecture.drawio
 [x] move the sql scripts to another .sql and execute it in ..._db 
 
 [x] lowercase shit
@@ -27,7 +27,7 @@
 
 [] how can we check if a user is online? last token request?
 
-[] JWT protocol
+[x] JWT protocol
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT
 	[x] add accessToken expiration to login and registration reply, add it also in auth_api_flow.drawio
 	[x] new token request
@@ -36,11 +36,34 @@
 [] SQL INJECTION PROTECTION
 [] XSS Attack
 
-[] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
-[] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
-[] Prevent token spam	Add short cooldown (optional)	Avoid repeated login requests
-[]await fastify.register(import('fastify-rate-limit'), {
-[]   max: 5, // requests
-[]   timeWindow: '5 minutes', // time window
-[]   keyGenerator: (req) => req.body.username || req.ip
-[] });
+[x] move username handling in to the user_profile service, update the databases too
+[] rename twoFactoruAuth in to 2FA where possible
+[x] check for db decoration in auth.js/start()
+[x] login doesn't work
+[] delete user data? (GDPR)
+	Don’t do the actual profile deletion inside the Auth service —
+	let Auth trigger a system-wide cascade via events or APIs.
+	Each service deletes what it owns.
+[x] rename users table in auth
+[x] check logout
+
+[x] 2FA
+	[x] Custom Otp mail
+	[x] Change profile image to 42 account to diplay it in to the email
+	[x] Update login route requiring 2fa
+
+[] add welcome mail? add psw change or 2fa enabled mail notification?
+[x] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
+[x] add endpoint to change the psw
+[x] should the language name depends on the preferred language of the user?
+	[x] seprate the template and the "language pack"
+[] add user/update-user, to change userame and language => test if than the mail are sent in the chosen language
+
+[x] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
+[x] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups
+[x] Prevent token spam	Add short cooldown (optional)	Avoid repeated login requests
+	await fastify.register(import('fastify-rate-limit'), {
+	max: 5, // requests
+	timeWindow: '5 minutes', // time window
+	keyGenerator: (req) => req.body.username || req.ip
+	});
