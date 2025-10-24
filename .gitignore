@@ -18,6 +18,10 @@ build/
 .env
 **/.env
 
+#auth files
+auth.db
+package-lock.json
+
 # MacOS
 .DS_Store
 
