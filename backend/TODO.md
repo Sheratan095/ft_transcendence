@@ -36,10 +36,11 @@
 [] SQL INJECTION PROTECTION
 [] XSS Attack
 
-[] move username handling in to the user_profile service, update the databases too
+[x] move username handling in to the user_profile service, update the databases too
 [] rename twoFactoruAuth in to 2FA where possible
-[] check for db decoration in auth.js/start()
+[x] check for db decoration in auth.js/start()
 [x] login doesn't work
+[] delete user data? (GDPR)
 
 [x] 2FA
 	[x] Custom Otp mail
