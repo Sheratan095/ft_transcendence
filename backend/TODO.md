@@ -41,6 +41,10 @@
 [x] check for db decoration in auth.js/start()
 [x] login doesn't work
 [] delete user data? (GDPR)
+	Don’t do the actual profile deletion inside the Auth service —
+	let Auth trigger a system-wide cascade via events or APIs.
+	Each service deletes what it owns.
+[] rename users table in auth
 
 [x] 2FA
 	[x] Custom Otp mail
