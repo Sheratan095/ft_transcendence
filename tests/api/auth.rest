@@ -4,7 +4,7 @@ DELETE http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJiYmQ0ZjY0LTc5YTgtNGZiNC1iNmE2LThlNzdjNWE0MjAwYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NzMxNCwiZXhwIjoxNzYxMjk3Mzc0fQ.cPblsI15VCQCO3_QUvzmJgvC1JdO0QDsA4Par1yPG2A"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OTc4NzczLWRiNWUtNDEzOC04MGQxLTkzYTFlOTk3NzBjMCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5OTE0NiwiZXhwIjoxNzYxOTAzOTQ2fQ.8wmf3gWEhJucW0FSbmynom3r6vt2U4HIPWOLgpoo8dY"
 }
 
 ###
@@ -51,7 +51,7 @@ POST http://localhost:3000/auth/token
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJiYmQ0ZjY0LTc5YTgtNGZiNC1iNmE2LThlNzdjNWE0MjAwYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5ODI3MywiZXhwIjoxNzYxOTAzMDczfQ.vjzdYgyQ1bcPGbVZU36gT_OkPRtasl4-z7rHidwb9_4"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OTc4NzczLWRiNWUtNDEzOC04MGQxLTkzYTFlOTk3NzBjMCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5OTEzMywiZXhwIjoxNzYxOTAzOTMzfQ.Eazit1s44YyXd-WRLtqNIhUJqdt6nWyiDE30A4fQXYc"
 }
 
 ###
