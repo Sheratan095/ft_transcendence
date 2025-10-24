@@ -4,13 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { promisify } from "util";
 import { mkdir, readFile } from "fs/promises";
-// import {formatExpirationDate} from "./auth_help.js";
 import path from "path";
 import { fileURLToPath } from 'url';
 
-export class ProfilesDatabase
+export class UsersDatabase
 {
-	constructor(dbPath = "./data/profiles.db")
+	constructor(dbPath = "./data/users.db")
 	{
 		this.dbPath = dbPath;
 		this.db = null;
@@ -34,11 +33,11 @@ export class ProfilesDatabase
 
 			await this.#createTables();
 
-			console.log("✅ PROFILES Database connected: ", this.dbPath);
+			console.log("✅ USERS Database connected: ", this.dbPath);
 		}
 		catch (error)
 		{
-			console.error("❌ PROFILES Database initialization error:", error);
+			console.error("❌ USERS Database initialization error:", error);
 			throw (error);
 		}
 	}
@@ -67,7 +66,7 @@ export class ProfilesDatabase
 		}
 		catch (error)
 		{
-			console.error("❌ Error creating tables for PROFILES db:", error);
+			console.error("❌ Error creating tables for USERS db:", error);
 
 			throw (error);
 		}
@@ -98,11 +97,11 @@ export class ProfilesDatabase
 	// Return the created profile object
 	async	createUserProfile(userId, username)
 	{
-		const	query = `INSERT INTO profiles (user_id, username) VALUES (?, ?)`;
+		const	query = `INSERT INTO users (user_id, username) VALUES (?, ?)`;
 
 		await this.db.run(query, [userId, username]);
 
-		return (await this.db.get("SELECT * FROM profiles WHERE user_id = ?", [userId]));
+		return (await this.db.get("SELECT * FROM users WHERE user_id = ?", [userId]));
 	}
 
 	// Get user profile by username
@@ -116,6 +115,12 @@ export class ProfilesDatabase
 	{
 		const	query = `SELECT * FROM users WHERE user_id = ?`;
 		return (await this.db.get(query, [userId]));
+	}
+
+	async	getAllUsers()
+	{
+		const	query = `SELECT * FROM users`;
+		return (await this.db.all(query));
 	}
 }
 

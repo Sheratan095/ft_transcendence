@@ -14,8 +14,8 @@ const	fastify = Fastify({
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { ProfilesDatabase } from './users_db.js';
-let		profilesDatabase;
+import { UsersDatabase } from './users_db.js';
+let		usersDatabase;
 
 // Validate required environment variables
 import { checkEnvVariables } from './users_help.js';
@@ -33,11 +33,11 @@ const	start = async () =>
 	try
 	{
 		// Initialize database
-		profilesDatabase = new ProfilesDatabase()
-		await profilesDatabase.initialize()
+		usersDatabase = new UsersDatabase()
+		await usersDatabase.initialize()
 
 		// Make database available to all routes
-		fastify.decorate('profilesDb', profilesDatabase)
+		fastify.decorate('usersDb', usersDatabase)
 
 		// Setup routes after database is initialized
 		fastify.register(userRoutes)

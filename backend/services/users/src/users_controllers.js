@@ -1,22 +1,17 @@
 
 import { extractUserData } from './users_help.js';
 
-let users = [
-	{ id: '1', name: 'Alice' },
-	{ id: '2', name: 'Bob' },
-];
-
 export const	getUsers = async (req, reply) =>
 {
 	try
 	{
 		// Extract user data from gateway headers
-		const userData = extractUserData(req);
-
-		console.log('Authenticated user:', userData);
-
+		const	usersDb = req.server.usersDb;
+		const	users = await usersDb.getAllUsers();
+		
 		console.log('Fetching users');
-		return (reply.code(200).send(users));	
+
+		return (reply.code(200).send(users));
 	}
 	catch (err)
 	{
@@ -31,13 +26,13 @@ export const	createUser = async (req, reply) =>
 {
 	try
 	{
-		const	profilesDb = req.server.profilesDb;
+		const	usersDb = req.server.usersDb;
 		const	username = req.body.Username;
 		const	userId = req.body.UserId;
 		
-		const	newUser = await profilesDb.createUserProfile(userId, username);
+		const	newUser = await usersDb.createUserProfile(userId, username);
 
-		console.log('User profile created :', newUser.user_id);
+		console.log('User created:', newUser);
 		return (reply.code(201).send(newUser));	
 	}
 	catch (err)
@@ -53,9 +48,9 @@ export const	getUser = async (req, reply) =>
 	try
 	{
 		const	username = req.params.username; // From URL parameter
-		const	profilesDb = req.server.profilesDb; // Changed from usersDb to profilesDb
+		const	usersDb = req.server.usersDb; // Changed back to usersDb
 
-		const	user = await profilesDb.getUserByUsername(username);
+		const	user = await usersDb.getUserByUsername(username);
 		if (!user)
 			return (reply.code(404).send({ error: 'User not found' }));
 
