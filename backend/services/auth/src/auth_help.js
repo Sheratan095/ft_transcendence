@@ -1,5 +1,8 @@
 //inter-service communication
 // This function checks for a valid API key in the request headers
+
+import axios from "axios";
+
 //	this ensures that only internal services can access protected endpoints
 export async function	validateInternalApiKey(request, reply)
 {
@@ -100,4 +103,11 @@ export function	extractUserData(request)
 		console.log('Error parsing user data from headers:', err.message);
 		return null;
 	}
+}
+
+export async function	getUserLanguage(userId)
+{
+	const	reply = await axios.get(`${process.env.USERS_SERVICE_URL}/user?id=${userId}`, { headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
+	console.log(reply.data)
+	return (reply.data.language);
 }

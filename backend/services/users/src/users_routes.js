@@ -89,9 +89,19 @@ const	getUserOpts =
 {
 	schema:
 	{
-		description: 'Get a user by username',
+		description: 'Get a user - supports query params: ?username=value or ?id=value',
 
 		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			properties:
+			{
+				username: { type: 'string' },
+				id: { type: 'string' }
+			}
+		},
 
 		response:
 		{
@@ -116,7 +126,9 @@ export function	userRoutes(fastify)
 {
 	// Get all users
 	fastify.get('/', getUsersOpts);
-	fastify.get('/:username', getUserOpts);
+	
+	// Versatile GET route - handles single user queries by username or id
+	fastify.get('/user', getUserOpts);
 
 	fastify.post('/new-user', newUserOpts);
 }

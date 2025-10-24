@@ -47,16 +47,14 @@ export const	getUser = async (req, reply) =>
 {
 	try
 	{
-		const	username = req.params.username; // From URL parameter
-		const	usersDb = req.server.usersDb; // Changed back to usersDb
+		const	{ id, username } = req.query;
+		const	usersDb = req.server.usersDb;
 
-		const	user = await usersDb.getUserByUsername(username);
-		if (!user)
-			return (reply.code(404).send({ error: 'User not found' }));
+		if (id)
+			return (await usersDb.getUserById(id));
 
-		console.log('Fetching user:', username);
-
-		return (reply.code(200).send(user));
+		if (username)
+			return (await usersDb.getUserByUsername(username));
 	}
 	catch (err)
 	{

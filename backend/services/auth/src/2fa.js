@@ -8,7 +8,7 @@ import { getExpirationDateByMinutes } from './auth_help.js';
 const	__filename = fileURLToPath(import.meta.url);
 const	__dirname = path.dirname(__filename);
 
-export async function	sendTwoFactorCode(user, authDb, reply)
+export async function	sendTwoFactorCode(user, language, authDb, reply)
 {
 	const	otp_code = generateOTPCode();
 	const	hash_optcode = bcrypt.hashSync(otp_code, parseInt(process.env.HASH_SALT_ROUNDS));
@@ -35,7 +35,7 @@ export function	generateOTPCode()
 	return (Math.floor(100000 + Math.random() * 900000).toString());
 }
 
-export async function	sendOTPEmail(to, otpCode, expiryMinutes = 10)
+export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 {
 	const	transporter = nodemailer.createTransport({
 		host: process.env.SMTP_HOST,
@@ -51,7 +51,8 @@ export async function	sendOTPEmail(to, otpCode, expiryMinutes = 10)
 	let	htmlContent;
 	try
 	{
-		const	templatePath = path.join(__dirname, 'email_templates', 'otp_template.html');
+		// The file path depens on the language
+		const	templatePath = path.join(__dirname, 'email_templates', `otp_template_${language}.html`);
 		const	htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 		
 		// Replace placeholders with actual values

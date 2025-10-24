@@ -1,5 +1,5 @@
 import { generateNewTokens, decodeToken} from './jwt.js';
-import { validator, isTokenExpired, extractUserData } from './auth_help.js';
+import { validator, isTokenExpired, extractUserData, getUserLanguage } from './auth_help.js';
 import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 import axios from 'axios'
@@ -23,7 +23,8 @@ export const	register = async (req, reply) =>
 		// Check if the username already exists
 		try
 		{
-			await axios.get(`${process.env.USERS_SERVICE_URL}/${username}`, { headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
+			const	usernameCheck = await axios.get(`${process.env.USERS_SERVICE_URL}/user?username=${username}`, {
+				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
 			
 			// If we get any response (not 404), username already exists
 			return (reply.code(409).send({ error: 'Username already exists' }));
@@ -40,9 +41,8 @@ export const	register = async (req, reply) =>
 		}
 		
 		// Create user in auth database
-		const	user = await authDb.createUser(email, hashedpassword);
-		console.log('User registered: ', user.id);
-
+		const user = await authDb.createUser(email, hashedpassword);
+		
 		// Create user profile in users service
 		try
 		{
@@ -57,6 +57,8 @@ export const	register = async (req, reply) =>
 			// Continue with registration even if profile creation fails
 		}
 
+		console.log('User registered: ', user.id)
+ 
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
 
@@ -110,7 +112,7 @@ export const	login = async (req, reply) =>
 		
 		// Access database through Fastify instance
 		const	authDb = req.server.authDb;
-
+		
 		// Get user from database
 		const	user = await authDb.getUserByMail(identifierLower);
 		
@@ -122,9 +124,11 @@ export const	login = async (req, reply) =>
 		{
 			// Clean up any existing 2FA tokens for this user first
 			await authDb.deleteTwoFactorTokenByUserId(user.id);
+
+			const	language = 	getUserLanguage(user.id);
 			
 			// Send 2FA code and require verification
-			return (await sendTwoFactorCode(user, authDb, reply));
+			return language, (await sendTwoFactorCode(user, authDb, reply));
 		}
 
 		const	newTokens = await generateNewTokens(user, authDb);
@@ -236,6 +240,7 @@ export const	token = async (req, reply) =>
 
 		// Verify JWT signature
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+		console.log('Decoded refresh token for user: ', decodedToken.id);
 
 		// Check if token exists in DB
 		const	storedToken = await authDb.getRefreshTokenByUserId(decodedToken.id);
@@ -361,7 +366,7 @@ export const	enable2FA = async (req, reply) =>
 
 		const	updatedUser = await authDb.enable2FA(userData.id, tfaEnabled);
 
-		console.log(`2FA ${tfaEnabled ? 'enabled' : 'disabled'} for user:`, updatedUser.id);
+		console.log('2FA activated for user:', updatedUser.id);
 
 		if (!updatedUser)
 			return (reply.code(404).send({ error: 'User not found' }));
