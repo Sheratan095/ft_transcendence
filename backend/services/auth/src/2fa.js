@@ -66,7 +66,7 @@ export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 		console.error('❌ Error loading email template:', error.message);
 	}
 
-	const	mailOptions =
+	const	mailOptions_en =
 	{
 		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
 		to,
@@ -74,6 +74,26 @@ export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 		text: `Your 42 Authentication Code is: ${otpCode}\nThis code will expire in ${expiryMinutes} minutes.`,
 		html: htmlContent
 	};
+
+	const	mailOptions_fr =
+	{
+		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
+		to,
+		subject: '🔐 Votre code d\'authentification 42',
+		text: `Votre code d'authentification 42 est : ${otpCode}\nCe code expirera dans ${expiryMinutes} minutes.`,
+		html: htmlContent
+	};
+
+	const	mailOptions_it =
+	{
+		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
+		to,
+		subject: '🔐 Il tuo codice di autenticazione 42',
+		text: `Il tuo codice di autenticazione 42 è: ${otpCode}\nQuesto codice scadrà tra ${expiryMinutes} minuti.`,
+		html: htmlContent
+	};
+
+	const	mailOptions = (language === 'fr') ? mailOptions_fr : (language === 'it') ? mailOptions_it : mailOptions_en;
 
 	try
 	{

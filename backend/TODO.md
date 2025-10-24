@@ -56,6 +56,7 @@
 [x] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
 [x] add endpoint to change the psw
 [] should the language name depends on the preferred language of the user?
+	[] seprate the template and the "language pack"
 
 [x] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
 [x] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups

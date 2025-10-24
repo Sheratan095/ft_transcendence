@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>42 Authentication Code</title>
+    <title>Code d'Authentification 42</title>
     <style>
         * {
             margin: 0;
@@ -246,36 +246,36 @@
         </div>
         
         <div class="content">
-            <div class="greeting">Hello, Student! 👨‍💻</div>
+            <div class="greeting">Salut, Étudiant ! 👨‍💻</div>
             
             <div class="message">
-                You've requested access to your ft_transcendence account. To complete the authentication process, please use the following One-Time Password (OTP) code:
+                Vous avez demandé l'accès à votre compte ft_transcendence. Pour terminer le processus d'authentification, veuillez utiliser le code à usage unique (OTP) suivant :
             </div>
             
             <div class="otp-container">
-                <div class="otp-label">Authentication Code</div>
+                <div class="otp-label">Code d'Authentification</div>
                 <div class="otp-code">{{OTP_CODE}}</div>
-                <div class="otp-expiry">⏰ Expires in {{EXPIRY_MINUTES}} minutes</div>
+                <div class="otp-expiry">⏰ Expire dans {{EXPIRY_MINUTES}} minutes</div>
             </div>
             
             <div class="security-notice">
-                <h3>Security Notice</h3>
+                <h3>Avis de Sécurité</h3>
                 <ul>
-                    <li>This code is valid for {{EXPIRY_MINUTES}} minutes only</li>
-                    <li>Never share this code with anyone</li>
-                    <li>If you didn't request this code, please ignore this email</li>
-                    <li>For security reasons, clear this email after use</li>
+                    <li>Ce code n'est valide que pendant {{EXPIRY_MINUTES}} minutes</li>
+                    <li>Ne partagez jamais ce code avec qui que ce soit</li>
+                    <li>Si vous n'avez pas demandé ce code, veuillez ignorer cet email</li>
+                    <li>Pour des raisons de sécurité, supprimez cet email après utilisation</li>
                 </ul>
             </div>
             
             <div class="message">
-                This is an automated message from the 42 authentication system. Please do not reply to this email.
+                Ceci est un message automatique du système d'authentification 42. Veuillez ne pas répondre à cet email.
             </div>
         </div>
         
         <div class="footer">
             <div class="footer-text">
-                42 School - ft_transcendence Project
+                École 42 - Projet ft_transcendence
             </div>
         </div>
     </div>
