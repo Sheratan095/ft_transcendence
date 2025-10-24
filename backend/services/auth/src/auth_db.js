@@ -96,7 +96,7 @@ export class AuthDatabase
   // -------- USERS METHODS --------
 
 	// Return the created user object
-	async	createUser(password, email)
+	async	createUser(email, password)
 	{
 		const	id = await this.#generateUUID();
 

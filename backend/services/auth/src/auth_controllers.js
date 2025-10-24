@@ -23,8 +23,7 @@ export const	register = async (req, reply) =>
 		// Check if the username already exists
 		try
 		{
-			const	usernameCheck = await axios.get(`${process.env.USERS_SERVICE_URL}/${username}`, {
-				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
+			await axios.get(`${process.env.USERS_SERVICE_URL}/${username}`, { headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
 			
 			// If we get any response (not 404), username already exists
 			return (reply.code(409).send({ error: 'Username already exists' }));
@@ -41,8 +40,8 @@ export const	register = async (req, reply) =>
 		}
 		
 		// Create user in auth database
-		const user = await authDb.createUser(email, hashedpassword);
-		
+		const	user = await authDb.createUser(email, hashedpassword);
+
 		// Create user profile in users service
 		try
 		{
@@ -112,7 +111,7 @@ export const	login = async (req, reply) =>
 		
 		// Access database through Fastify instance
 		const	authDb = req.server.authDb;
-		
+
 		// Get user from database
 		const	user = await authDb.getUserByMail(identifierLower);
 		
