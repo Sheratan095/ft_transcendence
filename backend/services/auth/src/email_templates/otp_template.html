@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{LANGUAGE}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code d'Authentification 42</title>
+    <title>{{TITLE}}</title>
     <style>
         * {
             margin: 0;
@@ -246,36 +246,33 @@
         </div>
         
         <div class="content">
-            <div class="greeting">Salut, Étudiant ! 👨‍💻</div>
+            <div class="greeting">{{GREETING}}</div>
             
             <div class="message">
-                Vous avez demandé l'accès à votre compte ft_transcendence. Pour terminer le processus d'authentification, veuillez utiliser le code à usage unique (OTP) suivant :
+                {{MESSAGE}}
             </div>
             
             <div class="otp-container">
-                <div class="otp-label">Code d'Authentification</div>
+                <div class="otp-label">{{OTP_LABEL}}</div>
                 <div class="otp-code">{{OTP_CODE}}</div>
-                <div class="otp-expiry">⏰ Expire dans {{EXPIRY_MINUTES}} minutes</div>
+                <div class="otp-expiry">{{EXPIRY_TEXT}}</div>
             </div>
             
             <div class="security-notice">
-                <h3>Avis de Sécurité</h3>
+                <h3>{{SECURITY_TITLE}}</h3>
                 <ul>
-                    <li>Ce code n'est valide que pendant {{EXPIRY_MINUTES}} minutes</li>
-                    <li>Ne partagez jamais ce code avec qui que ce soit</li>
-                    <li>Si vous n'avez pas demandé ce code, veuillez ignorer cet email</li>
-                    <li>Pour des raisons de sécurité, supprimez cet email après utilisation</li>
+                    {{SECURITY_POINTS}}
                 </ul>
             </div>
             
             <div class="message">
-                Ceci est un message automatique du système d'authentification 42. Veuillez ne pas répondre à cet email.
+                {{FOOTER_MESSAGE}}
             </div>
         </div>
         
         <div class="footer">
             <div class="footer-text">
-                École 42 - Projet ft_transcendence
+                {{FOOTER_TEXT}}
             </div>
         </div>
     </div>

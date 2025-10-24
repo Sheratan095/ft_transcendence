@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getExpirationDateByMinutes } from './auth_help.js';
+import { getLanguagePack } from './email_templates/language_packs.js';
 
 const	__filename = fileURLToPath(import.meta.url);
 const	__dirname = path.dirname(__filename);
@@ -48,52 +49,51 @@ export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 		}
 	});
 
-	// Generate HTML content by reading template and injecting OTP
+	// Get language pack for the specified language
+	const	langPack = getLanguagePack(language);
+
+	// Generate HTML content using single template and language pack
 	let	htmlContent;
 	try
 	{
-		// The file path depens on the language
-		const	templatePath = path.join(__dirname, 'email_templates', `otp_template_${language}.html`);
+		// Use the single template file
+		const	templatePath = path.join(__dirname, 'email_templates', 'otp_template.html');
 		const	htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 		
-		// Replace placeholders with actual values
+		// Generate security points HTML
+		const	securityPointsHtml = langPack.securityPoints
+			.map(point => `<li>${point.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes)}</li>`)
+			.join('');
+		
+		// Replace all placeholders with language pack values and dynamic content
 		htmlContent = htmlTemplate
+			.replace(/{{LANGUAGE}}/g, language)
+			.replace(/{{TITLE}}/g, langPack.title)
+			.replace(/{{GREETING}}/g, langPack.greeting)
+			.replace(/{{MESSAGE}}/g, langPack.message)
+			.replace(/{{OTP_LABEL}}/g, langPack.otpLabel)
 			.replace(/{{OTP_CODE}}/g, otpCode)
-			.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes);
+			.replace(/{{EXPIRY_TEXT}}/g, langPack.expiryText.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes))
+			.replace(/{{SECURITY_TITLE}}/g, langPack.securityTitle)
+			.replace(/{{SECURITY_POINTS}}/g, securityPointsHtml)
+			.replace(/{{FOOTER_MESSAGE}}/g, langPack.footerMessage)
+			.replace(/{{FOOTER_TEXT}}/g, langPack.footerText);
 	} 
 	catch (error)
 	{
 		console.error('❌ Error loading email template:', error.message);
 	}
 
-	const	mailOptions_en =
+	const	mailOptions =
 	{
 		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
 		to,
-		subject: '🔐 Your 42 Authentication Code',
-		text: `Your 42 Authentication Code is: ${otpCode}\nThis code will expire in ${expiryMinutes} minutes.`,
+		subject: langPack.subject,
+		text: langPack.plainText
+			.replace(/{{OTP_CODE}}/g, otpCode)
+			.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes),
 		html: htmlContent
 	};
-
-	const	mailOptions_fr =
-	{
-		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
-		to,
-		subject: '🔐 Votre code d\'authentification 42',
-		text: `Votre code d'authentification 42 est : ${otpCode}\nCe code expirera dans ${expiryMinutes} minutes.`,
-		html: htmlContent
-	};
-
-	const	mailOptions_it =
-	{
-		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
-		to,
-		subject: '🔐 Il tuo codice di autenticazione 42',
-		text: `Il tuo codice di autenticazione 42 è: ${otpCode}\nQuesto codice scadrà tra ${expiryMinutes} minuti.`,
-		html: htmlContent
-	};
-
-	const	mailOptions = (language === 'fr') ? mailOptions_fr : (language === 'it') ? mailOptions_it : mailOptions_en;
 
 	try
 	{

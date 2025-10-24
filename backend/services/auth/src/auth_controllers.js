@@ -126,7 +126,6 @@ export const	login = async (req, reply) =>
 			await authDb.deleteTwoFactorTokenByUserId(user.id);
 
 			const	language = await getUserLanguage(user.id);
-			console.log('User language for 2FA:', language);
 			
 			// Send 2FA code and require verification
 			return (await sendTwoFactorCode(user, language, authDb, reply));
