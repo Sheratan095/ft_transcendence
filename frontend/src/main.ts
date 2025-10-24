@@ -26,7 +26,7 @@ if (!form || !resultEl) {
       return;
     }
 
-    const payload: Record<string, string> = { password };
+    const payload: Record<string, string> = { password,  };
     // backend login endpoint in tests expects "username", but accept email as fallback
     if (username) payload.username = username;
     else payload.email = email;
@@ -44,6 +44,7 @@ if (!form || !resultEl) {
         },
         body: JSON.stringify(payload)
       });
+
 
       let body: any = null;
       try { body = await res.json(); } catch { body = null; }

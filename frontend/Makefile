@@ -1,69 +1,85 @@
-SHELL := /bin/bash
+PM := npm
 
-# Frontend Makefile (TypeScript + Tailwind)
-SRC_DIR := src
-CSS_IN := $(SRC_DIR)/styles.css
-CSS_OUT := $(SRC_DIR)/output.css
-PORT := 3004
+# Commands (you can override these when invoking make)
+INSTALL := $(PM) install
+DEV := $(PM) run dev
+BUILD := $(PM) run build
+PREVIEW := $(PM) run preview
+LINT := $(PM) run lint
+FORMAT := $(PM) run format
+TEST := $(PM) run test
 
-.PHONY: install build build-ts watch-ts watch-css dev serve clean help down
+# Tailwind CLI (uses npx so it works without global install)
+TAILWIND := npx tailwindcss
+TAILWIND_IN ?= src/index.css
+TAILWIND_OUT_DEV ?= src/tailwind.css
+TAILWIND_OUT_PROD ?= dist/assets/tailwind.css
 
-install:
-	@echo "Installing npm dependencies..."
-	npm install
+# TypeScript check
+TSC := npx tsc --noEmit
 
-build: build-ts
-	@echo "Frontend build complete."
-
-build-ts:
-	@echo "Compiling TypeScript..."
-	npx tsc ./src/index.ts --lib es6,dom --outDir src/dist --sourceMap
-
-down:
-	@echo "Stopping all frontend processes..."
-	@pkill -f "npx tsc" || true
-	@pkill -f "npx tailwindcss" || true
-	@pkill -f "python3 -m http.server" || true
-
-watch-ts:
-	@echo "Starting TypeScript watcher..."
-	npx tsc ./src/index.ts --lib es6,dom --outDir src/dist --watch --sourceMap
-
-watch-css:
-	@echo "Starting Tailwind watcher..."
-	npx tailwindcss -i $(CSS_IN) -o $(CSS_OUT) --watch
-
-dev:
-	@echo "Starting dev environment (TS watch, Tailwind watch, static server)..."
-	@trap 'echo "Stopping dev processes..."; kill $$TS_PID $$CSS_PID $$SERV_PID 2>/dev/null || true; exit 0' INT TERM
-	# start TS watcher
-	@npx tsc ./src/index.ts --lib es6,dom --outDir src/dist --sourceMap
-	# start Tailwind watcher
-	# start simple static server (python3)
-	@python3 -m http.server $(PORT) --directory $(SRC_DIR) & \
-	SERV_PID=$$!; \
-	echo "Dev server running on http://localhost:$(PORT)"; \
-	echo "PIDs: $$SERV_PID"; \
-	read -r; \
-	kill $$SERV_PID 2>/dev/null || true
-
-serve:
-	@echo "Serving $(SRC_DIR) on http://localhost:$(PORT)"
-	python3 -m http.server $(PORT) --directory $(SRC_DIR)
-
-clean:
-	@echo "Cleaning generated files..."
-	@rm -f $(CSS_OUT)
-	@rm -rf dist
+.PHONY: help install dev build preview lint format typecheck tailwind-watch tailwind-build clean
 
 help:
-	@echo "Frontend Makefile targets:"
-	@echo "  make install      - install npm deps"
-	@echo "  make build        - compile TS and build Tailwind CSS"
-	@echo "  make build-ts     - compile TypeScript"
-	@echo "  make build-css    - build Tailwind CSS (minified)"
-	@echo "  make watch-ts     - run tsc --watch"
-	@echo "  make watch-css    - run tailwindcss --watch"
-	@echo "  make dev          - run TS watcher, Tailwind watcher and static server (foreground)"
-	@echo "  make serve        - serve ./src via python3 http.server"
-	@echo "  make clean        - remove generated files"
+	@printf "Usage:\n"
+	@printf "  make install        Install dependencies (%s)\n" "$(PM)"
+	@printf "  make dev            Start Vite dev server\n"
+	@printf "  make build          Build for production (vite)\n"
+	@printf "  make preview        Preview production build\n"
+	@printf "  make typecheck      Run TypeScript type check (tsc --noEmit)\n"
+	@printf "  make tailwind-watch Run Tailwind in watch mode (writes to $(TAILWIND_OUT_DEV))\n"
+	@printf "  make tailwind-build Build Tailwind CSS for production (writes to $(TAILWIND_OUT_PROD))\n"
+	@printf "  make lint           Run lint script (if configured)\n"
+	@printf "  make format         Run format script (if configured)\n"
+	@printf "  make clean          Remove node_modules, dist and generated css\n"
+
+install:
+	@echo "=> Installing dependencies using $(PM)"
+	@$(INSTALL)
+
+dev:
+	@echo "=> Building Tailwind CSS for production:"
+	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_DEV)"
+	@mkdir -p $(dir $(TAILWIND_OUT_DEV))
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_DEV) --minify
+	@echo "=> Starting Vite dev server"
+	@$(DEV)
+
+build:
+	@echo "=> Building production bundle"
+	@$(BUILD)
+
+preview:
+	@echo "=> Previewing production build"
+	@$(PREVIEW)
+
+typecheck:
+	@echo "=> Running TypeScript type check"
+	@$(TSC)
+
+tailwind-watch:
+	@echo "=> Running Tailwind in watch mode:"
+	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_DEV)"
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_DEV) --watch
+
+tailwind-build:
+	@echo "=> Building Tailwind CSS for production:"
+	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_PROD)"
+	@mkdir -p $(dir $(TAILWIND_OUT_PROD))
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_PROD) --minify
+
+lint:
+	@echo "=> Running lint"
+	@$(LINT)
+
+format:
+	@echo "=> Running format"
+	@$(FORMAT)
+
+test:
+	@echo "=> Running tests"
+	@$(TEST)
+
+clean:
+	@echo "=> Cleaning node_modules, dist, and generated css"
+	@rm -rf node_modules dist $(TAILWIND_OUT_DEV)
