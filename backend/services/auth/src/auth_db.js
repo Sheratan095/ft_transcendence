@@ -78,7 +78,7 @@ export class AuthDatabase
 	async	#generateUUID()
 	{
 		const	id = uuidv4();
-		// while (await this.db.get("SELECT id FROM users WHERE id = ?", [id]))
+		// while (await this.db.get("SELECT id FROM auth_accounts WHERE id = ?", [id]))
 		// 	id = uuidv4();
 
 		return (id);
@@ -100,42 +100,42 @@ export class AuthDatabase
 	{
 		const	id = await this.#generateUUID();
 
-		await this.db.run("INSERT INTO users (id, password, email) VALUES (?, ?, ?)", [id, password, email]);
+		await this.db.run("INSERT INTO auth_accounts (id, password, email) VALUES (?, ?, ?)", [id, password, email]);
 
-		return (await this.db.get("SELECT * FROM users WHERE id = ?", [id]));
+		return (await this.db.get("SELECT * FROM auth_accounts WHERE id = ?", [id]));
 	}
 
 	async	getAllUsers()
 	{
-		return (await this.db.all("SELECT * FROM users"));
+		return (await this.db.all("SELECT * FROM auth_accounts"));
 	}
 
 	async	getUserById(userId)
 	{
-		return (await this.db.get("SELECT * FROM users WHERE id = ?", [userId]));
+		return (await this.db.get("SELECT * FROM auth_accounts WHERE id = ?", [userId]));
 	}
 
 	// Get user by username
 	async	getUserByMail(identifier)
 	{
-		return (await this.db.get("SELECT * FROM users WHERE email = ?", [identifier]));
+		return (await this.db.get("SELECT * FROM auth_accounts WHERE email = ?", [identifier]));
 	}
 
 	async	deleteUserById(userId)
 	{
-		await this.db.run("DELETE FROM users WHERE id = ?", [userId]);
+		await this.db.run("DELETE FROM auth_accounts WHERE id = ?", [userId]);
 	}
 
 	async	enable2FA(userId, enabled)
 	{
-		await this.db.run("UPDATE users SET tfa_enabled = ? WHERE id = ?", [enabled ? 1 : 0, userId]);
+		await this.db.run("UPDATE auth_accounts SET tfa_enabled = ? WHERE id = ?", [enabled ? 1 : 0, userId]);
 
 		return (await this.getUserById(userId));
 	}
 
 	async	updateUserPassword(userId, hashedPassword)
 	{
-		await this.db.run("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, userId]);
+		await this.db.run("UPDATE auth_accounts SET password = ? WHERE id = ?", [hashedPassword, userId]);
 		return (await this.getUserById(userId));
 	}
 

@@ -45,6 +45,7 @@
 	let Auth trigger a system-wide cascade via events or APIs.
 	Each service deletes what it owns.
 [] rename users table in auth
+[] check logout
 
 [x] 2FA
 	[x] Custom Otp mail

@@ -98,19 +98,24 @@ export class ProfilesDatabase
 	// Return the created profile object
 	async	createUserProfile(userId, username)
 	{
-		const	id = await this.#generateUUID();
-		const	query = `INSERT INTO profiles (id, user_id, username) VALUES (?, ?, ?)`;
+		const	query = `INSERT INTO profiles (user_id, username) VALUES (?, ?)`;
 
-		await this.db.run(query, [id, userId, username]);
+		await this.db.run(query, [userId, username]);
 
-		return (await this.db.get("SELECT * FROM profiles WHERE id = ?", [id]));
+		return (await this.db.get("SELECT * FROM profiles WHERE user_id = ?", [userId]));
 	}
 
 	// Get user profile by username
 	async	getUserByUsername(username)
 	{
-		const	query = `SELECT * FROM profiles WHERE username = ?`;
+		const	query = `SELECT * FROM users WHERE username = ?`;
 		return (await this.db.get(query, [username]));
+	}
+
+	async	getUserById(userId)
+	{
+		const	query = `SELECT * FROM users WHERE user_id = ?`;
+		return (await this.db.get(query, [userId]));
 	}
 }
 

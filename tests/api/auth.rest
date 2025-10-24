@@ -4,7 +4,7 @@ DELETE http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImIwODkxODFkLTc4M2UtNDhhMi04MjIzLTQyMjU3Zjc4YjcwYSIsImVtYWlsIjoiZHNhZGFAeG1wbGUuY29tIiwiaWF0IjoxNzYwOTc3Njg1LCJleHAiOjE3NjE1ODI0ODV9.U_YzL2wt8gxd_LZG-nFdAP00WNwWWkdJCyzU7PWzbJs"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJiYmQ0ZjY0LTc5YTgtNGZiNC1iNmE2LThlNzdjNWE0MjAwYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NzMxNCwiZXhwIjoxNzYxMjk3Mzc0fQ.cPblsI15VCQCO3_QUvzmJgvC1JdO0QDsA4Par1yPG2A"
 }
 
 ###
@@ -51,7 +51,7 @@ POST http://localhost:3000/auth/token
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViY2M3MjhhLTM4NzktNGU4OS1iNDJkLWY5NjBjOTQ0OGNmZSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NDI0MCwiZXhwIjoxNzYxODk5MDQwfQ.PvSfcWkINty1ozzylOsSK57B4FFPbQVjuSmM0rD6DDI"
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJiYmQ0ZjY0LTc5YTgtNGZiNC1iNmE2LThlNzdjNWE0MjAwYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5ODI3MywiZXhwIjoxNzYxOTAzMDczfQ.vjzdYgyQ1bcPGbVZU36gT_OkPRtasl4-z7rHidwb9_4"
 }
 
 ###
@@ -60,18 +60,17 @@ POST http://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "b6adbbf3-29e8-45ad-94ee-07330db6a732",
-  "otpCode": "384493"
+  "userId": "2bbd4f64-79a8-4fb4-b6a6-8e77c5a4200c",
+  "otpCode": "834464"
 }
 
 ###
 
 PUT http://localhost:3000/auth/enable-2fa
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI2YWRiYmYzLTI5ZTgtNDVhZC05NGVlLTA3MzMwZGI2YTczMiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NTIxMSwiZXhwIjoxNzYxMjk1MjcxfQ.zx5pOEHkx1FyLs5cDICRUgdzXqhUn9VkaMXoFZm0ZsY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjJiYmQ0ZjY0LTc5YTgtNGZiNC1iNmE2LThlNzdjNWE0MjAwYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5ODQxMiwiZXhwIjoxNzYxMjk4NDcyfQ.eDaxuJES-mdePfdXWloKDLFHBm002lLv8UZJlBET8zM
 
 {
-  "userId": "cf3696cf-7bac-4d96-be58-94e22c42880f",
   "tfaEnabled": false
 }
 
@@ -79,9 +78,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI2YWRiYmYzL
 
 PUT http://localhost:3000/auth/change-password
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFlZDQyODM4LTU5ZTEtNDFkZS1hNjBmLTNhYjZmMGQ2OTNmMyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NTY3MSwiZXhwIjoxNzYxMjk1NzMxfQ.TWFe_Vzv9PIFJkbV23syp8h7rVSHTv4FGOiQYcwF4Jo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjMjIzZTQwLWM2NzQtNGQ0ZS05ZjQ0LTlmZDkzN2JhODU5ZCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5ODYwOCwiZXhwIjoxNzYxMjk4NjY4fQ.PAiASYTBLlNNeLBWJIuvb-hXVefwUZU4f8KUDnj7XQ4
 
 {
   "oldPassword": "Mrco@123_",
-  "newPassword": "NewPassword456!"
+  "newPassword": "newPassword456!"
 }
