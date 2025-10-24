@@ -32,7 +32,7 @@ Content-Type: application/json
 
 {
   "email": "ceccarellim7@gmail.com",
-  "password": "NewPassword456!"
+  "password": "Mrco@123_"
 }
 
 ###
@@ -60,15 +60,15 @@ POST http://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "cf3696cf-7bac-4d96-be58-94e22c42880f",
-  "otpCode": "112493"
+  "userId": "b6adbbf3-29e8-45ad-94ee-07330db6a732",
+  "otpCode": "384493"
 }
 
 ###
 
-PUT http://localhost:3001/enable-2fa
+PUT http://localhost:3000/auth/enable-2fa
 Content-Type: application/json
-x-internal-api-key: 1234
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImI2YWRiYmYzLTI5ZTgtNDVhZC05NGVlLTA3MzMwZGI2YTczMiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NTIxMSwiZXhwIjoxNzYxMjk1MjcxfQ.zx5pOEHkx1FyLs5cDICRUgdzXqhUn9VkaMXoFZm0ZsY
 
 {
   "userId": "cf3696cf-7bac-4d96-be58-94e22c42880f",
@@ -79,7 +79,7 @@ x-internal-api-key: 1234
 
 PUT http://localhost:3000/auth/change-password
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImViY2M3MjhhLTM4NzktNGU4OS1iNDJkLWY5NjBjOTQ0OGNmZSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NDE5NiwiZXhwIjoxNzYxMjk0MjU2fQ.wO4-tSvG-I9fCGoxL2I_UUSDuaN7ABVjB4W63O5HBMo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFlZDQyODM4LTU5ZTEtNDFkZS1hNjBmLTNhYjZmMGQ2OTNmMyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5NTY3MSwiZXhwIjoxNzYxMjk1NzMxfQ.TWFe_Vzv9PIFJkbV23syp8h7rVSHTv4FGOiQYcwF4Jo
 
 {
   "oldPassword": "Mrco@123_",

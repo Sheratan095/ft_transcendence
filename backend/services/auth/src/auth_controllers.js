@@ -361,7 +361,7 @@ export const	enable2FA = async (req, reply) =>
 
 		const	updatedUser = await authDb.enable2FA(userData.id, tfaEnabled);
 
-		console.log('2FA activated for user:', updatedUser.id);
+		console.log(`2FA ${tfaEnabled ? 'enabled' : 'disabled'} for user:`, updatedUser.id);
 
 		if (!updatedUser)
 			return (reply.code(404).send({ error: 'User not found' }));
