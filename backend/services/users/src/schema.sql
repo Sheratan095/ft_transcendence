@@ -1,4 +1,4 @@
--- TO DO remove it - Drop tables in correct order (child first due to foreign key)
+-- Drop tables to reset database on restart (like auth service)
 DROP TABLE IF EXISTS users;
 
 -- Create profiles table

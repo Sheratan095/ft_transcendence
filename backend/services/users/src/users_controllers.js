@@ -32,7 +32,6 @@ export const	createUser = async (req, reply) =>
 		
 		const	newUser = await usersDb.createUserProfile(userId, username);
 
-		console.log('User created:', newUser);
 		return (reply.code(201).send(newUser));	
 	}
 	catch (err)
@@ -50,11 +49,21 @@ export const	getUser = async (req, reply) =>
 		const	{ id, username } = req.query;
 		const	usersDb = req.server.usersDb;
 
-		if (id)
-			return (await usersDb.getUserById(id));
+		let	user = null;
 
-		if (username)
-			return (await usersDb.getUserByUsername(username));
+		if (id)
+			user = (await usersDb.getUserById(id));
+		else if (username)
+			user = (await usersDb.getUserByUsername(username));
+		else
+			return (reply.code(400).send({ error: 'Please provide either username or id query parameter' }));
+
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		console.log('Fetching user:', username || id);
+
+		return (reply.code(200).send(user));
 	}
 	catch (err)
 	{

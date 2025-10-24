@@ -1,3 +1,4 @@
+import { getUserLanguage } from '../../auth/src/auth_help.js';
 import {
 	getUsers,
 	getUser,
@@ -12,8 +13,9 @@ const	User =
 	type: 'object',
 	properties:
 	{
-		id: { type: 'string' },
+		user_id: { type: 'string' },
 		username: { type: 'string' },
+		language: { type: 'string' },
 	},
 }
 

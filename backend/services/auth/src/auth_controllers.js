@@ -125,10 +125,11 @@ export const	login = async (req, reply) =>
 			// Clean up any existing 2FA tokens for this user first
 			await authDb.deleteTwoFactorTokenByUserId(user.id);
 
-			const	language = 	getUserLanguage(user.id);
+			const	language = await getUserLanguage(user.id);
+			console.log('User language for 2FA:', language);
 			
 			// Send 2FA code and require verification
-			return language, (await sendTwoFactorCode(user, authDb, reply));
+			return (await sendTwoFactorCode(user, language, authDb, reply));
 		}
 
 		const	newTokens = await generateNewTokens(user, authDb);

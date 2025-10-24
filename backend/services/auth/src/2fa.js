@@ -21,6 +21,7 @@ export async function	sendTwoFactorCode(user, language, authDb, reply)
 	await sendOTPEmail(
 		user.email,
 		otp_code,
+		language,
 		parseInt(process.env.OTP_EXPIRATION_MINUTES) || 10
 	);
 
