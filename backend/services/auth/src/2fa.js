@@ -99,8 +99,7 @@ export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 	{
 		await transporter.sendMail(mailOptions);
 
-		console.log(`📧 Modern 2FA Email sent to ${to}`);
-		console.log(`⏰ Code expires in ${expiryMinutes} minutes`);
+		console.log(`📧 Modern 2FA Email sent to ${to}, expires in ${expiryMinutes} minutes`);
 	}
 	catch (error)
 	{
