@@ -99,8 +99,11 @@ export class AuthDatabase
 	async	createUser(email, password)
 	{
 		const	id = await this.#generateUUID();
+		
+		// Normalize email to lowercase for consistent storage
+		const	normalizedEmail = email.toLowerCase();
 
-		await this.db.run("INSERT INTO auth_accounts (id, password, email) VALUES (?, ?, ?)", [id, password, email]);
+		await this.db.run("INSERT INTO auth_accounts (id, password, email) VALUES (?, ?, ?)", [id, password, normalizedEmail]);
 
 		return (await this.db.get("SELECT * FROM auth_accounts WHERE id = ?", [id]));
 	}
@@ -115,10 +118,13 @@ export class AuthDatabase
 		return (await this.db.get("SELECT * FROM auth_accounts WHERE id = ?", [userId]));
 	}
 
-	// Get user by username
+	// Get user by email
 	async	getUserByMail(identifier)
 	{
-		return (await this.db.get("SELECT * FROM auth_accounts WHERE email = ?", [identifier]));
+		// Normalize identifier to lowercase for consistent querying
+		const	normalizedIdentifier = identifier.toLowerCase();
+		
+		return (await this.db.get("SELECT * FROM auth_accounts WHERE email = ?", [normalizedIdentifier]));
 	}
 
 	async	deleteUserById(userId)

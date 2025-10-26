@@ -98,8 +98,11 @@ export class UsersDatabase
 	async	createUserProfile(userId, username)
 	{
 		const	query = `INSERT INTO users (user_id, username) VALUES (?, ?)`;
+		
+		// Store username in lowercase for consistency
+		const	lowercaseUsername = username.toLowerCase();
 
-		await this.db.run(query, [userId, username]);
+		await this.db.run(query, [userId, lowercaseUsername]);
 
 		return (await this.db.get("SELECT * FROM users WHERE user_id = ?", [userId]));
 	}
@@ -108,7 +111,8 @@ export class UsersDatabase
 	async	getUserByUsername(username)
 	{
 		const	query = `SELECT * FROM users WHERE username = ?`;
-		return (await this.db.get(query, [username]));
+		// Convert to lowercase for consistent querying
+		return (await this.db.get(query, [username.toLowerCase()]));
 	}
 
 	async	getUserById(userId)

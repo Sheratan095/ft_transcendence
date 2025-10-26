@@ -1,4 +1,3 @@
-import { getUserLanguage } from '../../auth/src/auth_help.js';
 import {
 	getUsers,
 	getUser,
@@ -24,7 +23,7 @@ const	UsernamePolicy =
 	type: 'string',
 	pattern: '^[a-zA-Z][a-zA-Z0-9._]{2,19}$',
 	errorMessage: {
-		pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed.'
+		pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed. (Username will be stored in lowercase)'
 	}
 };
 

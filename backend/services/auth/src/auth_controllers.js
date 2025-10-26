@@ -15,8 +15,8 @@ export const	register = async (req, reply) =>
 	{
 		validator(req.body.username, req.body.password, req.body.email);
 
-		const	username = req.body.username.toLowerCase();
-		const	email = req.body.email.toLowerCase();
+		const	username = req.body.username;
+		const	email = req.body.email;
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		const	authDb = req.server.authDb;
 
@@ -41,7 +41,7 @@ export const	register = async (req, reply) =>
 		}
 		
 		// Create user in auth database
-		const user = await authDb.createUser(email, hashedpassword);
+		const	user = await authDb.createUser(email, hashedpassword);
 		
 		// Create user profile in users service
 		try
@@ -108,13 +108,11 @@ export const	login = async (req, reply) =>
 		if (!identifier || !password)
 			return (reply.code(400).send({ error: 'Username/email and password are required' }));
 		
-		const	identifierLower = identifier.toLowerCase();
-		
 		// Access database through Fastify instance
 		const	authDb = req.server.authDb;
 		
-		// Get user from database
-		const	user = await authDb.getUserByMail(identifierLower);
+		// Get user from database (email normalization handled in DB layer)
+		const	user = await authDb.getUserByMail(identifier);
 		
 		if (!user || await bcrypt.compare(password, user.password) === false)
 			return (reply.code(401).send({ error: 'Invalid credentials' }));
