@@ -18,8 +18,9 @@ build/
 .env
 **/.env
 
-#auth files
-auth.db
+# Database and data files
+**/data/
+data/
 package-lock.json
 
 # MacOS
