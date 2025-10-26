@@ -21,7 +21,6 @@ build/
 # Database and data files
 **/data/
 data/
-package-lock.json
 
 # MacOS
 .DS_Store
