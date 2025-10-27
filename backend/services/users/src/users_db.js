@@ -97,14 +97,14 @@ export class UsersDatabase
 	// Return the created profile object
 	async	createUserProfile(userId, username)
 	{
-		const	query = `INSERT INTO users (user_id, username) VALUES (?, ?)`;
+		const	query = `INSERT INTO users (id, username) VALUES (?, ?)`;
 		
 		// Store username in lowercase for consistency
 		const	lowercaseUsername = username.toLowerCase();
 
 		await this.db.run(query, [userId, lowercaseUsername]);
 
-		return (await this.db.get("SELECT * FROM users WHERE user_id = ?", [userId]));
+		return (await this.db.get("SELECT * FROM users WHERE id = ?", [userId]));
 	}
 
 	// Get user profile by username
@@ -117,7 +117,7 @@ export class UsersDatabase
 
 	async	getUserById(userId)
 	{
-		const	query = `SELECT * FROM users WHERE user_id = ?`;
+		const	query = `SELECT * FROM users WHERE id = ?`;
 		return (await this.db.get(query, [userId]));
 	}
 
@@ -139,14 +139,14 @@ export class UsersDatabase
 
 		// Update username if provided
 		if (newUsername !== undefined && newUsername !== null && newUsername !== '') {
-			const	query = `UPDATE users SET username = ? WHERE user_id = ?`;
+			const	query = `UPDATE users SET username = ? WHERE id = ?`;
 			await this.db.run(query, [newUsername.toLowerCase(), userId]);
 			console.log('Username updated to:', newUsername.toLowerCase());
 		}
 		
 		// Update language if provided
 		if (newLanguage !== undefined && newLanguage !== null && newLanguage !== '') {
-			const	query = `UPDATE users SET language = ? WHERE user_id = ?`;
+			const	query = `UPDATE users SET language = ? WHERE id = ?`;
 			await this.db.run(query, [newLanguage, userId]);
 			console.log('Language updated to:', newLanguage);
 		}

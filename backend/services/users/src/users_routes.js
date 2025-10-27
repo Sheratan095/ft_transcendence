@@ -13,7 +13,7 @@ const	User =
 	type: 'object',
 	properties:
 	{
-		user_id: { type: 'string' },
+		id: { type: 'string' },
 		username: { type: 'string' },
 		language: { type: 'string' },
 	},
