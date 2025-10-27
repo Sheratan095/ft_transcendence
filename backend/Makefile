@@ -13,6 +13,8 @@ start: start-auth start-users start-gateway
 dev: dev-auth dev-users dev-gateway
 	@echo "All services started in development mode with auto-restart!"
 
+redev: stop dev
+
 # Start Auth service (production)
 .PHONY: start-auth
 start-auth:
