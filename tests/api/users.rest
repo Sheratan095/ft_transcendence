@@ -1,7 +1,5 @@
 GET http://localhost:3000/users/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhNzI4OWIwLWQyYjAtNDdhYy1hNzVlLTZhYjkzZGQ1NTM1MCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU2Mzg2MCwiZXhwIjoxNzYxNTY0NzYwfQ.kyszR9UFrV_Sr5wsg-SU_5ordC6JyFH_QnhSZvizI-E
-
-###
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4ZjhkYTkwLTI2MTQtNGNlMy05MWI2LTA1YTk2Zjg5MTljNSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU3MzY5OCwiZXhwIjoxNzYxNTc0NTk4fQ.7-ZlpYS1IIHXGNU5u4G5bv58HEXEAVv6Q7GFJ-hO-Qo
 
 PUT http://localhost:3000/users/update-user
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFiOGVmYWJjLTI2MTEtNGFhNC04NmFiLWI2YjcwMTAzZmFiYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU2NjA0MiwiZXhwIjoxNzYxNTY2OTQyfQ.zlIqOZWOWtv08HTR_PbWYVfVjPZZQgKxz0ITki0XAXo
@@ -11,3 +9,9 @@ Content-Type: application/json
 	  "newUsername": "MARCO_NEW5766564",
 	  "newLanguage": "fr"
 }
+
+###
+
+GET http://localhost:3000/users/:id?marco
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4ZjhkYTkwLTI2MTQtNGNlMy05MWI2LTA1YTk2Zjg5MTljNSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU3Mzc1OSwiZXhwIjoxNzYxNTc0NjU5fQ.26br6aAUNZ-wPkxgL3PpH6JilYRExwtencQwNu8Me6Y
+Content-Type: application/json

@@ -27,6 +27,7 @@ await setupSwagger(fastify);
 
 // Setup routes
 import { userRoutes } from './users_routes.js';
+import { relationshipsRoutes } from './relationships_routes.js';
 
 const	start = async () =>
 {
@@ -41,6 +42,7 @@ const	start = async () =>
 
 		// Setup routes after database is initialized
 		fastify.register(userRoutes)
+		fastify.register(relationshipsRoutes)
 
 		fastify.listen({ port: process.env.PORT })
 		console.log(`Server is running on port ${process.env.PORT}`)
