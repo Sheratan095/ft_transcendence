@@ -149,5 +149,33 @@ export class UsersDatabase
 
 		return (updatedUser);
 	}
+
+	// -------- USER RELATIONSHIPS METHODS --------
+
+	async	createFriendRequest(userId, addresseeId)
+	{
+		const	query = `INSERT INTO user_relationships (user_id, addressee_id, relationship_status) VALUES (?, ?, 'pending')`;
+
+		await this.db.run(query, [userId, addresseeId]);
+	}
+
+	async	updateFriendRequestStatus(userId, addresseeId, newStatus)
+	{
+		const	query = `UPDATE user_relationships SET relationship_status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND addressee_id = ?`;
+
+		await this.db.run(query, [newStatus, userId, addresseeId]);
+	}
+
+	async	getUsersRelation(userId, addresseeId)
+	{
+		const	query = `SELECT * FROM user_relationships WHERE user_id = ? AND addressee_id = ?`;
+
+		return (await this.db.get(query, [userId, addresseeId]));
+	}
+
+	async	blockUser(userId, addresseeId)
+	{
+		await this.updateFriendRequestStatus(userId, addresseeId, 'blocked');
+	}
 }
 
