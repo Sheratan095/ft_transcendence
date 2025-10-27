@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ft_transcendence — Profile</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link href="../../../tailwind.css" rel="stylesheet">
+  <script type="module" src="./profile.ts"></script>
+</head>
+<body class="bg-gray-100">
+  <div class="min-h-screen flex flex-col">
+    <!-- Profile Section -->
+    <div class="flex-1 py-10">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow rounded-lg p-6">
+          <div class="space-y-8">
+            <!-- Profile Header -->
+            <div class="text-center">
+              <h2 class="text-2xl font-bold text-gray-900">Profile Settings</h2>
+              <p class="text-sm text-gray-500">Manage your account settings and preferences</p>
+            </div>
+
+            <!-- Profile Form -->
+            <form id="profile-form" class="space-y-6">
+              <!-- Avatar Section -->
+              <div class="flex flex-col items-center space-y-4">
+                <div class="relative">
+                  <img id="avatar" src="/assets/placeholder-avatar.png" 
+                       alt="Profile" 
+                       class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">
+                  <label for="avatar-input" 
+                         class="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full cursor-pointer shadow-lg hover:bg-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                  </label>
+                  <input type="file" 
+                         id="avatar-input" 
+                         name="avatar" 
+                         accept="image/*" 
+                         class="hidden">
+                </div>
+                <p class="text-sm text-gray-500">Click the edit icon to change your profile picture</p>
+              </div>
+
+              <!-- User Info Section -->
+              <div class="grid grid-cols-1 gap-6">
+                <div>
+                  <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                  <div class="mt-1 flex rounded-md shadow-sm">
+                    <input type="text" 
+                           name="username" 
+                           id="username-input" 
+                           class="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                           placeholder="Enter your username">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Email</label>
+                  <div class="mt-1">
+                    <span id="email" class="block w-full px-3 py-2 text-gray-700 bg-gray-50 rounded-md sm:text-sm"></span>
+                  </div>
+                </div>
+
+                <!-- Display current username -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Current Username</label>
+                  <div class="mt-1">
+                    <span id="username" class="block w-full px-3 py-2 text-gray-700 bg-gray-50 rounded-md sm:text-sm"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="flex justify-end">
+                <button type="submit" 
+                        class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  Save Changes
+                </button>
+              </div>
+
+              <!-- Update Result Message -->
+              <div id="update-result" class="text-sm text-center"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

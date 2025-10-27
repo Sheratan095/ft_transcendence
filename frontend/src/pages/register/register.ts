@@ -26,7 +26,7 @@ if (!form || !resultEl) {
       return;
     }
 
-    const payload: Record<string, string> = { password, email, username };
+    const payload: Record<string, string> = { password, email, username, };
 
     if (submitBtn) submitBtn.disabled = true;
     resultEl.textContent = 'Registering new user...';
@@ -47,8 +47,9 @@ if (!form || !resultEl) {
       try { body = await res.json(); } catch { body = null; }
 
       if (res.ok) {
-        if (body && body.accessToken) localStorage.setItem('accessToken', body.accessToken);
-        if (body && body.refreshToken) localStorage.setItem('refreshToken', body.refreshToken);
+        if (body && body.tokens.accessToken) localStorage.setItem('accessToken', body.tokens.accessToken);
+        if (body && body.tokens.refreshToken) localStorage.setItem('refreshToken', body.tokens.accessToken);
+        if (body && body.user.id) localStorage.setItem('userId', body.user.id);
         resultEl.textContent = 'Registration successful.';
         resultEl.className = 'text-sm mt-2 text-center text-green-600';
         setTimeout(() => { window.location.href = '/'; }, 600);

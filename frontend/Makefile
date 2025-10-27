@@ -11,8 +11,8 @@ TEST := $(PM) run test
 
 # Tailwind CLI (uses npx so it works without global install)
 TAILWIND := npx tailwindcss
-TAILWIND_IN ?= src/index.css
-TAILWIND_OUT_DEV ?= src/tailwind.css
+TAILWIND_IN ?= ./index.css
+TAILWIND_OUT_DEV ?= ./tailwind.css
 TAILWIND_OUT_PROD ?= dist/assets/tailwind.css
 
 # TypeScript check

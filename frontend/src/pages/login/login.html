@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ft_transcendence — Login</title>
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
+  <link href="../../../tailwind.css" rel="stylesheet">
+  <script type="module" src="./login.ts"></script>
+</head>
+<body class="overflow-hidden">
+<div class="bg-gray-100 flex justify-center items-center h-screen">
+    <!-- Left: Image -->
+<div class="w-1/2 h-screen hidden lg:block">
+  <img src="https://marketplace.canva.com/8-1Kc/MAGoQJ8-1Kc/1/tl/canva-ginger-cat-with-paws-raised-in-air-MAGoQJ8-1Kc.jpg" alt="Placeholder Image" class="object-cover w-full h-full">
+</div>
+<!-- Right: Login Form -->
+<div class="lg:p-36 md:p-52 sm:20 p-8 w-full lg:w-1/2">
+  <h1 class="text-2xl font-semibold mb-4">Login</h1>
+  <form id="login-form" class="space-y-4" autocomplete="off">
+    <!-- Username Input -->
+    <div class="mb-4">
+      <label for="username" class="block text-gray-600">Email</label>
+      <input type="text" placeholder="email@domain.net" id="email" name="email" class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500" autocomplete="off">
+    </div>
+    <!-- Password Input -->
+    <div class="mb-4">
+      <label for="password" class="block text-gray-600">Password</label>
+      <input type="password" placeholder="password" id="password" name="password" class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500" autocomplete="off">
+    </div>
+    <!-- Forgot Password Link -->
+    <div class="mb-6 text-blue-500">
+      <a href="#" class="hover:underline">Forgot Password?</a>
+    </div>
+      <!-- Two-Factor Authentication (hidden until enabled by TS) -->
+      <div id="login-tfa-container" class="mb-4 hidden">
+        <label class="flex items-center space-x-2">
+          <input type="checkbox" id="login-enable2fa" name="enable2fa" class="rounded border-gray-300 text-blue-500 focus:border-blue-500 focus:ring-blue-500">
+          <span class="text-gray-600">Use Two-Factor Authentication (2FA)</span>
+        </label>
+        <p class="text-sm text-gray-500 mt-1">
+          <a href="#" class="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">Learn more about 2FA</a>
+        </p>
+      </div>
+    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full">Login</button>
+    <div id="login-result" class="text-sm mt-2 text-center"></div>
+    <div id="2fa" class="text-sm mt-2 text-center">
+
+    </div>
+  </form>
+  <div class="mt-6 text-blue-500 text-center">
+    <a href="../register/register.html" class="hover:underline">Sign up Here</a>
+  </div>
+</div>
+</div>
