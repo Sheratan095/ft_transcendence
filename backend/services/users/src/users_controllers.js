@@ -83,13 +83,9 @@ export const	updateUser = async (req, reply) =>
 
 		const	user = extractUserData(req);
 
-		console.log('Update request for user:', user.id);
-		console.log('New username:', newUsername);
-		console.log('New language:', newLanguage);
-
 		const	updatedUser = await usersDb.updateUser(user.id, newUsername, newLanguage);
 
-		console.log(`User ${user.userId} updated:`, updatedUser);
+		console.log(`User ${user.id} updated`);
 
 		return (reply.code(200).send(updatedUser));
 	}

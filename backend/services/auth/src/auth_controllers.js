@@ -47,7 +47,7 @@ export const	register = async (req, reply) =>
 		try
 		{
 			await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
-				{ Username: username, UserId: user.id },
+				{ username: username, userId: user.id },
 				{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
 			);
 		}
