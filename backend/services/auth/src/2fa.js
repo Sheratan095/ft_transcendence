@@ -18,7 +18,6 @@ export async function	sendTwoFactorCode(user, language, authDb, reply)
 
 	await (authDb.storeTwoFactorToken(user.id, hash_optcode, expirationDate));
 
-	// Send modern HTML email with 42 styling
 	await sendOTPEmail(
 		user.email,
 		otp_code,

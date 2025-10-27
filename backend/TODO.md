@@ -32,6 +32,7 @@
 	[x] add accessToken expiration to login and registration reply, add it also in auth_api_flow.drawio
 	[x] new token request
 	[x] solve /auth/token error
+	[] must be in the http only cockies
 
 [] SQL INJECTION PROTECTION
 [] XSS Attack

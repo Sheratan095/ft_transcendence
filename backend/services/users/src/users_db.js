@@ -152,30 +152,70 @@ export class UsersDatabase
 
 	// -------- USER RELATIONSHIPS METHODS --------
 
-	async	createFriendRequest(userId, addresseeId)
+	async	getFriends(userId)
 	{
-		const	query = `INSERT INTO user_relationships (user_id, addressee_id, relationship_status) VALUES (?, ?, 'pending')`;
+		const friends = await db.all(`
+		SELECT u.*
+		FROM users u
+		JOIN user_relationships ur
+		ON (u.id = ur.user1_id OR u.id = ur.user2_id)
+		WHERE ur.relationship_status = 'accepted'
+		AND (ur.user1_id = ? OR ur.user2_id = ?)
+		AND u.id != ?
+		`, [userId, userId, userId]);
 
-		await this.db.run(query, [userId, addresseeId]);
+		return (friends);
 	}
 
-	async	updateFriendRequestStatus(userId, addresseeId, newStatus)
+	async	getPendingRequests(userId)
 	{
-		const	query = `UPDATE user_relationships SET relationship_status = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND addressee_id = ?`;
+		const requests = await db.all(`
+			SELECT u.*
+			FROM users u
+			JOIN user_relationships ur
+			ON (u.id = ur.user1_id OR u.id = ur.user2_id)
+			WHERE ur.relationship_status = 'pending'
+			AND (
+					(ur.user1_id = u.id AND ur.user2_id = ?)
+				OR (ur.user2_id = u.id AND ur.user1_id = ?)
+			)
+		`, [userId, userId]);
 
-		await this.db.run(query, [newStatus, userId, addresseeId]);
+		return (requests);
 	}
 
-	async	getUsersRelation(userId, addresseeId)
+	async	isBlocked(userA, userB)
 	{
-		const	query = `SELECT * FROM user_relationships WHERE user_id = ? AND addressee_id = ?`;
+		const	row = await db.get(`
+			SELECT 1
+			FROM user_relationships
+			WHERE relationship_status = 'blocked'
+			AND ((user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?))
+		`, [userA, userB, userB, userA]);
 
-		return (await this.db.get(query, [userId, addresseeId]));
+		return (!!row); // true if blocked
 	}
 
-	async	blockUser(userId, addresseeId)
+	async	addFriendRequest(senderId, receiverId)
 	{
-		await this.updateFriendRequestStatus(userId, addresseeId, 'blocked');
+		// Ensure user1_id < user2_id for the bidirectional schema
+		const	[user1, user2] = senderId < receiverId ? [senderId, receiverId] : [receiverId, senderId];
+
+		return await db.run(`
+			INSERT INTO user_relationships (user1_id, user2_id, relationship_status)
+			VALUES (?, ?, 'pending')
+			ON CONFLICT(user1_id, user2_id) DO UPDATE SET relationship_status='pending', updated_at=CURRENT_TIMESTAMP
+		`, [user1, user2]);
+	}
+
+	async	acceptFriendRequest(userA, userB)
+	{
+		const	[user1, user2] = userA < userB ? [userA, userB] : [userB, userA];
+
+		return await db.run(`
+			UPDATE user_relationships
+			SET relationship_status='accepted', updated_at=CURRENT_TIMESTAMP
+			WHERE user1_id = ? AND user2_id = ? AND relationship_status='pending'
+		`, [user1, user2]);
 	}
 }
-
