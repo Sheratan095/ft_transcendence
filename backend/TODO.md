@@ -46,6 +46,7 @@
 	Each service deletes what it owns.
 [x] rename users table in auth
 [x] check logout
+[] normalize uppercase/lower case in schemas properties
 
 [x] 2FA
 	[x] Custom Otp mail

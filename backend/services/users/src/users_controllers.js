@@ -8,8 +8,7 @@ export const	getUsers = async (req, reply) =>
 		// Extract user data from gateway headers
 		const	usersDb = req.server.usersDb;
 		const	users = await usersDb.getAllUsers();
-		
-		console.log('Fetching users');
+
 
 		return (reply.code(200).send(users));
 	}
@@ -27,12 +26,12 @@ export const	createUser = async (req, reply) =>
 	try
 	{
 		const	usersDb = req.server.usersDb;
-		const	username = req.body.Username;
-		const	userId = req.body.UserId;
-		
+		const	username = req.body.username;
+		const	userId = req.body.userId;
+
 		const	newUser = await usersDb.createUserProfile(userId, username);
 
-		return (reply.code(201).send(newUser));	
+		return (reply.code(201).send(newUser));
 	}
 	catch (err)
 	{
@@ -69,6 +68,35 @@ export const	getUser = async (req, reply) =>
 	{
 		console.log('GetUser error:', err.message);
 		
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	updateUser = async (req, reply) =>
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+
+		const	newUsername = req.body.newUsername;
+		const	newLanguage = req.body.newLanguage;
+
+		const	user = extractUserData(req);
+
+		console.log('Update request for user:', user.id);
+		console.log('New username:', newUsername);
+		console.log('New language:', newLanguage);
+
+		const	updatedUser = await usersDb.updateUser(user.id, newUsername, newLanguage);
+
+		console.log(`User ${user.userId} updated:`, updatedUser);
+
+		return (reply.code(200).send(updatedUser));
+	}
+	catch (err)
+	{
+		console.log('UpdateUser error:', err.message);
+
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

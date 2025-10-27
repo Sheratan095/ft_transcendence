@@ -40,7 +40,8 @@ import {
 
 import {
 	getUsers,
-	getUser
+	getUser,
+	updateUsernameRoute
 } from './routes/users_routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
@@ -82,7 +83,7 @@ await fastify.register(async function (fastify)
 	fastify.post('/auth/token', { schema: { hide: true }, handler: tokenRoute })
 });
 
-// 🟠 AUTHENTICATED USER ACTIONS: Password changes (requires auth + rate limiting)
+// 🟠 AUTHENTICATED USER ACTIONS: Sensitive account changes (requires auth + rate limiting)
 await fastify.register(async function (fastify)
 {
 	await fastify.register(import('@fastify/rate-limit'),
@@ -94,6 +95,7 @@ await fastify.register(async function (fastify)
 
 	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
 	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: enable2FARoute })
+	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUsernameRoute })
 });
 
 // 🟢 RELAXED RATE LIMITING: General user routes (low risk, read operations)

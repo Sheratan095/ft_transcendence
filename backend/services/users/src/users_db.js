@@ -126,5 +126,35 @@ export class UsersDatabase
 		const	query = `SELECT * FROM users`;
 		return (await this.db.all(query));
 	}
+
+	async	updateUser(userId, newUsername, newLanguage)
+	{
+		console.log('Database updateUser called with:', { userId, newUsername, newLanguage });
+		
+		// Check if user exists first
+		const existingUser = await this.getUserById(userId);
+		if (!existingUser) {
+			throw new Error('User not found');
+		}
+
+		// Update username if provided
+		if (newUsername !== undefined && newUsername !== null && newUsername !== '') {
+			const	query = `UPDATE users SET username = ? WHERE user_id = ?`;
+			await this.db.run(query, [newUsername.toLowerCase(), userId]);
+			console.log('Username updated to:', newUsername.toLowerCase());
+		}
+		
+		// Update language if provided
+		if (newLanguage !== undefined && newLanguage !== null && newLanguage !== '') {
+			const	query = `UPDATE users SET language = ? WHERE user_id = ?`;
+			await this.db.run(query, [newLanguage, userId]);
+			console.log('Language updated to:', newLanguage);
+		}
+
+		// Return the updated user
+		const updatedUser = await this.getUserById(userId);
+		console.log('Updated user from DB:', updatedUser);
+		return updatedUser;
+	}
 }
 

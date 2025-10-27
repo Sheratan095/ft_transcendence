@@ -1,7 +1,8 @@
 import {
 	getUsers,
 	getUser,
-	createUser
+	createUser,
+	updateUser
 } from './users_controllers.js';
 
 import { validateInternalApiKey } from './users_help.js';
@@ -16,7 +17,21 @@ const	User =
 		username: { type: 'string' },
 		language: { type: 'string' },
 	},
-}
+};
+
+// Reusable error response schemas
+const	ErrorResponse =
+{
+	type: 'object',
+	properties:
+	{
+		statusCode: { type: 'integer' },
+		code: { type: 'string' },
+		error: { type: 'string' },
+		message: { type: 'string' }
+	},
+	additionalProperties: true // let Fastify include unexpected fields
+};
 
 const	UsernamePolicy = 
 {
@@ -24,6 +39,15 @@ const	UsernamePolicy =
 	pattern: '^[a-zA-Z][a-zA-Z0-9._]{2,19}$',
 	errorMessage: {
 		pattern: 'Username must start with a letter and be 3–20 characters long, only letters, numbers, dots, or underscores allowed. (Username will be stored in lowercase)'
+	}
+};
+
+const	SupportedLanguages =
+{
+	type: 'string',
+	enum: ['en', 'fr', 'it'], // Example supported languages
+	errorMessage: {
+		enum: 'Language must be one of the supported languages: en, fr, it.'
 	}
 };
 
@@ -74,11 +98,11 @@ const	newUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['Username', 'UserId'],
+			required: ['username', 'userId'],
 			properties:
 			{
-				Username: { ...UsernamePolicy },
-				UserId: { type: 'string' }
+				username: { ...UsernamePolicy },
+				userId: { type: 'string' }
 			}
 		}
 	},
@@ -121,15 +145,47 @@ const	getUserOpts =
 	handler: getUser,
 };
 
-// TO DO the update route has to be done with username policy
+// The userId isn't needed in the body as it's extracted from the JWT token
+const	updateUserOpts =
+{
+	schema:
+	{
+		description: 'Update user details',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			properties:
+			{
+				newUsername: { ...UsernamePolicy },
+				newLanguage: { ...SupportedLanguages }
+			},
+			anyOf:
+			[
+				{ required: ['newUsername'] },
+				{ required: ['newLanguage'] }
+			]
+		},
+		response:
+		{
+			200: User,
+			400: ErrorResponse,
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: updateUser,
+}
 
 export function	userRoutes(fastify)
 {
-	// Get all users
 	fastify.get('/', getUsersOpts);
 	
 	// Versatile GET route - handles single user queries by username or id
 	fastify.get('/user', getUserOpts);
+
+	fastify.put('/update-user', updateUserOpts);
 
 	fastify.post('/new-user', newUserOpts);
 }
