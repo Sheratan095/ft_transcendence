@@ -116,6 +116,7 @@ help:
 	@echo ""
 	@echo "  Development mode (auto-restart on file changes):"
 	@echo "    make dev         - Start all services in dev mode"
+	@echo "    make redev       - Restart all services in dev mode"
 	@echo "    make dev-auth    - Start only auth service in dev mode"
 	@echo "    make dev-users   - Start only users service in dev mode"
 	@echo "    make dev-gateway - Start only gateway in dev mode"
