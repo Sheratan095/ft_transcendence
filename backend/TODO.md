@@ -60,7 +60,7 @@
 	[x] seprate the template and the "language pack"
 [] add user/update-user, to change userame and language => test if than the mail are sent in the chosen language
 [] rename files with dsadsa-sdada.js format
-[] update db design for just id as pk
+[x] update db design for just id as pk
 
 [x] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords
 [x] Prevent spam registration	Throttle by IP, require CAPTCHA or email verification	Stop mass signups

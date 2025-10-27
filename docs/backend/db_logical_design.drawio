@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Page-1" id="rNN4AwOxWi-3c5t58apC">
-        <mxGraphModel dx="1742" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="1961" dy="1721" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -1039,7 +1039,7 @@
                         </Array>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-262" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;UUID: Universally unique identifier (550e8400-e29b-41d4-a716-446655440000)&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
+                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-262" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;UUID: Universally unique identifier (550e8400-e29b-41d4-a716-446655440000)&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
                     <mxGeometry x="-778" y="-940" width="730" height="40" as="geometry"/>
                 </mxCell>
                 <mxCell id="4" value="&lt;font style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;Unique, used as primary key&lt;/font&gt;&lt;div style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;&lt;font style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;it allows the user to login just from&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;&lt;font style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;one device at time because the refresh&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;&lt;font style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;token is overriden when a new login&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;&lt;font style=&quot;scrollbar-color: rgb(75, 75, 75) rgb(27, 29, 30);&quot;&gt;is done&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
@@ -1197,7 +1197,7 @@
                         <mxRectangle width="170" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="TXx-66uJjGeDDtM2rG6j-46" value="language :  string / enum ???" style="shape=partialRectangle;fillColor=none;align=left;verticalAlign=middle;strokeColor=none;spacingLeft=34;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;dropTarget=0;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
+                <mxCell id="TXx-66uJjGeDDtM2rG6j-46" value="language :  enum" style="shape=partialRectangle;fillColor=none;align=left;verticalAlign=middle;strokeColor=none;spacingLeft=34;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;dropTarget=0;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
                     <mxGeometry x="-360" y="570" width="90" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="TXx-66uJjGeDDtM2rG6j-47" value="" style="shape=partialRectangle;top=0;left=0;bottom=0;fillColor=none;stokeWidth=1;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[];portConstraint=eastwest;part=1;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="TXx-66uJjGeDDtM2rG6j-46" vertex="1" connectable="0">
@@ -1222,6 +1222,9 @@
                             <mxPoint x="-499" y="494"/>
                         </Array>
                     </mxGeometry>
+                </mxCell>
+                <mxCell id="32" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;The primary key of each table will be tranformed from user_id to just id&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="-778" y="-905" width="650" height="40" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
