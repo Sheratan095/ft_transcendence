@@ -110,7 +110,7 @@ await fastify.register(async function (fastify)
 
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUsers })
-	fastify.get('/users/:username', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUser })
+	fastify.get('/user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUser })
 });
 
 // Server startup function with error handling

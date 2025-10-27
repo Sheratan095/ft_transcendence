@@ -33,8 +33,9 @@ export const	getUser = async (req, reply) =>
 	{
 		const	username = req.params.username; // From URL parameter
 
-		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/users/${username}`,
+		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/user`,
 		{
+			params: req.query,
 			headers:
 			{
 				'x-internal-api-key': process.env.INTERNAL_API_KEY,
