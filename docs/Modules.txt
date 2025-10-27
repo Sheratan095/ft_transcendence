@@ -59,23 +59,6 @@ Max Length		254 characters	=> RFC limit
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-• Major module: Implement remote authentication.
-In this major module, the goal is to implement a secure external authentication
-system using OAuth 2.0 .
-You are free to choose any OAuth-compatible provider (e.g., Google,
-GitHub, etc.).
-Key features and objectives include:
-◦ Integrate the authentication system, allowing users to securely sign in.
-◦ Obtain the necessary credentials and permissions from the authority to enable
-secure login.
-◦ Implement user-friendly login and authorization flows that adhere to best practices and security standards.
-◦ Ensure the secure exchange of authentication tokens and user information
-between the web application and the authentication provider.
-This major module aims to provide a remote user authentication, offering users a
-secure and convenient way to access the web application
-
----------------------------------------------------------------------------------------------------------------------------------
-
 • Major module: Remote players
 It should be possible for two players to play remotely. Each player is located on a
 separated computer, accessing the same website and playing the same Pong game.
