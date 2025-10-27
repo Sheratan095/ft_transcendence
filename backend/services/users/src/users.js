@@ -1,5 +1,12 @@
 import Fastify from 'fastify';
 import ajvErrors from 'ajv-errors';
+import multipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const	__filename = fileURLToPath(import.meta.url);
+const	__dirname = path.dirname(__filename);
 
 const	fastify = Fastify({
 	logger: false,
@@ -8,6 +15,22 @@ const	fastify = Fastify({
 		plugins: [ajvErrors],
 		customOptions: { allErrors: true } // show all errors, not just the first
 	}
+});
+
+// Register multipart plugin for file uploads
+await fastify.register(multipart,
+{
+	limits:
+	{
+		fileSize: 10 * 1024 * 1024, // 10MB max file size
+	}
+});
+
+// Register static file serving for avatars
+await fastify.register(fastifyStatic,
+{
+	root: path.join(__dirname, '../data/avatars'),
+	prefix: '/avatars/', // URL prefix to access avatars
 });
 
 // Load environment variables from .env file

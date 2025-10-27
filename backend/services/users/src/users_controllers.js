@@ -1,5 +1,13 @@
 
 import { extractUserData } from './users_help.js';
+import { pipeline } from 'stream/promises';
+import { createWriteStream, existsSync } from 'fs';
+import { unlink } from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const	__filename = fileURLToPath(import.meta.url);
+const	__dirname = path.dirname(__filename);
 
 export const	getUsers = async (req, reply) =>
 {
@@ -92,6 +100,77 @@ export const	updateUser = async (req, reply) =>
 	catch (err)
 	{
 		console.log('UpdateUser error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	uploadAvatar = async (req, reply) =>
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	user = extractUserData(req);
+
+		// Get current user data to check for existing avatar
+		const	currentUser = await usersDb.getUserById(user.id);
+		
+		// Get the uploaded file
+		const	data = await req.file();
+		if (!data)
+			return (reply.code(400).send({ error: 'No file uploaded' }));
+
+		// Validate file type (images only)
+		const	allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+		if (!allowedMimeTypes.includes(data.mimetype))
+			return (reply.code(400).send({ error: 'Only image files are allowed (jpeg, png, gif, webp)' }));
+
+		// Generate unique filename with extension
+		const	fileExtension = data.filename.split('.').pop();
+		const	filename = `${user.id}_${Date.now()}.${fileExtension}`;
+
+		// Define paths
+		const	avatarsDir = path.join(__dirname, '../data/avatars');
+		const	filePath = path.join(avatarsDir, filename);
+		const	avatarUrl = `/avatars/${filename}`; // Relative URL to store in DB
+
+		// Delete old avatar if it exists
+		if (currentUser.avatar_url)
+		{
+			const	oldFilename = path.basename(currentUser.avatar_url);
+			const	oldFilePath = path.join(avatarsDir, oldFilename);
+
+			if (existsSync(oldFilePath))
+			{
+				try
+				{
+					await unlink(oldFilePath);
+					console.log(`Deleted old avatar: ${oldFilename}`);
+				}
+				catch (unlinkErr)
+				{
+					console.error(`Failed to delete old avatar: ${unlinkErr.message}`);
+					// Continue even if deletion fails - don't block the upload
+				}
+			}
+		}
+
+		// Save file to disk
+		await pipeline(data.file, createWriteStream(filePath));
+		
+		// Update database with avatar URL
+		await usersDb.updateUserAvatar(user.id, avatarUrl);
+
+		console.log(`Avatar uploaded for user ${user.id}: ${filename}`);
+
+		return reply.code(200).send({
+			message: 'Avatar uploaded successfully',
+			avatarUrl: avatarUrl
+		});
+	}
+	catch (err)
+	{
+		console.log('UploadAvatar error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

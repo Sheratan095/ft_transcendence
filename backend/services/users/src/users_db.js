@@ -7,6 +7,10 @@ import { mkdir, readFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from 'url';
 
+// Get the directory name of the current module for later use
+const	__filename = fileURLToPath(import.meta.url);
+const	__dirname = path.dirname(__filename);
+
 export class UsersDatabase
 {
 	constructor(dbPath = "./data/users.db")
@@ -22,6 +26,10 @@ export class UsersDatabase
 			// Create data directory if it doesn't exist
 			const	dir = path.dirname(this.dbPath);
 			await mkdir(dir, { recursive: true });
+
+			// Create avatars directory inside data folder
+			const	avatarsDir = path.join(dir, 'avatars');
+			await mkdir(avatarsDir, { recursive: true });
 
 			// Open database connection
 			this.db = new sqlite3.Database(this.dbPath);
@@ -47,9 +55,6 @@ export class UsersDatabase
 	{
 		try
 		{
-			// Get the directory name of the current module
-			const	__filename = fileURLToPath(import.meta.url);
-			const	__dirname = path.dirname(__filename);
 			const	schemaPath = path.join(__dirname, 'schema.sql');
 
 			// Read the SQL schema file
@@ -148,6 +153,22 @@ export class UsersDatabase
 		const	updatedUser = await this.getUserById(userId);
 
 		return (updatedUser);
+	}
+
+	// -------- USER AVATAR METHODS --------
+
+	async	updateUserAvatar(userId, avatarUrl)
+	{
+		const	query = `UPDATE users SET avatar_url = ? WHERE id = ?`;
+		await this.db.run(query, [avatarUrl, userId]);
+	}
+
+	async	getUserAvatar(userId)
+	{
+		const	query = `SELECT avatar_url FROM users WHERE id = ?`;
+		const	row = await this.db.get(query, [userId]);
+
+		return (row ? row.avatar_url : null);
 	}
 
 	// -------- USER RELATIONSHIPS METHODS --------

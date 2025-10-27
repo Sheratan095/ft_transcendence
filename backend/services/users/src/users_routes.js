@@ -2,7 +2,8 @@ import {
 	getUsers,
 	getUser,
 	createUser,
-	updateUser
+	updateUser,
+	uploadAvatar,
 } from './users_controllers.js';
 
 import { validateInternalApiKey } from './users_help.js';
@@ -178,6 +179,34 @@ const	updateUserOpts =
 	handler: updateUser,
 }
 
+const	uploadAvatarOpts =
+{
+	schema:
+	{
+		description: 'Upload or update user avatar',
+
+		...withInternalAuth,
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' },
+					avatarUrl: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			500: ErrorResponse,
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: uploadAvatar,
+};
+
+
 export function	userRoutes(fastify)
 {
 	fastify.get('/', getUsersOpts);
@@ -186,6 +215,7 @@ export function	userRoutes(fastify)
 	fastify.get('/user', getUserOpts);
 
 	fastify.post('/new-user', newUserOpts);
+	fastify.post('/upload-avatar', uploadAvatarOpts);
 
 	fastify.put('/update-user', updateUserOpts);
 }
