@@ -17,6 +17,7 @@ const	User =
 		id: { type: 'string' },
 		username: { type: 'string' },
 		language: { type: 'string' },
+		avatarUrl: { type: 'string' },
 	},
 };
 
