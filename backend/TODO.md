@@ -58,7 +58,7 @@
 [x] add endpoint to change the psw
 [x] should the language name depends on the preferred language of the user?
 	[x] seprate the template and the "language pack"
-[] add user/update-user, to change userame and language => test if than the mail are sent in the chosen language
+[x] add user/update-user, to change userame and language => test if than the mail are sent in the chosen language
 [] rename files with dsadsa-sdada.js format
 [x] update db design for just id as pk
 

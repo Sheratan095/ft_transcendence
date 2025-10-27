@@ -4,10 +4,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJhNzI4OWIwL
 ###
 
 PUT http://localhost:3000/users/update-user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ2YmU3ZDY0LTkwMzUtNDJmMy1iNzc2LWEyOGZmMTIzZjJjNyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU2MzkxMSwiZXhwIjoxNzYxNTY0ODExfQ.4i_tkbwWCl7yBFTxGJCMo9TJyXw58Crb_rxVOgxVs78
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFiOGVmYWJjLTI2MTEtNGFhNC04NmFiLWI2YjcwMTAzZmFiYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU2NjA0MiwiZXhwIjoxNzYxNTY2OTQyfQ.zlIqOZWOWtv08HTR_PbWYVfVjPZZQgKxz0ITki0XAXo
 Content-Type: application/json
 
 {
 	  "newUsername": "MARCO_NEW5766564",
-	  "newLanguage": "it"
+	  "newLanguage": "fr"
 }
