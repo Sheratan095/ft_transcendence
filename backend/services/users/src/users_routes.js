@@ -185,7 +185,7 @@ export function	userRoutes(fastify)
 	// Versatile GET route - handles single user queries by username or id
 	fastify.get('/user', getUserOpts);
 
-	fastify.put('/update-user', updateUserOpts);
-
 	fastify.post('/new-user', newUserOpts);
+
+	fastify.put('/update-user', updateUserOpts);
 }
