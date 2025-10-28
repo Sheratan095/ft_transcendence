@@ -1,17 +1,23 @@
 import axios from 'axios'
 
+const	USERS_URL = process.env.USERS_SERVICE_URL;
+const	API_KEY = process.env.INTERNAL_API_KEY;
+
+function	getAuthHeaders(req)
+{
+	return ({
+		'x-internal-api-key': API_KEY,
+		'x-user-data': JSON.stringify(req.user)
+	});
+}
+
 export const	getUsers = async (req, reply) =>
 {
 	// Forward request to users service with user data
 	try
 	{
-		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/`,
-		{
-			headers:
-			{
-				'x-internal-api-key': process.env.INTERNAL_API_KEY,
-				'x-user-data': JSON.stringify(req.user) // Pass authenticated user data
-			}
+		const	response = await axios.get(`${USERS_URL}/`, {
+			headers: getAuthHeaders(req)
 		})
 
 		return (reply.send(response.data))
@@ -22,6 +28,7 @@ export const	getUsers = async (req, reply) =>
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
+
 		return (reply.code(500).send({ error: 'Users service unavailable' }))
 	}
 }
@@ -31,14 +38,9 @@ export const	getUser = async (req, reply) =>
 	// Forward request to users service with user data
 	try
 	{
-		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/user`,
-		{
+		const	response = await axios.get(`${USERS_URL}/user`, {
 			params: req.query,
-			headers:
-			{
-				'x-internal-api-key': process.env.INTERNAL_API_KEY,
-				'x-user-data': JSON.stringify(req.user) // Pass authenticated user data
-			}
+			headers: getAuthHeaders(req)
 		})
 
 		return (reply.send(response.data))
@@ -49,6 +51,7 @@ export const	getUser = async (req, reply) =>
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
+
 		return (reply.code(500).send({ error: 'Users service unavailable' }))
 	}
 }
@@ -57,14 +60,8 @@ export const	updateUsername = async (req, reply) =>
 {
 	try
 	{
-		const	response = await axios.put(`${process.env.USERS_SERVICE_URL}/update-user`,
-		req.body,
-		{
-			headers:
-			{
-				'x-internal-api-key': process.env.INTERNAL_API_KEY,
-				'x-user-data': JSON.stringify(req.user) // Pass authenticated user data
-			}
+		const	response = await axios.put(`${USERS_URL}/update-user`, req.body, {
+			headers: getAuthHeaders(req)
 		})
 
 		return (reply.send(response.data))
@@ -75,6 +72,7 @@ export const	updateUsername = async (req, reply) =>
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
+
 		return (reply.code(500).send({ error: 'Users service unavailable' }))
 	}
 }
@@ -100,19 +98,14 @@ export const	uploadAvatar = async (req, reply) =>
 		});
 
 		// Forward to users service with proper multipart/form-data
-		const	response = await axios.post(`${process.env.USERS_SERVICE_URL}/upload-avatar`,
-			formData,
-			{
-				headers:
-				{
-					...formData.getHeaders(),
-					'x-internal-api-key': process.env.INTERNAL_API_KEY,
-					'x-user-data': JSON.stringify(req.user)
-				},
-				maxBodyLength: Infinity,
-				maxContentLength: Infinity
-			}
-		);
+		const	response = await axios.post(`${USERS_URL}/upload-avatar`, formData, {
+			headers: {
+				...formData.getHeaders(),
+				...getAuthHeaders(req)
+			},
+			maxBodyLength: Infinity,
+			maxContentLength: Infinity
+		});
 
 		return reply.send(response.data);
 	}
@@ -122,6 +115,7 @@ export const	uploadAvatar = async (req, reply) =>
 
 		if (err.response)
 			return reply.code(err.response.status).send(err.response.data);
+
 		return reply.code(500).send({ error: 'Users service unavailable' });
 	}
 }
