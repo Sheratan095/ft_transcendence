@@ -105,7 +105,7 @@ await fastify.register(async function (fastify)
 {
 	await fastify.register(import('@fastify/rate-limit'),
 	{
-		max: 3,					// Maximum 3 password changes
+		max: 10,				// Maximum 10 password changes
 		timeWindow: '1 hour',	// Per hour
 		keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
 	});

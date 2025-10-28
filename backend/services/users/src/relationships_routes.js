@@ -1,5 +1,6 @@
 import {
 	getUserRelationships,
+	acceptFriendRequest
 } from './relationships_controllers.js';
 
 import { validateInternalApiKey } from './users_help.js';
@@ -79,7 +80,45 @@ const	getUserRelationshipsOpts =
 	handler	: getUserRelationships
 };
 
+const	acceptFriendRequestOpts =
+{
+	schema:
+	{
+		description: 'Accept a friend request from another user.',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['relationshipId'],
+			properties:
+			{
+				relationshipId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					success: { type: 'boolean' },
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: acceptFriendRequest
+}
 export function	relationshipsRoutes(fastify)
 {
 	fastify.get('/relationships', getUserRelationshipsOpts);
+
+	fastify.put('/relationships/accept', acceptFriendRequestOpts);
 }

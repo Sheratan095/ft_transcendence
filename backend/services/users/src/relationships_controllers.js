@@ -18,3 +18,24 @@ export async function	getUserRelationships(req, reply)
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+export async function	acceptFriendRequest(req, reply)
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userId = extractUserData(req).id;
+		const	{ relationshipId } = req.body.relationshipId;
+
+		await usersDb.updateRelationshipStatus(relationshipId, userId, 'accepted');
+
+		return (reply.code(200).send({ message: 'Friend request accepted' }));
+	}
+	catch (err)
+	{
+		console.log('AcceptFriendRequest error:', err.message);
+		
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+
+}

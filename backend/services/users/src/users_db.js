@@ -192,36 +192,63 @@ export class UsersDatabase
 		return (relationships);
 	}
 
+	// Get only accepted friends
 	async	getFriends(userId)
 	{
-		const friends = await db.all(`
-		SELECT u.*
-		FROM users u
-		JOIN user_relationships ur
-		ON (u.id = ur.user1_id OR u.id = ur.user2_id)
-		WHERE ur.relationship_status = 'accepted'
-		AND (ur.user1_id = ? OR ur.user2_id = ?)
-		AND u.id != ?
-		`, [userId, userId, userId]);
+		const	friends = await this.db.all(`
+			SELECT 
+				CASE WHEN ur.user1_id = ? THEN ur.user2_id ELSE ur.user1_id END AS userId,
+				u.username,
+				u.language,
+				ur.updated_at AS friends_since
+			FROM user_relationships ur
+			JOIN users u
+			ON (u.id = ur.user1_id OR u.id = ur.user2_id)
+			WHERE ur.relationship_status = 'accepted'
+			AND (ur.user1_id = ? OR ur.user2_id = ?)
+			AND u.id != ?
+		`, [userId, userId, userId, userId]);
 
 		return (friends);
 	}
+	
+	// Get incoming friend requests (someone sent request TO userId)
 
-	async	getPendingRequests(userId)
+	#pair(a, b)
 	{
-		const requests = await db.all(`
-			SELECT u.*
-			FROM users u
-			JOIN user_relationships ur
-			ON (u.id = ur.user1_id OR u.id = ur.user2_id)
+		return (a < b ? [a, b] : [b, a]);
+	}
+
+	async	getIncomingRequests(userId)
+	{
+		const	requests = await this.db.all(`
+			SELECT sender.id AS userId, sender.username, ur.created_at
+			FROM user_relationships ur
+			JOIN users sender
+				ON sender.id = CASE 
+					WHEN ur.user1_id = ? THEN ur.user2_id
+					ELSE ur.user1_id END
 			WHERE ur.relationship_status = 'pending'
-			AND (
-					(ur.user1_id = u.id AND ur.user2_id = ?)
-				OR (ur.user2_id = u.id AND ur.user1_id = ?)
-			)
-		`, [userId, userId]);
+			AND ur.user1_id != ur.user2_id
+			AND (ur.user1_id = ? OR ur.user2_id = ?)
+			AND sender.id != ?
+		`, [userId, userId, userId, userId]);
 
 		return (requests);
+	}
+
+	// Check if either direction is blocked
+	async	isBlocked(a, b)
+	{
+		const [user1, user2] = this.#pair(a, b);
+
+		const row = await this.db.get(`
+			SELECT 1 FROM user_relationships
+			WHERE user1_id = ? AND user2_id = ?
+			AND relationship_status = 'blocked'
+		`, [user1, user2]);
+
+		return !!row;
 	}
 
 	async	isBlocked(userA, userB)
@@ -236,26 +263,57 @@ export class UsersDatabase
 		return (!!row); // true if blocked
 	}
 
-	async	addFriendRequest(senderId, receiverId)
+	// Send or re-send a friend request
+	async	addFriendRequest(sender, receiver)
 	{
-		// Ensure user1_id < user2_id for the bidirectional schema
-		const	[user1, user2] = senderId < receiverId ? [senderId, receiverId] : [receiverId, senderId];
+		const	[user1, user2] = this.#pair(sender, receiver);
 
-		return await db.run(`
-			INSERT INTO user_relationships (user1_id, user2_id, relationship_status)
-			VALUES (?, ?, 'pending')
-			ON CONFLICT(user1_id, user2_id) DO UPDATE SET relationship_status='pending', updated_at=CURRENT_TIMESTAMP
+		const	relationship = await this.db.get(`
+			SELECT relationship_status
+			FROM user_relationships
+			WHERE (user1_id = ? AND user2_id = ?)
 		`, [user1, user2]);
+
+		return (relationship);
 	}
 
-	async	acceptFriendRequest(userA, userB)
+	// Accept a pending request
+	async	acceptFriendRequest(a, b)
 	{
-		const	[user1, user2] = userA < userB ? [userA, userB] : [userB, userA];
-
-		return await db.run(`
+		const	[user1, user2] = this.#pair(a, b);
+		const	response = await this.db.run(`
 			UPDATE user_relationships
 			SET relationship_status='accepted', updated_at=CURRENT_TIMESTAMP
-			WHERE user1_id = ? AND user2_id = ? AND relationship_status='pending'
+			WHERE user1_id = ? AND user2_id = ?
+			AND relationship_status='pending'
 		`, [user1, user2]);
+
+		return (response);
+	}
+
+	// Reject a pending request (optional)
+	async	rejectFriendRequest(a, b)
+	{
+		const	[user1, user2] = this.#pair(a, b);
+		const	response = await this.db.run(`
+			UPDATE user_relationships
+			SET relationship_status='rejected', updated_at=CURRENT_TIMESTAMP
+			WHERE user1_id = ? AND user2_id = ?
+			AND relationship_status='pending'
+		`, [user1, user2]);
+
+		return (response);
+	}
+
+	// Remove / unfriend / cancel request
+	async	removeRelationship(a, b)
+	{
+		const	[user1, user2] = this.#pair(a, b);
+		const	response = await this.db.run(`
+			DELETE FROM user_relationships
+			WHERE user1_id = ? AND user2_id = ?
+		`, [user1, user2]);
+
+		return (response);
 	}
 }
