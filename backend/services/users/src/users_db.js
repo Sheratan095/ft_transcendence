@@ -173,6 +173,25 @@ export class UsersDatabase
 
 	// -------- USER RELATIONSHIPS METHODS --------
 
+	async	getRelationships(userId)
+	{
+		const	relationships = await this.db.all(`
+			SELECT 
+				u.id AS userId,
+				u.username AS username,
+				ur.relationship_status AS relationship_status,
+				ur.created_at AS created_at,
+				ur.updated_at AS updated_at
+			FROM user_relationships ur
+			JOIN users u
+			ON (u.id = ur.user1_id OR u.id = ur.user2_id)
+			WHERE (ur.user1_id = ? OR ur.user2_id = ?)
+			AND u.id != ?
+		`, [userId, userId, userId]);
+
+		return (relationships);
+	}
+
 	async	getFriends(userId)
 	{
 		const friends = await db.all(`

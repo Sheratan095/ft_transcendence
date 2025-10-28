@@ -65,7 +65,7 @@ const	withInternalAuth =
 		{
 			'x-internal-api-key': { type: 'string' }
 		}
-  }
+	}
 };
 
 const	getUsersOpts =

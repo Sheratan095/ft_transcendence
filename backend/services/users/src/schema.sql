@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS user_relationships (
     user1_id TEXT NOT NULL,
     user2_id TEXT NOT NULL,
-	relationship_status TEXT NOT NULL CHECK (relationship_status IN ('pending', 'accepted', 'rejected', 'blocked')),
+	relationship_status TEXT NOT NULL CHECK (relationship_status IN ('pending', 'accepted', 'accepted', 'blocked')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user1_id, user2_id),
