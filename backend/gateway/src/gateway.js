@@ -61,6 +61,19 @@ import {
 	uploadAvatar
 } from './routes/users_routes.js'
 
+import {
+	getUserRelationships,
+	getFriends,
+	getIncomingRequests,
+	sendFriendRequest,
+	acceptFriendRequest,
+	rejectFriendRequest,
+	blockUser,
+	unblockUser,
+	cancelFriendRequest,
+	removeFriend
+} from './routes/relationships_routes.js'
+
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
 {
@@ -129,6 +142,18 @@ await fastify.register(async function (fastify)
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUsers })
 	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUser })
+	
+	// RELATIONSHIPS routes
+	fastify.get('/relationships', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUserRelationships })
+	fastify.get('/relationships/friends', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getFriends })
+	fastify.get('/relationships/requests', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getIncomingRequests })
+	fastify.post('/relationships/request', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: sendFriendRequest })
+	fastify.put('/relationships/accept', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: acceptFriendRequest })
+	fastify.put('/relationships/reject', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: rejectFriendRequest })
+	fastify.put('/relationships/block', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: blockUser })
+	fastify.delete('/relationships/unblock', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: unblockUser })
+	fastify.delete('/relationships/removeFriend', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: removeFriend })
+	fastify.delete('/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: cancelFriendRequest })
 });
 
 // Server startup function with error handling
