@@ -450,13 +450,13 @@ const	getAccountOpts =
 
 export function	authRoutes(fastify)
 {
+	fastify.get('/get-account', getAccountOpts);
+
 	fastify.post('/register', registerOpts);
 	fastify.post('/login', loginOpts);
 	fastify.post('/validate-token', validateTokenOpts);
 	fastify.post('/token', tokenOpts);
 	fastify.post('/2fa', twoFactorAuthOpts);
-
-	fastify.get('/get-account', getAccountOpts);
 
 	fastify.put('/enable-2fa', enable2FAOpts);
 	fastify.put('/change-password', changePasswordOpts);
