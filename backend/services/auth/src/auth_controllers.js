@@ -427,3 +427,33 @@ export const	changePassword = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+export const	getAccount = async (req, reply) =>
+{
+	try
+	{
+		const	authDb = req.server.authDb;
+		const	userId = req.query.id;
+
+		// Get full user data from database
+		const	user = await authDb.getUserById(userId);
+
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+		
+		return (reply.code(200).send({
+			message: 'User account retrieved successfully',
+			user:
+			{
+				id: user.id,
+				email: user.email
+			}
+		}));
+	}
+	catch (err)
+	{
+		console.log('Get account error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}

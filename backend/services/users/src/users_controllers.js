@@ -1,5 +1,5 @@
 
-import { extractUserData } from './users_help.js';
+import { extractUserData, getAccount } from './users_help.js';
 import { pipeline } from 'stream/promises';
 import { createWriteStream, existsSync } from 'fs';
 import { unlink } from 'fs/promises';
@@ -68,6 +68,11 @@ export const	getUser = async (req, reply) =>
 		if (!user)
 			return (reply.code(404).send({ error: 'User not found' }));
 
+		// Get account details from auth service
+		const	account = await getAccount(user.id);
+		if (!account)
+			return (reply.code(404).send({ error: 'Account not found' }));
+
 		console.log('Fetching user:', username || id);
 
 		// SQLite returns created_at as a string, not a Date object
@@ -78,10 +83,9 @@ export const	getUser = async (req, reply) =>
 			username: user.username,
 			language: user.language,
 			createdAt: user.created_at, // Already a string in ISO format from SQLite
-			avatarUrl: user.avatar_url
+			avatarUrl: user.avatar_url,
+			email: account.email
 		};
-
-		console.log('User found:', response);
 
 		return (reply.code(200).send(response));
 	}

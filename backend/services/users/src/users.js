@@ -42,7 +42,7 @@ let		usersDatabase;
 
 // Validate required environment variables
 import { checkEnvVariables } from './users_help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'AUTH_SERVICE_URL']);
 
 // Setup Swagger documentation
 import { setupSwagger } from './users_swagger.js';

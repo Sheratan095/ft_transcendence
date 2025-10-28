@@ -6,7 +6,8 @@ import {
 	validateToken,
 	verifyTwoFactorAuth,
 	enable2FA,
-	changePassword
+	changePassword,
+	getAccount
 } from './auth_controllers.js';
 
 import { validateInternalApiKey } from './auth_help.js';
@@ -407,6 +408,46 @@ const	validateTokenOpts =
 	handler	: validateToken
 };
 
+const	getAccountOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal (called by user service to retrieve the email)',
+
+		description: 'Get account details for the authenticated user',
+
+		...withInternalAuth,
+		
+		querystring:
+		{
+			type: 'object',
+			properties:
+			{
+				id: { type: 'string'}
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' },
+					user: User
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler: getAccount
+};
+
+
 export function	authRoutes(fastify)
 {
 	fastify.post('/register', registerOpts);
@@ -414,6 +455,8 @@ export function	authRoutes(fastify)
 	fastify.post('/validate-token', validateTokenOpts);
 	fastify.post('/token', tokenOpts);
 	fastify.post('/2fa', twoFactorAuthOpts);
+
+	fastify.get('/get-account', getAccountOpts);
 
 	fastify.put('/enable-2fa', enable2FAOpts);
 	fastify.put('/change-password', changePasswordOpts);
