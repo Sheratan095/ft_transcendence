@@ -108,6 +108,12 @@ const	newUserOpts =
 				username: { ...UsernamePolicy },
 				userId: { type: 'string' }
 			}
+		},
+
+		response:
+		{
+			201: User,
+			500: ErrorResponse,
 		}
 	},
 	preHandler: validateInternalApiKey,
@@ -135,14 +141,8 @@ const	getUserOpts =
 		response:
 		{
 			200: User,
-			404:
-			{
-				type: 'object',
-				properties:
-				{
-					error: { type: 'string' }
-				}
-			}
+			404: ErrorResponse,
+			400: ErrorResponse,
 		}
 	},
 	preHandler: validateInternalApiKey,
