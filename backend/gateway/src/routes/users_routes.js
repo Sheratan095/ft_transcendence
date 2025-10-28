@@ -56,7 +56,7 @@ export const	getUser = async (req, reply) =>
 	}
 }
 
-export const	updateUsername = async (req, reply) =>
+export const	updateUser = async (req, reply) =>
 {
 	try
 	{
@@ -85,7 +85,7 @@ export const	uploadAvatar = async (req, reply) =>
 		const	data = await req.file();
 		
 		if (!data)
-			return reply.code(400).send({ error: 'No file uploaded' });
+			return (reply.code(400).send({ error: 'No file uploaded' }));
 
 		// Create FormData to forward the file properly
 		const	FormData = (await import('form-data')).default;
@@ -107,15 +107,15 @@ export const	uploadAvatar = async (req, reply) =>
 			maxContentLength: Infinity
 		});
 
-		return reply.send(response.data);
+		return (reply.send(response.data));
 	}
 	catch (err)
 	{
 		console.log('Users service error:', err.message);
 
 		if (err.response)
-			return reply.code(err.response.status).send(err.response.data);
+			return (reply.code(err.response.status).send(err.response.data));
 
-		return reply.code(500).send({ error: 'Users service unavailable' });
+		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
 }

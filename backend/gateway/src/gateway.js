@@ -57,7 +57,7 @@ import {
 import {
 	getUsers,
 	getUser,
-	updateUsername,
+	updateUser,
 	uploadAvatar
 } from './routes/users_routes.js'
 
@@ -126,7 +126,7 @@ await fastify.register(async function (fastify)
 	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
 	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: enable2FARoute })
 	fastify.post('/users/upload-avatar', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: uploadAvatar })
-	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUsername })
+	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUser })
 });
 
 // 🟢 RELAXED RATE LIMITING: General user routes (low risk, read operations)
