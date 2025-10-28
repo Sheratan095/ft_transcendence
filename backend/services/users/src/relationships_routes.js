@@ -7,6 +7,7 @@ import {
 	rejectFriendRequest,
 	blockUser,
 	unblockUser,
+	cancelFriendRequest,
 	removeFriend
 } from './relationships_controllers.js';
 
@@ -27,52 +28,6 @@ const	withInternalAuth =
 	}
 };
 
-const	RelationshipsStatus =
-{
-	type: 'string',
-	enum: ['pending', 'accepted', 'rejected', 'blocked'],
-	errorMessage: {
-		enum: 'The relationship_status must be one of: pending, accepted, rejected, blocked.'
-	}
-};
-
-
-const	UserRelationship =
-{
-	type: 'object',
-	properties:
-	{
-		userId: { type: 'string' },
-		username: { type: 'string' },
-		relationship_status: { ...RelationshipsStatus },
-		created_at: { type: 'string', format: 'date-time' },
-		updated_at: { type: 'string', format: 'date-time' }
-	},
-};
-
-const	Friend =
-{
-	type: 'object',
-	properties:
-	{
-		userId: { type: 'string' },
-		username: { type: 'string' },
-		language: { type: 'string' },
-		friends_since: { type: 'string', format: 'date-time' }
-	},
-};
-
-const	IncomingRequest =
-{
-	type: 'object',
-	properties:
-	{
-		userId: { type: 'string' },
-		username: { type: 'string' },
-		created_at: { type: 'string', format: 'date-time' }
-	},
-};
-
 // Reusable error response schemas
 const	ErrorResponse =
 {
@@ -87,6 +42,53 @@ const	ErrorResponse =
 	additionalProperties: true // let Fastify include unexpected fields
 };
 
+const	RelationshipsStatus =
+{
+	type: 'string',
+	enum: ['pending', 'accepted', 'rejected', 'blocked'],
+	errorMessage: {
+		enum: 'The relationship_status must be one of: pending, accepted, rejected, blocked.'
+	}
+};
+
+const	UserRelationship =
+{
+	type: 'object',
+	properties:
+	{
+		requester_id: { type: 'string' },
+		target_id: { type: 'string' },
+		username: { type: 'string' },
+		relationship_status: { ...RelationshipsStatus },
+		created_at: { type: 'string', format: 'date-time' },
+		updated_at: { type: 'string', format: 'date-time' }
+	},
+};
+
+const	Friend =
+{
+	type: 'object',
+	properties:
+	{
+		userId: { type: 'string' }, // still returned as userId for frontend
+		username: { type: 'string' },
+		language: { type: 'string' },
+		friends_since: { type: 'string', format: 'date-time' }
+	},
+};
+
+const	IncomingRequest =
+{
+	type: 'object',
+	properties:
+	{
+		requester_id: { type: 'string' },
+		username: { type: 'string' },
+		created_at: { type: 'string', format: 'date-time' }
+	},
+};
+
+//----------------------------------Schema definitions----------------------------------
 
 const	getUserRelationshipsOpts =
 {
@@ -103,6 +105,7 @@ const	getUserRelationshipsOpts =
 				type: 'array',
 				items: UserRelationship
 			},
+			400: ErrorResponse,
 			500: ErrorResponse,
 		}
 	},
@@ -125,6 +128,7 @@ const	getFriendsOpts =
 				type: 'array',
 				items: Friend
 			},
+			400: ErrorResponse,
 			500: ErrorResponse,
 		}
 	},
@@ -147,6 +151,7 @@ const	getIncomingRequestsOpts =
 				type: 'array',
 				items: IncomingRequest
 			},
+			400: ErrorResponse,
 			500: ErrorResponse,
 		}
 	},
@@ -165,10 +170,10 @@ const	sendFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['friendId'],
+			required: ['target_id'],
 			properties:
 			{
-				friendId: { type: 'string' }
+				target_id: { type: 'string' }
 			}
 		},
 
@@ -202,10 +207,10 @@ const	acceptFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['friendId'],
+			required: ['requester_id'],
 			properties:
 			{
-				friendId: { type: 'string' }
+				requester_id: { type: 'string' }
 			}
 		},
 
@@ -219,6 +224,7 @@ const	acceptFriendRequestOpts =
 					message: { type: 'string' }
 				}
 			},
+			400: ErrorResponse,
 			404: ErrorResponse,
 			500: ErrorResponse
 		}
@@ -238,10 +244,10 @@ const	rejectFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['friendId'],
+			required: ['requester_id'],
 			properties:
 			{
-				friendId: { type: 'string' }
+				requester_id: { type: 'string' }
 			}
 		},
 
@@ -255,6 +261,7 @@ const	rejectFriendRequestOpts =
 					message: { type: 'string' }
 				}
 			},
+			400: ErrorResponse,
 			404: ErrorResponse,
 			500: ErrorResponse
 		}
@@ -274,10 +281,10 @@ const	blockUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['blockedId'],
+			required: ['target_id'],
 			properties:
 			{
-				blockedId: { type: 'string' }
+				target_id: { type: 'string' }
 			}
 		},
 
@@ -310,10 +317,10 @@ const	unblockUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['blockedId'],
+			required: ['target_id'],
 			properties:
 			{
-				blockedId: { type: 'string' }
+				target_id: { type: 'string' }
 			}
 		},
 
@@ -327,12 +334,49 @@ const	unblockUserOpts =
 					message: { type: 'string' }
 				}
 			},
+			400: ErrorResponse,
 			500: ErrorResponse
 		}
 	},
 	preHandler: validateInternalApiKey,
 	handler	: unblockUser
 };
+
+const	cancelFriendRequestOpts =
+{
+	schema:
+	{
+		description: 'Cancel an outgoing friend request.',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['target_id'],
+			properties:
+			{
+				target_id: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: cancelFriendRequest
+}
 
 const	removeFriendOpts =
 {
@@ -345,10 +389,10 @@ const	removeFriendOpts =
 		body:
 		{
 			type: 'object',
-			required: ['friendId'],
+			required: ['target_id'],
 			properties:
 			{
-				friendId: { type: 'string' }
+				target_id: { type: 'string' }
 			}
 		},
 
@@ -362,6 +406,7 @@ const	removeFriendOpts =
 					message: { type: 'string' }
 				}
 			},
+			400: ErrorResponse,
 			500: ErrorResponse
 		}
 	},
@@ -386,5 +431,6 @@ export function	relationshipsRoutes(fastify)
 	
 	// DELETE routes
 	fastify.delete('/relationships/unblock', unblockUserOpts);
-	fastify.delete('/relationships/remove', removeFriendOpts);
+	fastify.delete('/relationships/removeFriend', removeFriendOpts);
+	fastify.delete('/relationships/cancelFriendRequest', cancelFriendRequestOpts);
 }
