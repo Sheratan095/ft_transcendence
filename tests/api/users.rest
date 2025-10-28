@@ -14,8 +14,8 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:3000/users/user?id=6a1535bd-deb6-4af2-87ed-e027283aad5c
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMTUzNWJkLWRlYjYtNGFmMi04N2VkLWUwMjcyODNhYWQ1YyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU4NTU1MiwiZXhwIjoxNzYxNTg2NDUyfQ._5y9bBkh9Bu_3jIZspas56YLEx1q1xjz3Pi98QTmXas
+GET http://localhost:3000/users/user?id=dfaebfee-efc0-49b8-8aa3-5af548cd763b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImRmYWViZmVlLWVmYzAtNDliOC04YWEzLTVhZjU0OGNkNzYzYiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTY1OTczNiwiZXhwIjoxNzYxNjYwNjM2fQ.Pbhj2GZ_RL3O-e036sR46nG45X6Z6UGkuXmN66J4X-c
 Content-Type: application/json
 
 ###

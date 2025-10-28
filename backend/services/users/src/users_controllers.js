@@ -70,7 +70,20 @@ export const	getUser = async (req, reply) =>
 
 		console.log('Fetching user:', username || id);
 
-		return (reply.code(200).send(user));
+		// SQLite returns created_at as a string, not a Date object
+		// Map snake_case fields to camelCase for API response
+		const	response =
+		{
+			id: user.id,
+			username: user.username,
+			language: user.language,
+			createdAt: user.created_at, // Already a string in ISO format from SQLite
+			avatarUrl: user.avatar_url
+		};
+
+		console.log('User found:', response);
+
+		return (reply.code(200).send(response));
 	}
 	catch (err)
 	{
