@@ -17,3 +17,32 @@ Content-Type: application/json
 GET http://localhost:3000/users/user?id=6a1535bd-deb6-4af2-87ed-e027283aad5c
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMTUzNWJkLWRlYjYtNGFmMi04N2VkLWUwMjcyODNhYWQ1YyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU4NTU1MiwiZXhwIjoxNzYxNTg2NDUyfQ._5y9bBkh9Bu_3jIZspas56YLEx1q1xjz3Pi98QTmXas
 Content-Type: application/json
+
+###
+
+# ====== AVATAR UPLOAD & RETRIEVAL EXAMPLES ======
+
+# Step 1: Upload Avatar
+# Use curl for file upload (REST Client has limited multipart support)
+# Replace YOUR_JWT_TOKEN with your actual JWT token
+# Run in terminal:
+# curl -X POST http://localhost:3000/users/upload-avatar \
+#   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+#   -F "file=@/path/to/your/image.jpg"
+
+###
+
+# Step 2: Get your profile with avatar URL
+GET http://localhost:3000/users/user?id=6a1535bd-deb6-4af2-87ed-e027283aad5c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMTUzNWJkLWRlYjYtNGFmMi04N2VkLWUwMjcyODNhYWQ1YyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU4NTU1MiwiZXhwIjoxNzYxNTg2NDUyfQ._5y9bBkh9Bu_3jIZspas56YLEx1q1xjz3Pi98QTmXas
+
+# Response will include: { "id": "...", "username": "...", "avatar_url": "/avatars/userid_timestamp.jpg" }
+
+###
+
+# Step 3: Access the avatar image directly
+# Open in browser or use GET request:
+GET http://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_1730123456789.jpg
+
+# OR view it in browser:
+# http://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_1730123456789.jpg

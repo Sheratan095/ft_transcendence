@@ -8,6 +8,14 @@ await fastify.register(cors, {
   origin: '*'  // for testing only; restrict to your domain in production TO DO
 });
 
+// Register multipart plugin for file uploads
+import multipart from '@fastify/multipart';
+await fastify.register(multipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+  }
+});
+
 // Register rate limiting plugin (global: false means we'll apply it selectively)
 await fastify.register(import('@fastify/rate-limit'), {
   global: false
@@ -96,8 +104,7 @@ await fastify.register(async function (fastify)
 
 	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
 	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: enable2FARoute })
-	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUsername })
-	fastify.put('/users/update-avatar', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: uploadAvatar })
+	fastify.post('/users/upload-avatar', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: uploadAvatar })
 });
 
 // 🟢 RELAXED RATE LIMITING: General user routes (low risk, read operations)

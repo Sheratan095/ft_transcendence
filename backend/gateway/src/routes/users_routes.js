@@ -85,27 +85,35 @@ export const	uploadAvatar = async (req, reply) =>
 {
 	try
 	{
-		const	formData = new FormData();
-		formData.append('avatar', req.file);
+		// Forward the multipart request to users service
+		const	data = await req.file();
+		
+		if (!data)
+			return reply.code(400).send({ error: 'No file uploaded' });
 
-		const	response = await axios.put(`${process.env.USERS_SERVICE_URL}/update-avatar`, formData,
-		{
-			headers:
+		// Forward to users service with streaming
+		const	response = await axios.post(`${process.env.USERS_SERVICE_URL}/upload-avatar`,
+			data.file,
 			{
-				...formData.getHeaders(),
-				'x-internal-api-key': process.env.INTERNAL_API_KEY,
-				'x-user-data': JSON.stringify(req.user) // Pass authenticated user data
+				headers:
+				{
+					'content-type': data.mimetype,
+					'x-internal-api-key': process.env.INTERNAL_API_KEY,
+					'x-user-data': JSON.stringify(req.user)
+				},
+				maxBodyLength: Infinity,
+				maxContentLength: Infinity
 			}
-		})
+		);
 
-		return (reply.send(response.data))
+		return reply.send(response.data);
 	}
 	catch (err)
 	{
-		console.log('Users service error:', err.message)
+		console.log('Users service error:', err.message);
 
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
-		return (reply.code(500).send({ error: 'Users service unavailable' }))
+			return reply.code(err.response.status).send(err.response.data);
+		return reply.code(500).send({ error: 'Users service unavailable' });
 	}
 }

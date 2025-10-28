@@ -18,6 +18,8 @@ const	User =
 		username: { type: 'string' },
 		language: { type: 'string' },
 		avatarUrl: { type: 'string' },
+		email: { type: 'string' },
+		createdAt: { type: 'string', format: 'date-time' },
 	},
 };
 

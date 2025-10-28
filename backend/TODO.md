@@ -48,6 +48,7 @@
 [x] rename users table in auth
 [x] check logout
 [x] normalize uppercase/lower case in schemas properties
+[] add mail in to user search reply
 
 [x] 2FA
 	[x] Custom Otp mail
