@@ -49,6 +49,7 @@
 [x] check logout
 [x] normalize uppercase/lower case in schemas properties
 [x] add mail in to user search reply
+[] fix problem with search by username
 
 [x] 2FA
 	[x] Custom Otp mail
