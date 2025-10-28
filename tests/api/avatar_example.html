@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Upload & Display Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            border: 2px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #avatar-preview {
+            margin-top: 20px;
+            max-width: 200px;
+            max-height: 200px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👤 Avatar Upload & Display</h1>
+        
+        <div class="info message">
+            <strong>Note:</strong> Replace the JWT token below with your actual token
+        </div>
+
+        <div>
+            <label for="jwt-token">JWT Token:</label><br>
+            <input type="text" id="jwt-token" style="width: 100%; padding: 8px; margin: 5px 0;" 
+                   placeholder="Paste your JWT token here">
+        </div>
+
+        <h2>Upload Avatar</h2>
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/gif,image/webp">
+        <br>
+        <button onclick="uploadAvatar()">Upload Avatar</button>
+
+        <h2>Load Avatar</h2>
+        <button onclick="loadUserProfile()">Load My Profile & Avatar</button>
+
+        <div id="message"></div>
+
+        <div id="avatar-container" style="display: none;">
+            <h3>Your Avatar:</h3>
+            <img id="avatar-preview" alt="User Avatar">
+            <p>Avatar URL: <code id="avatar-url"></code></p>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3000';
+
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type} message">${message}</div>`;
+        }
+
+        async function uploadAvatar() {
+            const fileInput = document.getElementById('file-input');
+            const jwtToken = document.getElementById('jwt-token').value.trim();
+
+            if (!jwtToken) {
+                showMessage('❌ Please provide a JWT token', 'error');
+                return;
+            }
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                showMessage('❌ Please select an image file', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                showMessage('❌ Only JPEG, PNG, GIF, and WebP images are allowed', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                showMessage('⏳ Uploading avatar...', 'info');
+
+                const response = await fetch(`${BASE_URL}/users/upload-avatar`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('✅ Avatar uploaded successfully!', 'success');
+                    
+                    // Display the uploaded avatar
+                    displayAvatar(data.avatarUrl);
+                } else {
+                    showMessage(`❌ Upload failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`❌ Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadUserProfile() {
+            const jwtToken = document.getElementById('jwt-token').value.trim();
+
+            if (!jwtToken) {
+                showMessage('❌ Please provide a JWT token', 'error');
+                return;
+            }
+
+            try {
+                showMessage('⏳ Loading profile...', 'info');
+
+                // Extract user ID from JWT (simplified - in production, verify on backend)
+                const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+                const userId = payload.id;
+
+                const response = await fetch(`${BASE_URL}/users/user?id=${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                });
+
+                const user = await response.json();
+
+                if (response.ok) {
+                    if (user.avatarUrl) {
+                        showMessage('✅ Profile loaded!', 'success');
+                        displayAvatar(user.avatarUrl);
+                    } else {
+                        showMessage('ℹ️ Profile loaded, but no avatar set yet', 'info');
+                        document.getElementById('avatar-container').style.display = 'none';
+                    }
+                } else {
+                    showMessage(`❌ Failed to load profile: ${user.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayAvatar(avatarUrl) {
+            const avatarContainer = document.getElementById('avatar-container');
+            const avatarPreview = document.getElementById('avatar-preview');
+            const avatarUrlDisplay = document.getElementById('avatar-url');
+
+            const fullUrl = `${BASE_URL}${avatarUrl}`;
+            
+            avatarPreview.src = fullUrl;
+            avatarUrlDisplay.textContent = avatarUrl;
+            avatarContainer.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

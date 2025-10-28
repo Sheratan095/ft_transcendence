@@ -31,8 +31,6 @@ export const	getUser = async (req, reply) =>
 	// Forward request to users service with user data
 	try
 	{
-		const	username = req.params.username; // From URL parameter
-
 		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/user`,
 		{
 			params: req.query,
@@ -91,13 +89,23 @@ export const	uploadAvatar = async (req, reply) =>
 		if (!data)
 			return reply.code(400).send({ error: 'No file uploaded' });
 
-		// Forward to users service with streaming
+		// Create FormData to forward the file properly
+		const	FormData = (await import('form-data')).default;
+		const	formData = new FormData();
+		
+		// Append the file stream to FormData with proper metadata
+		formData.append('file', data.file, {
+			filename: data.filename,
+			contentType: data.mimetype
+		});
+
+		// Forward to users service with proper multipart/form-data
 		const	response = await axios.post(`${process.env.USERS_SERVICE_URL}/upload-avatar`,
-			data.file,
+			formData,
 			{
 				headers:
 				{
-					'content-type': data.mimetype,
+					...formData.getHeaders(),
 					'x-internal-api-key': process.env.INTERNAL_API_KEY,
 					'x-user-data': JSON.stringify(req.user)
 				},

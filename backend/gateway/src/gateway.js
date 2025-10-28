@@ -16,6 +16,14 @@ await fastify.register(multipart, {
   }
 });
 
+// Register static file serving for avatars (proxy to users service)
+import proxy from '@fastify/http-proxy';
+await fastify.register(proxy, {
+  upstream: process.env.USERS_SERVICE_URL,
+  prefix: '/avatars',
+  rewritePrefix: '/avatars',
+});
+
 // Register rate limiting plugin (global: false means we'll apply it selectively)
 await fastify.register(import('@fastify/rate-limit'), {
   global: false
