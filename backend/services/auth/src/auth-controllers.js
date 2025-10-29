@@ -68,7 +68,8 @@ export const	register = async (req, reply) =>
 
 		return (reply.code(201).send({
 			message: 'User registered successfully',
-			user: {
+			user:
+			{
 				id: user.id,
 				email: user.email
 			}
@@ -136,7 +137,8 @@ export const	login = async (req, reply) =>
 		return (reply.code(200).send({
 			message: 'Login successful',
 			tfaRequired: false,
-			user: {
+			user:
+			{
 				id: user.id,
 				email: user.email
 			}
@@ -323,7 +325,8 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 
 		return (reply.code(200).send({
 			message: '2FA verification successful',
-			user: {
+			user:
+			{
 				id: user.id,
 				email: user.email
 			},
