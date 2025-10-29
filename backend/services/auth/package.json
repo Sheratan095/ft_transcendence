@@ -13,17 +13,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "@fastify/jwt": "^10.0.0",
     "@fastify/swagger": "^9.5.2",
     "ajv-errors": "^3.0.0",
+    "axios": "^1.12.2",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.9",
     "sqlite3": "^5.1.7",
-    "uuid": "^13.0.0",
-    "axios": "^1.12.2"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "dotenv": "^16.4.5",

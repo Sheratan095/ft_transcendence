@@ -10,6 +10,12 @@ const	fastify = Fastify({
 	}
 });
 
+import cookie from "@fastify/cookie";
+fastify.register(cookie, {
+//    secret: process.env.COOKIE_SECRET, // for signed cookies (optional)
+//    Signed cookies allow the server to detect tampering, but they do not hide the data
+});
+
 // Load environment variables from .env file
 import dotenv from 'dotenv';
 dotenv.config();

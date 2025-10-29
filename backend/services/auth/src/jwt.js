@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { getExpirationDateByDays } from './auth-help.js';
+import ms from 'ms'; // optional helper to convert "15m" -> milliseconds
 
 export const decodeToken = (token, secret) =>
 {
@@ -64,4 +65,29 @@ export async function	generateNewTokens(user, authDb)
 export function	generateAccessToken(user)
 {
 	return (jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION}));
+}
+
+// Helper to set auth cookies
+export function	setAuthCookies(reply, newTokens)
+{
+	const	accessTokenMaxAge = ms(process.env.ACCESS_TOKEN_EXPIRATION) / 1000;
+	const	refreshTokenMaxAge = parseInt(process.env.REFRESH_TOKEN_EXPIRATION_DAYS, 10) * 24 * 60 * 60;
+
+	reply.setCookie('accessToken', newTokens.accessToken,
+	{
+		path: '/',
+		httpOnly: true,
+		secure: false, // For http TO DO set "true" in production with https
+		sameSite: 'none', // Frontend and backend are on different domains
+		maxAge: accessTokenMaxAge
+	});
+
+	reply.setCookie('refreshToken', newTokens.refreshToken,
+	{
+		path: '/',
+		httpOnly: true,
+		secure: false, // For http TO DO set "true" in production with https
+		sameSite: 'none', // Frontend and backend are on different domains
+		maxAge: refreshTokenMaxAge
+	});
 }

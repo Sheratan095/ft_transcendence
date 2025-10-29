@@ -24,6 +24,8 @@ app.register(import('@fastify/helmet'), {
 This blocks injected <script> from running, even if it appears.
 
 ❌  2. Store JWT in HttpOnly cookies AUTH SERVICE
+		=> then the client has to send the token in that way and the middlewhere token verification
+			has to be done on cookie.token
 
 Your API gateway should set:
 

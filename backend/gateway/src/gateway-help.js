@@ -8,6 +8,7 @@ dotenv.config()
 // This function is called before protected routes to verify user authentication
 export async function	authenticateJwtToken(request, reply)
 {
+	// TO DO now the TOKENS are HTTP-only cookies, extract from cookies instead of Authorization header
 	// Extract Authorization header and parse Bearer token
 	const	authHeader = request.headers['authorization']
 	const	token = authHeader && authHeader.split(' ')[1]

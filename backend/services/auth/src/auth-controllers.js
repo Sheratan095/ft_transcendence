@@ -1,6 +1,7 @@
-import { generateNewTokens, decodeToken} from './jwt.js';
+import { generateNewTokens, decodeToken, setAuthCookies} from './jwt.js';
 import { validator, isTokenExpired, extractUserData, getUserLanguage } from './auth-help.js';
 import { sendTwoFactorCode } from './2fa.js';
+
 import bcrypt from 'bcrypt';
 import axios from 'axios'
 
@@ -56,24 +57,20 @@ export const	register = async (req, reply) =>
 			console.log('Error creating user profile:', err.message);
 			// Continue with registration even if profile creation fails
 		}
-
-		console.log('User registered: ', user.id)
  
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
 
+		// Set tokens as HTTP-only cookies
+		setAuthCookies(reply, newTokens);
+
+		console.log('User registered: ', user.id);
+
 		return (reply.code(201).send({
 			message: 'User registered successfully',
-			user:
-			{
+			user: {
 				id: user.id,
 				email: user.email
-			},
-			tokens: 
-			{
-				accessToken: newTokens.accessToken,
-				refreshToken: newTokens.refreshToken,
-				expiration: newTokens.expiration
 			}
 		}));
 	}
@@ -129,23 +126,19 @@ export const	login = async (req, reply) =>
 			return (await sendTwoFactorCode(user, language, authDb, reply));
 		}
 
-		const	newTokens = await generateNewTokens(user, authDb);
+		const newTokens = await generateNewTokens(user, authDb);
+
+		// Set tokens as HTTP-only cookies
+		setAuthCookies(reply, newTokens);
 
 		console.log('User logged in: ', user.id);
 
 		return (reply.code(200).send({
 			message: 'Login successful',
 			tfaRequired: false,
-			user:
-			{
+			user: {
 				id: user.id,
 				email: user.email
-			},
-			tokens:
-			{
-				accessToken: newTokens.accessToken,
-				refreshToken: newTokens.refreshToken,
-				expiration: newTokens.expiration
 			}
 		}));
 	}
@@ -322,23 +315,18 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			return (reply.code(404).send({ error: 'User not found' }));
 
 		// Generate tokens for successful 2FA verification
-		const	newTokens = await generateNewTokens(user, authDb);
+		const newTokens = await generateNewTokens(user, authDb);
+
+		setAuthCookies(reply, newTokens);
 
 		console.log('2FA verification successful for user:', user.id);
 
 		return (reply.code(200).send({
 			message: '2FA verification successful',
-			user:
-			{
+			user: {
 				id: user.id,
 				email: user.email
 			},
-			tokens:
-			{
-				accessToken: newTokens.accessToken,
-				refreshToken: newTokens.refreshToken,
-				expiration: newTokens.expiration
-			}
 		}));
 	}
 	catch (err)

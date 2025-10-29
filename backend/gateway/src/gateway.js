@@ -5,7 +5,8 @@ const	fastify = Fastify({ logger: false })
 // Allows to receive requests from different origins
 import cors from '@fastify/cors';
 await fastify.register(cors, {
-  origin: '*'  // for testing only; restrict to your domain in production TO DO
+	origin: process.env.FRONTEND_URL, // Allow only the frontend domain
+ 	credentials: true // Allow cookies to be sent
 });
 
 // Register multipart plugin for file uploads
