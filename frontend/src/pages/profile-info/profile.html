@@ -35,11 +35,15 @@
                       <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                     </svg>
                   </label>
-                  <input type="file" 
-                         id="avatar-input" 
-                         name="avatar" 
-                         accept="image/*" 
-                         class="hidden">
+                  <label for="avatar-input" class="sr-only">Choose profile picture</label>
+                  <input name="avatar-input" 
+                        type="file" 
+                        id="avatar-input" 
+                        name="avatar" 
+                        accept="image/*" 
+                        title="Choose a profile picture" 
+                        aria-label="Choose a profile picture"
+                        class="hidden">
                 </div>
                 <p class="text-sm text-gray-500">Click the edit icon to change your profile picture</p>
               </div>
@@ -47,20 +51,15 @@
               <!-- User Info Section -->
               <div class="grid grid-cols-1 gap-6">
                 <div>
-                  <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-                  <div class="mt-1 flex rounded-md shadow-sm">
+                  <label class="block text-sm font-medium text-gray-700">Username</label>
+                  <div class="mt-1">
                     <input type="text" 
-                           name="username" 
+                           name="input-username" 
                            id="username-input" 
                            class="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                           placeholder="Enter your username">
+                           placeholder="Enter your new username">
                   </div>
                 </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Email</label>
-                  <div class="mt-1">
-                    <span id="email" class="block w-full px-3 py-2 text-gray-700 bg-gray-50 rounded-md sm:text-sm"></span>
                   </div>
                 </div>
 
@@ -71,11 +70,24 @@
                     <span id="username" class="block w-full px-3 py-2 text-gray-700 bg-gray-50 rounded-md sm:text-sm"></span>
                   </div>
                 </div>
+
+                                <!-- Enable  two factor authentication (email)-->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Two-Factor Authentication (2FA)</label>
+                  <div class="mt-1">
+                    <label class="flex items-center space-x-2">
+                      <input type="checkbox" id="enable-2fa" name="enable-2fa" class="rounded border-gray-300 text-blue-500 focus:border-blue-500 focus:ring-blue-500">
+                      <span class="text-gray-600">Enable Two-Factor Authentication</span>
+                    </label>
+                  </div>
+                </div>
+                
               </div>
+
 
               <!-- Submit Button -->
               <div class="flex justify-end">
-                <button type="submit" 
+                <button type="submit" id="submit-button" 
                         class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                   Save Changes
                 </button>

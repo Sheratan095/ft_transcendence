@@ -1,6 +1,13 @@
 // API base URL - adjust for your environment
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
 
+export interface User {
+    id: string;
+    username: string;
+    email: string;
+    avatarUrl?: string;
+}
+
 export function getAccessToken(): string | null {
   return localStorage.getItem('accessToken');
 }
@@ -56,6 +63,32 @@ export function isLoggedInClient(): boolean {
   return !isTokenExpired(token);
 }
 
+export async function fetchUserProfile(): Promise<User | null> {
+    const token = getAccessToken();
+    const userId = localStorage.getItem('userId');
+    console.log('Fetching profile for userId:', userId);
+    if (!token) {
+        window.location.href = 'pages/login/login.html';
+        return null;
+    }
+    try {
+            const response = await fetch(`${API_BASE}/users/user?id=${userId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const user = await response.json();
+        return user;
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+    }
+}
+
 // Robust server validation
 export async function isLoggedInServerValidate(): Promise<{ ok: boolean; user?: any; error?: string }> {
   const token = getAccessToken();
@@ -71,7 +104,6 @@ export async function isLoggedInServerValidate(): Promise<{ ok: boolean; user?: 
     });
     if (res.ok) {
       const body = await res.json();
-       console.log('validation response', body);
       return { ok: true, user: body };
     } else {
       return { ok: false, error: `server_${res.status}` };
