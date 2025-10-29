@@ -38,7 +38,7 @@
 [] XSS Attack
 
 [x] move username handling in to the user_profile service, update the databases too
-[] rename twoFactoruAuth in to 2FA where possible
+[x] rename twoFactoruAuth in to 2FA where possible
 [x] check for db decoration in auth.js/start()
 [x] login doesn't work
 [] delete user data? (GDPR)
