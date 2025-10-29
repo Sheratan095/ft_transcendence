@@ -6,7 +6,7 @@ DOM-based	React/Vue manipulating DOM unsafely	Never use innerHTML
 
 Your backend prevents the first two.
 
-❌  1. Use Security Headers (Important)
+❌  1. Use Security Headers (Important) GATEWAY
 
 Install fastify-helmet (CSP support included):
 npm i @fastify/helmet
@@ -23,7 +23,7 @@ app.register(import('@fastify/helmet'), {
 });
 This blocks injected <script> from running, even if it appears.
 
-❌  2. Store JWT in HttpOnly cookies
+❌  2. Store JWT in HttpOnly cookies AUTH SERVICE
 
 Your API gateway should set:
 
@@ -35,7 +35,7 @@ reply.setCookie("token", jwt, {
 });
 This prevents XSS from stealing the token.
 
-❌  3. Sanitize User-Generated Input
+❌  3. Sanitize User-Generated Input MICROSERVICES DB
 
 Install sanitizer:
 npm i sanitize-html
@@ -52,14 +52,14 @@ function cleanInput(text) {
 Use before storing to DB:
 const safeUsername = cleanInput(input.username);
 
-✅ 4. Never return raw HTML unless absolutely required
+✅ 4. Never return raw HTML unless absolutely required MICROSERVICES ROUTES
 
 Your API responses should be JSON only:
 reply.send({ username: safeUsername });
 
 No string HTML pages → no attack surface.
 
-✅ 5. Validate and Restrict Input Schemas
+✅ 5. Validate and Restrict Input Schemas MICROSERVICES ROUTES
 Fastify has built-in JSON schema validation:
 {
 	body: {
@@ -72,7 +72,7 @@ Fastify has built-in JSON schema validation:
 }
 This prevents big payload attacks or weird input.
 
-✅ 6. Protect DB from Injection (safe queries)
+✅ 6. Protect DB from Injection (safe queries) MICROSERVICES DB
 
 If you're using SQLite/Postgres — always parametrize:
 db.run("SELECT * FROM users WHERE id = ?", [id]);
@@ -80,7 +80,7 @@ db.run("SELECT * FROM users WHERE id = ?", [id]);
 Never:
 db.run("SELECT * FROM users WHERE id = " + id);
 
-❌  7. Important: XSS Is Mainly Defeated in the Frontend
+❌  7. Important: XSS Is Mainly Defeated in the FRONTEND 
 
 Frontends must:
 Never use innerHTML or v-html or dangerouslySetInnerHTML
