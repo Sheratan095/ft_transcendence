@@ -14,13 +14,13 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- status is a reserved keyword in SQL, so we use relationship_status instead
 CREATE TABLE IF NOT EXISTS user_relationships (
-    user1_id TEXT NOT NULL,
-    user2_id TEXT NOT NULL,
-	relationship_status TEXT NOT NULL CHECK (relationship_status IN ('pending', 'accepted', 'accepted', 'blocked')),
+    requester_id TEXT NOT NULL,
+    target_id TEXT NOT NULL,
+    relationship_status TEXT NOT NULL CHECK (relationship_status IN ('pending', 'accepted', 'rejected', 'blocked')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user1_id, user2_id),
-    CHECK (user1_id < user2_id),
-    FOREIGN KEY (user1_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (user2_id) REFERENCES users(id) ON DELETE CASCADE
+    PRIMARY KEY (requester_id, target_id),
+    CHECK (requester_id != target_id),
+    FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (target_id) REFERENCES users(id) ON DELETE CASCADE
 );

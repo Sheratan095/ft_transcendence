@@ -14,19 +14,19 @@ const	fastify = Fastify({
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { AuthDatabase } from './auth_db.js';
+import { AuthDatabase } from './auth-db.js';
 let		authDatabase;
 
 // Validate required environment variables
-import { checkEnvVariables } from './auth_help.js';
+import { checkEnvVariables } from './auth-help.js';
 checkEnvVariables(['ACCESS_TOKEN_SECRET', 'REFRESH_TOKEN_SECRET', 'INTERNAL_API_KEY', 'PORT', 'HASH_SALT_ROUNDS', 'ACCESS_TOKEN_EXPIRATION', 'USERS_SERVICE_URL']);
 
 // Setup Swagger documentation
-import { setupSwagger } from './auth_swagger.js';
+import { setupSwagger } from './auth-swagger.js';
 await setupSwagger(fastify);
 
 // Setup routes
-import { authRoutes } from './auth_routes.js';
+import { authRoutes } from './auth-routes.js';
 
 const	start = async () =>
 {

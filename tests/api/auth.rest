@@ -60,15 +60,15 @@ POST http://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "25402126-ff26-46ad-bd44-545a9d5dc387",
-  "otpCode": "606760"
+  "userId": "c9d90c36-ce10-4386-b9fc-7caaae892864",
+  "otpCode": "295237"
 }
 
 ###
 
 PUT http://localhost:3000/auth/enable-2fa
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjFiOGVmYWJjLTI2MTEtNGFhNC04NmFiLWI2YjcwMTAzZmFiYyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU2NjA0MiwiZXhwIjoxNzYxNTY2OTQyfQ.zlIqOZWOWtv08HTR_PbWYVfVjPZZQgKxz0ITki0XAXo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2LWNlMTAtNDM4Ni1iOWZjLTdjYWFhZTg5Mjg2NCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTY4ODYzMywiZXhwIjoxNzYxNjg5NTMzfQ.1KOzTVso2tiMYe2ZKqVwQkWwBt3RKQvys_h-TgXBCyU
 
 {
   "tfaEnabled": true

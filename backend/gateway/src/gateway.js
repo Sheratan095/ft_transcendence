@@ -34,15 +34,15 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 // Register aggregated documentation from all microservices, { hide: true } in routes' schema is used to exclude routes from Swagger docs
-import SwaggerAggregator from './swagger_aggregator.js';
+import SwaggerAggregator from './swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
 // Validate required environment variables
-import { checkEnvVariables } from './gateway_help.js';
+import { checkEnvVariables } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'PORT']);
 
-import { authenticateJwtToken } from './gateway_help.js';
+import { authenticateJwtToken } from './gateway-help.js';
 
 import {
 	loginRoute,
@@ -52,14 +52,27 @@ import {
 	verifyTwoFactorAuth,
 	changePasswordRoute,
 	enable2FARoute
-} from './routes/auth_routes.js'
+} from './routes/auth-routes.js'
 
 import {
 	getUsers,
 	getUser,
-	updateUsername,
+	updateUser,
 	uploadAvatar
-} from './routes/users_routes.js'
+} from './routes/users-routes.js'
+
+import {
+	getUserRelationships,
+	getFriends,
+	getIncomingRequests,
+	sendFriendRequest,
+	acceptFriendRequest,
+	rejectFriendRequest,
+	blockUser,
+	unblockUser,
+	cancelFriendRequest,
+	removeFriend
+} from './routes/relationships-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
@@ -113,7 +126,7 @@ await fastify.register(async function (fastify)
 	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
 	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: enable2FARoute })
 	fastify.post('/users/upload-avatar', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: uploadAvatar })
-	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUsername })
+	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUser })
 });
 
 // 🟢 RELAXED RATE LIMITING: General user routes (low risk, read operations)
@@ -129,6 +142,18 @@ await fastify.register(async function (fastify)
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUsers })
 	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUser })
+	
+	// RELATIONSHIPS routes
+	fastify.get('/relationships', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUserRelationships })
+	fastify.get('/relationships/friends', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getFriends })
+	fastify.get('/relationships/requests', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getIncomingRequests })
+	fastify.post('/relationships/request', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: sendFriendRequest })
+	fastify.put('/relationships/accept', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: acceptFriendRequest })
+	fastify.put('/relationships/reject', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: rejectFriendRequest })
+	fastify.put('/relationships/block', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: blockUser })
+	fastify.delete('/relationships/unblock', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: unblockUser })
+	fastify.delete('/relationships/removeFriend', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: removeFriend })
+	fastify.delete('/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: cancelFriendRequest })
 });
 
 // Server startup function with error handling

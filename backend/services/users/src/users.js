@@ -37,20 +37,20 @@ await fastify.register(fastifyStatic,
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { UsersDatabase } from './users_db.js';
+import { UsersDatabase } from './users-db.js';
 let		usersDatabase;
 
 // Validate required environment variables
-import { checkEnvVariables } from './users_help.js';
+import { checkEnvVariables } from './users-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'AUTH_SERVICE_URL']);
 
 // Setup Swagger documentation
-import { setupSwagger } from './users_swagger.js';
+import { setupSwagger } from './users-swagger.js';
 await setupSwagger(fastify);
 
 // Setup routes
-import { userRoutes } from './users_routes.js';
-import { relationshipsRoutes } from './relationships_routes.js';
+import { userRoutes } from './users-routes.js';
+import { relationshipsRoutes } from './relationships-routes.js';
 
 const	start = async () =>
 {

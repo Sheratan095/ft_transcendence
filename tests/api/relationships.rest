@@ -1,0 +1,81 @@
+### Variables
+@baseUrl = http://localhost:3000
+@apiKey = 1234
+@userId1 = user-id-1
+@userId2 = user-id-2
+
+@jwt = your-jwt-token-here
+
+### Get all relationships for a user
+GET {{baseUrl}}/relationships
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+
+### Get only friends (accepted relationships)
+GET {{baseUrl}}/relationships/friends
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+
+### Get incoming friend requests
+GET {{baseUrl}}/relationships/requests
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+
+### Send a friend request
+POST {{baseUrl}}/relationships/request
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "friendId": "{{userId2}}"
+}
+
+### Accept a friend request
+PUT {{baseUrl}}/relationships/accept
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "friendId": "{{userId2}}"
+}
+
+### Reject a friend request
+PUT {{baseUrl}}/relationships/reject
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "friendId": "{{userId2}}"
+}
+
+### Block a user
+PUT {{baseUrl}}/relationships/block
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "blockedId": "{{userId2}}"
+}
+
+### Unblock a user
+DELETE {{baseUrl}}/relationships/unblock
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+Content-Type: application/json
+
+{
+  "blockedId": "{{userId2}}"
+}
+
+### Remove a friend or cancel friend request
+DELETE {{baseUrl}}/relationships/remove
+x-internal-api-key: {{apiKey}}
+Authorization: Bearer {{jwt}}
+
+{
+  "friendId": "{{userId2}}"
+}

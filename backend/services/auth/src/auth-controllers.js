@@ -1,5 +1,5 @@
 import { generateNewTokens, decodeToken} from './jwt.js';
-import { validator, isTokenExpired, extractUserData, getUserLanguage } from './auth_help.js';
+import { validator, isTokenExpired, extractUserData, getUserLanguage } from './auth-help.js';
 import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 import axios from 'axios'

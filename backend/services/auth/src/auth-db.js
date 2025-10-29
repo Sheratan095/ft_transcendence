@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { promisify } from "util";
 import { mkdir, readFile } from "fs/promises";
-import {formatExpirationDate} from "./auth_help.js";
+import {formatExpirationDate} from "./auth-help.js";
 import path from "path";
 import { fileURLToPath } from 'url';
 

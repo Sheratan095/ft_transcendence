@@ -115,7 +115,7 @@
                         <mxPoint x="940" y="994" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="45" value="auth_db" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.data;fontFamily=Helvetica;fontSize=16;fontColor=default;aspect=fixed;" parent="1" vertex="1">
+                <mxCell id="45" value="auth-db" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.data;fontFamily=Helvetica;fontSize=16;fontColor=default;aspect=fixed;" parent="1" vertex="1">
                     <mxGeometry x="949" y="356.02" width="61" height="73.96" as="geometry"/>
                 </mxCell>
                 <mxCell id="46" value="user_db" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.data;fontFamily=Helvetica;fontSize=16;fontColor=default;aspect=fixed;" parent="1" vertex="1">
