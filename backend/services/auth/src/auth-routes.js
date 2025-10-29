@@ -12,17 +12,6 @@ import {
 
 import { validateInternalApiKey } from './auth-help.js';
 
-const	Tokens =
-{
-	type: 'object',
-	properties:
-	{
-		expiration: { type: 'string' },
-		accessToken: { type: 'string' },
-		refreshToken: { type: 'string' },
-	},
-}
-
 const	User = 
 {
 	type: 'object',
@@ -38,7 +27,7 @@ const	PasswordPolicy =
 {
 	type: 'string',
 	pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+])[A-Za-z\\d!@#$%^&*()_+]{8,24}$',
- 		errorMessage: {
+		errorMessage: {
 		pattern: 'Password must be 8–24 chars long and include upper, lower, number, and symbol.'
 	}
 };
@@ -73,7 +62,6 @@ const	WelcomeResponse =
 	properties:
 	{
 		message: { type: 'string' },
-		tokens: Tokens,
 		user: User
 	}
 };
@@ -84,7 +72,6 @@ const	LoginResponse =
 	properties:
 	{
 		message: { type: 'string' },
-		tokens: Tokens,
 		user: User,
 		tfaRequired: { type: 'boolean' },
 		userId: { type: 'string' }
@@ -104,8 +91,15 @@ const	withInternalAuth =
 		{
 			'x-internal-api-key': { type: 'string' }
 		}
-  }
+	}
 };
+
+const	withCookieAuth =
+{
+	security: [{ cookieAuth: [] }],
+};
+
+// ------------------------------ROUTES WITHOUT JWT PROTECTION-----------------------------
 
 const	registerOpts = 
 {
@@ -113,7 +107,7 @@ const	registerOpts =
 	{
 		description: 'Register a new user',
 
-		...withInternalAuth, // <— inserts both security + headers here (spread syntax)
+		...withInternalAuth,
 
 		body:
 		{
@@ -178,16 +172,7 @@ const	logoutOpts =
 		description: 'Logout a user by invalidating their refresh token',
 
 		...withInternalAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['refreshToken'],
-			properties:
-			{
-				refreshToken: { type: 'string' }
-			}
-		},
+		...withCookieAuth,
 
 		response:
 		{
@@ -215,16 +200,7 @@ const	tokenOpts =
 		description: 'Generate a new access token using a refresh token',
 
 		...withInternalAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['refreshToken'],
-			properties:
-			{
-				refreshToken: { type: 'string' }
-			}
-		},
+		...withCookieAuth, // Refresh token is here
 
 		response:
 		{
@@ -234,7 +210,6 @@ const	tokenOpts =
 				properties:
 				{
 					message: { type: 'string' },
-					tokens: Tokens
 				}
 			},
 			400: ErrorResponse,
@@ -287,6 +262,7 @@ const	enable2FAOpts =
 		description: 'Enable or disable Two-Factor Authentication (2FA) for a user',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -295,7 +271,7 @@ const	enable2FAOpts =
 			properties:
 			{
 				tfaEnabled: { type: 'boolean' }
-			},
+			},	
 		},
 
 		response:
@@ -327,6 +303,7 @@ const	changePasswordOpts =
 		description: 'Change user password. userId is added in JWT validation middleware.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -360,6 +337,8 @@ const	changePasswordOpts =
 
 //-----------------------------INTERAL ROUTES-----------------------------
 
+
+// TOKEN is passed in body since this route is called by other services (not browser)
 const	validateTokenOpts =
 {
 	schema:
@@ -417,7 +396,7 @@ const	getAccountOpts =
 		description: 'Get account details for the authenticated user',
 
 		...withInternalAuth,
-		
+
 		querystring:
 		{
 			type: 'object',

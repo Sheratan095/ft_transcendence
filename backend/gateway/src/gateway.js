@@ -5,7 +5,7 @@ const	fastify = Fastify({ logger: false })
 // Allows to receive requests from different origins
 import cors from '@fastify/cors';
 await fastify.register(cors, {
-	origin: process.env.FRONTEND_URL, // Allow only the frontend domain
+	origin: '*', // Allow all origins for now TO DO restrict in production with process.env.FRONTEND_URL
  	credentials: true // Allow cookies to be sent
 });
 

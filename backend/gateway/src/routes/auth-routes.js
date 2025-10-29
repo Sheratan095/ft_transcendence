@@ -7,7 +7,7 @@ function	getAuthHeaders(request)
 {
 	const	headers =
 	{
-		'x-internal-api-key': API_KEY
+		'x-internal-api-key': API_KEY,
 	};
 
 	if (request.user)
@@ -16,13 +16,23 @@ function	getAuthHeaders(request)
 	return (headers);
 }
 
+function	forwardCookies(reply, response)
+{
+	const	setCookie = response.headers['set-cookie'];	
+
+	if (setCookie)	
+		reply.header('Set-Cookie', setCookie);
+}
+
 export async function	loginRoute(request, reply)
 {
 	try
 	{
 		const	response = await axios.post(`${AUTH_SERVICE_URL}/login`, request.body, {
-			headers: getAuthHeaders(request)
+			headers: getAuthHeaders(request),
 		});
+
+		forwardCookies(reply, response);
 
 		return (reply.send(response.data))
 	}
@@ -42,8 +52,10 @@ export async function	registerRoute(request, reply)
 	try
 	{
 		const	response = await axios.post(`${AUTH_SERVICE_URL}/register`, request.body, {
-			headers: getAuthHeaders(request)
+			headers: getAuthHeaders(request),
 		});
+
+		forwardCookies(reply, response);
 
 		return (reply.send(response.data))
 	}
@@ -65,7 +77,8 @@ export async function	logoutRoute(request, reply)
 		// In Axios, during a DELETE request, the request body must be sent as the 'data' property in the config object
 		// unlike POST requests where the body is the second argument
 		const	response = await axios.delete(`${AUTH_SERVICE_URL}/logout`, {
-			headers: getAuthHeaders(request)
+			headers: getAuthHeaders(request),
+			withCredentials: true
 		});
 
 		return (reply.send(response.data))
@@ -86,8 +99,11 @@ export async function	tokenRoute(request, reply)
 	try
 	{
 		const response = await axios.post(`${AUTH_SERVICE_URL}/token`, request.body, {
-			headers: getAuthHeaders(request)
+			headers: getAuthHeaders(request),
+			withCredentials: true
 		});
+
+		forwardCookies(reply, response);
 
 		return (reply.send(response.data))
 	}
@@ -109,6 +125,8 @@ export async function	verifyTwoFactorAuth(request, reply)
 		const response = await axios.post(`${AUTH_SERVICE_URL}/2fa`, request.body, {
 			headers: getAuthHeaders(request)
 		});
+
+		forwardCookies(reply, response);
 
 		return (reply.send(response.data))
 	}

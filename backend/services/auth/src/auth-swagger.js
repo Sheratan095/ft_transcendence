@@ -16,10 +16,11 @@ export async function setupSwagger(fastify) {
 			consumes: ['application/json'],
 			produces: ['application/json'],
 			securityDefinitions: {
-				bearerAuth: {
+				cookieAuth: {
 					type: 'apiKey',
-					name: 'Authorization',
-					in: 'header'
+					name: 'accessToken',   // the cookie name
+					in: 'cookie',
+					description: 'HttpOnly cookie containing JWT access token'
 				},
 				internalApiKey: {
 					type: 'apiKey',

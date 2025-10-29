@@ -127,7 +127,7 @@ export const	login = async (req, reply) =>
 			return (await sendTwoFactorCode(user, language, authDb, reply));
 		}
 
-		const newTokens = await generateNewTokens(user, authDb);
+		const	newTokens = await generateNewTokens(user, authDb);
 
 		// Set tokens as HTTP-only cookies
 		setAuthCookies(reply, newTokens);
@@ -159,7 +159,7 @@ export const	logout = async (req, reply) =>
 {
 	try
 	{
-		const	refreshToken = req.body.refreshToken;
+		const	refreshToken = req.cookies && req.cookies.refreshToken;
 		const	authDb = req.server.authDb;
 
 		// Verify and decode token
@@ -172,6 +172,10 @@ export const	logout = async (req, reply) =>
 
 		// remove token from DB - use correct parameters: tokenId, userId, refresh_token
 		await authDb.deleteRefreshTokenById(storedToken.id);
+
+		// remove cookies from browser
+		reply.clearCookie('accessToken');
+		reply.clearCookie('refreshToken');
 
 		console.log('User logged out: ', decodedToken.id);
 
@@ -228,7 +232,7 @@ export const	token = async (req, reply) =>
 {
 	try
 	{
-		const	refreshToken = req.body.refreshToken;
+		const	refreshToken = req.cookies && req.cookies.refreshToken;
 		const	authDb = req.server.authDb;
 
 		// Verify JWT signature
@@ -248,18 +252,16 @@ export const	token = async (req, reply) =>
 		}
 
 		const	user = await authDb.getUserById(decodedToken.id);
+	
 		const	newTokens = await generateNewTokens(user, authDb);
+
+		// Set tokens as HTTP-only cookies
+		setAuthCookies(reply, newTokens);
 
 		console.log('New tokens generated for user: ', user.id);
 
 		return (reply.code(200).send({
 			message: 'New tokens generated successfully',
-			tokens:
-			{
-				accessToken: newTokens.accessToken,
-				refreshToken: newTokens.refreshToken,
-				expiration: newTokens.expiration
-			}
 		}));
 
 	}
@@ -340,7 +342,6 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 	}
 }
 
-// TO DO, check if it works, shuld be called form user_profile service
 export const	enable2FA = async (req, reply) =>
 {
 	try
