@@ -9,9 +9,9 @@ import {
 	unblockUser,
 	cancelFriendRequest,
 	removeFriend
-} from './relationships_controllers.js';
+} from './relationships-controllers.js';
 
-import { validateInternalApiKey } from './users_help.js';
+import { validateInternalApiKey } from './users-help.js';
 
 const	withInternalAuth =
 {

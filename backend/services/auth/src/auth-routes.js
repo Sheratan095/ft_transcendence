@@ -8,9 +8,9 @@ import {
 	enable2FA,
 	changePassword,
 	getAccount
-} from './auth_controllers.js';
+} from './auth-controllers.js';
 
-import { validateInternalApiKey } from './auth_help.js';
+import { validateInternalApiKey } from './auth-help.js';
 
 const	Tokens =
 {

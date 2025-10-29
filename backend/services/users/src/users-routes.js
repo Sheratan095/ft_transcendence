@@ -4,9 +4,9 @@ import {
 	createUser,
 	updateUser,
 	uploadAvatar,
-} from './users_controllers.js';
+} from './users-controllers.js';
 
-import { validateInternalApiKey } from './users_help.js';
+import { validateInternalApiKey } from './users-help.js';
 
 // User schema
 const	User =

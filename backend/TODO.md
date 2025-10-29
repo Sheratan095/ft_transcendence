@@ -62,7 +62,7 @@
 [x] should the language name depends on the preferred language of the user?
 	[x] seprate the template and the "language pack"
 [x] add user/update-user, to change userame and language => test if than the mail are sent in the chosen language
-[] rename files with dsadsa-sdada.js format
+[x] rename files with dsadsa-sdada.js format (kebab-case)
 [x] update db design for just id as pk
 
 [x] Prevent brute force	Add rate limiting (login attempts)	Stop attackers guessing passwords

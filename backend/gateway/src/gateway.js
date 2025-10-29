@@ -34,15 +34,15 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 // Register aggregated documentation from all microservices, { hide: true } in routes' schema is used to exclude routes from Swagger docs
-import SwaggerAggregator from './swagger_aggregator.js';
+import SwaggerAggregator from './swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
 // Validate required environment variables
-import { checkEnvVariables } from './gateway_help.js';
+import { checkEnvVariables } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'PORT']);
 
-import { authenticateJwtToken } from './gateway_help.js';
+import { authenticateJwtToken } from './gateway-help.js';
 
 import {
 	loginRoute,
@@ -52,14 +52,14 @@ import {
 	verifyTwoFactorAuth,
 	changePasswordRoute,
 	enable2FARoute
-} from './routes/auth_routes.js'
+} from './routes/auth-routes.js'
 
 import {
 	getUsers,
 	getUser,
 	updateUser,
 	uploadAvatar
-} from './routes/users_routes.js'
+} from './routes/users-routes.js'
 
 import {
 	getUserRelationships,
@@ -72,7 +72,7 @@ import {
 	unblockUser,
 	cancelFriendRequest,
 	removeFriend
-} from './routes/relationships_routes.js'
+} from './routes/relationships-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)

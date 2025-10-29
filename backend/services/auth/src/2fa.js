@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getExpirationDateByMinutes } from './auth_help.js';
+import { getExpirationDateByMinutes } from './auth-help.js';
 import { getLanguagePack } from './email_templates/language_packs.js';
 
 const	__filename = fileURLToPath(import.meta.url);

@@ -1,4 +1,4 @@
-import { extractUserData } from './users_help.js';
+import { extractUserData } from './users-help.js';
 
 export async function	getUserRelationships(req, reply)
 {

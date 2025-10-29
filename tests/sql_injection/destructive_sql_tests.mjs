@@ -6,7 +6,7 @@
  * This script tests the most dangerous SQL injection scenarios
  */
 
-import { AuthDatabase } from '../../backend/services/auth/src/auth_db.js';
+import { AuthDatabase } from '../../backend/services/auth/src/auth-db.js';
 import fs from 'fs/promises';
 import path from 'path';
 

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { getExpirationDateByDays } from './auth_help.js';
+import { getExpirationDateByDays } from './auth-help.js';
 
 export const decodeToken = (token, secret) =>
 {
