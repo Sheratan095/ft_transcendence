@@ -14,9 +14,6 @@ export class Header {
     this.attachElements();
     this.attachHandlers();
     this.showProfileIfLoggedIn();
-    console.log("Login status" + isLoggedInClient());
-    console.log("Token: " + getAccessToken());
-    console.log("userId: " + localStorage.getItem('userId'));
   }
 
   private createHeaderHTML() {

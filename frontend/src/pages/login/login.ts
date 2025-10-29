@@ -70,12 +70,12 @@ if (!form || !resultEl) {
       console.log('login response', res, body);
 
       if (res.ok) {
-        // if (body.tfaRequired == true) {
-        //   resultEl.textContent = 'Two-factor authentication required. Please enter your 2FA code.';
-        //   resultEl.className = 'text-sm mt-2 text-center text-yellow-600';
-        //   // Here you would typically show a 2FA input field and handle that separately.
-        //   return;
-        // }
+        if (body.tfaRequired == true) {
+          resultEl.textContent = 'Two-factor authentication required. Please enter your 2FA code.';
+          resultEl.className = 'text-sm mt-2 text-center text-yellow-600';
+          // Here you would typically show a 2FA input field and handle that separately.
+          return;
+        }
         // expected response: { accessToken, refreshToken, user? }
         if (body && body.tokens.accessToken) localStorage.setItem('accessToken', body.tokens.accessToken);
         if (body && body.tokens.refreshToken) localStorage.setItem('refreshToken', body.tokens.accessToken);
