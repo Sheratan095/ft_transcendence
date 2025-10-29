@@ -6,7 +6,7 @@ DOM-based	React/Vue manipulating DOM unsafely	Never use innerHTML
 
 Your backend prevents the first two.
 
-❌  1. Use Security Headers (Important) GATEWAY
+✅ 1. Use Security Headers (Important) GATEWAY
 
 Install fastify-helmet (CSP support included):
 npm i @fastify/helmet

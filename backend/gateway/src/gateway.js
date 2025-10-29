@@ -16,6 +16,22 @@ await fastify.register(multipart, {
   }
 });
 
+// collection of middleware functions for Node.js designed to
+// 	secure web applications by setting crucial HTTP headers
+import helmet from "@fastify/helmet";
+fastify.register(helmet,
+{
+	contentSecurityPolicy:
+	{
+		directives: {
+			defaultSrc: ["'self'"],
+			scriptSrc: ["'self'"],
+			objectSrc: ["'none'"],
+			baseUri: ["'self'"],
+		},
+	},
+});
+
 // Register static file serving for avatars (proxy to users service)
 import proxy from '@fastify/http-proxy';
 await fastify.register(proxy, {
