@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getExpirationDateByMinutes } from './auth-help.js';
-import { getLanguagePack } from './email_templates/language_packs.js';
+import { getLanguagePack } from './email-templates/language-packs.js';
 
 const	__filename = fileURLToPath(import.meta.url);
 const	__dirname = path.dirname(__filename);
@@ -56,7 +56,7 @@ export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 	try
 	{
 		// Use the single template file
-		const	templatePath = path.join(__dirname, 'email_templates', 'otp_template.html');
+		const	templatePath = path.join(__dirname, 'email-templates', 'otp-template.html');
 		const	htmlTemplate = fs.readFileSync(templatePath, 'utf8');
 		
 		// Generate security points HTML
