@@ -420,9 +420,7 @@ export const	validateToken = async (req, reply) =>
 {
 	try
 	{
-		console.log('Validating token request');
-		const	token = req.cookies && req.cookies.token;
-		console.log('Validating token:', token);
+		const	token = req.cookies && req.cookies.accessToken;
 
 		// verify and decode ACCESS token (not refresh token!)
 		const	decodedToken = decodeToken(token, process.env.ACCESS_TOKEN_SECRET);
