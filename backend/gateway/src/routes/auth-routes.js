@@ -77,9 +77,14 @@ export async function	logoutRoute(request, reply)
 		// In Axios, during a DELETE request, the request body must be sent as the 'data' property in the config object
 		// unlike POST requests where the body is the second argument
 		const	response = await axios.delete(`${AUTH_SERVICE_URL}/logout`, {
-			headers: getAuthHeaders(request),
+			headers: {
+					...getAuthHeaders(request),
+					cookie: request.headers.cookie // <-- THIS LINE IS REQUIRED
+				},
 			withCredentials: true
 		});
+
+		forwardCookies(reply, response);
 
 		return (reply.send(response.data))
 	}
