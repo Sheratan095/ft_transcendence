@@ -87,8 +87,6 @@ export const	getUser = async (req, reply) =>
 			createdAt: user.created_at, // Already a string in ISO format from SQLite
 		};
 
-		console.log('GetUser response:', response);
-
 		return (reply.code(200).send(response));
 	}
 	catch (err)
