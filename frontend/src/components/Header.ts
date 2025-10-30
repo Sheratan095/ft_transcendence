@@ -1,5 +1,7 @@
 import { isLoggedInClient, isLoggedInServerValidate, getAccessToken, clearTokens, fetchUserProfile } from '../lib/auth';
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000';
+
 export class Header {
   private profileIcon: HTMLImageElement | null = null;
   private loginLink: HTMLAnchorElement | null = null;
@@ -121,7 +123,7 @@ export class Header {
 
   private async doLogout() {
       try {
-        await fetch('http://localhost:3000/auth/logout', {
+        await fetch(`${API_BASE}/auth/logout`, {
           method: 'DELETE',
           credentials: 'include',
         });
