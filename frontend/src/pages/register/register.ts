@@ -47,8 +47,8 @@ if (!form || !resultEl) {
       try { body = await res.json(); } catch { body = null; }
 
       if (res.ok) {
-        if (body && body.tokens.accessToken) localStorage.setItem('accessToken', body.tokens.accessToken);
-        if (body && body.tokens.refreshToken) localStorage.setItem('refreshToken', body.tokens.accessToken);
+        // if (body && body.tokens.accessToken) localStorage.setItem('accessToken', body.tokens.accessToken);
+        // if (body && body.tokens.refreshToken) localStorage.setItem('refreshToken', body.tokens.accessToken);
         if (body && body.user.id) localStorage.setItem('userId', body.user.id);
         resultEl.textContent = 'Registration successful.';
         resultEl.className = 'text-sm mt-2 text-center text-green-600';

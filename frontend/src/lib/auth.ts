@@ -64,20 +64,20 @@ export function isLoggedInClient(): boolean {
 }
 
 export async function fetchUserProfile(): Promise<User | null> {
-    const token = getAccessToken();
+    // const token = getAccessToken();
     const userId = localStorage.getItem('userId');
     console.log('Fetching profile for userId:', userId);
-    if (!token) {
-        window.location.href = 'pages/login/login.html';
-        return null;
-    }
+    // if (!token) {
+    //     window.location.href = 'pages/login/login.html';
+    //     return null;
+    // }
     try {
             const response = await fetch(`${API_BASE}/users/user?id=${userId}`, {
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
+                'credentials': 'include'
             }
         });
+        console.log('Profile fetch response:', response);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

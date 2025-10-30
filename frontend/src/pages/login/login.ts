@@ -77,13 +77,16 @@ if (!form || !resultEl) {
           return;
         }
         // expected response: { accessToken, refreshToken, user? }
-        if (body && body.tokens.accessToken) localStorage.setItem('accessToken', body.tokens.accessToken);
-        if (body && body.tokens.refreshToken) localStorage.setItem('refreshToken', body.tokens.accessToken);
+        // if (body && body.tokens.accessToken) localStorage.setItem('accessToken', body.tokens.accessToken);
+        // if (body && body.tokens.refreshToken) localStorage.setItem('refreshToken', body.tokens.accessToken);
         if (body && body.user.id) localStorage.setItem('userId', body.user.id);
+
+        console.log('Storing userId in localStorage:', body);
+
         resultEl.textContent = 'Login successful.';
         resultEl.className = 'text-sm mt-2 text-center text-green-600';
         // redirect to root or protected page
-        setTimeout(() => { window.location.href = '/'; }, 600);
+        // setTimeout(() => { window.location.href = '/'; }, 600);
       } else {
         const message = (body && (body.message || body.error)) || res.statusText || `Login failed (${res.status})`;
         resultEl.textContent = message;

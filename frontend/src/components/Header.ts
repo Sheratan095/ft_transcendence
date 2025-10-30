@@ -1,4 +1,4 @@
-import { isLoggedInClient, isLoggedInServerValidate, getAccessToken, clearTokens } from '../lib/auth';
+import { isLoggedInClient, isLoggedInServerValidate, getAccessToken, clearTokens, fetchUserProfile } from '../lib/auth';
 
 export class Header {
   private profileIcon: HTMLImageElement | null = null;
@@ -14,6 +14,7 @@ export class Header {
     this.attachElements();
     this.attachHandlers();
     this.showProfileIfLoggedIn();
+    fetchUserProfile();
   }
 
   private createHeaderHTML() {

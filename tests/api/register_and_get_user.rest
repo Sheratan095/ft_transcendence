@@ -1,0 +1,18 @@
+# Register a new user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "marco",
+  "email": "ceccarellim7@gmail.com",
+  "password": "SecurePass!234"
+}
+
+###
+# Get user by id using cookie authentication
+GET http://localhost:3000/users/user?username=marco
+Cookie: accessToken= Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjNmM2YyYWVmLTA0NzQtNDIwMi1iNTUxLTNhNzQwNzRmMDMxYiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTgxNjgxMiwiZXhwIjoxNzYxODE3NzEyfQ.v-_WsQhdQtFZi1_H_lF8Tza3cWjJnipgVyZWyx7F6mg
+
+###
+# (Optional) Replace YOUR_JWT_TOKEN_HERE with a valid JWT for testing
+# You can obtain a JWT by logging in or registering, depending on your auth flow.
