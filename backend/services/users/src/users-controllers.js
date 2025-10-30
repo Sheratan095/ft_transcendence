@@ -82,10 +82,12 @@ export const	getUser = async (req, reply) =>
 			id: user.id,
 			username: user.username,
 			language: user.language,
-			createdAt: user.created_at, // Already a string in ISO format from SQLite
 			avatarUrl: user.avatar_url,
-			email: account.email
+			email: account.email,
+			createdAt: user.created_at, // Already a string in ISO format from SQLite
 		};
+
+		console.log('GetUser response:', response);
 
 		return (reply.code(200).send(response));
 	}

@@ -80,6 +80,7 @@ export async function fetchUserProfile(): Promise<User | null> {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const user = await response.json();
+        console.log('Fetched user body:', user);
         return user;
     } catch (error) {
         console.error('Error fetching profile:', error);
