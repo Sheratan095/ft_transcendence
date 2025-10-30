@@ -5,6 +5,9 @@ export default defineConfig({
   server: {
     port: 3004,
     strictPort: true,
+    proxy: {
+      '/api': 'http://localhost:3000'
+    }
   },
   resolve: {
     alias: {

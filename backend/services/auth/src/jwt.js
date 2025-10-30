@@ -77,7 +77,7 @@ export function	setAuthCookies(reply, newTokens)
 	{
 		path: '/',
 		httpOnly: true,
-		secure: false, // For http TO DO set "true" in production with https
+		secure: true, // For http TO DO set "true" in production with https
 		sameSite: 'none', // Frontend and backend are on different domains
 		maxAge: accessTokenMaxAge
 	});
@@ -86,7 +86,7 @@ export function	setAuthCookies(reply, newTokens)
 	{
 		path: '/',
 		httpOnly: true,
-		secure: false, // For http TO DO set "true" in production with https
+		secure: true, // For http TO DO set "true" in production with https
 		sameSite: 'none', // Frontend and backend are on different domains
 		maxAge: refreshTokenMaxAge
 	});
