@@ -1,9 +1,10 @@
-import { generateNewTokens, decodeToken, setAuthCookies} from './jwt.js';
+import { generateNewTokens, decodeToken, setAuthCookies, clearAuthCookies} from './jwt.js';
 import { validator, isTokenExpired, extractUserData, getUserLanguage } from './auth-help.js';
 import { sendTwoFactorCode } from './2fa.js';
 
 import bcrypt from 'bcrypt';
 import axios from 'axios'
+import { clear } from 'console';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
 // making it more difficult for attackers to use precomputed tables (like rainbow tables) to crack passwords.
@@ -173,9 +174,7 @@ export const	logout = async (req, reply) =>
 		// remove token from DB - use correct parameters: tokenId, userId, refresh_token
 		await authDb.deleteRefreshTokenById(storedToken.id);
 
-		// remove cookies from browser
-		reply.clearCookie('accessToken');
-		reply.clearCookie('refreshToken');
+		clearAuthCookies(reply);
 
 		console.log('User logged out: ', decodedToken.id);
 

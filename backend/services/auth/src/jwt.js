@@ -91,3 +91,20 @@ export function	setAuthCookies(reply, newTokens)
 		maxAge: refreshTokenMaxAge
 	});
 }
+
+export function	clearAuthCookies(reply)
+{
+	reply.clearCookie('accessToken', {
+		path: '/',
+		httpOnly: true,
+		secure: true, // must match how it was originally set
+		sameSite: 'none',
+	});
+
+	reply.clearCookie('refreshToken', {
+		path: '/',
+		httpOnly: true,
+		secure: true,
+		sameSite: 'none',
+	});
+}
