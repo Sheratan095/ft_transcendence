@@ -14,7 +14,6 @@ export class Header {
     this.attachElements();
     this.attachHandlers();
     this.showProfileIfLoggedIn();
-    fetchUserProfile();
   }
 
   private createHeaderHTML() {
@@ -38,6 +37,10 @@ export class Header {
                 <button id="logout-btn" 
                   class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                   Logout
+                </button>
+                <button id="clear-userid" 
+                  class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  Clear User ID
                 </button>
               </div>
             </div>
@@ -78,26 +81,31 @@ export class Header {
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => this.doLogout());
     }
+
+    // Clear User ID handler
+    const clearUserIdBtn = document.getElementById('clear-userid');
+    if (clearUserIdBtn) {
+      clearUserIdBtn.addEventListener('click', () => {
+        localStorage.removeItem('userId');
+        alert('User ID cleared from localStorage.');
+      });
+    }
   }
 
   private async showProfileIfLoggedIn() {
-    if (isLoggedInClient()) {
-      this.showProfileUI();
       try {
-        const validation = await isLoggedInServerValidate();
-        if (!validation.ok) {
-          console.warn('Server validation failed:', validation.error);
+        const user = await fetchUserProfile();
+        if (!user) {
+          console.warn('Server validation failed:', user);
           this.hideProfileUI();
-        } else if (validation.user?.avatar) {
+        } else if (user) {
           // Update avatar if available
-          this.profileIcon!.src = validation.user.avatar;
+          this.showProfileUI();
+          this.profileIcon!.src = user.avatarUrl || '../../assets/placeholder-avatar.jpg';
         }
       } catch (err) {
         console.warn('Validation request failed:', err);
       }
-    } else {
-      this.hideProfileUI();
-    }
   }
 
   private showProfileUI() {
@@ -112,21 +120,18 @@ export class Header {
   }
 
   private async doLogout() {
-    const token = getAccessToken();
-    if (token) {
       try {
         await fetch('http://localhost:3000/auth/logout', {
           method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          credentials: 'include',
         });
       } catch (err) {
         // Ignore network errors during logout
+        console.warn('Logout request failed:', err);
       }
-    }
-    clearTokens();
+    console.log('Logging out user, clearing tokens and redirecting to login page.');
+    //localStorage.removeItem('userId');
     this.hideProfileUI();
-    window.location.href = './pages/login/login.html';
+    //window.location.href = './pages/login/login.html';
   }
 }
