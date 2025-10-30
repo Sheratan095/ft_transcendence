@@ -6,6 +6,7 @@ const	fastify = Fastify({ logger: false })
 import cors from '@fastify/cors';
 await fastify.register(cors, {
 	origin: process.env.FRONTEND_URL,
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
  	credentials: true // Allow cookies to be sent
 });
 
