@@ -4,13 +4,11 @@ import { sendTwoFactorCode } from './2fa.js';
 
 import bcrypt from 'bcrypt';
 import axios from 'axios'
-import { clear } from 'console';
 
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
 // making it more difficult for attackers to use precomputed tables (like rainbow tables) to crack passwords.
 // or crack one password and then be able to crack all other passwords with the same hash.
 // More rounds means more security but also more processing time.
-
 export const	register = async (req, reply) => 
 {
 	try
