@@ -172,7 +172,6 @@ const	logoutOpts =
 		description: 'Logout a user by invalidating their refresh token',
 
 		...withInternalAuth,
-		...withCookieAuth,
 
 		response:
 		{
@@ -347,16 +346,7 @@ const	validateTokenOpts =
 		description: 'Validate an access token and retrieve the associated user ID',
 
 		...withInternalAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['token'],
-			properties:
-			{
-				token: { type: 'string' }
-			}
-		},
+		...withCookieAuth,
 
 		response:
 		{

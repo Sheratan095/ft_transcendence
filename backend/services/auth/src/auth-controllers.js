@@ -191,40 +191,6 @@ export const	logout = async (req, reply) =>
 	}
 };
 
-// Used just to validate access to protected routes
-export const	validateToken = async (req, reply) =>
-{
-	try
-	{
-		const	token = req.body.token;
-
-		// verify and decode ACCESS token (not refresh token!)
-		const	decodedToken = decodeToken(token, process.env.ACCESS_TOKEN_SECRET);
-
-		// Return the complete user data from the token
-		return reply.code(200).send({
-			message: 'Token is valid', 
-			valid: true,
-			user:
-			{
-				id: decodedToken.id,
-				email: decodedToken.email
-			}
-		});
-	}
-	catch (err)
-	{
-		console.log('Token validation error:', err.message);
-		
-		if (err.name === 'TokenExpiredError')
-			return (reply.code(401).send({error: 'Token has expired' }));
-		else if (err.name === 'JsonWebTokenError')
-			return (reply.code(401).send({error: 'Invalid token' }));
-
-		return (reply.code(500).send({ error: 'Internal server error' }));
-	}
-};
-
 export const	token = async (req, reply) =>
 {
 	try
@@ -417,6 +383,8 @@ export const	changePassword = async (req, reply) =>
 	}
 }
 
+// ------------------------------- INTERNAL ROUTES -------------------------------
+
 export const	getAccount = async (req, reply) =>
 {
 	try
@@ -446,3 +414,39 @@ export const	getAccount = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+// Used just to validate access to protected routes
+export const	validateToken = async (req, reply) =>
+{
+	try
+	{
+		console.log('Validating token request');
+		const	token = req.cookies && req.cookies.token;
+		console.log('Validating token:', token);
+
+		// verify and decode ACCESS token (not refresh token!)
+		const	decodedToken = decodeToken(token, process.env.ACCESS_TOKEN_SECRET);
+
+		// Return the complete user data from the token
+		return reply.code(200).send({
+			message: 'Token is valid', 
+			valid: true,
+			user:
+			{
+				id: decodedToken.id,
+				email: decodedToken.email
+			}
+		});
+	}
+	catch (err)
+	{
+		console.log('Token validation error:', err.message);
+		
+		if (err.name === 'TokenExpiredError')
+			return (reply.code(401).send({error: 'Token has expired' }));
+		else if (err.name === 'JsonWebTokenError')
+			return (reply.code(401).send({error: 'Invalid token' }));
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+};

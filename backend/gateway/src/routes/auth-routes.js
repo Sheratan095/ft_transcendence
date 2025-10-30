@@ -70,6 +70,7 @@ export async function	registerRoute(request, reply)
 	}
 }
 
+// Need the refresh token from cookies
 export async function	logoutRoute(request, reply)
 {
 	try
@@ -79,7 +80,7 @@ export async function	logoutRoute(request, reply)
 		const	response = await axios.delete(`${AUTH_SERVICE_URL}/logout`, {
 			headers: {
 					...getAuthHeaders(request),
-					cookie: request.headers.cookie // <-- THIS LINE IS REQUIRED
+					cookie: request.headers.cookie
 				},
 			withCredentials: true
 		});
@@ -99,12 +100,16 @@ export async function	logoutRoute(request, reply)
 	}
 }
 
+// Need the refresh token from cookies
 export async function	tokenRoute(request, reply)
 {
 	try
 	{
 		const response = await axios.post(`${AUTH_SERVICE_URL}/token`, request.body, {
-			headers: getAuthHeaders(request),
+			headers: {
+					...getAuthHeaders(request),
+					cookie: request.headers.cookie
+				},
 			withCredentials: true
 		});
 
@@ -146,11 +151,11 @@ export async function	verifyTwoFactorAuth(request, reply)
 	}
 }
 
-export async function	changePasswordRoute(request, reply)
+export async function	enable2FARoute(request, reply)
 {
 	try
 	{
-		const	response = await axios.put(`${AUTH_SERVICE_URL}/change-password`, request.body, {
+		const	response = await axios.put(`${AUTH_SERVICE_URL}/enable-2fa`, request.body, {
 			headers: getAuthHeaders(request)
 		});
 
@@ -167,11 +172,11 @@ export async function	changePasswordRoute(request, reply)
 	}
 }
 
-export async function	enable2FARoute(request, reply)
+export async function	changePasswordRoute(request, reply)
 {
 	try
 	{
-		const	response = await axios.put(`${AUTH_SERVICE_URL}/enable-2fa`, request.body, {
+		const	response = await axios.put(`${AUTH_SERVICE_URL}/change-password`, request.body, {
 			headers: getAuthHeaders(request)
 		});
 

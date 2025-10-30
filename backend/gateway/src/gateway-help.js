@@ -8,9 +8,6 @@ dotenv.config()
 // This function is called before protected routes to verify user authentication
 export async function	authenticateJwtToken(request, reply)
 {
-	// Get token from cookies
-	const	token = request.cookies && request.cookies.accessToken;
-
 	// Return 401 if no token provided
 	if (token == null)
 		return (reply.code(401).send({ error: 'Authorization header required' }))
@@ -19,11 +16,13 @@ export async function	authenticateJwtToken(request, reply)
 	{
 		// Call auth service to validate the token with API key
 		const	response = await axios.post(`${process.env.AUTH_SERVICE_URL}/validate-token`, 
-			{token: token},
 			{
 				headers: {
-					'x-internal-api-key': process.env.INTERNAL_API_KEY
-				}
+					'x-internal-api-key': process.env.INTERNAL_API_KEY,
+					cookie: request.headers.cookie
+
+				},
+				withCredentials: true
 			}
 		)
 
