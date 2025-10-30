@@ -44,7 +44,7 @@ export const	createUser = async (req, reply) =>
 	catch (err)
 	{
 		console.log('CreateUser error:', err.message);
-		
+
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

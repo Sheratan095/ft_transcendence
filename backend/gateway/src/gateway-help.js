@@ -29,9 +29,6 @@ export async function	authenticateJwtToken(request, reply)
 	}
 	catch (err)
 	{
-		// Log authentication errors for debugging
-		console.log('Auth service error:', err.message)
-
 		// Forward auth service error messages if available
 		if (err.response && err.response.data)
 			return (reply.code(err.response.status).send(err.response.data))

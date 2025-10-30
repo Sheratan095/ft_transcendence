@@ -112,3 +112,26 @@ export async function	getUserLanguage(userId)
 	const	reply = await axios.get(`${process.env.USERS_SERVICE_URL}/user?id=${userId}`, { headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
 	return (reply.data.language);
 }
+
+export async function	usernameExists(username)
+{
+	try
+	{
+		const	usernameCheck = await axios.get(`${process.env.USERS_SERVICE_URL}/user?username=${username}`,
+		{
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }
+		});
+
+		// If we get any response (not 404), username already exists
+		return (true);
+	}
+	catch (err)
+	{
+		// If error is 404, username does not exist
+		if (err.response && err.response.status === 404)
+			return (false);
+
+		// For other errors, rethrow
+		throw (err);
+	}
+}

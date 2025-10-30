@@ -65,7 +65,12 @@ export async function	getAccount(userId)
 	}
 	catch (error)
 	{
-		console.log('Error fetching account from auth service:', error.message);
+		// If error is 404, user does not exist
+		if (error.response && error.response.status === 404)
+			console.log('User not found in auth service for userId:', userId);
+		else
+			console.log('Error fetching account from auth service:', error.message);
+
 		return (null);
 	}
 

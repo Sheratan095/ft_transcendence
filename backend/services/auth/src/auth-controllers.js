@@ -1,5 +1,5 @@
 import { generateNewTokens, decodeToken, setAuthCookies, clearAuthCookies} from './jwt.js';
-import { validator, isTokenExpired, extractUserData, getUserLanguage } from './auth-help.js';
+import { validator, isTokenExpired, extractUserData, getUserLanguage, usernameExists } from './auth-help.js';
 import { sendTwoFactorCode } from './2fa.js';
 
 import bcrypt from 'bcrypt';
@@ -11,6 +11,9 @@ import axios from 'axios'
 // More rounds means more security but also more processing time.
 export const	register = async (req, reply) => 
 {
+	let	user = null;
+	let	authDb = null;
+
 	try
 	{
 		validator(req.body.username, req.body.password, req.body.email);
@@ -18,48 +21,23 @@ export const	register = async (req, reply) =>
 		const	username = req.body.username;
 		const	email = req.body.email;
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
-		const	authDb = req.server.authDb;
+		authDb = req.server.authDb;
 
-		// Check if the username already exists
-		try
-		{
-			const	usernameCheck = await axios.get(`${process.env.USERS_SERVICE_URL}/user?username=${username}`, {
-				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }});
-			
-			// If we get any response (not 404), username already exists
-			return (reply.code(409).send({ error: 'Username already exists' }));
-		}
-		catch (err)
-		{
-			// If error is NOT 404, then it's a real error
-			if (err.response && err.response.status !== 404)
-			{
-				console.log('Error checking username:', err.message);
-				return (reply.code(500).send({ error: 'Error checking username availability' }));
-			}
-			// If it's 404, username is available - continue with registration
-		}
-		
+		// Check if username already exists in users service
+		if (await usernameExists(username))
+			throw (new Error('Username already exists'));
+
 		// Create user in auth database
-		const	user = await authDb.createUser(email, hashedpassword);
-		
+		user = await authDb.createUser(email, hashedpassword);
+
 		// Create user profile in users service
-		try
-		{
-			await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
-				{ username: username, userId: user.id },
-				{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
-			);
-		}
-		catch (err)
-		{
-			console.log('Error creating user profile:', err.message);
-			// Continue with registration even if profile creation fails
-		}
+		await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
+			{ username: username, userId: user.id },
+			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		);
  
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
-
 		// Set tokens as HTTP-only cookies
 		setAuthCookies(reply, newTokens);
 
@@ -77,6 +55,13 @@ export const	register = async (req, reply) =>
 	catch (err)
 	{
 		console.log('Registration error:', err.message)
+
+		// if the user in auth DB was created but the profile creation failed, delete the auth user
+		if (user && authDb) // Check if user and authDb are defined
+		{
+			console.log('PROBLEM auth and users DB are out of sync, canceling user creation...');
+			await authDb.deleteUserById(user.id);
+		}
 
 		// Handle validation errors from validator function
 		if (err.message.includes('Username') || err.message.includes('Password')) 

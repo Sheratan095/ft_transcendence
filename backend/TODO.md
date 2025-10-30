@@ -37,7 +37,7 @@
 [] SQL INJECTION PROTECTION
 [] XSS Attack
 
-[] registration with an existing username
+[x] registration with an existing username
 	CreateUser error: SQLITE_CONSTRAINT: UNIQUE constraint failed: users.username
 	Error creating user profile: Request failed with status code 500
 	User registered:  13da28ca-1497-4486-9637-2b1214abdd51
