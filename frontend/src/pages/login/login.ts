@@ -60,6 +60,7 @@ if (!form || !resultEl) {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
 
@@ -86,7 +87,7 @@ if (!form || !resultEl) {
         resultEl.textContent = 'Login successful.';
         resultEl.className = 'text-sm mt-2 text-center text-green-600';
         // redirect to root or protected page
-        // setTimeout(() => { window.location.href = '/'; }, 600);
+        setTimeout(() => { window.location.href = '/'; }, 600);
       } else {
         const message = (body && (body.message || body.error)) || res.statusText || `Login failed (${res.status})`;
         resultEl.textContent = message;

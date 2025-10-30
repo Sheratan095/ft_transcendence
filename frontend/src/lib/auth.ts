@@ -72,10 +72,8 @@ export async function fetchUserProfile(): Promise<User | null> {
     //     return null;
     // }
     try {
-            const response = await fetch(`${API_BASE}/users/user?id=${userId}`, {
-            headers: {
-                'credentials': 'include'
-            }
+        const response = await fetch(`${API_BASE}/users/user?id=${userId}`, {
+            credentials: 'include'
         });
         console.log('Profile fetch response:', response);
         if (!response.ok) {

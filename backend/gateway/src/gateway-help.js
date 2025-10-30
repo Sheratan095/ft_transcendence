@@ -11,6 +11,8 @@ export async function	authenticateJwtToken(request, reply)
 	// Get token from cookies
 	const	token = request.cookies && request.cookies.accessToken;
 
+	console.log(request);
+
 	// Return 401 if no token provided
 	if (token == null)
 		return (reply.code(401).send({ error: 'Authorization header required' }))
