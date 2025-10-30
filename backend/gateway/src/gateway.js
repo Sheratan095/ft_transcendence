@@ -5,7 +5,8 @@ const	fastify = Fastify({ logger: false })
 // Allows to receive requests from different origins
 import cors from '@fastify/cors';
 await fastify.register(cors, {
-	origin: process.env.FRONTEND_URL, // Allow all origins for now TO DO restrict in production with process.env.FRONTEND_URL
+	origin: process.env.FRONTEND_URL,
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
  	credentials: true // Allow cookies to be sent
 });
 
@@ -63,7 +64,7 @@ await swaggerAggregator.register(fastify);
 
 // Validate required environment variables
 import { checkEnvVariables } from './gateway-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'PORT']);
+checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'FRONTEND_URL', 'PORT']);
 
 import { authenticateJwtToken } from './gateway-help.js';
 

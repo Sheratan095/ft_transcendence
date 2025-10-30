@@ -77,13 +77,9 @@ export class UsersDatabase
 		}
 	}
 
-	// TO DO check it
-	// Make sure the generated UUID is unique, this chance is very low but possible
 	async	#generateUUID()
 	{
 		const	id = uuidv4();
-		// while (await this.db.get("SELECT id FROM users WHERE id = ?", [id]))
-		// 	id = uuidv4();
 
 		return (id);
 	}

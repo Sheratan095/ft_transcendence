@@ -23,7 +23,7 @@ app.register(import('@fastify/helmet'), {
 });
 This blocks injected <script> from running, even if it appears.
 
-❌  2. Store JWT in HttpOnly cookies AUTH SERVICE
+✅  2. Store JWT in HttpOnly cookies AUTH SERVICE
 		=> then the client has to send the token in that way and the middlewhere token verification
 			has to be done on cookie.token
 
@@ -37,7 +37,7 @@ reply.setCookie("token", jwt, {
 });
 This prevents XSS from stealing the token.
 
-❌  3. Sanitize User-Generated Input MICROSERVICES DB
+✅  3. Sanitize User-Generated Input MICROSERVICES DB (don't necessary because the server never send plain html code, just json)
 
 Install sanitizer:
 npm i sanitize-html
@@ -88,6 +88,10 @@ Frontends must:
 Never use innerHTML or v-html or dangerouslySetInnerHTML
 Always encode text before injecting into DOM
 If you're using React, you're already mostly safe unless you manually break it.
+
+bioContainer.innerHTML = user.bio;   // ❌ This will EXECUTE malicious scripts
+bioContainer.textContent = user.bio; // ✅ Treats text as plain text, no execution
+
 
 🧠 Summary
 API Gateway	Set cookies HttpOnly + Secure + SameSite

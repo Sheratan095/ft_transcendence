@@ -73,13 +73,9 @@ export class AuthDatabase
 		}
 	}
 
-	// TO DO check it
-	// Make sure the generated UUID is unique, this chance is very low but possible
 	async	#generateUUID()
 	{
 		const	id = uuidv4();
-		// while (await this.db.get("SELECT id FROM auth_accounts WHERE id = ?", [id]))
-		// 	id = uuidv4();
 
 		return (id);
 	}
