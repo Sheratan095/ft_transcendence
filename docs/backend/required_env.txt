@@ -25,3 +25,7 @@ services/users:
     INTERNAL_API_KEY=1234
     PORT=3002
     AUTH_SERVICE_URL=http://localhost:3001
+
+services/notification
+    INTERNAL_API_KEY=1234
+    PORT=3003

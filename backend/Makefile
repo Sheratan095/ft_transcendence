@@ -2,15 +2,16 @@
 GATEWAY_PORT=3000
 AUTH_PORT=3001
 USERS_PORT=3002
+NOTIFICATION_PORT=3003
 
 # Default target (production mode)
 .PHONY: start
-start: start-auth start-users start-gateway
+start: start-auth start-users start-notification start-gateway
 	@echo "All services started successfully!"
 
 # Development mode with auto-restart by nodemon
 .PHONY: dev
-dev: dev-auth dev-users dev-gateway
+dev: dev-auth dev-users dev-notification dev-gateway
 	@echo "All services started in development mode with auto-restart!"
 
 redev: stop dev
@@ -41,6 +42,18 @@ start-users:
 dev-users:
 	@echo "Starting Users Service in dev mode on port $(USERS_PORT)..."
 	@cd services/users && npm run dev &
+	@sleep 2
+
+.PHONY: dev-notification
+dev-notification:
+	@echo "Starting Notification Service in dev mode..."
+	@cd services/notification && npm run dev &
+	@sleep 2
+
+.PHONY: start-notification
+start-notification:
+	@echo "Starting Notification Service..."
+	@cd services/notification && node src/notification.js &
 	@sleep 2
 
 # Start Gateway (production)
