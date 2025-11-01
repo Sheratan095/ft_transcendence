@@ -15,13 +15,8 @@ export async function setupSwagger(fastify) {
 			schemes: ['http'],
 			consumes: ['application/json'],
 			produces: ['application/json'],
-			securityDefinitions: {
-				cookieAuth: {
-					type: 'apiKey',
-					name: 'accessToken',   // the cookie name
-					in: 'cookie',
-					description: 'HttpOnly cookie containing JWT access token'
-				},
+			securityDefinitions:
+			{
 				internalApiKey: {
 					type: 'apiKey',
 					name: 'x-internal-api-key',

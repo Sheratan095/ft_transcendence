@@ -23,6 +23,10 @@ const	fastify = Fastify({
 // import { checkEnvVariables } from './notification-help.js';
 // checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
 
+// Setup Swagger documentation
+import { setupSwagger } from './notification-swagger.js';
+await setupSwagger(fastify);
+
 const	start = async () =>
 {
 	try
