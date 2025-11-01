@@ -64,7 +64,7 @@ await swaggerAggregator.register(fastify);
 
 // Validate required environment variables
 import { checkEnvVariables } from './gateway-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'FRONTEND_URL', 'PORT']);
+checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'PORT']);
 
 import { authenticateJwtToken } from './gateway-help.js';
 

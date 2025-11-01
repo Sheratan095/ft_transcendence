@@ -27,13 +27,21 @@ export class	SwaggerAggregator
 				url: `${process.env.AUTH_SERVICE_URL}/docs/json`,
 				pathPrefix: '/auth'});
 		}
-		
+
 		if (process.env.USERS_SERVICE_URL)
 		{
 			services.push({
 				name: 'users',
 				url: `${process.env.USERS_SERVICE_URL}/docs/json`,
 				pathPrefix: '/users'});
+		}
+
+		if (process.env.NOTIFICATION_SERVICE_URL)
+		{
+			services.push({
+				name: 'notification',
+				url: `${process.env.NOTIFICATION_SERVICE_URL}/docs/json`,
+				pathPrefix: '/notification'});
 		}
 
 		// Future services can be added here automatically
@@ -132,12 +140,6 @@ export class	SwaggerAggregator
 			// Security definitions for API key authentication, available on swagger UI
 			securityDefinitions:
 			{
-				bearerAuth:
-				{
-					type: 'apiKey',
-					name: 'Authorization',
-					in: 'header'
-				},
 				internalApiKey:
 				{
 					type: 'apiKey',
