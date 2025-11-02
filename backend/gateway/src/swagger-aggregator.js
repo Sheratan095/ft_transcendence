@@ -193,9 +193,16 @@ export class	SwaggerAggregator
 				});
 			}
 
-			// Merge security definitions
+			// Merge security definitions (only if they have valid structure)
 			if (spec.securityDefinitions)
-				Object.assign(baseSpec.securityDefinitions, spec.securityDefinitions);
+			{
+				Object.entries(spec.securityDefinitions).forEach(([key, value]) =>
+				{
+					// Only add if the security definition has the required properties
+					if (value && value.type && value.name && value.in)
+						baseSpec.securityDefinitions[key] = value;
+				});
+			}
 		});
 
 		return (baseSpec);

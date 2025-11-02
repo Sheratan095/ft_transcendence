@@ -19,6 +19,10 @@ const	fastify = Fastify({
 //   connection.socket.on('message', msg => console.log('WS message:', msg));
 // });
 
+// Load environment variables from .env file
+import dotenv from 'dotenv';
+dotenv.config();
+
 // Validate required environment variables
 // import { checkEnvVariables } from './notification-help.js';
 // checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);

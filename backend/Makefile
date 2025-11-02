@@ -89,8 +89,13 @@ status:
 	@echo "Checking service status..."
 	@echo "Auth Service (port $(AUTH_PORT)):"
 	@ss -tlnp | grep -q ":$(AUTH_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
+
 	@echo "Users Service (port $(USERS_PORT)):"
 	@ss -tlnp | grep -q ":$(USERS_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
+
+	@echo "Notification Service (port $(NOTIFICATION_PORT)):"
+	@ss -tlnp | grep -q ":$(NOTIFICATION_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
+
 	@echo "Gateway (port $(GATEWAY_PORT)):"
 	@ss -tlnp | grep -q ":$(GATEWAY_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
 

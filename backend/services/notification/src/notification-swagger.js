@@ -11,8 +11,8 @@
 			{
 				info:
 				{
-					title: 'Users Service API',
-					description: 'Users microservice API',
+					title: 'Notification Service API',
+					description: 'Notification microservice API',
 					version: '1.0.0'
 				},
 				host: `localhost:${process.env.PORT}`,
