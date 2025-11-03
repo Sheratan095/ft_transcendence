@@ -154,7 +154,7 @@ export const	logout = async (req, reply) =>
 		if (!storedToken || storedToken.refresh_token !== refreshToken)
 			return (reply.code(401).send({ error: 'Refresh token not found or already invalidated' }));
 
-		// remove token from DB - use correct parameters: tokenId, userId, refresh_token
+		// remove token from DB
 		await authDb.deleteRefreshTokenById(storedToken.id);
 
 		clearAuthCookies(reply);
@@ -365,6 +365,39 @@ export const	changePassword = async (req, reply) =>
 	}
 }
 
+export const	deleteAccount = async (req, reply) =>
+{
+	try
+	{
+		const	authDb = req.server.authDb;
+		const	userData = extractUserData(req);
+
+		// Delete user from auth database
+		await authDb.deleteUserById(userData.id);
+
+		// remove refresh token from DB
+		await authDb.deleteRefreshTokenByUserId(userData.id);
+
+		// Notify users service to delete user profile
+		// System cascade events will handle deletion of related data in other services
+		// await axios.delete(`${process.env.USERS_SERVICE_URL}/delete-user/${userData.id}`,
+		// 	{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		// );
+
+		clearAuthCookies(reply);
+
+		console.log('User account deleted: ', userData.id);
+
+		return (reply.code(200).send({ message: 'User account deleted successfully' }));
+	}
+	catch (err)
+	{
+		console.log('Delete account error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
 // ------------------------------- INTERNAL ROUTES -------------------------------
 
 export const	getAccount = async (req, reply) =>
@@ -431,32 +464,3 @@ export const	validateToken = async (req, reply) =>
 	}
 };
 
-export const	deleteAccount = async (req, reply) =>
-{
-	try
-	{
-		const	authDb = req.server.authDb;
-		const	userData = extractUserData(req);
-
-		// Delete user from auth database
-		await authDb.deleteUserById(userData.id);
-
-		// Notify users service to delete user profile
-		// System cascade events will handle deletion of related data in other services
-		// await axios.delete(`${process.env.USERS_SERVICE_URL}/delete-user/${userData.id}`,
-		// 	{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
-		// );
-
-		clearAuthCookies(reply);
-
-		console.log('User account deleted: ', userData.id);
-
-		return (reply.code(200).send({ message: 'User account deleted successfully' }));
-	}
-	catch (err)
-	{
-		console.log('Delete account error:', err.message);
-
-		return (reply.code(500).send({ error: 'Internal server error' }));
-	}
-}
