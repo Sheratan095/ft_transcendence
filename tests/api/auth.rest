@@ -1,41 +1,4 @@
-
-
-DELETE http://localhost:3000/auth/logout
-Content-Type: application/json
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OTc4NzczLWRiNWUtNDEzOC04MGQxLTkzYTFlOTk3NzBjMCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5OTE0NiwiZXhwIjoxNzYxOTAzOTQ2fQ.8wmf3gWEhJucW0FSbmynom3r6vt2U4HIPWOLgpoo8dY"
-}
-
-###
-
-### Valid token validation
-POST http://localhost:3000/auth/validate-token
-Content-Type: application/json
-
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhiNWU3YTVkLTQ5ZjgtNDMwYi05N2JlLWNjNWZlNGU0M2NmMSIsImVtYWlsIjoiZHNhZGFAeG1wbGUuY29tIiwiaWF0IjoxNzYwOTc2MzU5fQ.7QX-FLZZwyU74C5LwIwQ0cz7IaBClLAuT2qEhwESYlM"
-}
-
-### Missing token validation (should return 400 Bad Request)
-POST http://localhost:3001/validate-token
-Content-Type: application/json
-x-internal-api-key: 1234
-
-{}
-
-###
-
-#return token and refresh token
-POST http://localhost:3000/auth/login
-Content-Type: application/json
-
-{
-  "email": "ceccarellim7@gmail.com",
-  "password": "Mrco@123_"
-}
-
-###
+### Register new user
 POST http://localhost:3000/auth/register
 Content-Type: application/json
 
@@ -47,15 +10,44 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:3000/auth/token
+### Login (copy the refreshToken from response)
+# @name login
+POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjE5OTc4NzczLWRiNWUtNDEzOC04MGQxLTkzYTFlOTk3NzBjMCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5OTEzMywiZXhwIjoxNzYxOTAzOTMzfQ.Eazit1s44YyXd-WRLtqNIhUJqdt6nWyiDE30A4fQXYc"
+  "email": "ceccarellim7@gmail.com",
+  "password": "Mrco@123_"
 }
 
 ###
 
+### Logout (paste refreshToken value from login response below)
+DELETE http://localhost:3000/auth/logout
+Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2Mzc0Yzk5LTBjODEtNGM0ZC1iMmQ2LTRjOTVjZmI1NmQ3MCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MjE3MDcwNCwiZXhwIjoxNzYyNzc1NTA0fQ.RiCIDZ5xYCb0KuWjOzdEwdQIcnizJ-rCnnuzl0RSmIE
+
+###
+
+### Refresh access token using stored refresh token cookie
+POST http://localhost:3000/auth/token
+
+###
+
+### Valid token validation
+POST http://localhost:3000/auth/validate-token
+
+###
+
+### Missing token validation (should return 400 Bad Request)
+POST http://localhost:3001/validate-token
+Content-Type: application/json
+x-internal-api-key: 1234
+
+{}
+
+###
+
+### Verify 2FA code
 POST http://localhost:3000/auth/2fa
 Content-Type: application/json
 
@@ -84,3 +76,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjMjIzZTQwL
   "oldPassword": "Mrco@123_",
   "newPassword": "newPassword456!"
 }
+
+###
+
+DELETE http://localhost:3000/auth/delete-account
+Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImEzNDU3MzBiLTJhNGMtNDQ1Yy1iN2EyLTVjMTBkMWY4MTc0YiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MjE3MTMyNSwiZXhwIjoxNzYyMTcyMjI1fQ.rMCEYgUoq_QVnruoWS8PU-5OBrnQIY-rsqL3r_Gkv8g

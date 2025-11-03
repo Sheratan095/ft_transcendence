@@ -7,7 +7,8 @@ import {
 	verifyTwoFactorAuth,
 	enable2FA,
 	changePassword,
-	getAccount
+	getAccount,
+	deleteAccount
 } from './auth-controllers.js';
 
 import { validateInternalApiKey } from './auth-help.js';
@@ -334,6 +335,35 @@ const	changePasswordOpts =
 	handler: changePassword
 };
 
+const	deleteAccountOpts =
+{
+	schema:
+	{
+		description: 'Delete user account. userId is added in JWT validation middleware.',
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			401: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: deleteAccount
+}
+
 //-----------------------------INTERAL ROUTES-----------------------------
 
 
@@ -431,4 +461,5 @@ export function	authRoutes(fastify)
 	fastify.put('/change-password', changePasswordOpts);
 
 	fastify.delete('/logout', logoutOpts);
+	fastify.delete('/delete-account', deleteAccountOpts);
 }

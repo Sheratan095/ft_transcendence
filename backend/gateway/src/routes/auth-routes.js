@@ -100,12 +100,34 @@ export async function	logoutRoute(request, reply)
 	}
 }
 
+export async function	deleteAccountRoute(request, reply)
+{
+	try
+	{
+		const	response = await axios.delete(`${AUTH_SERVICE_URL}/delete-account`, {
+			headers: getAuthHeaders(request),
+			cookie: request.headers.cookie
+		});
+
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('Auth service error:', err.message)
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+	}
+}
+
 // Need the refresh token from cookies
 export async function	tokenRoute(request, reply)
 {
 	try
 	{
-		const response = await axios.post(`${AUTH_SERVICE_URL}/token`, request.body, {
+		const	response = await axios.post(`${AUTH_SERVICE_URL}/token`, request.body, {
 			headers: {
 					...getAuthHeaders(request),
 					cookie: request.headers.cookie

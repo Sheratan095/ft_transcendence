@@ -75,7 +75,8 @@ import {
 	tokenRoute,
 	verifyTwoFactorAuth,
 	changePasswordRoute,
-	enable2FARoute
+	enable2FARoute,
+	deleteAccountRoute
 } from './routes/auth-routes.js'
 
 import {
@@ -135,6 +136,7 @@ await fastify.register(async function (fastify)
 
 	fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
 	fastify.post('/auth/token', { schema: { hide: true }, handler: tokenRoute })
+	fastify.delete('/auth/delete-account', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: deleteAccountRoute });
 });
 
 // 🟠 AUTHENTICATED USER ACTIONS: Sensitive account changes (requires auth + rate limiting)
