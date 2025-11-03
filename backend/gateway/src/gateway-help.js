@@ -24,8 +24,13 @@ export async function	authenticateJwtToken(request, reply)
 
 		// If token is valid, attach user data to request object
 		if (response.data.valid)
-			request.user = response.data.user
+		{
+			request.user = response.data.user;
+			return; // Continue to the route handler
+		}
 
+		// If token is not valid, return unauthorized
+		return reply.code(401).send({ error: 'Unauthorized' });
 	}
 	catch (err)
 	{

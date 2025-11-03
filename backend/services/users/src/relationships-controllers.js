@@ -13,7 +13,7 @@ export async function	getUserRelationships(req, reply)
 	}
 	catch (err)
 	{
-		console.log('GetUserRelationships error:', err.message);
+		console.log('GetUserRelationships error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -41,7 +41,7 @@ export async function	getFriends(req, reply)
 	}
 	catch (err)
 	{
-		console.log('GetFriends error:', err.message);
+		console.log('GetFriends error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -63,7 +63,7 @@ export async function	getIncomingRequests(req, reply)
 	}
 	catch (err)
 	{
-		console.log('GetIncomingRequests error:', err.message);
+		console.log('GetIncomingRequests error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -85,7 +85,7 @@ export async function	getOutgoingRequests(req, reply)
 	}
 	catch (err)
 	{
-		console.log('GetOutgoingRequests error:', err.message);
+		console.log('GetOutgoingRequests error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -117,7 +117,7 @@ export async function	sendFriendRequest(req, reply)
 	}
 	catch (err)
 	{
-		console.log('SendFriendRequest error:', err.message);
+		console.log('SendFriendRequest error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -143,7 +143,7 @@ export async function	acceptFriendRequest(req, reply)
 	}
 	catch (err)
 	{
-		console.log('AcceptFriendRequest error:', err.message);
+		console.log('AcceptFriendRequest error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -169,7 +169,7 @@ export async function	rejectFriendRequest(req, reply)
 	}
 	catch (err)
 	{
-		console.log('RejectFriendRequest error:', err.message);
+		console.log('RejectFriendRequest error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -195,7 +195,7 @@ export async function	blockUser(req, reply)
 	}
 	catch (err)
 	{
-		console.log('BlockUser error:', err.message);
+		console.log('BlockUser error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -218,7 +218,7 @@ export async function	unblockUser(req, reply)
 	}
 	catch (err)
 	{
-		console.log('UnblockUser error:', err.message);
+		console.log('UnblockUser error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -241,7 +241,7 @@ export async function	cancelFriendRequest(req, reply)
 	}
 	catch (err)
 	{
-		console.log('CancelFriendRequest error:', err.message);
+		console.log('CancelFriendRequest error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
@@ -267,10 +267,33 @@ export async function	removeFriend(req, reply)
 	}
 	catch (err)
 	{
-		console.log('RemoveFriend error:', err.message);
+		console.log('RemoveFriend error: ', err.message);
 
 		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
 			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+// This function could be avoided just by calling the db query directly in the deleteUser controller,
+// but for consistency and future extensibility (moving relationships in another microservice), we keep it here.
+export const	deleteUserRelationships = async (req, reply) =>
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userId = req.body.userId;
+
+		await usersDb.deleteUserRelationships(userId);
+
+		console.log(`User relationships deleted: ${userId}`);
+
+		return (reply.code(200).send({ message: 'User relationships deleted' }));
+	}
+	catch (err)
+	{
+		console.log('DeleteUserRelationships error: ', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

@@ -185,6 +185,11 @@ export class AuthDatabase
 		await (this.db.run("DELETE FROM refresh_tokens WHERE id = ?", [tokenId]));
 	}
 
+	async	deleteRefreshTokenByUserId(userId)
+	{
+		await (this.db.run("DELETE FROM refresh_tokens WHERE user_id = ?", [userId]));
+	}
+
 	// -------- TWO-FACTOR AUTH METHODS --------
 
 	async	storeTwoFactorToken(userId, otpCode, expiresAt)

@@ -15,17 +15,14 @@
 [x] login when a user is already logged? => just a new login (get new tokens)
 [x] when the reply is 500 (internal server error) => the error message should be deleted
 [x] add user id after jwt validation in gateway (added user data )
-[] Cleanup job: periodically remove expired tokens from DB.
 [x] check all status codes!!! 
 [x] update std_microsercice_architecture with new routes schemas
 
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes
 [x] consider to remove api flow, and add some "tutorial" fro swagger
-[] move swagger in another microservice?
+[x] move swagger in another microservice? added security layer with username and password 
 [] swagger implementation.txt
-
-[] how can we check if a user is online? last token request?
 
 [x] JWT protocol
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT
@@ -46,10 +43,6 @@
 [x] rename twoFactoruAuth in to 2FA where possible
 [x] check for db decoration in auth.js/start()
 [x] login doesn't work
-[] delete user data? (GDPR)
-	Don’t do the actual profile deletion inside the Auth service —
-	let Auth trigger a system-wide cascade via events or APIs.
-	Each service deletes what it owns.
 [x] rename users table in auth
 [x] check logout
 [x] normalize uppercase/lower case in schemas properties
@@ -61,7 +54,7 @@
 	[x] Change profile image to 42 account to diplay it in to the email
 	[x] Update login route requiring 2fa
 
-[] add welcome mail? add psw change or 2fa enabled mail notification?
+[x] add welcome mail? add psw change or 2fa enabled mail notification?
 [x] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
 [x] add endpoint to change the psw
 [x] should the language name depends on the preferred language of the user?
@@ -78,3 +71,12 @@
 	timeWindow: '5 minutes', // time window
 	keyGenerator: (req) => req.body.username || req.ip
 	});
+
+[] delete user data? (GDPR)
+	Don’t do the actual profile deletion inside the Auth service —
+	let Auth trigger a system-wide cascade via events or APIs.
+	Each service deletes what it owns.
+[] change checkForEnvVars and display all the missing vars
+[x] add checks on user existing and token expiration directly in gatewat jwt validation
+[] how can we check if a user is online? : ping on websocket notification service
+[] Cleanup job: periodically remove expired tokens from DB.

@@ -108,6 +108,12 @@ export class UsersDatabase
 		return (await this.db.get("SELECT * FROM users WHERE id = ?", [userId]));
 	}
 
+	async	deleteUserById(userId)
+	{
+		const	query = `DELETE FROM users WHERE id = ?`;
+		await this.db.run(query, [userId]);
+	}
+
 	// Get user profile by username
 	async	getUserByUsername(username)
 	{
@@ -429,5 +435,13 @@ export class UsersDatabase
 			WHERE (requester_id = ? AND target_id = ?) OR (requester_id = ? AND target_id = ?)
 			AND relationship_status = 'accepted'
 		`, [userId, friendId, friendId, userId]);
+	}
+
+	async	deleteUserRelationships(userId)
+	{
+		await this.db.run(`
+			DELETE FROM user_relationships
+			WHERE requester_id = ? OR target_id = ?
+		`, [userId, userId]);
 	}
 }

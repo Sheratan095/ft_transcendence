@@ -372,7 +372,7 @@ const	validateTokenOpts =
 {
 	schema:
 	{
-		summary: '🔒 Internal',
+		summary: 'Internal only 🔒 (called by gateway to validate "session")',
 		description: 'Validate an access token and retrieve the associated user ID',
 
 		...withInternalAuth,
