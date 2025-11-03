@@ -21,7 +21,7 @@
 [x] install swagger
 [x] swagger aggregator really makes sense? : yes
 [x] consider to remove api flow, and add some "tutorial" fro swagger
-[] move swagger in another microservice?
+[x] move swagger in another microservice? added security layer with username and password 
 [] swagger implementation.txt
 
 [x] JWT protocol
@@ -76,6 +76,7 @@
 	Don’t do the actual profile deletion inside the Auth service —
 	let Auth trigger a system-wide cascade via events or APIs.
 	Each service deletes what it owns.
+[] change checkForEnvVars and display all the missing vars
 [x] add checks on user existing and token expiration directly in gatewat jwt validation
 [] how can we check if a user is online? : ping on websocket notification service
 [] Cleanup job: periodically remove expired tokens from DB.

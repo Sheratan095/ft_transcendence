@@ -1,3 +1,8 @@
+// Validate required environment variables
+import { checkEnvVariables } from './gateway-help.js';
+checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'PORT'
+, 'DOC_USERNAME', 'DOC_PASSWORD']);
+
 import Fastify from 'fastify'
 // Initialize Fastify instance with built-in logging
 const	fastify = Fastify({ logger: false })
@@ -61,10 +66,6 @@ dotenv.config()
 import SwaggerAggregator from './swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
-
-// Validate required environment variables
-import { checkEnvVariables } from './gateway-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'PORT']);
 
 import { authenticateJwtToken } from './gateway-help.js';
 
@@ -136,7 +137,6 @@ await fastify.register(async function (fastify)
 
 	fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
 	fastify.post('/auth/token', { schema: { hide: true }, handler: tokenRoute })
-	fastify.delete('/auth/delete-account', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: deleteAccountRoute });
 });
 
 // 🟠 AUTHENTICATED USER ACTIONS: Sensitive account changes (requires auth + rate limiting)
@@ -151,6 +151,7 @@ await fastify.register(async function (fastify)
 
 	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
 	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: enable2FARoute })
+	fastify.delete('/auth/delete-account', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: deleteAccountRoute })
 	fastify.post('/users/upload-avatar', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: uploadAvatar })
 	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUser })
 });

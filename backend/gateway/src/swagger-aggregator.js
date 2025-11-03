@@ -1,4 +1,5 @@
 import axios from 'axios';
+import fastifyBasicAuth from '@fastify/basic-auth';
 
 /**
  * Swagger Aggregator - Combines API documentation from multiple microservices
@@ -242,6 +243,7 @@ export class	SwaggerAggregator
 	 * Registers the aggregated Swagger UI with Fastify
 	 * @param {Object} fastify - Fastify instance
 	 */
+
 	async	register(fastify)
 	{
 		// Get the aggregated spec
@@ -250,16 +252,33 @@ export class	SwaggerAggregator
 		// Register the Swagger plugin with the aggregated specification
 		await fastify.register(import('@fastify/swagger'), { swagger: aggregatedSpec });
 
-		// Register the unified documentation route
-		await fastify.register(import('@fastify/swagger-ui'),
+		// Register basic auth for protecting docs
+		await fastify.register(fastifyBasicAuth,
 		{
-			routePrefix: '/docs',
-			uiConfig:
+			validate: async (username, password, req, reply) =>
 			{
-				docExpansion: 'list',
-				deepLinking: true
+				if ( username !== process.env.DOC_USERNAME || password !== process.env.DOC_PASSWORD )
+					return (new Error('Unauthorized'));
 			},
-			staticCSP: true
+			authenticate: { realm: 'Swagger Documentation' }
+		});
+
+		// Register the unified documentation route with basic auth protection
+		await fastify.register(async function (fastify)
+		{
+			// Apply basic auth hook to all routes in this scope
+			fastify.addHook('onRequest', fastify.basicAuth);
+
+			await fastify.register(import('@fastify/swagger-ui'),
+			{
+				routePrefix: '/docs',
+				uiConfig:
+				{
+					docExpansion: 'list',
+					deepLinking: true
+				},
+				staticCSP: true
+			});
 		});
 
 		console.log('📚 Swagger aggregator registered at /docs');

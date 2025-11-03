@@ -4,6 +4,8 @@ gateway:
     USERS_SERVICE_URL=http://localhost:3002
     FRONTEND_URL=http://localhost:3004
     PORT=3000
+    DOC_USERNAME=admin
+    DOC_PASSWORD=admin
 
 services/auth:
     INTERNAL_API_KEY=1234
