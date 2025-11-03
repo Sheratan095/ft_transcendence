@@ -76,6 +76,7 @@ stop:
 	@echo "Stopping all Node services..."
 	@-ss -tlnp | grep ":$(AUTH_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-ss -tlnp | grep ":$(USERS_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
+	@-ss -tlnp | grep ":$(NOTIFICATION_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-ss -tlnp | grep ":$(GATEWAY_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-pkill -f "nodemon.*auth\.js" 2>/dev/null || true
 	@-pkill -f "nodemon.*users\.js" 2>/dev/null || true

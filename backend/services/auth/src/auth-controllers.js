@@ -242,9 +242,6 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 		// Check if token is expired
 		const	now = new Date();
 		const	expiresAt = new Date(storedToken.expires_at);
-		
-		console.log('Current time:', now.toISOString());
-		console.log('Token expiration time:', expiresAt.toISOString());
 
 		if (isTokenExpired(storedToken.expires_at))
 		{
@@ -253,7 +250,7 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			return (reply.code(401).send({ error: '2FA token has expired' }));
 		}
 
-		// Verify the OTP code		
+		// Verify the OTP code
 		if (!await bcrypt.compare(otpCode, storedToken.otp_code))
 			return (reply.code(401).send({ error: 'Invalid 2FA code' }));
 
@@ -433,3 +430,33 @@ export const	validateToken = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 };
+
+export const	deleteAccount = async (req, reply) =>
+{
+	try
+	{
+		const	authDb = req.server.authDb;
+		const	userData = extractUserData(req);
+
+		// Delete user from auth database
+		await authDb.deleteUserById(userData.id);
+
+		// Notify users service to delete user profile
+		// System cascade events will handle deletion of related data in other services
+		// await axios.delete(`${process.env.USERS_SERVICE_URL}/delete-user/${userData.id}`,
+		// 	{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		// );
+
+		clearAuthCookies(reply);
+
+		console.log('User account deleted: ', userData.id);
+
+		return (reply.code(200).send({ message: 'User account deleted successfully' }));
+	}
+	catch (err)
+	{
+		console.log('Delete account error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
