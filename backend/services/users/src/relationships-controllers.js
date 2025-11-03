@@ -275,3 +275,21 @@ export async function	removeFriend(req, reply)
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+// This function could be avoided just by calling the db query directly in the deleteUser controller,
+// but for consistency and future extensibility (moving relationships in another microservice), we keep it here.
+export const	deleteUserRelationships = async (userId, usersDb) =>
+{
+	try
+	{
+		await usersDb.deleteUserRelationships(userId);
+
+		return (reply.code(200).send({ message: 'User relationships deleted' }));
+	}
+	catch (err)
+	{
+		console.log('DeleteUserRelationships error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}

@@ -4,6 +4,7 @@ import {
 	createUser,
 	updateUser,
 	uploadAvatar,
+	deleteUser
 } from './users-controllers.js';
 
 import { validateInternalApiKey } from './users-help.js';
@@ -87,6 +88,7 @@ const	getUsersOpts =
 			},
 		},
 	},
+
 	preHandler: validateInternalApiKey,
 	handler: getUsers,
 };
@@ -116,6 +118,7 @@ const	newUserOpts =
 			500: ErrorResponse,
 		}
 	},
+
 	preHandler: validateInternalApiKey,
 	handler: createUser,
 }
@@ -145,6 +148,7 @@ const	getUserOpts =
 			400: ErrorResponse,
 		}
 	},
+
 	preHandler: validateInternalApiKey,
 	handler: getUser,
 };
@@ -178,6 +182,7 @@ const	updateUserOpts =
 			400: ErrorResponse,
 		}
 	},
+
 	preHandler: validateInternalApiKey,
 	handler: updateUser,
 }
@@ -205,10 +210,40 @@ const	uploadAvatarOpts =
 			500: ErrorResponse,
 		}
 	},
+
 	preHandler: validateInternalApiKey,
-	handler: uploadAvatar,
+	handler: uploadAvatar, 
 };
 
+const	deleteUserOpts =
+{
+	schema:
+	{
+		summary: 'Internal only 🔒 (called by user auth service during account deletion)',
+		description: 'Delete a user',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties:
+			{
+				userId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200: { type: 'object', properties: { message: { type: 'string' } } },
+			404: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: deleteUser,
+}
 
 export function	userRoutes(fastify)
 {
@@ -221,4 +256,6 @@ export function	userRoutes(fastify)
 	fastify.post('/upload-avatar', uploadAvatarOpts);
 
 	fastify.put('/update-user', updateUserOpts);
+
+	fastify.delete('/delete-user', deleteUserOpts);
 }

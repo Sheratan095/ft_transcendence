@@ -430,4 +430,12 @@ export class UsersDatabase
 			AND relationship_status = 'accepted'
 		`, [userId, friendId, friendId, userId]);
 	}
+
+	async	deleteUserRelationships(userId)
+	{
+		await this.db.run(`
+			DELETE FROM user_relationships
+			WHERE requester_id = ? OR target_id = ?
+		`, [userId, userId]);
+	}
 }

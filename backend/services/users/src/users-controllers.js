@@ -5,6 +5,8 @@ import { createWriteStream, existsSync } from 'fs';
 import { unlink } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { deleteUserRelationships } from './relationships-controllers.js';
+
 
 const	__filename = fileURLToPath(import.meta.url);
 const	__dirname = path.dirname(__filename);
@@ -188,6 +190,35 @@ export const	uploadAvatar = async (req, reply) =>
 	catch (err)
 	{
 		console.log('UploadAvatar error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	deleteUser = async (req, reply) =>
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userId = req.body.userId;
+
+		// Check if user exists
+		const	user = await usersDb.getUserById(userId);
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		deleteUserRelationships(userId, usersDb);
+
+		// Delete user from database
+		await usersDb.deleteUserById(userId);
+
+		console.log(`User ${userId} deleted`);
+
+		return (reply.code(200).send({ message: 'User deleted successfully' }));
+	}
+	catch (err)
+	{
+		console.log('DeleteUser error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
