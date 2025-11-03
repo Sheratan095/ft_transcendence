@@ -442,6 +442,13 @@ export const	validateToken = async (req, reply) =>
 		// verify and decode ACCESS token (not refresh token!)
 		const	decodedToken = decodeToken(token, process.env.ACCESS_TOKEN_SECRET);
 
+		if (!decodedToken || !decodedToken.id)
+			return (reply.code(401).send({ error: 'Invalid token' }));
+
+		const	user =  await req.server.authDb.getUserById(decodedToken.id);
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+
 		// Return the complete user data from the token
 		return reply.code(200).send({
 			message: 'Token is valid', 

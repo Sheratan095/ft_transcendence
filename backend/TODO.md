@@ -15,7 +15,6 @@
 [x] login when a user is already logged? => just a new login (get new tokens)
 [x] when the reply is 500 (internal server error) => the error message should be deleted
 [x] add user id after jwt validation in gateway (added user data )
-[] Cleanup job: periodically remove expired tokens from DB.
 [x] check all status codes!!! 
 [x] update std_microsercice_architecture with new routes schemas
 
@@ -24,8 +23,6 @@
 [x] consider to remove api flow, and add some "tutorial" fro swagger
 [] move swagger in another microservice?
 [] swagger implementation.txt
-
-[] how can we check if a user is online? last token request?
 
 [x] JWT protocol
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT
@@ -46,10 +43,6 @@
 [x] rename twoFactoruAuth in to 2FA where possible
 [x] check for db decoration in auth.js/start()
 [x] login doesn't work
-[] delete user data? (GDPR)
-	Don’t do the actual profile deletion inside the Auth service —
-	let Auth trigger a system-wide cascade via events or APIs.
-	Each service deletes what it owns.
 [x] rename users table in auth
 [x] check logout
 [x] normalize uppercase/lower case in schemas properties
@@ -79,4 +72,10 @@
 	keyGenerator: (req) => req.body.username || req.ip
 	});
 
-[] add checks on user existing and token expiration directly in gatewat jwt validation
+[] delete user data? (GDPR)
+	Don’t do the actual profile deletion inside the Auth service —
+	let Auth trigger a system-wide cascade via events or APIs.
+	Each service deletes what it owns.
+[x] add checks on user existing and token expiration directly in gatewat jwt validation
+[] how can we check if a user is online? : ping on websocket notification service
+[] Cleanup job: periodically remove expired tokens from DB.
