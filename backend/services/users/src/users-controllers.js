@@ -202,19 +202,14 @@ export const	deleteUser = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 		const	userId = req.body.userId;
 
-		// Check if user exists
-		const	user = await usersDb.getUserById(userId);
-		if (!user)
-			return (reply.code(404).send({ error: 'User not found' }));
-
-		deleteUserRelationships(userId, usersDb);
+		deleteUserRelationships(req, reply);
 
 		// Delete user from database
 		await usersDb.deleteUserById(userId);
 
-		console.log(`User ${userId} deleted`);
+		console.log(`User profile deleted: ${userId}`);
 
-		return (reply.code(200).send({ message: 'User deleted successfully' }));
+		return (reply.code(200).send({ message: 'User profile deleted successfully' }));
 	}
 	catch (err)
 	{

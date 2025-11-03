@@ -372,6 +372,11 @@ export const	deleteAccount = async (req, reply) =>
 		const	authDb = req.server.authDb;
 		const	userData = extractUserData(req);
 
+		await axios.delete(`${process.env.USERS_SERVICE_URL}/delete-user`, {
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+			data: { userId: userData.id }
+		});
+
 		// Delete user from auth database
 		await authDb.deleteUserById(userData.id);
 
@@ -380,13 +385,10 @@ export const	deleteAccount = async (req, reply) =>
 
 		// Notify users service to delete user profile
 		// System cascade events will handle deletion of related data in other services
-		// await axios.delete(`${process.env.USERS_SERVICE_URL}/delete-user/${userData.id}`,
-		// 	{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
-		// );
 
 		clearAuthCookies(reply);
 
-		console.log('User account deleted: ', userData.id);
+		console.log(`User account deleted: ${userData.id}`);
 
 		return (reply.code(200).send({ message: 'User account deleted successfully' }));
 	}

@@ -61,7 +61,7 @@
 	[x] Change profile image to 42 account to diplay it in to the email
 	[x] Update login route requiring 2fa
 
-[] add welcome mail? add psw change or 2fa enabled mail notification?
+[x] add welcome mail? add psw change or 2fa enabled mail notification?
 [x] auth/update_user that can contain both boolean for 2fa and username change (will be called by users/update)
 [x] add endpoint to change the psw
 [x] should the language name depends on the preferred language of the user?
@@ -78,3 +78,5 @@
 	timeWindow: '5 minutes', // time window
 	keyGenerator: (req) => req.body.username || req.ip
 	});
+
+[] add checks on user existing and token expiration directly in gatewat jwt validation

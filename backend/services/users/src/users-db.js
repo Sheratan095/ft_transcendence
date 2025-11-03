@@ -108,6 +108,12 @@ export class UsersDatabase
 		return (await this.db.get("SELECT * FROM users WHERE id = ?", [userId]));
 	}
 
+	async	deleteUserById(userId)
+	{
+		const	query = `DELETE FROM users WHERE id = ?`;
+		await this.db.run(query, [userId]);
+	}
+
 	// Get user profile by username
 	async	getUserByUsername(username)
 	{
