@@ -1,15 +1,19 @@
 export function	checkEnvVariables(requiredEnvVars)
 {
+	let	missingEnvVarsCount = 0;
+
 	for (const envVar of requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
 			console.error(`Missing required environment variable: ${envVar}`);
-			process.exit(1);
+			missingEnvVarsCount++;
 		}
 	}
-}
 
+	if (missingEnvVarsCount > 0)
+		process.exit(1);
+}
 
 // Helper function to extract user data from gateway headers
 // This function parses the user data passed from the gateway after JWT authentication

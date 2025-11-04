@@ -38,14 +38,19 @@ export function	extractUserData(request)
 
 export function	checkEnvVariables(requiredEnvVars)
 {
+	let	missingEnvVarsCount = 0;
+
 	for (const envVar of requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
 			console.error(`Missing required environment variable: ${envVar}`);
-			process.exit(1);
+			missingEnvVarsCount++;
 		}
 	}
+
+	if (missingEnvVarsCount > 0)
+		process.exit(1);
 }
 
 export async function	getAccount(userId)

@@ -20,14 +20,19 @@ export async function	validateInternalApiKey(request, reply)
 
 export function	checkEnvVariables(requiredEnvVars)
 {
+	let	missingEnvVarsCount = 0;
+
 	for (const envVar of requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
 			console.error(`Missing required environment variable: ${envVar}`);
-			process.exit(1);
+			missingEnvVarsCount++;
 		}
 	}
+
+	if (missingEnvVarsCount > 0)
+		process.exit(1);
 }
 
 // Standard validation are done by AJV schema validation in the routes
