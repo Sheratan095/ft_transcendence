@@ -1,288 +1,183 @@
-import axios from 'axios';
-import fastifyBasicAuth from '@fastify/basic-auth';
+import axios from "axios";
+import fastifyBasicAuth from "@fastify/basic-auth";
 
-/**
- * Swagger Aggregator - Combines API documentation from multiple microservices
- */
 export class	SwaggerAggregator
 {
 	constructor()
 	{
-		// Automatically discover services from environment variables
 		this.services = this.discoverServices();
+		this.currentSpec = null;
 	}
 
-	/**
-	 * Automatically discover microservices from environment variables
-	 * @returns {Array} Array of service configurations
-	 */
 	discoverServices()
 	{
 		const	services = [];
 
-		// Auto-discover services based on environment variables
-		if (process.env.AUTH_SERVICE_URL)
+		const	add = (env, name, prefix) =>
 		{
-			services.push({
-				name: 'auth',
-				url: `${process.env.AUTH_SERVICE_URL}/docs/json`,
-				pathPrefix: '/auth'});
-		}
+			if (process.env[env])
+			{
+				services.push(
+				{
+					name,
+					url: `${process.env[env]}/docs/json`,
+					pathPrefix: prefix
+				});
+			}
+		};
 
-		if (process.env.USERS_SERVICE_URL)
-		{
-			services.push({
-				name: 'users',
-				url: `${process.env.USERS_SERVICE_URL}/docs/json`,
-				pathPrefix: '/users'});
-		}
+		add("AUTH_SERVICE_URL", "auth", "/auth");
+		add("USERS_SERVICE_URL", "users", "/users");
+		add("NOTIFICATION_SERVICE_URL", "notification", "/notification");
 
-		if (process.env.NOTIFICATION_SERVICE_URL)
-		{
-			services.push({
-				name: 'notification',
-				url: `${process.env.NOTIFICATION_SERVICE_URL}/docs/json`,
-				pathPrefix: '/notification'});
-		}
-
-		// Future services can be added here automatically
-		// if (process.env.GAMES_SERVICE_URL) {
-		//     services.push({
-		//         name: 'games',
-		//         url: `${process.env.GAMES_SERVICE_URL}/documentation/json`,
-		//         pathPrefix: '/games'
-		//     });
-		// }
-
-		console.log(`📡 Discovered ${services.length} microservices:`, services.map(s => s.name));
-
+		console.log(`📡 Discovered services: ${services.map(s => s.name).join(", ")}`);
 		return (services);
 	}
 
-	/**
-	 * Fetches and aggregates OpenAPI specifications from all registered services
-	 * @returns {Object} Unified OpenAPI specification
-	 */
 	async	getAggregatedSpec()
 	{
-		try
-		{
-			const	specs = await Promise.allSettled(
-				this.services.map(async (service) =>
+		const	results = await Promise.all(
+			this.services.map(async svc =>
+			{
+				try
 				{
-					try
+					const	res = await axios.get(svc.url,
 					{
-						const	response = await axios.get(service.url,
-						{
-							timeout: 5000,
-							headers: {'x-internal-api-key': process.env.INTERNAL_API_KEY}
-						});
+						timeout: 5000,
+						headers: { "x-internal-api-key": process.env.INTERNAL_API_KEY }
+					});
 
-						return ({ 
-							name: service.name, 
-							pathPrefix: service.pathPrefix,
-							spec: response.data,
-							status: 'success'
-						});
-					}
-					catch (error)
-					{
-						console.warn(`⚠️  Failed to fetch docs from ${service.name}: ${error.message}`);
+					return { ...svc, spec: res.data };
+				}
+				catch (err)
+				{
+					console.warn(`⚠️ Failed to load ${svc.name} docs: ${err.message}`);
+					return (null);
+				}
+			})
+		);
 
-						return ({
-							name: service.name,
-							pathPrefix: service.pathPrefix,
-							spec: null,
-							status: 'failed',
-							error: error.message
-						});
-					}
-				})
-			);
+		const	specs = results.filter(Boolean);
+		console.log(`📚 Loaded ${specs.length}/${this.services.length} specs`);
 
-			// Filter successful specs
-			const	successfulSpecs = specs
-				.filter(result => result.status === 'fulfilled' && result.value.spec)
-				.map(result => result.value);
-
-			console.log(`📚 Successfully aggregated docs from ${successfulSpecs.length}/${this.services.length} services`);
-
-			return (this.mergeSpecs(successfulSpecs));
-		}
-		catch (error)
-		{
-			console.error('❌ Error aggregating specs:', error);
-			return (this.getFallbackSpec());
-		}
+		return (this.mergeSpecs(specs));
 	}
 
-	/**
-	 * Merges multiple OpenAPI specifications into a single unified spec
-	 * @param {Array} specs - Array of service specifications
-	 * @returns {Object} Merged OpenAPI specification
-	 */
 	mergeSpecs(specs)
 	{
-		const	baseSpec =
+		const	base =
 		{
-			swagger: '2.0',
-			info:
-			{
-				title: 'ft_transcendence API Gateway',
-				description: 'Unified API documentation for all microservices',
-				version: '1.0.0'
+			swagger: "2.0",
+			info: {
+				title: "ft_transcendence API Gateway",
+				description: "Unified API documentation",
+				version: "1.0.0"
 			},
-			host: 'localhost:3000',
-			schemes: ['http'],
-			consumes: ['application/json'],
-			produces: ['application/json'],
 			paths: {},
 			definitions: {},
-			// Security definitions for API key authentication, available on swagger UI
 			securityDefinitions:
 			{
+				cookieAuth:
+				{
+					type: "apiKey",
+					in: "cookie",
+					name: "access_token"
+				},
 				internalApiKey:
 				{
-					type: 'apiKey',
-					name: 'x-internal-api-key',
-					in: 'header'
+					type: "apiKey",
+					in: "header",
+					name: "x-internal-api-key"
 				}
 			},
 			tags: []
 		};
 
-		// Merge specifications
-		specs.forEach(({ name, pathPrefix, spec }) =>
+		for (const { name, pathPrefix, spec } of specs)
 		{
-			if (!spec)
-				return ;
+			const	tag = name[0].toUpperCase() + name.slice(1);
 
-			// Add service tag
-			baseSpec.tags.push(
-			{
-				name: name.charAt(0).toUpperCase() + name.slice(1),
-				description: `${name.charAt(0).toUpperCase() + name.slice(1)} service endpoints`
-			});
+			base.tags.push({ name: tag, description: `${tag} service` });
 
-			// Merge paths with prefix: /auth ("placeholder for localhost:300N") + /register (endpoint in microservice)
 			if (spec.paths)
 			{
-				Object.entries(spec.paths).forEach(([path, methods]) =>
+				for (const [path, methods] of Object.entries(spec.paths))
 				{
-					const	prefixedPath = pathPrefix + path;
-					baseSpec.paths[prefixedPath] = {};
+					const	newPath = pathPrefix + path;
+					base.paths[newPath] = {};
 
-					Object.entries(methods).forEach(([method, operation]) =>
-					{
-						baseSpec.paths[prefixedPath][method] =
-						{
-							...operation,
-							tags: [name.charAt(0).toUpperCase() + name.slice(1)]
-						};
-					});
-				});
-			}
-
-			// Merge definitions (Swagger 2.0 equivalent of components/schemas)
-			if (spec.definitions)
-			{
-				Object.entries(spec.definitions).forEach(([schemaName, schema]) =>
-				{
-					// Prefix schema names to avoid conflicts
-					const	prefixedName = `${name.charAt(0).toUpperCase() + name.slice(1)}${schemaName}`;
-					baseSpec.definitions[prefixedName] = schema;
-				});
-			}
-
-			// Merge security definitions (only if they have valid structure)
-			if (spec.securityDefinitions)
-			{
-				Object.entries(spec.securityDefinitions).forEach(([key, value]) =>
-				{
-					// Only add if the security definition has the required properties
-					if (value && value.type && value.name && value.in)
-						baseSpec.securityDefinitions[key] = value;
-				});
-			}
-		});
-
-		return (baseSpec);
-	}
-
-	/**
-	 * Returns a fallback specification when aggregation fails
-	 * @returns {Object} Fallback OpenAPI specification
-	 */
-	getFallbackSpec()
-	{
-		return ({
-			swagger: '2.0',
-			info: {
-				title: 'ft_transcendence API Gateway',
-				description: 'API documentation (some services may be unavailable)',
-				version: '1.0.0'
-			},
-			host: 'localhost:3000',
-			schemes: ['http'],
-			consumes: ['application/json'],
-			produces: ['application/json'],
-			paths: {},
-			securityDefinitions:
-			{
-				bearerAuth:
-				{
-					type: 'apiKey',
-					name: 'Authorization',
-					in: 'header'
+					for (const [method, op] of Object.entries(methods))
+						base.paths[newPath][method] = { ...op, tags: [tag] };
 				}
 			}
-		});
+
+			if (spec.definitions)
+			{
+				for (const [nameKey, schema] of Object.entries(spec.definitions))
+					base.definitions[`${tag}${nameKey}`] = schema;
+			}
+		}
+
+		return (base);
 	}
 
-	/**
-	 * Registers the aggregated Swagger UI with Fastify
-	 * @param {Object} fastify - Fastify instance
-	 */
+	getFallbackSpec()
+	{
+		return (
+		{
+			swagger: "2.0",
+			info: { title: "ft_transcendence API Gateway (Fallback)", version: "1.0.0" },
+			paths: {}
+		});
+	}
 
 	async	register(fastify)
 	{
-		// Get the aggregated spec
-		const	aggregatedSpec = await this.getAggregatedSpec();
+		// Load initial spec
+		this.currentSpec = await this.getAggregatedSpec();
 
-		// Register the Swagger plugin with the aggregated specification
-		await fastify.register(import('@fastify/swagger'), { swagger: aggregatedSpec });
-
-		// Register basic auth for protecting docs
+		// Protect docs with basic auth
 		await fastify.register(fastifyBasicAuth,
 		{
-			validate: async (username, password, req, reply) =>
+			validate: async (username, password) =>
 			{
-				if ( username !== process.env.DOC_USERNAME || password !== process.env.DOC_PASSWORD )
-					return (new Error('Unauthorized'));
+				if (username !== process.env.DOC_USERNAME || password !== process.env.DOC_PASSWORD)
+					throw new Error("Unauthorized");
 			},
-			authenticate: { realm: 'Swagger Documentation' }
+			authenticate: { realm: "Swagger Docs" }
 		});
 
-		// Register the unified documentation route with basic auth protection
-		await fastify.register(async function (fastify)
+		// Register Swagger (dynamic mode)
+		await fastify.register(import("@fastify/swagger"),
 		{
-			// Apply basic auth hook to all routes in this scope
-			fastify.addHook('onRequest', fastify.basicAuth);
-
-			await fastify.register(import('@fastify/swagger-ui'),
-			{
-				routePrefix: '/docs',
-				uiConfig:
-				{
-					docExpansion: 'list',
-					deepLinking: true
-				},
-				staticCSP: true
-			});
+			mode: "static",
+			specification: { document: this.currentSpec }
 		});
 
-		console.log('📚 Swagger aggregator registered at /docs');
+		// Register Swagger UI with dynamic refresh
+		await fastify.register(import("@fastify/swagger-ui"),
+		{
+			routePrefix: "/docs",
+			uiConfig: { docExpansion: "list", deepLinking: true },
+			transformSpecificationClone: true,
+			transformSpecification: (swaggerObject) =>
+			{
+				// Refresh specs on every page load (fire and forget)
+				console.log("🔄 Refreshing documentation on page load...");
+				this.getAggregatedSpec().then(spec => { this.currentSpec = spec;}).catch(err => {
+					console.error("❌ Failed to refresh specs:", err.message);});
+
+				// Return current spec immediately (may be stale on first load)
+				return (this.currentSpec);
+			}
+		});
+
+		// Protect UI
+		fastify.addHook("onRequest", fastify.basicAuth);
+
+		console.log("📚 Swagger UI available at → /docs");
+		console.log("🔄 Docs will auto-refresh on every page load");
 	}
 }
 
-export default (SwaggerAggregator);
+export default SwaggerAggregator;
