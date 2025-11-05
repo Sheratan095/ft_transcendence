@@ -24,6 +24,22 @@ const	User =
 	},
 }
 
+const	TokensResponse =
+{
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'Set-Cookie':
+			{
+				type: 'string',
+				description: 'HTTP-only cookies containing accessToken and refreshToken'
+			}
+		}
+	}
+}
+
 const	PasswordPolicy =
 {
 	type: 'string',
@@ -59,6 +75,7 @@ const	ErrorResponse =
 
 const	WelcomeResponse = 
 {
+	...TokensResponse,
 	type: 'object',
 	properties:
 	{
@@ -69,13 +86,14 @@ const	WelcomeResponse =
 
 const	LoginResponse = 
 {
+	...TokensResponse,
 	type: 'object',
 	properties:
 	{
 		message: { type: 'string' },
 		user: User,
 		tfaRequired: { type: 'boolean' },
-		userId: { type: 'string' }
+		userId: { type: 'string' },
 	},
 	additionalProperties: true
 };
@@ -90,7 +108,11 @@ const	withInternalAuth =
 		required: ['x-internal-api-key'],
 		properties:
 		{
-			'x-internal-api-key': { type: 'string' }
+			'x-internal-api-key': 
+			{ 
+				type: 'string',
+				description: 'Internal API key for service-to-service authentication'
+			}
 		}
 	}
 };
@@ -98,6 +120,22 @@ const	withInternalAuth =
 const	withCookieAuth =
 {
 	security: [{ cookieAuth: [] }],
+	
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'accessToken':
+			{
+				type: 'string',
+			},
+			'refreshToken':
+			{
+				type: 'string',
+			}
+		}
+	}
 };
 
 // ------------------------------ROUTES WITHOUT JWT PROTECTION-----------------------------
@@ -106,7 +144,9 @@ const	registerOpts =
 {
 	schema: 
 	{
-		description: 'Register a new user',
+		summary: 'Register new user',
+		description: 'Register a new user. Returns accessToken and refreshToken as HTTP-only cookies.',
+		tags: ['Authentication'],
 
 		...withInternalAuth,
 
@@ -138,7 +178,9 @@ const	loginOpts =
 {
 	schema: 
 	{
-		description: 'Login an existing user',
+		summary: 'Login user',
+		description: 'Login an existing user. If 2FA is not enabled, returns accessToken and refreshToken as HTTP-only cookies. If 2FA is enabled, returns tfaRequired=true without tokens.',
+		tags: ['Authentication'],
 
 		...withInternalAuth,
 
@@ -170,9 +212,12 @@ const	logoutOpts =
 {
 	schema:
 	{
-		description: 'Logout a user by invalidating their refresh token',
+		summary: 'Logout user',
+		description: 'Logout a user by invalidating their refresh token. Clears authentication cookies.',
+		tags: ['Authentication'],
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		response:
 		{
@@ -197,15 +242,18 @@ const	tokenOpts =
 {
 	schema:
 	{
-		description: 'Generate a new access token using a refresh token',
+		summary: 'Refresh access token',
+		description: 'Generate a new access token using a refresh token. Requires refreshToken cookie. Returns new accessToken cookie.',
+		tags: ['Authentication'],
 
 		...withInternalAuth,
-		...withCookieAuth, // Refresh token is here
+		...withCookieAuth,
 
 		response:
 		{
 			200:
 			{
+				...TokensResponse,
 				type: 'object',
 				properties:
 				{
@@ -225,7 +273,9 @@ const	twoFactorAuthOpts =
 {
 	schema:
 	{
-		description: 'Verify a user\'s Two-Factor Authentication (2FA) code',
+		summary: 'Verify 2FA code',
+		description: 'Verify a user\'s Two-Factor Authentication (2FA) code. Returns accessToken and refreshToken as HTTP-only cookies upon successful verification.',
+		tags: ['Authentication', '2FA'],
 
 		...withInternalAuth,
 
@@ -255,11 +305,14 @@ const	twoFactorAuthOpts =
 //-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
 // This is internal too
+
 const	enable2FAOpts =
 {
 	schema:
 	{
-		description: 'Enable or disable Two-Factor Authentication (2FA) for a user',
+		summary: 'Enable/Disable 2FA',
+		description: 'Enable or disable Two-Factor Authentication (2FA) for a user. Requires accessToken cookie for authentication.',
+		tags: ['Authentication', '2FA'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -300,7 +353,9 @@ const	changePasswordOpts =
 {
 	schema:
 	{
-		description: 'Change user password. userId is added in JWT validation middleware.',
+		summary: 'Change password',
+		description: 'Change user password. Requires accessToken cookie for authentication. userId is extracted from the JWT.',
+		tags: ['Account Management'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -339,7 +394,9 @@ const	deleteAccountOpts =
 {
 	schema:
 	{
-		description: 'Delete user account. userId is added in JWT validation middleware.',
+		summary: 'Delete account',
+		description: 'Delete user account. Requires accessToken cookie for authentication. userId is extracted from the JWT.',
+		tags: ['Account Management'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -372,8 +429,9 @@ const	validateTokenOpts =
 {
 	schema:
 	{
-		summary: 'Internal only 🔒 (called by gateway to validate "session")',
-		description: 'Validate an access token and retrieve the associated user ID',
+		summary: '🔒 Internal - Validate token',
+		description: 'Internal only (called by gateway to validate session). Validates an access token and retrieves the associated user. Requires accessToken cookie.',
+		tags: ['Internal'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -411,9 +469,9 @@ const	getAccountOpts =
 {
 	schema:
 	{
-		summary: '🔒 Internal (called by user service to retrieve the email)',
-
-		description: 'Get account details for the authenticated user',
+		summary: '🔒 Internal - Get account',
+		description: 'Internal only (called by user service to retrieve account details). No authentication tokens required - uses internal API key only.',
+		tags: ['Internal'],
 
 		...withInternalAuth,
 

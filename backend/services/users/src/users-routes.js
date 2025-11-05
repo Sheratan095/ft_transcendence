@@ -66,10 +66,37 @@ const	withInternalAuth =
 		required: ['x-internal-api-key'],
 		properties:
 		{
-			'x-internal-api-key': { type: 'string' }
+			'x-internal-api-key': 
+			{ 
+				type: 'string',
+				description: 'Internal API key for service-to-service authentication'
+			}
 		}
 	}
 };
+
+const	withCookieAuth =
+{
+	security: [{ cookieAuth: [] }],
+	
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'accessToken':
+			{
+				type: 'string',
+			},
+			'refreshToken':
+			{
+				type: 'string',
+			}
+		}
+	}
+};
+
+//-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
 const	getUsersOpts =
 {
@@ -78,6 +105,7 @@ const	getUsersOpts =
 		description: 'Retrieve a list of all users',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		response:
 		{
@@ -93,36 +121,6 @@ const	getUsersOpts =
 	handler: getUsers,
 };
 
-const	newUserOpts =
-{
-	schema:
-	{
-		summary: 'Internal only 🔒 (called by user auth service during registration)',
-
-		...withInternalAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['username', 'userId'],
-			properties:
-			{
-				username: { ...UsernamePolicy },
-				userId: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			201: User,
-			500: ErrorResponse,
-		}
-	},
-
-	preHandler: validateInternalApiKey,
-	handler: createUser,
-}
-
 const	getUserOpts =
 {
 	schema:
@@ -130,6 +128,7 @@ const	getUserOpts =
 		description: 'Get a user - supports query params: ?username=value or ?id=value',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		querystring:
 		{
@@ -153,7 +152,6 @@ const	getUserOpts =
 	handler: getUser,
 };
 
-// The userId isn't needed in the body as it's extracted from the JWT token
 const	updateUserOpts =
 {
 	schema:
@@ -161,6 +159,7 @@ const	updateUserOpts =
 		description: 'Update user details',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -194,6 +193,7 @@ const	uploadAvatarOpts =
 		description: 'Upload or update user avatar',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		response:
 		{
@@ -215,6 +215,38 @@ const	uploadAvatarOpts =
 	handler: uploadAvatar, 
 };
 
+//-----------------------------INTERAL ROUTES-----------------------------
+
+const	newUserOpts =
+{
+	schema:
+	{
+		summary: 'Internal only 🔒 (called by user auth service during registration)',
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['username', 'userId'],
+			properties:
+			{
+				username: { ...UsernamePolicy },
+				userId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			201: User,
+			500: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: createUser,
+}
+
 const	deleteUserOpts =
 {
 	schema:
@@ -223,6 +255,7 @@ const	deleteUserOpts =
 		description: 'Delete a user',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
