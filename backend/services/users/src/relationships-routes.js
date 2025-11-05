@@ -24,7 +24,11 @@ const	withInternalAuth =
 		required: ['x-internal-api-key'],
 		properties:
 		{
-			'x-internal-api-key': { type: 'string' }
+			'x-internal-api-key': 
+			{ 
+				type: 'string',
+				description: 'Internal API key for service-to-service authentication'
+			}
 		}
 	}
 };
@@ -38,13 +42,10 @@ const	withCookieAuth =
 		type: 'object',
 		properties:
 		{
-			'accessToken':
+			'Cookie':
 			{
 				type: 'string',
-			},
-			'refreshToken':
-			{
-				type: 'string',
+				description: 'Required cookies: accessToken (for authentication)'
 			}
 		}
 	}
@@ -116,7 +117,9 @@ const	getUserRelationshipsOpts =
 {
 	schema:
 	{
-		description: 'Get all relationships of the authenticated user.',
+		summary: 'Get all relationships',
+		description: 'Get all relationships of the authenticated user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -140,7 +143,9 @@ const	getFriendsOpts =
 {
 	schema:
 	{
-		description: 'Get only accepted friends of the authenticated user.',
+		summary: 'Get friends',
+		description: 'Get only accepted friends of the authenticated user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -164,7 +169,9 @@ const	getIncomingRequestsOpts =
 {
 	schema:
 	{
-		description: 'Get incoming friend requests for the authenticated user.',
+		summary: 'Get incoming requests',
+		description: 'Get incoming friend requests for the authenticated user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -188,7 +195,9 @@ const	getOutgoingRequestsOpts =
 {
 	schema:
 	{
-		description: 'Get outgoing friend requests sent by the authenticated user.',
+		summary: 'Get outgoing requests',
+		description: 'Get outgoing friend requests sent by the authenticated user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -212,7 +221,9 @@ const	sendFriendRequestOpts =
 {
 	schema:
 	{
-		description: 'Send a friend request to another user.',
+		summary: 'Send friend request',
+		description: 'Send a friend request to another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -250,7 +261,9 @@ const	acceptFriendRequestOpts =
 {
 	schema:
 	{
-		description: 'Accept a friend request from another user.',
+		summary: 'Accept friend request',
+		description: 'Accept a friend request from another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -288,7 +301,9 @@ const	rejectFriendRequestOpts =
 {
 	schema:
 	{
-		description: 'Reject a friend request from another user.',
+		summary: 'Reject friend request',
+		description: 'Reject a friend request from another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -326,7 +341,9 @@ const	blockUserOpts =
 {
 	schema:
 	{
-		description: 'Block another user.',
+		summary: 'Block user',
+		description: 'Block another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -363,7 +380,9 @@ const	unblockUserOpts =
 {
 	schema:
 	{
-		description: 'Unblock a previously blocked user.',
+		summary: 'Unblock user',
+		description: 'Unblock a previously blocked user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -400,7 +419,9 @@ const	cancelFriendRequestOpts =
 {
 	schema:
 	{
-		description: 'Cancel an outgoing friend request.',
+		summary: 'Cancel friend request',
+		description: 'Cancel an outgoing friend request. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -437,7 +458,9 @@ const	removeFriendOpts =
 {
 	schema:
 	{
-		description: 'Remove a friend or cancel a friend request.',
+		summary: 'Remove friend',
+		description: 'Remove a friend or cancel a friend request. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -477,8 +500,6 @@ export function	relationshipsRoutes(fastify)
 	fastify.get('/relationships/friends', getFriendsOpts);
 	fastify.get('/relationships/requests/incoming', getIncomingRequestsOpts);
 	fastify.get('/relationships/requests/outgoing', getOutgoingRequestsOpts);
-	// TO DO modify gateway to add these routes
-
 	// POST routes
 	fastify.post('/relationships/request', sendFriendRequestOpts);
 	

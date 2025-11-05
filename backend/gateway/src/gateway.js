@@ -91,6 +91,7 @@ import {
 	getUserRelationships,
 	getFriends,
 	getIncomingRequests,
+	getOutgoingRequests,
 	sendFriendRequest,
 	acceptFriendRequest,
 	rejectFriendRequest,
@@ -173,7 +174,8 @@ await fastify.register(async function (fastify)
 	// RELATIONSHIPS routes
 	fastify.get('/relationships', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUserRelationships })
 	fastify.get('/relationships/friends', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getFriends })
-	fastify.get('/relationships/requests', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getIncomingRequests })
+	fastify.get('/relationships/requests/incoming', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getIncomingRequests })
+	fastify.get('/relationships/requests/outgoing', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getOutgoingRequests })
 	fastify.post('/relationships/request', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: sendFriendRequest })
 	fastify.put('/relationships/accept', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: acceptFriendRequest })
 	fastify.put('/relationships/reject', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: rejectFriendRequest })

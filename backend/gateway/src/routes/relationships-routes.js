@@ -74,6 +74,27 @@ export const	getIncomingRequests = async (req, reply) =>
 	}
 };
 
+export const	getOutgoingRequests = async (req, reply) =>
+{
+	try
+	{
+		const	response = await axios.get(`${USERS_URL}/relationships/requests/outgoing`, {
+			headers: getAuthHeaders(req)
+		});
+
+		return (reply.send(response.data));
+	}
+	catch (err)
+	{
+		console.log('GetOutgoingRequests error:', err.message);
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data));
+
+		return (reply.code(500).send({ error: 'Users service unavailable' }));
+	}
+}
+
 export const	sendFriendRequest = async (req, reply) =>
 {
 	try

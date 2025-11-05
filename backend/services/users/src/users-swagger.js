@@ -26,6 +26,12 @@
 						type: 'apiKey',
 						name: 'x-internal-api-key',
 						in: 'header'
+					},
+					cookieAuth:
+					{
+						type: 'apiKey',
+						name: 'refresh_token',
+						in: 'header'
 					}
 				}
 			}

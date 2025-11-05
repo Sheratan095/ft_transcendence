@@ -84,13 +84,10 @@ const	withCookieAuth =
 		type: 'object',
 		properties:
 		{
-			'accessToken':
+			'Cookie':
 			{
 				type: 'string',
-			},
-			'refreshToken':
-			{
-				type: 'string',
+				description: 'Required cookies: accessToken (for authentication)'
 			}
 		}
 	}
@@ -102,7 +99,9 @@ const	getUsersOpts =
 {
 	schema:
 	{
-		description: 'Retrieve a list of all users',
+		summary: 'Get all users',
+		description: 'Retrieve a list of all users. Requires accessToken cookie for authentication.',
+		tags: ['Users'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -125,7 +124,9 @@ const	getUserOpts =
 {
 	schema:
 	{
-		description: 'Get a user - supports query params: ?username=value or ?id=value',
+		summary: 'Get single user',
+		description: 'Get a user by username or id. Supports query params: ?username=value or ?id=value. Requires accessToken cookie for authentication.',
+		tags: ['Users'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -156,7 +157,9 @@ const	updateUserOpts =
 {
 	schema:
 	{
-		description: 'Update user details',
+		summary: 'Update user',
+		description: 'Update user details (username and/or language). Requires accessToken cookie for authentication. User is identified from JWT.',
+		tags: ['Users'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -190,7 +193,9 @@ const	uploadAvatarOpts =
 {
 	schema:
 	{
-		description: 'Upload or update user avatar',
+		summary: 'Upload avatar',
+		description: 'Upload or update user avatar image. Requires accessToken cookie for authentication. Accepts multipart/form-data with image file.',
+		tags: ['Users'],
 
 		...withInternalAuth,
 		...withCookieAuth,
@@ -221,7 +226,9 @@ const	newUserOpts =
 {
 	schema:
 	{
-		summary: 'Internal only 🔒 (called by user auth service during registration)',
+		summary: '🔒 Internal - Create user',
+		description: 'Internal only (called by auth service during registration). Creates a new user profile. No authentication tokens required - uses internal API key only.',
+		tags: ['Internal'],
 
 		...withInternalAuth,
 
@@ -251,8 +258,9 @@ const	deleteUserOpts =
 {
 	schema:
 	{
-		summary: 'Internal only 🔒 (called by user auth service during account deletion)',
-		description: 'Delete a user',
+		summary: '🔒 Internal - Delete user',
+		description: 'Internal only (called by auth service during account deletion). Deletes a user profile and all related data. Requires accessToken cookie for authentication.',
+		tags: ['Internal'],
 
 		...withInternalAuth,
 		...withCookieAuth,

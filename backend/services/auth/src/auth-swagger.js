@@ -23,9 +23,6 @@ export async function setupSwagger(fastify) {
 					name: 'x-internal-api-key',
 					in: 'header'
 				},
-				// The cookie is needed just in auth because are the
-				// 	only ones that need them
-				//	all other routes are authenticated by gateway that call auth service
 				cookieAuth:
 				{
 					type: 'apiKey',

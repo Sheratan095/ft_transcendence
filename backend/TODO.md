@@ -23,6 +23,7 @@
 [x] consider to remove api flow, and add some "tutorial" fro swagger
 [x] move swagger in another microservice? added security layer with username and password 
 [] swagger implementation.txt
+[] swagger refresh
 
 [x] JWT protocol
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT
