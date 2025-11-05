@@ -30,8 +30,8 @@
 					cookieAuth:
 					{
 						type: 'apiKey',
-						name: 'refresh_token',
-						in: 'header'
+						name: 'JWT tokens',
+						in: 'cookie'
 					}
 				}
 			}

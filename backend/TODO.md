@@ -24,7 +24,7 @@
 [x] move swagger in another microservice? added security layer with username and password 
 [] swagger implementation.txt
 [x] swagger refresh
-[] check ...withAuthCookies and updated the std mic architecture
+[x] check ...withAuthCookies and updated the std mic architecture
 
 [x] JWT protocol
 	[x] userId and email are critical credentials (CAN'T be changed), they are used to sign the JWT

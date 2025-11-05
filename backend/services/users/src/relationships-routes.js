@@ -42,10 +42,13 @@ const	withCookieAuth =
 		type: 'object',
 		properties:
 		{
-			'Cookie':
+			'accessToken':
 			{
 				type: 'string',
-				description: 'Required cookies: accessToken (for authentication)'
+			},
+			'refreshToken':
+			{
+				type: 'string',
 			}
 		}
 	}

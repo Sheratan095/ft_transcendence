@@ -77,18 +77,14 @@ export class	SwaggerAggregator
 			definitions: {},
 			securityDefinitions:
 			{
-				cookieAuth:
-				{
-					type: "apiKey",
-					in: "cookie",
-					name: "access_token"
-				},
-				internalApiKey:
-				{
-					type: "apiKey",
-					in: "header",
-					name: "x-internal-api-key"
-				}
+				// Don't needed since all the calls are done on gateway andpoint
+				//	and swagger UI can't make call direclty to microservices
+				// internalApiKey:
+				// {
+				// 	type: "apiKey",
+				// 	in: "header",
+				// 	name: "x-internal-api-key"
+				// }
 			},
 			tags: []
 		};
