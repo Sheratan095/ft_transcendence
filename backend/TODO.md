@@ -22,7 +22,7 @@
 [x] swagger aggregator really makes sense? : yes
 [x] consider to remove api flow, and add some "tutorial" fro swagger
 [x] move swagger in another microservice? added security layer with username and password 
-[] swagger implementation.txt
+[x] swagger implementation.txt
 [x] swagger refresh
 [x] check ...withAuthCookies and updated the std mic architecture
 
