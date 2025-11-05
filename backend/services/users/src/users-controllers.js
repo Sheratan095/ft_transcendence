@@ -21,7 +21,6 @@ export const	getUsers = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 		const	users = await usersDb.getAllUsers();
 
-
 		return (reply.code(200).send(users));
 	}
 	catch (err)

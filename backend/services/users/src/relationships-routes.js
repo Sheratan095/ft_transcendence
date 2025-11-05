@@ -2,6 +2,7 @@ import {
 	getUserRelationships,
 	getFriends,
 	getIncomingRequests,
+	getOutgoingRequests,
 	sendFriendRequest,
 	acceptFriendRequest,
 	rejectFriendRequest,
@@ -48,7 +49,6 @@ const	withCookieAuth =
 		}
 	}
 };
-
 
 // Reusable error response schemas
 const	ErrorResponse =
@@ -182,6 +182,30 @@ const	getIncomingRequestsOpts =
 	},
 	preHandler: validateInternalApiKey,
 	handler	: getIncomingRequests
+};
+
+const	getOutgoingRequestsOpts =
+{
+	schema:
+	{
+		description: 'Get outgoing friend requests sent by the authenticated user.',
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: IncomingRequest
+			},
+			400: ErrorResponse,
+			500: ErrorResponse,
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: getOutgoingRequests
 };
 
 const	sendFriendRequestOpts =
@@ -451,8 +475,10 @@ export function	relationshipsRoutes(fastify)
 	// GET routes
 	fastify.get('/relationships', getUserRelationshipsOpts);
 	fastify.get('/relationships/friends', getFriendsOpts);
-	fastify.get('/relationships/requests', getIncomingRequestsOpts);
-	
+	fastify.get('/relationships/requests/incoming', getIncomingRequestsOpts);
+	fastify.get('/relationships/requests/outgoing', getOutgoingRequestsOpts);
+	// TO DO modify gateway to add these routes
+
 	// POST routes
 	fastify.post('/relationships/request', sendFriendRequestOpts);
 	

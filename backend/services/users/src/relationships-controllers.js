@@ -1,5 +1,7 @@
 import { extractUserData } from './users-help.js';
 
+//-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
+
 export async function	getUserRelationships(req, reply)
 {
 	try

@@ -423,7 +423,6 @@ const	deleteAccountOpts =
 
 //-----------------------------INTERAL ROUTES-----------------------------
 
-
 // TOKEN is passed in body since this route is called by other services (not browser)
 const	validateTokenOpts =
 {
@@ -503,7 +502,6 @@ const	getAccountOpts =
 	preHandler: validateInternalApiKey,
 	handler: getAccount
 };
-
 
 export function	authRoutes(fastify)
 {
