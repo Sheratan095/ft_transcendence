@@ -11,6 +11,8 @@ import { deleteUserRelationships } from './relationships-controllers.js';
 const	__filename = fileURLToPath(import.meta.url);
 const	__dirname = path.dirname(__filename);
 
+//-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
+
 export const	getUsers = async (req, reply) =>
 {
 	try
@@ -30,26 +32,6 @@ export const	getUsers = async (req, reply) =>
 	}
 
 } 
-
-export const	createUser = async (req, reply) =>
-{
-	try
-	{
-		const	usersDb = req.server.usersDb;
-		const	username = req.body.username;
-		const	userId = req.body.userId;
-
-		const	newUser = await usersDb.createUserProfile(userId, username);
-
-		return (reply.code(201).send(newUser));
-	}
-	catch (err)
-	{
-		console.log('CreateUser error:', err.message);
-
-		return (reply.code(500).send({ error: 'Internal server error' }));
-	}
-}
 
 export const	getUser = async (req, reply) =>
 {
@@ -190,6 +172,28 @@ export const	uploadAvatar = async (req, reply) =>
 	catch (err)
 	{
 		console.log('UploadAvatar error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+//-----------------------------INTERAL ROUTES-----------------------------
+
+export const	createUser = async (req, reply) =>
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	username = req.body.username;
+		const	userId = req.body.userId;
+
+		const	newUser = await usersDb.createUserProfile(userId, username);
+
+		return (reply.code(201).send(newUser));
+	}
+	catch (err)
+	{
+		console.log('CreateUser error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

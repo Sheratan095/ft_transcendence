@@ -28,6 +28,28 @@ const	withInternalAuth =
 	}
 };
 
+const	withCookieAuth =
+{
+	security: [{ cookieAuth: [] }],
+	
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'accessToken':
+			{
+				type: 'string',
+			},
+			'refreshToken':
+			{
+				type: 'string',
+			}
+		}
+	}
+};
+
+
 // Reusable error response schemas
 const	ErrorResponse =
 {
@@ -88,7 +110,7 @@ const	IncomingRequest =
 	},
 };
 
-//----------------------------------Schema definitions----------------------------------
+//-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
 const	getUserRelationshipsOpts =
 {
@@ -97,6 +119,7 @@ const	getUserRelationshipsOpts =
 		description: 'Get all relationships of the authenticated user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		response:
 		{
@@ -120,6 +143,7 @@ const	getFriendsOpts =
 		description: 'Get only accepted friends of the authenticated user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		response:
 		{
@@ -143,6 +167,7 @@ const	getIncomingRequestsOpts =
 		description: 'Get incoming friend requests for the authenticated user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		response:
 		{
@@ -166,6 +191,7 @@ const	sendFriendRequestOpts =
 		description: 'Send a friend request to another user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -203,6 +229,7 @@ const	acceptFriendRequestOpts =
 		description: 'Accept a friend request from another user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -240,6 +267,7 @@ const	rejectFriendRequestOpts =
 		description: 'Reject a friend request from another user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -277,6 +305,7 @@ const	blockUserOpts =
 		description: 'Block another user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -313,6 +342,7 @@ const	unblockUserOpts =
 		description: 'Unblock a previously blocked user.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -349,6 +379,7 @@ const	cancelFriendRequestOpts =
 		description: 'Cancel an outgoing friend request.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
@@ -385,6 +416,7 @@ const	removeFriendOpts =
 		description: 'Remove a friend or cancel a friend request.',
 
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
