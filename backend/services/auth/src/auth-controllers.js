@@ -5,6 +5,8 @@ import { sendTwoFactorCode } from './2fa.js';
 import bcrypt from 'bcrypt';
 import axios from 'axios'
 
+// ------------------------------ROUTES WITHOUT JWT PROTECTION-----------------------------
+
 // SALT ROUNDS are used to hash passwords securely and add an extra variable to the hashing process
 // making it more difficult for attackers to use precomputed tables (like rainbow tables) to crack passwords.
 // or crack one password and then be able to crack all other passwords with the same hash.
@@ -286,6 +288,8 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+//-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
 export const	enable2FA = async (req, reply) =>
 {
