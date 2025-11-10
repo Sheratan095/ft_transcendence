@@ -2,6 +2,7 @@ gateway:
     INTERNAL_API_KEY=1234
     AUTH_SERVICE_URL=http://localhost:3001
     USERS_SERVICE_URL=http://localhost:3002
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
     FRONTEND_URL=http://localhost:3004
     PORT=3000
     DOC_USERNAME=admin
@@ -22,12 +23,11 @@ services/auth:
     OTP_EXPIRATION_MINUTES=5
     USERS_SERVICE_URL=http://localhost:3002
 
-
 services/users:
     INTERNAL_API_KEY=1234
     PORT=3002
     AUTH_SERVICE_URL=http://localhost:3001
 
-services/notification
+services/notification:
     INTERNAL_API_KEY=1234
     PORT=3003

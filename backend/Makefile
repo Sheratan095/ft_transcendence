@@ -112,6 +112,7 @@ install:
 	@echo "Installing dependencies..."
 	@cd services/auth && npm install
 	@cd services/users && npm install
+	@cd services/notification && npm install
 	@cd gateway && npm install
 	@echo "Dependencies installed!"
 

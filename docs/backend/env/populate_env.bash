@@ -8,7 +8,7 @@ INPUT_FILE="required_env.txt"
 current_service=""
 
 # backend location
-LOCATION="../../backend/"
+LOCATION="../../../backend/"
 
 while IFS= read -r line || [[ -n "$line" ]]; do
     # Trim leading/trailing whitespace
