@@ -1,5 +1,5 @@
 // Validate required environment variables
-import { checkEnvVariables } from './gateway-help.js';
+import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'PORT'
 , 'DOC_USERNAME', 'DOC_PASSWORD']);
 
@@ -67,7 +67,10 @@ import SwaggerAggregator from './swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
-import { authenticateJwtToken } from './gateway-help.js';
+
+import {
+	handleSocketUpgrade
+} from './routes/notification-routes.js'
 
 import {
 	loginRoute,
@@ -150,11 +153,11 @@ await fastify.register(async function (fastify)
 		keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
 	});
 
-	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: changePasswordRoute })
-	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: enable2FARoute })
-	fastify.delete('/auth/delete-account', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: deleteAccountRoute })
-	fastify.post('/users/upload-avatar', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: uploadAvatar })
-	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: updateUser })
+	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwt, handler: changePasswordRoute })
+	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwt, handler: enable2FARoute })
+	fastify.delete('/auth/delete-account', { schema: { hide: true }, preHandler: authenticateJwt, handler: deleteAccountRoute })
+	fastify.post('/users/upload-avatar', { schema: { hide: true }, preHandler: authenticateJwt, handler: uploadAvatar })
+	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: updateUser })
 });
 
 // 🟢 RELAXED RATE LIMITING: General user routes (low risk, read operations)
@@ -168,21 +171,21 @@ await fastify.register(async function (fastify)
 	});
 
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
-	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUsers })
-	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUser })
+	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsers })
+	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUser })
 	
 	// RELATIONSHIPS routes
-	fastify.get('/relationships', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getUserRelationships })
-	fastify.get('/relationships/friends', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getFriends })
-	fastify.get('/relationships/requests/incoming', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getIncomingRequests })
-	fastify.get('/relationships/requests/outgoing', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: getOutgoingRequests })
-	fastify.post('/relationships/request', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: sendFriendRequest })
-	fastify.put('/relationships/accept', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: acceptFriendRequest })
-	fastify.put('/relationships/reject', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: rejectFriendRequest })
-	fastify.put('/relationships/block', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: blockUser })
-	fastify.delete('/relationships/unblock', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: unblockUser })
-	fastify.delete('/relationships/removeFriend', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: removeFriend })
-	fastify.delete('/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwtToken, handler: cancelFriendRequest })
+	fastify.get('/relationships', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserRelationships })
+	fastify.get('/relationships/friends', { schema: { hide: true }, preHandler: authenticateJwt, handler: getFriends })
+	fastify.get('/relationships/requests/incoming', { schema: { hide: true }, preHandler: authenticateJwt, handler: getIncomingRequests })
+	fastify.get('/relationships/requests/outgoing', { schema: { hide: true }, preHandler: authenticateJwt, handler: getOutgoingRequests })
+	fastify.post('/relationships/request', { schema: { hide: true }, preHandler: authenticateJwt, handler: sendFriendRequest })
+	fastify.put('/relationships/accept', { schema: { hide: true }, preHandler: authenticateJwt, handler: acceptFriendRequest })
+	fastify.put('/relationships/reject', { schema: { hide: true }, preHandler: authenticateJwt, handler: rejectFriendRequest })
+	fastify.put('/relationships/block', { schema: { hide: true }, preHandler: authenticateJwt, handler: blockUser })
+	fastify.delete('/relationships/unblock', { schema: { hide: true }, preHandler: authenticateJwt, handler: unblockUser })
+	fastify.delete('/relationships/removeFriend', { schema: { hide: true }, preHandler: authenticateJwt, handler: removeFriend })
+	fastify.delete('/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwt, handler: cancelFriendRequest })
 });
 
 // Server startup function with error handling
@@ -190,7 +193,12 @@ const	start = async () =>
 {
 	try
 	{
-		fastify.listen({ port: process.env.PORT })
+		fastify.listen({port: process.env.PORT }, () =>
+		{
+			// When the client sends an Upgrade request (tries to establish a WebSocket connection)
+			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
+		})
+
 		console.log(`Gateway server is running on port ${process.env.PORT}`)
 	}
 	catch (err)

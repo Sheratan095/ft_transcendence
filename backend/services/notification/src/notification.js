@@ -11,17 +11,35 @@ await fastify.register(fastifyWebsocket);
 
 fastify.get('/ws', { websocket: true }, (socket, req) =>
 {
-	console.log('✅ WebSocket client connected');
+	// Extract user data from request (set by gateway after authentication)
+	const	user = req.user || null;
+	
+	if (user)
+		console.log(`✅ WebSocket client connected - User: ${user.id} (${user.email})`);
+	else
+		console.log('✅ WebSocket client connected - No user data');
 	
 	socket.on('message', msg =>
 	{
 		console.log("📩 Message from user:", msg.toString());
-		socket.send("Echo: " + msg.toString());
+		
+		// You can now use user.id and user.email in your WebSocket logic
+		if (user)
+		{
+			socket.send(`Echo from ${user.email}: ${msg.toString()}`);
+		}
+		else
+		{
+			socket.send("Echo: " + msg.toString());
+		}
 	});
 
 	socket.on('close', () =>
 	{
-		console.log('❌ WebSocket connection closed');
+		if (user)
+			console.log(`❌ WebSocket connection closed - User: ${user.id}`);
+		else
+			console.log('❌ WebSocket connection closed');
 	});
 
 	socket.on('error', (err) =>
