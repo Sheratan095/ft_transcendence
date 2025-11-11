@@ -25,7 +25,8 @@
     "axios": "^1.12.2",
     "dotenv": "^16.4.5",
     "fastify": "^5.6.1",
-    "form-data": "^4.0.4"
+    "form-data": "^4.0.4",
+    "http-proxy": "^1.18.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
