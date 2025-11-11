@@ -80,6 +80,7 @@ stop:
 	@-ss -tlnp | grep ":$(GATEWAY_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-pkill -f "nodemon.*auth\.js" 2>/dev/null || true
 	@-pkill -f "nodemon.*users\.js" 2>/dev/null || true
+	@-pkill -f "nodemon.*notification\.js" 2>/dev/null || true
 	@-pkill -f "nodemon.*gateway\.js" 2>/dev/null || true
 	@sleep 1
 	@echo "All services stopped"

@@ -18,7 +18,8 @@
     "ajv-errors": "^3.0.0",
     "axios": "^1.13.0",
     "dotenv": "^17.2.3",
-    "fastify": "^5.6.1"
+    "fastify": "^5.6.1",
+    "fastify-websocket": "^4.2.2"
   },
   "devDependencies": {
     "dotenv": "^16.4.5",
