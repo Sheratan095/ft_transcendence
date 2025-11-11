@@ -150,26 +150,29 @@ export class	SwaggerAggregator
 			specification: { document: this.currentSpec }
 		});
 
-		// Register Swagger UI with dynamic refresh
-		await fastify.register(import("@fastify/swagger-ui"),
+		// Register Swagger UI with dynamic refresh and protect it with basic auth
+		await fastify.register(async function (fastifyInstance)
 		{
-			routePrefix: "/docs",
-			uiConfig: { docExpansion: "list", deepLinking: true },
-			transformSpecificationClone: true,
-			transformSpecification: (swaggerObject) =>
+			// Apply basic auth only to this scope (docs routes)
+			fastifyInstance.addHook("onRequest", fastify.basicAuth);
+			
+			await fastifyInstance.register(import("@fastify/swagger-ui"),
 			{
-				// Refresh specs on every page load (fire and forget)
-				console.log("🔄 Refreshing documentation on page load...");
-				this.getAggregatedSpec().then(spec => { this.currentSpec = spec;}).catch(err => {
-					console.error("❌ Failed to refresh specs:", err.message);});
+				routePrefix: "/docs",
+				uiConfig: { docExpansion: "list", deepLinking: true },
+				transformSpecificationClone: true,
+				transformSpecification: (swaggerObject) =>
+				{
+					// Refresh specs on every page load (fire and forget)
+					console.log("🔄 Refreshing documentation on page load...");
+					this.getAggregatedSpec().then(spec => { this.currentSpec = spec;}).catch(err => {
+						console.error("❌ Failed to refresh specs:", err.message);});
 
-				// Return current spec immediately (may be stale on first load)
-				return (this.currentSpec);
-			}
+					// Return current spec immediately (may be stale on first load)
+					return (this.currentSpec);
+				}
+			});
 		});
-
-		// Protect UI
-		fastify.addHook("onRequest", fastify.basicAuth);
 
 		console.log("📚 Swagger UI available at → /docs");
 		console.log("🔄 Docs will auto-refresh on every page load");

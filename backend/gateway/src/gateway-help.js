@@ -22,7 +22,7 @@ async function	validateJwtTokenInternal(cookieHeader)
 	if (response.data.valid)
 		return (response.data.user);
 	
-	throw (new Error('Invalid token'));
+	throw new Error('Invalid token');
 }
 
 // Authentication middleware that validates JWT tokens via auth service
@@ -61,7 +61,7 @@ export async function	authenticateJwtWebSocket(request)
 		const	cookieHeader = request.headers.cookie;
 		
 		if (!cookieHeader)
-			throw (new Error('No cookies provided'));
+			throw new Error('No cookies provided');
 
 		// Validate token using the same auth service endpoint
 		const	user = await validateJwtTokenInternal(cookieHeader);
@@ -72,9 +72,9 @@ export async function	authenticateJwtWebSocket(request)
 	{
 		// Rethrow with appropriate error message
 		if (err.response && err.response.data)
-			throw (new Error(err.response.data.error || 'Unauthorized'));
-		
-		throw new (Error('Authentication failed'));
+			throw new Error(err.response.data.error || 'Unauthorized');
+
+		throw new Error('Authentication failed');
 	}
 }
 

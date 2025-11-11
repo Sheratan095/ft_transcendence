@@ -14,6 +14,11 @@ export async function	handleSocketUpgrade(req, socket, head)
 		
 		// Attach user data to request so notification service can access it
 		req.user = user;
+
+// 		User logged in:  38b77b05-31c8-497d-95fc-a34177ace239
+// ✅ WebSocket authenticated for user: 38b77b05-31c8-497d-95fc-a34177ace239
+// (node:19656) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+// (Use `node --trace-deprecation ...` to show where the warning was created)
 		
 		// Proxy to notification service
 		proxy.ws(req, socket, head);

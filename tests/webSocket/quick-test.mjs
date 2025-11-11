@@ -1,22 +1,31 @@
 import WebSocket from 'ws';
 
 // login the user to get a valid jwt token in http cookies
-fetch('http://localhost:3000/auth/login', {
+const response = await fetch('http://localhost:3000/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'ceccarellim7@gmail.com', password: 'Password123!' })
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error(`Login failed: ${response.statusText}`);
-    }
-    return response;
-})
-.then(() => {
-    console.log('🔑 Login successful, proceeding to WebSocket connection');
+    body: JSON.stringify({ email: 'ceccarellim7@gmail.com', password: 'Mrco@123_' })
 });
 
-const ws = new WebSocket('ws://localhost:3000/');
+if (!response.ok) {
+    throw new Error(`Login failed: ${response.statusText}`);
+}
+
+// Extract cookies from the response headers
+const cookies = response.headers.get('set-cookie');
+if (!cookies) {
+    throw new Error('No cookies received from login');
+}
+
+console.log('🔑 Login successful, cookies received');
+console.log('🍪 Cookies:', cookies);
+
+// Create WebSocket connection with cookies in the headers
+const ws = new WebSocket('ws://localhost:3000/', {
+    headers: {
+        'Cookie': cookies
+    }
+});
 
 ws.on('open', () => {
     console.log('✅ Connected');
