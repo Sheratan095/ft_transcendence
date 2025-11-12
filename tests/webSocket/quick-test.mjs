@@ -43,7 +43,7 @@ ws.on('message', (data) => {
 
 ws.on('close', () => {
     console.log('❌ Closed');
-    // process.exit(0);
+    process.exit(0);
 });
 
 ws.on('error', (error) => {

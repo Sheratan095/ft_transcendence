@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import {
+	handleNewConnection,
 	handleMessage,
 	handleClose,
 	handleError
@@ -20,15 +21,14 @@ await fastify.register(fastifyWebsocket);
 
 fastify.get('/ws', { websocket: true }, (socket, req) =>
 {
-	// Extract user data from request (set by gateway after authentication)
-	const	user = req.user;
-	
-	console.log(`✅ WebSocket client connected - User: ${user.id}`);
-	userConnectionManager.addConnection(user.id, socket);
+	// if the request is invalid, reject it
+	let	userId = handleNewConnection(socket, req);
+	if (!userId)
+		return ;
 
-	socket.on('message', msg => {handleMessage(socket, msg, user);});
+	socket.on('message', msg => {handleMessage(socket, msg, userId);});
 
-	socket.on('close', () => {handleClose(socket, user);});
+	socket.on('close', () => {handleClose(socket, userId);});
 
 	socket.on('error', (err) => {handleError(socket, err);});
 });

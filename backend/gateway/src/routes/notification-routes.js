@@ -50,13 +50,15 @@ export async function	handleSocketUpgrade(req, socket, head)
 
 		console.log(`WebSocket authenticated for user: ${user.id}`);
 
-		// Attach user data to request so notification service can access it
-		req.user = user;
+		// Also inject forwarding headers so the proxied service (different process)
+		// can reconstruct the authenticated user. We include an internal API key
+		// to prevent spoofing and only use simple fields (id, email).
+		req.headers = req.headers || {};
 
-		// User logged in:  38b77b05-31c8-497d-95fc-a34177ace239
-		// ✅ WebSocket authenticated for user: 38b77b05-31c8-497d-95fc-a34177ace239
-		// (node:19656) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
-		// (Use `node --trace-deprecation ...` to show where the warning was created)
+		if (user && user.id)
+			req.headers['x-user-id'] = user.id;
+		if (process.env.INTERNAL_API_KEY)
+			req.headers['x-internal-api-key'] = process.env.INTERNAL_API_KEY;
 
 		// Ensure socket errors are handled locally (prevents uncaught exceptions)
 		socket.on('error', (err) =>
