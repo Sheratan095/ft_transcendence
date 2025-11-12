@@ -151,11 +151,15 @@ export class	SwaggerAggregator
 		});
 
 		// Register Swagger UI with dynamic refresh and protect it with basic auth
-		await fastify.register(async function (fastifyInstance)
+		// Use arrow function so `this` inside transformSpecification refers to the
+		// SwaggerAggregator instance. If a normal function is used, `this` will
+		// be undefined (strict mode) and calls like `this.getAggregatedSpec()`
+		// will fail with "Cannot read properties of undefined".
+		await fastify.register(async (fastifyInstance) =>
 		{
 			// Apply basic auth only to this scope (docs routes)
 			fastifyInstance.addHook("onRequest", fastify.basicAuth);
-			
+
 			await fastifyInstance.register(import("@fastify/swagger-ui"),
 			{
 				routePrefix: "/docs",
@@ -165,8 +169,9 @@ export class	SwaggerAggregator
 				{
 					// Refresh specs on every page load (fire and forget)
 					console.log("🔄 Refreshing documentation on page load...");
-					this.getAggregatedSpec().then(spec => { this.currentSpec = spec;}).catch(err => {
-						console.error("❌ Failed to refresh specs:", err.message);});
+					this.getAggregatedSpec().then(spec => { this.currentSpec = spec; }).catch(err => {
+						console.error("❌ Failed to refresh specs:", err.message);
+					});
 
 					// Return current spec immediately (may be stale on first load)
 					return (this.currentSpec);
