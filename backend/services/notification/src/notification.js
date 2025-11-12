@@ -55,20 +55,17 @@ checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
 import { setupSwagger } from './notification-swagger.js';
 await setupSwagger(fastify);
 
-await fastify.listen({ port: 3003, host: '0.0.0.0' });
-console.log('🚀 Server running on ws://localhost:3003/ws');
-
-// const	start = async () =>
-// {
-// 	try
-// 	{
-// 		await fastify.listen({ port: process.env.PORT, host: '0.0.0.0' })
-// 		console.log(`Server is running on port ${process.env.PORT}`)
-// 	}
-// 	catch (err)
-// 	{
-// 		fastify.log.error(err)
-// 		process.exit(1)
-// 	}
-// }
-// start()
+const	start = async () =>
+{
+	try
+	{
+		await fastify.listen({ port: process.env.PORT, host: '0.0.0.0' })
+		console.log(`Server is running on port ws://localhost:${process.env.PORT}/ws`)
+	}
+	catch (err)
+	{
+		fastify.log.error(err)
+		process.exit(1)
+	}
+}
+start()

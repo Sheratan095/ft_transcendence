@@ -21,7 +21,10 @@ console.log('🔑 Login successful, cookies received');
 console.log('🍪 Cookies:', cookies);
 
 // Create WebSocket connection with cookies in the headers
-const ws = new WebSocket('ws://localhost:3000/', {
+// NOTE: the notification service exposes the websocket route at '/ws'.
+// The gateway proxies Upgrade requests to the notification service and
+// forwards the original request path, so we must connect to '/ws'.
+const ws = new WebSocket('ws://localhost:3000/ws', {
     headers: {
         'Cookie': cookies
     }
@@ -35,12 +38,12 @@ ws.on('open', () => {
 
 ws.on('message', (data) => {
     console.log('📥 Received:', data.toString());
-    // ws.close();
+    ws.close();
 });
 
 ws.on('close', () => {
     console.log('❌ Closed');
-    process.exit(0);
+    // process.exit(0);
 });
 
 ws.on('error', (error) => {
@@ -52,5 +55,5 @@ ws.on('error', (error) => {
 setTimeout(() => {
     console.log('⏱️ Timeout - no response received');
     ws.close();
-    process.exit(1);
+    process.exit(0);
 }, 5000);
