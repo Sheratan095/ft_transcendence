@@ -5,8 +5,14 @@ const	fastify = Fastify({ logger: false });
 import dotenv from 'dotenv';
 dotenv.config();
 
-import UserConnectionManager from './UserConnectionManager.js';
-export	const	userConnectionManager = new UserConnectionManager();
+import {
+	handleMessage,
+	handleClose,
+	handleError
+} from './event-hanlders.js';
+
+// The class is initialized in UserConnectionManager.js
+import { userConnectionManager } from './UserConnectionManager.js';
 
 // Register WebSocket plugin
 import fastifyWebsocket from '@fastify/websocket';
@@ -15,40 +21,16 @@ await fastify.register(fastifyWebsocket);
 fastify.get('/ws', { websocket: true }, (socket, req) =>
 {
 	// Extract user data from request (set by gateway after authentication)
-	const	user = req.user || null;
+	const	user = req.user;
 	
-	if (user)
-		console.log(`✅ WebSocket client connected - User: ${user.id}`);
-	
-	socket.on('message', msg =>
-	{
-		console.log("📩 Message from user:", msg.toString());
+	console.log(`✅ WebSocket client connected - User: ${user.id}`);
+	userConnectionManager.addConnection(user.id, socket);
 
-		userConnectionManager.addConnection(user.id, socket);
+	socket.on('message', msg => {handleMessage(socket, msg, user);});
 
-		// You can now use user.id and user.email in your WebSocket logic
-		if (user)
-		{
-			socket.send(`Echo from ${user.email}: ${msg.toString()}`);
-		}
-		else
-		{
-			socket.send("Echo: " + msg.toString());
-		}
-	});
+	socket.on('close', () => {handleClose(socket, user);});
 
-	socket.on('close', () =>
-	{
-		userConnectionManager.removeConnection(user.id);
-
-		if (user)
-			console.log(`❌ WebSocket connection closed - User: ${user.id}`);
-	});
-
-	socket.on('error', (err) =>
-	{
-		console.log('⚠️ WebSocket error:', err.message);
-	});
+	socket.on('error', (err) => {handleError(socket, err);});
 });
 
 import { checkEnvVariables } from './notification-help.js';

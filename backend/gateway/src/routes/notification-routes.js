@@ -48,7 +48,7 @@ export async function	handleSocketUpgrade(req, socket, head)
 		// Authenticate WebSocket connection using JWT from cookies
 		const	user = await authenticateJwtWebSocket(req);
 
-		console.log(`✅ WebSocket authenticated for user: ${user.id}`);
+		console.log(`WebSocket authenticated for user: ${user.id}`);
 
 		// Attach user data to request so notification service can access it
 		req.user = user;

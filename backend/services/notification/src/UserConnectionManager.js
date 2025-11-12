@@ -26,4 +26,4 @@ class	UserConnectionManager
 	}
 }
 
-export default UserConnectionManager;
+export const	userConnectionManager = new UserConnectionManager();
