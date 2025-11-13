@@ -40,12 +40,17 @@ checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
 import { setupSwagger } from './notification-swagger.js';
 await setupSwagger(fastify);
 
+import { notificationRoutes } from './notification-routes.js';
+
 const	start = async () =>
 {
 	try
 	{
 		await fastify.listen({ port: process.env.PORT, host: '0.0.0.0' })
 		console.log(`Server is running on port ws://localhost:${process.env.PORT}/ws`)
+
+		// Setup routes after database is initialized
+		fastify.register(notificationRoutes);
 	}
 	catch (err)
 	{

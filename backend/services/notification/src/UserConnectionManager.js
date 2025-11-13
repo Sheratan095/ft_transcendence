@@ -27,17 +27,26 @@ class	UserConnectionManager
 		return (this._connections.size);
 	}
 
+	sendFriendRequestNotification(targetUserId, requesterUsername, relationshipId)
+	{
+		const	targetSocket = this.getConnection(targetUserId);
+		if (targetSocket)
+		{
+			this.#dispatchEventToSocket(
+				targetSocket,
+				'friendRequest',
+				{
+					from: requesterUsername,
+					relationshipId: relationshipId
+				}
+			);
+		}
+	}
+
 	#sendOnlineUsersList(socket)
 	{
 		const	onlineUserIds = Array.from(this._connections.keys());
-		try
-		{
-			socket.send(JSON.stringify({ event: 'onlineUsers', data: { users: onlineUserIds } }));
-		}
-		catch (e)
-		{
-			console.error('Failed to send online users list:', e.message);
-		}
+		this.#dispatchEventToSocket(socket, 'onlineUsers', { users: onlineUserIds });
 	}
 
 	#dispatchEventToFriends(userId, event, data)
@@ -47,15 +56,21 @@ class	UserConnectionManager
 		{
 			// Except send to self
 			if (otherUserId !== userId)
+				this.#dispatchEventToSocket(otherSocket, event, data);
+		}
+	}
+
+	#dispatchEventToSocket(socket, event, data)
+	{
+		if (socket)
+		{
+			try
 			{
-				try
-				{
-					otherSocket.send(JSON.stringify({ event, data }));
-				}
-				catch (e)
-				{
-					console.error(`Failed to send ${event} to user ${otherUserId}:`, e.message);
-				}
+				socket.send(JSON.stringify({ event, data }));
+			}
+			catch (e)
+			{
+				console.error(`Failed to send ${event} to user ${userId}:`, e.message);
 			}
 		}
 	}
