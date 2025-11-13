@@ -8,6 +8,7 @@ class	UserConnectionManager
 	addConnection(userId, socket)
 	{
 		this._connections.set(userId, socket);
+		this.#sendOnlineUsersList(socket);
 		this.#dispatchEventToFriends(userId, 'friendOnline', { userId });
 	}
 
@@ -24,6 +25,19 @@ class	UserConnectionManager
 	count()
 	{
 		return (this._connections.size);
+	}
+
+	#sendOnlineUsersList(socket)
+	{
+		const	onlineUserIds = Array.from(this._connections.keys());
+		try
+		{
+			socket.send(JSON.stringify({ event: 'onlineUsers', data: { users: onlineUserIds } }));
+		}
+		catch (e)
+		{
+			console.error('Failed to send online users list:', e.message);
+		}
 	}
 
 	#dispatchEventToFriends(userId, event, data)

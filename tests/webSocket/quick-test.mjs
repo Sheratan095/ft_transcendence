@@ -46,7 +46,6 @@ ws.on('message', (data) => {
         
         // Handle different event types
         if (message.event) {
-            console.log(`🎯 Event: ${message.event}`, message.data);
             
             // Handle specific events
             switch (message.event) {
@@ -55,6 +54,9 @@ ws.on('message', (data) => {
                     break;
                 case 'friendOffline':
                     console.log('� Friend went offline:', message.data);
+                    break;
+                case 'onlineUsers':
+                    console.log('🟢 Online users list:', message.data);
                     break;
                 default:
                     console.log('📦 Unknown event:', message.event);
