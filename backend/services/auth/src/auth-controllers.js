@@ -1,5 +1,6 @@
-import { generateNewTokens, decodeToken, setAuthCookies, clearAuthCookies} from './jwt.js';
-import { validator, isTokenExpired, extractUserData, getUserLanguage, usernameExists } from './auth-help.js';
+import { generateNewTokens, decodeToken, setAuthCookies, clearAuthCookies } from './jwt.js';
+
+import { validator, isTokenExpired, extractUserData, getUserLanguage, createUserProfileInUsersService } from './auth-help.js';
 import { sendTwoFactorCode } from './2fa.js';
 
 import bcrypt from 'bcrypt';
@@ -25,18 +26,12 @@ export const	register = async (req, reply) =>
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		authDb = req.server.authDb;
 
-		// Check if username already exists in users service
-		if (await usernameExists(username))
-			throw (new Error('Username already exists'));
-
 		// Create user in auth database
 		user = await authDb.createUser(email, hashedpassword);
 
-		// Create user profile in users service
-		await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
-			{ username: username, userId: user.id },
-			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
-		);
+		await createUserProfileInUsersService(user.id, username);
+
+		console.log('User profile created in users service for user: ', user.id);
  
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
@@ -47,37 +42,43 @@ export const	register = async (req, reply) =>
 
 		return (reply.code(201).send({
 			message: 'User registered successfully',
-			user:
-			{
-				id: user.id,
-				email: user.email
-			}
+			user: { id: user.id, email: user.email }
 		}));
 	}
 	catch (err)
 	{
-		console.log('Registration error:', err.message)
-
 		// if the user in auth DB was created but the profile creation failed, delete the auth user
 		if (user && authDb) // Check if user and authDb are defined
-		{
-			console.log('PROBLEM auth and users DB are out of sync, canceling user creation...');
 			await authDb.deleteUserById(user.id);
-		}
-
-		// Handle validation errors from validator function
-		if (err.message.includes('Username') || err.message.includes('Password')) 
-			return (reply.code(400).send({ error: err.message }))
 
 		if (err.code === 'SQLITE_CONSTRAINT')
 		{
-			if (err.message.includes('username'))
-				return (reply.code(409).send({ error: 'Username already exists' }))
+			// From authDb
 			if (err.message.includes('email'))
-				return (reply.code(409).send({ error: 'Email already exists' }))
+			{
+				console.error(`Duplicate email attempt`);
+				return (reply.code(409).send({ 
+					error: 'Registration failed',
+					details: 'Email already exists' 
+				}));
+			}
+			
+			// From usersDb
+			if (err.message.includes('username'))
+			{
+				console.error(`Duplicate username attempt`);
+				return (reply.code(409).send({ 
+					error: 'Registration failed',
+					details: 'Username already exists' 
+				}));
+			}
 		}
 
-		return (reply.code(500).send({ error: 'Internal server error' }))
+		console.error(`Registration error - Code: ${err.code}, Message: ${err.message}`);
+		return (reply.code(500).send({ 
+			error: 'Registration failed',
+			details: 'An unexpected error occurred during registration' 
+		}));
 	}
 }
 

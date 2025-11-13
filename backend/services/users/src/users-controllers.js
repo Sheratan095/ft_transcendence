@@ -194,6 +194,10 @@ export const	createUser = async (req, reply) =>
 	{
 		console.log('CreateUser error:', err.message);
 
+		if (err.code === 'SQLITE_CONSTRAINT')
+			return (reply.code(409).send({ error: 'SQLLITE_CONSTRAINT username already exist' }));
+
+		// Custom error for better log in auth controller
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
