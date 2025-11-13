@@ -12,7 +12,7 @@ export const	sendFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.error('Error in sendFriendRequest handler:', err);
+		console.error('[NOTIFICATION] Error in sendFriendRequest handler:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
@@ -29,7 +29,7 @@ export const	sendFriendAccept = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.error('Error in sendFriendAccept handler:', err);
+		console.error('[NOTIFICATION] Error in sendFriendAccept handler:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
