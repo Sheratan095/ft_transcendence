@@ -83,7 +83,7 @@
 [] how can we check if a user is online? : ping on websocket notification service
 [] Cleanup job: periodically remove expired tokens from DB.
 
-[] register MAA => error
+[x] register MAA => error
 
 [] FIX THIS
 	(node:12179) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
