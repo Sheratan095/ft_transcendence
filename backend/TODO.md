@@ -85,7 +85,7 @@
 
 [x] register MAA => error
 
-[] FIX THIS
+[x] FIX THIS
 	(node:12179) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
 	at common.setupOutgoing (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/common.js:43:22)
 	at Array.stream (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js:104:14)

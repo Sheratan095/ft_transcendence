@@ -190,6 +190,8 @@ export const	createUser = async (req, reply) =>
 
 		const	newUser = await usersDb.createUserProfile(userId, username);
 
+		console.log('[USERS] User profile created in users service for user: ', userId);
+
 		return (reply.code(201).send(newUser));
 	}
 	catch (err)

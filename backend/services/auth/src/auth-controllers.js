@@ -30,8 +30,6 @@ export const	register = async (req, reply) =>
 		user = await authDb.createUser(email, hashedpassword);
 
 		await createUserProfileInUsersService(user.id, username);
-
-		console.log('[AUTH] User profile created in users service for user: ', user.id);
  
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);

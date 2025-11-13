@@ -4,8 +4,8 @@ AUTH_PORT=3001
 USERS_PORT=3002
 NOTIFICATION_PORT=3003
 
-NODE = node --trace-deprecation
-NODE_OPTIONS_ENV = NODE_OPTIONS="--trace-deprecation"
+NODE = node --no-deprecation
+NODE_OPTIONS_ENV = NODE_OPTIONS="--no-deprecation"
 
 # Default target (production mode)
 .PHONY: start
