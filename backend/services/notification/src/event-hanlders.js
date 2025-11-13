@@ -34,9 +34,8 @@ export function	handleNewConnection(socket, req)
 
 export function	handleMessage(socket, msg, userId)
 {
-	console.log("📩 Message from user:", msg.toString());
+	console.log(`Message from user: ${userId} : ${msg.toString()}`);
 
-	userConnectionManager.addConnection(userId, socket);
 	// You can now use user.id and user.email in your WebSocket logic
 	if (userId)
 	{

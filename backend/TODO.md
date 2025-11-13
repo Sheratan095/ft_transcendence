@@ -82,3 +82,13 @@
 [x] add checks on user existing and token expiration directly in gatewat jwt validation
 [] how can we check if a user is online? : ping on websocket notification service
 [] Cleanup job: periodically remove expired tokens from DB.
+
+[] register MAA => error
+
+[] FIX THIS
+	(node:12179) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+	at common.setupOutgoing (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/common.js:43:22)
+	at Array.stream (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js:104:14)
+	at ProxyServer.<anonymous> (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/index.js:81:21)
+	at handleSocketUpgrade (file:///home/maceccar/Desktop/ft_transcendence/backend/gateway/src/routes/notification-routes.js:77:9)
+	at process.processTicksAndRejections (node:internal/process/task_queues:105:5]

@@ -8,6 +8,7 @@ class	UserConnectionManager
 	addConnection(userId, socket)
 	{
 		this._connections.set(userId, socket);
+		this.#dispatchEventToFriends(userId, 'friendOnline', { userId });
 	}
 
 	removeConnection(userId)
@@ -23,6 +24,26 @@ class	UserConnectionManager
 	count()
 	{
 		return (this._connections.size);
+	}
+
+	#dispatchEventToFriends(userId, event, data)
+	{
+		console.log(`Dispatching event '${event}' from user ${userId} to friends`);
+		for (const [otherUserId, otherSocket] of this._connections.entries())
+		{
+			// Except send to self
+			if (otherUserId !== userId)
+			{
+				try
+				{
+					otherSocket.send(JSON.stringify({ event, data }));
+				}
+				catch (e)
+				{
+					console.error(`Failed to send ${event} to user ${otherUserId}:`, e.message);
+				}
+			}
+		}
 	}
 }
 
