@@ -38,7 +38,7 @@ export async function	loginRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -61,7 +61,7 @@ export async function	registerRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -91,7 +91,7 @@ export async function	logoutRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -113,7 +113,7 @@ export async function	deleteAccountRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -141,7 +141,7 @@ export async function	tokenRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -164,7 +164,7 @@ export async function	verifyTwoFactorAuth(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -185,7 +185,7 @@ export async function	enable2FARoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -206,7 +206,7 @@ export async function	changePasswordRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))

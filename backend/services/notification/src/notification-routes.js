@@ -59,7 +59,7 @@ const	sendFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requesterUsername', 'targetUserId', 'relationshipId'],
+			required: ['requesterUsername', 'targetUserId'],
 			properties:
 			{
 				requesterUsername: { type: 'string'},
@@ -92,7 +92,7 @@ const	sendFriendAcceptOpts =
 		body:
 		{
 			type: 'object',
-			required: ['accepterId', 'accepterUsername', 'relationshipId'],
+			required: ['requesterId', 'accepterUsername'],
 			properties:
 			{
 				requesterId: {type: 'string'},

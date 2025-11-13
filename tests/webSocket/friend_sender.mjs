@@ -1,0 +1,183 @@
+import WebSocket from 'ws';
+
+/**
+ * Sender script - simulates a user sending friend requests and accepting them
+ * Tests the friend request flow with EMPTY target_id to trigger validation errors
+ */
+
+const SENDER_EMAIL = 'pippo@gmail.com';
+const SENDER_PASSWORD = 'Mrco@123_';
+const GATEWAY_URL = 'http://localhost:3000';
+
+let accessToken = '';
+let refreshToken = '';
+
+async function login() {
+    console.log('🔐 Logging in as sender...');
+    const response = await fetch(`${GATEWAY_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            email: SENDER_EMAIL, 
+            password: SENDER_PASSWORD 
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Login failed: ${response.statusText}`);
+    }
+
+    // Extract cookies
+    const cookies = response.headers.get('set-cookie');
+    if (!cookies) {
+        throw new Error('No cookies received from login');
+    }
+
+    // Parse cookies to extract tokens
+    const cookieArray = cookies.split(',').map(c => c.trim());
+    for (const cookie of cookieArray) {
+        if (cookie.startsWith('accessToken=')) {
+            accessToken = cookie.split(';')[0].split('=')[1];
+        }
+        if (cookie.startsWith('refreshToken=')) {
+            refreshToken = cookie.split(';')[0].split('=')[1];
+        }
+    }
+
+    console.log('✅ Login successful');
+    console.log('🍪 Cookies obtained\n');
+    
+    return cookies;
+}
+
+async function connectWebSocket(cookies) {
+    return new Promise((resolve, reject) => {
+        console.log('🔌 Connecting to WebSocket...');
+        const ws = new WebSocket('ws://localhost:3000/ws', {
+            headers: {
+                'Cookie': cookies
+            }
+        });
+
+        ws.on('open', () => {
+            console.log('✅ WebSocket connected successfully!\n');
+            resolve(ws);
+        });
+
+        ws.on('message', (data) => {
+            const rawMessage = data.toString();
+            console.log('📥 Received notification:');
+            console.log('   Raw:', rawMessage);
+            
+            try {
+                const message = JSON.parse(rawMessage);
+                console.log('   Parsed:', JSON.stringify(message, null, 2));
+            } catch (err) {
+                console.log('   (Not JSON format)');
+            }
+            console.log('');
+        });
+
+        ws.on('close', () => {
+            console.log('❌ WebSocket connection closed');
+        });
+
+        ws.on('error', (err) => {
+            console.error('❌ WebSocket error:', err.message);
+            reject(err);
+        });
+    });
+}
+
+async function sendFriendRequest(cookies, targetId) {
+    console.log(`📤 Sending friend request with targetId: "${targetId}" (EMPTY to test validation)...`);
+    
+    try {
+        const response = await fetch(`${GATEWAY_URL}/relationships/request`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookies
+            },
+            body: JSON.stringify({ targetId })
+        });
+
+        const data = await response.json();
+        
+        console.log(`Response status: ${response.status}`);
+        console.log('Response body:', JSON.stringify(data, null, 2));
+        
+        if (response.ok) {
+            console.log('✅ Friend request sent successfully!\n');
+        } else {
+            console.log('❌ Failed to send friend request');
+            console.log(`   Error: ${data.error || data.message}\n`);
+        }
+        
+        return response.ok;
+    } catch (err) {
+        console.error('❌ Error sending friend request:', err.message);
+        return false;
+    }
+}
+
+async function acceptFriendRequest(cookies, requesterId = '') {
+    console.log(`📤 Accepting friend request from requesterId: "${requesterId}" (EMPTY to test validation)...`);
+    
+    try {
+        const response = await fetch(`${GATEWAY_URL}/relationships/accept`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie': cookies
+            },
+            body: JSON.stringify({ requesterId })
+        });
+
+        const data = await response.json();
+        
+        console.log(`Response status: ${response.status}`);
+        console.log('Response body:', JSON.stringify(data, null, 2));
+        
+        if (response.ok) {
+            console.log('✅ Friend request accepted successfully!\n');
+        } else {
+            console.log('❌ Failed to accept friend request');
+            console.log(`   Error: ${data.error || data.message}\n`);
+        }
+        
+        return response.ok;
+    } catch (err) {
+        console.error('❌ Error accepting friend request:', err.message);
+        return false;
+    }
+}
+
+async function main() {
+    try {
+        // Step 1: Login
+        const cookies = await login();
+        
+        // Step 2: Connect WebSocket to receive notifications
+        const ws = await connectWebSocket(cookies);
+        
+        // Wait a bit to ensure connection is stable
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Step 3: Test sending friend request
+        await sendFriendRequest(cookies, '07548445-1c76-485a-a590-08880414b4d3');
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+    
+        
+        console.log('\n✅ All tests completed!');
+        console.log('📡 Keeping WebSocket open to monitor any late notifications...');
+        console.log('Press Ctrl+C to exit\n');
+        
+    } catch (err) {
+        console.error('❌ Fatal error:', err.message);
+        process.exit(1);
+    }
+}
+
+main();

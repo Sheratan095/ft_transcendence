@@ -55,7 +55,10 @@ class	UserConnectionManager
 
 	#sendOnlineUsersList(socket)
 	{
+		// TO DO: exclude self
+		// Send list of online user IDs excluding the current socket's user
 		const	onlineUserIds = Array.from(this._connections.keys());
+
 		this.#dispatchEventToSocket(socket, 'onlineUsers', { users: onlineUserIds });
 	}
 

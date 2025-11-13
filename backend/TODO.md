@@ -92,3 +92,6 @@
 	at ProxyServer.<anonymous> (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/index.js:81:21)
 	at handleSocketUpgrade (file:///home/maceccar/Desktop/ft_transcendence/backend/gateway/src/routes/notification-routes.js:77:9)
 	at process.processTicksAndRejections (node:internal/process/task_queues:105:5]
+
+[]	Registration error - Code: undefined, Message: Password is too similar to username or email.
+	Auth service error: Request failed with status code 500

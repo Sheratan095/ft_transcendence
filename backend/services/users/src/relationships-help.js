@@ -5,15 +5,14 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId)
 {
 	try
 	{
-		await axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/send-friend-request`,
+		await axios.post( `${process.env.NOTIFICATION_SERVICE_URL}/send-friend-request`,
+			{
+				requesterUsername: requesterUsername,
+				targetUserId: targetUserId,
+			},
 			{
 				headers: {
 					'x-internal-api-key': process.env.INTERNAL_API_KEY
-				},
-				body:
-				{
-					requesterUsername: requesterUsername,
-					targetUserId: targetUserId,
 				}
 			}
 		)
@@ -24,9 +23,9 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId)
 	{
 		// If error is 404, user does not exist
 		if (error.response && error.response.status === 404)
-			console.log('User not found in auth service for userId:', userId);
+			console.log('User not found for targetUserId:', targetUserId);
 		else
-			console.log('Error fetching account from auth service:', error.message);
+			console.log('Error notifying friend request:', error.message);
 
 		return (false);
 	}
@@ -38,13 +37,12 @@ export async function	notifyFriendAccept(requesterId, accepterUsername)
 	{
 		await axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/send-friend-accept`,
 			{
+				requesterId: requesterId,
+				accepterUsername: accepterUsername,
+			},
+			{
 				headers: {
 					'x-internal-api-key': process.env.INTERNAL_API_KEY
-				},
-				body:
-				{
-					requesterId: requesterId,
-					accepterUsername: accepterUsername,
 				}
 			}
 		)
@@ -55,9 +53,9 @@ export async function	notifyFriendAccept(requesterId, accepterUsername)
 	{
 		// If error is 404, user does not exist
 		if (error.response && error.response.status === 404)
-			console.log('User not found in auth service for userId:', userId);
+			console.log('User not found for requesterId:', requesterId);
 		else
-			console.log('Error fetching account from auth service:', error.message);
+			console.log('Error notifying friend accept:', error.message);
 
 		return (false);
 	}

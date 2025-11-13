@@ -107,7 +107,7 @@ export async function	sendFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body.targetId;
+		const	{ targetId } = req.body;
 
 		// Validate targetId exists
 		const	targetUser = await usersDb.getUserById(targetId);
@@ -145,7 +145,7 @@ export async function	acceptFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	user = extractUserData(req);
-		const	{ requesterId } = req.body.requesterId;
+		const	{ requesterId } = req.body;
 
 		await usersDb.acceptFriendRequest(user.id, requesterId);
 
@@ -174,7 +174,7 @@ export async function	rejectFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ requesterId } = req.body.requesterId;
+		const	{ requesterId } = req.body;
 
 		await usersDb.rejectFriendRequest(userId, requesterId);
 
