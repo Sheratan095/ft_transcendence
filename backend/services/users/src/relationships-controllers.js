@@ -1,5 +1,9 @@
 import { extractUserData } from './users-help.js';
-import { notifyFriendRequest } from './relationships-help.js';
+
+import {
+	notifyFriendAccept,
+	notifyFriendRequest
+} from './relationships-help.js';
 
 //-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
@@ -140,10 +144,13 @@ export async function	acceptFriendRequest(req, reply)
 	try
 	{
 		const	usersDb = req.server.usersDb;
-		const	userId = extractUserData(req).id;
-		const	{ requestorId } = req.body.requester_id;
+		const	user = extractUserData(req);
+		const	{ requesterId } = req.body.requester_id;
 
-		await usersDb.acceptFriendRequest(userId, requestorId);
+		await usersDb.acceptFriendRequest(user.id, requesterId);
+
+		if (await notifyFriendAccept(requesterId, user.username) === false)
+			return (reply.code(500).send({ error: 'Failed to notify user' }));
 
 		return (reply.code(200).send({ message: 'Friend request accepted' }));
 	}

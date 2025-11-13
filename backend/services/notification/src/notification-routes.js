@@ -1,7 +1,8 @@
 import { validateInternalApiKey } from './notification-help.js';
 
 import {
-	sendFriendRequest
+	sendFriendRequest,
+	sendFriendAccept
 } from './notification-controllers.js';
 
 import {
@@ -63,7 +64,6 @@ const	sendFriendRequestOpts =
 			{
 				requesterUsername: { type: 'string'},
 				targetUserId: { type: 'string'},
-				relationshipId: { type: 'string'}
 			}
 		},
 
@@ -78,10 +78,41 @@ const	sendFriendRequestOpts =
 	handler: sendFriendRequest
 }
 
+// The requester is referred to the one 
+//	who SENT the friend request
+const	sendFriendAcceptOpts = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Send friend accept',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['accepterId', 'accepterUsername', 'relationshipId'],
+			properties:
+			{
+				requesterId: {type: 'string'},
+				accepterUsername: { type: 'string'},
+			}
+		},
+
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		}
+	},
+
+	prehandler: validateInternalApiKey,
+	handler: sendFriendAccept,
+}
+
 export function	notificationRoutes(fastify)
 {
-	fastify.post('/send-friend-request', sendFriendRequestOpts);
-
 	fastify.get('/ws', { websocket: true }, (socket, req) =>
 	{
 		// if the request is invalid, reject it
@@ -95,4 +126,8 @@ export function	notificationRoutes(fastify)
 
 		socket.on('error', (err) => {handleError(socket, err);});
 	});
+
+	fastify.post('/send-friend-request', sendFriendRequestOpts);
+	fastify.post('/send-friend-accept', sendFriendAcceptOpts);
+
 }

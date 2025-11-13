@@ -27,7 +27,7 @@ class	UserConnectionManager
 		return (this._connections.size);
 	}
 
-	sendFriendRequestNotification(targetUserId, requesterUsername, relationshipId)
+	sendFriendRequestNotification(targetUserId, requesterUsername)
 	{
 		const	targetSocket = this.getConnection(targetUserId);
 		if (targetSocket)
@@ -35,10 +35,20 @@ class	UserConnectionManager
 			this.#dispatchEventToSocket(
 				targetSocket,
 				'friendRequest',
-				{
-					from: requesterUsername,
-					relationshipId: relationshipId
-				}
+				{ from: requesterUsername }
+			);
+		}
+	}
+
+	sendFriendRequestAccept(requesterId, accepterUsername, relationshipId)
+	{
+		const	targetSocket = this.getConnection(requesterId);
+		if (targetSocket)
+		{
+			this.#dispatchEventToSocket(
+				targetSocket,
+				'friendAccept',
+				{ from: accepterUsername }
 			);
 		}
 	}
