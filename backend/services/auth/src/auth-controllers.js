@@ -49,6 +49,10 @@ export const	register = async (req, reply) =>
 	{
 		console.error(`[AUTH] Registration error: ${err.message}`);
 
+		// Intercepted by validator
+		if (err.statusCode === 442)
+			return (reply.code(400).send({ error: 'Registration failed', details: err.message }));
+
 		// if the user in auth DB was created but the profile creation failed, delete the auth user
 		if (user && authDb) // Check if user and authDb are defined
 			await authDb.deleteUserById(user.id);

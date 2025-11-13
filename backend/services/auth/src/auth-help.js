@@ -39,6 +39,8 @@ export function	checkEnvVariables(requiredEnvVars)
 // This function implements additional custom validation logic
 //	Username can't contains reserved words
 //	Password can't be too common / too weak or too similar to username/email
+// The trhows can be caught and transformed into proper HTTP responses in the controllers
+//	that's way ther's a custom statusCode property in some errors
 export function	validator(username, password, email)
 {
 	const	psw_lower = password.toLowerCase();
@@ -50,7 +52,7 @@ export function	validator(username, password, email)
 	reservedWords.forEach(element =>
 	{
 		if (username_lower.includes(element))
-			throw (new Error(`Username '${username}' is not allowed.`));
+			throw (Object.assign(new Error(`Username '${username}' is not allowed.`), { statusCode: 442 }));
 	});
 
 	// Check password strength
@@ -58,11 +60,11 @@ export function	validator(username, password, email)
 	commonPasswords.forEach(element =>
 	{
 		if (psw_lower.includes(element))
-			throw (new Error('Password is too common.'));
+			throw (Object.assign(new Error('Password is too common.'), { statusCode: 442 }));
 	});
 
 	if (psw_lower.includes(username_lower) || psw_lower.includes(email_lower))
-		throw (new Error('Password is too similar to username or email.'));
+		throw (Object.assign(new Error('Password is too similar to username or email.'), { statusCode: 442 }));
 }
 
 export function	formatExpirationDate(date)
