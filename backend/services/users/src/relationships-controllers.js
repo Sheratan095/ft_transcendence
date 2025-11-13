@@ -38,10 +38,10 @@ export async function	getFriends(req, reply)
 
 		const	friends = await usersDb.getFriends(userId);
 
-		// Map updated_at to friends_since
+		// Map updatedAt to friendsSince
 		const	mappedFriends = friends.map(friend => ({
 			...friend,
-			friends_since: friend.updated_at
+			friendsSince: friend.updatedAt
 		}));
 
 		return (reply.code(200).send(mappedFriends));
@@ -107,7 +107,7 @@ export async function	sendFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body.target_id;
+		const	{ targetId } = req.body.targetId;
 
 		// Validate targetId exists
 		const	targetUser = await usersDb.getUserById(targetId);
@@ -145,7 +145,7 @@ export async function	acceptFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	user = extractUserData(req);
-		const	{ requesterId } = req.body.requester_id;
+		const	{ requesterId } = req.body.requesterId;
 
 		await usersDb.acceptFriendRequest(user.id, requesterId);
 
@@ -174,7 +174,7 @@ export async function	rejectFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ requesterId } = req.body.requester_id;
+		const	{ requesterId } = req.body.requesterId;
 
 		await usersDb.rejectFriendRequest(userId, requesterId);
 
@@ -200,7 +200,7 @@ export async function	blockUser(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ blockedId } = req.body.target_id;
+		const	{ blockedId } = req.body.targetId;
 
 		await usersDb.blockUser(userId, blockedId);
 
@@ -223,7 +223,7 @@ export async function	unblockUser(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body.target_id;
+		const	{ targetId } = req.body.targetId;
 
 		await usersDb.unblockUser(userId, targetId);
 
@@ -246,7 +246,7 @@ export async function	cancelFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body.target_id;
+		const	{ targetId } = req.body.targetId;
 
 		await usersDb.cancelFriendRequest(userId, targetId);
 
@@ -272,7 +272,7 @@ export async function	removeFriend(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ friendId } = req.body.target_id;
+		const	{ friendId } = req.body.targetId;
 
 		await usersDb.removeFriend(userId, friendId);
 
