@@ -1,8 +1,15 @@
-import { validateInternalApiKey } from './notificaiton-help.js';
+import { validateInternalApiKey } from './notification-help.js';
 
 import {
 	sendFriendRequest
-} from './notification-help.js';
+} from './notification-controllers.js';
+
+import {
+	handleNewConnection,
+	handleMessage,
+	handleClose,
+	handleError
+} from './event-hanlders.js';
 
 // Reusable error response schemas
 const	ErrorResponse =
@@ -43,8 +50,7 @@ const	sendFriendRequestOpts =
 {
 	schema:
 	{
-		summary: '🔒 Internal - Validate token',
-		descritpion: 'Send a friend request notification to a user via websocket.',
+		summary: '🔒 Internal - Send friend request',
 		tags: ['Notifications', 'Internal'],
 	
 		...withInternalAuth,
@@ -64,19 +70,29 @@ const	sendFriendRequestOpts =
 		response:
 		{
 			200 : {},
-			400: ErrorResponse,
-			401: ErrorResponse,
-			403: ErrorResponse,
 			500: ErrorResponse
 		}
 	},
 
-	prehandler: validateInternalApiKe,
+	prehandler: validateInternalApiKey,
 	handler: sendFriendRequest
 }
 
-export function	authRoutes(fastify)
+export function	notificationRoutes(fastify)
 {
-	fastify.post('/send-friend-request', getAccountOpts);
+	fastify.post('/send-friend-request', sendFriendRequestOpts);
 
+	fastify.get('/ws', { websocket: true }, (socket, req) =>
+	{
+		// if the request is invalid, reject it
+		let	userId = handleNewConnection(socket, req);
+		if (!userId)
+			return ;
+
+		socket.on('message', msg => {handleMessage(socket, msg, userId);});
+
+		socket.on('close', () => {handleClose(socket, userId);});
+
+		socket.on('error', (err) => {handleError(socket, err);});
+	});
 }

@@ -1,21 +1,25 @@
 import axios from 'axios';
 
-// TO DO implement
 // add notification...url to required env vars
 export async function	notifyFriendRequest(requesterUsername, targetUserId, relationshipId)
 {
 	try
 	{
-		const	response = await axios.get(`${process.env.NOTIFICATION_SERVICE_URL}/get-account?id=${userId}`,
+		await axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/send-friend-request`,
 			{
 				headers: {
 					'x-internal-api-key': process.env.INTERNAL_API_KEY
+				},
+				body:
+				{
+					requesterUsername: requesterUsername,
+					targetUserId: targetUserId,
+					relationshipId: relationshipId
 				}
 			}
 		)
 
-		return (response.data.user);
-
+		return (true);
 	}
 	catch (error)
 	{
@@ -25,7 +29,6 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId, relat
 		else
 			console.log('Error fetching account from auth service:', error.message);
 
-		return (null);
+		return (false);
 	}
-
 }

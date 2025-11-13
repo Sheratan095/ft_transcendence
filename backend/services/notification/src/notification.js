@@ -5,33 +5,9 @@ const	fastify = Fastify({ logger: false });
 import dotenv from 'dotenv';
 dotenv.config();
 
-import {
-	handleNewConnection,
-	handleMessage,
-	handleClose,
-	handleError
-} from './event-hanlders.js';
-
-// The class is initialized in UserConnectionManager.js
-import { userConnectionManager } from './UserConnectionManager.js';
-
 // Register WebSocket plugin
 import fastifyWebsocket from '@fastify/websocket';
 await fastify.register(fastifyWebsocket);
-
-fastify.get('/ws', { websocket: true }, (socket, req) =>
-{
-	// if the request is invalid, reject it
-	let	userId = handleNewConnection(socket, req);
-	if (!userId)
-		return ;
-
-	socket.on('message', msg => {handleMessage(socket, msg, userId);});
-
-	socket.on('close', () => {handleClose(socket, userId);});
-
-	socket.on('error', (err) => {handleError(socket, err);});
-});
 
 import { checkEnvVariables } from './notification-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
@@ -46,11 +22,11 @@ const	start = async () =>
 {
 	try
 	{
+		// Setup routes before starting the server
+		fastify.register(notificationRoutes);
+
 		await fastify.listen({ port: process.env.PORT, host: '0.0.0.0' })
 		console.log(`Server is running on port ws://localhost:${process.env.PORT}/ws`)
-
-		// Setup routes after database is initialized
-		fastify.register(notificationRoutes);
 	}
 	catch (err)
 	{

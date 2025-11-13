@@ -1,4 +1,5 @@
 import { extractUserData } from './users-help.js';
+import { notifyFriendRequest } from './relationships-help.js';
 
 //-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
@@ -114,6 +115,9 @@ export async function	sendFriendRequest(req, reply)
 			return (reply.code(400).send({ error: 'Cannot send friend request to yourself' }));
 
 		await usersDb.sendFriendRequest(userId, targetId);
+
+		if (await notifyFriendRequest(extractUserData(req).username, targetId, null) === false)
+			return (reply.code(500).send({ error: 'Failed to notify user' }));
 
 		return (reply.code(200).send({ message: 'Friend request sent' }));
 	}
