@@ -8,6 +8,7 @@ import WebSocket from 'ws';
 const SENDER_EMAIL = 'pippo@gmail.com';
 const SENDER_PASSWORD = 'Mrco@123_';
 const GATEWAY_URL = 'http://localhost:3000';
+const TARGET_ID = '09d77fc0-f118-41b9-a4c0-eff22da513a2'; // Example target user ID
 
 let accessToken = '';
 let refreshToken = '';
@@ -165,7 +166,7 @@ async function main() {
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Step 3: Test sending friend request
-        await sendFriendRequest(cookies, '07548445-1c76-485a-a590-08880414b4d3');
+        await sendFriendRequest(cookies, TARGET_ID);
         
         await new Promise(resolve => setTimeout(resolve, 2000));
     

@@ -7,7 +7,7 @@ export function	handleNewConnection(socket, req)
 	// Validate the forwarded internal key matches our environment variable.
 	if (!process.env.INTERNAL_API_KEY || key !== process.env.INTERNAL_API_KEY)
 	{
-		console.error('Missing or invalid internal API key on proxied websocket request');
+		console.error('[NOTIFICATION] Missing or invalid internal API key on proxied websocket request');
 
 		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
 		try { socket.destroy(); } catch (e) {}
@@ -19,14 +19,14 @@ export function	handleNewConnection(socket, req)
 
 	if (!userId)
 	{
-		console.error('No authenticated user found for websocket connection');
+		console.error('[NOTIFICATION] No authenticated user found for websocket connection');
 		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
 		try { socket.destroy(); } catch (e) {}
 
 		return (NULL);
 	}
 
-	console.log(`WebSocket client connected - User: ${userId}`);
+	console.log(`[NOTIFICATION] WebSocket client connected - User: ${userId}`);
 	userConnectionManager.addConnection(userId, socket);
 
 	return (userId);
@@ -34,7 +34,7 @@ export function	handleNewConnection(socket, req)
 
 export function	handleMessage(socket, msg, userId)
 {
-	console.log(`Message from user: ${userId} : ${msg.toString()}`);
+	console.log(`[NOTIFICATION] Message from user: ${userId} : ${msg.toString()}`);
 
 	// You can now use user.id and user.email in your WebSocket logic
 	if (userId)
@@ -49,11 +49,11 @@ export function	handleMessage(socket, msg, userId)
 
 export function	handleClose(socket, userId)
 {
-	console.log(`❌ WebSocket connection closed - User: ${userId}`);
+	console.log(`[NOTIFICATION] WebSocket connection closed - User: ${userId}`);
 
 	userConnectionManager.removeConnection(userId);
 }
 export function	handleError(socket, err)
 {
-	console.log('⚠️ WebSocket error in handler:', err.message);
+	console.log(`[NOTIFICATION] WebSocket error in handler: ${err.message}`);
 }

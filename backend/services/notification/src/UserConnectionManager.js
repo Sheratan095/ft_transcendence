@@ -64,7 +64,8 @@ class	UserConnectionManager
 
 	#dispatchEventToFriends(userId, event, data)
 	{
-		console.log(`Dispatching event '${event}' from user ${userId} to friends`);
+		console.log(`[NOTIFICATION] Dispatching event '${event}' from user ${userId} to friends`);
+
 		for (const [otherUserId, otherSocket] of this._connections.entries())
 		{
 			// Except send to self
@@ -83,7 +84,7 @@ class	UserConnectionManager
 			}
 			catch (e)
 			{
-				console.error(`Failed to send ${event} to user ${userId}:`, e.message);
+				console.error(`[NOTIFICATION] Failed to send ${event} to user ${userId}:`, e.message);
 			}
 		}
 	}
