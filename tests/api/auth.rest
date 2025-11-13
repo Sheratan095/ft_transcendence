@@ -3,7 +3,7 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "MARCo",
+  "username": "MARCO",
   "email": "ceccarellim7@gmail.com",
   "password": "Mrco@123_"
 }
