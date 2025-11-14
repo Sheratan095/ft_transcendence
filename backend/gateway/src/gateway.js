@@ -1,7 +1,7 @@
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'PORT'
-, 'DOC_USERNAME', 'DOC_PASSWORD']);
+, 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS']);
 
 import Fastify from 'fastify'
 import { readFileSync } from 'fs';
@@ -12,17 +12,22 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // HTTPS Configuration
-let httpsOptions = null;
+let	httpsOptions = null;
 
-if (process.env.USE_HTTPS === 'true') {
-	try {
-		const certsPath = process.env.CERTS_PATH || path.join(__dirname, '../certs');
-		httpsOptions = {
+if (process.env.USE_HTTPS === 'true')
+{
+	try
+	{
+		const	certsPath = process.env.CERTS_PATH || path.join(__dirname, process.env.HTTPS_CERTS_PATH);
+		httpsOptions =
+		{
 			key: readFileSync(path.join(certsPath, 'key.pem')),
 			cert: readFileSync(path.join(certsPath, 'cert.pem'))
 		};
 		console.log('[GATEWAY] HTTPS enabled');
-	} catch (err) {
+	}
+	catch (err)
+	{
 		console.error('[GATEWAY] Failed to load HTTPS certificates:', err.message);
 		console.error('[GATEWAY] Falling back to HTTP');
 		httpsOptions = null;
@@ -37,7 +42,8 @@ const	fastify = Fastify({
 
 // Allows to receive requests from different origins
 import cors from '@fastify/cors';
-await fastify.register(cors, {
+await fastify.register(cors,
+{
 	origin: (origin, cb) => {
 		// Allow requests from frontend URL and file:// protocol (for testing)
 		const	allowedOrigins = [

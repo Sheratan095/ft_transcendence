@@ -12,7 +12,7 @@ const RECEIVER_PASSWORD = 'Mrco@123_';
 async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
 
     try {
-        const response = await fetch('http://localhost:3000/relationships/accept', {
+        const response = await fetch('https://localhost:3000/relationships/accept', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ async function startReceiver() {
     try {
         // Login to get JWT tokens
         console.log('🔐 Registering as receiver...');
-        const response = await fetch('http://localhost:3000/auth/register', {
+        const response = await fetch('https://localhost:3000/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 

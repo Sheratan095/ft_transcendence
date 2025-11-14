@@ -9,7 +9,7 @@ const SENDER_EMAIL = 'pippo@gmail.com';
 const SENDER_PASSWORD = 'Mrco@123_';
 const SENDER_USERNAME = 'pippo';
 const TARGET_USERNAME = 'baudo';
-const GATEWAY_URL = 'http://localhost:3000';
+const GATEWAY_URL = 'https://localhost:3000';
 
 let accessToken = '';
 let refreshToken = '';

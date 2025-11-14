@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 
 // login the user to get a valid jwt token in http cookies
-const response = await fetch('http://localhost:3000/auth/login', {
+const response = await fetch('https://localhost:3000/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: 'ceccarellim7@gmail.com', password: 'Mrco@123_' })
