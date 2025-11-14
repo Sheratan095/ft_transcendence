@@ -24,7 +24,7 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🌐 Test server running at https://localhost:${PORT}`);
+    console.log(`🌐 Test server running at http://localhost:${PORT}`);
     console.log(`📝 Open this URL in your browser to test the search functionality`);
     console.log(`Press Ctrl+C to stop`);
 });

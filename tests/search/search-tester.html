@@ -343,19 +343,28 @@
             }
         });
 
+        // Debounce function to limit API calls
+        let searchTimeout = null;
+        let currentSearchController = null;
+
         // Search function
-        searchBtn.addEventListener('click', async () => {
+        async function performSearch() {
             const query = document.getElementById('searchQuery').value.trim();
 
             if (!query) {
-                showStatus(searchStatus, 'Please enter a search query', 'error');
+                results.innerHTML = '';
+                searchStatus.className = 'status';
+                searchStats.textContent = '';
                 return;
             }
 
-            searchBtn.disabled = true;
-            searchBtn.textContent = 'Searching...';
-            showStatus(searchStatus, 'Searching users...', 'info');
-            results.innerHTML = '';
+            // Cancel previous request if still pending
+            if (currentSearchController) {
+                currentSearchController.abort();
+            }
+            currentSearchController = new AbortController();
+
+            showStatus(searchStatus, 'Searching...', 'info');
             searchStats.textContent = '';
 
             try {
@@ -363,10 +372,11 @@
                 
                 const response = await fetch(`${GATEWAY_URL}/users/search?q=${encodeURIComponent(query)}`, {
                     method: 'GET',
-                    credentials: 'include', // Send cookies
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    signal: currentSearchController.signal
                 });
 
                 const endTime = performance.now();
@@ -382,6 +392,7 @@
                 if (users.length === 0) {
                     showStatus(searchStatus, 'No users found', 'info');
                     searchStats.textContent = `Search completed in ${duration}ms`;
+                    results.innerHTML = '';
                 } else {
                     showStatus(searchStatus, `Found ${users.length} user${users.length > 1 ? 's' : ''}`, 'success');
                     searchStats.textContent = `Search completed in ${duration}ms`;
@@ -389,17 +400,43 @@
                 }
 
             } catch (error) {
+                if (error.name === 'AbortError') {
+                    // Request was cancelled, ignore
+                    return;
+                }
                 showStatus(searchStatus, `❌ ${error.message}`, 'error');
-            } finally {
-                searchBtn.disabled = false;
-                searchBtn.textContent = 'Search';
+                results.innerHTML = '';
             }
+        }
+
+        // Real-time search on input with debouncing
+        document.getElementById('searchQuery').addEventListener('input', (e) => {
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout for 300ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                performSearch();
+            }, 300);
+        });
+
+        // Search button click
+        searchBtn.addEventListener('click', () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            performSearch();
         });
 
         // Allow search on Enter key
         document.getElementById('searchQuery').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !searchBtn.disabled) {
-                searchBtn.click();
+            if (e.key === 'Enter') {
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                performSearch();
             }
         });
 

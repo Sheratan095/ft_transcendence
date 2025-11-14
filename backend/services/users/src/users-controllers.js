@@ -45,11 +45,7 @@ export const	searchUser = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 		const	user = extractUserData(req);
 
-		console.log(`[USERS] SearchUser query: "${query}" by user: ${user.id}`);
-
 		const	rows = await usersDb.searchUsers(query);
-
-		console.log(`[USERS] SearchUser found ${rows.length} results`);
 
 		const	results = rows.map(row => ({
 			id: row.id,
@@ -57,7 +53,7 @@ export const	searchUser = async (req, reply) =>
 			avatarUrl: row.avatar_url,
 		}));
 
-		console.log(`[USERS] SearchUser "${query}" requested by user: ${user.id}`);
+		console.log(`[USERS] SearchUser "${query}" requested by user: ${user.id}, found ${results.length} results`);
 
 		return reply.code(200).send(results);
 	}

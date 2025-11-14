@@ -38,8 +38,6 @@ export const	searchUsers = async (req, reply) =>
 	// Forward request to users service with user data
 	try
 	{
-		console.log('[GATEWAY] Search request query params:', req.query);
-		
 		const	response = await axios.get(`${USERS_URL}/search`, {
 			params: req.query,
 			headers: getAuthHeaders(req)

@@ -128,9 +128,9 @@ export class UsersDatabase
 		return (await this.db.get(query, [userId]));
 	}
 
-	async searchUsers(searchQuery)
+	async	searchUsers(searchQuery)
 	{
-		const likeQuery = `%${searchQuery.toLowerCase()}%`;
+		const	likeQuery = `${searchQuery.toLowerCase()}%`;
 
 		const query = `
 			SELECT id, username, avatar_url
@@ -140,7 +140,7 @@ export class UsersDatabase
 			LIMIT 20;
 		`;
 
-		return await this.db.all(query, [likeQuery]);
+		return (await this.db.all(query, [likeQuery]));
 	}
 
 	async	getAllUsers()

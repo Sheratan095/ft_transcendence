@@ -18,6 +18,16 @@ Content-Type: application/json
   "password": "Mrco@123_"
 }
 
+### Register new user
+POST https://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "poppi",
+  "email": "poppi@gmail.com",
+  "password": "Mrco@123_"
+}
+
 ###
 
 ### Login (copy the refreshToken from response)
