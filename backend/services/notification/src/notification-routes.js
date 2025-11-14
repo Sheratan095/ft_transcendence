@@ -74,7 +74,7 @@ const	sendFriendRequestOpts =
 		}
 	},
 
-	prehandler: validateInternalApiKey,
+	preHandler: validateInternalApiKey,
 	handler: sendFriendRequest
 }
 
@@ -107,7 +107,7 @@ const	sendFriendAcceptOpts =
 		}
 	},
 
-	prehandler: validateInternalApiKey,
+	preHandler: validateInternalApiKey,
 	handler: sendFriendAccept,
 }
 

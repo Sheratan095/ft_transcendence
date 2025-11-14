@@ -128,7 +128,9 @@ export async function	sendFriendRequest(req, reply)
 
 		await usersDb.sendFriendRequest(userId, targetId);
 
-		if (await notifyFriendRequest(extractUserData(req).username, targetId, null) === false)
+		const	requesterUsername = (await usersDb.getUserById(userId)).username;
+
+		if (await notifyFriendRequest(requesterUsername, targetId) === false)
 			return (reply.code(500).send({ error: 'Failed to notify user' }));
 
 		console.log('[RELATIONSHIPS] Friend request sent from userId:', userId, 'to targetId:', targetId);

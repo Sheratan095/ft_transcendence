@@ -57,7 +57,7 @@ export const	getIncomingRequests = async (req, reply) =>
 {
 	try
 	{
-		const	response = await axios.get(`${USERS_URL}/relationships/requests`, {
+		const	response = await axios.get(`${USERS_URL}/relationships/requests/incoming`, {
 			headers: getAuthHeaders(req)
 		});
 

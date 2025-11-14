@@ -34,6 +34,7 @@ export const	getUsers = async (req, reply) =>
 
 } 
 
+// TO DO da rifa
 export const	getUser = async (req, reply) =>
 {
 	try

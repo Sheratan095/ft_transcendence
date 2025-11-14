@@ -21,11 +21,7 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId)
 	}
 	catch (error)
 	{
-		// If error is 404, user does not exist
-		if (error.response && error.response.status === 404)
-			console.log('User not found for targetUserId:', targetUserId);
-		else
-			console.log('Error notifying friend request:', error.message);
+		console.log('[USERS] Error notifying friend request:', error.message);
 
 		return (false);
 	}

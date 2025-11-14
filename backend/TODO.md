@@ -95,3 +95,5 @@
 
 [x]	Registration error - Code: undefined, Message: Password is too similar to username or email.
 	Auth service error: Request failed with status code 500
+
+[] Refactor of users research (by email directly in auth?) - (by username in ?)

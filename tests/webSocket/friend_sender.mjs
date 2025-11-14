@@ -7,8 +7,8 @@ import WebSocket from 'ws';
 
 const SENDER_EMAIL = 'pippo@gmail.com';
 const SENDER_PASSWORD = 'Mrco@123_';
+const TARGET_EMAIL = 'baudo@gmail.com'; // Will fetch the actual user ID dynamically
 const GATEWAY_URL = 'http://localhost:3000';
-const TARGET_ID = '09d77fc0-f118-41b9-a4c0-eff22da513a2'; // Example target user ID
 
 let accessToken = '';
 let refreshToken = '';
@@ -90,6 +90,39 @@ async function connectWebSocket(cookies) {
     });
 }
 
+async function getTargetUserId(cookies, targetEmail) {
+    console.log(`🔍 Fetching user ID for ${targetEmail}...`);
+    
+    try {
+        // Get all users and find the target by username
+        // TO DO da levà e mettella co una ricerca specifica per mail
+        const response = await fetch(`${GATEWAY_URL}/users/`, {
+            method: 'GET',
+            headers: {
+                'Cookie': cookies
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch users: ${response.statusText}`);
+        }
+
+        const users = await response.json();
+        const targetUsername = targetEmail.split('@')[0]; // Extract username from email
+        const targetUser = users.find(u => u.username === targetUsername);
+
+        if (!targetUser) {
+            throw new Error(`Target user '${targetUsername}' not found`);
+        }
+
+        console.log(`✅ Found target user: ${targetUser.username} (ID: ${targetUser.id})\n`);
+        return targetUser.id;
+    } catch (err) {
+        console.error('❌ Error fetching target user ID:', err.message);
+        throw err;
+    }
+}
+
 async function sendFriendRequest(cookies, targetId) {
     console.log(`📤 Sending friend request with targetId: "${targetId}" (EMPTY to test validation)...`);
     
@@ -165,8 +198,11 @@ async function main() {
         // Wait a bit to ensure connection is stable
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Step 3: Test sending friend request
-        await sendFriendRequest(cookies, TARGET_ID);
+        // Step 3: Get target user ID dynamically
+        const targetId = await getTargetUserId(cookies, TARGET_EMAIL);
+        
+        // Step 4: Test sending friend request
+        await sendFriendRequest(cookies, targetId);
         
         await new Promise(resolve => setTimeout(resolve, 2000));
     
