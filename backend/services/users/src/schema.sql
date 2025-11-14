@@ -4,8 +4,8 @@ DROP TABLE IF EXISTS users;
 
 -- Create profiles table
 CREATE TABLE IF NOT EXISTS users (
-	id TEXT PRIMARY KEY,
-	username TEXT UNIQUE NOT NULL COLLATE NOCASE,
+	id TEXT PRIMARY KEY, -- TO DO change it
+	username TEXT UNIQUE NOT NULL COLLATE NOCASE, -- TO DO change it
 	language TEXT NOT NULL CHECK (language IN ('en', 'fr', 'it')) DEFAULT 'en',
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	avatar_url TEXT DEFAULT NULL
