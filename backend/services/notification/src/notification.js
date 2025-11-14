@@ -25,7 +25,7 @@ const	start = async () =>
 		// Setup routes before starting the server
 		fastify.register(notificationRoutes);
 
-		await fastify.listen({ port: process.env.PORT, host: '0.0.0.0' })
+		await fastify.listen({ port: process.env.PORT })
 		console.log(`Server is running on port ws://localhost:${process.env.PORT}/ws`)
 	}
 	catch (err)

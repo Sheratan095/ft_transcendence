@@ -11,7 +11,7 @@ class	UserConnectionManager
 	addConnection(userId, socket)
 	{
 		this._connections.set(userId, socket);
-		// First: send the list of currently-online users to the newly connected user
+
 		this.#sendOnlineUsersListTo(userId, socket);
 
 		// Then notify other connected users that this user is now online
