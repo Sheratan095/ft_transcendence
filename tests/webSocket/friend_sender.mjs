@@ -7,20 +7,22 @@ import WebSocket from 'ws';
 
 const SENDER_EMAIL = 'pippo@gmail.com';
 const SENDER_PASSWORD = 'Mrco@123_';
+const SENDER_USERNAME = 'pippo';
 const TARGET_EMAIL = 'baudo@gmail.com'; // Will fetch the actual user ID dynamically
 const GATEWAY_URL = 'http://localhost:3000';
 
 let accessToken = '';
 let refreshToken = '';
 
-async function login() {
-    console.log('🔐 Logging in as sender...');
-    const response = await fetch(`${GATEWAY_URL}/auth/login`, {
+async function register() {
+    console.log('🔐 Registering as sender...');
+    const response = await fetch(`${GATEWAY_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             email: SENDER_EMAIL, 
-            password: SENDER_PASSWORD 
+            password: SENDER_PASSWORD,
+            username: SENDER_USERNAME
         })
     });
 
@@ -31,7 +33,7 @@ async function login() {
     // Extract cookies
     const cookies = response.headers.get('set-cookie');
     if (!cookies) {
-        throw new Error('No cookies received from login');
+        throw new Error('No cookies received from register');
     }
 
     // Parse cookies to extract tokens
@@ -189,8 +191,8 @@ async function acceptFriendRequest(cookies, requesterId = '') {
 
 async function main() {
     try {
-        // Step 1: Login
-        const cookies = await login();
+        // Step 1: register
+        const cookies = await register();
         
         // Step 2: Connect WebSocket to receive notifications
         const ws = await connectWebSocket(cookies);
