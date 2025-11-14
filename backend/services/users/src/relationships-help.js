@@ -13,7 +13,7 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId)
 			{
 				headers: {
 					'x-internal-api-key': process.env.INTERNAL_API_KEY
-				}
+				},
 			}
 		)
 
