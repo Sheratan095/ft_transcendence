@@ -21,7 +21,9 @@ export const	getUsers = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 		const	users = await usersDb.getAllUsers();
 
-		console.log('[USERS] GetUsers success, total users:', users.length);
+		const	requestingUser = extractUserData(req);
+		if (requestingUser)
+			console.log(`[USERS] GetUsers requested by user: ${requestingUser.id}`);
 
 		return (reply.code(200).send(users));
 	}
@@ -71,7 +73,9 @@ export const	getUser = async (req, reply) =>
 			createdAt: user.created_at, // Already a string in ISO format from SQLite
 		};
 
-		console.log('[USERS] GetUser success for user:', username || id);
+		const	requestingUser = extractUserData(req);
+		if (requestingUser)
+			console.log(`[USERS] GetUser ${user.id} requested by ${requestingUser.id}`);
 
 		return (reply.code(200).send(response));
 	}
