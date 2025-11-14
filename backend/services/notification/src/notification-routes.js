@@ -59,11 +59,12 @@ const	sendFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requesterUsername', 'targetUserId'],
+			required: ['requesterUsername', 'targetUserId', 'requesterId'],
 			properties:
 			{
 				requesterUsername: { type: 'string'},
 				targetUserId: { type: 'string'},
+				requesterId: { type: 'string'},
 			}
 		},
 

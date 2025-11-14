@@ -505,6 +505,7 @@ export function	relationshipsRoutes(fastify)
 	fastify.get('/relationships/friends', getFriendsOpts);
 	fastify.get('/relationships/requests/incoming', getIncomingRequestsOpts);
 	fastify.get('/relationships/requests/outgoing', getOutgoingRequestsOpts);
+
 	// POST routes
 	fastify.post('/relationships/request', sendFriendRequestOpts);
 	

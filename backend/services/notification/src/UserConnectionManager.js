@@ -33,7 +33,7 @@ class	UserConnectionManager
 		return (this._connections.size);
 	}
 
-	sendFriendRequestNotification(targetUserId, requesterUsername)
+	sendFriendRequestNotification(targetUserId, requesterUsername, requesterId)
 	{
 		const	targetSocket = this.getConnection(targetUserId);
 		if (targetSocket)
@@ -41,7 +41,7 @@ class	UserConnectionManager
 			this.#dispatchEventToSocket(
 				targetSocket,
 				'friend.request',
-				{ from: requesterUsername }
+				{ from: requesterUsername, requesterId: requesterId }
 			);
 		}
 	}

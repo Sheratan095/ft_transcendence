@@ -10,7 +10,7 @@ const RECEIVER_USERNAME = 'baudo';
 const RECEIVER_PASSWORD = 'Mrco@123_';
 
 async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
-    console.log(`\n➡️ Accepting friend request from ID ${requesterId} as ${accepterUsername}...`);
+
     try {
         const response = await fetch('http://localhost:3000/relationships/accept', {
             method: 'PUT',
@@ -87,13 +87,13 @@ async function startReceiver() {
                 
                 if (message.event === 'friend.request') {
                     console.log('\n🎉 Friend request received!');
-                    console.log(`   From: ${message.data.requesterUsername}`);
+                    console.log(`   From: ${message.data.from}`);
                     // Automatically accept the friend request for testing
-                    acceptFriendRequest(message.data.requesterId, message.data.targetUsername, cookies);
+                    acceptFriendRequest(message.data.requesterId, RECEIVER_USERNAME, cookies);
                 }
                 else if (message.event === 'friend.accept') {
                     console.log('\n🎉 Friend request accepted!');
-                    console.log(`   By: ${message.data.accepterUsername}`);
+                    console.log(`   By: ${message.data.from}`);
                 }
             } catch (err) {
                 console.log('   (Not JSON format)');

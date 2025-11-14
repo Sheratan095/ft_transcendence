@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // add notification...url to required env vars
-export async function	notifyFriendRequest(requesterUsername, targetUserId)
+export async function	notifyFriendRequest(requesterUsername, targetUserId, requesterId)
 {
 	try
 	{
@@ -9,6 +9,7 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId)
 			{
 				requesterUsername: requesterUsername,
 				targetUserId: targetUserId,
+				requesterId: requesterId,
 			},
 			{
 				headers: {
