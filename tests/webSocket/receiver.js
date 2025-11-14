@@ -8,6 +8,32 @@ import WebSocket from 'ws';
 const RECEIVER_EMAIL = 'baudo@gmail.com';
 const RECEIVER_PASSWORD = 'Mrco@123_';
 
+async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
+    console.log(`\n➡️ Accepting friend request from ID ${requesterId} as ${accepterUsername}...`);
+    try {
+        const response = await fetch('http://localhost:3000/relationships/accept', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Cookie' : cookies
+            },
+            body: JSON.stringify({
+                requesterId: requesterId,
+            })
+        });
+
+        console.log(response);
+
+        if (!response.ok) {
+            throw new Error(`Failed to accept friend request: ${response.statusText}`);
+        }
+
+        console.log(`✅ Friend request from ID ${requesterId} accepted by ${accepterUsername}`);
+    } catch (error) {
+        console.error('❌ Error accepting friend request:', error.message);
+    }
+}
+
 async function startReceiver() {
     try {
         // Login to get JWT tokens
@@ -57,11 +83,13 @@ async function startReceiver() {
                 const message = JSON.parse(rawMessage);
                 console.log('   Parsed:', JSON.stringify(message, null, 2));
                 
-                if (message.event === 'friend-request') {
+                if (message.event === 'friend.request') {
                     console.log('\n🎉 Friend request received!');
                     console.log(`   From: ${message.data.requesterUsername}`);
+                    // Automatically accept the friend request for testing
+                    acceptFriendRequest(message.data.requesterId, message.data.targetUsername, cookies);
                 }
-                else if (message.event === 'friend-accept') {
+                else if (message.event === 'friend.accept') {
                     console.log('\n🎉 Friend request accepted!');
                     console.log(`   By: ${message.data.accepterUsername}`);
                 }

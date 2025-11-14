@@ -109,79 +109,6 @@ export async function	getOutgoingRequests(req, reply)
 	}
 }
 
-export async function	sendFriendRequest(req, reply)
-{
-	try
-	{
-		const	usersDb = req.server.usersDb;
-		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body;
-
-		// Validate targetId exists
-		const	targetUser = await usersDb.getUserById(targetId);
-		if (!targetUser)
-			return (reply.code(404).send({ error: 'User not found' }));
-
-		// Can't send request to yourself
-		if (userId === targetId)
-			return (reply.code(400).send({ error: 'Cannot send friend request to yourself' }));
-
-		await usersDb.sendFriendRequest(userId, targetId);
-
-		const	requesterUsername = (await usersDb.getUserById(userId)).username;
-
-		if (await notifyFriendRequest(requesterUsername, targetId) === false)
-			return (reply.code(500).send({ error: 'Failed to notify user' }));
-
-		console.log('[RELATIONSHIPS] Friend request sent from userId:', userId, 'to targetId:', targetId);
-
-		return (reply.code(200).send({ message: 'Friend request sent' }));
-	}
-	catch (err)
-	{
-		console.log('[RELATIONSHIPS] SendFriendRequest error: ', err.message);
-
-		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
-			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
-
-		if (err.message.includes('blocked') || err.message.includes('already') || err.message.includes('already sent'))
-			return (reply.code(400).send({ error: err.message }));
-
-		return (reply.code(500).send({ error: 'Internal server error' }));
-	}
-}
-
-export async function	acceptFriendRequest(req, reply)
-{
-	try
-	{
-		const	usersDb = req.server.usersDb;
-		const	user = extractUserData(req);
-		const	{ requesterId } = req.body;
-
-		await usersDb.acceptFriendRequest(user.id, requesterId);
-
-		if (await notifyFriendAccept(requesterId, user.username) === false)
-			return (reply.code(500).send({ error: 'Failed to notify user' }));
-
-		console.log('[RELATIONSHIPS] Friend request accepted by userId:', user.id, 'from requesterId:', requesterId);
-
-		return (reply.code(200).send({ message: 'Friend request accepted' }));
-	}
-	catch (err)
-	{
-		console.log('[RELATIONSHIPS] AcceptFriendRequest error: ', err.message);
-
-		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
-			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
-
-		if (err.message.includes('No pending'))
-			return (reply.code(404).send({ error: err.message }));
-
-		return (reply.code(500).send({ error: 'Internal server error' }));
-	}
-}
-
 export async function	rejectFriendRequest(req, reply)
 {
 	try
@@ -331,6 +258,83 @@ export const	deleteUserRelationships = async (req, reply) =>
 	catch (err)
 	{
 		console.log('[RELATIONSHIPS] DeleteUserRelationships error: ', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+//-----------------------------CONTROLLERS THAT SEND NOTIFICATIONS TO OTHER USERS-----------------------------
+
+export async function	sendFriendRequest(req, reply)
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userId = extractUserData(req).id;
+		const	{ targetId } = req.body;
+
+		// Validate targetId exists
+		const	targetUser = await usersDb.getUserById(targetId);
+		if (!targetUser)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		// Can't send request to yourself
+		if (userId === targetId)
+			return (reply.code(400).send({ error: 'Cannot send friend request to yourself' }));
+
+		await usersDb.sendFriendRequest(userId, targetId);
+
+		const	requesterUsername = (await usersDb.getUserById(userId)).username;
+
+		if (await notifyFriendRequest(requesterUsername, targetId) === false)
+			return (reply.code(500).send({ error: 'Failed to notify user' }));
+
+		console.log('[RELATIONSHIPS] Friend request sent from userId:', userId, 'to targetId:', targetId);
+
+		return (reply.code(200).send({ message: 'Friend request sent' }));
+	}
+	catch (err)
+	{
+		console.log('[RELATIONSHIPS] SendFriendRequest error: ', err.message);
+
+		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
+			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
+
+		if (err.message.includes('blocked') || err.message.includes('already') || err.message.includes('already sent'))
+			return (reply.code(400).send({ error: err.message }));
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export async function	acceptFriendRequest(req, reply)
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	user = extractUserData(req); // Accepter
+		const	{ requesterId } = req.body;
+
+		await usersDb.acceptFriendRequest(user.id, requesterId);
+
+		const	accepterUsername = (await usersDb.getUserById(user.id)).username;
+
+		if (await notifyFriendAccept(requesterId, accepterUsername) === false)
+			return (reply.code(500).send({ error: 'Failed to notify user' }));
+
+		console.log('[RELATIONSHIPS] Friend request accepted by userId:', user.id, 'from requesterId:', requesterId);
+
+		return (reply.code(200).send({ message: 'Friend request accepted' }));
+	}
+	catch (err)
+	{
+		console.log('[RELATIONSHIPS] AcceptFriendRequest error: ', err.message);
+
+		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
+			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
+
+		if (err.message.includes('No pending'))
+			return (reply.code(404).send({ error: err.message }));
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
