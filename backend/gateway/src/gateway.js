@@ -4,8 +4,36 @@ checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 
 , 'DOC_USERNAME', 'DOC_PASSWORD']);
 
 import Fastify from 'fastify'
-// Initialize Fastify instance with built-in logging
-const	fastify = Fastify({ logger: false })
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// HTTPS Configuration
+let httpsOptions = null;
+
+if (process.env.USE_HTTPS === 'true') {
+	try {
+		const certsPath = process.env.CERTS_PATH || path.join(__dirname, '../certs');
+		httpsOptions = {
+			key: readFileSync(path.join(certsPath, 'key.pem')),
+			cert: readFileSync(path.join(certsPath, 'cert.pem'))
+		};
+		console.log('[GATEWAY] HTTPS enabled');
+	} catch (err) {
+		console.error('[GATEWAY] Failed to load HTTPS certificates:', err.message);
+		console.error('[GATEWAY] Falling back to HTTP');
+		httpsOptions = null;
+	}
+}
+
+// Initialize Fastify instance with built-in logging and optional HTTPS
+const	fastify = Fastify({ 
+	logger: false,
+	https: httpsOptions
+})
 
 // Allows to receive requests from different origins
 import cors from '@fastify/cors';
@@ -226,7 +254,8 @@ const	start = async () =>
 			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
 		})
 
-		console.log(`[GATEWAY] Server is running on port ${process.env.PORT}`)
+		const protocol = httpsOptions ? 'https' : 'http';
+		console.log(`[GATEWAY] Server is running on ${protocol}://localhost:${process.env.PORT}`)
 	}
 	catch (err)
 	{

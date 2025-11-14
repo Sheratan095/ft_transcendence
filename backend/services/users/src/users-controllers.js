@@ -45,7 +45,11 @@ export const	searchUser = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 		const	user = extractUserData(req);
 
-		const	rows = await usersDb.searchUsers(user.id, query);
+		console.log(`[USERS] SearchUser query: "${query}" by user: ${user.id}`);
+
+		const	rows = await usersDb.searchUsers(query);
+
+		console.log(`[USERS] SearchUser found ${rows.length} results`);
 
 		const	results = rows.map(row => ({
 			id: row.id,
