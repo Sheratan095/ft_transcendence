@@ -129,6 +129,7 @@ export const	acceptFriendRequest = async (req, reply) =>
 	catch (err)
 	{
 		console.log('[GATEWAY] AcceptFriendRequest error:', err.message);
+		console.log('Error details:', err.response ? err.response.data : 'No response data');
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));

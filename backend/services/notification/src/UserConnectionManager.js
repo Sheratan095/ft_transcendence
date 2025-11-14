@@ -1,3 +1,6 @@
+
+// Dot-notation (most common & scalable)
+// domain.action
 class	UserConnectionManager
 {
 	constructor()
@@ -9,7 +12,7 @@ class	UserConnectionManager
 	{
 		this._connections.set(userId, socket);
 		this.#sendOnlineUsersList(socket);
-		this.#dispatchEventToFriends(userId, 'friendOnline', { userId });
+		this.#dispatchEventToFriends(userId, 'friend.online', { userId });
 	}
 
 	removeConnection(userId)
@@ -34,20 +37,20 @@ class	UserConnectionManager
 		{
 			this.#dispatchEventToSocket(
 				targetSocket,
-				'friendRequest',
+				'friend.request',
 				{ from: requesterUsername }
 			);
 		}
 	}
 
-	sendFriendRequestAccept(requesterId, accepterUsername, relationshipId)
+	sendFriendRequestAccept(requesterId, accepterUsername)
 	{
 		const	targetSocket = this.getConnection(requesterId);
 		if (targetSocket)
 		{
 			this.#dispatchEventToSocket(
 				targetSocket,
-				'friendAccept',
+				'friend.accept',
 				{ from: accepterUsername }
 			);
 		}
@@ -59,7 +62,17 @@ class	UserConnectionManager
 		// Send list of online user IDs excluding the current socket's user
 		const	onlineUserIds = Array.from(this._connections.keys());
 
-		this.#dispatchEventToSocket(socket, 'onlineUsers', { users: onlineUserIds });
+		for (const userId of onlineUserIds)
+		{
+			if (userId !== socket.userId)
+			{
+				this.#dispatchEventToSocket(
+					socket,
+					'friend.online',
+					{ userId }
+				);
+			}
+		}
 	}
 
 	#dispatchEventToFriends(userId, event, data)
