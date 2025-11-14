@@ -53,6 +53,7 @@ export function	handleClose(socket, userId)
 
 	userConnectionManager.removeConnection(userId);
 }
+
 export function	handleError(socket, err)
 {
 	console.log(`[NOTIFICATION] WebSocket error in handler: ${err.message}`);

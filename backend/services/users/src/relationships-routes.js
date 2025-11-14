@@ -220,86 +220,6 @@ const	getOutgoingRequestsOpts =
 	handler	: getOutgoingRequests
 };
 
-const	sendFriendRequestOpts =
-{
-	schema:
-	{
-		summary: 'Send friend request',
-		description: 'Send a friend request to another user. Requires accessToken cookie for authentication.',
-		tags: ['Relationships'],
-
-		...withInternalAuth,
-		...withCookieAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['targetId'],
-			properties:
-			{
-				targetId: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'object',
-				properties:
-				{
-					message: { type: 'string' }
-				}
-			},
-			400: ErrorResponse,
-			404: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-	preHandler: validateInternalApiKey,
-	handler	: sendFriendRequest
-};
-
-const	acceptFriendRequestOpts =
-{
-	schema:
-	{
-		summary: 'Accept friend request',
-		description: 'Accept a friend request from another user. Requires accessToken cookie for authentication.',
-		tags: ['Relationships'],
-
-		...withInternalAuth,
-		...withCookieAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['requesterId'],
-			properties:
-			{
-				requesterId: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'object',
-				properties:
-				{
-					message: { type: 'string' }
-				}
-			},
-			400: ErrorResponse,
-			404: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-	preHandler: validateInternalApiKey,
-	handler	: acceptFriendRequest
-};
-
 const	rejectFriendRequestOpts =
 {
 	schema:
@@ -494,6 +414,88 @@ const	removeFriendOpts =
 	},
 	preHandler: validateInternalApiKey,
 	handler	: removeFriend
+};
+
+//-----------------------------ROUTES THAT SEND NOTIFICATIONS TO OTHER USERS-----------------------------
+
+const	sendFriendRequestOpts =
+{
+	schema:
+	{
+		summary: 'Send friend request',
+		description: 'Send a friend request to another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['targetId'],
+			properties:
+			{
+				targetId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			404: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: sendFriendRequest
+};
+
+const	acceptFriendRequestOpts =
+{
+	schema:
+	{
+		summary: 'Accept friend request',
+		description: 'Accept a friend request from another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['requesterId'],
+			properties:
+			{
+				requesterId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			404: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: acceptFriendRequest
 };
 
 export function	relationshipsRoutes(fastify)
