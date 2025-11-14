@@ -6,6 +6,7 @@ import WebSocket from 'ws';
  */
 
 const RECEIVER_EMAIL = 'baudo@gmail.com';
+const RECEIVER_USERNAME = 'baudo'; 
 const RECEIVER_PASSWORD = 'Mrco@123_';
 
 async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
@@ -37,13 +38,14 @@ async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
 async function startReceiver() {
     try {
         // Login to get JWT tokens
-        console.log('🔐 Logging in as receiver...');
-        const response = await fetch('http://localhost:3000/auth/login', {
+        console.log('🔐 Registering as receiver...');
+        const response = await fetch('http://localhost:3000/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 email: RECEIVER_EMAIL, 
-                password: RECEIVER_PASSWORD 
+                password: RECEIVER_PASSWORD,
+                username: RECEIVER_USERNAME
             })
         });
 

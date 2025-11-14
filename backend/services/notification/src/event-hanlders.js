@@ -12,7 +12,7 @@ export function	handleNewConnection(socket, req)
 		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
 		try { socket.destroy(); } catch (e) {}
 
-		return (NULL);
+		return (null);
 	}
 
 	const	userId = req.headers['x-user-id'];
@@ -23,7 +23,7 @@ export function	handleNewConnection(socket, req)
 		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
 		try { socket.destroy(); } catch (e) {}
 
-		return (NULL);
+		return (null);
 	}
 
 	console.log(`[NOTIFICATION] WebSocket client connected - User: ${userId}`);
