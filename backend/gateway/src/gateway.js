@@ -199,7 +199,7 @@ const	start = async () =>
 			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
 		})
 
-		console.log(`Gateway server is running on port ${process.env.PORT}`)
+		console.log(`[GATEWAY] Server is running on port ${process.env.PORT}`)
 	}
 	catch (err)
 	{
