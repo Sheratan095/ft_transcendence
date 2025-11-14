@@ -44,7 +44,7 @@ export function	checkEnvVariables(requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
-			console.error(`[USERS] Missing required environment variable: ${envVar}`);
+			console.log(`[USERS] Missing required environment variable: ${envVar}`);
 			missingEnvVarsCount++;
 		}
 	}

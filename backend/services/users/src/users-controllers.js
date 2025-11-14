@@ -156,7 +156,7 @@ export const	uploadAvatar = async (req, reply) =>
 				}
 				catch (unlinkErr)
 				{
-					console.error(`Failed to delete old avatar: ${unlinkErr.message}`);
+					console.log(`Failed to delete old avatar: ${unlinkErr.message}`);
 					// Continue even if deletion fails - don't block the upload
 				}
 			}

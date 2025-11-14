@@ -45,7 +45,7 @@ export class UsersDatabase
 		}
 		catch (error)
 		{
-			console.error("[USERS] Database initialization error:", error);
+			console.log("[USERS] Database initialization error:", error);
 			throw (error);
 		}
 	}
@@ -71,7 +71,7 @@ export class UsersDatabase
 		}
 		catch (error)
 		{
-			console.error("❌ Error creating tables for USERS db:", error);
+			console.log("❌ Error creating tables for USERS db:", error);
 
 			throw (error);
 		}

@@ -26,7 +26,7 @@ async function testRoutes() {
     console.log("User Response:", userRes.data);
 
   } catch (err) {
-    console.error(
+    console.log(
       "Error:",
       err.response ? err.response.data : err.message
     );
