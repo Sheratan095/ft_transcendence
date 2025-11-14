@@ -97,7 +97,7 @@
 	Auth service error: Request failed with status code 500
 
 [] Refactor of users research (by email directly in auth?) - (by username in ?)
-[] Fix it
+[x] Fix it
 	[AUTH] Registration error: SQLITE_CONSTRAINT: UNIQUE constraint failed: auth_accounts.email
 	Duplicate email attempt
 	[GATEWAY] Auth service error: Request failed with status code 409

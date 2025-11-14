@@ -26,7 +26,7 @@ export function	checkEnvVariables(requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
-			console.error(`Missing required environment variable: ${envVar}`);
+			console.error(`[AUTH] Missing required environment variable: ${envVar}`);
 			missingEnvVarsCount++;
 		}
 	}
@@ -109,7 +109,7 @@ export function	extractUserData(request)
 	}
 	catch (err)
 	{
-		console.log('Error parsing user data from headers:', err.message);
+		console.log('[AUTH] Error parsing user data from headers:', err.message);
 		return (null);
 	}
 }
