@@ -21,17 +21,20 @@ export const	getUsers = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 		const	users = await usersDb.getAllUsers();
 
+		console.log('[USERS] GetUsers success, total users:', users.length);
+
 		return (reply.code(200).send(users));
 	}
 	catch (err)
 	{
-		console.log('GetUsers error:', err.message);
+		console.log('[USERS] GetUsers error:', err.message);
 		
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 
 } 
 
+// TO DO da rifa
 export const	getUser = async (req, reply) =>
 {
 	try
@@ -56,8 +59,6 @@ export const	getUser = async (req, reply) =>
 		if (!account)
 			return (reply.code(404).send({ error: 'Account not found' }));
 
-		console.log('Fetching user:', username || id);
-
 		// SQLite returns created_at as a string, not a Date object
 		// Map snake_case fields to camelCase for API response
 		const	response =
@@ -70,11 +71,13 @@ export const	getUser = async (req, reply) =>
 			createdAt: user.created_at, // Already a string in ISO format from SQLite
 		};
 
+		console.log('[USERS] GetUser success for user:', username || id);
+
 		return (reply.code(200).send(response));
 	}
 	catch (err)
 	{
-		console.log('GetUser error:', err.message);
+		console.log('[USERS] GetUser error:', err.message);
 		
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -93,13 +96,13 @@ export const	updateUser = async (req, reply) =>
 
 		const	updatedUser = await usersDb.updateUser(user.id, newUsername, newLanguage);
 
-		console.log(`User ${user.id} updated`);
+		console.log(`[USERS] User ${user.id} updated`);
 
 		return (reply.code(200).send(updatedUser));
 	}
 	catch (err)
 	{
-		console.log('UpdateUser error:', err.message);
+		console.log('[USERS] UpdateUser error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -161,7 +164,7 @@ export const	uploadAvatar = async (req, reply) =>
 		// Update database with avatar URL
 		await usersDb.updateUserAvatar(user.id, avatarUrl);
 
-		console.log(`Avatar uploaded for user ${user.id}: ${filename}`);
+		console.log(`[USERS] Avatar uploaded for user ${user.id}: ${filename}`);
 
 		return reply.code(200).send({
 			message: 'Avatar uploaded successfully',
@@ -170,7 +173,7 @@ export const	uploadAvatar = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('UploadAvatar error:', err.message);
+		console.log('[USERS] UploadAvatar error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -188,11 +191,13 @@ export const	createUser = async (req, reply) =>
 
 		const	newUser = await usersDb.createUserProfile(userId, username);
 
+		console.log('[USERS] User profile created in users service for user: ', userId);
+
 		return (reply.code(201).send(newUser));
 	}
 	catch (err)
 	{
-		console.log('CreateUser error:', err.message);
+		console.log('[USERS] CreateUser error:', err.message);
 
 		if (err.code === 'SQLITE_CONSTRAINT')
 			return (reply.code(409).send({ error: 'SQLLITE_CONSTRAINT username already exist' }));
@@ -214,13 +219,13 @@ export const	deleteUser = async (req, reply) =>
 		// Delete user from database
 		await usersDb.deleteUserById(userId);
 
-		console.log(`User profile deleted: ${userId}`);
+		console.log(`[USERS] User profile deleted: ${userId}`);
 
 		return (reply.code(200).send({ message: 'User profile deleted successfully' }));
 	}
 	catch (err)
 	{
-		console.log('DeleteUser error:', err.message);
+		console.log('[USERS] DeleteUser error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}

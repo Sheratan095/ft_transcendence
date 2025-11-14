@@ -24,7 +24,7 @@ export const	getUsers = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Users service error:', err.message)
+		console.log('[GATEWAY] Users service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -47,7 +47,7 @@ export const	getUser = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Users service error:', err.message)
+		console.log('[GATEWAY] Users service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -68,7 +68,7 @@ export const	updateUser = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Users service error:', err.message)
+		console.log('[GATEWAY] Users service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -111,7 +111,7 @@ export const	uploadAvatar = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Users service error:', err.message);
+		console.log('[GATEWAY] Users service error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));

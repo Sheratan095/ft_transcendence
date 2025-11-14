@@ -23,7 +23,7 @@ export const	getUserRelationships = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('UserRelationships error:', err.message);
+		console.log('[GATEWAY] GetUserRelationships error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -44,7 +44,7 @@ export const	getFriends = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('GetFriends error:', err.message);
+		console.log('[GATEWAY] GetFriends error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -57,7 +57,7 @@ export const	getIncomingRequests = async (req, reply) =>
 {
 	try
 	{
-		const	response = await axios.get(`${USERS_URL}/relationships/requests`, {
+		const	response = await axios.get(`${USERS_URL}/relationships/requests/incoming`, {
 			headers: getAuthHeaders(req)
 		});
 
@@ -65,7 +65,7 @@ export const	getIncomingRequests = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('GetIncomingRequests error:', err.message);
+		console.log('[GATEWAY] GetIncomingRequests error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -86,7 +86,7 @@ export const	getOutgoingRequests = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('GetOutgoingRequests error:', err.message);
+		console.log('[GATEWAY] GetOutgoingRequests error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -107,7 +107,7 @@ export const	sendFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('SendFriendRequest error:', err.message);
+		console.log('[GATEWAY] SendFriendRequest error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -128,7 +128,7 @@ export const	acceptFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('AcceptFriendRequest error:', err.message);
+		console.log('[GATEWAY] AcceptFriendRequest error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -149,7 +149,7 @@ export const	rejectFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('RejectFriendRequest error:', err.message);
+		console.log('[GATEWAY] RejectFriendRequest error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -170,7 +170,7 @@ export const	blockUser = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('BlockUser error:', err.message);
+		console.log('[GATEWAY] BlockUser error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -192,7 +192,7 @@ export const	unblockUser = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('UnblockUser error:', err.message);
+		console.log('[GATEWAY] UnblockUser error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -214,7 +214,7 @@ export const	cancelFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('CancelFriendRequest error:', err.message);
+		console.log('[GATEWAY] CancelFriendRequest error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));
@@ -236,7 +236,7 @@ export const	removeFriend = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('RemoveFriend error:', err.message);
+		console.log('[GATEWAY] RemoveFriend error:', err.message);
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data));

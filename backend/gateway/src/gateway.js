@@ -73,14 +73,14 @@ import {
 } from './routes/notification-routes.js'
 
 import {
-	loginRoute,
-	registerRoute,
-	logoutRoute,
-	tokenRoute,
+	login,
+	register,
+	logout,
+	token,
 	verifyTwoFactorAuth,
-	changePasswordRoute,
-	enable2FARoute,
-	deleteAccountRoute
+	changePassword,
+	enable2FA,
+	deleteAccount
 } from './routes/auth-routes.js'
 
 import {
@@ -124,8 +124,8 @@ await fastify.register(async function (fastify)
 	});
 
 	// AUTH routes do not require authentication, in logout and token refresh the user is identified via the refresh_token
-	fastify.post('/auth/login', { schema: { hide: true }, handler: loginRoute })
-	fastify.post('/auth/register', { schema: { hide: true }, handler: registerRoute })
+	fastify.post('/auth/login', { schema: { hide: true }, handler: login })
+	fastify.post('/auth/register', { schema: { hide: true }, handler: register })
 	fastify.post('/auth/2fa', { schema: { hide: true }, handler: verifyTwoFactorAuth })
 });
 
@@ -139,8 +139,8 @@ await fastify.register(async function (fastify)
 		keyGenerator: (req) => req.ip // Rate limit by IP for token operations
 	});
 
-	fastify.delete('/auth/logout', { schema: { hide: true }, handler: logoutRoute })
-	fastify.post('/auth/token', { schema: { hide: true }, handler: tokenRoute })
+	fastify.delete('/auth/logout', { schema: { hide: true }, handler: logout })
+	fastify.post('/auth/token', { schema: { hide: true }, handler: token })
 });
 
 // 🟠 AUTHENTICATED USER ACTIONS: Sensitive account changes (requires auth + rate limiting)
@@ -153,9 +153,9 @@ await fastify.register(async function (fastify)
 		keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
 	});
 
-	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwt, handler: changePasswordRoute })
-	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwt, handler: enable2FARoute })
-	fastify.delete('/auth/delete-account', { schema: { hide: true }, preHandler: authenticateJwt, handler: deleteAccountRoute })
+	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwt, handler: changePassword })
+	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwt, handler: enable2FA })
+	fastify.delete('/auth/delete-account', { schema: { hide: true }, preHandler: authenticateJwt, handler: deleteAccount })
 	fastify.post('/users/upload-avatar', { schema: { hide: true }, preHandler: authenticateJwt, handler: uploadAvatar })
 	fastify.put('/users/update-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: updateUser })
 });

@@ -7,7 +7,7 @@ const	proxy = httpProxy.createProxyServer({ target: process.env.NOTIFICATION_SER
 // Handle both HTTP and WebSocket proxy errors and close/destroy sockets gracefully.
 proxy.on('error', (err, req, resOrSocket) =>
 {
-	console.error('⚠️ Proxy error:', err && err.message ? err.message : err);
+	console.error('[GATEWAY] Proxy error:', err && err.message ? err.message : err);
 
 	// If this is an HTTP response object, send a 502
 	try
@@ -37,7 +37,7 @@ proxy.on('error', (err, req, resOrSocket) =>
 	catch (e)
 	{
 		// swallow any secondary errors to avoid crashing
-		console.error('⚠️ Error while handling proxy error:', e && e.message ? e.message : e);
+		console.error('[GATEWAY] Error while handling proxy error:', e && e.message ? e.message : e);
 	}
 });
 
@@ -48,15 +48,17 @@ export async function	handleSocketUpgrade(req, socket, head)
 		// Authenticate WebSocket connection using JWT from cookies
 		const	user = await authenticateJwtWebSocket(req);
 
-		console.log(`✅ WebSocket authenticated for user: ${user.id}`);
+		console.log(`[GATEWAY] WebSocket authenticated for user: ${user.id}`);
 
-		// Attach user data to request so notification service can access it
-		req.user = user;
+		// Also inject forwarding headers so the proxied service (different process)
+		// can reconstruct the authenticated user. We include an internal API key
+		// to prevent spoofing and only use simple fields (id, email).
+		req.headers = req.headers || {};
 
-		// User logged in:  38b77b05-31c8-497d-95fc-a34177ace239
-		// ✅ WebSocket authenticated for user: 38b77b05-31c8-497d-95fc-a34177ace239
-		// (node:19656) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
-		// (Use `node --trace-deprecation ...` to show where the warning was created)
+		if (user && user.id)
+			req.headers['x-user-id'] = user.id;
+		if (process.env.INTERNAL_API_KEY)
+			req.headers['x-internal-api-key'] = process.env.INTERNAL_API_KEY;
 
 		// Ensure socket errors are handled locally (prevents uncaught exceptions)
 		socket.on('error', (err) =>
@@ -67,7 +69,7 @@ export async function	handleSocketUpgrade(req, socket, head)
 				return;
 			}
 
-			console.error('⚠️ WebSocket socket error:', err && err.message ? err.message : err);
+			console.log('[GATEWAY] WebSocket socket error:', err && err.message ? err.message : err);
 			try { socket.destroy(); } catch (e) {}
 		});
 
@@ -76,7 +78,7 @@ export async function	handleSocketUpgrade(req, socket, head)
 	}
 	catch (err)
 	{
-		console.log('❌ WebSocket authentication failed:', err.message);
+		console.log('[GATEWAY] WebSocket authentication failed:', err.message);
 		
 		// Send 401 Unauthorized and close connection
 		socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');

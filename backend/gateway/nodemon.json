@@ -6,5 +6,8 @@
     "NODE_ENV": "development"
   },
   "verbose": false,
-  "delay": 1000
+  "delay": 1000,
+  "execMap": {
+    "js": "node --no-deprecation"
+  }
 }

@@ -73,7 +73,7 @@ const	RelationshipsStatus =
 	type: 'string',
 	enum: ['pending', 'accepted', 'rejected', 'blocked'],
 	errorMessage: {
-		enum: 'The relationship_status must be one of: pending, accepted, rejected, blocked.'
+		enum: 'The relationshipStatus must be one of: pending, accepted, rejected, blocked.'
 	}
 };
 
@@ -82,12 +82,12 @@ const	UserRelationship =
 	type: 'object',
 	properties:
 	{
-		requester_id: { type: 'string' },
-		target_id: { type: 'string' },
+		requesterId: { type: 'string' },
+		targetId: { type: 'string' },
 		username: { type: 'string' },
-		relationship_status: { ...RelationshipsStatus },
-		created_at: { type: 'string', format: 'date-time' },
-		updated_at: { type: 'string', format: 'date-time' }
+		relationshipStatus: { ...RelationshipsStatus },
+		createdAt: { type: 'string', format: 'date-time' },
+		updatedAt: { type: 'string', format: 'date-time' }
 	},
 };
 
@@ -99,7 +99,7 @@ const	Friend =
 		userId: { type: 'string' }, // still returned as userId for frontend
 		username: { type: 'string' },
 		language: { type: 'string' },
-		friends_since: { type: 'string', format: 'date-time' }
+		friendsSince: { type: 'string', format: 'date-time' }
 	},
 };
 
@@ -108,9 +108,9 @@ const	IncomingRequest =
 	type: 'object',
 	properties:
 	{
-		requester_id: { type: 'string' },
+		requesterId: { type: 'string' },
 		username: { type: 'string' },
-		created_at: { type: 'string', format: 'date-time' }
+		createdAt: { type: 'string', format: 'date-time' }
 	},
 };
 
@@ -234,10 +234,10 @@ const	sendFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -274,10 +274,10 @@ const	acceptFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requester_id'],
+			required: ['requesterId'],
 			properties:
 			{
-				requester_id: { type: 'string' }
+				requesterId: { type: 'string' }
 			}
 		},
 
@@ -314,10 +314,10 @@ const	rejectFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requester_id'],
+			required: ['requesterId'],
 			properties:
 			{
-				requester_id: { type: 'string' }
+				requesterId: { type: 'string' }
 			}
 		},
 
@@ -354,10 +354,10 @@ const	blockUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -393,10 +393,10 @@ const	unblockUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -432,10 +432,10 @@ const	cancelFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -471,10 +471,10 @@ const	removeFriendOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 

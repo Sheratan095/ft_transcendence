@@ -37,13 +37,40 @@ ws.on('open', () => {
 });
 
 ws.on('message', (data) => {
-    console.log('📥 Received:', data.toString());
-    ws.close();
+    const rawMessage = data.toString();
+    console.log('📥 Raw message:', rawMessage);
+    
+    try {
+        // Try to parse as JSON (for structured events)
+        const message = JSON.parse(rawMessage);
+        
+        // Handle different event types
+        if (message.event) {
+            
+            // Handle specific events
+            switch (message.event) {
+                case 'friendOnline':
+                    console.log('👥 Friend came online:', message.data);
+                    break;
+                case 'friendOffline':
+                    console.log('� Friend went offline:', message.data);
+                    break;
+                case 'onlineUsers':
+                    console.log('🟢 Online users list:', message.data);
+                    break;
+                default:
+                    console.log('📦 Unknown event:', message.event);
+            }
+        }
+    } catch (e) {
+        // Not JSON, just a plain text message
+        console.log('💬 Text message:', rawMessage);
+    }
 });
 
 ws.on('close', () => {
     console.log('❌ Closed');
-    // process.exit(0);
+    process.exit(0);
 });
 
 ws.on('error', (error) => {
@@ -52,8 +79,8 @@ ws.on('error', (error) => {
 });
 
 // Timeout after 5 seconds
-setTimeout(() => {
-    console.log('⏱️ Timeout - no response received');
-    ws.close();
-    process.exit(0);
-}, 5000);
+// setTimeout(() => {
+//     console.log('⏱️ Timeout - no response received');
+//     ws.close();
+//     process.exit(0);
+// }, 5000);

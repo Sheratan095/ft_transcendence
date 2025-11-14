@@ -24,7 +24,7 @@ function	forwardCookies(reply, response)
 		reply.header('Set-Cookie', setCookie);
 }
 
-export async function	loginRoute(request, reply)
+export async function	login(request, reply)
 {
 	try
 	{
@@ -38,7 +38,7 @@ export async function	loginRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -47,7 +47,7 @@ export async function	loginRoute(request, reply)
 	}
 }
 
-export async function	registerRoute(request, reply)
+export async function	register(request, reply)
 {
 	try
 	{
@@ -61,7 +61,7 @@ export async function	registerRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -71,7 +71,7 @@ export async function	registerRoute(request, reply)
 }
 
 // Need the refresh token from cookies
-export async function	logoutRoute(request, reply)
+export async function	logout(request, reply)
 {
 	try
 	{
@@ -91,7 +91,7 @@ export async function	logoutRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -100,7 +100,7 @@ export async function	logoutRoute(request, reply)
 	}
 }
 
-export async function	deleteAccountRoute(request, reply)
+export async function	deleteAccount(request, reply)
 {
 	try
 	{
@@ -113,7 +113,7 @@ export async function	deleteAccountRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -123,7 +123,7 @@ export async function	deleteAccountRoute(request, reply)
 }
 
 // Need the refresh token from cookies
-export async function	tokenRoute(request, reply)
+export async function	token(request, reply)
 {
 	try
 	{
@@ -141,7 +141,7 @@ export async function	tokenRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -164,7 +164,7 @@ export async function	verifyTwoFactorAuth(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -173,7 +173,7 @@ export async function	verifyTwoFactorAuth(request, reply)
 	}
 }
 
-export async function	enable2FARoute(request, reply)
+export async function	enable2FA(request, reply)
 {
 	try
 	{
@@ -185,7 +185,7 @@ export async function	enable2FARoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
@@ -194,7 +194,7 @@ export async function	enable2FARoute(request, reply)
 	}
 }
 
-export async function	changePasswordRoute(request, reply)
+export async function	changePassword(request, reply)
 {
 	try
 	{
@@ -206,7 +206,7 @@ export async function	changePasswordRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('Auth service error:', err.message)
+		console.log('[GATEWAY] Auth service error:', err.message)
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))

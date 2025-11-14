@@ -3,8 +3,18 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "MARCO",
-  "email": "cearellim7@gmail.com",
+  "username": "pippo",
+  "email": "pippo@gmail.com",
+  "password": "Mrco@123_"
+}
+
+### Register new user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "baudo",
+  "email": "baudo@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -16,7 +26,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "ceccarellim7@gmail.com",
+  "email": "baudo@gmail.com",
   "password": "Mrco@123_"
 }
 
