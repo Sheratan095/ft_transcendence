@@ -126,7 +126,7 @@ async function getTargetUserId(cookies, targetEmail) {
 }
 
 async function sendFriendRequest(cookies, targetId) {
-    console.log(`📤 Sending friend request with targetId: "${targetId}" (EMPTY to test validation)...`);
+    console.log(`📤 Sending friend request with targetId: "${targetId}"`);
     
     try {
         const response = await fetch(`${GATEWAY_URL}/relationships/request`, {
@@ -158,7 +158,7 @@ async function sendFriendRequest(cookies, targetId) {
 }
 
 async function acceptFriendRequest(cookies, requesterId = '') {
-    console.log(`📤 Accepting friend request from requesterId: "${requesterId}" (EMPTY to test validation)...`);
+    console.log(`📤 Accepting friend request from requesterId: "${requesterId}"...`);
     
     try {
         const response = await fetch(`${GATEWAY_URL}/relationships/accept`, {

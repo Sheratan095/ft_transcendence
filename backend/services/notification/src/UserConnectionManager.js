@@ -11,7 +11,10 @@ class	UserConnectionManager
 	addConnection(userId, socket)
 	{
 		this._connections.set(userId, socket);
-		this.#sendOnlineUsersList(socket);
+		// First: send the list of currently-online users to the newly connected user
+		this.#sendOnlineUsersListTo(userId, socket);
+
+		// Then notify other connected users that this user is now online
 		this.#dispatchEventToFriends(userId, 'friend.online', { userId });
 	}
 
@@ -56,33 +59,29 @@ class	UserConnectionManager
 		}
 	}
 
-	#sendOnlineUsersList(socket)
+	// Send the current list of connected users to the newly connected `senderUserId`.
+	// The client expects a single event containing the list of online friends.
+	#sendOnlineUsersListTo(senderUserId, senderSocket)
 	{
-		// TO DO: exclude self
-		// Send list of online user IDs excluding the current socket's user
-		const	onlineUserIds = Array.from(this._connections.keys());
+		const	online = [];
 
-		for (const userId of onlineUserIds)
+		for (const [otherUserId] of this._connections.entries())
 		{
-			if (userId !== socket.userId)
-			{
-				this.#dispatchEventToSocket(
-					socket,
-					'friend.online',
-					{ userId }
-				);
-			}
+			if (otherUserId !== senderUserId)
+				online.push(otherUserId);
 		}
+
+		this.#dispatchEventToSocket(senderSocket, 'friends.onlineList', { online });
 	}
 
-	#dispatchEventToFriends(userId, event, data)
+	#dispatchEventToFriends(senderUserId, event, data)
 	{
-		console.log(`[NOTIFICATION] Dispatching event '${event}' from user ${userId} to friends`);
+		console.log(`[NOTIFICATION] Dispatching event '${event}' from user ${senderUserId} to friends`);
 
 		for (const [otherUserId, otherSocket] of this._connections.entries())
 		{
 			// Except send to self
-			if (otherUserId !== userId)
+			if (otherUserId !== senderUserId)
 				this.#dispatchEventToSocket(otherSocket, event, data);
 		}
 	}
@@ -97,7 +96,7 @@ class	UserConnectionManager
 			}
 			catch (e)
 			{
-				console.error(`[NOTIFICATION] Failed to send ${event} to user ${userId}:`, e.message);
+				console.error(`[NOTIFICATION] Failed to send ${event}:`, e.message);
 			}
 		}
 	}
