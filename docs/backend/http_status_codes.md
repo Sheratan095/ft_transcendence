@@ -17,6 +17,7 @@
 |------|------|-------|-------------|
 | **400** | Bad Request | Invalid request format/validation errors | register (validation failures) |
 | **401** | Unauthorized | Authentication failed or invalid credentials | login (wrong password), logout, validateToken, token |
+| **404** | Not Found | The resource requested doesn't exist
 | **409** | Conflict | Resource already exists | register (username/email exists) |
 
 ---

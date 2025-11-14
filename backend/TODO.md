@@ -101,3 +101,7 @@
 	[AUTH] Registration error: SQLITE_CONSTRAINT: UNIQUE constraint failed: auth_accounts.email
 	Duplicate email attempt
 	[GATEWAY] Auth service error: Request failed with status code 409
+
+[] add user/... to all relationships routes in gateway registrations
+[] add a "starting script" that generate the env, install packages and create the certificates(they shouldn't be posted in the repo)
+[] refactor of backend_design
