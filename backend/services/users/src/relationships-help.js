@@ -22,7 +22,7 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId, reque
 	}
 	catch (error)
 	{
-		console.log('[USERS] Error notifying friend request:', error.message);
+		console.log('[RELATIONSHIPS] Error notifying friend request:', error.message);
 
 		return (false);
 	}
@@ -50,9 +50,9 @@ export async function	notifyFriendAccept(requesterId, accepterUsername)
 	{
 		// If error is 404, user does not exist
 		if (error.response && error.response.status === 404)
-			console.log('User not found for requesterId:', requesterId);
+			console.log('[RELATIONSHIPS] User not found for requesterId:', requesterId);
 		else
-			console.log('Error notifying friend accept:', error.message);
+			console.log('[RELATIONSHIPS] Error notifying friend accept:', error.message);
 
 		return (false);
 	}

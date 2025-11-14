@@ -41,11 +41,11 @@ export class UsersDatabase
 
 			await this.#createTables();
 
-			console.log("✅ USERS Database connected: ", this.dbPath);
+			console.log("[USERS] Database connected: ", this.dbPath);
 		}
 		catch (error)
 		{
-			console.error("❌ USERS Database initialization error:", error);
+			console.error("[USERS] Database initialization error:", error);
 			throw (error);
 		}
 	}
