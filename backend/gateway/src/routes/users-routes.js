@@ -33,6 +33,35 @@ export const	getUsers = async (req, reply) =>
 	}
 }
 
+export const	searchUsers = async (req, reply) =>
+{
+	// Forward request to users service with user data
+	try
+	{
+		console.log('[GATEWAY] Search request query params:', req.query);
+		
+		const	response = await axios.get(`${USERS_URL}/search`, {
+			params: req.query,
+			headers: getAuthHeaders(req)
+		})
+
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('[GATEWAY] Users service error:', err.message)
+		if (err.response) {
+			console.log('[GATEWAY] Users service status:', err.response.status)
+			console.log('[GATEWAY] Users service data:', err.response.data)
+		}
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		return (reply.code(500).send({ error: 'Users service unavailable' }))
+	}
+}
+
 export const	getUser = async (req, reply) =>
 {
 	// Forward request to users service with user data

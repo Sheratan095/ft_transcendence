@@ -6,6 +6,7 @@ import { unlink } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { deleteUserRelationships } from './relationships-controllers.js';
+import { hasUncaughtExceptionCaptureCallback } from 'process';
 
 
 const	__filename = fileURLToPath(import.meta.url);
@@ -34,9 +35,37 @@ export const	getUsers = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 
-} 
+}
 
-// TO DO da rifa
+export const	searchUser = async (req, reply) =>
+{
+	try
+	{
+		const	query = req.query.q;
+		const	usersDb = req.server.usersDb;
+		const	user = extractUserData(req);
+
+		const	rows = await usersDb.searchUsers(user.id, query);
+
+		const	results = rows.map(row => ({
+			id: row.id,
+			username: row.username,
+			avatarUrl: row.avatar_url,
+		}));
+
+		console.log(`[USERS] SearchUser "${query}" requested by user: ${user.id}`);
+
+		return reply.code(200).send(results);
+	}
+	catch (err)
+	{
+		console.log('[USERS] SearchUser error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+
 export const	getUser = async (req, reply) =>
 {
 	try

@@ -10,7 +10,20 @@ const	fastify = Fastify({ logger: false })
 // Allows to receive requests from different origins
 import cors from '@fastify/cors';
 await fastify.register(cors, {
-	origin: process.env.FRONTEND_URL,
+	origin: (origin, cb) => {
+		// Allow requests from frontend URL and file:// protocol (for testing)
+		const	allowedOrigins = [
+			process.env.FRONTEND_URL,
+			'null', // file:// protocol shows as 'null'
+		];
+		
+		// Allow any localhost origin for development
+		if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || allowedOrigins.includes(origin))
+			cb(null, true);
+		else
+			cb(new Error('Not allowed by CORS'), false);
+	},
+
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
  	credentials: true // Allow cookies to be sent
 });
@@ -85,6 +98,7 @@ import {
 
 import {
 	getUsers,
+	searchUsers,
 	getUser,
 	updateUser,
 	uploadAvatar
@@ -186,6 +200,19 @@ await fastify.register(async function (fastify)
 	fastify.delete('/relationships/unblock', { schema: { hide: true }, preHandler: authenticateJwt, handler: unblockUser })
 	fastify.delete('/relationships/removeFriend', { schema: { hide: true }, preHandler: authenticateJwt, handler: removeFriend })
 	fastify.delete('/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwt, handler: cancelFriendRequest })
+});
+
+// SEARCH route – tighter rate limit
+await fastify.register(async function (fastify)
+{
+	await fastify.register(import('@fastify/rate-limit'),
+	{
+		max: 20,					// 20 search attempts
+		timeWindow: '10 seconds',	// every 10 seconds
+		keyGenerator: (req) => req.user?.id || req.ip
+	});
+
+	fastify.get('/users/search',{ schema: { hide: true }, preHandler: authenticateJwt, handler: searchUsers });
 });
 
 // Server startup function with error handling

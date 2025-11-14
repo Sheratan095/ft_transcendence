@@ -128,6 +128,22 @@ export class UsersDatabase
 		return (await this.db.get(query, [userId]));
 	}
 
+	async	searchUsers(excludeUserId, searchQuery)
+	{
+		const	likeQuery = `%${searchQuery.toLowerCase()}%`;
+
+		const	query = `
+			SELECT id, username, avatar_url
+			FROM users
+			WHERE (LOWER(username) LIKE ? OR id LIKE ?)
+			AND id != ?
+			ORDER BY username ASC
+			LIMIT 20
+		`;
+
+		return (await this.db.all(query, [likeQuery, likeQuery, excludeUserId]));
+	}
+
 	async	getAllUsers()
 	{
 		const	query = `SELECT * FROM users`;
