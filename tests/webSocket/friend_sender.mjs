@@ -1,5 +1,8 @@
 import WebSocket from 'ws';
 
+// Disable SSL certificate validation for self-signed certificates in development
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 /**
  * Sender script - simulates a user sending friend requests and accepting them
  * Tests the friend request flow with EMPTY target_id to trigger validation errors
@@ -56,10 +59,11 @@ async function register() {
 async function connectWebSocket(cookies) {
     return new Promise((resolve, reject) => {
         console.log('🔌 Connecting to WebSocket...');
-        const ws = new WebSocket('ws://localhost:3000/ws', {
+        const ws = new WebSocket('wss://localhost:3000/ws', {
             headers: {
                 'Cookie': cookies
-            }
+            },
+            rejectUnauthorized: false // Accept self-signed certificates
         });
 
         ws.on('open', () => {
@@ -126,7 +130,7 @@ async function sendFriendRequest(cookies, targetId) {
     console.log(`📤 Sending friend request with targetId: "${targetId}"`);
     
     try {
-        const response = await fetch(`${GATEWAY_URL}/relationships/request`, {
+        const response = await fetch(`${GATEWAY_URL}/users/relationships/request`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -158,7 +162,7 @@ async function acceptFriendRequest(cookies, requesterId = '') {
     console.log(`📤 Accepting friend request from requesterId: "${requesterId}"...`);
     
     try {
-        const response = await fetch(`${GATEWAY_URL}/relationships/accept`, {
+        const response = await fetch(`${GATEWAY_URL}/users/relationships/accept`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

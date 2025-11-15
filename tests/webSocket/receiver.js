@@ -1,5 +1,8 @@
 import WebSocket from 'ws';
 
+// Disable SSL certificate validation for self-signed certificates in development
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 /**
  * Receiver script - simulates a user receiving friend request notifications
  * This user logs in and keeps a WebSocket connection open to receive notifications
@@ -12,7 +15,7 @@ const RECEIVER_PASSWORD = 'Mrco@123_';
 async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
 
     try {
-        const response = await fetch('https://localhost:3000/relationships/accept', {
+        const response = await fetch('https://localhost:3000/users/relationships/accept', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,10 +68,11 @@ async function startReceiver() {
 
         // Connect to WebSocket with authentication
         console.log('🔌 Connecting to WebSocket...');
-        const ws = new WebSocket('ws://localhost:3000/ws', {
+        const ws = new WebSocket('wss://localhost:3000/ws', {
             headers: {
                 'Cookie': cookies
-            }
+            },
+            rejectUnauthorized: false // Accept self-signed certificates
         });
 
         ws.on('open', () => {

@@ -1,5 +1,5 @@
 ### Variables
-@baseUrl = https://localhost:3000
+@baseUrl = https://localhost:3000/users
 @apiKey = 1234
 @userId1 = user-id-1
 @userId2 = user-id-2
