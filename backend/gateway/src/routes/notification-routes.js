@@ -65,7 +65,7 @@ export async function	handleSocketUpgrade(req, socket, head)
 		{	
 			if (err.code === 'ECONNRESET' || err.code === 'EPIPE')
 			{
-				console.log(`ℹ️ Socket closed early (${err.code}) — likely client disconnect`);
+				console.log(`[GATEWAY] Socket closed early (${err.code}) — likely client disconnect`);
 				return;
 			}
 

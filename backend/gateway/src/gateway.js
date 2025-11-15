@@ -1,16 +1,63 @@
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'PORT'
-, 'DOC_USERNAME', 'DOC_PASSWORD']);
+, 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS']);
 
 import Fastify from 'fastify'
-// Initialize Fastify instance with built-in logging
-const	fastify = Fastify({ logger: false })
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// HTTPS Configuration
+let	httpsOptions = null;
+
+if (process.env.USE_HTTPS === 'true')
+{
+	try
+	{
+		const	certsPath = process.env.CERTS_PATH || path.join(__dirname, process.env.HTTPS_CERTS_PATH);
+		httpsOptions =
+		{
+			key: readFileSync(path.join(certsPath, 'key.pem')),
+			cert: readFileSync(path.join(certsPath, 'cert.pem'))
+		};
+		console.log('[GATEWAY] HTTPS enabled');
+	}
+	catch (err)
+	{
+		console.error('[GATEWAY] Failed to load HTTPS certificates:', err.message);
+		console.error('[GATEWAY] Falling back to HTTP');
+		httpsOptions = null;
+	}
+}
+
+// Initialize Fastify instance with built-in logging and optional HTTPS
+const	fastify = Fastify({ 
+	logger: false,
+	https: httpsOptions
+})
 
 // Allows to receive requests from different origins
 import cors from '@fastify/cors';
-await fastify.register(cors, {
-	origin: process.env.FRONTEND_URL,
+await fastify.register(cors,
+{
+	origin: (origin, cb) => {
+		// Allow requests from frontend URL and file:// protocol (for testing)
+		const	allowedOrigins = [
+			process.env.FRONTEND_URL,
+			'null', // file:// protocol shows as 'null'
+		];
+		
+		// Allow any localhost origin for development
+		if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || allowedOrigins.includes(origin))
+			cb(null, true);
+		else
+			cb(new Error('Not allowed by CORS'), false);
+	},
+
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
  	credentials: true // Allow cookies to be sent
 });
@@ -85,6 +132,7 @@ import {
 
 import {
 	getUsers,
+	searchUsers,
 	getUser,
 	updateUser,
 	uploadAvatar
@@ -188,6 +236,19 @@ await fastify.register(async function (fastify)
 	fastify.delete('/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwt, handler: cancelFriendRequest })
 });
 
+// SEARCH route – tighter rate limit
+await fastify.register(async function (fastify)
+{
+	await fastify.register(import('@fastify/rate-limit'),
+	{
+		max: 20,					// 20 search attempts
+		timeWindow: '10 seconds',	// every 10 seconds
+		keyGenerator: (req) => req.user?.id || req.ip
+	});
+
+	fastify.get('/users/search',{ schema: { hide: true }, preHandler: authenticateJwt, handler: searchUsers });
+});
+
 // Server startup function with error handling
 const	start = async () =>
 {
@@ -199,7 +260,8 @@ const	start = async () =>
 			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
 		})
 
-		console.log(`Gateway server is running on port ${process.env.PORT}`)
+		const protocol = httpsOptions ? 'https' : 'http';
+		console.log(`[GATEWAY] Server is running on ${protocol}://localhost:${process.env.PORT}`)
 	}
 	catch (err)
 	{

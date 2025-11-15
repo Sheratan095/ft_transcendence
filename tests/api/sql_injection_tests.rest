@@ -4,7 +4,7 @@
 ###
 ### 1. SQL Injection in Login Username Field
 ### Attempting to bypass authentication with OR condition
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -15,7 +15,7 @@ Content-Type: application/json
 ###
 ### 2. SQL Injection in Login Username Field - UNION Attack
 ### Attempting to extract data with UNION
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 ###
 ### 3. SQL Injection in Login Username Field - Comment Bypass
 ### Attempting to bypass password check with SQL comments
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -37,7 +37,7 @@ Content-Type: application/json
 ###
 ### 4. SQL Injection in Registration Username
 ### Attempting to inject SQL in username during registration
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -49,7 +49,7 @@ Content-Type: application/json
 ###
 ### 5. SQL Injection in Registration Email
 ### Attempting to inject SQL in email field
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -61,7 +61,7 @@ Content-Type: application/json
 ###
 ### 6. SQL Injection with Stacked Queries
 ### Attempting to execute multiple SQL statements
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -73,7 +73,7 @@ Content-Type: application/json
 ###
 ### 7. SQL Injection with Encoded Characters
 ### Attempting injection with URL encoded characters
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -84,7 +84,7 @@ Content-Type: application/json
 ###
 ### 8. SQL Injection with Hex Encoding
 ### Attempting injection with hex encoded strings
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -95,7 +95,7 @@ Content-Type: application/json
 ###
 ### 9. Boolean-based Blind SQL Injection
 ### Attempting to extract information through boolean responses
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -106,7 +106,7 @@ Content-Type: application/json
 ###
 ### 10. Time-based Blind SQL Injection
 ### Attempting to cause delays to detect injection points
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -117,7 +117,7 @@ Content-Type: application/json
 ###
 ### 11. Second-order SQL Injection
 ### Register a user with malicious username, then try to trigger it in login
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -128,7 +128,7 @@ Content-Type: application/json
 
 ###
 ### 12. Test Login with the malicious username from test 11
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -139,7 +139,7 @@ Content-Type: application/json
 ###
 ### 13. CASE manipulation injection
 ### Attempting to bypass with case variations
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -150,7 +150,7 @@ Content-Type: application/json
 ###
 ### 14. Nested query injection
 ### Attempting to inject nested SELECT statements
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -161,7 +161,7 @@ Content-Type: application/json
 ###
 ### 15. NULL byte injection
 ### Attempting to use null bytes to truncate queries
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -172,7 +172,7 @@ Content-Type: application/json
 ###
 ### 16. Function-based injection
 ### Attempting to use SQLite functions for injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -183,7 +183,7 @@ Content-Type: application/json
 ###
 ### 17. Error-based injection attempt
 ### Trying to trigger SQL errors to extract information
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -194,7 +194,7 @@ Content-Type: application/json
 ###
 ### 18. Data exfiltration attempt via LIKE
 ### Attempting to extract data character by character
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -205,7 +205,7 @@ Content-Type: application/json
 ###
 ### 19. Schema discovery attempt
 ### Trying to discover table and column names
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -216,7 +216,7 @@ Content-Type: application/json
 ###
 ### 20. Multi-line injection
 ### Testing multi-line SQL injection
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {

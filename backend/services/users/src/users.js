@@ -68,7 +68,7 @@ const	start = async () =>
 		fastify.register(relationshipsRoutes)
 
 		fastify.listen({ port: process.env.PORT })
-		console.log(`Server is running on port ${process.env.PORT}`)
+		console.log(`[USERS] Server is running on port ${process.env.PORT}]`)
 	}
 	catch (err)
 	{

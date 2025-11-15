@@ -5,8 +5,8 @@ export const	sendFriendRequest = async (req, reply) =>
 {
 	try
 	{
-		const	{ requesterUsername, targetUserId, relationshipId } = req.body;
-		userConnectionManager.sendFriendRequestNotification(targetUserId, requesterUsername);
+		const	{ requesterUsername, targetUserId, requesterId } = req.body;
+		userConnectionManager.sendFriendRequestNotification(targetUserId, requesterUsername, requesterId);
 
 		return (reply.code(200).send());
 	}

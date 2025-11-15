@@ -7,6 +7,8 @@ import {
 
 //-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
 
+//-------------------READONLY OPERATIONS-----------------------------
+
 export async function	getUserRelationships(req, reply)
 {
 	try
@@ -108,6 +110,8 @@ export async function	getOutgoingRequests(req, reply)
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+//-------------------WRITE OPERATIONS-----------------------------
 
 export async function	rejectFriendRequest(req, reply)
 {
@@ -278,6 +282,13 @@ export async function	sendFriendRequest(req, reply)
 		if (!targetUser)
 			return (reply.code(404).send({ error: 'User not found' }));
 
+		// Check if users are blocked before sending request
+		if (await usersDb.isBlocked(userId, targetId))
+		{
+			console.log('[RELATIONSHIPS] Not notifying - users are blocked');
+			return (reply.code(200).send({ message: 'Friend request accepted' }));
+		}
+
 		// Can't send request to yourself
 		if (userId === targetId)
 			return (reply.code(400).send({ error: 'Cannot send friend request to yourself' }));
@@ -286,7 +297,7 @@ export async function	sendFriendRequest(req, reply)
 
 		const	requesterUsername = (await usersDb.getUserById(userId)).username;
 
-		if (await notifyFriendRequest(requesterUsername, targetId) === false)
+		if (await notifyFriendRequest(requesterUsername, targetId, userId) === false)
 			return (reply.code(500).send({ error: 'Failed to notify user' }));
 
 		console.log('[RELATIONSHIPS] Friend request sent from userId:', userId, 'to targetId:', targetId);
@@ -314,6 +325,13 @@ export async function	acceptFriendRequest(req, reply)
 		const	usersDb = req.server.usersDb;
 		const	user = extractUserData(req); // Accepter
 		const	{ requesterId } = req.body;
+
+		// Check if users are blocked before accepting request
+		if (await usersDb.isBlocked(user.id, requesterId))
+		{
+			console.log('[RELATIONSHIPS] Not notifying - users are blocked');
+			return (reply.code(200).send({ message: 'Friend request accepted' }));
+		}
 
 		await usersDb.acceptFriendRequest(user.id, requesterId);
 

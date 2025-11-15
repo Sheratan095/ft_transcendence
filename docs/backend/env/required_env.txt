@@ -7,6 +7,8 @@ gateway:
     PORT=3000
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
+    USE_HTTPS=true
+    HTTPS_CERTS_PATH=../../certs/certs/
 
 services/auth:
     INTERNAL_API_KEY=1234

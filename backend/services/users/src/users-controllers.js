@@ -6,6 +6,7 @@ import { unlink } from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { deleteUserRelationships } from './relationships-controllers.js';
+import { hasUncaughtExceptionCaptureCallback } from 'process';
 
 
 const	__filename = fileURLToPath(import.meta.url);
@@ -21,7 +22,9 @@ export const	getUsers = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 		const	users = await usersDb.getAllUsers();
 
-		console.log('[USERS] GetUsers success, total users:', users.length);
+		const	requestingUser = extractUserData(req);
+		if (requestingUser)
+			console.log(`[USERS] GetUsers requested by user: ${requestingUser.id}`);
 
 		return (reply.code(200).send(users));
 	}
@@ -32,9 +35,37 @@ export const	getUsers = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 
-} 
+}
 
-// TO DO da rifa
+export const	searchUser = async (req, reply) =>
+{
+	try
+	{
+		const	query = req.query.q;
+		const	usersDb = req.server.usersDb;
+		const	user = extractUserData(req);
+
+		const	rows = await usersDb.searchUsers(query);
+
+		const	results = rows.map(row => ({
+			id: row.id,
+			username: row.username,
+			avatarUrl: row.avatar_url,
+		}));
+
+		console.log(`[USERS] SearchUser "${query}" requested by user: ${user.id}, found ${results.length} results`);
+
+		return reply.code(200).send(results);
+	}
+	catch (err)
+	{
+		console.log('[USERS] SearchUser error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+
 export const	getUser = async (req, reply) =>
 {
 	try
@@ -71,7 +102,9 @@ export const	getUser = async (req, reply) =>
 			createdAt: user.created_at, // Already a string in ISO format from SQLite
 		};
 
-		console.log('[USERS] GetUser success for user:', username || id);
+		const	requestingUser = extractUserData(req);
+		if (requestingUser)
+			console.log(`[USERS] GetUser ${user.id} requested by ${requestingUser.id}`);
 
 		return (reply.code(200).send(response));
 	}
@@ -152,7 +185,7 @@ export const	uploadAvatar = async (req, reply) =>
 				}
 				catch (unlinkErr)
 				{
-					console.error(`Failed to delete old avatar: ${unlinkErr.message}`);
+					console.log(`Failed to delete old avatar: ${unlinkErr.message}`);
 					// Continue even if deletion fails - don't block the upload
 				}
 			}

@@ -1,9 +1,9 @@
-GET http://localhost:3000/users/
+GET https://localhost:3000/users/
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2LWNlMTAtNDM4Ni1iOWZjLTdjYWFhZTg5Mjg2NCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTY4ODY4OSwiZXhwIjoxNzYxNjg5NTg5fQ.6WrKTiYlX08s7zWEckLAd8nHY9bb-3tX-SQZzeCl1ns
 
 ###
 
-PUT http://localhost:3000/users/update-user
+PUT https://localhost:3000/users/update-user
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4ZjhkYTkwLTI2MTQtNGNlMy05MWI2LTA1YTk2Zjg5MTljNSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU3NDEyOSwiZXhwIjoxNzYxNTc1MDI5fQ.kag82g6wkpao3yGoQA6vrjHB1X1IBcXnMt0ch3ugcZY
 Content-Type: application/json
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:3000/users/user?username=MarcO
+GET https://localhost:3000/users/user?username=MarcO
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkZjRiMGFiLThiZGYtNGMyZi04MDRjLWUxNjcxMjBiZmZmYiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTc0NjA0MSwiZXhwIjoxNzYxNzQ2OTQxfQ.g6RmAMSaNo02FAzpfRAxyBjQ25djCBzMtKdegTiumHU
 Content-Type: application/json
 
@@ -26,14 +26,14 @@ Content-Type: application/json
 # Use curl for file upload (REST Client has limited multipart support)
 # Replace YOUR_JWT_TOKEN with your actual JWT token
 # Run in terminal:
-# curl -X POST http://localhost:3000/users/upload-avatar \
+# curl -X POST https://localhost:3000/users/upload-avatar \
 #   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 #   -F "file=@/path/to/your/image.jpg"
 
 ###
 
 # Step 2: Get your profile with avatar URL
-GET http://localhost:3000/users/user?id=6a1535bd-deb6-4af2-87ed-e027283aad5c
+GET https://localhost:3000/users/user?id=6a1535bd-deb6-4af2-87ed-e027283aad5c
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMTUzNWJkLWRlYjYtNGFmMi04N2VkLWUwMjcyODNhYWQ1YyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU4NTU1MiwiZXhwIjoxNzYxNTg2NDUyfQ._5y9bBkh9Bu_3jIZspas56YLEx1q1xjz3Pi98QTmXas
 
 # Response will include: { "id": "...", "username": "...", "avatar_url": "/avatars/userid_timestamp.jpg" }
@@ -42,7 +42,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMTUzNWJkL
 
 # Step 3: Access the avatar image directly
 # Open in browser or use GET request:
-GET http://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_1730123456789.jpg
+GET https://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_1730123456789.jpg
 
 # OR view it in browser:
-# http://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_1730123456789.jpg
+# https://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_1730123456789.jpg

@@ -2,7 +2,7 @@ import axios from "axios";
 import { CookieJar } from "tough-cookie";
 import { wrapper } from "axios-cookiejar-support";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://localhost:3000";
 
 // Create a cookie jar to store auth cookies
 const jar = new CookieJar();
@@ -26,7 +26,7 @@ async function testRoutes() {
     console.log("User Response:", userRes.data);
 
   } catch (err) {
-    console.error(
+    console.log(
       "Error:",
       err.response ? err.response.data : err.message
     );

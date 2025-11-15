@@ -36,15 +36,7 @@ export function	handleMessage(socket, msg, userId)
 {
 	console.log(`[NOTIFICATION] Message from user: ${userId} : ${msg.toString()}`);
 
-	// You can now use user.id and user.email in your WebSocket logic
-	if (userId)
-	{
-		socket.send(`Echo from ${userId}: ${msg.toString()}`);
-	}
-	else
-	{
-		socket.send("Echo: " + msg.toString());
-	}
+	socket.send(`Echo from ${userId}: ${msg.toString()}`);
 }
 
 export function	handleClose(socket, userId)

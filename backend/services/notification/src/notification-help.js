@@ -46,7 +46,7 @@ export function	extractUserData(request)
 	}
 	catch (err)
 	{
-		console.log('Error parsing user data from headers:', err.message);
+		console.log('[NOTIFICATION] Error parsing user data from headers:', err.message);
 		return (null);
 	}
 }

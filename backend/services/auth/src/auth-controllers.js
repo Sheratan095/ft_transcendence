@@ -60,7 +60,6 @@ export const	register = async (req, reply) =>
 			// From authDb
 			if (err.message.includes('email'))
 			{
-				console.error(`Duplicate email attempt`);
 				return (reply.code(409).send({ 
 					error: 'Registration failed',
 					details: 'Email already exists' 
@@ -70,7 +69,6 @@ export const	register = async (req, reply) =>
 			// From usersDb
 			if (err.message.includes('username'))
 			{
-				console.error(`Duplicate username attempt`);
 				return (reply.code(409).send({ 
 					error: 'Registration failed',
 					details: 'Username already exists' 

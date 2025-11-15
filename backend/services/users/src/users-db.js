@@ -41,11 +41,11 @@ export class UsersDatabase
 
 			await this.#createTables();
 
-			console.log("✅ USERS Database connected: ", this.dbPath);
+			console.log("[USERS] Database connected: ", this.dbPath);
 		}
 		catch (error)
 		{
-			console.error("❌ USERS Database initialization error:", error);
+			console.log("[USERS] Database initialization error:", error);
 			throw (error);
 		}
 	}
@@ -71,7 +71,7 @@ export class UsersDatabase
 		}
 		catch (error)
 		{
-			console.error("❌ Error creating tables for USERS db:", error);
+			console.log("❌ Error creating tables for USERS db:", error);
 
 			throw (error);
 		}
@@ -126,6 +126,21 @@ export class UsersDatabase
 	{
 		const	query = `SELECT * FROM users WHERE id = ?`;
 		return (await this.db.get(query, [userId]));
+	}
+
+	async	searchUsers(searchQuery)
+	{
+		const	likeQuery = `${searchQuery.toLowerCase()}%`;
+
+		const query = `
+			SELECT id, username, avatar_url
+			FROM users
+			WHERE LOWER(username) LIKE ?
+			ORDER BY username ASC
+			LIMIT 20;
+		`;
+
+		return (await this.db.all(query, [likeQuery]));
 	}
 
 	async	getAllUsers()

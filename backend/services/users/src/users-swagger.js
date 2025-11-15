@@ -51,5 +51,5 @@
 			return (fastify.swagger());
 		});
 
-		console.log(`📚 Users Service Swagger JSON spec available at http://localhost:${process.env.PORT}/docs/json`);
+		console.log(`[USERS] Service Swagger JSON spec available at http://localhost:${process.env.PORT}/docs/json`);
 	}

@@ -34,11 +34,11 @@ export class AuthDatabase
 
 			await this.#createTables();
 
-			console.log("✅ AUTH Database connected: ", this.dbPath);
+			console.log("[AUTH] Database connected: ", this.dbPath);
 		}
 		catch (error)
 		{
-			console.error("❌ AUTH Database initialization error:", error);
+			console.error("[AUTH] Database initialization error:", error);
 			throw (error);
 		}
 	}

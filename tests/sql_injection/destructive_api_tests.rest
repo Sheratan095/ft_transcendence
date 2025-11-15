@@ -7,7 +7,7 @@
 ###
 
 ### Attempt mass user deletion through login
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -17,7 +17,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to delete all users through registration
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -31,7 +31,7 @@ Content-Type: application/json
 ###
 
 ### Attempt to drop users table through login
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -41,7 +41,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to drop refresh_tokens table
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -52,7 +52,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to drop twofactor_tokens table
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -66,7 +66,7 @@ Content-Type: application/json
 ###
 
 ### Attempt to alter table structure
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -76,7 +76,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to create malicious table
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -90,7 +90,7 @@ Content-Type: application/json
 ###
 
 ### Attempt to update all user passwords
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -100,7 +100,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to make all users admin
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -114,7 +114,7 @@ Content-Type: application/json
 ###
 
 ### Attempt to corrupt all email addresses
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -124,7 +124,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to nullify all passwords
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -138,7 +138,7 @@ Content-Type: application/json
 ###
 
 ### Multiple SQL statements in one injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -148,7 +148,7 @@ Content-Type: application/json
 
 ###
 ### Transaction manipulation attempt
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -162,7 +162,7 @@ Content-Type: application/json
 ###
 
 ### Attempt to extract all user data
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -172,7 +172,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to extract database schema
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -185,7 +185,7 @@ Content-Type: application/json
 ###
 
 ### Attempt to extract table names
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -195,7 +195,7 @@ Content-Type: application/json
 
 ###
 ### Attempt boolean-based blind SQL injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -208,7 +208,7 @@ Content-Type: application/json
 ###
 
 ### Attempt to attach external database
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -218,7 +218,7 @@ Content-Type: application/json
 
 ###
 ### Attempt to use PRAGMA commands
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -232,7 +232,7 @@ Content-Type: application/json
 ###
 
 ### Case variation injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -242,7 +242,7 @@ Content-Type: application/json
 
 ###
 ### Comment variation injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -252,7 +252,7 @@ Content-Type: application/json
 
 ###
 ### Encoded character injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -265,7 +265,7 @@ Content-Type: application/json
 ###
 
 ### Complex nested query injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -275,7 +275,7 @@ Content-Type: application/json
 
 ###
 ### EXISTS-based injection
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
@@ -288,7 +288,7 @@ Content-Type: application/json
 ###
 
 ### Maximum destruction attempt
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
@@ -299,7 +299,7 @@ Content-Type: application/json
 
 ###
 ### Kitchen sink attack (everything at once)
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {

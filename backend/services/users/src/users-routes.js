@@ -1,5 +1,6 @@
 import {
 	getUsers,
+	searchUser,
 	getUser,
 	createUser,
 	updateUser,
@@ -156,6 +157,41 @@ const	getUserOpts =
 	handler: getUser,
 };
 
+const	searchUserOpts = 
+{
+	schema:
+	{
+		summary: 'Search users',
+		description: 'Search users by username substring. Requires accessToken cookie for authentication.',
+		tags: ['Users'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+		querystring:
+		{
+			type: 'object',
+			required: ['q'],
+			properties:
+			{
+				q: { type: 'string', description: 'Substring to search in usernames' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: User,
+			},
+			400: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: searchUser,
+}
+
 const	updateUserOpts =
 {
 	schema:
@@ -295,6 +331,7 @@ export function	userRoutes(fastify)
 	
 	// Versatile GET route - handles single user queries by username or id
 	fastify.get('/user', getUserOpts);
+	fastify.get('/search', searchUserOpts);
 
 	fastify.post('/new-user', newUserOpts);
 	fastify.post('/upload-avatar', uploadAvatarOpts);

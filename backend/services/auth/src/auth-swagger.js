@@ -47,5 +47,5 @@ export async function setupSwagger(fastify) {
 		return fastify.swagger();
 	});
 
-	console.log(`📚 Auth Service Swagger JSON spec available at http://localhost:${process.env.PORT}/docs/json`);
+	console.log(`[AUTH] Service Swagger JSON spec available at http://localhost:${process.env.PORT}/docs/json`);
 }

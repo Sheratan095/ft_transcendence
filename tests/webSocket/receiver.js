@@ -10,9 +10,9 @@ const RECEIVER_USERNAME = 'baudo';
 const RECEIVER_PASSWORD = 'Mrco@123_';
 
 async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
-    console.log(`\n➡️ Accepting friend request from ID ${requesterId} as ${accepterUsername}...`);
+
     try {
-        const response = await fetch('http://localhost:3000/relationships/accept', {
+        const response = await fetch('https://localhost:3000/relationships/accept', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ async function startReceiver() {
     try {
         // Login to get JWT tokens
         console.log('🔐 Registering as receiver...');
-        const response = await fetch('http://localhost:3000/auth/register', {
+        const response = await fetch('https://localhost:3000/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -87,13 +87,13 @@ async function startReceiver() {
                 
                 if (message.event === 'friend.request') {
                     console.log('\n🎉 Friend request received!');
-                    console.log(`   From: ${message.data.requesterUsername}`);
+                    console.log(`   From: ${message.data.from}`);
                     // Automatically accept the friend request for testing
-                    acceptFriendRequest(message.data.requesterId, message.data.targetUsername, cookies);
+                    acceptFriendRequest(message.data.requesterId, RECEIVER_USERNAME, cookies);
                 }
                 else if (message.event === 'friend.accept') {
                     console.log('\n🎉 Friend request accepted!');
-                    console.log(`   By: ${message.data.accepterUsername}`);
+                    console.log(`   By: ${message.data.from}`);
                 }
             } catch (err) {
                 console.log('   (Not JSON format)');

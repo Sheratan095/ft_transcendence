@@ -31,7 +31,7 @@ export function	extractUserData(request)
 	}
 	catch (err)
 	{
-		console.log('Error parsing user data from headers:', err.message);
+		console.log('[USERS] Error parsing user data from headers:', err.message);
 		return (null);
 	}
 }
@@ -44,7 +44,7 @@ export function	checkEnvVariables(requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
-			console.error(`Missing required environment variable: ${envVar}`);
+			console.log(`[USERS] Missing required environment variable: ${envVar}`);
 			missingEnvVarsCount++;
 		}
 	}
@@ -72,9 +72,9 @@ export async function	getAccount(userId)
 	{
 		// If error is 404, user does not exist
 		if (error.response && error.response.status === 404)
-			console.log('User not found in auth service for userId:', userId);
+			console.log('[USERS] User not found in auth service for userId:', userId);
 		else
-			console.log('Error fetching account from auth service:', error.message);
+			console.log('[USERS] Error fetching account from auth service:', error.message);
 
 		return (null);
 	}

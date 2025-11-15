@@ -30,7 +30,7 @@ export class	SwaggerAggregator
 		add("USERS_SERVICE_URL", "users", "/users");
 		add("NOTIFICATION_SERVICE_URL", "notification", "/notification");
 
-		console.log(`📡 Discovered services: ${services.map(s => s.name).join(", ")}`);
+		console.log(`[GATEWAY] 📡 Discovered services: ${services.map(s => s.name).join(", ")}`);
 		return (services);
 	}
 
@@ -58,7 +58,7 @@ export class	SwaggerAggregator
 		);
 
 		const	specs = results.filter(Boolean);
-		console.log(`📚 Loaded ${specs.length}/${this.services.length} specs`);
+		console.log(`[GATEWAY] 📚 Loaded ${specs.length}/${this.services.length} specs`);
 
 		return (this.mergeSpecs(specs));
 	}
@@ -168,9 +168,9 @@ export class	SwaggerAggregator
 				transformSpecification: (swaggerObject) =>
 				{
 					// Refresh specs on every page load (fire and forget)
-					console.log("🔄 Refreshing documentation on page load...");
+					console.log("[GATEWAY] 🔄 Refreshing documentation on page load...");
 					this.getAggregatedSpec().then(spec => { this.currentSpec = spec; }).catch(err => {
-						console.error("❌ Failed to refresh specs:", err.message);
+						console.error("[GATEWAY] ❌ Failed to refresh specs:", err.message);
 					});
 
 					// Return current spec immediately (may be stale on first load)
@@ -179,8 +179,8 @@ export class	SwaggerAggregator
 			});
 		});
 
-		console.log("📚 Swagger UI available at → /docs");
-		console.log("🔄 Docs will auto-refresh on every page load");
+		console.log("[GATEWAY] 📚 Swagger UI available at → /docs");
+		console.log("[GATEWAY] 🔄 Docs will auto-refresh on every page load");
 	}
 }
 

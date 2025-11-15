@@ -38,7 +38,11 @@ export async function	login(request, reply)
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
+		console.log('[GATEWAY] Login error:', err.message)
+		if (err.response) {
+			console.log('[GATEWAY] Auth response status:', err.response.status)
+			console.log('[GATEWAY] Auth response data:', err.response.data)
+		}
 
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))

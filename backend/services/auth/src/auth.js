@@ -49,7 +49,7 @@ const	start = async () =>
 		fastify.register(authRoutes)
 
 		fastify.listen({ port: process.env.PORT })
-		console.log(`Server is running on port ${process.env.PORT}`)
+		console.log(`[AUTH] Server is running on port ${process.env.PORT}`)
 	}
 	catch (err)
 	{
