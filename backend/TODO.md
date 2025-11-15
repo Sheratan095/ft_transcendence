@@ -105,8 +105,3 @@
 [x] add user/... to all relationships routes in gateway registrations
 [] add a "starting script" that generate the env, install packages and create the certificates(they shouldn't be posted in the repo)
 [] refactor of backend_design
-
-[] try to ger relationships withoute JWT
-{
-  "error": "User not found"
-}

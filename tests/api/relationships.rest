@@ -17,12 +17,12 @@ x-internal-api-key: {{apiKey}}
 Authorization: Bearer {{jwt}}
 
 ### Get incoming friend requests
-GET {{baseUrl}}/relationships/requests
+GET {{baseUrl}}/relationships/requests/incoming
 x-internal-api-key: {{apiKey}}
 Authorization: Bearer {{jwt}}
 
-### Send a friend request
-POST {{baseUrl}}/relationships/request
+### Get outgoing friend requests
+GET {{baseUrl}}/relationships/requests/outgoing
 x-internal-api-key: {{apiKey}}
 Authorization: Bearer {{jwt}}
 Content-Type: application/json
@@ -72,9 +72,10 @@ Content-Type: application/json
 }
 
 ### Remove a friend or cancel friend request
-DELETE {{baseUrl}}/relationships/remove
+DELETE {{baseUrl}}/relationships/removeFriend
 x-internal-api-key: {{apiKey}}
 Authorization: Bearer {{jwt}}
+Content-Type: application/json
 
 {
   "friendId": "{{userId2}}"
