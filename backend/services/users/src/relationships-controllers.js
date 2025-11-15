@@ -42,10 +42,12 @@ export async function	getFriends(req, reply)
 
 		const	friends = await usersDb.getFriends(userId);
 
-		// Map updatedAt to friendsSince
+		// Map snake_case to camelCase
 		const	mappedFriends = friends.map(friend => ({
-			...friend,
-			friendsSince: friend.updatedAt
+			userId: friend.userId,
+			username: friend.username,
+			avatarUrl: friend.avatar_url,
+			friendsSince: friend.friends_since
 		}));
 
 		console.log('[RELATIONSHIPS] GetFriends success for userId:', userId);

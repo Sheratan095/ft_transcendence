@@ -223,6 +223,7 @@ export class UsersDatabase
 				END AS userId,
 				u.username,
 				u.language,
+				u.avatar_url,
 				ur.updated_at AS friends_since
 			FROM user_relationships ur
 			JOIN users u ON (u.id = ur.requester_id OR u.id = ur.target_id)
