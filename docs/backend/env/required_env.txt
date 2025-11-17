@@ -34,3 +34,7 @@ services/users:
 services/notification:
     INTERNAL_API_KEY=1234
     PORT=3003
+
+services/chat:
+    INTERNAL_API_KEY=1234
+    PORT=3003
