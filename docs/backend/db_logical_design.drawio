@@ -1,10 +1,10 @@
 <mxfile host="65bd71144e">
     <diagram name="Page-1" id="rNN4AwOxWi-3c5t58apC">
-        <mxGraphModel dx="2026" dy="2012" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="2763" dy="2169" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-210" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=6;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=none;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000,#D70404);fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
+                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-210" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=6;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=none;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000,#440089);fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
                     <mxGeometry x="-575" y="-100" width="270" height="380" as="geometry"/>
                 </mxCell>
                 <mxCell id="wx6jZ7UeDeFFOWRXVseS-285" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=6;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=none;sketch=1;curveFitting=1;jiggle=2;strokeColor=light-dark(#000000,#FF9933);fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1">
@@ -13,7 +13,7 @@
                 <mxCell id="wx6jZ7UeDeFFOWRXVseS-230" value="" style="group;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="1" vertex="1" connectable="0">
                     <mxGeometry x="-160" y="-650" width="890" height="520" as="geometry"/>
                 </mxCell>
-                <mxCell id="wx6jZ7UeDeFFOWRXVseS-227" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=6;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=none;strokeColor=light-dark(#000000,#FF0080);movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" parent="wx6jZ7UeDeFFOWRXVseS-230" vertex="1">
+                <mxCell id="wx6jZ7UeDeFFOWRXVseS-227" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=6;fillWeight=4;hachureGap=8;hachureAngle=45;fillColor=none;strokeColor=light-dark(#000000,#FF0080);movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" parent="wx6jZ7UeDeFFOWRXVseS-230" vertex="1">
                     <mxGeometry x="-20" y="-50" width="890" height="590" as="geometry"/>
                 </mxCell>
                 <mxCell id="wx6jZ7UeDeFFOWRXVseS-337" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Custom matches are those created by invitind a friend (mandatory for CHAT module)&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;in case of a custom match, player1 is the host (inviter) and player2 is the invited that can&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;accept or refuse the invite&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;imageHeight=20;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="wx6jZ7UeDeFFOWRXVseS-230" vertex="1">
