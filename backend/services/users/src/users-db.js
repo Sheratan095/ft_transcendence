@@ -1,7 +1,4 @@
 import sqlite3 from "sqlite3";
-
-import { v4 as uuidv4 } from 'uuid';
-
 import { promisify } from "util";
 import { mkdir, readFile } from "fs/promises";
 import path from "path";
@@ -79,7 +76,7 @@ export class	UsersDatabase
 				catch (err)
 				{
 					// Silently ignore errors if tables already exist
-					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists'))
+					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists') || err.message.includes('UNIQUE constraint failed'))
 						continue;
 
 					console.log("[USERS] Table creation info:", err.message);

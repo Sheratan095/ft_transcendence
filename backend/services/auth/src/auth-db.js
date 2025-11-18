@@ -75,7 +75,7 @@ export class	AuthDatabase
 				catch (err)
 				{
 					// Silently ignore errors if tables already exist
-					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists'))
+					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists') || err.message.includes('UNIQUE constraint failed'))
 						continue;
 
 					console.log("[USERS] Table creation info:", err.message);
