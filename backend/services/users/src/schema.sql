@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS user_relationships (
 );
 
 INSERT INTO users (id, username, language, created_at, avatar_url)
-VALUES ('1', 'pippo', 'en', CURRENT_TIMESTAMP, NULL);
+VALUES ('1', 'test1', 'en', CURRENT_TIMESTAMP, NULL);
 
 INSERT INTO users (id, username, language, created_at, avatar_url)
-VALUES ('2', 'baudo', 'en', CURRENT_TIMESTAMP, NULL);
+VALUES ('2', 'test2', 'en', CURRENT_TIMESTAMP, NULL);

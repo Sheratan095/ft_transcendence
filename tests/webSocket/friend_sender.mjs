@@ -8,10 +8,10 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
  * Tests the friend request flow with EMPTY target_id to trigger validation errors
  */
 
-const SENDER_EMAIL = 'pippo@gmail.com';
-const SENDER_PASSWORD = 'Mrco@123_';
-const SENDER_USERNAME = 'pippo';
-const TARGET_USERNAME = 'baudo';
+const SENDER_EMAIL = 'test1@gmail.com';
+const SENDER_PASSWORD = '1234';
+const SENDER_USERNAME = 'test1';
+const TARGET_USERNAME = 'test2';
 const GATEWAY_URL = 'https://localhost:3000';
 
 let accessToken = '';

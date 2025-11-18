@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS twofactor_tokens (
 -- Password: Mrco@123_
 
 INSERT INTO auth_accounts (id, email, password, created_at, tfa_enabled)
-VALUES ('1', 'pippo@gmail.com', '$2b$10$zlng16Ho2LuJ6KMwoN6EAuQSdiKWOmd.MMJqgvVKWEhYPgP9oT1Ia', datetime('now'), 0);
+VALUES ('1', 'test1@gmail.com', '$2b$10$mUv8z0znMrFPbTfkAQtV..MDZ/8rRsv0NrFyFIGLR0i65MSYdlgga', datetime('now'), 0);
 
 INSERT INTO auth_accounts (id, email, password, created_at, tfa_enabled)
-VALUES ('2', 'baudo@gmail.com', '$2b$10$zlng16Ho2LuJ6KMwoN6EAuQSdiKWOmd.MMJqgvVKWEhYPgP9oT1Ia', datetime('now'), 0);
+VALUES ('2', 'test2@gmail.com', '$2b$10$mUv8z0znMrFPbTfkAQtV..MDZ/8rRsv0NrFyFIGLR0i65MSYdlgga', datetime('now'), 0);

@@ -3,8 +3,8 @@ POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "pippo",
-  "email": "pippo@gmail.com",
+  "username": "marco",
+  "email": "ceccarellim7@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -13,8 +13,8 @@ POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "baudo",
-  "email": "baudo@gmail.com",
+  "username": "test2",
+  "email": "test2@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -36,7 +36,7 @@ POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "pippo@gmail.com",
+  "email": "test1@gmail.com",
   "password": "Mrco@123_"
 }
 

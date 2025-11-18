@@ -8,9 +8,9 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
  * This user logs in and keeps a WebSocket connection open to receive notifications
  */
 
-const RECEIVER_EMAIL = 'baudo@gmail.com';
-const RECEIVER_USERNAME = 'baudo'; 
-const RECEIVER_PASSWORD = 'Mrco@123_';
+const RECEIVER_EMAIL = 'test2@gmail.com';
+const RECEIVER_USERNAME = 'test2'; 
+const RECEIVER_PASSWORD = '1234';
 
 async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
 
