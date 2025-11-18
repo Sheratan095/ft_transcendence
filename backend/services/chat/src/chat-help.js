@@ -1,20 +1,18 @@
-import axios from "axios";
-
-//inter-service communication
+// Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
 export async function	validateInternalApiKey(request, reply)
 {
-	const	apiKey = request.headers['x-internal-api-key']
-	const	expectedApiKey = process.env.INTERNAL_API_KEY
-	
-	if (!apiKey || apiKey !== expectedApiKey)
+	const	key = req.headers['x-internal-api-key'];
+	// Validate the forwarded internal key matches our environment variable.
+	if (!process.env.INTERNAL_API_KEY || key !== process.env.INTERNAL_API_KEY)
 	{
-		return (reply.code(401).send(
-		{
-			error: 'Unauthorized: Invalid or missing API key',
-			message: 'This service only accepts requests from authorized services'
-		}))
+		console.error('[NOTIFICATION] Missing or invalid internal API key on proxied websocket request');
+
+		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
+		try { socket.destroy(); } catch (e) {}
+
+		return (null);
 	}
 }
 
@@ -26,7 +24,7 @@ export function	checkEnvVariables(requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
-			console.error(`[AUTH] Missing required environment variable: ${envVar}`);
+			console.error(`[CHAT] Missing required environment variable: ${envVar}`);
 			missingEnvVarsCount++;
 		}
 	}
@@ -48,7 +46,7 @@ export function	extractUserData(request)
 	}
 	catch (err)
 	{
-		console.log('[AUTH] Error parsing user data from headers:', err.message);
+		console.log('[CHAT] Error parsing user data from headers:', err.message);
 		return (null);
 	}
 }

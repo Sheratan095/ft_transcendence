@@ -1,14 +1,11 @@
-/**
- * Swagger documentation setup for Auth Service
- * Provides JSON spec only - UI is handled by the gateway aggregator
- */
-export async function setupSwagger(fastify) {
+export async function	setupSwagger(fastify)
+{
 	// Setup Swagger documentation (JSON spec only)
 	await fastify.register(import('@fastify/swagger'), {
 		swagger: {
 			info: {
-				title: 'Auth Service API',
-				description: 'Authentication microservice API',
+				title: 'Chat Service API',
+				description: 'Chat microservice API with WebSocket support',
 				version: '1.0.0'
 			},
 			host: `localhost:${process.env.PORT}`,
