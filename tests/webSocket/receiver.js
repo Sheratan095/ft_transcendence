@@ -1,18 +1,21 @@
 import WebSocket from 'ws';
 
+// Disable SSL certificate validation for self-signed certificates in development
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 /**
  * Receiver script - simulates a user receiving friend request notifications
  * This user logs in and keeps a WebSocket connection open to receive notifications
  */
 
-const RECEIVER_EMAIL = 'baudo@gmail.com';
-const RECEIVER_USERNAME = 'baudo'; 
-const RECEIVER_PASSWORD = 'Mrco@123_';
+const RECEIVER_EMAIL = 'test2@gmail.com';
+const RECEIVER_USERNAME = 'test2'; 
+const RECEIVER_PASSWORD = '1234';
 
 async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
 
     try {
-        const response = await fetch('https://localhost:3000/relationships/accept', {
+        const response = await fetch('https://localhost:3000/users/relationships/accept', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,14 +41,13 @@ async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
 async function startReceiver() {
     try {
         // Login to get JWT tokens
-        console.log('🔐 Registering as receiver...');
-        const response = await fetch('https://localhost:3000/auth/register', {
+        console.log('🔐 Login as receiver...');
+        const response = await fetch('https://localhost:3000/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 email: RECEIVER_EMAIL, 
                 password: RECEIVER_PASSWORD,
-                username: RECEIVER_USERNAME
             })
         });
 
@@ -65,10 +67,11 @@ async function startReceiver() {
 
         // Connect to WebSocket with authentication
         console.log('🔌 Connecting to WebSocket...');
-        const ws = new WebSocket('ws://localhost:3000/ws', {
+        const ws = new WebSocket('wss://localhost:3000/notifications/ws', {
             headers: {
                 'Cookie': cookies
-            }
+            },
+            rejectUnauthorized: false // Accept self-signed certificates
         });
 
         ws.on('open', () => {

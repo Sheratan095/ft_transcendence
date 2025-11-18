@@ -77,6 +77,7 @@ const	RelationshipsStatus =
 	}
 };
 
+
 const	UserRelationship =
 {
 	type: 'object',
@@ -98,7 +99,7 @@ const	Friend =
 	{
 		userId: { type: 'string' }, // still returned as userId for frontend
 		username: { type: 'string' },
-		language: { type: 'string' },
+		avatarUrl: { type: 'string' },
 		friendsSince: { type: 'string', format: 'date-time' }
 	},
 };

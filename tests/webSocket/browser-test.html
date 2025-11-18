@@ -49,7 +49,8 @@
                 return;
             }
 
-            socket = new WebSocket('ws://localhost:3003/ws');
+            // Connect through the gateway which handles authentication
+            socket = new WebSocket('ws://localhost:3000/notifications/ws');
 
             socket.addEventListener('open', () => {
                 addLog('Connected to WebSocket server', 'status');

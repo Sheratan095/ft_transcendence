@@ -8,7 +8,11 @@ import {formatExpirationDate} from "./auth-help.js";
 import path from "path";
 import { fileURLToPath } from 'url';
 
-export class AuthDatabase
+// Get the directory name of the current module for later use
+const	__filename = fileURLToPath(import.meta.url);
+const	__dirname = path.dirname(__filename);
+
+export class	AuthDatabase
 {
 	constructor(dbPath = "./data/auth.db")
 	{
@@ -28,9 +32,13 @@ export class AuthDatabase
 			this.db = new sqlite3.Database(this.dbPath);
 			
 			// Promisify database methods for easier async/await usage
-			this.db.run = promisify(this.db.run).bind(this.db);
-			this.db.get = promisify(this.db.get).bind(this.db);
-			this.db.all = promisify(this.db.all).bind(this.db);
+			const run = promisify(this.db.run.bind(this.db));
+			const get = promisify(this.db.get.bind(this.db));
+			const all = promisify(this.db.all.bind(this.db));
+			
+			this.db.run = run;
+			this.db.get = get;
+			this.db.all = all;
 
 			await this.#createTables();
 
@@ -43,14 +51,10 @@ export class AuthDatabase
 		}
 	}
 
-	// Private method (#) to create tables
 	async	#createTables()
 	{
 		try
 		{
-			// Get the directory name of the current module
-			const	__filename = fileURLToPath(import.meta.url);
-			const	__dirname = path.dirname(__filename);
 			const	schemaPath = path.join(__dirname, 'schema.sql');
 
 			// Read the SQL schema file
@@ -63,12 +67,24 @@ export class AuthDatabase
 				.filter(stmt => stmt.length > 0);
 
 			for (const statement of statements)
-				await this.db.run(statement);
+			{
+				try
+				{
+					await this.db.run(statement);
+				}
+				catch (err)
+				{
+					// Silently ignore errors if tables already exist
+					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists') || err.message.includes('UNIQUE constraint failed'))
+						continue;
+
+					console.log("[USERS] Table creation info:", err.message);
+				}
+			}
 		}
 		catch (error)
 		{
-			console.error("❌ Error creating tables for AUTH db:", error);
-
+			console.log("❌ Error reading schema for USERS db:", error);
 			throw (error);
 		}
 	}

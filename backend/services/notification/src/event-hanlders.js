@@ -1,17 +1,15 @@
+import { validateInternalApiKey } from './notification-help.js';
 // The class is initialized in UserConnectionManager.js
 import { userConnectionManager } from './UserConnectionManager.js';
 
 export function	handleNewConnection(socket, req)
 {
-	const	key = req.headers['x-internal-api-key'];
-	// Validate the forwarded internal key matches our environment variable.
-	if (!process.env.INTERNAL_API_KEY || key !== process.env.INTERNAL_API_KEY)
+	// Validate internal API key
+	const	isValid = validateInternalApiKey(req, socket);
+	
+	if (!isValid)
 	{
-		console.error('[NOTIFICATION] Missing or invalid internal API key on proxied websocket request');
-
-		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
-		try { socket.destroy(); } catch (e) {}
-
+		console.log('[NOTIFICATION] Rejecting WebSocket connection due to invalid API key');
 		return (null);
 	}
 
@@ -20,8 +18,7 @@ export function	handleNewConnection(socket, req)
 	if (!userId)
 	{
 		console.error('[NOTIFICATION] No authenticated user found for websocket connection');
-		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
-		try { socket.destroy(); } catch (e) {}
+		try { socket.close(1008, 'No user ID provided'); } catch (e) {}
 
 		return (null);
 	}

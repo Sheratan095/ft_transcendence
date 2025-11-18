@@ -1,26 +1,19 @@
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
-export async function	validateInternalApiKey(request, socket)
+export async function	validateInternalApiKey(request, reply)
 {
-	const	apiKey = request.headers['x-internal-api-key'];
+	const	key = req.headers['x-internal-api-key'];
 	// Validate the forwarded internal key matches our environment variable.
-	if (!process.env.INTERNAL_API_KEY || apiKey !== process.env.INTERNAL_API_KEY)
+	if (!process.env.INTERNAL_API_KEY || key !== process.env.INTERNAL_API_KEY)
 	{
-		console.log('[NOTIFICATION] Missing or invalid internal API key');
-		console.log('[NOTIFICATION] Expected key:', process.env.INTERNAL_API_KEY ? 'SET' : 'NOT SET');
-		console.log('[NOTIFICATION] Received key:', apiKey ? 'PROVIDED' : 'MISSING');
+		console.error('[NOTIFICATION] Missing or invalid internal API key on proxied websocket request');
 
-		// For WebSocket connections, socket is already upgraded - just close it
-		if (socket)
-		{
-			try { socket.close(1008, 'Unauthorized'); } catch (e) {}
-		}
+		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
+		try { socket.destroy(); } catch (e) {}
 
-		return (false);
+		return (null);
 	}
-
-	return (true);
 }
 
 export function	checkEnvVariables(requiredEnvVars)
@@ -31,7 +24,7 @@ export function	checkEnvVariables(requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
-			console.log(`Missing required environment variable: ${envVar}`);
+			console.error(`[CHAT] Missing required environment variable: ${envVar}`);
 			missingEnvVarsCount++;
 		}
 	}
@@ -53,7 +46,7 @@ export function	extractUserData(request)
 	}
 	catch (err)
 	{
-		console.log('[NOTIFICATION] Error parsing user data from headers:', err.message);
+		console.log('[CHAT] Error parsing user data from headers:', err.message);
 		return (null);
 	}
 }

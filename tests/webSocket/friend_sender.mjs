@@ -1,28 +1,30 @@
 import WebSocket from 'ws';
 
+// Disable SSL certificate validation for self-signed certificates in development
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 /**
  * Sender script - simulates a user sending friend requests and accepting them
  * Tests the friend request flow with EMPTY target_id to trigger validation errors
  */
 
-const SENDER_EMAIL = 'pippo@gmail.com';
-const SENDER_PASSWORD = 'Mrco@123_';
-const SENDER_USERNAME = 'pippo';
-const TARGET_USERNAME = 'baudo';
+const SENDER_EMAIL = 'test1@gmail.com';
+const SENDER_PASSWORD = '1234';
+const SENDER_USERNAME = 'test1';
+const TARGET_USERNAME = 'test2';
 const GATEWAY_URL = 'https://localhost:3000';
 
 let accessToken = '';
 let refreshToken = '';
 
 async function register() {
-    console.log('🔐 Registering as sender...');
-    const response = await fetch(`${GATEWAY_URL}/auth/register`, {
+    console.log('🔐 Logging in as sender...');
+    const response = await fetch(`${GATEWAY_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             email: SENDER_EMAIL, 
             password: SENDER_PASSWORD,
-            username: SENDER_USERNAME
         })
     });
 
@@ -56,10 +58,11 @@ async function register() {
 async function connectWebSocket(cookies) {
     return new Promise((resolve, reject) => {
         console.log('🔌 Connecting to WebSocket...');
-        const ws = new WebSocket('ws://localhost:3000/ws', {
+        const ws = new WebSocket('wss://localhost:3000/notifications/ws', {
             headers: {
                 'Cookie': cookies
-            }
+            },
+            rejectUnauthorized: false // Accept self-signed certificates
         });
 
         ws.on('open', () => {
@@ -126,7 +129,7 @@ async function sendFriendRequest(cookies, targetId) {
     console.log(`📤 Sending friend request with targetId: "${targetId}"`);
     
     try {
-        const response = await fetch(`${GATEWAY_URL}/relationships/request`, {
+        const response = await fetch(`${GATEWAY_URL}/users/relationships/request`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -158,7 +161,7 @@ async function acceptFriendRequest(cookies, requesterId = '') {
     console.log(`📤 Accepting friend request from requesterId: "${requesterId}"...`);
     
     try {
-        const response = await fetch(`${GATEWAY_URL}/relationships/accept`, {
+        const response = await fetch(`${GATEWAY_URL}/users/relationships/accept`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
