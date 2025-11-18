@@ -23,8 +23,8 @@ console.log('🍪 Cookies:', cookies);
 // Create WebSocket connection with cookies in the headers
 // NOTE: the notification service exposes the websocket route at '/ws'.
 // The gateway proxies Upgrade requests to the notification service and
-// forwards the original request path, so we must connect to '/ws'.
-const ws = new WebSocket('ws://localhost:3000/ws', {
+// forwards the original request path, so we must connect to '/notifications/ws'.
+const ws = new WebSocket('ws://localhost:3000/notifications/ws', {
     headers: {
         'Cookie': cookies
     }

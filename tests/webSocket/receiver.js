@@ -41,14 +41,13 @@ async function acceptFriendRequest(requesterId, accepterUsername, cookies) {
 async function startReceiver() {
     try {
         // Login to get JWT tokens
-        console.log('🔐 Registering as receiver...');
-        const response = await fetch('https://localhost:3000/auth/register', {
+        console.log('🔐 Login as receiver...');
+        const response = await fetch('https://localhost:3000/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 email: RECEIVER_EMAIL, 
                 password: RECEIVER_PASSWORD,
-                username: RECEIVER_USERNAME
             })
         });
 
@@ -68,7 +67,7 @@ async function startReceiver() {
 
         // Connect to WebSocket with authentication
         console.log('🔌 Connecting to WebSocket...');
-        const ws = new WebSocket('wss://localhost:3000/ws', {
+        const ws = new WebSocket('wss://localhost:3000/notifications/ws', {
             headers: {
                 'Cookie': cookies
             },

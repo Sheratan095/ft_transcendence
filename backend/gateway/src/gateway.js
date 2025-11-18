@@ -115,9 +115,7 @@ const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
 
-import {
-	handleSocketUpgrade
-} from './routes/notification-routes.js'
+import { handleSocketUpgrade } from './routes/webSocket-routes.js'
 
 import {
 	login,

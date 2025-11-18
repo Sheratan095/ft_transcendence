@@ -18,14 +18,13 @@ let accessToken = '';
 let refreshToken = '';
 
 async function register() {
-    console.log('🔐 Registering as sender...');
-    const response = await fetch(`${GATEWAY_URL}/auth/register`, {
+    console.log('🔐 Logging in as sender...');
+    const response = await fetch(`${GATEWAY_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             email: SENDER_EMAIL, 
             password: SENDER_PASSWORD,
-            username: SENDER_USERNAME
         })
     });
 
@@ -59,7 +58,7 @@ async function register() {
 async function connectWebSocket(cookies) {
     return new Promise((resolve, reject) => {
         console.log('🔌 Connecting to WebSocket...');
-        const ws = new WebSocket('wss://localhost:3000/ws', {
+        const ws = new WebSocket('wss://localhost:3000/notifications/ws', {
             headers: {
                 'Cookie': cookies
             },

@@ -1,6 +1,6 @@
 -- TO DO remove it - Drop tables in correct order (child first due to foreign key)
-DROP TABLE IF EXISTS user_relationships;
-DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS user_relationships;
+-- DROP TABLE IF EXISTS users;
 
 -- Create profiles table
 CREATE TABLE IF NOT EXISTS users (
@@ -24,3 +24,9 @@ CREATE TABLE IF NOT EXISTS user_relationships (
     FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (target_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+INSERT INTO users (id, username, language, created_at, avatar_url)
+VALUES ('1', 'pippo', 'en', CURRENT_TIMESTAMP, NULL);
+
+INSERT INTO users (id, username, language, created_at, avatar_url)
+VALUES ('2', 'baudo', 'en', CURRENT_TIMESTAMP, NULL);

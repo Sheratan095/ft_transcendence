@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 const	__filename = fileURLToPath(import.meta.url);
 const	__dirname = path.dirname(__filename);
 
-export class UsersDatabase
+export class	UsersDatabase
 {
 	constructor(dbPath = "./data/users.db")
 	{
@@ -35,9 +35,13 @@ export class UsersDatabase
 			this.db = new sqlite3.Database(this.dbPath);
 			
 			// Promisify database methods for easier async/await usage
-			this.db.run = promisify(this.db.run).bind(this.db);
-			this.db.get = promisify(this.db.get).bind(this.db);
-			this.db.all = promisify(this.db.all).bind(this.db);
+			const run = promisify(this.db.run.bind(this.db));
+			const get = promisify(this.db.get.bind(this.db));
+			const all = promisify(this.db.all.bind(this.db));
+			
+			this.db.run = run;
+			this.db.get = get;
+			this.db.all = all;
 
 			await this.#createTables();
 
@@ -67,21 +71,26 @@ export class UsersDatabase
 				.filter(stmt => stmt.length > 0);
 
 			for (const statement of statements)
-				await this.db.run(statement);
+			{
+				try
+				{
+					await this.db.run(statement);
+				}
+				catch (err)
+				{
+					// Silently ignore errors if tables already exist
+					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists'))
+						continue;
+
+					console.log("[USERS] Table creation info:", err.message);
+				}
+			}
 		}
 		catch (error)
 		{
-			console.log("❌ Error creating tables for USERS db:", error);
-
+			console.log("❌ Error reading schema for USERS db:", error);
 			throw (error);
 		}
-	}
-
-	async	#generateUUID()
-	{
-		const	id = uuidv4();
-
-		return (id);
 	}
 
 	async	#close()
