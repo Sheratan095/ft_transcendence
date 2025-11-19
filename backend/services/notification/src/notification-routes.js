@@ -92,7 +92,7 @@ const	sendFriendAcceptOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requesterId', 'accepterUsername'],
+			required: ['requesterId', 'accepterUsername', 'accepterId'],
 			properties:
 			{
 				requesterId: {type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
@@ -149,6 +149,7 @@ const	send2FaOpts =
 
 export function	notificationRoutes(fastify)
 {
+	// Actual WebSocket endpoint
 	fastify.get('/ws', { websocket: true }, (socket, req) =>
 	{
 		// if the request is invalid, reject it

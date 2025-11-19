@@ -53,7 +53,7 @@ class	UserConnectionManager
 		}
 	}
 
-	sendFriendRequestAccept(requesterId, accepterUsername)
+	sendFriendRequestAccept(requesterId, accepterUsername, accepterId)
 	{
 		const	targetSocket = this.getConnection(requesterId);
 		if (targetSocket)
@@ -61,7 +61,10 @@ class	UserConnectionManager
 			this.#dispatchEventToSocket(
 				targetSocket,
 				'friend.accept',
-				{ from: accepterUsername }
+				{
+					from: accepterUsername,
+					accepterId: accepterUsername
+				}
 			);
 		}
 	}

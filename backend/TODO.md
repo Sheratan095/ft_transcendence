@@ -107,4 +107,4 @@
 [x] refactor of backend_design
 
 [x] move email send in to notification service (endpoing called by auth service during login)
-[] "real friends online" instead of all online users
+[x] "real friends online" instead of all online users

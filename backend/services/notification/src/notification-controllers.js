@@ -22,9 +22,9 @@ export const	sendFriendAccept = async (req, reply) =>
 {
 	try
 	{
-		const	{ requesterId, accepterUsername } = req.body;
+		const	{ requesterId, accepterUsername, accepterId } = req.body;
 
-		userConnectionManager.sendFriendRequestAccept(requesterId, accepterUsername);
+		userConnectionManager.sendFriendRequestAccept(requesterId, accepterUsername, accepterId);
 
 		return (reply.code(200).send());
 	}
