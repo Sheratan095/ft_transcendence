@@ -146,3 +146,24 @@ export const	uploadAvatar = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
 }
+
+export const	getUsersStats = async (req, reply) =>
+{
+	try
+	{
+		const	response = await axios.get(`${USERS_URL}/stats`, {
+			headers: {'x-internal-api-key': API_KEY,}
+		})
+
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('[GATEWAY] Users service error:', err.message)
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		return (reply.code(500).send({ error: 'Users service unavailable' }))
+	}
+}

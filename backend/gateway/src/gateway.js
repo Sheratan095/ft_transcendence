@@ -133,7 +133,8 @@ import {
 	searchUsers,
 	getUser,
 	updateUser,
-	uploadAvatar
+	uploadAvatar,
+	getUsersStats,
 } from './routes/users-routes.js'
 
 import {
@@ -245,6 +246,7 @@ await fastify.register(async function (fastify)
 	});
 
 	fastify.get('/users/search',{ schema: { hide: true }, preHandler: authenticateJwt, handler: searchUsers });
+	fastify.get('/users/stats',{ schema: { hide: true }, handler: getUsersStats });
 });
 
 // Server startup function with error handling
