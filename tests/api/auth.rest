@@ -13,8 +13,8 @@ POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "test2",
-  "email": "test2@gmail.com",
+  "username": "marco",
+  "email": "ceccarellim7@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -37,8 +37,19 @@ Content-Type: application/json
 
 {
   "email": "test1@gmail.com",
+  "password": "1234"
+}
+
+### Login (copy the refreshToken from response)
+# @name login
+POST https://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "ceccarellim7@gmail.com",
   "password": "Mrco@123_"
 }
+
 
 ###
 

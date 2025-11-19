@@ -1,3 +1,9 @@
+import nodemailer from "nodemailer";
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { getLanguagePack } from './email-templates/language-packs.js';
+
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
@@ -8,8 +14,6 @@ export async function	validateInternalApiKey(request, socket)
 	if (!process.env.INTERNAL_API_KEY || apiKey !== process.env.INTERNAL_API_KEY)
 	{
 		console.log('[NOTIFICATION] Missing or invalid internal API key');
-		console.log('[NOTIFICATION] Expected key:', process.env.INTERNAL_API_KEY ? 'SET' : 'NOT SET');
-		console.log('[NOTIFICATION] Received key:', apiKey ? 'PROVIDED' : 'MISSING');
 
 		// For WebSocket connections, socket is already upgraded - just close it
 		if (socket)
@@ -55,5 +59,79 @@ export function	extractUserData(request)
 	{
 		console.log('[NOTIFICATION] Error parsing user data from headers:', err.message);
 		return (null);
+	}
+}
+
+export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
+{
+	const	transporter = nodemailer.createTransport({
+		host: process.env.SMTP_HOST,
+		port: process.env.SMTP_PORT,
+		secure: false, // true for 465, false for 587
+		auth: {
+			user: process.env.SMTP_USER,
+			pass: process.env.SMTP_PASS
+		}
+	});
+
+	// Get language pack for the specified language
+	const	langPack = getLanguagePack(language);
+
+	const	__filename = fileURLToPath(import.meta.url);
+	const	__dirname = path.dirname(__filename);
+
+	// Generate HTML content using single template and language pack
+	let	htmlContent;
+	try
+	{
+		// Use the single template file
+		const	templatePath = path.join(__dirname, 'email-templates', 'otp-template.html');
+		const	htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+		
+		// Generate security points HTML
+		const	securityPointsHtml = langPack.securityPoints
+			.map(point => `<li>${point.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes)}</li>`)
+			.join('');
+		
+		// Replace all placeholders with language pack values and dynamic content
+		htmlContent = htmlTemplate
+			.replace(/{{LANGUAGE}}/g, language)
+			.replace(/{{TITLE}}/g, langPack.title)
+			.replace(/{{GREETING}}/g, langPack.greeting)
+			.replace(/{{MESSAGE}}/g, langPack.message)
+			.replace(/{{OTP_LABEL}}/g, langPack.otpLabel)
+			.replace(/{{OTP_CODE}}/g, otpCode)
+			.replace(/{{EXPIRY_TEXT}}/g, langPack.expiryText.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes))
+			.replace(/{{SECURITY_TITLE}}/g, langPack.securityTitle)
+			.replace(/{{SECURITY_POINTS}}/g, securityPointsHtml)
+			.replace(/{{FOOTER_MESSAGE}}/g, langPack.footerMessage)
+			.replace(/{{FOOTER_TEXT}}/g, langPack.footerText);
+	} 
+	catch (error)
+	{
+		console.error('[NOTIFICATION] Error loading email template:', error.message);
+	}
+
+	const	mailOptions =
+	{
+		from: `"42 ft_transcendence" <${process.env.SMTP_USER}>`,
+		to,
+		subject: langPack.subject,
+		text: langPack.plainText
+			.replace(/{{OTP_CODE}}/g, otpCode)
+			.replace(/{{EXPIRY_MINUTES}}/g, expiryMinutes),
+		html: htmlContent
+	};
+
+	try
+	{
+		await transporter.sendMail(mailOptions);
+
+		console.log(`[NOTIFICATION] 2FA Email sent to ${to}, expires in ${expiryMinutes} minutes`);
+	}
+	catch (error)
+	{
+		console.log(`[NOTIFICATION] Error sending OTP email: ${error.message}`);
+		throw (error);
 	}
 }

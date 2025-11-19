@@ -106,5 +106,5 @@
 [] add a "starting script" that generate the env, install packages and create the certificates(they shouldn't be posted in the repo)
 [x] refactor of backend_design
 
-[] move email send in to notification service (endpoing called by auth service during login)
+[x] move email send in to notification service (endpoing called by auth service during login)
 [] "real friends online" instead of all online users

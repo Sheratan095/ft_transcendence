@@ -2,7 +2,8 @@ import { validateInternalApiKey } from './notification-help.js';
 
 import {
 	sendFriendRequest,
-	sendFriendAccept
+	sendFriendAccept,
+	send2FaCode
 } from './notification-controllers.js';
 
 import {
@@ -112,6 +113,41 @@ const	sendFriendAcceptOpts =
 	handler: sendFriendAccept,
 }
 
+const	send2FaOpts = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Send 2FA code (Called by auth service during login)',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['email', 'otpCode', 'language', 'expiryMinutes'],
+			properties:
+			{
+				email: { type: 'string', format: 'email' },
+				otpCode: { type: 'string' },
+				language: { type: 'string' },
+				expiryMinutes: { type: 'integer' }
+			}
+		},
+
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: send2FaCode,
+}
+
+//-----------------------------EXPORT ROUTES-----------------------------
+
 export function	notificationRoutes(fastify)
 {
 	fastify.get('/ws', { websocket: true }, (socket, req) =>
@@ -130,5 +166,5 @@ export function	notificationRoutes(fastify)
 
 	fastify.post('/send-friend-request', sendFriendRequestOpts);
 	fastify.post('/send-friend-accept', sendFriendAcceptOpts);
-
+	fastify.post('/send-2fa-code', send2FaOpts);
 }

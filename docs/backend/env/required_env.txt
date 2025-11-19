@@ -24,6 +24,7 @@ services/auth:
     SMTP_PASS=udkh apxb ltsl iikp
     OTP_EXPIRATION_MINUTES=5
     USERS_SERVICE_URL=http://localhost:3002
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
 
 services/users:
     INTERNAL_API_KEY=1234
@@ -34,6 +35,11 @@ services/users:
 services/notification:
     INTERNAL_API_KEY=1234
     PORT=3003
+    SMTP_HOST=smtp.gmail.com
+    SMTP_PORT=587
+    SMTP_USER=43skhool@gmail.com
+    SMTP_PASS=udkh apxb ltsl iikp
+
 
 services/chat:
     INTERNAL_API_KEY=1234
