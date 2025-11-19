@@ -5,7 +5,7 @@ import path from "path";
 export default defineConfig({
   base: '/',
   server: {
-    port: 3004,
+    port: 443,
     strictPort: true,
     proxy: {
       '/api': 'http://localhost:3000'

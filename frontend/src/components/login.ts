@@ -6,7 +6,7 @@ const resultEl = document.getElementById('login-result') as HTMLDivElement | nul
 const loginTfaContainer = document.getElementById('login-tfa-container') as HTMLDivElement | null;
 const loginTfaCheckbox = document.getElementById('login-enable2fa') as HTMLInputElement | null;
 
-import { getAccessToken, clearTokens, isLoggedInServerValidate, isLoggedInClient } from '../../lib/auth.ts';
+import { getAccessToken, clearTokens, isLoggedInServerValidate, isLoggedInClient } from '../lib/auth.ts';
 
 /** Reveal the login 2FA UI. Call this from other scripts or the console.
  * Example: window.showLogin2faOption && window.showLogin2faOption();
