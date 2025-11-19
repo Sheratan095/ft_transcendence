@@ -17,7 +17,7 @@ const GATEWAY_URL = 'https://localhost:3000';
 let accessToken = '';
 let refreshToken = '';
 
-async function register() {
+async function login() {
     console.log('🔐 Logging in as sender...');
     const response = await fetch(`${GATEWAY_URL}/auth/login`, {
         method: 'POST',
@@ -35,7 +35,7 @@ async function register() {
     // Extract cookies
     const cookies = response.headers.get('set-cookie');
     if (!cookies) {
-        throw new Error('No cookies received from register');
+        throw new Error('No cookies received from login');
     }
 
     // Parse cookies to extract tokens
@@ -191,8 +191,8 @@ async function acceptFriendRequest(cookies, requesterId = '') {
 
 async function main() {
     try {
-        // Step 1: register
-        const cookies = await register();
+        // Step 1: login
+        const cookies = await login();
         
         // Step 2: Connect WebSocket to receive notifications
         const ws = await connectWebSocket(cookies);

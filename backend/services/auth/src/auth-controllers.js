@@ -111,7 +111,7 @@ export const	login = async (req, reply) =>
 
 			const	language = await getUserLanguage(user.id);
 
-			console.log('[AUTH] 2FA sent for user: ', user.id);
+			console.log('[AUTH] 2FA is requested for user: ', user.id);
 
 			// Send 2FA code and require verification
 			return (await sendTwoFactorCode(user, language, authDb, reply));

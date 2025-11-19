@@ -7,9 +7,9 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId, reque
 	{
 		await axios.post( `${process.env.NOTIFICATION_SERVICE_URL}/send-friend-request`,
 			{
-				requesterUsername: requesterUsername,
 				targetUserId: targetUserId,
 				requesterId: requesterId,
+				requesterUsername: requesterUsername,
 			},
 			{
 				headers: {
@@ -28,13 +28,14 @@ export async function	notifyFriendRequest(requesterUsername, targetUserId, reque
 	}
 }
 
-export async function	notifyFriendAccept(requesterId, accepterUsername)
+export async function	notifyFriendAccept(requesterId, accepterId, accepterUsername)
 {
 	try
 	{
 		await axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/send-friend-accept`,
 			{
 				requesterId: requesterId,
+				accepterId: accepterId,
 				accepterUsername: accepterUsername,
 			},
 			{

@@ -13,8 +13,8 @@ POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "test2",
-  "email": "test2@gmail.com",
+  "username": "marco",
+  "email": "ceccarellim7@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -37,8 +37,19 @@ Content-Type: application/json
 
 {
   "email": "test1@gmail.com",
+  "password": "1234"
+}
+
+### Login (copy the refreshToken from response)
+# @name login
+POST https://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "ceccarellim7@gmail.com",
   "password": "Mrco@123_"
 }
+
 
 ###
 
@@ -83,7 +94,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2LWNlMTAtNDM4Ni1iOWZjLTdjYWFhZTg5Mjg2NCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTY4ODYzMywiZXhwIjoxNzYxNjg5NTMzfQ.1KOzTVso2tiMYe2ZKqVwQkWwBt3RKQvys_h-TgXBCyU
 
 {
-  "tfaEnabled": true
+  "tfaEnabled": false
 }
 
 ###

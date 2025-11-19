@@ -2,7 +2,8 @@ import { validateInternalApiKey } from './notification-help.js';
 
 import {
 	sendFriendRequest,
-	sendFriendAccept
+	sendFriendAccept,
+	send2FaCode
 } from './notification-controllers.js';
 
 import {
@@ -62,9 +63,9 @@ const	sendFriendRequestOpts =
 			required: ['requesterUsername', 'targetUserId', 'requesterId'],
 			properties:
 			{
-				requesterUsername: { type: 'string'},
-				targetUserId: { type: 'string'},
-				requesterId: { type: 'string'},
+				targetUserId: { type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+				requesterId: { type: 'string'}, // WHO SENT THE FRIEND REQUEST
+				requesterUsername: { type: 'string'}, // USERNAME OF THE REQUESTER
 			}
 		},
 
@@ -79,8 +80,6 @@ const	sendFriendRequestOpts =
 	handler: sendFriendRequest
 }
 
-// The requester is referred to the one 
-//	who SENT the friend request
 const	sendFriendAcceptOpts = 
 {
 	schema:
@@ -93,11 +92,12 @@ const	sendFriendAcceptOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requesterId', 'accepterUsername'],
+			required: ['requesterId', 'accepterUsername', 'accepterId'],
 			properties:
 			{
-				requesterId: {type: 'string'},
-				accepterUsername: { type: 'string'},
+				requesterId: {type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+				accepterId: {type: 'string'}, // WHO ACCEPTED THE REQUEST
+				accepterUsername: { type: 'string'}, // USERNAME OF THE ACCEPTER
 			}
 		},
 
@@ -112,8 +112,44 @@ const	sendFriendAcceptOpts =
 	handler: sendFriendAccept,
 }
 
+const	send2FaOpts = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Send 2FA code (Called by auth service during login)',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['email', 'otpCode', 'language', 'expiryMinutes'],
+			properties:
+			{
+				email: { type: 'string', format: 'email' },
+				otpCode: { type: 'string' },
+				language: { type: 'string' },
+				expiryMinutes: { type: 'integer' }
+			}
+		},
+
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: send2FaCode,
+}
+
+//-----------------------------EXPORT ROUTES-----------------------------
+
 export function	notificationRoutes(fastify)
 {
+	// Actual WebSocket endpoint
 	fastify.get('/ws', { websocket: true }, (socket, req) =>
 	{
 		// if the request is invalid, reject it
@@ -130,5 +166,5 @@ export function	notificationRoutes(fastify)
 
 	fastify.post('/send-friend-request', sendFriendRequestOpts);
 	fastify.post('/send-friend-accept', sendFriendAcceptOpts);
-
+	fastify.post('/send-2fa-code', send2FaOpts);
 }

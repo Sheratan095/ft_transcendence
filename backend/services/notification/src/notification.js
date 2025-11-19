@@ -10,7 +10,8 @@ import fastifyWebsocket from '@fastify/websocket';
 await fastify.register(fastifyWebsocket);
 
 import { checkEnvVariables } from './notification-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'USERS_SERVICE_URL',
+	'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']);
 
 // Setup Swagger documentation
 import { setupSwagger } from './notification-swagger.js';

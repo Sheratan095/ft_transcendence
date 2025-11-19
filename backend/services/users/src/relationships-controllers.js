@@ -339,7 +339,7 @@ export async function	acceptFriendRequest(req, reply)
 
 		const	accepterUsername = (await usersDb.getUserById(user.id)).username;
 
-		if (await notifyFriendAccept(requesterId, accepterUsername) === false)
+		if (await notifyFriendAccept(requesterId, user.id, accepterUsername) === false)
 			return (reply.code(500).send({ error: 'Failed to notify user' }));
 
 		console.log('[RELATIONSHIPS] Friend request accepted by userId:', user.id, 'from requesterId:', requesterId);
@@ -355,6 +355,39 @@ export async function	acceptFriendRequest(req, reply)
 
 		if (err.message.includes('No pending'))
 			return (reply.code(404).send({ error: err.message }));
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+//-----------------------------INTERNAL ROUTES CALLED-----------------------------
+export async function	getFriendsInternal(req, reply)
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userId = req.query.userId;
+
+		const	friends = await usersDb.getFriends(userId);
+
+		// Map snake_case to camelCase
+		const	mappedFriends = friends.map(friend => ({
+			userId: friend.userId,
+			username: friend.username,
+			avatarUrl: friend.avatar_url,
+			friendsSince: friend.friends_since
+		}));
+
+		console.log('[RELATIONSHIPS] GetFriendsInternal success for userId:', userId);
+
+		return (reply.code(200).send(mappedFriends));
+	}
+	catch (err)
+	{
+		console.log('[RELATIONSHIPS] GetFriendsInternal error: ', err.message);
+
+		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
+			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
