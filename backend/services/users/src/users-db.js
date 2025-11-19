@@ -178,6 +178,14 @@ export class	UsersDatabase
 		return (updatedUser);
 	}
 
+	async	getTotalUserCount()
+	{
+		const	query = `SELECT COUNT(*) AS count FROM users`;
+		const	row = await this.db.get(query);
+
+		return (row.count);
+	}
+
 	// -------- USER AVATAR METHODS --------
 
 	async	updateUserAvatar(userId, avatarUrl)

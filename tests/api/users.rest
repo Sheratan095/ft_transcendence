@@ -3,6 +3,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2L
 
 ###
 
+GET https://localhost:3000/users/stats
+
+###
+
 PUT https://localhost:3000/users/update-user
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4ZjhkYTkwLTI2MTQtNGNlMy05MWI2LTA1YTk2Zjg5MTljNSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU3NDEyOSwiZXhwIjoxNzYxNTc1MDI5fQ.kag82g6wkpao3yGoQA6vrjHB1X1IBcXnMt0ch3ugcZY
 Content-Type: application/json

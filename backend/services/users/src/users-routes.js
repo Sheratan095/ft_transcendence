@@ -5,7 +5,8 @@ import {
 	createUser,
 	updateUser,
 	uploadAvatar,
-	deleteUser
+	deleteUser,
+	getUsersStats,
 } from './users-controllers.js';
 
 import { validateInternalApiKey } from './users-help.js';
@@ -259,6 +260,33 @@ const	uploadAvatarOpts =
 	handler: uploadAvatar, 
 };
 
+const	getUsersStatsOpts =
+{
+	schema:
+	{
+		summary: 'Get user statistics (total users and active users), NO AUTHENTICATION REQUIRED',
+		tags: ['Users'],
+
+		// Without cookie auth, because it's requestable by every one
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					totalUsers: { type: 'integer' },
+					activeUsers: { type: 'integer' }
+				}
+			},
+			500: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUsersStats,
+};
 //-----------------------------INTERAL ROUTES-----------------------------
 
 const	newUserOpts =
@@ -332,6 +360,7 @@ export function	userRoutes(fastify)
 	// Versatile GET route - handles single user queries by username or id
 	fastify.get('/user', getUserOpts);
 	fastify.get('/search', searchUserOpts);
+	fastify.get('/stats', getUsersStatsOpts);
 
 	fastify.post('/new-user', newUserOpts);
 	fastify.post('/upload-avatar', uploadAvatarOpts);
