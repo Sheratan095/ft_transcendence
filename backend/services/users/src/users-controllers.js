@@ -1,5 +1,5 @@
 
-import { extractUserData, getAccount } from './users-help.js';
+import { extractUserData, getAccount, getActiveUsersCount } from './users-help.js';
 import { pipeline } from 'stream/promises';
 import { createWriteStream, existsSync } from 'fs';
 import { unlink } from 'fs/promises';
@@ -72,11 +72,13 @@ export const	getUsersStats = async (req, reply) =>
 		const	usersDb = req.server.usersDb;
 
 		const	totalUsers = await usersDb.getTotalUserCount();
+		const	activeUsers = await getActiveUsersCount();
 
 		console.log(`[USERS] GetUsersStats requested`);
 
 		return reply.code(200).send({
-			totalUsers: totalUsers
+			totalUsers: totalUsers,
+			activeUsers: activeUsers
 		});
 	}
 	catch (err)

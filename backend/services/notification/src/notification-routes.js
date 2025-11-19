@@ -3,7 +3,8 @@ import { validateInternalApiKey } from './notification-help.js';
 import {
 	sendFriendRequest,
 	sendFriendAccept,
-	send2FaCode
+	send2FaCode,
+	getActiveUsersCount
 } from './notification-controllers.js';
 
 import {
@@ -145,6 +146,33 @@ const	send2FaOpts =
 	handler: send2FaCode,
 }
 
+const	getActiveUsersCountOpts = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Get number of active WebSocket connections',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		response:
+		{
+			200 :
+			{
+				type: 'object',
+				properties:
+				{
+					activeConnections: { type: 'integer' }
+				}
+			},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getActiveUsersCount
+}
+
 //-----------------------------EXPORT ROUTES-----------------------------
 
 export function	notificationRoutes(fastify)
@@ -163,6 +191,8 @@ export function	notificationRoutes(fastify)
 
 		socket.on('error', (err) => {handleError(socket, err);});
 	});
+
+	fastify.get('/active-users-count', getActiveUsersCountOpts);
 
 	fastify.post('/send-friend-request', sendFriendRequestOpts);
 	fastify.post('/send-friend-accept', sendFriendAcceptOpts);

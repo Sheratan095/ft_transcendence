@@ -51,3 +51,18 @@ export const	send2FaCode = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
+
+export const	getActiveUsersCount = async (req, reply) =>
+{
+	try
+	{
+		const	activeConnections = userConnectionManager.count();
+
+		return reply.code(200).send({ activeConnections });
+	}
+	catch (err)
+	{
+		console.error('[NOTIFICATION] Error in getActiveUsersCount handler:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}

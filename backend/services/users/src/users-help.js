@@ -80,3 +80,24 @@ export async function	getAccount(userId)
 	}
 
 }
+
+export async function	getActiveUsersCount()
+{
+	try
+	{
+		const	response =	await axios.get(`${process.env.NOTIFICATION_SERVICE_URL}/active-users-count`,
+		{
+			headers:
+			{
+				'x-internal-api-key': process.env.INTERNAL_API_KEY
+			}
+		});
+
+		return (response.data.activeConnections);
+	}
+	catch (err)
+	{
+		console.log('[USERS] GetActiveUsersCount error:', err.message);
+		return (0);
+	}
+}
