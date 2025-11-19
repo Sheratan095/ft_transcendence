@@ -20,8 +20,9 @@ if (!form || !resultEl) {
     const email = emailEl?.value.trim() ?? '';
     const password = passwordEl?.value ?? '';
 
-    if (!(username || email) || !password) {
-      resultEl.textContent = 'Enter username (or email) and password.';
+    // Require username, email and password
+    if (!username || !email || !password) {
+      resultEl.textContent = 'Enter username, email and password.';
       resultEl.className = 'text-sm mt-2 text-center text-red-600';
       return;
     }
@@ -39,6 +40,7 @@ if (!form || !resultEl) {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
 

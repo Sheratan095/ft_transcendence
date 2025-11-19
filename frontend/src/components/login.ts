@@ -6,7 +6,7 @@ const resultEl = document.getElementById('login-result') as HTMLDivElement | nul
 const loginTfaContainer = document.getElementById('login-tfa-container') as HTMLDivElement | null;
 const loginTfaCheckbox = document.getElementById('login-enable2fa') as HTMLInputElement | null;
 
-import { getAccessToken, clearTokens, isLoggedInServerValidate, isLoggedInClient } from '../lib/auth.ts';
+// auth helpers are available if needed; we don't store tokens client-side because server sets httpOnly cookies
 
 /** Reveal the login 2FA UI. Call this from other scripts or the console.
  * Example: window.showLogin2faOption && window.showLogin2faOption();
@@ -44,10 +44,10 @@ if (!form || !resultEl) {
       return;
     }
 
-  const payload: Record<string, any> = { password };
-    // backend login endpoint in tests expects "username", but accept email as fallback
-    if (username) payload.mail = username;
-    else payload.email = email;
+    const payload: Record<string, any> = { password };
+    // Backend expects `email` as identifier. Use username input only if it contains an email-like value.
+    const identifier = username || email;
+    payload.email = identifier;
 
     if (submitBtn) submitBtn.disabled = true;
     resultEl.textContent = 'Signing in...';
