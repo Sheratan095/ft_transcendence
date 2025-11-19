@@ -532,7 +532,7 @@ const	getFriendsInternalOpts =
 	},
 
 	preHandler: validateInternalApiKey,
-	handler: getFriends
+	handler: getFriendsInternal
 }
 
 export function	relationshipsRoutes(fastify)

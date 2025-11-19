@@ -3,6 +3,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { getLanguagePack } from './email-templates/language-packs.js';
+import axios from 'axios';
 
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
@@ -136,21 +137,26 @@ export async function	sendOTPEmail(to, otpCode, language, expiryMinutes = 10)
 	}
 }
 
-export async function	getFriendsList(userId)
+export async function	getFriendsList(userId, onlineUserIds)
 {
-	const	response = await axios.get(`${process.env.GATEWAY_URL}/users/relationships/friendsInternal/?userId=${userId}`, {
-		headers: {
-			'Content-Type': 'application/json',
-			'x-internal-api-key': process.env.INTERNAL_API_KEY
-		}
-	});
-
-	if (!response.ok)
+	try
 	{
-		console.log(`[NOTIFICATION] Failed to fetch friends list for user ${userId}: ${response.status} ${response.statusText}`);
-		return (null);
-	}
+		const	response = await axios.get(`${process.env.USERS_SERVICE_URL}/relationships/friendsInternal`, {
+			params: { userId },
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY
+			}
+		});
 
-	const	data = await response.json();
-	return (data.friends || []);
+		// return only friends who are online
+		const	filteredFriends = (response.data || []).filter(friend => onlineUserIds.includes(friend.userId));
+
+		return (filteredFriends);
+	}
+	catch (error)
+	{
+		console.log(`[NOTIFICATION] Failed to fetch friends list for user ${userId}:`, error.message);
+		return ([]);
+	}
 }

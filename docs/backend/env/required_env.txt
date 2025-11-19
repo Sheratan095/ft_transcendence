@@ -36,7 +36,7 @@ services/notification:
     SMTP_PORT=587
     SMTP_USER=43skhool@gmail.com
     SMTP_PASS=udkh apxb ltsl iikp
-
+    USERS_SERVICE_URL=http://localhost:3002\
 
 services/chat:
     INTERNAL_API_KEY=1234

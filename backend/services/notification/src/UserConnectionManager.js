@@ -9,19 +9,25 @@ class	UserConnectionManager
 		this._connections = new Map(); // userId -> WebSocket
 	}
 
-	addConnection(userId, socket)
+	async	addConnection(userId, socket)
 	{
 		this._connections.set(userId, socket);
+		const	onlineFriends = await getFriendsList(userId, [...this._connections.keys()]);
 
-		this.#sendOnlineFriendListTo(userId, socket);
+		// Send the current list of connected users to the newly connected `senderUserId`.
+		this.#dispatchEventToSocket(socket, 'friends.onlineList', { onlineFriends });
 
 		// Then notify other connected users that this user is now online
-		this.#dispatchEventToFriends(userId, 'friend.online', { userId });
+		this.#dispatchEventToFriends(userId, 'friend.online', { userId }, onlineFriends);
 	}
 
-	removeConnection(userId)
+	async	removeConnection(userId)
 	{
 		this._connections.delete(userId);
+		const	onlineFriends = await getFriendsList(userId, [...this._connections.keys()]);
+
+		// Notify other connected users that this user is now offline
+		this.#dispatchEventToFriends(userId, 'friend.offline', { userId }, onlineFriends);
 	}
 
 	getConnection(userId)
@@ -60,19 +66,8 @@ class	UserConnectionManager
 		}
 	}
 
-	// Send the current list of connected users to the newly connected `senderUserId`.
-	#sendOnlineFriendListTo(senderUserId, senderSocket)
+	#dispatchEventToFriends(senderUserId, event, data, onlineFriends)
 	{
-		// TO DO should iw works
-		const	online = getFriendsList(senderUserId);
-
-		this.#dispatchEventToSocket(senderSocket, 'friends.onlineList', { online });
-	}
-
-	#dispatchEventToFriends(senderUserId, event, data)
-	{
-		const	onlineFriends = getFriendsList(senderUserId);
-
 		for (const frined of onlineFriends)
 		{
 			// Except send to self
