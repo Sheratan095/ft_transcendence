@@ -5,6 +5,7 @@ gateway:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     CHAT_SERVICE_URL=http://localhost:3004
     FRONTEND_URL=http://localhost:5173
+    PORT=3000
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
     USE_HTTPS=true
@@ -18,10 +19,6 @@ services/auth:
     PORT=3001
     REFRESH_TOKEN_EXPIRATION_DAYS=7
     HASH_SALT_ROUNDS=10
-    SMTP_HOST=smtp.gmail.com
-    SMTP_PORT=587
-    SMTP_USER=43skhool@gmail.com
-    SMTP_PASS=udkh apxb ltsl iikp
     OTP_EXPIRATION_MINUTES=5
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3003
