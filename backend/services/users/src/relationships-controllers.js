@@ -339,7 +339,7 @@ export async function	acceptFriendRequest(req, reply)
 
 		const	accepterUsername = (await usersDb.getUserById(user.id)).username;
 
-		if (await notifyFriendAccept(requesterId, accepterUsername) === false)
+		if (await notifyFriendAccept(requesterId, user.id, accepterUsername) === false)
 			return (reply.code(500).send({ error: 'Failed to notify user' }));
 
 		console.log('[RELATIONSHIPS] Friend request accepted by userId:', user.id, 'from requesterId:', requesterId);

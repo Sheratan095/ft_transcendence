@@ -63,9 +63,9 @@ const	sendFriendRequestOpts =
 			required: ['requesterUsername', 'targetUserId', 'requesterId'],
 			properties:
 			{
-				requesterUsername: { type: 'string'},
-				targetUserId: { type: 'string'},
-				requesterId: { type: 'string'},
+				targetUserId: { type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+				requesterId: { type: 'string'}, // WHO SENT THE FRIEND REQUEST
+				requesterUsername: { type: 'string'}, // USERNAME OF THE REQUESTER
 			}
 		},
 
@@ -80,8 +80,6 @@ const	sendFriendRequestOpts =
 	handler: sendFriendRequest
 }
 
-// The requester is referred to the one 
-//	who SENT the friend request
 const	sendFriendAcceptOpts = 
 {
 	schema:
@@ -97,8 +95,9 @@ const	sendFriendAcceptOpts =
 			required: ['requesterId', 'accepterUsername'],
 			properties:
 			{
-				requesterId: {type: 'string'},
-				accepterUsername: { type: 'string'},
+				requesterId: {type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+				accepterId: {type: 'string'}, // WHO ACCEPTED THE REQUEST
+				accepterUsername: { type: 'string'}, // USERNAME OF THE ACCEPTER
 			}
 		},
 
