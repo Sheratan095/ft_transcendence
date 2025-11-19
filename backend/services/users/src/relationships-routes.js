@@ -1,6 +1,7 @@
 import {
 	getUserRelationships,
 	getFriends,
+	getFriendsInternal,
 	getIncomingRequests,
 	getOutgoingRequests,
 	sendFriendRequest,
@@ -499,11 +500,47 @@ const	acceptFriendRequestOpts =
 	handler	: acceptFriendRequest
 };
 
+//-----------------------------INTERNAL ROUTES-----------------------------
+
+const	getFriendsInternalOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Get friends list (called by notification service for online management)',
+		tags: ['Relationships', 'Internal'],
+	
+		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			properties:
+			{
+				userId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: Friend
+			},
+			500: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getFriends
+}
+
 export function	relationshipsRoutes(fastify)
 {
 	// GET routes
 	fastify.get('/relationships', getUserRelationshipsOpts);
 	fastify.get('/relationships/friends', getFriendsOpts);
+	fastify.get('/relationships/friendsInternal', getFriendsInternalOpts);
 	fastify.get('/relationships/requests/incoming', getIncomingRequestsOpts);
 	fastify.get('/relationships/requests/outgoing', getOutgoingRequestsOpts);
 

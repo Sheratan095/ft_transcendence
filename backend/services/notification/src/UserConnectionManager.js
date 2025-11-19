@@ -1,3 +1,4 @@
+import { getFriendsList } from './notification-help.js';
 
 // Dot-notation (most common & scalable)
 // domain.action
@@ -12,7 +13,7 @@ class	UserConnectionManager
 	{
 		this._connections.set(userId, socket);
 
-		this.#sendOnlineUsersListTo(userId, socket);
+		this.#sendOnlineFriendListTo(userId, socket);
 
 		// Then notify other connected users that this user is now online
 		this.#dispatchEventToFriends(userId, 'friend.online', { userId });
@@ -60,30 +61,26 @@ class	UserConnectionManager
 	}
 
 	// Send the current list of connected users to the newly connected `senderUserId`.
-	// The client expects a single event containing the list of online friends.
-	#sendOnlineUsersListTo(senderUserId, senderSocket)
+	#sendOnlineFriendListTo(senderUserId, senderSocket)
 	{
-		const	online = [];
-
-		for (const [otherUserId] of this._connections.entries())
-		{
-			if (otherUserId !== senderUserId)
-				online.push(otherUserId);
-		}
+		// TO DO should iw works
+		const	online = getFriendsList(senderUserId);
 
 		this.#dispatchEventToSocket(senderSocket, 'friends.onlineList', { online });
 	}
 
 	#dispatchEventToFriends(senderUserId, event, data)
 	{
-		console.log(`[NOTIFICATION] Dispatching event '${event}' from user ${senderUserId} to friends`);
+		const	onlineFriends = getFriendsList(senderUserId);
 
-		for (const [otherUserId, otherSocket] of this._connections.entries())
+		for (const frined of onlineFriends)
 		{
 			// Except send to self
-			if (otherUserId !== senderUserId)
-				this.#dispatchEventToSocket(otherSocket, event, data);
+			if (frined.userId !== senderUserId)
+				this.#dispatchEventToSocket(this.getConnection(frined.userId), event, data);
 		}
+
+		console.log(`[NOTIFICATION] Dispatching event '${event}' from user ${senderUserId} to friends`);
 	}
 
 	#dispatchEventToSocket(socket, event, data)
