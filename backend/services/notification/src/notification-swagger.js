@@ -12,6 +12,26 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 
 ---
 
+**CLIENT → SERVER EVENTS**
+
+- **ping**
+\`\`\`json
+{
+  "event": "ping",
+  "data": {}
+}
+
+Reponse:
+{
+  "event": "pong",
+  "data": {
+	"timestamp": 1625247600000
+  }
+}
+\`\`\`
+
+---
+
 **SERVER → CLIENT EVENTS**
 
 - **friends.onlineList** - Sent immediately after successful connection.
