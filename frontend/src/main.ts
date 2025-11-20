@@ -68,7 +68,7 @@ document.getElementById("to-register")?.addEventListener("click", (e) => {
 
     try {
       resultEl.textContent = 'Signing in...';
-      const res = await fetch(`http://localhost:3000/auth/login`, {
+      const res = await fetch(`https://localhost:3000/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
  
@@ -161,7 +161,7 @@ this.renderLogin();
   
       try {
         resultEl.textContent = 'Registering...';
-        const res = await fetch(`http://localhost:3000/auth/register`, {
+        const res = await fetch(`https://localhost:3000/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
    
