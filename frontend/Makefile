@@ -2,7 +2,7 @@ PM := npm
 
 # Commands (you can override these when invoking make)
 INSTALL := $(PM) install
-DEV := $(PM) run dev
+DEV := $(PM) run dev --watch
 BUILD := $(PM) run build
 PREVIEW := $(PM) run preview
 LINT := $(PM) run lint

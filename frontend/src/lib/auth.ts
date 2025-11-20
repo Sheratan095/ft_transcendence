@@ -64,37 +64,58 @@ export function isLoggedInClient(): boolean {
 }
 
 export async function fetchUserProfile(): Promise<User | null> {
-    // const token = getAccessToken();
-    const userId = localStorage.getItem('userId');
-    console.log('Fetching profile for userId:', userId);
-    // if (!token) {
-    //     window.location.href = 'pages/login/login.html';
-    //     return null;
-    // }
-    try {
-        const response = await fetch(`${API_BASE}/users/user?id=${userId}`, {
-            credentials: 'include'
-        });
-        console.log('Profile fetch response:', response);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const user = await response.json();
-        console.log('Fetched user body:', user);
-        return user;
-    } catch (error) {
-        console.error('Error fetching profile:', error);
-        return null;
+  const token = getAccessToken();
+  if (!token) {
+    // not authenticated
+    return null;
+  }
+
+  // Prefer extracting user id from the access token payload
+  const payload: any = decodeJwt(token);
+  let userId: string | null = null;
+  if (payload && payload.id) userId = payload.id;
+  // fallback to localStorage if set by other parts of the app
+  if (!userId) userId = localStorage.getItem('userId');
+
+  if (!userId) {
+    console.error('No user id available to fetch profile');
+    return null;
+  }
+
+  try {
+    const url = `${API_BASE}/users/user?id=${encodeURIComponent(userId)}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Profile fetch failed', response.status);
+      return null;
     }
+
+    const user = await response.json();
+    return user;
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return null;
+  }
 }
 
 // Robust server validation
 export async function isLoggedInServerValidate(): Promise<{ ok: boolean; user?: any; error?: string }> {
   const token = getAccessToken();
-  const userId = localStorage.getItem('userId');
   if (!token) return { ok: false, error: 'no_token' };
+
+  const payload: any = decodeJwt(token);
+  const userId = payload?.id || localStorage.getItem('userId');
+  if (!userId) return { ok: false, error: 'no_user_id' };
+
   try {
-    const res = await fetch(`${API_BASE}/users/user?id=${userId}`, {
+    const res = await fetch(`${API_BASE}/users/user?id=${encodeURIComponent(userId)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,

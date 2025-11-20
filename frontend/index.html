@@ -1,18 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ft_transcendence</title>
-  <link rel="icon" type="image/png" href="/assets/favicon.png">
-  <link href="./tailwind.css" rel="stylesheet">
-  <script type="module">
-    import { Header } from './src/components/Header.ts';
-    new Header();
-  </script>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link href="./tailwind.css" rel="stylesheet" />
+  <script type="module" src="./src/main.ts"></script>
+  <style>
+    @keyframes ball {
+      0% { top: 34%; left: 52%; }
+      8.3% { top: 52%; left: 90%; }
+      24.9% { top: 85%; left: 8%; }
+      30% { top: 98%; left: 27%; }
+      41.5% { top: 70%; left: 90%; }
+      58.1% { top: 55%; left: 8%; }
+      74.7% { top: 13%; left: 90%; }
+      79% { top: 1%; left: 70%; }
+      91.3% { top: 22%; left: 8%; }
+      100% { top: 34%; left: 52%; }
+    }
+
+    @keyframes ping {
+      0%, 5% { top: 10%; }
+      9% { top: 24%; }
+      13% { top: 17%; }
+      24.9% { top: 82%; }
+      47% { top: 37%; }
+      52% { top: 41%; }
+      56% { top: 64%; }
+      58.1% { top: 54%; }
+      70% { top: 74%; }
+      84% { top: 12%; }
+      91.3% { top: 18%; }
+      100% { top: 10%; }
+    }
+
+    @keyframes pong {
+      0% { top: 90%; }
+      8.3% { top: 51%; }
+      20% { top: 60%; }
+      25% { top: 34%; }
+      41.5% { top: 68%; }
+      46% { top: 36%; }
+      52% { top: 18%; }
+      58.1% { top: 53%; }
+      66% { top: 14%; }
+      70% { top: 20%; }
+      74.7% { top: 10%; }
+      91.3% { top: 10%; }
+      100% { top: 90%; }
+    }
+  </style>
 </head>
-<body class="bg-gray-50">
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  </main>
+<body class="bg-black text-neutral-200 font-sans antialiased">
+  <section class="relative h-max flex flex-col items-center justify-center overflow-hidden bg-black">
+    <div class="fixed inset-0 bg-[length:40px_40px] pointer-events-none
+      bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]
+      animate-[gridMove_12s_linear_infinite] opacity-60 mix-blend-lighten [mask-image:radial-gradient(ellipse_at_center,transparent_5%,black)]">
+    </div>
+
+    <div class="absolute inset-0 z-20 mix-blend-difference pointer-events-none
+      bg-[#ff009d] [clip-path:polygon(0_0,45%_0,25%_100%,0%_100%)]">
+    </div>
+
+    <h1 class="text-[10vw] font-extrabold uppercase tracking-tighter leading-[0.8] text-gray-100 float-start mt-10">
+      FT/<br />TRASCENDENCE
+    </h1>
+    <p class="max-w-2xl mt-10 text-[2vw] tracking-wide text-neutral-500 text-center font-bold">
+      Yesterday Dr.Phil was just an ordinary human.
+    </p>
+
+    <div class="flex flex-col md:flex-row items-center justify-center gap-20 m-1 flex-wrap px-8">
+
+      <div class="p-10 sm:w-[20 em] border-4 border-neutral-700 bg-neutral-900 shadow-[10px_10px_0_0_#ff009d] overflow-hidden">
+        <h3 class="text-[2em] font-extrabold mb-6 uppercase tracking-tight text-[#ff009d] text-center md:text-left">
+          Play pong
+        </h3>
+        <div class="mx-auto w-[10em] h-[10em] relative border-4 border-double border-white float-left">
+          <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-0 h-full border-dotted border-r-2 border-white"></div>
+          <div class="absolute left-[6%] w-1 h-4 bg-white animate-[ping_6s_linear_infinite]"></div>
+          <div class="absolute right-[6%] w-1 h-4 bg-white animate-[pong_6s_linear_infinite]"></div>
+          <div class="absolute w-1.5 h-1.5 bg-white animate-[ball_6s_linear_infinite]"></div>
+        </div>
+      </div>
+        <div id="auth-container"></div>
+    </div>
+    <br>
+  </section>
+  <section class="py-10 relative overflow-hidden border-y-2 border-yellow-300">
+    <br>
+    <div class="whitespace-nowrap animate-[scroll_75s_linear_infinite] text-yellow-300 uppercase font-black tracking-tighter text-7xl opacity-40">
+      Tournaments • Pong • Tic • Tac • Toe • Multiplayer • Rankings •
+    </div>
+    <br>
+  </section>
+
+  <section class="px-8 py-24 bg-black">
+    <h2 class="text-6xl md:text-8xl font-black uppercase mb-20 tracking-tight text-white leading-none">
+      DESIGN FORMULA
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-16">
+      <div class="p-10 border-4 border-neutral-700 bg-neutral-900 shadow-[10px_10px_0_0_#ff00aa] overflow-hidden">
+        <h3 class="text-4xl font-extrabold mb-6 uppercase tracking-tight text-pink-300">Colorful black</h3>
+        <p class="text-neutral-300 text-lg">High-contrast palettes</p>
+      </div>
+      <div class="p-10 border-4 border-neutral-700 bg-neutral-900 shadow-[10px_10px_0_0_#00ff78] overflow-hidden">
+        <h3 class="text-4xl font-extrabold mb-6 uppercase tracking-tight text-green-300">Strong Typography</h3>
+        <p class="text-neutral-300 text-lg">Oversized, warped type.</p>
+      </div>
+      <div class="p-10 border-4 border-neutral-700 bg-neutral-900 shadow-[10px_10px_0_0_#ffee00] overflow-hidden">
+        <h3 class="text-4xl font-extrabold mb-6 uppercase tracking-tight text-yellow-300">Layouts</h3>
+        <p class="text-neutral-300 text-lg">Unpolished layouts.</p>
+      </div>
+      <div class="p-10 border-4 border-neutral-700 bg-neutral-900 shadow-[10px_10px_0_0_#67e8f9] overflow-hidden">
+        <h3 class="text-4xl font-extrabold mb-6 uppercase tracking-tight text-cyan-300">Textures</h3>
+        <p class="text-neutral-300 text-lg">Futuristic and tactile.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-12 px-8 text-center border-t-2 border-neutral-800 bg-black text-neutral-500 transform -skew-y-1">
+    © 2025 ft_footer
+  </footer>
 </body>
 </html>
