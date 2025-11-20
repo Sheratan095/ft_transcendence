@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Search Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .user-info.show {
+            display: block;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .user-info strong {
+            color: #333;
+        }
+
+        .results {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .user-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .user-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-card h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .user-card p {
+            color: #666;
+            font-size: 13px;
+            margin: 3px 0;
+        }
+
+        .user-card .user-id {
+            font-family: monospace;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .search-stats {
+            color: #666;
+            font-size: 13px;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 User Search Tester</h1>
+        <p class="subtitle">Test the gateway search endpoint</p>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="section">
+            <div class="section-title">🔐 Login</div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="user@example.com" value="test1@gmail.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Password" value="Mrco@123_">
+            </div>
+            <button id="loginBtn">Login</button>
+            <div id="loginStatus" class="status"></div>
+            <div id="userInfo" class="user-info"></div>
+        </div>
+
+        <!-- Search Section -->
+        <div id="searchSection" class="section hidden">
+            <div class="section-title">🔎 Search Users</div>
+            <div class="form-group">
+                <label for="searchQuery">Search by username or email</label>
+                <input type="text" id="searchQuery" placeholder="Type to search...">
+            </div>
+            <button id="searchBtn">Search</button>
+            <div id="searchStatus" class="status"></div>
+            <div id="searchStats" class="search-stats"></div>
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const GATEWAY_URL = 'https://localhost:3000';
+        let accessToken = null;
+
+        const loginBtn = document.getElementById('loginBtn');
+        const searchBtn = document.getElementById('searchBtn');
+        const loginStatus = document.getElementById('loginStatus');
+        const searchStatus = document.getElementById('searchStatus');
+        const userInfo = document.getElementById('userInfo');
+        const results = document.getElementById('results');
+        const searchStats = document.getElementById('searchStats');
+        const loginSection = document.getElementById('loginSection');
+        const searchSection = document.getElementById('searchSection');
+
+        // Check if already logged in on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                const email = sessionStorage.getItem('userEmail');
+                showStatus(loginStatus, '✅ Already logged in', 'success');
+                userInfo.innerHTML = `
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Status:</strong> Authenticated ✓</p>
+                    <button onclick="logout()" style="margin-top: 10px; padding: 8px 16px; background: #dc3545; border-radius: 4px;">Logout</button>
+                `;
+                userInfo.classList.add('show');
+                searchSection.classList.remove('hidden');
+                document.getElementById('searchQuery').focus();
+            }
+        });
+
+        // Logout function
+        window.logout = function() {
+            sessionStorage.clear();
+            location.reload();
+        };
+
+        // Login function
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                showStatus(loginStatus, 'Please enter both email and password', 'error');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            showStatus(loginStatus, 'Authenticating...', 'info');
+
+            try {
+                const response = await fetch(`${GATEWAY_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', // Important for cookies
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Login failed');
+                }
+
+                // Extract cookies
+                const cookies = response.headers.get('set-cookie');
+                
+                showStatus(loginStatus, '✅ Login successful!', 'success');
+                
+                // Store login state in sessionStorage
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('userEmail', email);
+                
+                // Show user info (you can fetch this from /users/user endpoint if needed)
+                userInfo.innerHTML = `
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Status:</strong> Authenticated ✓</p>
+                    <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                        Cookies stored in browser. You can now search for users.
+                    </p>
+                `;
+                userInfo.classList.add('show');
+
+                // Show search section
+                searchSection.classList.remove('hidden');
+                
+                // Auto-focus on search input
+                document.getElementById('searchQuery').focus();
+                
+            } catch (error) {
+                showStatus(loginStatus, `❌ ${error.message}`, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        });
+
+        // Debounce function to limit API calls
+        let searchTimeout = null;
+        let currentSearchController = null;
+
+        // Search function
+        async function performSearch() {
+            const query = document.getElementById('searchQuery').value.trim();
+
+            if (!query) {
+                results.innerHTML = '';
+                searchStatus.className = 'status';
+                searchStats.textContent = '';
+                return;
+            }
+
+            // Cancel previous request if still pending
+            if (currentSearchController) {
+                currentSearchController.abort();
+            }
+            currentSearchController = new AbortController();
+
+            showStatus(searchStatus, 'Searching...', 'info');
+            searchStats.textContent = '';
+
+            try {
+                const startTime = performance.now();
+                
+                const response = await fetch(`${GATEWAY_URL}/users/search?q=${encodeURIComponent(query)}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: currentSearchController.signal
+                });
+
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(0);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Search failed');
+                }
+
+                const users = await response.json();
+                
+                if (users.length === 0) {
+                    showStatus(searchStatus, 'No users found', 'info');
+                    searchStats.textContent = `Search completed in ${duration}ms`;
+                    results.innerHTML = '';
+                } else {
+                    showStatus(searchStatus, `Found ${users.length} user${users.length > 1 ? 's' : ''}`, 'success');
+                    searchStats.textContent = `Search completed in ${duration}ms`;
+                    displayResults(users);
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // Request was cancelled, ignore
+                    return;
+                }
+                showStatus(searchStatus, `❌ ${error.message}`, 'error');
+                results.innerHTML = '';
+            }
+        }
+
+        // Real-time search on input with debouncing
+        document.getElementById('searchQuery').addEventListener('input', (e) => {
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout for 300ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                performSearch();
+            }, 300);
+        });
+
+        // Search button click
+        searchBtn.addEventListener('click', () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            performSearch();
+        });
+
+        // Allow search on Enter key
+        document.getElementById('searchQuery').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                performSearch();
+            }
+        });
+
+        // Display search results
+        function displayResults(users) {
+            results.innerHTML = '';
+            
+            users.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'user-card';
+                card.innerHTML = `
+                    <h3>👤 ${escapeHtml(user.username)}</h3>
+                    <p><strong>Language:</strong> ${escapeHtml(user.language || 'N/A')}</p>
+                    <p><strong>Created:</strong> ${new Date(user.created_at).toLocaleDateString()}</p>
+                    <p class="user-id"><strong>ID:</strong> ${escapeHtml(user.id)}</p>
+                `;
+                results.appendChild(card);
+            });
+        }
+
+        // Show status message
+        function showStatus(element, message, type) {
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-focus on email field
+        document.getElementById('email').focus();
+    </script>
+</body>
+</html>

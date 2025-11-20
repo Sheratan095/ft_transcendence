@@ -80,5 +80,31 @@
 	Each service deletes what it owns.
 [x] change checkForEnvVars and display all the missing vars
 [x] add checks on user existing and token expiration directly in gatewat jwt validation
-[] how can we check if a user is online? : ping on websocket notification service
+[x] how can we check if a user is online? : ping on websocket notification service
 [] Cleanup job: periodically remove expired tokens from DB.
+
+[x] register MAA => error
+
+[x] FIX THIS
+	(node:12179) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+	at common.setupOutgoing (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/common.js:43:22)
+	at Array.stream (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/passes/ws-incoming.js:104:14)
+	at ProxyServer.<anonymous> (/home/maceccar/Desktop/ft_transcendence/backend/gateway/node_modules/http-proxy/lib/http-proxy/index.js:81:21)
+	at handleSocketUpgrade (file:///home/maceccar/Desktop/ft_transcendence/backend/gateway/src/routes/notification-routes.js:77:9)
+	at process.processTicksAndRejections (node:internal/process/task_queues:105:5]
+
+[x]	Registration error - Code: undefined, Message: Password is too similar to username or email.
+	Auth service error: Request failed with status code 500
+
+[x] Refactor of users research (by email directly in auth?) - (by username in ?)
+[x] Fix it
+	[AUTH] Registration error: SQLITE_CONSTRAINT: UNIQUE constraint failed: auth_accounts.email
+	Duplicate email attempt
+	[GATEWAY] Auth service error: Request failed with status code 409
+
+[x] add user/... to all relationships routes in gateway registrations
+[] add a "starting script" that generate the env, install packages and create the certificates(they shouldn't be posted in the repo)
+[x] refactor of backend_design
+
+[] move email send in to notification service (endpoing called by auth service during login)
+[] "real friends online" instead of all online users

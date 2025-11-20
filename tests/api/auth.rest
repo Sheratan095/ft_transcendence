@@ -1,10 +1,30 @@
 ### Register new user
-POST http://localhost:3000/auth/register
+POST https://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "MARCo",
+  "username": "marco",
   "email": "ceccarellim7@gmail.com",
+  "password": "Mrco@123_"
+}
+
+### Register new user
+POST https://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "test2",
+  "email": "test2@gmail.com",
+  "password": "Mrco@123_"
+}
+
+### Register new user
+POST https://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "poppi",
+  "email": "poppi@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -12,34 +32,34 @@ Content-Type: application/json
 
 ### Login (copy the refreshToken from response)
 # @name login
-POST http://localhost:3000/auth/login
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "ceccarellim7@gmail.com",
+  "email": "test1@gmail.com",
   "password": "Mrco@123_"
 }
 
 ###
 
 ### Logout (paste refreshToken value from login response below)
-DELETE http://localhost:3000/auth/logout
+DELETE https://localhost:3000/auth/logout
 Cookie: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImY2Mzc0Yzk5LTBjODEtNGM0ZC1iMmQ2LTRjOTVjZmI1NmQ3MCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MjE3MDcwNCwiZXhwIjoxNzYyNzc1NTA0fQ.RiCIDZ5xYCb0KuWjOzdEwdQIcnizJ-rCnnuzl0RSmIE
 
 ###
 
 ### Refresh access token using stored refresh token cookie
-POST http://localhost:3000/auth/token
+POST https://localhost:3000/auth/token
 
 ###
 
 ### Valid token validation
-POST http://localhost:3000/auth/validate-token
+POST https://localhost:3000/auth/validate-token
 
 ###
 
 ### Missing token validation (should return 400 Bad Request)
-POST http://localhost:3001/validate-token
+POST https://localhost:3001/validate-token
 Content-Type: application/json
 x-internal-api-key: 1234
 
@@ -48,7 +68,7 @@ x-internal-api-key: 1234
 ###
 
 ### Verify 2FA code
-POST http://localhost:3000/auth/2fa
+POST https://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
@@ -58,7 +78,7 @@ Content-Type: application/json
 
 ###
 
-PUT http://localhost:3000/auth/enable-2fa
+PUT https://localhost:3000/auth/enable-2fa
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2LWNlMTAtNDM4Ni1iOWZjLTdjYWFhZTg5Mjg2NCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTY4ODYzMywiZXhwIjoxNzYxNjg5NTMzfQ.1KOzTVso2tiMYe2ZKqVwQkWwBt3RKQvys_h-TgXBCyU
 
@@ -68,7 +88,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2L
 
 ###
 
-PUT http://localhost:3000/auth/change-password
+PUT https://localhost:3000/auth/change-password
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjMjIzZTQwLWM2NzQtNGQ0ZS05ZjQ0LTlmZDkzN2JhODU5ZCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTI5ODYwOCwiZXhwIjoxNzYxMjk4NjY4fQ.PAiASYTBLlNNeLBWJIuvb-hXVefwUZU4f8KUDnj7XQ4
 
@@ -79,5 +99,5 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjMjIzZTQwL
 
 ###
 
-DELETE http://localhost:3000/auth/delete-account
+DELETE https://localhost:3000/auth/delete-account
 Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVlODk1ODczLWNhYzItNGU1Mi05M2MyLWE2ZTE3NzA3NGVkNiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MjE4MTk1MSwiZXhwIjoxNzYyMTgyODUxfQ.gj-rEVj7e9Ro0gRXguwkfeVk9SgOIeWrDBbtGoqUvu4

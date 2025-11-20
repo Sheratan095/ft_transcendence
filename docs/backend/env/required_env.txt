@@ -3,10 +3,12 @@ gateway:
     AUTH_SERVICE_URL=http://localhost:3001
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3003
-    FRONTEND_URL=http://localhost:3004
-    PORT=3000
+    CHAT_SERVICE_URL=http://localhost:3004
+    FRONTEND_URL=http://localhost:5173
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
+    USE_HTTPS=true
+    HTTPS_CERTS_PATH=../../certs/certs/
 
 services/auth:
     INTERNAL_API_KEY=1234
@@ -27,7 +29,12 @@ services/users:
     INTERNAL_API_KEY=1234
     PORT=3002
     AUTH_SERVICE_URL=http://localhost:3001
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
 
 services/notification:
     INTERNAL_API_KEY=1234
     PORT=3003
+
+services/chat:
+    INTERNAL_API_KEY=1234
+    PORT=3004

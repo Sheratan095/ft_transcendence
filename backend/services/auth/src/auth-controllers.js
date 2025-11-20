@@ -1,5 +1,6 @@
-import { generateNewTokens, decodeToken, setAuthCookies, clearAuthCookies} from './jwt.js';
-import { validator, isTokenExpired, extractUserData, getUserLanguage, usernameExists } from './auth-help.js';
+import { generateNewTokens, decodeToken, setAuthCookies, clearAuthCookies } from './jwt.js';
+
+import { validator, isTokenExpired, extractUserData, getUserLanguage, createUserProfileInUsersService } from './auth-help.js';
 import { sendTwoFactorCode } from './2fa.js';
 
 import bcrypt from 'bcrypt';
@@ -25,59 +26,60 @@ export const	register = async (req, reply) =>
 		const	hashedpassword = bcrypt.hashSync(req.body.password, parseInt(process.env.HASH_SALT_ROUNDS));
 		authDb = req.server.authDb;
 
-		// Check if username already exists in users service
-		if (await usernameExists(username))
-			throw (new Error('Username already exists'));
-
 		// Create user in auth database
 		user = await authDb.createUser(email, hashedpassword);
 
-		// Create user profile in users service
-		await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
-			{ username: username, userId: user.id },
-			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
-		);
+		await createUserProfileInUsersService(user.id, username);
  
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
 		// Set tokens as HTTP-only cookies
 		setAuthCookies(reply, newTokens);
 
-		console.log('User registered: ', user.id);
+		console.log('[AUTH] User registered: ', user.id);
 
 		return (reply.code(201).send({
 			message: 'User registered successfully',
-			user:
-			{
-				id: user.id,
-				email: user.email
-			}
+			user: { id: user.id, email: user.email }
 		}));
 	}
 	catch (err)
 	{
-		console.log('Registration error:', err.message)
+		console.error(`[AUTH] Registration error: ${err.message}`);
+
+		// Intercepted by validator
+		if (err.statusCode === 442)
+			return (reply.code(400).send({ error: 'Registration failed', details: err.message }));
 
 		// if the user in auth DB was created but the profile creation failed, delete the auth user
 		if (user && authDb) // Check if user and authDb are defined
-		{
-			console.log('PROBLEM auth and users DB are out of sync, canceling user creation...');
 			await authDb.deleteUserById(user.id);
-		}
-
-		// Handle validation errors from validator function
-		if (err.message.includes('Username') || err.message.includes('Password')) 
-			return (reply.code(400).send({ error: err.message }))
 
 		if (err.code === 'SQLITE_CONSTRAINT')
 		{
-			if (err.message.includes('username'))
-				return (reply.code(409).send({ error: 'Username already exists' }))
+			// From authDb
 			if (err.message.includes('email'))
-				return (reply.code(409).send({ error: 'Email already exists' }))
+			{
+				return (reply.code(409).send({ 
+					error: 'Registration failed',
+					details: 'Email already exists' 
+				}));
+			}
+			
+			// From usersDb
+			if (err.message.includes('username'))
+			{
+				return (reply.code(409).send({ 
+					error: 'Registration failed',
+					details: 'Username already exists' 
+				}));
+			}
 		}
 
-		return (reply.code(500).send({ error: 'Internal server error' }))
+		return (reply.code(500).send({ 
+			error: 'Registration failed',
+			details: 'An unexpected error occurred during registration' 
+		}));
 	}
 }
 
@@ -108,7 +110,9 @@ export const	login = async (req, reply) =>
 			await authDb.deleteTwoFactorTokenByUserId(user.id);
 
 			const	language = await getUserLanguage(user.id);
-			
+
+			console.log('[AUTH] 2FA sent for user: ', user.id);
+
 			// Send 2FA code and require verification
 			return (await sendTwoFactorCode(user, language, authDb, reply));
 		}
@@ -118,7 +122,7 @@ export const	login = async (req, reply) =>
 		// Set tokens as HTTP-only cookies
 		setAuthCookies(reply, newTokens);
 
-		console.log('User logged in: ', user.id);
+		console.log('[AUTH] User logged in: ', user.id);
 
 		return (reply.code(200).send({
 			message: 'Login successful',
@@ -132,7 +136,7 @@ export const	login = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Login error:', err.message);
+		console.log('[AUTH] Login error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -161,13 +165,13 @@ export const	logout = async (req, reply) =>
 
 		clearAuthCookies(reply);
 
-		console.log('User logged out: ', decodedToken.id);
+		console.log('[AUTH] User logged out: ', decodedToken.id);
 
 		return (reply.code(200).send({ message: 'Logged out successfully' }));
 	}
 	catch (err)
 	{
-		console.log('Logout error:', err.message);
+		console.log('[AUTH] Logout error:', err.message);
 		
 		if (err.name === 'TokenExpiredError')
 			return (reply.code(401).send({ error: 'Token has expired' }));
@@ -187,7 +191,6 @@ export const	token = async (req, reply) =>
 
 		// Verify JWT signature
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-		console.log('Decoded refresh token for user: ', decodedToken.id);
 
 		// Check if token exists in DB
 		const	storedToken = await authDb.getRefreshTokenByUserId(decodedToken.id);
@@ -208,7 +211,7 @@ export const	token = async (req, reply) =>
 		// Set tokens as HTTP-only cookies
 		setAuthCookies(reply, newTokens);
 
-		console.log('New tokens generated for user: ', user.id);
+		console.log('[AUTH] New tokens generated for user: ', user.id);
 
 		return (reply.code(200).send({
 			message: 'New tokens generated successfully',
@@ -217,7 +220,7 @@ export const	token = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Token error:', err.message);
+		console.log('[AUTH] Token error:', err.message);
 		
 		if (err.name === 'TokenExpiredError')
 			return (reply.code(401).send({ error: 'Token has expired' }));
@@ -242,9 +245,6 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			return (reply.code(401).send({ error: 'No 2FA token found or expired' }));
 
 		// Check if token is expired
-		const	now = new Date();
-		const	expiresAt = new Date(storedToken.expires_at);
-
 		if (isTokenExpired(storedToken.expires_at))
 		{
 			// Clean up expired token
@@ -266,11 +266,10 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			return (reply.code(404).send({ error: 'User not found' }));
 
 		// Generate tokens for successful 2FA verification
-		const newTokens = await generateNewTokens(user, authDb);
-
+		const	newTokens = await generateNewTokens(user, authDb);
 		setAuthCookies(reply, newTokens);
 
-		console.log('2FA verification successful for user:', user.id);
+		console.log('[AUTH] 2FA verification successful for user:', user.id);
 
 		return (reply.code(200).send({
 			message: '2FA verification successful',
@@ -283,7 +282,7 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('2FA verification error:', err.message);
+		console.log('[AUTH] 2FA verification error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -305,7 +304,7 @@ export const	enable2FA = async (req, reply) =>
 
 		const	updatedUser = await authDb.enable2FA(userData.id, tfaEnabled);
 
-		console.log('2FA activated for user:', updatedUser.id);
+		console.log(`[AUTH] 2FA ${tfaEnabled ? 'enabled' : 'disabled'} for user:`, updatedUser.id);
 
 		if (!updatedUser)
 			return (reply.code(404).send({ error: 'User not found' }));
@@ -322,7 +321,7 @@ export const	enable2FA = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Update 2FA settings error:', err.message);
+		console.log(`[AUTH] Update 2FA settings error:`, err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -357,13 +356,13 @@ export const	changePassword = async (req, reply) =>
 		// Update password in database
 		await authDb.updateUserPassword(user.id, hashedNewPassword);
 
-		console.log('Password changed for user:', user.id);
+		console.log('[AUTH] Password changed for user:', user.id);
 
 		return (reply.code(200).send({ message: 'Password changed successfully' }));
 	}
 	catch (err)
 	{
-		console.log('Change password error:', err.message);
+		console.log('[AUTH] Change password error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -392,13 +391,13 @@ export const	deleteAccount = async (req, reply) =>
 
 		clearAuthCookies(reply);
 
-		console.log(`User account deleted: ${userData.id}`);
+		console.log(`[AUTH] User account deleted: ${userData.id}`);
 
 		return (reply.code(200).send({ message: 'User account deleted successfully' }));
 	}
 	catch (err)
 	{
-		console.log('Delete account error:', err.message);
+		console.log('[AUTH] Delete account error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -430,7 +429,7 @@ export const	getAccount = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Get account error:', err.message);
+		console.log('[AUTH] Get account error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
@@ -466,7 +465,7 @@ export const	validateToken = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('Token validation error:', err.message);
+		console.log('[AUTH] Token validation error:', err.message);
 		
 		if (err.name === 'TokenExpiredError')
 			return (reply.code(401).send({error: 'Token has expired' }));

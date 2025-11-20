@@ -73,21 +73,22 @@ const	RelationshipsStatus =
 	type: 'string',
 	enum: ['pending', 'accepted', 'rejected', 'blocked'],
 	errorMessage: {
-		enum: 'The relationship_status must be one of: pending, accepted, rejected, blocked.'
+		enum: 'The relationshipStatus must be one of: pending, accepted, rejected, blocked.'
 	}
 };
+
 
 const	UserRelationship =
 {
 	type: 'object',
 	properties:
 	{
-		requester_id: { type: 'string' },
-		target_id: { type: 'string' },
+		requesterId: { type: 'string' },
+		targetId: { type: 'string' },
 		username: { type: 'string' },
-		relationship_status: { ...RelationshipsStatus },
-		created_at: { type: 'string', format: 'date-time' },
-		updated_at: { type: 'string', format: 'date-time' }
+		relationshipStatus: { ...RelationshipsStatus },
+		createdAt: { type: 'string', format: 'date-time' },
+		updatedAt: { type: 'string', format: 'date-time' }
 	},
 };
 
@@ -98,8 +99,8 @@ const	Friend =
 	{
 		userId: { type: 'string' }, // still returned as userId for frontend
 		username: { type: 'string' },
-		language: { type: 'string' },
-		friends_since: { type: 'string', format: 'date-time' }
+		avatarUrl: { type: 'string' },
+		friendsSince: { type: 'string', format: 'date-time' }
 	},
 };
 
@@ -108,9 +109,9 @@ const	IncomingRequest =
 	type: 'object',
 	properties:
 	{
-		requester_id: { type: 'string' },
+		requesterId: { type: 'string' },
 		username: { type: 'string' },
-		created_at: { type: 'string', format: 'date-time' }
+		createdAt: { type: 'string', format: 'date-time' }
 	},
 };
 
@@ -220,86 +221,6 @@ const	getOutgoingRequestsOpts =
 	handler	: getOutgoingRequests
 };
 
-const	sendFriendRequestOpts =
-{
-	schema:
-	{
-		summary: 'Send friend request',
-		description: 'Send a friend request to another user. Requires accessToken cookie for authentication.',
-		tags: ['Relationships'],
-
-		...withInternalAuth,
-		...withCookieAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['target_id'],
-			properties:
-			{
-				target_id: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'object',
-				properties:
-				{
-					message: { type: 'string' }
-				}
-			},
-			400: ErrorResponse,
-			404: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-	preHandler: validateInternalApiKey,
-	handler	: sendFriendRequest
-};
-
-const	acceptFriendRequestOpts =
-{
-	schema:
-	{
-		summary: 'Accept friend request',
-		description: 'Accept a friend request from another user. Requires accessToken cookie for authentication.',
-		tags: ['Relationships'],
-
-		...withInternalAuth,
-		...withCookieAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['requester_id'],
-			properties:
-			{
-				requester_id: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'object',
-				properties:
-				{
-					message: { type: 'string' }
-				}
-			},
-			400: ErrorResponse,
-			404: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-	preHandler: validateInternalApiKey,
-	handler	: acceptFriendRequest
-};
-
 const	rejectFriendRequestOpts =
 {
 	schema:
@@ -314,10 +235,10 @@ const	rejectFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requester_id'],
+			required: ['requesterId'],
 			properties:
 			{
-				requester_id: { type: 'string' }
+				requesterId: { type: 'string' }
 			}
 		},
 
@@ -354,10 +275,10 @@ const	blockUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -393,10 +314,10 @@ const	unblockUserOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -432,10 +353,10 @@ const	cancelFriendRequestOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -471,10 +392,10 @@ const	removeFriendOpts =
 		body:
 		{
 			type: 'object',
-			required: ['target_id'],
+			required: ['targetId'],
 			properties:
 			{
-				target_id: { type: 'string' }
+				targetId: { type: 'string' }
 			}
 		},
 
@@ -496,6 +417,88 @@ const	removeFriendOpts =
 	handler	: removeFriend
 };
 
+//-----------------------------ROUTES THAT SEND NOTIFICATIONS TO OTHER USERS-----------------------------
+
+const	sendFriendRequestOpts =
+{
+	schema:
+	{
+		summary: 'Send friend request',
+		description: 'Send a friend request to another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['targetId'],
+			properties:
+			{
+				targetId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			404: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: sendFriendRequest
+};
+
+const	acceptFriendRequestOpts =
+{
+	schema:
+	{
+		summary: 'Accept friend request',
+		description: 'Accept a friend request from another user. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['requesterId'],
+			properties:
+			{
+				requesterId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			404: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+	preHandler: validateInternalApiKey,
+	handler	: acceptFriendRequest
+};
+
 export function	relationshipsRoutes(fastify)
 {
 	// GET routes
@@ -503,6 +506,7 @@ export function	relationshipsRoutes(fastify)
 	fastify.get('/relationships/friends', getFriendsOpts);
 	fastify.get('/relationships/requests/incoming', getIncomingRequestsOpts);
 	fastify.get('/relationships/requests/outgoing', getOutgoingRequestsOpts);
+
 	// POST routes
 	fastify.post('/relationships/request', sendFriendRequestOpts);
 	

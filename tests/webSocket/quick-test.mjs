@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 
 // login the user to get a valid jwt token in http cookies
-const response = await fetch('http://localhost:3000/auth/login', {
+const response = await fetch('https://localhost:3000/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: 'ceccarellim7@gmail.com', password: 'Mrco@123_' })
@@ -23,8 +23,8 @@ console.log('🍪 Cookies:', cookies);
 // Create WebSocket connection with cookies in the headers
 // NOTE: the notification service exposes the websocket route at '/ws'.
 // The gateway proxies Upgrade requests to the notification service and
-// forwards the original request path, so we must connect to '/ws'.
-const ws = new WebSocket('ws://localhost:3000/ws', {
+// forwards the original request path, so we must connect to '/notifications/ws'.
+const ws = new WebSocket('ws://localhost:3000/notifications/ws', {
     headers: {
         'Cookie': cookies
     }
@@ -37,13 +37,40 @@ ws.on('open', () => {
 });
 
 ws.on('message', (data) => {
-    console.log('📥 Received:', data.toString());
-    ws.close();
+    const rawMessage = data.toString();
+    console.log('📥 Raw message:', rawMessage);
+    
+    try {
+        // Try to parse as JSON (for structured events)
+        const message = JSON.parse(rawMessage);
+        
+        // Handle different event types
+        if (message.event) {
+            
+            // Handle specific events
+            switch (message.event) {
+                case 'friendOnline':
+                    console.log('👥 Friend came online:', message.data);
+                    break;
+                case 'friendOffline':
+                    console.log('� Friend went offline:', message.data);
+                    break;
+                case 'onlineUsers':
+                    console.log('🟢 Online users list:', message.data);
+                    break;
+                default:
+                    console.log('📦 Unknown event:', message.event);
+            }
+        }
+    } catch (e) {
+        // Not JSON, just a plain text message
+        console.log('💬 Text message:', rawMessage);
+    }
 });
 
 ws.on('close', () => {
     console.log('❌ Closed');
-    // process.exit(0);
+    process.exit(0);
 });
 
 ws.on('error', (error) => {
@@ -52,8 +79,8 @@ ws.on('error', (error) => {
 });
 
 // Timeout after 5 seconds
-setTimeout(() => {
-    console.log('⏱️ Timeout - no response received');
-    ws.close();
-    process.exit(0);
-}, 5000);
+// setTimeout(() => {
+//     console.log('⏱️ Timeout - no response received');
+//     ws.close();
+//     process.exit(0);
+// }, 5000);

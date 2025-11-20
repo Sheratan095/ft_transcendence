@@ -1,7 +1,4 @@
 import sqlite3 from "sqlite3";
-
-import { v4 as uuidv4 } from 'uuid';
-
 import { promisify } from "util";
 import { mkdir, readFile } from "fs/promises";
 import path from "path";
@@ -11,7 +8,7 @@ import { fileURLToPath } from 'url';
 const	__filename = fileURLToPath(import.meta.url);
 const	__dirname = path.dirname(__filename);
 
-export class UsersDatabase
+export class	UsersDatabase
 {
 	constructor(dbPath = "./data/users.db")
 	{
@@ -35,17 +32,21 @@ export class UsersDatabase
 			this.db = new sqlite3.Database(this.dbPath);
 			
 			// Promisify database methods for easier async/await usage
-			this.db.run = promisify(this.db.run).bind(this.db);
-			this.db.get = promisify(this.db.get).bind(this.db);
-			this.db.all = promisify(this.db.all).bind(this.db);
+			const run = promisify(this.db.run.bind(this.db));
+			const get = promisify(this.db.get.bind(this.db));
+			const all = promisify(this.db.all.bind(this.db));
+			
+			this.db.run = run;
+			this.db.get = get;
+			this.db.all = all;
 
 			await this.#createTables();
 
-			console.log("✅ USERS Database connected: ", this.dbPath);
+			console.log("[USERS] Database connected: ", this.dbPath);
 		}
 		catch (error)
 		{
-			console.error("❌ USERS Database initialization error:", error);
+			console.log("[USERS] Database initialization error:", error);
 			throw (error);
 		}
 	}
@@ -67,21 +68,26 @@ export class UsersDatabase
 				.filter(stmt => stmt.length > 0);
 
 			for (const statement of statements)
-				await this.db.run(statement);
+			{
+				try
+				{
+					await this.db.run(statement);
+				}
+				catch (err)
+				{
+					// Silently ignore errors if tables already exist
+					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists') || err.message.includes('UNIQUE constraint failed'))
+						continue;
+
+					console.log("[USERS] Table creation info:", err.message);
+				}
+			}
 		}
 		catch (error)
 		{
-			console.error("❌ Error creating tables for USERS db:", error);
-
+			console.log("❌ Error reading schema for USERS db:", error);
 			throw (error);
 		}
-	}
-
-	async	#generateUUID()
-	{
-		const	id = uuidv4();
-
-		return (id);
 	}
 
 	async	#close()
@@ -126,6 +132,21 @@ export class UsersDatabase
 	{
 		const	query = `SELECT * FROM users WHERE id = ?`;
 		return (await this.db.get(query, [userId]));
+	}
+
+	async	searchUsers(searchQuery)
+	{
+		const	likeQuery = `${searchQuery.toLowerCase()}%`;
+
+		const query = `
+			SELECT id, username, avatar_url
+			FROM users
+			WHERE LOWER(username) LIKE ?
+			ORDER BY username ASC
+			LIMIT 20;
+		`;
+
+		return (await this.db.all(query, [likeQuery]));
 	}
 
 	async	getAllUsers()
@@ -208,6 +229,7 @@ export class UsersDatabase
 				END AS userId,
 				u.username,
 				u.language,
+				u.avatar_url,
 				ur.updated_at AS friends_since
 			FROM user_relationships ur
 			JOIN users u ON (u.id = ur.requester_id OR u.id = ur.target_id)

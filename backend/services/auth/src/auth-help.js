@@ -26,7 +26,7 @@ export function	checkEnvVariables(requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
-			console.error(`Missing required environment variable: ${envVar}`);
+			console.error(`[AUTH] Missing required environment variable: ${envVar}`);
 			missingEnvVarsCount++;
 		}
 	}
@@ -39,6 +39,8 @@ export function	checkEnvVariables(requiredEnvVars)
 // This function implements additional custom validation logic
 //	Username can't contains reserved words
 //	Password can't be too common / too weak or too similar to username/email
+// The trhows can be caught and transformed into proper HTTP responses in the controllers
+//	that's way ther's a custom statusCode property in some errors
 export function	validator(username, password, email)
 {
 	const	psw_lower = password.toLowerCase();
@@ -50,7 +52,7 @@ export function	validator(username, password, email)
 	reservedWords.forEach(element =>
 	{
 		if (username_lower.includes(element))
-			throw (new Error(`Username '${username}' is not allowed.`));
+			throw (Object.assign(new Error(`Username '${username}' is not allowed.`), { statusCode: 442 }));
 	});
 
 	// Check password strength
@@ -58,11 +60,11 @@ export function	validator(username, password, email)
 	commonPasswords.forEach(element =>
 	{
 		if (psw_lower.includes(element))
-			throw (new Error('Password is too common.'));
+			throw (Object.assign(new Error('Password is too common.'), { statusCode: 442 }));
 	});
 
 	if (psw_lower.includes(username_lower) || psw_lower.includes(email_lower))
-		throw (new Error('Password is too similar to username or email.'));
+		throw (Object.assign(new Error('Password is too similar to username or email.'), { statusCode: 442 }));
 }
 
 export function	formatExpirationDate(date)
@@ -107,7 +109,7 @@ export function	extractUserData(request)
 	}
 	catch (err)
 	{
-		console.log('Error parsing user data from headers:', err.message);
+		console.log('[AUTH] Error parsing user data from headers:', err.message);
 		return (null);
 	}
 }
@@ -118,25 +120,51 @@ export async function	getUserLanguage(userId)
 	return (reply.data.language);
 }
 
-export async function	usernameExists(username)
+export async function	createUserProfileInUsersService(userId, username)
 {
 	try
 	{
-		const	usernameCheck = await axios.get(`${process.env.USERS_SERVICE_URL}/user?username=${username}`,
-		{
-			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }
-		});
+		const	newUserReply = await axios.post(`${process.env.USERS_SERVICE_URL}/new-user`, 
+			{ username: username, userId: userId },
+			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		);
 
-		// If we get any response (not 404), username already exists
-		return (true);
+		return (newUserReply.data);
 	}
 	catch (err)
 	{
-		// If error is 404, username does not exist
-		if (err.response && err.response.status === 404)
-			return (false);
+		// Handle axios errors and transform them into meaningful errors
+		if (err.response)
+		{
+			const status = err.response.status;
+			const errorData = err.response.data;
 
-		// For other errors, rethrow
-		throw (err);
+			if (status === 409)
+			{
+				// Username already exists
+				const error = new Error(errorData.error || 'SQLITE_CONSTRAINT username already exist');
+				error.code = 'SQLITE_CONSTRAINT';
+				error.statusCode = 409;
+				throw error;
+			}
+			
+			if (status === 442)
+			{
+				// Internal error in users service
+				const error = new Error('Internal server error in users service');
+				error.code = 442;
+				error.statusCode = 442;
+				throw error;
+			}
+
+			// Other HTTP errors
+			const error = new Error(errorData.error || 'Users service error');
+			error.statusCode = status;
+			error.originalError = err;
+			throw error;
+		}
+
+		// Network or other errors
+		throw err;
 	}
 }

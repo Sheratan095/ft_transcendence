@@ -19,9 +19,6 @@ build/
 **/.env
 
 # Database and data files
-**/data/
-data/
-auth.db
 
 # MacOS
 .DS_Store

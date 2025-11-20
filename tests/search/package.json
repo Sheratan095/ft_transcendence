@@ -1,0 +1,9 @@
+{
+  "name": "search-tester",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "description": "HTTP server for search test page"
+}

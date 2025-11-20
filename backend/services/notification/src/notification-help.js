@@ -1,3 +1,28 @@
+// Middleware to validate API key for inter-service communication
+// This function checks for a valid API key in the request headers
+//	this ensures that only internal services can access protected endpoints
+export async function	validateInternalApiKey(request, socket)
+{
+	const	apiKey = request.headers['x-internal-api-key'];
+	// Validate the forwarded internal key matches our environment variable.
+	if (!process.env.INTERNAL_API_KEY || apiKey !== process.env.INTERNAL_API_KEY)
+	{
+		console.log('[NOTIFICATION] Missing or invalid internal API key');
+		console.log('[NOTIFICATION] Expected key:', process.env.INTERNAL_API_KEY ? 'SET' : 'NOT SET');
+		console.log('[NOTIFICATION] Received key:', apiKey ? 'PROVIDED' : 'MISSING');
+
+		// For WebSocket connections, socket is already upgraded - just close it
+		if (socket)
+		{
+			try { socket.close(1008, 'Unauthorized'); } catch (e) {}
+		}
+
+		return (false);
+	}
+
+	return (true);
+}
+
 export function	checkEnvVariables(requiredEnvVars)
 {
 	let	missingEnvVarsCount = 0;
@@ -6,7 +31,7 @@ export function	checkEnvVariables(requiredEnvVars)
 	{
 		if (!process.env[envVar])
 		{
-			console.error(`Missing required environment variable: ${envVar}`);
+			console.log(`Missing required environment variable: ${envVar}`);
 			missingEnvVarsCount++;
 		}
 	}
@@ -28,7 +53,7 @@ export function	extractUserData(request)
 	}
 	catch (err)
 	{
-		console.log('Error parsing user data from headers:', err.message);
+		console.log('[NOTIFICATION] Error parsing user data from headers:', err.message);
 		return (null);
 	}
 }
