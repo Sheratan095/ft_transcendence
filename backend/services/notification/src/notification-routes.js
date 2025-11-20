@@ -47,6 +47,28 @@ const	withInternalAuth =
 	}
 };
 
+const	withCookieAuth =
+{
+	security: [{ cookieAuth: [] }],
+	
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'accessToken':
+			{
+				type: 'string',
+			},
+			'refreshToken':
+			{
+				type: 'string',
+			}
+		}
+	}
+};
+
+
 //-----------------------------INTERAL ROUTES-----------------------------
 
 const	sendFriendRequestOpts =

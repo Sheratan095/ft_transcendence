@@ -2,11 +2,11 @@
 // Chat connection manager handles WebSocket connections and message routing
 class	ChatConnectionManager
 {
-	constructor()
-	{
-		this._connections = new Map(); // userId -> WebSocket
-		this._rooms = new Map(); // roomId -> Set of userIds
-	}
+		constructor()
+		{
+			this._connections = new Map(); // userId -> WebSocket
+			this._rooms = new Map(); // roomId -> Set of userIds
+		}
 
 	addConnection(userId, socket)
 	{
