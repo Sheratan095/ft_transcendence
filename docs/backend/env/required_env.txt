@@ -4,7 +4,7 @@ gateway:
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     CHAT_SERVICE_URL=http://localhost:3004
-    FRONTEND_URL=http://localhost:5173
+    FRONTEND_URL=http://localhost:443
     PORT=3000
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
