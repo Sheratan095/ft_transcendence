@@ -34,19 +34,3 @@ export const	sendSystemMessage = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
-
-// Get connection statistics
-export const	getConnectionStats = async (req, reply) =>
-{
-	try
-	{
-		return reply.code(200).send({
-			connectedUsers: chatConnectionManager.count()
-		});
-	}
-	catch (err)
-	{
-		console.error('[CHAT] Error in getConnectionStats handler:', err);
-		return (reply.code(500).send({error: 'Internal server error' }));
-	}
-}
