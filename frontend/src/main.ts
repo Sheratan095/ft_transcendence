@@ -1,5 +1,4 @@
 import spa from './spa';
-import { Header } from './components/Header';
 
 
 class AuthUI {
@@ -35,14 +34,6 @@ private renderLogin() {
           class="w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-[#0dff66]" />
       </div>
 
-      <div class="flex items-center justify-between mt-1">
-        <label class="inline-flex items-center gap-2 text-sm text-neutral-400">
-          <input type="checkbox" name="remember" class="h-4 w-4 rounded border-neutral-600 bg-neutral-800 focus:ring-[#0dff66]" />
-          Remember me
-        </label>
-        <a href="#" class="text-sm text-[#0dff66] hover:underline">Forgot?</a>
-      </div>
-
       <button type="submit" class="mt-6 w-full bg-[#0dff66] text-black font-semibold py-2 rounded-md hover:brightness-90 hover:scale-[1.02] transition">Sign in</button>
 
       <div class="mt-4 text-xl text-neutral-400 text-center">
@@ -50,6 +41,7 @@ private renderLogin() {
         <a id="to-register" href="#" class="text-[#0dff66] hover:underline">Create one</a>
       </div>
     </form>
+    <div id="auth-error" class="text-red-400 text-sm text-center hidden"></div>
   </div>
   `;
 
@@ -64,8 +56,8 @@ document.getElementById("to-register")?.addEventListener("click", (e) => {
     ev.preventDefault();
     const email = (document.getElementById('email') as HTMLInputElement)?.value?.trim() || '';
     const password = (document.getElementById('password') as HTMLInputElement)?.value || '';
-    const resultEl = document.createElement('div');
-    resultEl.className = 'text-sm mt-2 text-center';
+    const resultEl = document.getElementById('auth-error') as HTMLDivElement;
+    resultEl.className = 'text-xl mt-2 text-center';
     form.appendChild(resultEl);
 
     if (!email || !password) {
@@ -76,26 +68,28 @@ document.getElementById("to-register")?.addEventListener("click", (e) => {
 
     try {
       resultEl.textContent = 'Signing in...';
-      const res = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:3000'}/auth/login`, {
+      const res = await fetch(`http://localhost:3000/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+ 
         credentials: 'include',
         body: JSON.stringify({ email, password })
       });
+      console.log('login response', res);
 
       const body = await res.json().catch(() => null);
       if (res.ok) {
         if (body?.user?.id) localStorage.setItem('userId', body.user.id);
         resultEl.textContent = 'Login successful.';
-        resultEl.className = 'text-sm mt-2 text-center text-green-600';
+        resultEl.className = 'text-xl mt-2 text-center text-green-600';
         setTimeout(() => { location.href = '/'; }, 600);
       } else {
         resultEl.textContent = (body && (body.message || body.error)) || `Login failed (${res.status})`;
-        resultEl.className = 'text-sm mt-2 text-center text-red-600';
+        resultEl.className = 'text-xl mt-2 text-center text-red-600';
       }
     } catch (err) {
       resultEl.textContent = (err as Error).message || 'Network error';
-      resultEl.className = 'text-sm mt-2 text-center text-red-600';
+      resultEl.className = 'text-xl mt-2 text-center text-red-600';
     }
   });
 }
@@ -133,6 +127,7 @@ private renderRegister() {
         <a id="to-login" href="#" class="text-[#0dff66] hover:underline">Sign in</a>
       </div>
     </form>
+    <div id="auth-error" class="text-red-400 text-sm text-center hidden"></div>
   </div>
   `;
 
@@ -154,44 +149,44 @@ this.renderLogin();
       const email = (document.getElementById('email_reg') as HTMLInputElement)?.value?.trim() || '';
       const password = (document.getElementById('password_reg') as HTMLInputElement)?.value || '';
   
-      const resultEl = document.createElement('div');
-      resultEl.className = 'text-sm mt-2 text-center';
+      const resultEl = document.getElementById('auth-error') as HTMLDivElement;
+      resultEl.className = 'text-xl mt-2 text-center';
       target.appendChild(resultEl);
   
       if (!username || !email || !password) {
         resultEl.textContent = 'Enter username, email and password.';
-        resultEl.className = 'text-sm mt-2 text-center text-red-600';
+        resultEl.className = 'text-xl mt-2 text-center text-red-600';
         return;
       }
   
       try {
         resultEl.textContent = 'Registering...';
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:3000'}/auth/register`, {
+        const res = await fetch(`http://localhost:3000/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+   
           credentials: 'include',
           body: JSON.stringify({ username, email, password })
         });
-  
+        
         const body = await res.json().catch(() => null);
         if (res.ok) {
           if (body?.user?.id) localStorage.setItem('userId', body.user.id);
           resultEl.textContent = 'Registration successful.';
-          resultEl.className = 'text-sm mt-2 text-center text-green-600';
+          resultEl.className = 'text-xl mt-2 text-center text-green-600';
           setTimeout(() => { location.href = '/'; }, 600);
         } else {
           resultEl.textContent = (body && (body.message || body.error)) || `Register failed (${res.status})`;
-          resultEl.className = 'text-sm mt-2 text-center text-red-600';
+          resultEl.className = 'text-xl mt-2 text-center text-red-600';
         }
       } catch (err) {
         resultEl.textContent = (err as Error).message || 'Network error';
-        resultEl.className = 'text-sm mt-2 text-center text-red-600';
+        resultEl.className = 'text-xl mt-2 text-center text-red-600';
       }
     });
 }}
 
 document.addEventListener('DOMContentLoaded', async () => {
-  new Header();
   new AuthUI();
 
   //await spa.start();
