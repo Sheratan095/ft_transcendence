@@ -153,7 +153,7 @@ import {
 
 import {
 	
-} from './routes/chat.routes.js'
+} from './routes/chat-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
