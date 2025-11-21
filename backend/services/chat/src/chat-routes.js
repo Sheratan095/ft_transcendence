@@ -2,6 +2,7 @@ import { validateInternalApiKey } from './chat-help.js';
 
 import {
 	sendSystemMessage,
+	getChats,
 } from './chat-controllers.js';
 
 import {
@@ -65,8 +66,62 @@ const	withCookieAuth =
 	}
 };
 
+const	chatType =
+{
+	chat_type: 'string',
+	enum: ['dm', 'group'],
+}
+
+const	member = 
+{
+	type: 'object',
+	properties:
+	{
+		userId: { type: 'string' },
+		username: { type: 'string' }
+	}
+}
+
+const	chat = 
+{
+	type: 'object',
+	properties:
+	{
+		chatType: {chatType},
+		members:
+		{
+			type: 'array',
+			items: member
+		}
+	}
+}
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
+const	getChatsOpts = 
+{
+	schema:
+	{
+		summary: 'Get all chats of the user',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		response:
+		{
+			200: {
+				type: 'array',
+				items: chat
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getChats
+}
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -105,7 +160,7 @@ const	sendSystemMessageOpts =
 
 	preHandler: validateInternalApiKey,
 	handler: sendSystemMessage
-}
+};
 
 export function	chatRoutes(fastify)
 {
@@ -123,6 +178,8 @@ export function	chatRoutes(fastify)
 
 		socket.on('error', (err) => {handleError(socket, err);});
 	});
+
+	fastify.get('/', getChatsOpts);
 
 	// HTTP routes for internal service communication
 	fastify.post('/send-system-message', sendSystemMessageOpts);

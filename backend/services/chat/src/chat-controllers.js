@@ -30,7 +30,25 @@ export const	sendSystemMessage = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.error('[CHAT] Error in sendSystemMessage handler:', err);
+		console.error('[CHAT] Error in sendSystemMessage controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	getChats = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	chats = await chatDb.getChatsByUserId(userId);
+
+		console.log(chats)
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in getChats controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }

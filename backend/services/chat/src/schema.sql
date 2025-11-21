@@ -4,8 +4,8 @@
 CREATE TABLE IF NOT EXISTS chats
 (
 	id			TEXT PRIMARY KEY,
-	type		TEXT NOT NULL CHECK(type IN ('dm', 'group')),
-	created_at	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	chat_type	TEXT NOT NULL CHECK(chat_type IN ('dm', 'group')),
+	created_at	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ------------------------------------------------------------
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS chat_members
 	joined_at	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 	PRIMARY KEY (user_id, chat_id),
-	FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+	FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 	-- FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE  -> auth/auth_accounts
 );
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS messages
 	content			TEXT NOT NULL,
 	created_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-	FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+	FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 	-- FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE -> auth/auth_accounts
 );
 
@@ -48,6 +48,6 @@ CREATE TABLE IF NOT EXISTS message_statuses
 	updated_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 	PRIMARY KEY (message_id, user_id),
-	FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+	FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
 	-- FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -> auth/auth_accounts
 );
