@@ -159,8 +159,8 @@ export class	ChatDatabase
 		// Create new private chat
 		const	chatId = await this.#generateUUID();
 		const	insertChatQuery = `
-			INSERT INTO chats (id, chat_type)
-			VALUES (?, 'dm')
+			INSERT INTO chats (id, name, chat_type)
+			VALUES (?, 'dm', 'dm')
 		`;
 
 		await this.db.run(insertChatQuery, [chatId]);

@@ -10,7 +10,8 @@ import {
 	blockUser,
 	unblockUser,
 	cancelFriendRequest,
-	removeFriend
+	removeFriend,
+	checkBlock
 } from './relationships-controllers.js';
 
 import { validateInternalApiKey } from './users-help.js';
@@ -535,6 +536,42 @@ const	getFriendsInternalOpts =
 	handler: getFriendsInternal
 }
 
+const	checkBlockOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Check block status between two users',
+		description: 'Internal only. Checks if userA has blocked userB. (Called by chat service before sending messages).',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['userA', 'userB'],
+			properties:
+			{
+				userA: { type: 'string' },
+				userB: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: { isBlocked: { type: 'boolean' } }
+			},
+			500: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: checkBlock,
+}
+
 export function	relationshipsRoutes(fastify)
 {
 	// GET routes
@@ -543,6 +580,7 @@ export function	relationshipsRoutes(fastify)
 	fastify.get('/relationships/friendsInternal', getFriendsInternalOpts);
 	fastify.get('/relationships/requests/incoming', getIncomingRequestsOpts);
 	fastify.get('/relationships/requests/outgoing', getOutgoingRequestsOpts);
+	fastify.get('/relationships/check-block', checkBlockOpts);
 
 	// POST routes
 	fastify.post('/relationships/request', sendFriendRequestOpts);

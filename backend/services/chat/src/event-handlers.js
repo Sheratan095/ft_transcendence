@@ -1,5 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
+import { checkBlock } from './chat-help.js';
 
 export function	handleNewConnection(socket, req)
 {
@@ -49,9 +50,9 @@ export function	handleMessage(socket, msg, userId, chatDb)
 			// 	handleLeaveRoom(userId, message.data);
 			// 	break;
 
-			case 'chat.message':
-				handleChatMessage(userId, message.data, chatDb);
-				break;
+			// case 'chat.message':
+			// 	handleChatMessage(userId, message.data, chatDb);
+			// 	break;
 
 			case 'chat.private_message':
 				handlePrivateMessage(userId, message.data, chatDb);
@@ -129,7 +130,6 @@ async function	handlePrivateMessage(userId, data, chatDb)
 {
 	try
 	{
-		// TO DO validate toUserId is a friend and not blocked
 		const	{ toUserId, message } = data;
 
 		if (!toUserId || !message)
@@ -139,7 +139,16 @@ async function	handlePrivateMessage(userId, data, chatDb)
 		}
 
 		if (toUserId === userId)
+		{
+			console.log(`[CHAT] Himself: User ${userId} attempted to send a private message to themselves`);
 			return;
+		}
+
+		if (!(await checkBlock(toUserId, userId)))
+		{
+			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
+			return;
+		}
 
 		// Create a new chat between the two users if it doesn't exist
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId);

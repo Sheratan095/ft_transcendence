@@ -74,3 +74,32 @@ export async function	getUsernameById(userId)
 		return (null);
 	}
 }
+
+export async function	checkBlock(userA, userB)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/check-block?userA=${userA}&userB=${userB}`,
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to check block status between ${userA} and ${userB}: ${response.statusText}`);
+			return (false);
+		}
+
+		const	data = await response.json();
+		return (data.isBlocked);
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error checking block status:', err.message);
+		return (false);
+	}
+}
