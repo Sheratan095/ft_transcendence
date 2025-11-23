@@ -32,7 +32,7 @@ export function	handleNewConnection(socket, req)
 	return (userId);
 }
 
-export function	handleMessage(socket, msg, userId)
+export function	handleMessage(socket, msg, userId, chatDb)
 {
 	try
 	{
@@ -44,34 +44,37 @@ export function	handleMessage(socket, msg, userId)
 			// case 'chat.join':
 			// 	handleJoinRoom(userId, message.data);
 			// 	break;
-			
+
 			// case 'chat.leave':
 			// 	handleLeaveRoom(userId, message.data);
 			// 	break;
-			
+
 			case 'chat.message':
-				handleChatMessage(userId, message.data);
+				handleChatMessage(userId, message.data, chatDb);
 				break;
-			
+
+			case 'chat.private_message':
+				handlePrivateMessage(userId, message.data, chatDb);
+				break;
+
+			case 'chat.private_message':
+				handlePrivateMessage(userId, message.data, chatDb);
+				break;
+
 			// case 'chat.typing':
 			// 	handleTypingIndicator(userId, message.data);
 			// 	break;
-			
+
 			default:
 				console.log(`[CHAT] Unknown event: ${message.event}`);
-				socket.send(JSON.stringify({
-					event: 'error',
-					data: { message: 'Unknown event type' }
-				}));
+				chatConnectionManager.sendErrorMessage(userId, 'Invalid message format');
+				break;
 		}
 	}
 	catch (err)
 	{
 		console.error(`[CHAT] Error parsing message from user ${userId}:`, err.message);
-		socket.send(JSON.stringify({
-			event: 'error',
-			data: { message: 'Invalid message format' }
-		}));
+		chatConnectionManager.sendErrorMessage(userId, 'Invalid message format');
 	}
 }
 
@@ -85,4 +88,69 @@ export function	handleClose(socket, userId)
 	console.log(`[CHAT] WebSocket connection closed - User: ${userId}`);
 
 	chatConnectionManager.removeConnection(userId);
+}
+
+function	handleChatMessage(userId, data, chatDb)
+{
+	try
+	{
+		const	{ roomId, message } = data;
+
+		if (!roomId || !message)
+		{
+			console.log('[CHAT] Invalid chat message data');
+			return;
+		}
+
+		// Get id of users in the room
+		const	usersIdInRoom = chatConnectionManager.getUsersInRoom(roomId).map(user => user.userId);
+		if (!usersIdInRoom || usersIdInRoom.length === 0)
+		{
+			console.log(`[CHAT] No users in room ${roomId}`);
+			return;
+		}
+
+		console.log(`[CHAT] Broadcasting message from user ${userId} to room ${roomId}`);
+
+		// Broadcast the message to all users in the room
+		chatConnectionManager.sendToRoom(
+			roomId,
+			usersIdInRoom,
+			message
+		);
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error handling chat message:', err.message);
+	}
+}
+
+async function	handlePrivateMessage(userId, data, chatDb)
+{
+	try
+	{
+		const	{ toUserId, message } = data;
+
+		if (!toUserId || !message)
+		{
+			console.log('[CHAT] Invalid private message data');
+			return;
+		}
+
+		// Create a new chat between the two users if it doesn't exist
+		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
+
+		await chatConnectionManager.sendToUser(
+			userId,
+			toUserId,
+			message
+		);
+
+		console.log(`[CHAT] Sending private message from user ${userId} to user ${toUserId}`);
+
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error handling private message:', err.message);
+	}
 }

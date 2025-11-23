@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS chats
 (
 	id			TEXT PRIMARY KEY,
+	name		TEXT NOT NULL,
 	chat_type	TEXT NOT NULL CHECK(chat_type IN ('dm', 'group')),
 	created_at	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

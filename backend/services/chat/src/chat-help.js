@@ -50,3 +50,31 @@ export function	extractUserData(request)
 		return (null);
 	}
 }
+
+export async function	getUsernameById(userId)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USER_SERVICE_URL}/users/${userId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to fetch user data for ID ${userId}: ${response.statusText}`);
+			return (null);
+		}
+
+		const	userData = await response.json();
+		return (userData.username);
+	}
+	catch (error)
+	{
+		console.error(`[CHAT] Error fetching user data for ID ${userId}:`, error.message);
+		return (null);
+	}
+}

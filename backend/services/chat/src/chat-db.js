@@ -116,5 +116,52 @@ export class	ChatDatabase
 		const	chats = await this.db.all(query, [userId]);
 		return (chats);
 	}
-}
 
+	async	getChatUsers(chatId)
+	{
+		const	query = `
+			SELECT users.id
+			FROM chat_members
+			WHERE chat_members.chat_id = ?
+		`;
+
+		const	users = await this.db.all(query, [chatId]);
+		return (users);
+	}
+
+	async	createPrivateChat(userId1, userId2)
+	{
+		// Check if a private chat already exists between these two users
+		const	existingChatQuery = `
+			SELECT chats.id
+			FROM chats
+			JOIN chat_members cm1 ON chats.id = cm1.chat_id AND cm1.user_id = ?
+			JOIN chat_members cm2 ON chats.id = cm2.chat_id AND cm2.user_id = ?
+			WHERE chats.chat_type = 'dm'
+		`;
+
+		const	existingChat = await this.db.get(existingChatQuery, [userId1, userId2]);
+		if (existingChat)
+			return (existingChat.id);
+
+		// Create new private chat
+		const	chatId = await this.#generateUUID();
+		const	insertChatQuery = `
+			INSERT INTO chats (id, chat_type)
+			VALUES (?, 'dm')
+		`;
+
+		await this.db.run(insertChatQuery, [chatId]);
+
+		// Add both users to the chat_members table
+		const insertMemberQuery = `
+			INSERT INTO chat_members (chat_id, user_id)
+			VALUES (?, ?)
+		`;
+
+		await this.db.run(insertMemberQuery, [chatId, userId1]);
+		await this.db.run(insertMemberQuery, [chatId, userId2]);
+
+		return (chatId);
+	}
+}

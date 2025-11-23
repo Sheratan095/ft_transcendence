@@ -43,20 +43,29 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
   "event": "chat.message",
   "data": {
     "roomId": "room123",
-    "message": "Hello everyone!",
-    "username": "john_doe"
+    "message": "Hello everyone!"
   }
 }
 \`\`\`
 
-- **chat.typing** - Send typing indicator
+- **chat.private_message** - Send a private message to a user
+\`\`\`json
+{
+  "event": "chat.private_message",
+  "data": {
+    "toUserId": "user456",
+    "message": "Hello everyone!"
+  }
+}
+\`\`\`
+
+- **chat.typing** - Send typing indicator [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.typing",
   "data": {
     "roomId": "room123",
-    "isTyping": true,
-    "username": "john_doe"
+    "isTyping": true
   }
 }
 \`\`\`
@@ -103,15 +112,28 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
   "event": "chat.message",
   "data": {
     "roomId": "room123",
-    "userId": "456",
-    "username": "jane_smith",
+    "roomName": "General Chat",
+    "from": "jane_smith",
     "message": "Hello everyone!",
     "timestamp": "2025-11-19T10:30:00.000Z"
   }
 }
 \`\`\`
 
-- **chat.typing** - Typing indicator from another user
+- **chat.private_message** - Message received from a user
+\`\`\`json
+{
+  "event": "chat.private_message",
+  "data": {
+    "from": "jane_smith",
+    "senderId": "456",
+    "message": "Hello everyone!",
+    "timestamp": "2025-11-19T10:30:00.000Z"
+  }
+}
+\`\`\`
+
+- **chat.typing** - Typing indicator from another user [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.typing",
