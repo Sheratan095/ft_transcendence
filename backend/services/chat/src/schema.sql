@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS messages
 CREATE TABLE IF NOT EXISTS message_statuses
 (
 	message_id		TEXT NOT NULL,
-	user_id			TEXT NOT NULL,
 	status			TEXT NOT NULL CHECK(status IN ('sent', 'delivered')),
 	updated_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

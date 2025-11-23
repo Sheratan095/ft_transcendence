@@ -17,7 +17,23 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 
 **CLIENT → SERVER EVENTS**
 
-- **chat.join** - Join a chat room
+- **ping**
+\`\`\`json
+{
+  "event": "ping",
+  "data": {}
+}
+
+Reponse:
+{
+  "event": "pong",
+  "data": {
+	"timestamp": 1625247600000
+  }
+}
+\`\`\`
+
+- **chat.join** - Join a chat room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.join",
@@ -27,7 +43,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **chat.leave** - Leave a chat room
+- **chat.leave** - Leave a chat room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.leave",
@@ -37,7 +53,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **chat.message** - Send a message to a room
+- **chat.message** - Send a message to a room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.message",
@@ -74,7 +90,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 
 **SERVER → CLIENT EVENTS**
 
-- **chat.joined** - Confirmation that you joined a room
+- **chat.joined** - Confirmation that you joined a room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.joined",
@@ -84,7 +100,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **chat.userJoined** - Another user joined the room
+- **chat.userJoined** - Another user joined the room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.userJoined",
@@ -95,7 +111,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **chat.userLeft** - A user left the room
+- **chat.userLeft** - A user left the room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.userLeft",
@@ -106,7 +122,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **chat.message** - Message received in a room
+- **chat.message** - Message received in a room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.message",

@@ -191,4 +191,44 @@ export class	ChatDatabase
 
 		return (messageId);
 	}
+
+	async	updateMessageStatus(messageId, userId, status)
+	{
+		const	timestamp = new Date().toISOString();
+
+		// Update existing status entry
+		const	updateStatusQuery = `
+			UPDATE message_statuses
+			SET status = ?, updated_at = ?
+			WHERE message_id = ? AND user_id = ?
+		`;
+		await this.db.run(updateStatusQuery, [status, timestamp, messageId, userId]);
+	}
+
+	async	createMessageStatus(messageId, status)
+	{
+		const	timestamp = new Date().toISOString();
+
+		const	insertStatusQuery = `
+			INSERT INTO message_statuses (message_id, status, updated_at)
+			VALUES (?, ?, ?)
+		`;
+
+		await this.db.run(insertStatusQuery, [messageId, status, timestamp]);
+	}
+
+	async	getUndeliveredMessages(userId)
+	{
+		const	query = `
+			SELECT m.id as message_id, m.chat_id, m.sender_id, m.content, m.created_at
+			FROM messages m
+			JOIN chat_members cm ON m.chat_id = cm.chat_id
+			LEFT JOIN message_statuses ms ON m.id = ms.message_id AND ms.user_id = ?
+			WHERE cm.user_id = ? AND (ms.status IS NULL OR ms.status = 'sent')
+			ORDER BY m.created_at ASC
+		`;
+
+		const	messages = await this.db.all(query, [userId, userId]);
+		return (messages);
+	}
 }

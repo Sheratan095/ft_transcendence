@@ -42,6 +42,10 @@ export function	handleMessage(socket, msg, userId, chatDb)
 
 		switch (message.event)
 		{
+			case 'ping': // Handle ping event
+				socket.send(JSON.stringify({ event: 'pong', data: { timestamp: Date.now() } }));
+				break;
+
 			// case 'chat.join':
 			// 	handleJoinRoom(userId, message.data);
 			// 	break;
@@ -131,6 +135,7 @@ async function	handlePrivateMessage(userId, data, chatDb)
 	try
 	{
 		const	{ toUserId, message } = data;
+		const	messageSent = false
 
 		if (!toUserId || !message)
 		{
@@ -154,11 +159,8 @@ async function	handlePrivateMessage(userId, data, chatDb)
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
 		const	messageId = await chatDb.addMessageToChat(chatId, userId, message);
 
-		await chatConnectionManager.sendToUser(
-			userId,
-			toUserId,
-			message
-		);
+		messageSent = await chatConnectionManager.sendToUser(userId, toUserId, message);
+		await chatDb.updateMessageStatus(messageId, toUserId, messageSent ? 'delivered' : 'sent');
 	}
 	catch (err)
 	{

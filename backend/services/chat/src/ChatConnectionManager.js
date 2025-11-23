@@ -74,9 +74,11 @@ class	ChatConnectionManager
 		{
 			console.log(`[CHAT] Sending private message from user ${userId} to user ${toUserId}`);
 			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
+			return (true);
 		}
-		else
-			console.log(`[CHAT] User ${toUserId} not connected, cannot send private message`);
+
+		console.log(`[CHAT] User ${toUserId} not connected, cannot send private message`);
+		return (false);
 	}
 
 	async	sendErrorMessage(userId, message)
@@ -112,6 +114,16 @@ class	ChatConnectionManager
 		}
 
 		return (username);
+	}
+
+	async	sendUndeliveredMessages(userId)
+	{
+		const	socket = this._connections.get(userId);
+		if (!socket)
+			return;
+	
+		const	undeliveredMessages = await chatDb.getUndeliveredMessagesForUser(userId);
+	
 	}
 }
 
