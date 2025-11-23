@@ -87,12 +87,16 @@ const	chat =
 	type: 'object',
 	properties:
 	{
+		id: { type: 'string' },
+		name: { type: 'string' },
 		chatType: {chatType},
 		members:
 		{
 			type: 'array',
 			items: member
-		}
+		},
+		createdAt: { type: 'string', format: 'date-time' },
+		joinedAt: { type: 'string', format: 'date-time' }
 	}
 }
 

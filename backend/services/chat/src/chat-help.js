@@ -3,16 +3,12 @@
 //	this ensures that only internal services can access protected endpoints
 export async function	validateInternalApiKey(request, reply)
 {
-	const	key = req.headers['x-internal-api-key'];
+	const	key = request.headers['x-internal-api-key'];
 	// Validate the forwarded internal key matches our environment variable.
 	if (!process.env.INTERNAL_API_KEY || key !== process.env.INTERNAL_API_KEY)
 	{
-		console.error('[NOTIFICATION] Missing or invalid internal API key on proxied websocket request');
-
-		try { socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n'); } catch (e) {}
-		try { socket.destroy(); } catch (e) {}
-
-		return (null);
+		console.error('[CHAT] Missing or invalid internal API key');
+		return reply.code(401).send({ error: 'Unauthorized', message: 'Invalid or missing API key' });
 	}
 }
 

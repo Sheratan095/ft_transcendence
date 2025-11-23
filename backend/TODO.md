@@ -109,5 +109,5 @@
 [x] move email send in to notification service (endpoing called by auth service during login)
 [x] "real friends online" instead of all online users
 
-[] refactor of all db's like chat db (indenting, "type_like" enums)
+[x] refactor of all db's like chat db (indenting, "type_like" enums)
 [] prisma? for db interactions

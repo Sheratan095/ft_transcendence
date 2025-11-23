@@ -129,6 +129,7 @@ async function	handlePrivateMessage(userId, data, chatDb)
 {
 	try
 	{
+		// TO DO validate toUserId is a friend and not blocked
 		const	{ toUserId, message } = data;
 
 		if (!toUserId || !message)

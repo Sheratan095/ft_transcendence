@@ -1,5 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
+import { extractUserData } from './chat-help.js';
 
 // Example controller for sending system messages to a room (called via HTTP)
 export const	sendSystemMessage = async (req, reply) =>
@@ -42,9 +43,41 @@ export const	getChats = async (req, reply) =>
 		const	chatDb = req.server.chatDb;
 		const	userId = extractUserData(req).id;
 
-		const	chats = await chatDb.getChatsByUserId(userId);
+		console.log(`[CHAT] Fetching chats for user ${userId}`);
 
-		console.log(chats)
+		const	rawChats = await chatDb.getChatsByUserId(userId);
+
+		// Group by chat_id and aggregate members
+		const	chatsMap = new Map();
+		
+		for (const row of rawChats)
+		{
+			if (!chatsMap.has(row.chat_id))
+			{
+				chatsMap.set(row.chat_id, {
+					id: row.chat_id,
+					name: row.name || null,
+					chatType: row.chat_type,
+					createdAt: row.created_at,
+					joinedAt: row.joined_at,
+					members: []
+				});
+			}
+			
+			// Add member info (will need to fetch username from users service)
+			const	chat = chatsMap.get(row.chat_id);
+			if (row.user_id && !chat.members.find(m => m.userId === row.user_id))
+			{
+				chat.members.push({
+					userId: row.user_id,
+					username: await chatConnectionManager.getUsernameFromCache(row.user_id)
+				});
+			}
+		}
+
+		const	chats = Array.from(chatsMap.values());
+
+		return (reply.code(200).send(chats));
 	}
 	catch (err)
 	{

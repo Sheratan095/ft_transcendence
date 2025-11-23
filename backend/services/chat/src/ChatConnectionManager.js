@@ -36,7 +36,7 @@ class	ChatConnectionManager
 	async	sendToRoom(roomId, roomName, userIds, message)
 	{
 		// Refresh username cache
-		const	username = await this.#getUsernameFromCache(userId, refresh=true);
+		const	username = await this.getUsernameFromCache(userId, refresh=true);
 
 		const	data = {
 			roomId: roomId,
@@ -59,7 +59,7 @@ class	ChatConnectionManager
 	async	sendToUser(userId, toUserId, message)
 	{
 		// Refresh username cache (refresh = true)
-		const	senderUsername = await this.#getUsernameFromCache(userId, true);
+		const	senderUsername = await this.getUsernameFromCache(userId, true);
 
 		const	data = {
 			from: senderUsername,
@@ -101,7 +101,8 @@ class	ChatConnectionManager
 		}
 	}
 
-	async	#getUsernameFromCache(userId, refresh=false)
+	// Used also in chat-controllers.js
+	async	getUsernameFromCache(userId, refresh=false)
 	{
 		let	username = this._cachedUsersInRooms.get(userId);
 		if (!username || refresh)

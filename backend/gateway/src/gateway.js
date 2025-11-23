@@ -152,7 +152,7 @@ import {
 } from './routes/relationships-routes.js'
 
 import {
-	
+	getAllChats
 } from './routes/chat-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
@@ -237,6 +237,9 @@ await fastify.register(async function (fastify)
 	fastify.delete('/users/relationships/unblock', { schema: { hide: true }, preHandler: authenticateJwt, handler: unblockUser })
 	fastify.delete('/users/relationships/removeFriend', { schema: { hide: true }, preHandler: authenticateJwt, handler: removeFriend })
 	fastify.delete('/users/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwt, handler: cancelFriendRequest })
+
+	// CHAT routes
+	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
 });
 
 // SEARCH route – tighter rate limit

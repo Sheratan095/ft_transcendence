@@ -106,11 +106,23 @@ export class	ChatDatabase
 
 	async	getChatsByUserId(userId)
 	{
-		// TO DO: order by last message timestamp
+		// Get all chats for the user with all members
 		const	query = `
-			SELECT *
-			FROM chats INNER JOIN chat_members ON chats.id = chat_members.chat_id
-			WHERE chat_members.user_id = ?
+			SELECT 
+				c.id as chat_id,
+				c.name,
+				c.chat_type,
+				c.created_at,
+				cm.user_id,
+				cm.joined_at
+			FROM chats c
+			INNER JOIN chat_members cm ON c.id = cm.chat_id
+			WHERE c.id IN (
+				SELECT chat_id 
+				FROM chat_members 
+				WHERE user_id = ?
+			)
+			ORDER BY c.created_at DESC
 		`;
 
 		const	chats = await this.db.all(query, [userId]);

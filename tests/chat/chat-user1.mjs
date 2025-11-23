@@ -211,12 +211,32 @@ function handleInput(ws, input) {
 	}
 }
 
+async function	retrieveChats(cookies)
+{
+	console.log('🔍 Getting chats for User 1...');
+	const response = await fetch(`${GATEWAY_URL}/chat/`, {
+		method: 'GET',
+		headers: {
+			'Cookie': cookies
+		},
+	});
+
+	if (!response.ok)
+		throw new Error(`Failed to retrieve chats: ${response.statusText}`);
+
+	const chats = await response.json();
+	console.log('✅ Chats retrieved:', JSON.stringify(chats, null, 2));
+	return (chats)
+}
+
 async function main() {
 	try {
 		console.log('=== Chat Test User 1 ===\n');
 		
 		// Step 1: Login
 		const cookies = await login();
+
+		const chats = await retrieveChats(cookies);
 		
 		// Step 2: Connect WebSocket
 		const ws = await connectWebSocket(cookies);
