@@ -55,7 +55,7 @@ export async function	getUsernameById(userId)
 {
 	try
 	{
-		const	response = await fetch(`${process.env.USER_SERVICE_URL}/users/${userId}`, {
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/user?id=${userId}`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export async function	getUsernameById(userId)
 
 		if (!response.ok)
 		{
-			console.error(`[CHAT] Failed to fetch user data for ID ${userId}: ${response.statusText}`);
+			console.error(`[CHAT] Failed to fetch user data for Id ${userId}: ${response.statusText}`);
 			return (null);
 		}
 
@@ -74,7 +74,7 @@ export async function	getUsernameById(userId)
 	}
 	catch (error)
 	{
-		console.error(`[CHAT] Error fetching user data for ID ${userId}:`, error.message);
+		console.error(`[CHAT] Error fetching user data for Id ${userId}:`, error.message);
 		return (null);
 	}
 }

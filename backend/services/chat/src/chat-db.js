@@ -164,4 +164,19 @@ export class	ChatDatabase
 
 		return (chatId);
 	}
+
+	async	addMessageToChat(chatId, senderId, message)
+	{
+		const	messageId = await this.#generateUUID();
+		const	timestamp = new Date().toISOString();
+
+		const	insertMessageQuery = `
+			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
+			VALUES (?, ?, ?, ?, ?)
+		`;
+
+		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, timestamp]);
+
+		return (messageId);
+	}
 }

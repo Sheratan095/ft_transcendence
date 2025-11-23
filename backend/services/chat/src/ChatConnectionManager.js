@@ -58,11 +58,11 @@ class	ChatConnectionManager
 
 	async	sendToUser(userId, toUserId, message)
 	{
-		// Refresh username cache
-		const	username = await this.#getUsernameFromCache(userId, refresh=true);
+		// Refresh username cache (refresh = true)
+		const	senderUsername = await this.#getUsernameFromCache(userId, true);
 
 		const	data = {
-			from: username,
+			from: senderUsername,
 			senderId: userId,
 			message : message,
 			timestamp: new Date().toISOString(),
@@ -71,7 +71,12 @@ class	ChatConnectionManager
 		// Check it user is connected to socket
 		const	socket = this._connections.get(toUserId);
 		if (socket)
+		{
+			console.log(`[CHAT] Sending private message from user ${userId} to user ${toUserId}`);
 			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
+		}
+		else
+			console.log(`[CHAT] User ${toUserId} not connected, cannot send private message`);
 	}
 
 	async	sendErrorMessage(userId, message)

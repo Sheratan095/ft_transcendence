@@ -37,7 +37,7 @@ export function	handleMessage(socket, msg, userId, chatDb)
 	try
 	{
 		const	message = JSON.parse(msg.toString());
-		console.log(`[CHAT] Message from user ${userId}:`, message);
+		console.log(`[CHAT] Message from user ${userId}`);
 
 		switch (message.event)
 		{
@@ -137,17 +137,18 @@ async function	handlePrivateMessage(userId, data, chatDb)
 			return;
 		}
 
+		if (toUserId === userId)
+			return;
+
 		// Create a new chat between the two users if it doesn't exist
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, message);
 
 		await chatConnectionManager.sendToUser(
 			userId,
 			toUserId,
 			message
 		);
-
-		console.log(`[CHAT] Sending private message from user ${userId} to user ${toUserId}`);
-
 	}
 	catch (err)
 	{
