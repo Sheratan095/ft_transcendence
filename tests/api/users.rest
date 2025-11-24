@@ -1,5 +1,4 @@
 GET https://localhost:3000/users/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2LWNlMTAtNDM4Ni1iOWZjLTdjYWFhZTg5Mjg2NCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTY4ODY4OSwiZXhwIjoxNzYxNjg5NTg5fQ.6WrKTiYlX08s7zWEckLAd8nHY9bb-3tX-SQZzeCl1ns
 
 ###
 
@@ -8,7 +7,6 @@ GET https://localhost:3000/users/stats
 ###
 
 PUT https://localhost:3000/users/update-user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImQ4ZjhkYTkwLTI2MTQtNGNlMy05MWI2LTA1YTk2Zjg5MTljNSIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU3NDEyOSwiZXhwIjoxNzYxNTc1MDI5fQ.kag82g6wkpao3yGoQA6vrjHB1X1IBcXnMt0ch3ugcZY
 Content-Type: application/json
 
 {
@@ -17,9 +15,7 @@ Content-Type: application/json
 
 ###
 
-GET https://localhost:3000/users/user?username=MarcO
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImJkZjRiMGFiLThiZGYtNGMyZi04MDRjLWUxNjcxMjBiZmZmYiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTc0NjA0MSwiZXhwIjoxNzYxNzQ2OTQxfQ.g6RmAMSaNo02FAzpfRAxyBjQ25djCBzMtKdegTiumHU
-Content-Type: application/json
+GET https://localhost:3000/users/user?id=7f656d27-7686-4d8d-a1d9-a35ddb62f50e
 
 ###
 
@@ -37,7 +33,6 @@ Content-Type: application/json
 
 # Step 2: Get your profile with avatar URL
 GET https://localhost:3000/users/user?id=6a1535bd-deb6-4af2-87ed-e027283aad5c
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMTUzNWJkLWRlYjYtNGFmMi04N2VkLWUwMjcyODNhYWQ1YyIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTU4NTU1MiwiZXhwIjoxNzYxNTg2NDUyfQ._5y9bBkh9Bu_3jIZspas56YLEx1q1xjz3Pi98QTmXas
 
 # Response will include: { "id": "...", "username": "...", "avatar_url": "/avatars/userid_timestamp.jpg" }
 
