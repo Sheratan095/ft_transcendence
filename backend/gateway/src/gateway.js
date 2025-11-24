@@ -152,7 +152,8 @@ import {
 } from './routes/relationships-routes.js'
 
 import {
-	getAllChats
+	getAllChats,
+	getMessages
 } from './routes/chat-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
@@ -240,6 +241,7 @@ await fastify.register(async function (fastify)
 
 	// CHAT routes
 	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
+	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
 });
 
 // SEARCH route – tighter rate limit

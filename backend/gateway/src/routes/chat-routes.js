@@ -32,3 +32,25 @@ export const	getAllChats = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Chat service unavailable' }))
 	}
 }
+
+export const	getMessages = async (req, reply) =>
+{
+	try
+	{
+		const	response = await axios.get(`${CHAT_URL}/messages`, {
+			params: req.query,
+			headers: getAuthHeaders(req)
+		})
+
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('[GATEWAY] Chat service error:', err.message)
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		return (reply.code(500).send({ error: 'Chat service unavailable' }))
+	}
+}
