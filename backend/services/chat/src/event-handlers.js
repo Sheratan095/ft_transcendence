@@ -135,7 +135,6 @@ async function	handlePrivateMessage(userId, data, chatDb)
 	try
 	{
 		const	{ toUserId, message } = data;
-		const	messageSent = false
 
 		if (!toUserId || !message)
 		{
@@ -159,8 +158,7 @@ async function	handlePrivateMessage(userId, data, chatDb)
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
 		const	messageId = await chatDb.addMessageToChat(chatId, userId, message);
 
-		messageSent = await chatConnectionManager.sendToUser(userId, toUserId, message);
-		await chatDb.updateMessageStatus(messageId, toUserId, messageSent ? 'delivered' : 'sent');
+		await chatConnectionManager.sendToUser(userId, toUserId, message);
 	}
 	catch (err)
 	{

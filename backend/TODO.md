@@ -111,3 +111,4 @@
 
 [x] refactor of all db's like chat db (indenting, "type_like" enums)
 [] prisma? for db interactions
+[] dark swagger ui 

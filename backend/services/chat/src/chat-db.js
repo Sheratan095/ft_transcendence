@@ -104,6 +104,8 @@ export class	ChatDatabase
 		}
 	}
 
+	//-----------------------------CHAT QUERIES----------------------------
+
 	async	getChatsByUserId(userId)
 	{
 		// Get all chats for the user with all members
@@ -127,6 +129,25 @@ export class	ChatDatabase
 
 		const	chats = await this.db.all(query, [userId]);
 		return (chats);
+	}
+
+	async	getMessagesByChatId(chatId, limit=50, offset=0)
+	{
+		const	query = `
+			SELECT 
+				id
+				chat_id,
+				sender_id,
+				content,
+				created_at
+			FROM messages
+			WHERE chat_id = ?
+			ORDER BY created_at DESC
+			LIMIT ? OFFSET ?
+		`;
+
+		const	messages = await this.db.all(query, [chatId, limit, offset]);
+		return (messages);
 	}
 
 	async	getChatUsers(chatId)
@@ -177,6 +198,20 @@ export class	ChatDatabase
 		return (chatId);
 	}
 
+	async	isUserInChat(userId, chatId)
+	{
+		const	query = `
+			SELECT COUNT(*) as count
+			FROM chat_members
+			WHERE chat_id = ? AND user_id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId, userId]);
+		return (result.count > 0);
+	}
+
+	//-----------------------------MESSAGE QUERIES----------------------------
+
 	async	addMessageToChat(chatId, senderId, message)
 	{
 		const	messageId = await this.#generateUUID();
@@ -192,6 +227,8 @@ export class	ChatDatabase
 		return (messageId);
 	}
 
+	//-----------------------------MESSAGE STATUS QUERIES----------------------------
+
 	async	updateMessageStatus(messageId, userId, status)
 	{
 		const	timestamp = new Date().toISOString();
@@ -205,16 +242,16 @@ export class	ChatDatabase
 		await this.db.run(updateStatusQuery, [status, timestamp, messageId, userId]);
 	}
 
-	async	createMessageStatus(messageId, status)
+	async	createMessageStatus(messageId, userId, status)
 	{
 		const	timestamp = new Date().toISOString();
 
 		const	insertStatusQuery = `
-			INSERT INTO message_statuses (message_id, status, updated_at)
-			VALUES (?, ?, ?)
+			INSERT INTO message_statuses (message_id, user_id, status, updated_at)
+			VALUES (?, ?, ?, ?)
 		`;
 
-		await this.db.run(insertStatusQuery, [messageId, status, timestamp]);
+		await this.db.run(insertStatusQuery, [messageId, userId, status, timestamp]);
 	}
 
 	async	getUndeliveredMessages(userId)
@@ -224,11 +261,54 @@ export class	ChatDatabase
 			FROM messages m
 			JOIN chat_members cm ON m.chat_id = cm.chat_id
 			LEFT JOIN message_statuses ms ON m.id = ms.message_id AND ms.user_id = ?
-			WHERE cm.user_id = ? AND (ms.status IS NULL OR ms.status = 'sent')
+			WHERE cm.user_id = ? AND ms.status = 'sent'
 			ORDER BY m.created_at ASC
 		`;
 
 		const	messages = await this.db.all(query, [userId, userId]);
 		return (messages);
+	}
+
+	// Returns aggregated status for a message across all users
+	// DELIVERED if it's delivered to all users
+	// READ if it's read by all users [future implementation]
+	// Return "sent" if at least one user has not received it yet OR in case of error
+	async	getOverallMessageStatus(messageId)
+	{
+		try
+		{
+			const query = `
+				SELECT 
+					MIN(status) AS min_status,
+					MAX(status) AS max_status
+				FROM message_statuses
+				WHERE message_id = ?
+			`;
+
+			const	[rows] = await this.pool.query(query, [messageId]);
+
+			if (rows.length === 0 || rows[0].min_status === null)
+				return ("sent");
+
+			const	{ min_status, max_status } = rows[0];
+
+			// ---- AGGREGATION LOGIC ----
+
+			// Future: if you add "read" status
+			if (min_status === "read" && max_status === "read")
+				return ("read");
+
+			// All delivered
+			if (min_status === "delivered" && max_status === "delivered")
+				return ("delivered");
+
+			// Otherwise: at least one user still has only "sent"
+			return ("sent");
+		}
+		catch (err)
+		{
+			console.error("[CHATDB] Failed to compute overall message status:", err);
+			return ("sent");
+		}
 	}
 }

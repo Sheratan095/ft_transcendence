@@ -85,3 +85,42 @@ export const	getChats = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
+
+export const	getMessages = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	chatId = req.query.chatId;
+		const	limit = req.query.limit;
+		const	offset = req.query.offset;
+
+		if (await chatDb.isUserInChat(userId, chatId) === false)
+		{
+			console.log(`[CHAT] User ${userId} attempted to access messages for chat ${chatId} without membership`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
+		}
+
+		const	rawMessages = await chatDb.getMessagesByChatId(chatId, limit, offset);
+		// Add the overallor message status just if the message is sent from the requestor user
+		for (const message of rawMessages)
+		{
+			if (message.sender_id === userId)
+				message.message_status = await chatDb.getOverallMessageStatus(message.id);
+			else
+				message.message_status = undefined;
+		}
+
+		console.log(`[CHAT] User ${userId} fetched ${rawMessages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
+
+		return (reply.code(200).send(rawMessages));
+
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in getMessages controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}

@@ -74,11 +74,13 @@ class	ChatConnectionManager
 		{
 			console.log(`[CHAT] Sending private message from user ${userId} to user ${toUserId}`);
 			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
-			return (true);
+			chatDb.createMessageStatus(messageId, toUserId, 'delivered');
 		}
-
-		console.log(`[CHAT] User ${toUserId} not connected, cannot send private message`);
-		return (false);
+		else
+		{
+			console.log(`[CHAT] User ${toUserId} not connected, cannot send private message`);
+			chatDb.createMessageStatus(messageId, toUserId, 'delivered');
+		}
 	}
 
 	async	sendErrorMessage(userId, message)
@@ -116,15 +118,15 @@ class	ChatConnectionManager
 		return (username);
 	}
 
-	async	sendUndeliveredMessages(userId)
-	{
-		const	socket = this._connections.get(userId);
-		if (!socket)
-			return;
+	// async	sendUndeliveredMessages(userId)
+	// {
+	// 	const	socket = this._connections.get(userId);
+	// 	if (!socket)
+	// 		return;
 	
-		const	undeliveredMessages = await chatDb.getUndeliveredMessagesForUser(userId);
+	// 	const	undeliveredMessages = await chatDb.getUndeliveredMessagesForUser(userId);
 	
-	}
+	// }
 }
 
 export const	chatConnectionManager = new ChatConnectionManager();

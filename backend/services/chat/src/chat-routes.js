@@ -3,6 +3,7 @@ import { validateInternalApiKey } from './chat-help.js';
 import {
 	sendSystemMessage,
 	getChats,
+	getMessages
 } from './chat-controllers.js';
 
 import {
@@ -100,6 +101,20 @@ const	chat =
 	}
 }
 
+const	message =
+{
+	type: 'object',
+	properties:
+	{
+		id: { type: 'string' },
+		chatId: { type: 'string' },
+		senderId: { type: 'string' },
+		content: { type: 'string' },
+		createdAt: { type: 'string', format: 'date-time' },
+		messageStatus: { type: 'string', enum: ['sent', 'delivered', 'read', 'undefined'] } // undefined for messages not sent by the requestor user
+	}
+}
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 const	getChatsOpts = 
@@ -125,6 +140,44 @@ const	getChatsOpts =
 
 	preHandler: validateInternalApiKey,
 	handler: getChats
+}
+
+const	getMessagesOpts = 
+{
+	schema:
+	{
+		summary: 'Get chat messages for a specific chat',
+		description: 'The message status is the overall status for the message (sent, delivered, read) only for messages sent by the requestor user.',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['chatId', 'limit', 'offset'],
+			properties:
+			{
+				chatId: { type: 'string' },
+				limit: { type: 'integer', minimum: 1, maximum: 100, default: 50 }, // load up to 100 messages
+				offset: { type: 'integer', minimum: 0, default: 0 } // (start from ...)
+			}
+		},
+
+		response:
+		{
+			200: {
+				type: 'array',
+				items: message
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler : getMessages
 }
 
 //-----------------------------INTERNAL ROUTES-----------------------------
@@ -184,9 +237,8 @@ export function	chatRoutes(fastify)
 	});
 
 	fastify.get('/', getChatsOpts);
+	fastify.get('/chat-messages', getMessagesOpts);
 
 	// HTTP routes for internal service communication
 	fastify.post('/send-system-message', sendSystemMessageOpts);
-
-	// fastify.post('/create-private', )
 }

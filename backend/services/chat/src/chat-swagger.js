@@ -53,6 +53,16 @@ Reponse:
 }
 \`\`\`
 
+- **chat.visualize** - A user visualized that chat [TO DO]
+\`\`\`json
+{
+  "event": "chat.leave",
+  "data": {
+    "roomId": "room123"
+  }
+}
+\`\`\`
+
 - **chat.message** - Send a message to a room [NOT IMPLEMENTED YET]
 \`\`\`json
 {
