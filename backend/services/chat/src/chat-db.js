@@ -210,6 +210,30 @@ export class	ChatDatabase
 		return (result.count > 0);
 	}
 
+	async	chatExists(chatId)
+	{
+		const	query = `
+			SELECT COUNT(*) as count
+			FROM chats
+			WHERE id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId]);
+		return (result.count > 0);
+	}
+
+	async	isUserInChat(userId, chatId)
+	{
+		const	query = `
+			SELECT COUNT(*) as count
+			FROM chat_members
+			WHERE chat_id = ? AND user_id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId, userId]);
+		return (result.count > 0);
+	}
+
 	//-----------------------------MESSAGE QUERIES----------------------------
 
 	async	addMessageToChat(chatId, senderId, message)
@@ -311,4 +335,5 @@ export class	ChatDatabase
 			return ("sent");
 		}
 	}
+
 }

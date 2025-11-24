@@ -63,13 +63,23 @@ Reponse:
 }
 \`\`\`
 
-- **chat.message** - Send a message to a room [NOT IMPLEMENTED YET]
+- **chat.message** - Send a message to a room
 \`\`\`json
 {
   "event": "chat.message",
   "data": {
     "roomId": "room123",
-    "message": "Hello everyone!"
+    "content": "Hello everyone!"
+  }
+}
+
+Response (acknowledgment to sender):
+{
+  "event": "chat.messageSent",
+  "data": {
+    "chat_id": "room123",
+    "message_id": "msg789",
+    "status": "delivered" // or "pending" if some users are offline
   }
 }
 \`\`\`
@@ -80,7 +90,17 @@ Reponse:
   "event": "chat.private_message",
   "data": {
     "toUserId": "user456",
-    "message": "Hello everyone!"
+    "content": "Hello everyone!"
+  }
+}
+
+Response (acknowledgment to sender):
+{
+  "event": "chat.messageSent",
+  "data": {
+    "chat_id": "chat789",
+    "message_id": "msg123",
+    "status": "delivered" // or "pending" if recipient is offline
   }
 }
 \`\`\`
@@ -132,15 +152,16 @@ Reponse:
 }
 \`\`\`
 
-- **chat.message** - Message received in a room [NOT IMPLEMENTED YET]
+- **chat.message** - Message received in a room
 \`\`\`json
 {
   "event": "chat.message",
   "data": {
     "roomId": "room123",
-    "roomName": "General Chat",
     "from": "jane_smith",
-    "message": "Hello everyone!",
+    "senderId": "456",
+    "messageId": "msg789",
+    "content": "Hello everyone!",
     "timestamp": "2025-11-19T10:30:00.000Z"
   }
 }
@@ -153,8 +174,32 @@ Reponse:
   "data": {
     "from": "jane_smith",
     "senderId": "456",
-    "message": "Hello everyone!",
+    "messageId": "msg123",
+    "content": "Hello everyone!",
     "timestamp": "2025-11-19T10:30:00.000Z"
+  }
+}
+\`\`\`
+
+- **chat.messageSent** - Acknowledgment that your message was sent
+\`\`\`json
+{
+  "event": "chat.messageSent",
+  "data": {
+    "chat_id": "chat789",
+    "message_id": "msg123",
+    "status": "delivered" // "delivered" if sent to all recipients, "pending" if some are offline
+  }
+}
+\`\`\`
+
+- **chat.messageStatusUpdate** - Update on message status (delivered/read)
+\`\`\`json
+{
+  event: "chat.messageStatusUpdate",
+  data: {
+    message_id: "456",
+    overall_status: "delivered"
   }
 }
 \`\`\`

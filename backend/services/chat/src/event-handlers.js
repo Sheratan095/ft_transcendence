@@ -54,16 +54,12 @@ export function	handleMessage(socket, msg, userId, chatDb)
 			// 	handleLeaveRoom(userId, message.data);
 			// 	break;
 
-			// case 'chat.message':
-			// 	handleChatMessage(userId, message.data, chatDb);
-			// 	break;
-
-			case 'chat.private_message':
-				handlePrivateMessage(userId, message.data, chatDb);
+			case 'chat.message':
+				handleChatMessage(userId, message.data, chatDb, false);
 				break;
 
 			case 'chat.private_message':
-				handlePrivateMessage(userId, message.data, chatDb);
+				handleChatMessage(userId, message.data, chatDb, true);
 				break;
 
 			// case 'chat.typing':
@@ -95,73 +91,71 @@ export function	handleClose(socket, userId)
 	chatConnectionManager.removeConnection(userId);
 }
 
-function	handleChatMessage(userId, data, chatDb)
+async function	handleChatMessage(userId, data, chatDb, isPrivate = false)
 {
 	try
 	{
-		const	{ roomId, message } = data;
+		const	{ toUserId, roomId, content } = data;
+		const	targetId = isPrivate ? toUserId : roomId;
 
-		if (!roomId || !message)
+		// Validation
+		if (!targetId || !content)
 		{
-			console.log('[CHAT] Invalid chat message data');
+			console.log(`[CHAT] Invalid ${isPrivate ? 'private' : 'room'} message data`);
+			chatConnectionManager.sendErrorMessage(userId, 'Missing required fields');
 			return;
 		}
 
-		// Get id of users in the room
-		const	usersIdInRoom = chatConnectionManager.getUsersInRoom(roomId).map(user => user.userId);
-		if (!usersIdInRoom || usersIdInRoom.length === 0)
+		if (isPrivate)
 		{
-			console.log(`[CHAT] No users in room ${roomId}`);
-			return;
+			// Private message specific checks
+			if (toUserId === userId) // Cannot send message to yourself
+			{
+				console.log(`[CHAT] User ${userId} attempted to send a private message to themselves`);
+				chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to yourself');
+				return;
+			}
+
+			if (!(await checkBlock(toUserId, userId)))
+			{
+				console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
+				// chatConnectionManager.sendErrorMessage(userId, 'Can\'t send message');
+				return;
+			}
+		}
+		else
+		{
+			// Room message specific checks
+			if (!(await chatDb.isUserInChat(userId, roomId))) // Check if room exists and user is in the room
+			{
+				console.log(`[CHAT] ${userId} try to sent message ${roomId} but he isn't in the room`);
+				chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to this room');
+				return;
+			}
 		}
 
-		console.log(`[CHAT] Broadcasting message from user ${userId} to room ${roomId}`);
+		// Store message in DB
+		const	chatId = isPrivate 
+			? await chatDb.createPrivateChat(userId, toUserId) // If chat already exists, returns the existing one
+			: roomId;
 
-		// Broadcast the message to all users in the room
-		chatConnectionManager.sendToRoom(
-			roomId,
-			usersIdInRoom,
-			message
-		);
-	}
-	catch (err)
-	{
-		console.error('[CHAT] Error handling chat message:', err.message);
-	}
-}
-
-async function	handlePrivateMessage(userId, data, chatDb)
-{
-	try
-	{
-		const	{ toUserId, message } = data;
-
-		if (!toUserId || !message)
-		{
-			console.log('[CHAT] Invalid private message data');
-			return;
-		}
-
-		if (toUserId === userId)
-		{
-			console.log(`[CHAT] Himself: User ${userId} attempted to send a private message to themselves`);
-			return;
-		}
-
-		if (!(await checkBlock(toUserId, userId)))
-		{
-			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
-			return;
-		}
-
-		// Create a new chat between the two users if it doesn't exist
-		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
 		const	messageId = await chatDb.addMessageToChat(chatId, userId, message);
 
-		await chatConnectionManager.sendToUser(userId, toUserId, message);
+		// Send to recipient(s)
+		// It's returned if the message was delivered to all users in the room
+		const	deliveredToAll =
+			isPrivate ? await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb)
+					  : await chatConnectionManager.sendToRoom(roomId, userId, messageId, content, chatDb);
+
+		// Acknowledge to sender
+		const	status = deliveredToAll ? 'delivered' : 'pending';
+		chatConnectionManager.replyToMessage(userId, chatId, messageId, status);
+
+		console.log(`[CHAT] ${isPrivate ? 'Private' : 'Room'} message from user ${userId} to ${targetId} sent successfully`);
 	}
 	catch (err)
 	{
-		console.error('[CHAT] Error handling private message:', err.message);
+		console.error(`[CHAT] Error handling ${isPrivate ? 'private' : 'room'} message:`, err.message);
+		chatConnectionManager.sendErrorMessage(userId, 'Failed to send message');
 	}
 }
