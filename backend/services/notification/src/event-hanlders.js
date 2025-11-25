@@ -63,8 +63,11 @@ export function	handleClose(socket, userId)
 	userConnectionManager.removeConnection(userId);
 }
 
-export function	handleError(socket, err)
+export function	handleError(socket, err, userId)
 {
-	console.log(`[NOTIFICATION] WebSocket error in handler: ${err.message}`);
-	// TO DO remove connection if needed??
+	console.error(`[NOTIFICATION] WebSocket error for user ${userId}: ${err.message}`);
+	
+	// Remove the connection as it's likely broken
+	if (userId)
+		userConnectionManager.removeConnection(userId);
 }

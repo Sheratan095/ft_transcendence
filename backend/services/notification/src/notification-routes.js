@@ -211,7 +211,7 @@ export function	notificationRoutes(fastify)
 
 		socket.on('close', () => {handleClose(socket, userId);});
 
-		socket.on('error', (err) => {handleError(socket, err);});
+		socket.on('error', (err) => {handleError(socket, err, userId);});
 	});
 
 	fastify.get('/active-users-count', getActiveUsersCountOpts);

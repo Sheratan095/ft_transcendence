@@ -60,13 +60,26 @@ class	ChatConnectionManager
 			{
 				this.#dispatchEventToSocket(socket, 'chat.message', data);
 				// Create message status as 'delivered' for each connected user
-				if (userId !== senderId)
-					await chatDb.createMessageStatus(messageId, userId, 'delivered');
+
+				// Add the row also for the sender as 'read'
+				await chatDb.createMessageStatus(
+					messageId,
+					userId,
+					userId === senderId ? "read" : "delivered"
+				);
 
 				deliveredCount++;
 			}
-			else if (userId !== senderId) // User not connected
-				await chatDb.createMessageStatus(messageId, userId, 'sent');
+			else
+			{
+				// Add the message to db as sent for offline users
+				//	and as read for the sender anyway
+				await chatDb.createMessageStatus(
+					messageId,
+					userId,
+					userId === senderId ? "read" : "sent"
+				);
+			}
 		}
 
 		return (deliveredCount != userIds.length);
