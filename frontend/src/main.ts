@@ -1,4 +1,6 @@
 import spa from './spa';
+import { renderProfile, getUserId } from './lib/auth';
+
 
 class AuthUI {
   private container: HTMLElement;
@@ -12,7 +14,15 @@ class AuthUI {
     this.container.classList.add('w-full', 'flex', 'items-center', 'justify-center');
     this.container.style.minHeight = '240px';
 
-    this.renderLogin();
+    getUserCount();
+    if (getUserId()) {
+        renderProfile(el);
+      return;
+    }
+    else
+    {
+      this.renderLogin();
+    }
   }
 
   private clear() {
@@ -23,7 +33,7 @@ class AuthUI {
     this.clear();
 
     const card = document.createElement('div');
-    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900 shadow-[10px_10px_0_0_#0dff66] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full h-full flex items-start justify-start';
+    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900/50 backdrop-blur-sm shadow-[10px_10px_0_0_#0dff66] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full h-full flex items-start justify-start flex-col justify-between';
 
     const form = document.createElement('form');
     form.id = 'login-form';
@@ -91,7 +101,7 @@ class AuthUI {
 
     const authError = document.createElement('div');
     authError.id = 'auth-error';
-    authError.className = 'text-red-400 text-sm text-center hidden';
+    authError.className = 'text-red-400 text-sm text-center align-end hidden mt-4 min-h-[1.5rem] w-full';
 
     form.appendChild(title);
     form.appendChild(desc);
@@ -121,7 +131,7 @@ class AuthUI {
 
       try {
         authError.textContent = 'Signing in...';
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:3000'}/auth/login`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           credentials: 'include',
@@ -149,7 +159,7 @@ class AuthUI {
     this.clear();
 
     const card = document.createElement('div');
-    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900 shadow-[10px_10px_0_0_#00ffff] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full h-full flex items-start justify-start';
+    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900/50 backdrop-blur-sm shadow-[10px_10px_0_0_#00ffff] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full h-full flex items-start justify-start flex flex-col justify-between';
 
     const form = document.createElement('form');
     form.id = 'register-form';
@@ -227,7 +237,7 @@ class AuthUI {
 
     const authError = document.createElement('div');
     authError.id = 'auth-error';
-    authError.className = 'text-red-400 text-sm text-center hidden';
+    authError.className = 'text-red-400 text-sm text-center align-center hidden mt-4 min-h-[1.5rem] w-full';
 
     form.appendChild(title);
     form.appendChild(desc);
@@ -260,7 +270,7 @@ class AuthUI {
 
       try {
         authError.textContent = 'Registering...';
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:3000'}/auth/register`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           credentials: 'include',
@@ -284,6 +294,30 @@ class AuthUI {
     });
   }
 }
+
+async function getUserCount() 
+{
+  const onlineCount = document.getElementById('online-count');
+  if (!onlineCount) return;
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/users/stats`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      credentials: 'include'
+    });
+    if (res.ok) {
+      const body = await res.json();
+      if (body && typeof body.activeUsers === 'number') {
+        onlineCount.textContent = 'Join now! (' + body.activeUsers + '/' + body.totalUsers + ') users online.';
+      }
+    }
+  }
+    catch (err) {
+      console.error('Failed to fetch user stats', err);
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   new AuthUI();

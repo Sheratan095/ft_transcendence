@@ -1,12 +1,13 @@
-import { isLoggedInClient } from './lib/auth';
+
 
 type RouteConfig = { html: string; script?: string };
 
+// Use relative module paths. We'll resolve them with import.meta.url so Vite serves them correctly.
 const routes: Record<string, RouteConfig> = {
-  '/': { html: '/src/pages/profile-page/profilepage.html', script: '/src/pages/profile-page/profilepage.ts' },
-  '/login': { html: '/src/pages/login/login.html', script: '/src/pages/login/login.ts' },
-  '/register': { html: '/src/pages/register/register.html', script: '/src/pages/register/register.ts' },
-  '/profile': { html: '/src/pages/profile-info/profile.html', script: '/src/pages/profile-info/profile.ts' }
+  '/': { html: './pages/profile-page/profilepage.html', script: './pages/profile-page/profilepage.ts' },
+  '/login': { html: './pages/login/login.html', script: './pages/login/login.ts' },
+  '/register': { html: './pages/register/register.html', script: './pages/register/register.ts' },
+  '/profile': { html: './pages/profile-info/profile.html', script: './pages/profile-info/profile.ts' }
 };
 
 async function navigate(path: string) {
@@ -21,8 +22,10 @@ async function renderRoute(path: string) {
   const route = routes[path] || routes['/'];
   try {
     // Load HTML
-    const res = await fetch(route.html);
-    if (!res.ok) throw new Error(`Failed to load ${route.html}: ${res.status}`);
+    // Resolve HTML path relative to this module so Vite serves the correct URL
+    const htmlUrl = new URL(route.html, import.meta.url).href;
+    const res = await fetch(htmlUrl);
+    if (!res.ok) throw new Error(`Failed to load ${htmlUrl}: ${res.status}`);
     const html = await res.text();
     container.innerHTML = html;
 
@@ -30,11 +33,17 @@ async function renderRoute(path: string) {
     // Load script if provided (dynamic import)
     if (route.script) {
       try {
-        // ensure script executes as module; Vite supports TS imports
-        await import(route.script);
+        // Resolve script URL relative to this module and import as module
+        const scriptUrl = new URL(route.script, import.meta.url).href;
+        await import(/* @vite-ignore */ scriptUrl);
       } catch (err) {
-        // If dynamic import with .ts fails, attempt without extension
-        try { await import(route.script.replace(/\.ts$/, '.js')); } catch (_) { console.warn('Page script import failed', err); }
+        // If dynamic import with .ts fails, attempt .js
+        try {
+          const alt = new URL(route.script.replace(/\.ts$/, '.js'), import.meta.url).href;
+          await import(/* @vite-ignore */ alt);
+        } catch (_) {
+          console.warn('Page script import failed', err);
+        }
       }
     }
   } catch (err) {

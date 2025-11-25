@@ -5,7 +5,6 @@ INSTALL := $(PM) install
 DEV := $(PM) run dev --watch --https
 BUILD := $(PM) run build
 PREVIEW := $(PM) run preview
-LINT := $(PM) run lint
 FORMAT := $(PM) run format
 TEST := $(PM) run test
 
@@ -29,7 +28,6 @@ help:
 	@printf "  make typecheck      Run TypeScript type check (tsc --noEmit)\n"
 	@printf "  make tailwind-watch Run Tailwind in watch mode (writes to $(TAILWIND_OUT_DEV))\n"
 	@printf "  make tailwind-build Build Tailwind CSS for production (writes to $(TAILWIND_OUT_PROD))\n"
-	@printf "  make lint           Run lint script (if configured)\n"
 	@printf "  make format         Run format script (if configured)\n"
 	@printf "  make clean          Remove node_modules, dist and generated css\n"
 
@@ -37,7 +35,7 @@ install:
 	@echo "=> Installing dependencies using $(PM)"
 	@$(INSTALL)
 
-dev:
+dev: tailwind-build
 	@echo "=> Starting Tailwind in watch mode and Vite dev server"
 	@echo "   tailwind: input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_DEV)"
 	@mkdir -p $(dir $(TAILWIND_OUT_DEV))
@@ -69,10 +67,6 @@ tailwind-build:
 	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_PROD)"
 	@mkdir -p $(dir $(TAILWIND_OUT_PROD))
 	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_PROD) --minify
-
-lint:
-	@echo "=> Running lint"
-	@$(LINT)
 
 format:
 	@echo "=> Running format"
