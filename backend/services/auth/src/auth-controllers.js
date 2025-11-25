@@ -154,14 +154,15 @@ export const	logout = async (req, reply) =>
 
 		// Verify and decode token
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+		const	userId = decodedToken.id;
 
-		const	storedToken = await authDb.getRefreshTokenByUserId(decodedToken.id);
+		const	storedToken = await authDb.getRefreshTokenByUserId(userId);
 		
 		if (!storedToken || storedToken.refresh_token !== refreshToken)
 			return (reply.code(401).send({ error: 'Refresh token not found or already invalidated' }));
 
 		// remove token from DB
-		await authDb.deleteRefreshTokenById(storedToken.id);
+		await authDb.deleteRefreshTokenByUserId(userId);
 
 		clearAuthCookies(reply);
 
@@ -191,16 +192,17 @@ export const	token = async (req, reply) =>
 
 		// Verify JWT signature
 		const	decodedToken = decodeToken(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+		const	userId = decodedToken.id;
 
 		// Check if token exists in DB
-		const	storedToken = await authDb.getRefreshTokenByUserId(decodedToken.id);
+		const	storedToken = await authDb.getRefreshTokenByUserId(userId);
 		if (!storedToken || storedToken.refresh_token !== refreshToken)
 			return (reply.code(401).send({ error: 'Refresh token not found or revoked' }));
 
 		// Check if token is expired
 		if (isTokenExpired(storedToken.expires_at))
 		{
-			await authDb.deleteRefreshTokenById(storedToken.id);
+			await authDb.deleteRefreshTokenByUserId(userId);
 			return (reply.code(401).send({ error: 'Refresh token has expired' }));
 		}
 
@@ -248,7 +250,7 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 		if (isTokenExpired(storedToken.expires_at))
 		{
 			// Clean up expired token
-			await authDb.deleteTwoFactorTokenById(storedToken.id);
+			await authDb.deleteTwoFactorTokenByUserId(userId);
 			return (reply.code(401).send({ error: '2FA token has expired' }));
 		}
 
@@ -257,7 +259,7 @@ export const	verifyTwoFactorAuth = async (req, reply) =>
 			return (reply.code(401).send({ error: 'Invalid 2FA code' }));
 
 		// Clean up used token
-		await authDb.deleteTwoFactorTokenById(storedToken.id);
+		await authDb.deleteTwoFactorTokenByUserId(userId);
 
 		// Get user data
 		const	user = await authDb.getUserById(userId);

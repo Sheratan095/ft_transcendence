@@ -83,8 +83,8 @@ POST https://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "c9d90c36-ce10-4386-b9fc-7caaae892864",
-  "otpCode": "295237"
+  "userId": "0f4b76f9-4d86-4857-80ac-43f5f9dd7379",
+  "otpCode": "846422"
 }
 
 ###
@@ -94,7 +94,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImM5ZDkwYzM2LWNlMTAtNDM4Ni1iOWZjLTdjYWFhZTg5Mjg2NCIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MTY4ODYzMywiZXhwIjoxNzYxNjg5NTMzfQ.1KOzTVso2tiMYe2ZKqVwQkWwBt3RKQvys_h-TgXBCyU
 
 {
-  "tfaEnabled": false
+  "tfaEnabled": true
 }
 
 ###

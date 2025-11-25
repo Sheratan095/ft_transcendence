@@ -15,11 +15,9 @@ CREATE TABLE IF NOT EXISTS auth_accounts
 -- ------------------------------------------------------------
 -- REFRESH TOKENS
 -- ------------------------------------------------------------
--- TO DO use user_id as PK
 CREATE TABLE IF NOT EXISTS refresh_tokens
 (
-	id				TEXT PRIMARY KEY,
-	user_id			TEXT NOT NULL,
+	user_id			TEXT PRIMARY KEY,
 	refresh_token	TEXT NOT NULL,
 	created_at		TEXT DEFAULT (datetime('now')),
 	expires_at		TEXT NOT NULL,
@@ -30,16 +28,14 @@ CREATE TABLE IF NOT EXISTS refresh_tokens
 -- ------------------------------------------------------------
 -- 2FA TOKENS
 -- ------------------------------------------------------------
--- TO DO use user_id as PK
 CREATE TABLE IF NOT EXISTS twofactor_tokens
 (
-	id				TEXT PRIMARY KEY,
-	user_id			TEXT NOT NULL,
+	user_id			TEXT PRIMARY KEY,
 	otp_code		TEXT NOT NULL,
 	created_at		TEXT DEFAULT (datetime('now')),
 	expires_at		TEXT NOT NULL,
 
-	FOREIGN KEY (user_id) REFERENCES auth_accounts (id) ON DELETE CASCADE -- Delete 2FA tokens when account is deleted
+	FOREIGN KEY (user_id) REFERENCES auth_accounts (id) ON DELETE CASCADE
 );
 
 -- Password: Mrco@123_
