@@ -46,3 +46,6 @@ docker-compose.override.yml
 .idea/
 *.sublime-workspace
 *.sublime-project
+
+**/data/
+data/
