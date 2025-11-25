@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS message_statuses
 (
 	message_id		TEXT NOT NULL,
 	user_id			TEXT NOT NULL, -- represents the user who is receiving the message
-	status			TEXT NOT NULL CHECK(status IN ('sent', 'delivered')),
+	status			TEXT NOT NULL CHECK(status IN ('sent', 'delivered', 'read')),
 	updated_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 	PRIMARY KEY (message_id, user_id),

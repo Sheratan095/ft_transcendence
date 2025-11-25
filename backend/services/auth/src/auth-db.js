@@ -162,17 +162,15 @@ export class	AuthDatabase
 	// expiresAt: Date object
 	async	insertRefreshToken(userId, refresh_token, expiresAt)
 	{
-		const	id = uuidv4();
-
 		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS' (ISO FORMAT)
 		const	expiresAtStr = formatExpirationDate(expiresAt);
 
 		await this.db.run(
-			"INSERT INTO refresh_tokens (id, user_id, refresh_token, expires_at) VALUES (?, ?, ?, ?)",
-			[id, userId, refresh_token, expiresAtStr]
+			"INSERT INTO refresh_tokens (user_id, refresh_token, expires_at) VALUES (?, ?, ?)",
+			[userId, refresh_token, expiresAtStr]
 		);
 
-		return (id);
+		return (userId);
 	}
 
 	// expiresAt: Date object
@@ -196,11 +194,6 @@ export class	AuthDatabase
 		return (await this.db.all("SELECT * FROM refresh_tokens"));
 	}
 
-	async	deleteRefreshTokenById(tokenId,)
-	{
-		await (this.db.run("DELETE FROM refresh_tokens WHERE id = ?", [tokenId]));
-	}
-
 	async	deleteRefreshTokenByUserId(userId)
 	{
 		await (this.db.run("DELETE FROM refresh_tokens WHERE user_id = ?", [userId]));
@@ -210,24 +203,17 @@ export class	AuthDatabase
 
 	async	storeTwoFactorToken(userId, otpCode, expiresAt)
 	{
-		const	id = uuidv4();
-
 		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
 		const	expiresAtStr = formatExpirationDate(expiresAt);
 
-		await this.db.run("INSERT INTO twofactor_tokens (id, user_id, otp_code, expires_at) VALUES (?, ?, ?, ?)", [id, userId, otpCode, expiresAtStr]);
+		await this.db.run("INSERT INTO twofactor_tokens (user_id, otp_code, expires_at) VALUES (?, ?, ?)", [userId, otpCode, expiresAtStr]);
 
-		return (id);
+		return (userId);
 	}
 
 	async	getTwoFactorTokenByUserId(userId)
 	{
 		return (await this.db.get("SELECT * FROM twofactor_tokens WHERE user_id = ?", [userId]));
-	}
-
-	async	deleteTwoFactorTokenById(tokenId)
-	{
-		await (this.db.run("DELETE FROM twofactor_tokens WHERE id = ?", [tokenId]));
 	}
 
 	async	deleteTwoFactorTokenByUserId(userId)

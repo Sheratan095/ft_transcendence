@@ -131,22 +131,29 @@ export class	ChatDatabase
 		return (chats);
 	}
 
-	async	getMessagesByChatId(chatId, limit=50, offset=0)
+	// Fecth just the messages for a chat that a user is part of and that he has received
+	async getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
-		const	query = `
+		const query = `
 			SELECT 
-				id
-				chat_id,
-				sender_id,
-				content,
-				created_at
-			FROM messages
-			WHERE chat_id = ?
-			ORDER BY created_at DESC
-			LIMIT ? OFFSET ?
+				m.id,
+				m.chat_id,
+				m.sender_id,
+				m.content,
+				m.created_at,
+				ms.status AS message_status
+			FROM messages m
+			INNER JOIN message_statuses ms 
+				ON m.id = ms.message_id
+			WHERE m.chat_id = ?
+			AND ms.user_id = ?
+			ORDER BY m.created_at DESC
+			LIMIT ? OFFSET ?;
 		`;
+		// Fetch all messages in the chat received by the user (exclude messages before join and after leave)
+		// Included messages sent by the user as well
 
-		const	messages = await this.db.all(query, [chatId, limit, offset]);
+		const	messages = await this.db.all(query, [chatId, userId, limit, offset]);
 		return (messages);
 	}
 
