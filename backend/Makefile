@@ -180,3 +180,37 @@ help:
 	@echo "    make status   - Check service status"
 	@echo "    make install  - Install dependencies"
 	@echo "    make help     - Show this help"
+
+# Clean build artifacts and temporary files
+.PHONY: clean
+clean:
+	@echo "Cleaning temporary files and logs..."
+	@find . -name "*.log" -type f -delete
+	@find . -name "*.tmp" -type f -delete
+	@find . -name "*.swp" -type f -delete
+	@find . -name "*.swo" -type f -delete
+	@echo "Clean complete!"
+
+# Complete clean: remove all gitignored files (node_modules, databases, etc.)
+.PHONY: fclean
+fclean: stop clean
+	@echo "⚠️  WARNING: This will remove:"
+	@echo "  - All node_modules/"
+	@echo "  - All database files (*.db)"
+	@echo "  - All .env files"
+	@echo "  - All build/dist directories"
+	@read -p "Continue? [y/N] " confirm && [ "$$confirm" = "y" ] || [ "$$confirm" = "Y" ] || exit 1
+	@echo "Removing node_modules..."
+	@find . -name "node_modules" -type d -prune -exec rm -rf {} +
+	@echo "Removing database files..."
+	@find . -path "*/data/*.db" -type f -delete
+	@echo "Removing .env files..."
+	@find . -name ".env" -type f -delete
+	@echo "Removing build directories..."
+	@find . -name "dist" -type d -prune -exec rm -rf {} +
+	@find . -name "build" -type d -prune -exec rm -rf {} +
+	@echo "✅ Full clean complete! Run 'make install' to reinstall dependencies."
+
+# Rebuild from scratch
+.PHONY: re
+re: fclean install 
