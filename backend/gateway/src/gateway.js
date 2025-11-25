@@ -110,7 +110,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 // Register aggregated documentation from all microservices, { hide: true } in routes' schema is used to exclude routes from Swagger docs
-import SwaggerAggregator from './swagger-aggregator.js';
+import SwaggerAggregator from './swagger/swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 

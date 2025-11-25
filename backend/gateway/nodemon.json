@@ -1,7 +1,7 @@
 {
-  "watch": ["**.js", ".env"],
+  "watch": ["**.js", ".env", "**.css"],
   "ignore": ["node_modules", "*.log", "*.json"],
-  "ext": "js,json,env",
+  "ext": "js,json,env,css",
   "env": {
     "NODE_ENV": "development"
   },
