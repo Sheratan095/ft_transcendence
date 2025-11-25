@@ -2,7 +2,7 @@ PM := npm
 
 # Commands (you can override these when invoking make)
 INSTALL := $(PM) install
-DEV := $(PM) run dev --watch
+DEV := $(PM) run dev --watch --https
 BUILD := $(PM) run build
 PREVIEW := $(PM) run preview
 LINT := $(PM) run lint
@@ -38,10 +38,12 @@ install:
 	@$(INSTALL)
 
 dev:
-	@echo "=> Building Tailwind CSS for production:"
-	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_DEV)"
+	@echo "=> Starting Tailwind in watch mode and Vite dev server"
+	@echo "   tailwind: input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_DEV)"
 	@mkdir -p $(dir $(TAILWIND_OUT_DEV))
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_DEV) --minify
+	# Start Tailwind in watch mode in the background so CSS is recompiled on changes
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_DEV) --watch &
+	@echo "=> Tailwind watcher started"
 	@echo "=> Starting Vite dev server"
 	@$(DEV)
 
