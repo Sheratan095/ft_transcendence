@@ -31,9 +31,29 @@ export function	handleNewConnection(socket, req)
 
 export function	handleMessage(socket, msg, userId)
 {
-	console.log(`[NOTIFICATION] Message from user: ${userId} : ${msg.toString()}`);
+	try
+	{
+		const	message = JSON.parse(msg.toString());
+		console.log(`[NOTIFICATION] Message from user: ${userId} : `, message);
 
-	socket.send(`Echo from ${userId}: ${msg.toString()}`);
+		switch (message.event)
+		{
+			case 'ping': // Handle ping event
+				socket.send(JSON.stringify({ event: 'pong', data: { timestamp: Date.now() } }));
+				break;
+		
+			default:
+				console.log(`[NOTIFICATION] Unknown event type: ${message.event}`);
+		}
+	}
+	catch (err)
+	{
+		console.error(`[NOTIFICATION] Error processing message from user ${userId}: ${err.message}`);
+		socket.send(JSON.stringify({
+			event: 'error',
+			data: { message: 'Invalid message format' }
+		}));
+	}
 }
 
 export function	handleClose(socket, userId)
@@ -46,4 +66,5 @@ export function	handleClose(socket, userId)
 export function	handleError(socket, err)
 {
 	console.log(`[NOTIFICATION] WebSocket error in handler: ${err.message}`);
+	// TO DO remove connection if needed??
 }

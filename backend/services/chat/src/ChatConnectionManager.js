@@ -1,3 +1,4 @@
+import { getUsernameById } from './chat-help.js';
 
 // Chat connection manager handles WebSocket connections and message routing
 class	ChatConnectionManager
@@ -5,7 +6,9 @@ class	ChatConnectionManager
 	constructor()
 	{
 		this._connections = new Map(); // userId -> WebSocket
-		this._rooms = new Map(); // roomId -> Set of userIds
+		// Cache for usernames to reduce DB lookups 
+		//	refresh every time a user sends a message
+		this._cachedUsersInRooms = new Map(); // userId -> Username
 	}
 
 	addConnection(userId, socket)
@@ -16,14 +19,6 @@ class	ChatConnectionManager
 
 	removeConnection(userId)
 	{
-		// Remove user from all rooms
-		for (const [roomId, users] of this._rooms.entries())
-		{
-			users.delete(userId);
-			if (users.size === 0)
-				this._rooms.delete(roomId);
-		}
-
 		this._connections.delete(userId);
 		console.log(`[CHAT] User ${userId} disconnected`);
 	}
@@ -38,78 +33,98 @@ class	ChatConnectionManager
 		return (this._connections.size);
 	}
 
-	// Join a chat room (1-on-1 or group chat)
-	joinRoom(userId, roomId)
+	// Return if the message was delivered to all users in the room
+	async	sendToRoom(roomId, senderId, messageId, content, chatDb)
 	{
-		if (!this._rooms.has(roomId))
-			this._rooms.set(roomId, new Set());
-		
-		this._rooms.get(roomId).add(userId);
-		console.log(`[CHAT] User ${userId} joined room ${roomId}`);
-	}
+		// Refresh username cache
+		const	username = await this.#getUsernameFromCache(senderId, true);
 
-	// Leave a chat room
-	leaveRoom(userId, roomId)
-	{
-		const	room = this._rooms.get(roomId);
-		
-		if (room)
+		const	data = {
+			roomId: roomId,
+			from: username,
+			senderId: senderId,
+			messageId: messageId,
+			content: content,
+			timestamp: new Date().toISOString(),
+		};
+
+		// Get users in room
+		const	userIds = this.getUsersInRoom(roomId)?.map(user => user.userId) || [];
+		let		deliveredCount = 0;
+
+		// Send to each user in the room
+		for (const userId of userIds)
 		{
-			room.delete(userId);
-			if (room.size === 0)
-				this._rooms.delete(roomId);
-			
-			console.log(`[CHAT] User ${userId} left room ${roomId}`);
-		}
-	}
-
-	// Send message to a specific room
-	sendToRoom(roomId, event, data, excludeUserId = null)
-	{
-		const	room = this._rooms.get(roomId);
-		
-		if (!room)
-		{
-			console.log(`[CHAT] Room ${roomId} not found`);
-			return;
-		}
-
-		console.log(`[CHAT] Sending event '${event}' to room ${roomId}`);
-
-		for (const userId of room)
-		{
-			if (userId !== excludeUserId)
+			const	socket = this._connections.get(userId);
+			if (socket)
 			{
-				const	socket = this.getConnection(userId);
-				if (socket)
-					this.#dispatchEventToSocket(socket, event, data);
+				this.#dispatchEventToSocket(socket, 'chat.message', data);
+				// Create message status as 'delivered' for each connected user
+				if (userId !== senderId)
+					await chatDb.createMessageStatus(messageId, userId, 'delivered');
+
+				deliveredCount++;
 			}
+			else if (userId !== senderId) // User not connected
+				await chatDb.createMessageStatus(messageId, userId, 'sent');
 		}
+
+		return (deliveredCount != userIds.length);
 	}
 
-	// Send message to a specific user
-	sendToUser(userId, event, data)
+	// Return if the message was delivered to the user
+	async	sendToUser(senderId, toUserId, messageId, content, chatDb)
 	{
-		const	socket = this.getConnection(userId);
-		
+		// Refresh username cache (refresh = true)
+		const	senderUsername = await this.#getUsernameFromCache(senderId, true);
+
+		const	data = {
+			from: senderUsername,
+			senderId: senderId,
+			messageId: messageId,
+			content: content,
+			timestamp: new Date().toISOString(),
+		};
+
+		// Check if user is connected to socket
+		const	socket = this._connections.get(toUserId);
 		if (socket)
 		{
-			this.#dispatchEventToSocket(socket, event, data);
-			console.log(`[CHAT] Sent event '${event}' to user ${userId}`);
+			console.log(`[CHAT] Sending private message from user ${senderId} to user ${toUserId}`);
+			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
+			if (chatDb)
+				await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
+
+			return (true);
 		}
 		else
-			console.log(`[CHAT] User ${userId} not connected`);
+		{
+			console.log(`[CHAT] User ${toUserId} not connected, message is pending (status 'sent')`);
+			if (chatDb)
+				await chatDb.createMessageStatus(messageId, toUserId, 'sent');
+
+			return (false);
+		}
 	}
 
-	// Send typing indicator to room
-	sendTypingIndicator(roomId, userId, username, isTyping)
+	async	sendErrorMessage(userId, message)
 	{
-		this.sendToRoom(
-			roomId,
-			'chat.typing',
-			{ userId, username, isTyping },
-			userId // exclude sender
-		);
+		const	socket = this._connections.get(userId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'error', { message });
+	}
+
+	async	replyToMessage(userId, chatId, messageId, status)
+	{
+		const	socket = this._connections.get(userId);
+		const	data = {
+			chat_id: chatId,
+			message_id: messageId,
+			status: status,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'chat.messageSent', data);
 	}
 
 	#dispatchEventToSocket(socket, event, data)
@@ -126,6 +141,29 @@ class	ChatConnectionManager
 			}
 		}
 	}
+
+	// Used also in chat-controllers.js
+	async	#getUsernameFromCache(userId, refresh=false)
+	{
+		let	username = this._cachedUsersInRooms.get(userId);
+		if (!username || refresh)
+		{
+			username = await getUsernameById(userId);
+			this._cachedUsersInRooms.set(userId, username);
+		}
+
+		return (username);
+	}
+
+	// async	sendUndeliveredMessages(userId)
+	// {
+	// 	const	socket = this._connections.get(userId);
+	// 	if (!socket)
+	// 		return;
+	
+	// 	const	undeliveredMessages = await chatDb.getUndeliveredMessagesForUser(userId);
+	
+	// }
 }
 
 export const	chatConnectionManager = new ChatConnectionManager();

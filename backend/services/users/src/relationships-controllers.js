@@ -392,3 +392,28 @@ export async function	getFriendsInternal(req, reply)
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+export async function	checkBlock(req, reply)
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userA = req.query.userA;
+		const	userB = req.query.userB;
+
+		const	isBlocked = await usersDb.isBlocked(userA, userB);
+
+		console.log('[RELATIONSHIPS] CheckBlock between ', userA, ' and ', userB, ' :', isBlocked);
+
+		return (reply.code(200).send({ isBlocked }));
+	}
+	catch (err)
+	{
+		console.log('[RELATIONSHIPS] CheckBlock error: ', err.message);
+
+		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
+			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}

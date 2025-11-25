@@ -1,5 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
+import { checkBlock } from './chat-help.js';
 
 export function	handleNewConnection(socket, req)
 {
@@ -32,140 +33,129 @@ export function	handleNewConnection(socket, req)
 	return (userId);
 }
 
-export function	handleMessage(socket, msg, userId)
+export function	handleMessage(socket, msg, userId, chatDb)
 {
 	try
 	{
 		const	message = JSON.parse(msg.toString());
-		console.log(`[CHAT] Message from user ${userId}:`, message);
+		console.log(`[CHAT] Message from user ${userId}`);
 
 		switch (message.event)
 		{
-			case 'chat.join':
-				handleJoinRoom(userId, message.data);
+			case 'ping': // Handle ping event
+				socket.send(JSON.stringify({ event: 'pong', data: { timestamp: Date.now() } }));
 				break;
-			
-			case 'chat.leave':
-				handleLeaveRoom(userId, message.data);
-				break;
-			
+
+			// case 'chat.join':
+			// 	handleJoinRoom(userId, message.data);
+			// 	break;
+
+			// case 'chat.leave':
+			// 	handleLeaveRoom(userId, message.data);
+			// 	break;
+
 			case 'chat.message':
-				handleChatMessage(userId, message.data);
+				handleChatMessage(userId, message.data, chatDb, false);
 				break;
-			
-			case 'chat.typing':
-				handleTypingIndicator(userId, message.data);
+
+			case 'chat.private_message':
+				handleChatMessage(userId, message.data, chatDb, true);
 				break;
-			
+
+			// case 'chat.typing':
+			// 	handleTypingIndicator(userId, message.data);
+			// 	break;
+
 			default:
 				console.log(`[CHAT] Unknown event: ${message.event}`);
-				socket.send(JSON.stringify({
-					event: 'error',
-					data: { message: 'Unknown event type' }
-				}));
+				chatConnectionManager.sendErrorMessage(userId, 'Invalid message format');
+				break;
 		}
 	}
 	catch (err)
 	{
 		console.error(`[CHAT] Error parsing message from user ${userId}:`, err.message);
-		socket.send(JSON.stringify({
-			event: 'error',
-			data: { message: 'Invalid message format' }
-		}));
+		chatConnectionManager.sendErrorMessage(userId, 'Invalid message format');
 	}
+}
+
+export function	handleError(userId, data)
+{
+	console.log(`[CHAT] WebSocket error in handler: ${err.message}`);
 }
 
 export function	handleClose(socket, userId)
 {
 	console.log(`[CHAT] WebSocket connection closed - User: ${userId}`);
+
 	chatConnectionManager.removeConnection(userId);
 }
 
-export function	handleError(socket, err)
+async function	handleChatMessage(userId, data, chatDb, isPrivate = false)
 {
-	console.log(`[CHAT] WebSocket error in handler: ${err.message}`);
-}
-
-// ============ Event Handlers ============
-
-function	handleJoinRoom(userId, data)
-{
-	const	{ roomId } = data;
-	
-	if (!roomId)
+	try
 	{
-		console.error(`[CHAT] Missing roomId in join event from user ${userId}`);
-		return;
-	}
+		const	{ toUserId, roomId, content } = data;
+		const	targetId = isPrivate ? toUserId : roomId;
 
-	chatConnectionManager.joinRoom(userId, roomId);
-	
-	// Notify user they've joined successfully
-	chatConnectionManager.sendToUser(userId, 'chat.joined', { roomId });
-	
-	// Notify others in the room
-	chatConnectionManager.sendToRoom(
-		roomId,
-		'chat.userJoined',
-		{ userId, roomId },
-		userId // exclude sender
-	);
-}
-
-function	handleLeaveRoom(userId, data)
-{
-	const	{ roomId } = data;
-	
-	if (!roomId)
-	{
-		console.error(`[CHAT] Missing roomId in leave event from user ${userId}`);
-		return;
-	}
-
-	chatConnectionManager.leaveRoom(userId, roomId);
-	
-	// Notify others in the room
-	chatConnectionManager.sendToRoom(
-		roomId,
-		'chat.userLeft',
-		{ userId, roomId },
-		userId // exclude sender
-	);
-}
-
-function	handleChatMessage(userId, data)
-{
-	const	{ roomId, message, username } = data;
-	
-	if (!roomId || !message)
-	{
-		console.error(`[CHAT] Missing roomId or message in chat.message from user ${userId}`);
-		return;
-	}
-
-	// Broadcast message to all users in the room (including sender for confirmation)
-	chatConnectionManager.sendToRoom(
-		roomId,
-		'chat.message',
+		// Validation
+		if (!targetId || !content)
 		{
-			roomId,
-			userId,
-			username: username || 'Anonymous',
-			message,
-			timestamp: new Date().toISOString()
+			console.log(`[CHAT] Invalid ${isPrivate ? 'private' : 'room'} message data`);
+			chatConnectionManager.sendErrorMessage(userId, 'Missing required fields');
+			return;
 		}
-	);
-}
 
-function	handleTypingIndicator(userId, data)
-{
-	const	{ roomId, isTyping, username } = data;
-	
-	if (!roomId || isTyping === undefined)
-	{
-		console.error(`[CHAT] Missing roomId or isTyping in typing indicator from user ${userId}`);
-		return;
+		if (isPrivate)
+		{
+			// Private message specific checks
+			if (toUserId === userId) // Cannot send message to yourself
+			{
+				console.log(`[CHAT] User ${userId} attempted to send a private message to themselves`);
+				chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to yourself');
+				return;
+			}
+
+			if (!(await checkBlock(toUserId, userId)))
+			{
+				console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
+				// chatConnectionManager.sendErrorMessage(userId, 'Can\'t send message');
+				return;
+			}
+		}
+		else
+		{
+			// Room message specific checks
+			if (!(await chatDb.isUserInChat(userId, roomId))) // Check if room exists and user is in the room
+			{
+				console.log(`[CHAT] ${userId} try to sent message ${roomId} but he isn't in the room`);
+				chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to this room');
+				return;
+			}
+		}
+
+		// Store message in DB
+		const	chatId = isPrivate 
+			? await chatDb.createPrivateChat(userId, toUserId) // If chat already exists, returns the existing one
+			: roomId;
+
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, message);
+
+		// Send to recipient(s)
+		// It's returned if the message was delivered to all users in the room
+		const	deliveredToAll =
+			isPrivate ? await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb)
+					  : await chatConnectionManager.sendToRoom(roomId, userId, messageId, content, chatDb);
+
+		// Acknowledge to sender
+		const	status = deliveredToAll ? 'delivered' : 'pending';
+		chatConnectionManager.replyToMessage(userId, chatId, messageId, status);
+
+		console.log(`[CHAT] ${isPrivate ? 'Private' : 'Room'} message from user ${userId} to ${targetId} sent successfully`);
 	}
-
-	chatConnectionManager.sendTypingIndicator(roomId, userId, username, isTyping);
+	catch (err)
+	{
+		console.error(`[CHAT] Error handling ${isPrivate ? 'private' : 'room'} message:`, err.message);
+		chatConnectionManager.sendErrorMessage(userId, 'Failed to send message');
+	}
 }

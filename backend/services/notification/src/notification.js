@@ -27,7 +27,8 @@ const	start = async () =>
 		fastify.register(notificationRoutes);
 
 		await fastify.listen({ port: process.env.PORT })
-		console.log(`[NOTIFICATION] Server is running on port ws://localhost:${process.env.PORT}/ws`)
+		console.log(`[NOTIFICATION] Server is running on localhost:${process.env.PORT}`)
+		console.log(`[NOTIFICATION] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{

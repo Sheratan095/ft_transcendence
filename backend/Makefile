@@ -20,6 +20,11 @@ dev: dev-auth dev-users dev-notification dev-chat dev-gateway
 
 redev: stop dev
 
+.PHONY: frontend
+frontend:
+	@echo "Starting Frontend dev server on port 443..."
+	@cd ../frontend && sudo $$(which node) ./node_modules/.bin/vite
+
 # Start Auth service (production)
 .PHONY: start-auth
 start-auth:

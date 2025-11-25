@@ -110,7 +110,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 // Register aggregated documentation from all microservices, { hide: true } in routes' schema is used to exclude routes from Swagger docs
-import SwaggerAggregator from './swagger-aggregator.js';
+import SwaggerAggregator from './swagger/swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
@@ -150,6 +150,11 @@ import {
 	cancelFriendRequest,
 	removeFriend
 } from './routes/relationships-routes.js'
+
+import {
+	getAllChats,
+	getMessages
+} from './routes/chat-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
@@ -233,6 +238,10 @@ await fastify.register(async function (fastify)
 	fastify.delete('/users/relationships/unblock', { schema: { hide: true }, preHandler: authenticateJwt, handler: unblockUser })
 	fastify.delete('/users/relationships/removeFriend', { schema: { hide: true }, preHandler: authenticateJwt, handler: removeFriend })
 	fastify.delete('/users/relationships/cancelFriendRequest', { schema: { hide: true }, preHandler: authenticateJwt, handler: cancelFriendRequest })
+
+	// CHAT routes
+	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
+	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
 });
 
 // SEARCH route – tighter rate limit

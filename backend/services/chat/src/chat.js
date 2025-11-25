@@ -12,6 +12,9 @@ await fastify.register(fastifyWebsocket);
 import { checkEnvVariables } from './chat-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
 
+import { ChatDatabase } from './chat-db.js';
+let		chatDatabase;
+
 // Setup Swagger documentation
 import { setupSwagger } from './chat-swagger.js';
 await setupSwagger(fastify);
@@ -22,11 +25,19 @@ const	start = async () =>
 {
 	try
 	{
+		// Initialize database
+		chatDatabase = new ChatDatabase()
+		await chatDatabase.initialize()
+
+		// Make database available to all routes
+		fastify.decorate('chatDb', chatDatabase)
+
 		// Setup routes before starting the server
 		fastify.register(chatRoutes);
 
 		await fastify.listen({ port: process.env.PORT })
-		console.log(`[CHAT] Server is running on port ws://localhost:${process.env.PORT}/ws`)
+		console.log(`[CHAT] Server is running on localhost:${process.env.PORT}`)
+		console.log(`[CHAT] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{

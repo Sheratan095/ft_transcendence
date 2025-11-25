@@ -78,7 +78,7 @@ export class	AuthDatabase
 					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists') || err.message.includes('UNIQUE constraint failed'))
 						continue;
 
-					console.log("[USERS] Table creation info:", err.message);
+					console.log("[AUTH] Table creation info:", err.message);
 				}
 			}
 		}

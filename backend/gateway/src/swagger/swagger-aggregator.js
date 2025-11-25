@@ -1,5 +1,11 @@
 import axios from "axios";
 import fastifyBasicAuth from "@fastify/basic-auth";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export class	SwaggerAggregator
 {
@@ -161,10 +167,21 @@ export class	SwaggerAggregator
 			// Apply basic auth only to this scope (docs routes)
 			fastifyInstance.addHook("onRequest", fastify.basicAuth);
 
+			const darkCss = readFileSync(join(__dirname, 'dark.css'), 'utf-8');
+
 			await fastifyInstance.register(import("@fastify/swagger-ui"),
 			{
 				routePrefix: "/docs",
 				uiConfig: { docExpansion: "list", deepLinking: true },
+				theme: {
+					title: "ft_transcendence API",
+					css: [
+						{
+							filename: "dark.css",
+							content: darkCss
+						}
+					]
+				},
 				transformSpecificationClone: true,
 				transformSpecification: (swaggerObject) =>
 				{

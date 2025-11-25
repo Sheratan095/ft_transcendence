@@ -53,8 +53,6 @@ export async function	handleSocketUpgrade(req, socket, head)
 		// Authenticate WebSocket connection using JWT from cookies
 		const	user = await authenticateJwtWebSocket(req);
 
-		console.log(`[GATEWAY] WebSocket authenticated for user: ${user.id}`);
-
 		// Also inject forwarding headers so the proxied service (different process)
 		//	can reconstruct the authenticated user.
 		// We include an internal API key for service to service comunication
@@ -79,14 +77,14 @@ export async function	handleSocketUpgrade(req, socket, head)
 		
 		if (url.pathname === '/chat/ws')
 		{
-			console.log(`[GATEWAY] Routing WebSocket to CHAT service for user: ${user.id}`);
+			console.log(`[GATEWAY] WebSocket Authenicated, routing connection to CHAT service for user: ${user.id}`);
 			// Rewrite the URL to /ws for the chat service
 			req.url = '/ws';
 			chatProxy.ws(req, socket, head, { target: process.env.CHAT_SERVICE_URL });
 		}
 		else if (url.pathname === '/notifications/ws')
 		{
-			console.log(`[GATEWAY] Routing WebSocket to NOTIFICATION service for user: ${user.id}`);
+			console.log(`[GATEWAY] WebSocket Authenicated, routing connection to NOTIFICATION service for user: ${user.id}`);
 			// Rewrite the URL to /ws for the notification service
 			req.url = '/ws';
 			notificationProxy.ws(req, socket, head, { target: process.env.NOTIFICATION_SERVICE_URL });

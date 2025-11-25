@@ -1,0 +1,339 @@
+import sqlite3 from "sqlite3";
+
+import { v4 as uuidv4 } from 'uuid';
+
+import { promisify } from "util";
+import { mkdir, readFile } from "fs/promises";
+import path from "path";
+import { fileURLToPath } from 'url';
+
+// Get the directory name of the current module for later use
+const	__filename = fileURLToPath(import.meta.url);
+const	__dirname = path.dirname(__filename);
+
+export class	ChatDatabase
+{
+	constructor(dbPath = "./data/chat.db")
+	{
+		this.dbPath = dbPath;
+		this.db = null;
+	}
+
+	async	initialize()
+	{
+		try
+		{
+			// Create data directory if it doesn't exist
+			const	dir = path.dirname(this.dbPath);
+			await mkdir(dir, { recursive: true });
+
+			// Open database connection
+			this.db = new sqlite3.Database(this.dbPath);
+			
+			// Promisify database methods for easier async/await usage
+			const run = promisify(this.db.run.bind(this.db));
+			const get = promisify(this.db.get.bind(this.db));
+			const all = promisify(this.db.all.bind(this.db));
+			
+			this.db.run = run;
+			this.db.get = get;
+			this.db.all = all;
+
+			await this.#createTables();
+
+			console.log("[CHAT] Database connected: ", this.dbPath);
+		}
+		catch (error)
+		{
+			console.error("[CHAT] Database initialization error:", error);
+			throw (error);
+		}
+	}
+
+	async	#createTables()
+	{
+		try
+		{
+			const	schemaPath = path.join(__dirname, 'schema.sql');
+
+			// Read the SQL schema file
+			const	schema = await readFile(schemaPath, 'utf8');
+
+			// Split the schema into individual statements and execute them
+			const	statements = schema
+				.split(';')
+				.map(stmt => stmt.trim())
+				.filter(stmt => stmt.length > 0);
+
+			for (const statement of statements)
+			{
+				try
+				{
+					await this.db.run(statement);
+				}
+				catch (err)
+				{
+					// Silently ignore errors if tables already exist
+					if (err.message.includes('SQLITE_MISUSE') || err.message.includes('already exists') || err.message.includes('UNIQUE constraint failed'))
+						continue;
+
+					console.log("[CHAT] Table creation info:", err.message);
+				}
+			}
+		}
+		catch (error)
+		{
+			console.log("❌ Error reading schema for USERS db:", error);
+			throw (error);
+		}
+	}
+
+	async	#generateUUID()
+	{
+		const	id = uuidv4();
+
+		return (id);
+	}
+
+	async	#close()
+	{
+		if (this.db)
+		{
+			this.db.close();
+			this.db = null;
+		}
+	}
+
+	//-----------------------------CHAT QUERIES----------------------------
+
+	async	getChatsByUserId(userId)
+	{
+		// Get all chats for the user with all members
+		const	query = `
+			SELECT 
+				c.id as chat_id,
+				c.name,
+				c.chat_type,
+				c.created_at,
+				cm.user_id,
+				cm.joined_at
+			FROM chats c
+			INNER JOIN chat_members cm ON c.id = cm.chat_id
+			WHERE c.id IN (
+				SELECT chat_id 
+				FROM chat_members 
+				WHERE user_id = ?
+			)
+			ORDER BY c.created_at DESC
+		`;
+
+		const	chats = await this.db.all(query, [userId]);
+		return (chats);
+	}
+
+	async	getMessagesByChatId(chatId, limit=50, offset=0)
+	{
+		const	query = `
+			SELECT 
+				id
+				chat_id,
+				sender_id,
+				content,
+				created_at
+			FROM messages
+			WHERE chat_id = ?
+			ORDER BY created_at DESC
+			LIMIT ? OFFSET ?
+		`;
+
+		const	messages = await this.db.all(query, [chatId, limit, offset]);
+		return (messages);
+	}
+
+	async	getChatUsers(chatId)
+	{
+		const	query = `
+			SELECT users.id
+			FROM chat_members
+			WHERE chat_members.chat_id = ?
+		`;
+
+		const	users = await this.db.all(query, [chatId]);
+		return (users);
+	}
+
+	async	createPrivateChat(userId1, userId2)
+	{
+		// Check if a private chat already exists between these two users
+		const	existingChatQuery = `
+			SELECT chats.id
+			FROM chats
+			JOIN chat_members cm1 ON chats.id = cm1.chat_id AND cm1.user_id = ?
+			JOIN chat_members cm2 ON chats.id = cm2.chat_id AND cm2.user_id = ?
+			WHERE chats.chat_type = 'dm'
+		`;
+
+		const	existingChat = await this.db.get(existingChatQuery, [userId1, userId2]);
+		if (existingChat)
+			return (existingChat.id);
+
+		// Create new private chat
+		const	chatId = await this.#generateUUID();
+		const	insertChatQuery = `
+			INSERT INTO chats (id, name, chat_type)
+			VALUES (?, 'dm', 'dm')
+		`;
+
+		await this.db.run(insertChatQuery, [chatId]);
+
+		// Add both users to the chat_members table
+		const insertMemberQuery = `
+			INSERT INTO chat_members (chat_id, user_id)
+			VALUES (?, ?)
+		`;
+
+		await this.db.run(insertMemberQuery, [chatId, userId1]);
+		await this.db.run(insertMemberQuery, [chatId, userId2]);
+
+		return (chatId);
+	}
+
+	async	isUserInChat(userId, chatId)
+	{
+		const	query = `
+			SELECT COUNT(*) as count
+			FROM chat_members
+			WHERE chat_id = ? AND user_id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId, userId]);
+		return (result.count > 0);
+	}
+
+	async	chatExists(chatId)
+	{
+		const	query = `
+			SELECT COUNT(*) as count
+			FROM chats
+			WHERE id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId]);
+		return (result.count > 0);
+	}
+
+	async	isUserInChat(userId, chatId)
+	{
+		const	query = `
+			SELECT COUNT(*) as count
+			FROM chat_members
+			WHERE chat_id = ? AND user_id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId, userId]);
+		return (result.count > 0);
+	}
+
+	//-----------------------------MESSAGE QUERIES----------------------------
+
+	async	addMessageToChat(chatId, senderId, message)
+	{
+		const	messageId = await this.#generateUUID();
+		const	timestamp = new Date().toISOString();
+
+		const	insertMessageQuery = `
+			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
+			VALUES (?, ?, ?, ?, ?)
+		`;
+
+		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, timestamp]);
+
+		return (messageId);
+	}
+
+	//-----------------------------MESSAGE STATUS QUERIES----------------------------
+
+	async	updateMessageStatus(messageId, userId, status)
+	{
+		const	timestamp = new Date().toISOString();
+
+		// Update existing status entry
+		const	updateStatusQuery = `
+			UPDATE message_statuses
+			SET status = ?, updated_at = ?
+			WHERE message_id = ? AND user_id = ?
+		`;
+		await this.db.run(updateStatusQuery, [status, timestamp, messageId, userId]);
+	}
+
+	async	createMessageStatus(messageId, userId, status)
+	{
+		const	timestamp = new Date().toISOString();
+
+		const	insertStatusQuery = `
+			INSERT INTO message_statuses (message_id, user_id, status, updated_at)
+			VALUES (?, ?, ?, ?)
+		`;
+
+		await this.db.run(insertStatusQuery, [messageId, userId, status, timestamp]);
+	}
+
+	async	getUndeliveredMessages(userId)
+	{
+		const	query = `
+			SELECT m.id as message_id, m.chat_id, m.sender_id, m.content, m.created_at
+			FROM messages m
+			JOIN chat_members cm ON m.chat_id = cm.chat_id
+			LEFT JOIN message_statuses ms ON m.id = ms.message_id AND ms.user_id = ?
+			WHERE cm.user_id = ? AND ms.status = 'sent'
+			ORDER BY m.created_at ASC
+		`;
+
+		const	messages = await this.db.all(query, [userId, userId]);
+		return (messages);
+	}
+
+	// Returns aggregated status for a message across all users
+	// DELIVERED if it's delivered to all users
+	// READ if it's read by all users [future implementation]
+	// Return "sent" if at least one user has not received it yet OR in case of error
+	async	getOverallMessageStatus(messageId)
+	{
+		try
+		{
+			const query = `
+				SELECT 
+					MIN(status) AS min_status,
+					MAX(status) AS max_status
+				FROM message_statuses
+				WHERE message_id = ?
+			`;
+
+			const	[rows] = await this.pool.query(query, [messageId]);
+
+			if (rows.length === 0 || rows[0].min_status === null)
+				return ("sent");
+
+			const	{ min_status, max_status } = rows[0];
+
+			// ---- AGGREGATION LOGIC ----
+
+			// Future: if you add "read" status
+			if (min_status === "read" && max_status === "read")
+				return ("read");
+
+			// All delivered
+			if (min_status === "delivered" && max_status === "delivered")
+				return ("delivered");
+
+			// Otherwise: at least one user still has only "sent"
+			return ("sent");
+		}
+		catch (err)
+		{
+			console.error("[CHATDB] Failed to compute overall message status:", err);
+			return ("sent");
+		}
+	}
+
+}
