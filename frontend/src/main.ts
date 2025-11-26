@@ -1,4 +1,3 @@
-import spa from './spa';
 import { renderProfile, getUserId } from './lib/auth';
 
 
@@ -33,7 +32,7 @@ class AuthUI {
     this.clear();
 
     const card = document.createElement('div');
-    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900/50 backdrop-blur-sm shadow-[10px_10px_0_0_#0dff66] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full h-full flex items-start justify-start flex-col justify-between';
+    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900/60 backdrop-blur-sm shadow-[10px_10px_0_0_#0dff66] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full flex items-start justify-start flex-col justify-between';
 
     const form = document.createElement('form');
     form.id = 'login-form';
@@ -159,7 +158,7 @@ class AuthUI {
     this.clear();
 
     const card = document.createElement('div');
-    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900/50 backdrop-blur-sm shadow-[10px_10px_0_0_#00ffff] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full h-full flex items-start justify-start flex flex-col justify-between';
+    card.className = 'rounded-xl border border-neutral-700 bg-neutral-900/70 backdrop-blur-sm shadow-[10px_10px_0_0_#00ffff] transition-all duration-[0.4s] hover:shadow-lg p-8 w-full h-full flex items-start justify-start flex flex-col justify-between';
 
     const form = document.createElement('form');
     form.id = 'register-form';

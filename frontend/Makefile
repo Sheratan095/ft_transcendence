@@ -11,8 +11,7 @@ TEST := $(PM) run test
 # Tailwind CLI (uses npx so it works without global install)
 TAILWIND := npx tailwindcss
 TAILWIND_IN ?= ./index.css
-TAILWIND_OUT_DEV ?= ./tailwind.css
-TAILWIND_OUT_PROD ?= dist/assets/tailwind.css
+TAILWIND_OUT ?= ./tailwind.css
 
 # TypeScript check
 TSC := npx tsc --noEmit
@@ -26,8 +25,8 @@ help:
 	@printf "  make build          Build for production (vite)\n"
 	@printf "  make preview        Preview production build\n"
 	@printf "  make typecheck      Run TypeScript type check (tsc --noEmit)\n"
-	@printf "  make tailwind-watch Run Tailwind in watch mode (writes to $(TAILWIND_OUT_DEV))\n"
-	@printf "  make tailwind-build Build Tailwind CSS for production (writes to $(TAILWIND_OUT_PROD))\n"
+	@printf "  make tailwind-watch Run Tailwind in watch mode (writes to $(TAILWIND_OUT))\n"
+	@printf "  make tailwind-build Build Tailwind CSS for production (writes to $(TAILWIND_OUT))\n"
 	@printf "  make format         Run format script (if configured)\n"
 	@printf "  make clean          Remove node_modules, dist and generated css\n"
 
@@ -37,11 +36,8 @@ install:
 
 dev: tailwind-build
 	@echo "=> Starting Tailwind in watch mode and Vite dev server"
-	@echo "   tailwind: input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_DEV)"
-	@mkdir -p $(dir $(TAILWIND_OUT_DEV))
-	# Start Tailwind in watch mode in the background so CSS is recompiled on changes
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_DEV) --watch &
-	@echo "=> Tailwind watcher started"
+	@echo "   tailwind: input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
+	@mkdir -p $(dir $(TAILWIND_OUT))
 	@echo "=> Starting Vite dev server"
 	@$(DEV)
 
@@ -59,14 +55,14 @@ typecheck:
 
 tailwind-watch:
 	@echo "=> Running Tailwind in watch mode:"
-	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_DEV)"
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_DEV) --watch
+	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT) --watch
 
 tailwind-build:
 	@echo "=> Building Tailwind CSS for production:"
-	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT_PROD)"
-	@mkdir -p $(dir $(TAILWIND_OUT_PROD))
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT_PROD) --minify
+	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
+	@mkdir -p $(dir $(TAILWIND_OUT))
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT) --minify
 
 format:
 	@echo "=> Running format"
@@ -78,4 +74,4 @@ test:
 
 clean:
 	@echo "=> Cleaning node_modules, dist, and generated css"
-	@rm -rf node_modules dist $(TAILWIND_OUT_DEV)
+	@rm -rf node_modules dist $(TAILWIND_OUT)

@@ -11,6 +11,11 @@ export function getUserId(): string | null {
   return localStorage.getItem('userId');
 }
 
+export function isLoggedInClient(): boolean {
+  const userId = getUserId();
+  return userId !== null && userId !== '';
+}
+
 export async function fetchUserProfile(): Promise<User | null> {
   let userId: string | null = getUserId();
   if (!userId) {
@@ -56,6 +61,8 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
     console.warn('renderProfile: target container not found');
     return null;
   }
+
+  // show loading state
   root.innerHTML = '';
   const loading = document.createElement('div');
   loading.className = 'py-8 text-center text-neutral-400';
@@ -71,120 +78,55 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
     location.reload();
     return null;
   }
-  const card = document.createElement('div');
-  card.className =
-    "text-card-foreground flex flex-col gap-6 rounded-xl py-6 transition-all duration-300 " +
-    "hover:shadow-md h-full bg-neutral-900/50 border border-neutral-800 shadow-lg w-full max-w-2xl mx-auto";
-  const header = document.createElement('div');
-  header.className =
-    "flex items-start gap-4 px-6 pb-4"; // switched to flex layout
 
-  // LEFT — avatar (smaller + floated)
-  const avatarWrap = document.createElement('div');
-  avatarWrap.className =
-    "relative w-14 h-14 rounded-xl overflow-hidden border border-neutral-700 flex items-center justify-center shrink-0";
+  // Clone template
+  const template = document.getElementById('profile-card-template') as HTMLTemplateElement;
+  if (!template) {
+    console.error('Profile card template not found');
+    return null;
+  }
 
-  const avatar = document.createElement('img');
-  avatar.alt = user.username || "avatar";
-  avatar.className = "w-6 h-6 object-cover";
-  avatar.src = user.avatarUrl || "/assets/placeholder-avatar.jpg";
+  const card = template.content.cloneNode(true) as DocumentFragment;
+  const cardEl = (card.querySelector('div') as HTMLElement) || null;
 
-  avatarWrap.appendChild(avatar);
+  // Populate template with user data
+  const avatar = card.querySelector('#profile-avatar') as HTMLImageElement;
+  if (avatar) avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
 
-  // RIGHT — title + additional content
-  const headerRight = document.createElement('div');
-  headerRight.className = "flex flex-col justify-center";
+  const username = card.querySelector('#profile-username') as HTMLElement;
+  if (username) username.textContent = user.username || user.email || 'User';
 
-  const titleWrap = document.createElement('div');
-  titleWrap.className = "text-xl font-bold capitalize";
+  const email = card.querySelector('#profile-email') as HTMLElement;
+  if (email) email.textContent = user.email || '';
 
-  const title = document.createElement('h1');
-  title.textContent = user.username || user.email || "User";
+  const id = card.querySelector('#profile-id') as HTMLElement;
+  if (id) id.textContent = user.id || '';
 
-  titleWrap.appendChild(title);
+  const editBtn = card.querySelector('#profile-edit-btn') as HTMLButtonElement;
+  const logoutBtn = card.querySelector('#profile-logout-btn') as HTMLButtonElement;
 
-  headerRight.appendChild(titleWrap);
-
-  header.appendChild(avatarWrap);
-  header.appendChild(headerRight);
-
-
-  const content = document.createElement('div');
-  content.className = "px-6";
-
-  const contentWrapper = document.createElement('div');
-  contentWrapper.className = "space-y-4";
-
-  const infoGroup = document.createElement('div');
-  infoGroup.className = "space-y-2";
-
-  const rowEmail = document.createElement('div');
-  rowEmail.className = "flex items-center gap-2";
-  rowEmail.innerHTML = `<p class="text-sm"><span class="font-medium">Email:</span> ${user.email}</p>`;
-
-  const rowId = document.createElement('div');
-  rowId.className = "flex items-center gap-2";
-  rowId.innerHTML = `<p class="text-sm"><span class="font-medium">User ID:</span> ${user.id}</p>`;
-
-  infoGroup.appendChild(rowEmail);
-  infoGroup.appendChild(rowId);
-
-  contentWrapper.appendChild(infoGroup);
-  const aboutGroup = document.createElement('div');
-
-  const aboutTitle = document.createElement('h3');
-  aboutTitle.className =
-    "text-sm font-semibold text-neutral-400 mb-2";
-  aboutTitle.textContent = "Account info";
-
-  const aboutText = document.createElement('div');
-  aboutText.className =
-    "text-xs text-neutral-500 space-y-2";
-  aboutText.innerHTML = `
-    <p>This is your personal profile card.</p>
-    <p>Your email and ID are used for account authentication.</p>
-  `;
-
-  aboutGroup.appendChild(aboutTitle);
-  aboutGroup.appendChild(aboutText);
-
-  contentWrapper.appendChild(aboutGroup);
-
-  content.appendChild(contentWrapper);
-  const actions = document.createElement('div');
-  actions.className = "w-full flex gap-4 px-6 mt-2";
-
-  const editBtn = document.createElement('button');
-  editBtn.className =
-    "flex-1 bg-[#0dff66] text-black font-semibold py-2 rounded-md hover:brightness-90 transition";
-  editBtn.textContent = "Edit profile";
-
-  const logoutBtn = document.createElement('button');
-  logoutBtn.className =
-    "flex-1 bg-neutral-800 text-white border border-neutral-700 py-2 rounded-md hover:bg-neutral-700 transition";
-  logoutBtn.textContent = "Logout";
-
-  actions.appendChild(editBtn);
-  actions.appendChild(logoutBtn);
-  card.appendChild(header);
-  card.appendChild(content);
-  card.appendChild(actions);
-
+  // Append card to root
   root.appendChild(card);
-  logoutBtn.addEventListener('click', async () => {
-    localStorage.removeItem('userId');
-    await fetch(`${API_BASE}/auth/logout`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      credentials: 'include',
+
+  // Attach event listeners
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      localStorage.removeItem('userId');
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        credentials: 'include',
+      });
+      window.location.reload();
     });
-    window.location.reload();
-  });
+  }
 
-  editBtn.addEventListener('click', () => {
-    const ev = new CustomEvent('profile:edit', { detail: user });
-    window.dispatchEvent(ev);
-  });
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      const ev = new CustomEvent('profile:edit', { detail: user });
+      window.dispatchEvent(ev);
+    });
+  }
 
-  return card;
+  return cardEl;
 }

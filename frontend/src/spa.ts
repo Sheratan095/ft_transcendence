@@ -1,8 +1,6 @@
-
+import { isLoggedInClient } from './lib/auth';
 
 type RouteConfig = { html: string; script?: string };
-
-// Use relative module paths. We'll resolve them with import.meta.url so Vite serves them correctly.
 const routes: Record<string, RouteConfig> = {
   '/': { html: './pages/profile-page/profilepage.html', script: './pages/profile-page/profilepage.ts' },
   '/login': { html: './pages/login/login.html', script: './pages/login/login.ts' },
