@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { checkBlock } from './chat-help.js';
+import { checkBlock, notifyMessageStatusUpdates } from './chat-help.js';
 
 export function	handleNewConnection(socket, req)
 {
@@ -33,6 +33,18 @@ export function	handleNewConnection(socket, req)
 	return (userId);
 }
 
+export function	handleError(userId, data)
+{
+	console.log(`[CHAT] WebSocket error in handler: ${err.message}`);
+}
+
+export function	handleClose(socket, userId)
+{
+	console.log(`[CHAT] WebSocket connection closed - User: ${userId}`);
+
+	chatConnectionManager.removeConnection(userId);
+}
+
 export function	handleMessage(socket, msg, userId, chatDb)
 {
 	try
@@ -53,6 +65,10 @@ export function	handleMessage(socket, msg, userId, chatDb)
 			// case 'chat.leave':
 			// 	handleLeaveRoom(userId, message.data);
 			// 	break;
+
+			case 'chat.read':
+				handleChatRead(userId, message.data, chatDb);
+				break;
 
 			case 'chat.message':
 				handleChatMessage(userId, message.data, chatDb, false);
@@ -77,18 +93,6 @@ export function	handleMessage(socket, msg, userId, chatDb)
 		console.error(`[CHAT] Error parsing message from user ${userId}:`, err.message);
 		chatConnectionManager.sendErrorMessage(userId, 'Invalid message format');
 	}
-}
-
-export function	handleError(userId, data)
-{
-	console.log(`[CHAT] WebSocket error in handler: ${err.message}`);
-}
-
-export function	handleClose(socket, userId)
-{
-	console.log(`[CHAT] WebSocket connection closed - User: ${userId}`);
-
-	chatConnectionManager.removeConnection(userId);
 }
 
 async function	handleChatMessage(userId, data, chatDb, isPrivate = false)
@@ -157,5 +161,41 @@ async function	handleChatMessage(userId, data, chatDb, isPrivate = false)
 	{
 		console.error(`[CHAT] Error handling ${isPrivate ? 'private' : 'room'} message:`, err.message);
 		chatConnectionManager.sendErrorMessage(userId, 'Failed to send message');
+	}
+}
+
+async function	handleChatRead(userId, data, chatDb)
+{
+	try
+	{
+		const	{ roomId } = data;
+
+		// Validation
+		if (!roomId)
+		{
+			console.log(`[CHAT] Invalid chat read data from user ${userId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Missing required fields for chat read');
+			return;
+		}
+
+		// Check if room exists and user is in the room
+		if (!(await chatDb.isUserInChat(userId, roomId)))
+		{
+			console.log(`[CHAT] ${userId} try to mark messages as read in ${roomId} but he isn't in the room`);
+			chatConnectionManager.sendErrorMessage(userId, 'Cannot mark messages as read in this room');
+			return;
+		}
+
+		// Mark all message status for this user in this chat as read
+		//  only updates messages that aren't already 'read' to reduce writes
+		const	updatedTime = await chatDb.markMessagesAsRead(roomId, userId);
+
+		// Notify senders about the status update
+		await notifyMessageStatusUpdates(roomId, updatedTime, chatDb);
+	}
+	catch (err)
+	{
+		console.error(`[CHAT] Error handling chat read from user ${userId}:`, err.message);
+		chatConnectionManager.sendErrorMessage(userId, 'Failed to mark messages as read');
 	}
 }

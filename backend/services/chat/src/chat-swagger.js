@@ -56,11 +56,12 @@ Reponse:
 - **chat.visualize** - A user visualized that chat [TO DO]
 \`\`\`json
 {
-  "event": "chat.leave",
+  "event": "chat.read",
   "data": {
     "roomId": "room123"
   }
 }
+
 \`\`\`
 
 - **chat.message** - Send a message to a room
@@ -198,6 +199,7 @@ Response (acknowledgment to sender):
 {
   event: "chat.messageStatusUpdate",
   data: {
+    chat_id: "456",
     message_id: "456",
     overall_status: "delivered"
   }

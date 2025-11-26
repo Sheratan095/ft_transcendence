@@ -140,6 +140,19 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'chat.messageSent', data);
 	}
 
+	async	notifyMessageStatusUpdate(userId, chatId, messageId, status)
+	{
+		const	socket = this._connections.get(userId);
+		const	data = {
+			chat_id: chatId,
+			message_id: messageId,
+			overall_status: status,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'chat.messageStatusUpdate', data);
+	}
+
 	#dispatchEventToSocket(socket, event, data)
 	{
 		if (socket)

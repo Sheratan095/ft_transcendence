@@ -1,3 +1,5 @@
+import { chatConnectionManager } from './ChatConnectionManager.js';
+
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
@@ -101,5 +103,17 @@ export async function	checkBlock(userA, userB)
 	{
 		console.error('[CHAT] Error checking block status:', err.message);
 		return (false);
+	}
+}
+
+// Helper to notify message senders about status updates (delivered/read)
+export async function	notifyMessageStatusUpdates(roomId, updatedTime, chatDb)
+{
+	const	justUpdatedMessages = await chatDb.getMessagesUpdatedAt(roomId, updatedTime);
+
+	for (const { message_id, sender_id } of justUpdatedMessages)
+	{
+		const	overallStatus = await chatDb.getOverallMessageStatus(message_id);
+		chatConnectionManager.notifyMessageStatusUpdate(sender_id, roomId, message_id, overallStatus);
 	}
 }
