@@ -57,7 +57,7 @@
   <section class="relative h-max flex flex-col items-center justify-center overflow-hidden bg-black">
     <div class="fixed inset-0 bg-[length:40px_40px] pointer-events-none
       bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]
-      animate-[gridMove_12s_linear_infinite] opacity-60 mix-blend-lighten [mask-image:radial-gradient(ellipse_at_center,transparent_5%,black)]">
+      animate-[gridMove_12s_linear_infinite] opacity-60 mix-blend-lighten [mask-image:radial-gradient(ellipse_at_top_left,transparent_15%,black)]">
     </div>
 
     <div class="absolute inset-0 z-20 mix-blend-difference pointer-events-none
@@ -65,7 +65,7 @@
     </div>
 
   <br>
-    <h1 class="text-[10vw] font-extrabold uppercase tracking-tighter leading-[0.8] text-gay-100 float-start mt-10">
+    <h1 class="text-[10vw] font-extrabold uppercase tracking-tighter leading-[0.8] text-gay-100 float-start mt-5">
       FT/<br />TRASCENDENCE
     </h1>
     <p class="max-w-2xl mt-10 text-2xl tracking-wide text-neutral-500 text-center font-bold">
@@ -79,7 +79,7 @@
             gap-[10vw]">
 
   <!-- CARD PONG -->
-  <div class="p-10 w-full md:w-[40vw] lg:w-[35vw]
+  <div class="p-10 w-full max-w-[50vw] max-h-[80vh]
               border-4 border-neutral-700 bg-neutral-900
               shadow-[10px_10px_0_0_#ff009d] overflow-hidden">
 
@@ -150,16 +150,16 @@
 
   <!-- Profile card template (hidden) -->
   <template id="profile-card-template">
-    <div class="text-card-foreground flex flex-col gap-12 rounded-xl pb-6 transition-all duration-300 hover:shadow-md bg-neutral-900/50 border border-neutral-700 shadow-lg w-full mx-auto">
+    <div class="text-card-foreground border flex flex-col gap-12 border-neutral-700 bg-neutral-900/50 rounded-xl pb-6 shadow-[10px_10px_0_0_#0dff66] transition-all duration-[0.4s] hover:shadow-lg w-full h-full">
       <!-- Header with avatar and title -->
       <div class="flex items-start gap-4 p-6 pb-4">
         <!-- Avatar -->
-        <div class="relative w-[10vw] h-[10vw] rounded-xl overflow-hidden border-[2px] border-neutral-400 flex items-center justify-center shrink">
+        <div class="relative w-[20vw] min-w-24 max-w-48 min-h-24 max-h-48 z-30 aspect-square rounded-xl overflow-hidden border-[2px] border-neutral-400 flex items-center justify-center shrink">
           <img id="profile-avatar" alt="avatar" class="w-full h-full object-cover" src="/assets/placeholder-avatar.jpg" />
         </div>
           <!-- Title section -->
         <div class="flex flex-col justify-center">
-          <h1 id="profile-username" class="text-xl font-bold capitalize">User</h1>
+          <h1 id="profile-username" class="z-30 text-2xl font-bold capitalize">User</h1>
           <!-- Content section -->
           <div class="px-6 py-6">
             <div class="space-y-4">
@@ -171,6 +171,10 @@
                 <div class="flex items-center gap-2">
                   <p class="text-sm"><span class="font-extrabold">User ID:</span> <span class=" text-gray-500" id="profile-id">0</span></p>
                 </div>
+                <div class="flex items-center gap-2">
+                  <p class="text-sm"><span class="font-extrabold">Rank:</span> <span class=" text-gray-500" id="profile-rank">Rookie</span></p>
+                </div>
+                
               </div>
               <!-- About group -->
               <div>
