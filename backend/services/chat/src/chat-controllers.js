@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData } from './chat-help.js';
+import { extractUserData, notifyMessageStatusUpdates } from './chat-help.js';
 
 // Example controller for sending system messages to a room (called via HTTP)
 export const	sendSystemMessage = async (req, reply) =>
@@ -114,6 +114,11 @@ export const	getMessages = async (req, reply) =>
 		}
 
 		console.log(`[CHAT] User ${userId} fetched ${rawMessages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
+
+		// Update messages in requested chat statuses to 'delivered' for this user
+		const	deliveredTime = await chatDb.markMessagesAsDelivered(chatId, userId);
+		// Notify senders about the status update if the overall status changed
+		await notifyMessageStatusUpdates(chatId, deliveredTime, chatDb);
 
 		return (reply.code(200).send(rawMessages));
 

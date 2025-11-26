@@ -364,6 +364,28 @@ export class	ChatDatabase
 		return (timestamp);
 	}
 
+	// Used when a user fetch messages from a chat
+	async	markMessagesAsDelivered(chatId, userId)
+	{
+		const	timestamp = new Date().toISOString();
+
+		const	query = `
+			UPDATE message_statuses
+			SET status = 'delivered', 
+				updated_at = ?
+			WHERE user_id = ?
+			AND message_id IN (
+				SELECT id FROM messages WHERE chat_id = ?
+			)
+			AND status = 'sent'
+		`;
+		// Using IN clause because SQLite doesn't support JOINs in UPDATE statements directly
+
+		await this.db.run(query, [timestamp, userId, chatId]);
+
+		return (timestamp);
+	}
+
 	async	getMessagesUpdatedAt(chatId, timestamp)
 	{
 		const	query = `
