@@ -1,3 +1,69 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .btn-lock svg {
+    @apply fill-none transform-gpu;
+  }
+
+  .btn-lock svg .bling {
+    stroke: #fff;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 3;
+    stroke-dashoffset: 15;
+    transition: all 0.3s ease;
+  }
+
+  .btn-lock svg .lock {
+    stroke: #fff;
+    stroke-width: 4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-dasharray: 36;
+    transition: all 0.4s ease;
+  }
+
+  .btn-lock svg .lockb {
+    fill: #fff;
+    fill-rule: evenodd;
+    clip-rule: evenodd;
+    transform: rotate(8deg);
+    transform-origin: 14px 20px;
+    transition: all 0.2s ease;
+  }
+
+  /* Checked state */
+  input[type="checkbox"].peer:checked + label svg .bling {
+    animation: bling6132 0.3s linear forwards;
+    animation-delay: 0.2s;
+  }
+
+  input[type="checkbox"].peer:checked + label svg .lock {
+    stroke-dasharray: 48;
+    animation: locked 0.3s linear forwards;
+  }
+
+  input[type="checkbox"].peer:checked + label svg .lockb {
+    transform: rotate(0);
+    transform-origin: 14px 22px;
+  }
+
+  @keyframes bling6132 {
+    50% {
+      stroke-dasharray: 3;
+      stroke-dashoffset: 12;
+    }
+    100% {
+      stroke-dasharray: 3;
+      stroke-dashoffset: 9;
+    }
+  }
+
+  @keyframes locked {
+    50% {
+      transform: translateY(1px);
+    }
+  }
+}
