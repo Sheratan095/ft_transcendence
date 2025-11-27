@@ -30,7 +30,8 @@ if (process.env.USE_HTTPS === 'true')
 	{
 		console.error('[GATEWAY] Failed to load HTTPS certificates:', err.message);
 		console.error('[GATEWAY] Falling back to HTTP');
-		httpsOptions = null;
+
+		exit(1);
 	}
 }
 
@@ -155,6 +156,7 @@ import {
 	getAllChats,
 	getMessages
 } from './routes/chat-routes.js'
+import { exit } from 'process';
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)

@@ -134,7 +134,7 @@ restart: stop
 
 # Install dependencies for all services
 .PHONY: install
-install:
+install: gen-certs
 	@echo "Installing dependencies..."
 	@cd services/auth && npm install
 	@cd services/users && npm install
@@ -209,6 +209,8 @@ fclean: stop clean
 	@echo "Removing build directories..."
 	@find . -name "dist" -type d -prune -exec rm -rf {} +
 	@find . -name "build" -type d -prune -exec rm -rf {} +
+	@echo "Removing SSL certificates..."
+	@find . -path "*/certs/certs" -type d -prune -exec rm -rf {} +
 	@echo "✅ Full clean complete! Run 'make install' to reinstall dependencies."
 
 .PHONY: gen-certs
@@ -218,4 +220,4 @@ gen-certs:
 
 # Rebuild from scratch
 .PHONY: re
-re: fclean gen-certs install 
+re: fclean install 
