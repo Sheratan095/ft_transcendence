@@ -211,6 +211,11 @@ fclean: stop clean
 	@find . -name "build" -type d -prune -exec rm -rf {} +
 	@echo "✅ Full clean complete! Run 'make install' to reinstall dependencies."
 
+.PHONY: gen-certs
+gen-certs:
+	@echo "Generating self-signed SSL certificates..."
+	@cd ./certs/ && bash ./generate-certs.sh 
+
 # Rebuild from scratch
 .PHONY: re
-re: fclean install 
+re: fclean gen-certs install 
