@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData, notifyMessageStatusUpdates } from './chat-help.js';
+import { extractUserData, checkBlock } from './chat-help.js';
 
 // Example controller for sending system messages to a room (called via HTTP)
 export const	sendSystemMessage = async (req, reply) =>
@@ -126,6 +126,43 @@ export const	getMessages = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[CHAT] Error in getMessages controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	addUserToChat = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	{ chatId, toUserId } = req.body;
+
+		// Check if the inviter is a member of the chat
+		if (await chatDb.isUserInChat(userId, chatId) === false)
+		{
+			console.log(`[CHAT] User ${userId} attempted to invite to chat ${chatId} without membership`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
+		}
+
+		if (!(await checkBlock(toUserId, userId)))
+		{
+			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
+			// chatConnectionManager.sendErrorMessage(userId, 'Can\'t invite in chat');
+			return;
+		}
+
+		// Add the user to the chat
+		await chatDb.addUserToChat(chatId, toUserId);
+
+		console.log(`[CHAT] User ${userId} invited user ${toUserId} to chat ${chatId}`);
+
+		return (reply.code(200).send({ success: true }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in inviteInChat controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }

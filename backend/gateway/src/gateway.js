@@ -154,7 +154,8 @@ import {
 
 import {
 	getAllChats,
-	getMessages
+	getMessages,
+	addUserToChat
 } from './routes/chat-routes.js'
 import { exit } from 'process';
 
@@ -244,6 +245,7 @@ await fastify.register(async function (fastify)
 	// CHAT routes
 	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
 	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
+	fastify.post('/chat/add-user-to-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
 });
 
 // SEARCH route – tighter rate limit

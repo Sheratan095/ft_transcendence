@@ -3,7 +3,8 @@ import { validateInternalApiKey } from './chat-help.js';
 import {
 	sendSystemMessage,
 	getChats,
-	getMessages
+	getMessages,
+	addUserToChat
 } from './chat-controllers.js';
 
 import {
@@ -180,6 +181,42 @@ const	getMessagesOpts =
 	handler : getMessages
 }
 
+const	addUserToChatOpts = 
+{
+	schema:
+	{
+		summary: 'Send chat invite to user',
+		description: 'Only friends can be invited to chats.',
+		tags: ['Chat', 'Internal'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['chatId', 'toUserId'],
+			properties:
+			{
+				chatId: { type: 'string' },
+				toUserId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200: {
+				type: 'object',
+				properties: { success: { type: 'boolean' } }
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: addUserToChat
+}
 //-----------------------------INTERNAL ROUTES-----------------------------
 
 const	sendSystemMessageOpts =
@@ -241,4 +278,5 @@ export function	chatRoutes(fastify)
 
 	// HTTP routes for internal service communication
 	fastify.post('/send-system-message', sendSystemMessageOpts);
+	fastify.post('/add-user-to-chat', addUserToChatOpts);
 }

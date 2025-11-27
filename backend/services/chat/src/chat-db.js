@@ -132,7 +132,7 @@ export class	ChatDatabase
 	}
 
 	// Fecth just the messages for a chat that a user is part of and that he has received
-	async getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
+	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
 		const query = `
 			SELECT 
@@ -239,6 +239,18 @@ export class	ChatDatabase
 
 		const	result = await this.db.get(query, [chatId, userId]);
 		return (result.count > 0);
+	}
+
+	async	addUserToChat(chatId, userId)
+	{
+		const	insertMemberQuery = `
+			INSERT INTO chat_members (chat_id, user_id, joined_at)
+			VALUES (?, ?, ?)
+		`;
+
+		const	timestamp = new Date().toISOString();
+
+		await this.db.run(insertMemberQuery, [chatId, userId, timestamp]);
 	}
 
 	//-----------------------------MESSAGE QUERIES----------------------------
