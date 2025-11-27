@@ -153,6 +153,8 @@ export const	addUserToChat = async (req, reply) =>
 			return;
 		}
 
+		// TO DO send notification to toUserId
+
 		// Add the user to the chat
 		await chatDb.addUserToChat(chatId, toUserId);
 
@@ -163,6 +165,32 @@ export const	addUserToChat = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[CHAT] Error in inviteInChat controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	createGroupChat = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	{ groupName } = req.body;
+
+		// Create the group chat
+		const	chatId = await chatDb.createGroupChat(groupName);
+
+		// Add creator to the chat
+		await chatDb.addUserToChat(chatId, userId);
+
+		console.log(`[CHAT] User ${userId} created group chat ${chatId} with name "${groupName}"`);
+
+		return (reply.code(200).send({ chatId }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in createGroupChat controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }

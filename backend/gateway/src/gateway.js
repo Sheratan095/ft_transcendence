@@ -1,3 +1,5 @@
+import { exit } from 'process';
+
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'CHAT_SERVICE_URL', 
@@ -155,9 +157,9 @@ import {
 import {
 	getAllChats,
 	getMessages,
-	addUserToChat
+	addUserToChat,
+	createGroupChat
 } from './routes/chat-routes.js'
-import { exit } from 'process';
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
@@ -246,6 +248,7 @@ await fastify.register(async function (fastify)
 	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
 	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
 	fastify.post('/chat/add-user-to-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
+	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
 });
 
 // SEARCH route – tighter rate limit

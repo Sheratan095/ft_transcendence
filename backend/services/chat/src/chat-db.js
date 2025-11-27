@@ -205,6 +205,21 @@ export class	ChatDatabase
 		return (chatId);
 	}
 
+	async	createGroupChat(name)
+	{
+		// Create new group chat
+		const	chatId = await this.#generateUUID();
+
+		const	insertChatQuery = `
+			INSERT INTO chats (id, name, chat_type)
+			VALUES (?, ?, 'group')
+		`;
+
+		await this.db.run(insertChatQuery, [chatId, name]);
+
+		return (chatId);
+	}
+
 	async	isUserInChat(userId, chatId)
 	{
 		const	query = `

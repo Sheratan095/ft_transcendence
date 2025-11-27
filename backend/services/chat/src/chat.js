@@ -10,7 +10,7 @@ import fastifyWebsocket from '@fastify/websocket';
 await fastify.register(fastifyWebsocket);
 
 import { checkEnvVariables } from './chat-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL']);
 
 import { ChatDatabase } from './chat-db.js';
 let		chatDatabase;

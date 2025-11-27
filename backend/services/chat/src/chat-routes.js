@@ -4,7 +4,8 @@ import {
 	sendSystemMessage,
 	getChats,
 	getMessages,
-	addUserToChat
+	addUserToChat,
+	createGroupChat
 } from './chat-controllers.js';
 
 import {
@@ -116,6 +117,13 @@ const	message =
 	}
 }
 
+const	groupNamePolicy =
+{
+	type: 'string',
+	minLength: 1,
+	maxLength: 100
+};
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 const	getChatsOpts = 
@@ -217,6 +225,39 @@ const	addUserToChatOpts =
 	preHandler: validateInternalApiKey,
 	handler: addUserToChat
 }
+
+const	createGroupChatOpts = 
+{
+	schema:
+	{
+		summary: 'Create a new group chat',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['name'],
+			properties:
+			{
+				name: groupNamePolicy,
+			}
+		},
+
+		response:
+		{
+			200: chat,
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: createGroupChat
+}
+
 //-----------------------------INTERNAL ROUTES-----------------------------
 
 const	sendSystemMessageOpts =
@@ -279,4 +320,5 @@ export function	chatRoutes(fastify)
 	// HTTP routes for internal service communication
 	fastify.post('/send-system-message', sendSystemMessageOpts);
 	fastify.post('/add-user-to-chat', addUserToChatOpts);
+	fastify.post('/create-group-chat', createGroupChatOpts);
 }
