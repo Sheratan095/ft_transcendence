@@ -220,18 +220,6 @@ export class	ChatDatabase
 		return (chatId);
 	}
 
-	async	isUserInChat(userId, chatId)
-	{
-		const	query = `
-			SELECT COUNT(*) as count
-			FROM chat_members
-			WHERE chat_id = ? AND user_id = ?
-		`;
-
-		const	result = await this.db.get(query, [chatId, userId]);
-		return (result.count > 0);
-	}
-
 	async	chatExists(chatId)
 	{
 		const	query = `
@@ -258,6 +246,29 @@ export class	ChatDatabase
 
 	async	addUserToChat(chatId, userId)
 	{
+		// Check if user is already in chat
+		if (await this.isUserInChat(userId, chatId))
+		{
+			const error = new Error('User is already a member of this chat');
+			error.code = 'USER_ALREADY_IN_CHAT';
+			throw error;
+		}
+
+		// Check if the chat is group chat
+		const	chatTypeQuery = `
+			SELECT chat_type
+			FROM chats
+			WHERE id = ?
+		`;
+
+		const	chat = await this.db.get(chatTypeQuery, [chatId]);
+		if (!chat || chat.chat_type !== 'group')
+		{
+			const error = new Error('Can only add users to group chats');
+			error.code = 'CHAT_NOT_GROUP_TYPE';
+			throw error;
+		}
+
 		const	insertMemberQuery = `
 			INSERT INTO chat_members (chat_id, user_id, joined_at)
 			VALUES (?, ?, ?)

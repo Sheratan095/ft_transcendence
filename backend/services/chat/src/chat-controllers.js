@@ -146,6 +146,7 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
+
 		if (!(await checkBlock(toUserId, userId)))
 		{
 			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
@@ -153,7 +154,9 @@ export const	addUserToChat = async (req, reply) =>
 			return;
 		}
 
-		// TO DO send notification to toUserId
+		// TO DO send notification to toUserId (notification service)
+
+		// TO DO inform other users in the chat about the new member (chat service)
 
 		// Add the user to the chat
 		await chatDb.addUserToChat(chatId, toUserId);
@@ -165,6 +168,15 @@ export const	addUserToChat = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[CHAT] Error in inviteInChat controller:', err);
+
+		// Catch error if user is already in chat
+		if (err.code === 'USER_ALREADY_IN_CHAT')
+			return (reply.code(400).send({ error: 'Bad Request', message: 'User is already a member of the chat' }));
+
+		// Catch error if the chat isn't group type
+		if (err.code === 'CHAT_NOT_GROUP_TYPE')
+			return (reply.code(400).send({ error: 'Bad Request', message: 'Cannot invite users to a non-group chat' }));
+
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
