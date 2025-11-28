@@ -1,7 +1,6 @@
 import { validateInternalApiKey } from './chat-help.js';
 
 import {
-	sendSystemMessage,
 	getChats,
 	getMessages,
 	addUserToChat,
@@ -258,45 +257,6 @@ const	createGroupChatOpts =
 	handler: createGroupChat
 }
 
-//-----------------------------INTERNAL ROUTES-----------------------------
-
-const	sendSystemMessageOpts =
-{
-	schema:
-	{
-		summary: '🔒 Internal - Send system message to room',
-		tags: ['Chat', 'Internal'],
-	
-		...withInternalAuth,
-
-		body:
-		{
-			type: 'object',
-			required: ['roomId', 'message'],
-			properties:
-			{
-				roomId: { type: 'string' },
-				message: { type: 'string' }
-			}
-		},
-
-		response:
-		{
-			200: {
-				type: 'object',
-				properties: {
-					success: { type: 'boolean' }
-				}
-			},
-			400: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-
-	preHandler: validateInternalApiKey,
-	handler: sendSystemMessage
-};
-
 export function	chatRoutes(fastify)
 {
 	// WebSocket route for real-time chat
@@ -318,7 +278,6 @@ export function	chatRoutes(fastify)
 	fastify.get('/chat-messages', getMessagesOpts);
 
 	// HTTP routes for internal service communication
-	fastify.post('/send-system-message', sendSystemMessageOpts);
 	fastify.post('/add-user-to-chat', addUserToChatOpts);
 	fastify.post('/create-group-chat', createGroupChatOpts);
 }

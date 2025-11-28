@@ -149,7 +149,7 @@ async function	handleChatMessage(userId, data, chatDb, isPrivate = false)
 		// It's returned if the message was delivered to all users in the room
 		const	deliveredToAll =
 			isPrivate ? await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb)
-					  : await chatConnectionManager.sendToRoom(roomId, userId, messageId, content, chatDb);
+					  : await chatConnectionManager.sendMsgToRoom(roomId, userId, messageId, content, chatDb);
 
 		// Acknowledge to sender
 		const	status = deliveredToAll ? 'delivered' : 'pending';
@@ -164,6 +164,8 @@ async function	handleChatMessage(userId, data, chatDb, isPrivate = false)
 	}
 }
 
+// TO DO HOW TK client knows the chatId of private chats??
+// ok when fetched at the begin of connection but how to manage new private chats??
 async function	handleChatRead(userId, data, chatDb)
 {
 	try

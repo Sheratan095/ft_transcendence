@@ -117,3 +117,27 @@ export async function	notifyMessageStatusUpdates(roomId, updatedTime, chatDb)
 		chatConnectionManager.notifyMessageStatusUpdate(sender_id, roomId, message_id, overallStatus);
 	}
 }
+
+export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, chatId)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.NOTIFICATION_SERVICE_URL}/notification/send-chat-user-added`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+			body: JSON.stringify({
+				from: senderUsername,
+				senderId: senderId,
+				targetId: toUserId,
+				chatId: chatId,
+			}),
+		});
+	}
+	catch (err)
+	{
+		console.error(`[CHAT] Error notifying user ${toUserId} about being added to chat ${chatId}:`, err.message);
+	}
+}

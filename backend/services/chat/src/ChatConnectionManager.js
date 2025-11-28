@@ -34,10 +34,10 @@ class	ChatConnectionManager
 	}
 
 	// Return if the message was delivered to all users in the room
-	async	sendToRoom(roomId, senderId, messageId, content, chatDb)
+	async	sendMsgToRoom(roomId, senderId, messageId, content, chatDb)
 	{
 		// Refresh username cache
-		const	username = await this.#getUsernameFromCache(senderId, true);
+		const	username = await this.getUsernameFromCache(senderId, true);
 
 		const	data = {
 			roomId: roomId,
@@ -85,11 +85,40 @@ class	ChatConnectionManager
 		return (deliveredCount != userIds.length);
 	}
 
+	async	sendSystemMsgToRoom(roomId, message, chatDb)
+	{
+		const	data = {
+			roomId: roomId,
+			message: message,
+			timestamp: new Date().toISOString(),
+		};
+
+		// Get users in room
+		const	userIds = this.getUsersIdInRoom(roomId)?.map(user => user.userId) || [];
+
+		// Send to each user in the room
+		for (const userId of userIds)
+		{
+			const	socket = this._connections.get(userId);
+			if (socket)
+				this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
+		}
+	}
+
+	async	getUsersIdInRoom(roomId, chatDb)
+	{
+		const	users = await chatDb.getUsersInChat(roomId);
+		if (users)
+			return (users);
+
+		return (null);
+	}
+
 	// Return if the message was delivered to the user
 	async	sendToUser(senderId, toUserId, messageId, content, chatDb)
 	{
 		// Refresh username cache (refresh = true)
-		const	senderUsername = await this.#getUsernameFromCache(senderId, true);
+		const	senderUsername = await this.getUsernameFromCache(senderId, true);
 
 		const	data = {
 			from: senderUsername,
@@ -169,7 +198,7 @@ class	ChatConnectionManager
 	}
 
 	// Used also in chat-controllers.js
-	async	#getUsernameFromCache(userId, refresh=false)
+	async	getUsernameFromCache(userId, refresh=false)
 	{
 		let	username = this._cachedUsersInRooms.get(userId);
 		if (!username || refresh)

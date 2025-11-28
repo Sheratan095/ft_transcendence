@@ -270,13 +270,11 @@ export class	ChatDatabase
 		}
 
 		const	insertMemberQuery = `
-			INSERT INTO chat_members (chat_id, user_id, joined_at)
-			VALUES (?, ?, ?)
+			INSERT INTO chat_members (chat_id, user_id)
+			VALUES (?, ?)
 		`;
 
-		const	timestamp = new Date().toISOString();
-
-		await this.db.run(insertMemberQuery, [chatId, userId, timestamp]);
+		await this.db.run(insertMemberQuery, [chatId, userId]);
 	}
 
 	//-----------------------------MESSAGE QUERIES----------------------------

@@ -1,40 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData, checkBlock } from './chat-help.js';
-
-// Example controller for sending system messages to a room (called via HTTP)
-export const	sendSystemMessage = async (req, reply) =>
-{
-	try
-	{
-		const	{ roomId, message } = req.body;
-		
-		if (!roomId || !message)
-		{
-			return reply.code(400).send({
-				error: 'Bad Request',
-				message: 'Missing roomId or message'
-			});
-		}
-
-		chatConnectionManager.sendToRoom(
-			roomId,
-			'chat.system',
-			{
-				roomId,
-				message,
-				timestamp: new Date().toISOString()
-			}
-		);
-
-		return (reply.code(200).send({ success: true }));
-	}
-	catch (err)
-	{
-		console.error('[CHAT] Error in sendSystemMessage controller:', err);
-		return (reply.code(500).send({error: 'Internal server error' }));
-	}
-}
+import { extractUserData, checkBlock, notifyUserAddedToChat } from './chat-help.js';
 
 export const	getChats = async (req, reply) =>
 {
@@ -146,7 +112,6 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
-
 		if (!(await checkBlock(toUserId, userId)))
 		{
 			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
@@ -154,12 +119,15 @@ export const	addUserToChat = async (req, reply) =>
 			return;
 		}
 
-		// TO DO send notification to toUserId (notification service)
-
-		// TO DO inform other users in the chat about the new member (chat service)
-
 		// Add the user to the chat
 		await chatDb.addUserToChat(chatId, toUserId);
+
+		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
+		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
+
+		notifyUserAddedToChat(toUserId, userId, fromUsername, chatId);
+
+		chatConnectionManager.sendSystemMsgToRoom(chatId, `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`, chatDb);
 
 		console.log(`[CHAT] User ${userId} invited user ${toUserId} to chat ${chatId}`);
 
