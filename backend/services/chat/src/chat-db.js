@@ -157,16 +157,16 @@ export class	ChatDatabase
 		return (messages);
 	}
 
-	async	getChatUsers(chatId)
+	async	getUsersInRoom(chatId)
 	{
 		const	query = `
-			SELECT users.id
+			SELECT user_id
 			FROM chat_members
-			WHERE chat_members.chat_id = ?
+			WHERE chat_id = ?
 		`;
 
 		const	users = await this.db.all(query, [chatId]);
-		return (users);
+		return (users.map(u => u.user_id));
 	}
 
 	async	createPrivateChat(userId1, userId2)
@@ -352,12 +352,12 @@ export class	ChatDatabase
 				WHERE message_id = ?
 			`;
 
-			const	[rows] = await this.pool.query(query, [messageId]);
+			const	row = await this.db.get(query, [messageId]);
 
-			if (rows.length === 0 || rows[0].min_status === null)
+			if (!row || row.min_status === null)
 				return ("sent");
 
-			const	{ min_status, max_status } = rows[0];
+			const	{ min_status, max_status } = row;
 
 			// ---- AGGREGATION LOGIC ----
 

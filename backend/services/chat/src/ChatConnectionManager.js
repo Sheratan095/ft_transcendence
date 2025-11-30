@@ -49,7 +49,7 @@ class	ChatConnectionManager
 		};
 
 		// Get users in room
-		const	userIds = this.getUsersInRoom(roomId)?.map(user => user.userId) || [];
+		const	userIds = await chatDb.getUsersInRoom(roomId);
 		let		deliveredCount = 0;
 
 		// Send to each user in the room
@@ -94,7 +94,7 @@ class	ChatConnectionManager
 		};
 
 		// Get users in room
-		const	userIds = this.getUsersIdInRoom(roomId)?.map(user => user.userId) || [];
+		const	userIds = await chatDb.getUsersInRoom(roomId);
 
 		// Send to each user in the room
 		for (const userId of userIds)
@@ -103,15 +103,6 @@ class	ChatConnectionManager
 			if (socket)
 				this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
 		}
-	}
-
-	async	getUsersIdInRoom(roomId, chatDb)
-	{
-		const	users = await chatDb.getUsersInChat(roomId);
-		if (users)
-			return (users);
-
-		return (null);
 	}
 
 	// Return if the message was delivered to the user

@@ -69,7 +69,7 @@ export const	getMessages = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
-		const	rawMessages = await chatDb.getMessagesByChatId(chatId, limit, offset);
+		const	rawMessages = await chatDb.getMessagesByChatIdForUser(chatId, userId, limit, offset);
 		// Add the overallor message status just if the message is sent from the requestor user
 		for (const message of rawMessages)
 		{
