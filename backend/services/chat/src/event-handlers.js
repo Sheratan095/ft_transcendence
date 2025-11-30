@@ -33,9 +33,9 @@ export function	handleNewConnection(socket, req)
 	return (userId);
 }
 
-export function	handleError(userId, data)
+export function	handleError(err, userId)
 {
-	console.log(`[CHAT] WebSocket error in handler: ${err.message}`);
+	console.log(`[CHAT] WebSocket error for user ${userId} in handler: ${err.message}`);
 }
 
 export function	handleClose(socket, userId)
@@ -117,15 +117,15 @@ async function	handleChatMessage(userId, data, chatDb)
 			return;
 		}
 
-		const	messageId = await chatDb.addMessageToChat(chatId, userId, message);
+		const	messageId = await chatDb.addMessageToChat(roomId, userId, content);
 
-		// Send to recipient(s)
+		// Send to recipients
 		// It's returned if the message was delivered to all users in the room
-		const	deliveredToAll = await chatConnectionManager.sendMsgToRoom(chatId, userId, messageId, content, chatDb);
+		const	deliveredToAll = await chatConnectionManager.sendMsgToRoom(roomId, userId, messageId, content, chatDb);
 
 		// Acknowledge to sender
 		const	status = deliveredToAll ? 'delivered' : 'pending';
-		chatConnectionManager.replyToMessage(userId, chatId, messageId, status);
+		chatConnectionManager.replyToMessage(userId, roomId, messageId, status);
 
 		console.log(`[CHAT] Room message from user ${userId} to ${roomId} sent successfully`);
 	}
@@ -168,12 +168,15 @@ async function handlePrivateMessage(userId, data, chatDb)
 		// If chat already exists, returns the existing one
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
 
-		// It's returned if the message was delivered to all users in the room
-		const	delivered = await chatConnectionManager.sendToUser(toUserId, userId, messageId, content, chatDb);
+		// Store message in database
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, content);
+
+		// Send to recipient
+		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb);
 
 		// Acknowledge to sender
 		const	status = delivered ? 'delivered' : 'pending';
-		connectonManager.replyToMessage(userId, chatId, messageId, status);
+		chatConnectionManager.replyToMessage(userId, chatId, messageId, status);
 
 		console.log(`[CHAT] Private message from user ${userId} to user ${toUserId} sent successfully`);
 	}
@@ -184,8 +187,6 @@ async function handlePrivateMessage(userId, data, chatDb)
 	}
 }
 
-// TO DO HOW TK client knows the chatId of private chats??
-// ok when fetched at the begin of connection but how to manage new private chats??
 async function	handleChatRead(userId, data, chatDb)
 {
 	try
