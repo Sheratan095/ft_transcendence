@@ -164,21 +164,24 @@ import {
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
 {
-	await fastify.register(import('@fastify/rate-limit'),
+	if (process.env.RATE_LIMIT_ACTIVE === 'true')
 	{
-		max: 5,						// Maximum 5 attempts
-		timeWindow: '5 minutes',	// Per 5-minute window
-		keyGenerator: (req) => { return req.body?.username || req.body?.email || req.ip; }, // Rate limit by username (if provided) or IP address
-		errorResponseBuilder: (req, context) =>
+		await fastify.register(import('@fastify/rate-limit'),
 		{
-			return ({
-				statusCode: 429,
-				error: 'Too Many Requests',
-				message: 'Rate limit exceeded. Please try again later.',
-				retryAfter: Math.round(context.ttl / 1000) // seconds until reset
-			});
-		}
-	});
+			max: 5,						// Maximum 5 attempts
+			timeWindow: '5 minutes',	// Per 5-minute window
+			keyGenerator: (req) => { return req.body?.username || req.body?.email || req.ip; }, // Rate limit by username (if provided) or IP address
+			errorResponseBuilder: (req, context) =>
+			{
+				return ({
+					statusCode: 429,
+					error: 'Too Many Requests',
+					message: 'Rate limit exceeded. Please try again later.',
+					retryAfter: Math.round(context.ttl / 1000) // seconds until reset
+				});
+			}
+		});
+	}
 
 	// AUTH routes do not require authentication, in logout and token refresh the user is identified via the refresh_token
 	fastify.post('/auth/login', { schema: { hide: true }, handler: login })
@@ -189,12 +192,15 @@ await fastify.register(async function (fastify)
 // 🟡 MODERATE RATE LIMITING: Token and logout routes (moderate risk)
 await fastify.register(async function (fastify)
 {
-	await fastify.register(import('@fastify/rate-limit'),
+	if (process.env.RATE_LIMIT_ACTIVE === 'true')
 	{
-		max: 10,					// Maximum 10 requests
-		timeWindow: '5 minutes',	// Per 5-minute window
-		keyGenerator: (req) => req.ip // Rate limit by IP for token operations
-	});
+		await fastify.register(import('@fastify/rate-limit'),
+		{
+			max: 10,					// Maximum 10 requests
+			timeWindow: '5 minutes',	// Per 5-minute window
+			keyGenerator: (req) => req.ip // Rate limit by IP for token operations
+		});
+	}
 
 	fastify.delete('/auth/logout', { schema: { hide: true }, handler: logout })
 	fastify.post('/auth/token', { schema: { hide: true }, handler: token })
@@ -203,12 +209,15 @@ await fastify.register(async function (fastify)
 // 🟠 AUTHENTICATED USER ACTIONS: Sensitive account changes (requires auth + rate limiting)
 await fastify.register(async function (fastify)
 {
-	await fastify.register(import('@fastify/rate-limit'),
+	if (process.env.RATE_LIMIT_ACTIVE === 'true')
 	{
-		max: 10,				// Maximum 10 password changes
-		timeWindow: '1 hour',	// Per hour
-		keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
-	});
+		await fastify.register(import('@fastify/rate-limit'),
+		{
+			max: 10,				// Maximum 10 password changes
+			timeWindow: '1 hour',	// Per hour
+			keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
+		});
+	}
 
 	fastify.put('/auth/change-password', { schema: { hide: true }, preHandler: authenticateJwt, handler: changePassword })
 	fastify.put('/auth/enable-2fa', { schema: { hide: true }, preHandler: authenticateJwt, handler: enable2FA })
@@ -220,12 +229,15 @@ await fastify.register(async function (fastify)
 // 🟢 RELAXED RATE LIMITING: General user routes (low risk, read operations)
 await fastify.register(async function (fastify)
 {
-	await fastify.register(import('@fastify/rate-limit'),
+	if (process.env.RATE_LIMIT_ACTIVE === 'true')
 	{
-		max: 100,					// Maximum 100 requests
-		timeWindow: '1 minute',		// Per minute
-		keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
-	});
+		await fastify.register(import('@fastify/rate-limit'),
+		{
+			max: 100,					// Maximum 100 requests
+			timeWindow: '1 minute',		// Per minute
+			keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
+		});
+	}
 
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsers })
@@ -254,12 +266,15 @@ await fastify.register(async function (fastify)
 // SEARCH route – tighter rate limit
 await fastify.register(async function (fastify)
 {
-	await fastify.register(import('@fastify/rate-limit'),
+	if (process.env.RATE_LIMIT_ACTIVE === 'true')
 	{
-		max: 20,					// 20 search attempts
-		timeWindow: '10 seconds',	// every 10 seconds
-		keyGenerator: (req) => req.user?.id || req.ip
-	});
+		await fastify.register(import('@fastify/rate-limit'),
+		{
+			max: 20,					// 20 search attempts
+			timeWindow: '10 seconds',	// every 10 seconds
+			keyGenerator: (req) => req.user?.id || req.ip
+		});
+	}
 
 	fastify.get('/users/search',{ schema: { hide: true }, preHandler: authenticateJwt, handler: searchUsers });
 	fastify.get('/users/stats',{ schema: { hide: true }, handler: getUsersStats });
