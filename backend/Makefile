@@ -4,6 +4,7 @@ AUTH_PORT=3001
 USERS_PORT=3002
 NOTIFICATION_PORT=3003
 CHAT_PORT=3004
+PONG_PORT=3005
 
 NODE = node --no-deprecation
 NODE_OPTIONS_ENV = NODE_OPTIONS="--no-deprecation"
@@ -15,7 +16,7 @@ start: start-auth start-users start-notification start-gateway
 
 # Development mode with auto-restart by nodemon
 .PHONY: dev
-dev: dev-auth dev-users dev-notification dev-chat dev-gateway
+dev: dev-auth dev-users dev-notification dev-chat  dev-pong dev-gateway
 	@echo "All services started in development mode with auto-restart!"
 
 redev: stop dev
@@ -77,6 +78,18 @@ start-chat:
 	@cd services/chat && $(NODE) src/chat.js &
 	@sleep 2
 
+.PHONY: start-pong
+start-pong:
+	@echo "Starting Pong Service on port $(PONG_PORT)..."
+	@cd services/pong && $(NODE) src/pong.js &
+	@sleep 2
+
+.PHONY: dev-pong
+dev-pong:
+	@echo "Starting Pong Service in dev mode on port $(PONG_PORT)..."
+	@cd services/pong && $(NODE_OPTIONS_ENV) npm run dev &
+	@sleep 2
+
 # Start Gateway (production)
 .PHONY: start-gateway
 start-gateway:
@@ -99,11 +112,13 @@ stop:
 	@-ss -tlnp | grep ":$(USERS_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-ss -tlnp | grep ":$(NOTIFICATION_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-ss -tlnp | grep ":$(CHAT_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
+	@-ss -tlnp | grep ":$(PONG_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-ss -tlnp | grep ":$(GATEWAY_PORT)" | sed 's/.*pid=\([0-9]*\).*/\1/' | xargs -r kill 2>/dev/null || true
 	@-pkill -f "auth\.js" 2>/dev/null || true
 	@-pkill -f "users\.js" 2>/dev/null || true
-	@-pkill -f "chat\.js" 2>/dev/null || true
 	@-pkill -f "notification\.js" 2>/dev/null || true
+	@-pkill -f "chat\.js" 2>/dev/null || true
+	@-pkill -f "pong\.js" 2>/dev/null || true
 	@-pkill -f "gateway\.js" 2>/dev/null || true
 	@echo "All services stopped"
 
@@ -123,6 +138,9 @@ status:
 	@echo "Chat Service (port $(CHAT_PORT)):"
 	@ss -tlnp | grep -q ":$(CHAT_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
 
+	@echo "Pong Service (port $(PONG_PORT)):"
+	@ss -tlnp | grep -q ":$(PONG_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
+
 	@echo "Gateway (port $(GATEWAY_PORT)):"
 	@ss -tlnp | grep -q ":$(GATEWAY_PORT)" && echo "  ✅ Running" || echo "  ❌ Not running"
 
@@ -140,6 +158,7 @@ install: gen-certs
 	@cd services/users && npm install
 	@cd services/notification && npm install
 	@cd services/chat && npm install
+	@cd services/pong && npm install
 	@cd gateway && npm install
 	@echo "Dependencies installed!"
 
@@ -155,6 +174,8 @@ logs:
 	@tail -f services/notification/notification.log 2>/dev/null || echo "No notification logs found"
 	@echo "=== Chat Service Logs ==="  
 	@tail -f services/chat/chat.log 2>/dev/null || echo "No chat logs found"
+	@echo "=== Pong Service Logs ==="  
+	@tail -f services/pong/pong.log 2>/dev/null || echo "No pong logs found"
 	@echo "=== Gateway Logs ==="  
 	@tail -f gateway/gateway.log 2>/dev/null || echo "No gateway logs found"
 
@@ -172,9 +193,10 @@ help:
 	@echo "    make redev       - Restart all services in dev mode"
 	@echo "    make dev-auth    - Start only auth service in dev mode"
 	@echo "    make dev-users   - Start only users service in dev mode"
-	@echo "    make dev-gateway - Start only gateway in dev mode"
 	@echo "    make dev-notification - Start only notification service in dev mode"
+	@echo "    make dev-pong    - Start only pong service in dev mode"
 	@echo "    make dev-chat    - Start only chat service in dev mode"
+	@echo "    make dev-gateway - Start only gateway in dev mode"
 	@echo ""
 	@echo "  Utilities:"
 	@echo "    make status   - Check service status"
