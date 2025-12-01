@@ -79,14 +79,24 @@ export const	getMessages = async (req, reply) =>
 				message.message_status = undefined;
 		}
 
-		console.log(`[CHAT] User ${userId} fetched ${rawMessages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
+		// map to match the response schema
+		const messages = rawMessages.map(msg => ({
+			id: msg.id,
+			chatId: msg.chat_id,
+			senderId: msg.sender_id,
+			content: msg.content,
+			createdAt: msg.created_at,
+			messageStatus: msg.message_status
+		}));
+
+		console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
 
 		// Update messages in requested chat statuses to 'delivered' for this user
 		const	deliveredTime = await chatDb.markMessagesAsDelivered(chatId, userId);
 		// Notify senders about the status update if the overall status changed
-		await notifyMessageStatusUpdates(chatId, deliveredTime, chatDb);
+		await chatConnectionManager.notifyMessageStatusUpdate(chatId, deliveredTime, chatDb);
 
-		return (reply.code(200).send(rawMessages));
+		return (reply.code(200).send(messages));
 
 	}
 	catch (err)

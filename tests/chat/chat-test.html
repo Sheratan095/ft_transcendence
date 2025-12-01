@@ -489,8 +489,10 @@
                 }
 
                 const data = await response.json();
-                userId = data.user.id;
+                userId = String(data.user.id); // Ensure userId is always a string
                 userEmail = data.user.email;
+
+                console.log('Logged in - userId:', userId, 'type:', typeof userId);
 
                 // HTTP-only cookies are automatically set by the browser
                 // We don't need to manually extract or store them
@@ -644,12 +646,15 @@
                 }
 
                 const newMessages = await response.json();
+                
+                console.log('Loaded messages from API:', newMessages);
 
+                // Reverse to show oldest first (WhatsApp style)
                 if (offset === 0) {
-                    messages.set(chatId, newMessages);
+                    messages.set(chatId, newMessages.reverse());
                 } else {
                     const existing = messages.get(chatId) || [];
-                    messages.set(chatId, [...newMessages, ...existing]);
+                    messages.set(chatId, [...newMessages.reverse(), ...existing]);
                 }
 
                 renderMessages();
@@ -701,20 +706,28 @@
 
             chatMessages.forEach(msg => {
                 const messageDiv = document.createElement('div');
-                const isSent = msg.senderId === userId;
+                // Handle both snake_case (from API) and camelCase (from WebSocket)
+                const senderId = msg.senderId || msg.sender_id;
+                const createdAt = msg.createdAt || msg.created_at;
+                const messageStatus = msg.messageStatus || msg.message_status;
+                
+                // Compare as strings since backend returns string IDs
+                const isSent = String(senderId) === String(userId);
+                
+                console.log('Message:', {senderId, userId, isSent, senderIdType: typeof senderId, userIdType: typeof userId});
 
                 messageDiv.className = `message ${isSent ? 'message-sent' : 'message-received'}`;
 
                 let statusText = '';
-                if (isSent && msg.messageStatus) {
-                    statusText = `<span class="message-status">${msg.messageStatus}</span>`;
+                if (isSent && messageStatus) {
+                    statusText = `<span class="message-status">${messageStatus}</span>`;
                 }
 
                 messageDiv.innerHTML = `
-                    ${!isSent ? `<div class="message-header">Sender: ${msg.senderId}</div>` : ''}
+                    ${!isSent ? `<div class="message-header">Sender: ${senderId}</div>` : ''}
                     <div class="message-content">${escapeHtml(msg.content)}</div>
                     <div class="message-footer">
-                        <span>${new Date(msg.createdAt).toLocaleTimeString()}</span>
+                        <span>${new Date(createdAt).toLocaleTimeString()}</span>
                         ${statusText}
                     </div>
                 `;
@@ -870,7 +883,7 @@
                 senderId: data.senderId,
                 content: data.content,
                 createdAt: data.timestamp,
-                messageStatus: data.senderId === userId ? 'delivered' : undefined
+                messageStatus: String(data.senderId) === String(userId) ? 'delivered' : undefined
             };
 
             // Add to messages
