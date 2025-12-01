@@ -1,9 +1,10 @@
 import { validateInternalApiKey } from './chat-help.js';
 
 import {
-	sendSystemMessage,
 	getChats,
-	getMessages
+	getMessages,
+	addUserToChat,
+	createGroupChat
 } from './chat-controllers.js';
 
 import {
@@ -115,6 +116,13 @@ const	message =
 	}
 }
 
+const	groupNamePolicy =
+{
+	type: 'string',
+	minLength: 1,
+	maxLength: 100
+};
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 const	getChatsOpts = 
@@ -180,25 +188,25 @@ const	getMessagesOpts =
 	handler : getMessages
 }
 
-//-----------------------------INTERNAL ROUTES-----------------------------
-
-const	sendSystemMessageOpts =
+const	addUserToChatOpts = 
 {
 	schema:
 	{
-		summary: '🔒 Internal - Send system message to room',
+		summary: 'Send chat invite to user',
+		description: 'Only friends can be invited to chats.',
 		tags: ['Chat', 'Internal'],
-	
+
 		...withInternalAuth,
+		...withCookieAuth,
 
 		body:
 		{
 			type: 'object',
-			required: ['roomId', 'message'],
+			required: ['chatId', 'toUserId'],
 			properties:
 			{
-				roomId: { type: 'string' },
-				message: { type: 'string' }
+				chatId: { type: 'string' },
+				toUserId: { type: 'string' }
 			}
 		},
 
@@ -206,9 +214,7 @@ const	sendSystemMessageOpts =
 		{
 			200: {
 				type: 'object',
-				properties: {
-					success: { type: 'boolean' }
-				}
+				properties: { success: { type: 'boolean' } }
 			},
 			400: ErrorResponse,
 			500: ErrorResponse
@@ -216,8 +222,40 @@ const	sendSystemMessageOpts =
 	},
 
 	preHandler: validateInternalApiKey,
-	handler: sendSystemMessage
-};
+	handler: addUserToChat
+}
+
+const	createGroupChatOpts = 
+{
+	schema:
+	{
+		summary: 'Create a new group chat',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['name'],
+			properties:
+			{
+				name: groupNamePolicy,
+			}
+		},
+
+		response:
+		{
+			200: chat,
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: createGroupChat
+}
 
 export function	chatRoutes(fastify)
 {
@@ -240,5 +278,6 @@ export function	chatRoutes(fastify)
 	fastify.get('/chat-messages', getMessagesOpts);
 
 	// HTTP routes for internal service communication
-	fastify.post('/send-system-message', sendSystemMessageOpts);
+	fastify.post('/add-user-to-chat', addUserToChatOpts);
+	fastify.post('/create-group-chat', createGroupChatOpts);
 }

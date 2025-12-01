@@ -66,3 +66,20 @@ export const	getActiveUsersCount = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
+
+export const	sendChatUserAdded = async (req, reply) =>
+{
+	try
+	{
+		const	{ from, senderId, targetId, chatId } = req.body;
+
+		userConnectionManager.sendChatUserAddedNotification(targetId, senderId, from, chatId);
+
+		return (reply.code(200).send());
+	}
+	catch (err)
+	{
+		console.error('[NOTIFICATION] Error in sendChatUserAdded handler:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}

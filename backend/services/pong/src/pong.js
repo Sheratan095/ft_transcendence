@@ -9,35 +9,34 @@ dotenv.config();
 import fastifyWebsocket from '@fastify/websocket';
 await fastify.register(fastifyWebsocket);
 
-import { checkEnvVariables } from './chat-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL']);
+import { checkEnvVariables } from './pong-help.js';
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
 
-import { ChatDatabase } from './chat-db.js';
-let		chatDatabase;
+import { PongDatabase } from './pong-db.js';
+let		pongDatabase;
 
 // Setup Swagger documentation
-import { setupSwagger } from './chat-swagger.js';
+import { setupSwagger } from './pong-swagger.js';
 await setupSwagger(fastify);
 
-import { chatRoutes } from './chat-routes.js';
+import { pongRoutes } from './pong-routes.js';
 
 const	start = async () =>
 {
 	try
 	{
 		// Initialize database
-		chatDatabase = new ChatDatabase()
-		await chatDatabase.initialize()
+		pongDatabase = new PongDatabase()
+		await pongDatabase.initialize()
 
 		// Make database available to all routes
-		fastify.decorate('chatDb', chatDatabase)
-
+		fastify.decorate('pongDb', pongDatabase)
 		// Setup routes before starting the server
-		fastify.register(chatRoutes);
+		fastify.register(pongRoutes);
 
 		await fastify.listen({ port: process.env.PORT })
-		console.log(`[CHAT] Server is running on localhost:${process.env.PORT}`)
-		console.log(`[CHAT] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
+		console.log(`[PONG] Server is running on localhost:${process.env.PORT}`)
+		console.log(`[PONG] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{

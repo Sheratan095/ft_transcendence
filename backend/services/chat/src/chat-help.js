@@ -1,3 +1,5 @@
+import { chatConnectionManager } from './ChatConnectionManager.js';
+
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
@@ -101,5 +103,48 @@ export async function	checkBlock(userA, userB)
 	{
 		console.error('[CHAT] Error checking block status:', err.message);
 		return (false);
+	}
+}
+
+// Helper to notify message senders about status updates (delivered/read)
+export async function	notifyMessageStatusUpdates(roomId, updatedTime, chatDb)
+{
+	try
+	{
+		const	justUpdatedMessages = await chatDb.getMessagesUpdatedAt(roomId, updatedTime);
+
+		for (const { message_id, sender_id } of justUpdatedMessages)
+		{
+			const	overallStatus = await chatDb.getOverallMessageStatus(message_id);
+			chatConnectionManager.notifyMessageStatusUpdate(sender_id, roomId, message_id, overallStatus);
+		}
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error notifying message status updates:', err.message);
+	}
+}
+
+export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, chatId)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.NOTIFICATION_SERVICE_URL}/notification/send-chat-user-added`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+			body: JSON.stringify({
+				from: senderUsername,
+				senderId: senderId,
+				targetId: toUserId,
+				chatId: chatId,
+			}),
+		});
+	}
+	catch (err)
+	{
+		console.error(`[CHAT] Error notifying user ${toUserId} about being added to chat ${chatId}:`, err.message);
 	}
 }

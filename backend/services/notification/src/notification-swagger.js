@@ -89,6 +89,18 @@ Reponse:
 }
 \`\`\`
 
+- **friend.userAdded** - Notify the user he has been added to a chat by another user.
+\`\`\`json
+{
+  "event": "friend.userAdded",
+  "data": {
+	"from": "jane_smith",
+	"senderId": "456",
+	"chatId": "chat789"
+  }
+}
+\`\`\`
+
 ---
 
 **ERROR HANDLING**

@@ -18,6 +18,15 @@ build/
 .env
 **/.env
 
+# SSL/TLS certificates
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+**/certs/certs/
+
 # Database and data files
 
 # MacOS

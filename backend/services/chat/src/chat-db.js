@@ -132,7 +132,7 @@ export class	ChatDatabase
 	}
 
 	// Fecth just the messages for a chat that a user is part of and that he has received
-	async getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
+	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
 		const query = `
 			SELECT 
@@ -157,16 +157,16 @@ export class	ChatDatabase
 		return (messages);
 	}
 
-	async	getChatUsers(chatId)
+	async	getUsersInRoom(chatId)
 	{
 		const	query = `
-			SELECT users.id
+			SELECT user_id
 			FROM chat_members
-			WHERE chat_members.chat_id = ?
+			WHERE chat_id = ?
 		`;
 
 		const	users = await this.db.all(query, [chatId]);
-		return (users);
+		return (users.map(u => u.user_id));
 	}
 
 	async	createPrivateChat(userId1, userId2)
@@ -205,16 +205,19 @@ export class	ChatDatabase
 		return (chatId);
 	}
 
-	async	isUserInChat(userId, chatId)
+	async	createGroupChat(name)
 	{
-		const	query = `
-			SELECT COUNT(*) as count
-			FROM chat_members
-			WHERE chat_id = ? AND user_id = ?
+		// Create new group chat
+		const	chatId = await this.#generateUUID();
+
+		const	insertChatQuery = `
+			INSERT INTO chats (id, name, chat_type)
+			VALUES (?, ?, 'group')
 		`;
 
-		const	result = await this.db.get(query, [chatId, userId]);
-		return (result.count > 0);
+		await this.db.run(insertChatQuery, [chatId, name]);
+
+		return (chatId);
 	}
 
 	async	chatExists(chatId)
@@ -239,6 +242,39 @@ export class	ChatDatabase
 
 		const	result = await this.db.get(query, [chatId, userId]);
 		return (result.count > 0);
+	}
+
+	async	addUserToChat(chatId, userId)
+	{
+		// Check if user is already in chat
+		if (await this.isUserInChat(userId, chatId))
+		{
+			const error = new Error('User is already a member of this chat');
+			error.code = 'USER_ALREADY_IN_CHAT';
+			throw error;
+		}
+
+		// Check if the chat is group chat
+		const	chatTypeQuery = `
+			SELECT chat_type
+			FROM chats
+			WHERE id = ?
+		`;
+
+		const	chat = await this.db.get(chatTypeQuery, [chatId]);
+		if (!chat || chat.chat_type !== 'group')
+		{
+			const error = new Error('Can only add users to group chats');
+			error.code = 'CHAT_NOT_GROUP_TYPE';
+			throw error;
+		}
+
+		const	insertMemberQuery = `
+			INSERT INTO chat_members (chat_id, user_id)
+			VALUES (?, ?)
+		`;
+
+		await this.db.run(insertMemberQuery, [chatId, userId]);
 	}
 
 	//-----------------------------MESSAGE QUERIES----------------------------
@@ -316,12 +352,12 @@ export class	ChatDatabase
 				WHERE message_id = ?
 			`;
 
-			const	[rows] = await this.pool.query(query, [messageId]);
+			const	row = await this.db.get(query, [messageId]);
 
-			if (rows.length === 0 || rows[0].min_status === null)
+			if (!row || row.min_status === null)
 				return ("sent");
 
-			const	{ min_status, max_status } = rows[0];
+			const	{ min_status, max_status } = row;
 
 			// ---- AGGREGATION LOGIC ----
 
@@ -343,4 +379,58 @@ export class	ChatDatabase
 		}
 	}
 
+	async	markMessagesAsRead(chatId, userId)
+	{
+		const	timestamp = new Date().toISOString();
+
+		const	query = `
+			UPDATE message_statuses
+			SET status = 'read', 
+				updated_at = ?
+			WHERE user_id = ?
+			AND message_id IN (
+				SELECT id FROM messages WHERE chat_id = ?
+			)
+			AND status != 'read'
+		`;
+		// Using IN clause because SQLite doesn't support JOINs in UPDATE statements directly
+
+		await this.db.run(query, [timestamp, userId, chatId]);
+
+		return (timestamp);
+	}
+
+	// Used when a user fetch messages from a chat
+	async	markMessagesAsDelivered(chatId, userId)
+	{
+		const	timestamp = new Date().toISOString();
+
+		const	query = `
+			UPDATE message_statuses
+			SET status = 'delivered', 
+				updated_at = ?
+			WHERE user_id = ?
+			AND message_id IN (
+				SELECT id FROM messages WHERE chat_id = ?
+			)
+			AND status = 'sent'
+		`;
+		// Using IN clause because SQLite doesn't support JOINs in UPDATE statements directly
+
+		await this.db.run(query, [timestamp, userId, chatId]);
+
+		return (timestamp);
+	}
+
+	async	getMessagesUpdatedAt(chatId, timestamp)
+	{
+		const	query = `
+			SELECT message_id, sender_id
+			FROM message_statuses ms
+			JOIN messages m ON m.id = ms.message_id
+			WHERE m.chat_id = ? AND ms.updated_at = ?
+		`;
+
+		return (this.db.all(query, [chatId, timestamp]));
+	}
 }

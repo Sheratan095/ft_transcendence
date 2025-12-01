@@ -63,7 +63,24 @@ class	UserConnectionManager
 				'friend.accept',
 				{
 					from: accepterUsername,
-					accepterId: accepterUsername
+					accepterId: accepterId
+				}
+			);
+		}
+	}
+
+	sendChatUserAddedNotification(targetId, senderId, fromUsername, chatId)
+	{
+		const	targetSocket = this.getConnection(targetId);
+		if (targetSocket)
+		{
+			this.#dispatchEventToSocket(
+				targetSocket,
+				'chat.userAdded',
+				{
+					from: fromUsername,
+					senderId: senderId,
+					chatId: chatId
 				}
 			);
 		}

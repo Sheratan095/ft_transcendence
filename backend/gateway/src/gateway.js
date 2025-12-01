@@ -1,3 +1,5 @@
+import { exit } from 'process';
+
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'CHAT_SERVICE_URL', 
@@ -30,7 +32,8 @@ if (process.env.USE_HTTPS === 'true')
 	{
 		console.error('[GATEWAY] Failed to load HTTPS certificates:', err.message);
 		console.error('[GATEWAY] Falling back to HTTP');
-		httpsOptions = null;
+
+		exit(1);
 	}
 }
 
@@ -153,7 +156,9 @@ import {
 
 import {
 	getAllChats,
-	getMessages
+	getMessages,
+	addUserToChat,
+	createGroupChat
 } from './routes/chat-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
@@ -242,6 +247,8 @@ await fastify.register(async function (fastify)
 	// CHAT routes
 	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
 	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
+	fastify.post('/chat/add-user-to-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
+	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
 });
 
 // SEARCH route – tighter rate limit

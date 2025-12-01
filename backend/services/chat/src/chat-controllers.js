@@ -1,40 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData } from './chat-help.js';
-
-// Example controller for sending system messages to a room (called via HTTP)
-export const	sendSystemMessage = async (req, reply) =>
-{
-	try
-	{
-		const	{ roomId, message } = req.body;
-		
-		if (!roomId || !message)
-		{
-			return reply.code(400).send({
-				error: 'Bad Request',
-				message: 'Missing roomId or message'
-			});
-		}
-
-		chatConnectionManager.sendToRoom(
-			roomId,
-			'chat.system',
-			{
-				roomId,
-				message,
-				timestamp: new Date().toISOString()
-			}
-		);
-
-		return (reply.code(200).send({ success: true }));
-	}
-	catch (err)
-	{
-		console.error('[CHAT] Error in sendSystemMessage controller:', err);
-		return (reply.code(500).send({error: 'Internal server error' }));
-	}
-}
+import { extractUserData, checkBlock, notifyUserAddedToChat } from './chat-help.js';
 
 export const	getChats = async (req, reply) =>
 {
@@ -103,7 +69,7 @@ export const	getMessages = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
-		const	rawMessages = await chatDb.getMessagesByChatId(chatId, limit, offset);
+		const	rawMessages = await chatDb.getMessagesByChatIdForUser(chatId, userId, limit, offset);
 		// Add the overallor message status just if the message is sent from the requestor user
 		for (const message of rawMessages)
 		{
@@ -115,12 +81,96 @@ export const	getMessages = async (req, reply) =>
 
 		console.log(`[CHAT] User ${userId} fetched ${rawMessages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
 
+		// Update messages in requested chat statuses to 'delivered' for this user
+		const	deliveredTime = await chatDb.markMessagesAsDelivered(chatId, userId);
+		// Notify senders about the status update if the overall status changed
+		await notifyMessageStatusUpdates(chatId, deliveredTime, chatDb);
+
 		return (reply.code(200).send(rawMessages));
 
 	}
 	catch (err)
 	{
 		console.error('[CHAT] Error in getMessages controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	addUserToChat = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	{ chatId, toUserId } = req.body;
+
+		// Check if the inviter is a member of the chat
+		if (await chatDb.isUserInChat(userId, chatId) === false)
+		{
+			console.log(`[CHAT] User ${userId} attempted to invite to chat ${chatId} without membership`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
+		}
+
+		if (!(await checkBlock(toUserId, userId)))
+		{
+			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
+			// chatConnectionManager.sendErrorMessage(userId, 'Can\'t invite in chat');
+			return;
+		}
+
+		// Add the user to the chat
+		await chatDb.addUserToChat(chatId, toUserId);
+
+		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
+		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
+
+		notifyUserAddedToChat(toUserId, userId, fromUsername, chatId);
+
+		chatConnectionManager.sendSystemMsgToRoom(chatId, `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`, chatDb);
+
+		console.log(`[CHAT] User ${userId} invited user ${toUserId} to chat ${chatId}`);
+
+		return (reply.code(200).send({ success: true }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in inviteInChat controller:', err);
+
+		// Catch error if user is already in chat
+		if (err.code === 'USER_ALREADY_IN_CHAT')
+			return (reply.code(400).send({ error: 'Bad Request', message: 'User is already a member of the chat' }));
+
+		// Catch error if the chat isn't group type
+		if (err.code === 'CHAT_NOT_GROUP_TYPE')
+			return (reply.code(400).send({ error: 'Bad Request', message: 'Cannot invite users to a non-group chat' }));
+
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	createGroupChat = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	{ groupName } = req.body;
+
+		// Create the group chat
+		const	chatId = await chatDb.createGroupChat(groupName);
+
+		// Add creator to the chat
+		await chatDb.addUserToChat(chatId, userId);
+
+		console.log(`[CHAT] User ${userId} created group chat ${chatId} with name "${groupName}"`);
+
+		return (reply.code(200).send({ chatId }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in createGroupChat controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }

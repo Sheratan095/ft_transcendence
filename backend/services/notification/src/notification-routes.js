@@ -4,7 +4,8 @@ import {
 	sendFriendRequest,
 	sendFriendAccept,
 	send2FaCode,
-	getActiveUsersCount
+	getActiveUsersCount,
+	sendChatUserAdded
 } from './notification-controllers.js';
 
 import {
@@ -195,6 +196,39 @@ const	getActiveUsersCountOpts =
 	handler: getActiveUsersCount
 }
 
+const	sendChatUserAddedOpts = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Notify users that he has been added to a chat',
+		tags: ['Notifications', 'Internal'],
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId', 'chatId', 'addedByUserId'],
+			properties:
+			{
+				from: { type: 'string' },
+				senderId: { type: 'string' },
+				targetId: { type: 'string' }, // WHO TO SENT THE NOTIFICATION TO
+				chatId: { type: 'string' }, // CHAT ID
+			}
+		},
+
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: sendChatUserAdded,
+}
+
 //-----------------------------EXPORT ROUTES-----------------------------
 
 export function	notificationRoutes(fastify)
@@ -219,4 +253,5 @@ export function	notificationRoutes(fastify)
 	fastify.post('/send-friend-request', sendFriendRequestOpts);
 	fastify.post('/send-friend-accept', sendFriendAcceptOpts);
 	fastify.post('/send-2fa-code', send2FaOpts);
+	fastify.post('/send-chat-user-added', sendChatUserAddedOpts);
 }
