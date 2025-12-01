@@ -275,7 +275,7 @@ export function	chatRoutes(fastify)
 	});
 
 	fastify.get('/', getChatsOpts);
-	fastify.get('/chat-messages', getMessagesOpts);
+	fastify.get('/messages', getMessagesOpts);
 
 	// HTTP routes for internal service communication
 	fastify.post('/add-user-to-chat', addUserToChatOpts);

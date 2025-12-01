@@ -50,11 +50,11 @@ export function	handleMessage(socket, msg, userId, chatDb)
 	try
 	{
 		const	message = JSON.parse(msg.toString());
-		console.log(`[CHAT] Message from user ${userId}`);
 
 		switch (message.event)
 		{
 			case 'ping': // Handle ping event
+				console.log(`[CHAT] Ping received from user ${userId}`);
 				socket.send(JSON.stringify({ event: 'pong', data: { timestamp: Date.now() } }));
 				break;
 

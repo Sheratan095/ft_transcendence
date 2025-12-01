@@ -32,9 +32,14 @@ export async function	authenticateJwt(request, reply)
 {
 	try
 	{
+		if (!request.headers.cookie)
+		{
+			console.log('[GATEWAY] No authentication cookie provided');
+			return (reply.code(401).send({ error: "No authentication cookie provided" }));
+		}
+
 		// Call auth service to validate the token with API key
 		const	user = await validateJwtTokenInternal(request.headers.cookie);
-
 		// If token is valid, attach user data to request object
 		request.user = user;
 
