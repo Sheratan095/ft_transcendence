@@ -200,16 +200,6 @@ class	ChatConnectionManager
 
 		return (username);
 	}
-
-	// async	sendUndeliveredMessages(userId)
-	// {
-	// 	const	socket = this._connections.get(userId);
-	// 	if (!socket)
-	// 		return;
-	
-	// 	const	undeliveredMessages = await chatDb.getUndeliveredMessagesForUser(userId);
-	
-	// }
 }
 
 export const	chatConnectionManager = new ChatConnectionManager();
