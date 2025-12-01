@@ -19,7 +19,7 @@ let		pongDatabase;
 import { setupSwagger } from './pong-swagger.js';
 await setupSwagger(fastify);
 
-import { chatRoutes } from './pong-routes.js';
+import { pongRoutes } from './pong-routes.js';
 
 const	start = async () =>
 {

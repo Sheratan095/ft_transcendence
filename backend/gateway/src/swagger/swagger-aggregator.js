@@ -36,6 +36,7 @@ export class	SwaggerAggregator
 		add("USERS_SERVICE_URL", "users", "/users");
 		add("NOTIFICATION_SERVICE_URL", "notification", "/notification");
 		add("CHAT_SERVICE_URL", "chat", "/chat");
+		add("PONG_SERVICE_URL", "pong", "/pong");
 
 		console.log(`[GATEWAY] 📡 Discovered services: ${services.map(s => s.name).join(", ")}`);
 		return (services);

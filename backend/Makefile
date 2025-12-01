@@ -31,78 +31,78 @@ frontend:
 start-auth:
 	@echo "Starting Auth Service on port $(AUTH_PORT)..."
 	@cd services/auth && $(NODE) src/auth.js &
-	@sleep 2
+	@sleep 1
 
 # Start Auth service (development with auto-restart)
 .PHONY: dev-auth
 dev-auth:
 	@echo "Starting Auth Service in dev mode on port $(AUTH_PORT)..."
 	@cd services/auth && $(NODE_OPTIONS_ENV) npm run dev &
-	@sleep 2
+	@sleep 1
 
 # Start Users service (production)
 .PHONY: start-users
 start-users:
 	@echo "Starting Users Service on port $(USERS_PORT)..."
 	@cd services/users && $(NODE) src/users.js &
-	@sleep 2
+	@sleep 1
 
 # Start Users service (development with auto-restart)
 .PHONY: dev-users
 dev-users:
 	@echo "Starting Users Service in dev mode on port $(USERS_PORT)..."
 	@cd services/users && $(NODE_OPTIONS_ENV) npm run dev &
-	@sleep 2
+	@sleep 1
 
 .PHONY: dev-notification
 dev-notification:
 	@echo "Starting Notification Service in dev mode..."
 	@cd services/notification && $(NODE_OPTIONS_ENV) npm run dev &
-	@sleep 2
+	@sleep 1
 
 .PHONY: start-notification
 start-notification:
 	@echo "Starting Notification Service..."
 	@cd services/notification && $(NODE) src/notification.js &
-	@sleep 2
+	@sleep 1
 
 .PHONY: dev-chat
 dev-chat:
 	@echo "Starting Chat Service in dev mode..."
 	@cd services/chat && $(NODE_OPTIONS_ENV) npm run dev &
-	@sleep 2
+	@sleep 1
 
 .PHONY: start-chat
 start-chat:
 	@echo "Starting Chat Service..."
 	@cd services/chat && $(NODE) src/chat.js &
-	@sleep 2
+	@sleep 1
 
 .PHONY: start-pong
 start-pong:
 	@echo "Starting Pong Service on port $(PONG_PORT)..."
 	@cd services/pong && $(NODE) src/pong.js &
-	@sleep 2
+	@sleep 1
 
 .PHONY: dev-pong
 dev-pong:
 	@echo "Starting Pong Service in dev mode on port $(PONG_PORT)..."
 	@cd services/pong && $(NODE_OPTIONS_ENV) npm run dev &
-	@sleep 2
+	@sleep 1
 
 # Start Gateway (production)
 .PHONY: start-gateway
 start-gateway:
 	@echo "Starting Gateway on port $(GATEWAY_PORT)..."  
 	@cd gateway && $(NODE) gateway.js &
-	@sleep 2
+	@sleep 1
 
 # Start Gateway (development with auto-restart)
 .PHONY: dev-gateway
 dev-gateway:
 	@echo "Starting Gateway in dev mode on port $(GATEWAY_PORT)..."
 	@cd gateway && $(NODE_OPTIONS_ENV) npm run dev &
-	@sleep 2
+	@sleep 1
 
 # Stop all Node services
 .PHONY: stop
@@ -147,7 +147,7 @@ status:
 # Restart all services
 .PHONY: restart
 restart: stop
-	@sleep 2
+	@sleep 1
 	@$(MAKE) start
 
 # Install dependencies for all services

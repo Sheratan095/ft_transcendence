@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/pong.js",
+  "type": "module",
   "scripts": {
     "start": "node src/pong.js",
     "dev": "nodemon src/pong.js",

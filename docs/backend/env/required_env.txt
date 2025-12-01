@@ -4,6 +4,7 @@ gateway:
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     CHAT_SERVICE_URL=http://localhost:3004
+    PONG_SERVICE_URL=http://localhost:3005
     FRONTEND_URL=http://localhost:443
     PORT=3000
     DOC_USERNAME=admin
@@ -43,3 +44,7 @@ services/chat:
     PORT=3004
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3004
+
+services/pong:
+    INTERNAL_API_KEY=1234
+    PORT=3005
