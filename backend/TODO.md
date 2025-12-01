@@ -112,3 +112,7 @@
 [x] refactor of all db's like chat db (indenting, "type_like" enums)
 [] prisma? for db interactions
 [x] dark swagger ui 
+
+[]	When frontend doesn't implement http only cookies, try to change message
+	[AUTH] User logged in:  1
+	[AUTH] Token validation error: Invalid token

@@ -11,6 +11,7 @@ gateway:
     DOC_PASSWORD=admin
     USE_HTTPS=true
     HTTPS_CERTS_PATH=../../certs/certs/
+    RATE_LIMIT_ACTIVE=true
 
 services/auth:
     INTERNAL_API_KEY=1234
