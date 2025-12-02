@@ -117,6 +117,14 @@ async function	handleChatMessage(userId, data, chatDb)
 			return;
 		}
 
+		if ((await chatDb.getChatType(roomId)) !== 'group')
+		{
+			console.log(`[CHAT] ${userId} try to sent room message to non-group chat ${roomId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Cannot send room message to a non-group chat');
+			return;
+		}
+
+
 		const	messageId = await chatDb.addMessageToChat(roomId, userId, content);
 
 		// Send to recipients
@@ -124,7 +132,7 @@ async function	handleChatMessage(userId, data, chatDb)
 		const	deliveredToAll = await chatConnectionManager.sendMsgToRoom(roomId, userId, messageId, content, chatDb);
 
 		// Acknowledge to sender
-		const	status = deliveredToAll ? 'delivered' : 'pending';
+		const	status = deliveredToAll ? 'delivered' : 'sent';
 		chatConnectionManager.replyToMessage(userId, roomId, messageId, status);
 
 		console.log(`[CHAT] Room message from user ${userId} to ${roomId} sent successfully`);
@@ -175,8 +183,8 @@ async function handlePrivateMessage(userId, data, chatDb)
 		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb);
 
 		// Acknowledge to sender
-		const	status = delivered ? 'delivered' : 'pending';
-		chatConnectionManager.replyToMessage(userId, chatId, messageId, status);
+		const	status = delivered ? 'delivered' : 'sent';
+		chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content);
 
 		console.log(`[CHAT] Private message from user ${userId} to user ${toUserId} sent successfully`);
 	}

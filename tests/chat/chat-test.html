@@ -204,6 +204,20 @@
             color: #e0e0e0;
         }
 
+        .message-private-sent {
+            align-self: flex-end;
+            background: #9C27B0;
+            color: white;
+            border-left: 4px solid #E1BEE7;
+        }
+
+        .message-private-received {
+            align-self: flex-start;
+            background: #4A148C;
+            color: #E1BEE7;
+            border-left: 4px solid #9C27B0;
+        }
+
         .message-system {
             align-self: center;
             background: #2196F3;
@@ -224,7 +238,7 @@
             line-height: 1.4;
         }
 
-        .message-footer {
+            .message-footer {
             font-size: 11px;
             margin-top: 4px;
             opacity: 0.7;
@@ -235,7 +249,18 @@
 
         .message-status {
             font-size: 11px;
-            color: #aaa;
+            color: rgba(7, 7, 7, 0.9);
+            font-weight: 500;
+        }
+
+        .message-private-badge {
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-bottom: 4px;
+            display: inline-block;
+            font-weight: 600;
         }
 
         .input-container {
@@ -462,6 +487,7 @@
         let messageOffset = 0;
         const MESSAGE_LIMIT = 50;
         let pingInterval = null; // Store interval ID to prevent duplicates
+        let pendingConfirmations = new Map(); // messageId -> status (store confirmations that arrive before the message)
 
         // Login function
         async function login() {
@@ -710,20 +736,34 @@
                 const senderId = msg.senderId || msg.sender_id;
                 const createdAt = msg.createdAt || msg.created_at;
                 const messageStatus = msg.messageStatus || msg.message_status;
+                const isPrivate = msg.isPrivate || false;
                 
                 // Compare as strings since backend returns string IDs
                 const isSent = String(senderId) === String(userId);
                 
-                console.log('Message:', {senderId, userId, isSent, senderIdType: typeof senderId, userIdType: typeof userId});
+                console.log('Message:', {senderId, userId, isSent, isPrivate, senderIdType: typeof senderId, userIdType: typeof userId});
 
-                messageDiv.className = `message ${isSent ? 'message-sent' : 'message-received'}`;
+                // Determine message class based on type and sender
+                let messageClass = 'message ';
+                if (isPrivate) {
+                    messageClass += isSent ? 'message-private-sent' : 'message-private-received';
+                } else {
+                    messageClass += isSent ? 'message-sent' : 'message-received';
+                }
+                messageDiv.className = messageClass;
 
                 let statusText = '';
                 if (isSent && messageStatus) {
                     statusText = `<span class="message-status">${messageStatus}</span>`;
                 }
 
+                let privateBadge = '';
+                if (isPrivate) {
+                    privateBadge = '<div class="message-private-badge">🔒 Private Message</div>';
+                }
+
                 messageDiv.innerHTML = `
+                    ${privateBadge}
                     ${!isSent ? `<div class="message-header">Sender: ${senderId}</div>` : ''}
                     <div class="message-content">${escapeHtml(msg.content)}</div>
                     <div class="message-footer">
@@ -747,14 +787,35 @@
             if (!chat) return;
 
             if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = {
-                    event: 'chat.message',
-                    data: {
-                        roomId: currentChatId,
-                        content: content
+                let message;
+                const tempId = 'temp-' + Date.now();
+                
+                // Use different event types based on chat type
+                if (chat.chatType === 'dm') {
+                    // For DM chats, send as private message to the other user
+                    const otherMember = chat.members.find(m => String(m.userId) !== String(userId));
+                    if (!otherMember) {
+                        alert('Cannot find recipient in DM chat');
+                        return;
                     }
-                };
-
+                    
+                    message = {
+                        event: 'chat.private_message',
+                        data: {
+                            toUserId: String(otherMember.userId),
+                            content: content
+                        }
+                    };
+                } else {
+                    // For group chats, send as room message
+                    message = {
+                        event: 'chat.message',
+                        data: {
+                            roomId: currentChatId,
+                            content: content
+                        }
+                    };
+                }
                 ws.send(JSON.stringify(message));
                 input.value = '';
             } else {
@@ -835,7 +896,7 @@
 
         // Handle WebSocket messages
         function handleWebSocketMessage(message) {
-            console.log('Received message:', message);
+            console.log('Received WebSocket message:', message);
 
             switch (message.event) {
                 case 'pong':
@@ -843,10 +904,12 @@
                     break;
 
                 case 'chat.message':
+                    console.log('Handling chat.message event:', message.data);
                     handleIncomingMessage(message.data);
                     break;
 
                 case 'chat.private_message':
+                    console.log('Handling chat.private_message event:', message.data);
                     handleIncomingPrivateMessage(message.data);
                     break;
 
@@ -874,7 +937,15 @@
 
         // Handle incoming room message
         function handleIncomingMessage(data) {
+            console.log('handleIncomingMessage called with data:', data);
             const chatId = data.roomId;
+
+            // Check if we have a pending confirmation for this message
+            const pendingStatus = pendingConfirmations.get(data.messageId);
+            if (pendingStatus) {
+                console.log(`Found pending confirmation for message ${data.messageId}: ${pendingStatus}`);
+                pendingConfirmations.delete(data.messageId);
+            }
 
             // Create message object
             const msg = {
@@ -883,8 +954,11 @@
                 senderId: data.senderId,
                 content: data.content,
                 createdAt: data.timestamp,
-                messageStatus: String(data.senderId) === String(userId) ? 'delivered' : undefined
+                messageStatus: pendingStatus || (String(data.senderId) === String(userId) ? 'delivered' : undefined),
+                isPrivate: false
             };
+
+            console.log('Adding message to UI:', msg);
 
             // Add to messages
             const chatMessages = messages.get(chatId) || [];
@@ -893,11 +967,14 @@
 
             // Re-render if this is the current chat
             if (chatId === currentChatId) {
+                console.log('Rendering messages for current chat');
                 renderMessages();
                 scrollToBottom();
 
                 // Mark as read
                 markChatAsRead(chatId);
+            } else {
+                console.log(`Message is for chat ${chatId}, but current chat is ${currentChatId}`);
             }
 
             // Reload chat list to update unread counts (if implemented)
@@ -906,24 +983,39 @@
 
         // Handle incoming private message
         async function handleIncomingPrivateMessage(data) {
+            console.log('handleIncomingPrivateMessage called with data:', data);
+            
             // Find or create chat for this private message
             let chat = chats.find(c => c.chatType === 'dm' && c.members.some(m => m.userId === data.senderId));
 
             if (!chat) {
+                console.log('Chat not found, reloading chats...');
                 // Reload chats to get the new chat
                 await loadChats();
                 chat = chats.find(c => c.chatType === 'dm' && c.members.some(m => m.userId === data.senderId));
             }
 
             if (chat) {
+                console.log('Found chat:', chat.id);
+                
+                // Check if we have a pending confirmation for this message
+                const pendingStatus = pendingConfirmations.get(data.messageId);
+                if (pendingStatus) {
+                    console.log(`Found pending confirmation for message ${data.messageId}: ${pendingStatus}`);
+                    pendingConfirmations.delete(data.messageId);
+                }
+
                 const msg = {
                     id: data.messageId,
                     chatId: chat.id,
                     senderId: data.senderId,
                     content: data.content,
                     createdAt: data.timestamp,
-                    messageStatus: undefined
+                    messageStatus: pendingStatus,
+                    isPrivate: true
                 };
+
+                console.log('Adding private message to UI:', msg);
 
                 const chatMessages = messages.get(chat.id) || [];
                 chatMessages.push(msg);
@@ -970,18 +1062,46 @@
             const messageId = data.message_id;
             const status = data.status;
 
-            console.log(`Message ${messageId} sent with status: ${status}`);
+            console.log(`Message ${messageId} sent with status: ${status}`, data);
 
-            // Update message status in UI
-            const chatMessages = messages.get(chatId);
-            if (chatMessages) {
-                const msg = chatMessages.find(m => m.id === messageId);
-                if (msg) {
-                    msg.messageStatus = status;
-                    if (chatId === currentChatId) {
-                        renderMessages();
-                    }
+            // Check if message already exists (from incoming message event)
+            const chatMessages = messages.get(chatId) || [];
+            const existingMsg = chatMessages.find(m => m.id === messageId);
+            
+            if (existingMsg) {
+                // Update status if message already exists
+                existingMsg.messageStatus = status;
+                if (chatId === currentChatId) {
+                    renderMessages();
                 }
+            } else {
+                // Message doesn't exist yet - create it from the confirmation data
+                console.log(`Creating message ${messageId} from confirmation`);
+                
+                const msg = {
+                    id: messageId,
+                    chatId: chatId,
+                    senderId: userId,
+                    content: data.content || data.message || '',
+                    createdAt: data.timestamp || new Date().toISOString(),
+                    messageStatus: status,
+                    isPrivate: data.is_private || false
+                };
+
+                chatMessages.push(msg);
+                messages.set(chatId, chatMessages);
+
+                // Render if this is the current chat
+                if (chatId === currentChatId) {
+                    console.log('Rendering message for current chat');
+                    renderMessages();
+                    scrollToBottom();
+                } else {
+                    console.log(`Message is for chat ${chatId}, but current chat is ${currentChatId}`);
+                }
+
+                // Update chat list
+                loadChats();
             }
         }
 

@@ -232,6 +232,9 @@ export class	ChatDatabase
 		return (result.count > 0);
 	}
 
+	// CHECK:
+	//	if chat exist
+	//	if type is group
 	async	isUserInChat(userId, chatId)
 	{
 		const	query = `
@@ -242,6 +245,18 @@ export class	ChatDatabase
 
 		const	result = await this.db.get(query, [chatId, userId]);
 		return (result.count > 0);
+	}
+
+	async	getChatType(chatId)
+	{
+		const	query = `
+			SELECT chat_type
+			FROM chats
+			WHERE id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId]);
+		return (result ? result.chat_type : null);
 	}
 
 	async	addUserToChat(chatId, userId)

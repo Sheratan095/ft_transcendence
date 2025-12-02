@@ -149,12 +149,13 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'error', { message });
 	}
 
-	async	replyToMessage(userId, chatId, messageId, status)
+	async	replyToMessage(userId, chatId, messageId, status, content)
 	{
 		const	socket = this._connections.get(userId);
 		const	data = {
 			chat_id: chatId,
 			message_id: messageId,
+			content: content,
 			status: status,
 		};
 

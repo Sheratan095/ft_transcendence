@@ -80,7 +80,8 @@ Response (acknowledgment to sender):
   "data": {
     "chat_id": "room123",
     "message_id": "msg789",
-    "status": "delivered" // or "pending" if some users are offline
+    "content": "Hello everyone!",
+    "status": "delivered" // or "sent" if some users are offline
   }
 }
 \`\`\`
@@ -101,7 +102,8 @@ Response (acknowledgment to sender):
   "data": {
     "chat_id": "chat789",
     "message_id": "msg123",
-    "status": "delivered" // or "pending" if recipient is offline
+    "content": "Hello everyone!",
+    "status": "delivered" // or "sent" if recipient is offline
   }
 }
 \`\`\`
@@ -189,7 +191,7 @@ Response (acknowledgment to sender):
   "data": {
     "chat_id": "chat789",
     "message_id": "msg123",
-    "status": "delivered" // "delivered" if sent to all recipients, "pending" if some are offline
+    "status": "delivered" // "delivered" if sent to all recipients, "sent" if some are offline
   }
 }
 \`\`\`
