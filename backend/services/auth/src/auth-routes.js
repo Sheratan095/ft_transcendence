@@ -19,8 +19,8 @@ const	User =
 	properties:
 	{
 		id: { type: 'string' },
-		tfaEnabled: { type: 'boolean' },
 		email: { type: 'string' },
+		tfaEnabled: { type: 'boolean' },
 	},
 }
 
@@ -92,8 +92,6 @@ const	LoginResponse =
 	{
 		message: { type: 'string' },
 		user: User,
-		tfaRequired: { type: 'boolean' },
-		userId: { type: 'string' },
 	},
 	additionalProperties: true
 };

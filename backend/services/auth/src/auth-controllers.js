@@ -126,11 +126,11 @@ export const	login = async (req, reply) =>
 
 		return (reply.code(200).send({
 			message: 'Login successful',
-			tfaRequired: false,
 			user:
 			{
 				id: user.id,
-				email: user.email
+				email: user.email,
+				tfaEnabled: user.tfa_enabled,
 			}
 		}));
 	}
