@@ -2,7 +2,7 @@
 import { chatConnectionManager } from './ChatConnectionManager.js';
 import { checkBlock, notifyMessageStatusUpdates } from './chat-help.js';
 
-export function	handleNewConnection(socket, req)
+export function	handleNewConnection(socket, req, chatDb)
 {
 	const	key = req.headers['x-internal-api-key'];
 	// Validate the forwarded internal key matches our environment variable.
@@ -28,7 +28,7 @@ export function	handleNewConnection(socket, req)
 	}
 
 	console.log(`[CHAT] WebSocket client connected - User: ${userId}`);
-	chatConnectionManager.addConnection(userId, socket);
+	chatConnectionManager.addConnection(userId, socket, chatDb);
 
 	return (userId);
 }
@@ -144,6 +144,8 @@ async function	handleChatMessage(userId, data, chatDb)
 	}
 }
 
+// TO DO [CHAT] Fetching chats for user 1 after private message is sent
+//	client fetch again the chats to get the new one, should just take the new message from the server websocket reply
 async function handlePrivateMessage(userId, data, chatDb)
 {
 	try

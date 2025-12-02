@@ -131,6 +131,24 @@ export class	ChatDatabase
 		return (chats);
 	}
 
+	async	getChatsForUser(userId)
+	{
+		const	query = `
+			SELECT 
+				c.id as chat_id,
+				c.name,
+				c.chat_type,
+				c.created_at
+			FROM chats c
+			INNER JOIN chat_members cm ON c.id = cm.chat_id
+			WHERE cm.user_id = ?
+			ORDER BY c.created_at DESC
+		`;
+
+		const	chats = await this.db.all(query, [userId]);
+		return (chats);
+	}
+
 	// Fecth just the messages for a chat that a user is part of and that he has received
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
@@ -351,20 +369,22 @@ export class	ChatDatabase
 		return (messages);
 	}
 
-	// Returns aggregated status for a message across all users
-	// DELIVERED if it's delivered to all users
-	// READ if it's read by all users [future implementation]
-	// Return "sent" if at least one user has not received it yet OR in case of error
+	// Returns aggregated status for a message across all recipients (excluding sender)
+	// DELIVERED if it's delivered to all recipients
+	// READ if it's read by all recipients [future implementation]
+	// Return "sent" if at least one recipient has not received it yet OR in case of error
 	async	getOverallMessageStatus(messageId)
 	{
 		try
 		{
 			const query = `
 				SELECT 
-					MIN(status) AS min_status,
-					MAX(status) AS max_status
-				FROM message_statuses
-				WHERE message_id = ?
+					MIN(ms.status) AS min_status,	
+					MAX(ms.status) AS max_status
+				FROM message_statuses ms
+				JOIN messages m ON ms.message_id = m.id
+				WHERE ms.message_id = ?
+				AND ms.user_id != m.sender_id
 			`;
 
 			const	row = await this.db.get(query, [messageId]);
@@ -384,7 +404,7 @@ export class	ChatDatabase
 			if (min_status === "delivered" && max_status === "delivered")
 				return ("delivered");
 
-			// Otherwise: at least one user still has only "sent"
+			// Otherwise: at least one recipient still has only "sent"
 			return ("sent");
 		}
 		catch (err)
@@ -428,7 +448,7 @@ export class	ChatDatabase
 			AND message_id IN (
 				SELECT id FROM messages WHERE chat_id = ?
 			)
-			AND status = 'sent'
+			AND status != 'read'
 		`;
 		// Using IN clause because SQLite doesn't support JOINs in UPDATE statements directly
 

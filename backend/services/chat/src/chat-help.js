@@ -150,3 +150,11 @@ export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, 
 		console.error(`[CHAT] Error notifying user ${toUserId} about being added to chat ${chatId}:`, err.message);
 	}
 }
+
+export async function	getChatsForUser(userId, chatDb)
+{
+	// Fetch all chats for the user from the database
+	const	chats = await chatDb.getChatsForUser(userId);
+
+	return (chats);
+}

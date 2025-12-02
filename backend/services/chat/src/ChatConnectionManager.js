@@ -1,4 +1,4 @@
-import { getUsernameById } from './chat-help.js';
+import { getUsernameById, notifyMessageStatusUpdates } from './chat-help.js';
 
 // Chat connection manager handles WebSocket connections and message routing
 class	ChatConnectionManager
@@ -11,10 +11,19 @@ class	ChatConnectionManager
 		this._cachedUsersInRooms = new Map(); // userId -> Username
 	}
 
-	addConnection(userId, socket)
+	async	addConnection(userId, socket, chatDb)
 	{
 		this._connections.set(userId, socket);
-		console.log(`[CHAT] User ${userId} connected`);
+
+		// Mark all chat messages as delivered for this user
+		const	chats = await chatDb.getChatsForUser(userId);
+		for (const chat of chats)
+		{
+			const	timestamp = await chatDb.markMessagesAsDelivered(chat.chat_id, userId);
+			notifyMessageStatusUpdates(chat.chat_id, timestamp, chatDb);
+		}
+
+		console.log(`[CHAT] User ${userId} connected, all messages received are now marked as delivered`);
 	}
 
 	removeConnection(userId)
