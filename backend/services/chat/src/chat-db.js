@@ -379,7 +379,7 @@ export class	ChatDatabase
 		{
 			const query = `
 				SELECT 
-					MIN(ms.status) AS min_status,	
+					MIN(ms.status) AS min_status,
 					MAX(ms.status) AS max_status
 				FROM message_statuses ms
 				JOIN messages m ON ms.message_id = m.id

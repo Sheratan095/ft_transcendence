@@ -27,7 +27,6 @@ export function	handleNewConnection(socket, req, chatDb)
 		return (null);
 	}
 
-	console.log(`[CHAT] WebSocket client connected - User: ${userId}`);
 	chatConnectionManager.addConnection(userId, socket, chatDb);
 
 	return (userId);
@@ -133,7 +132,7 @@ async function	handleChatMessage(userId, data, chatDb)
 
 		// Acknowledge to sender
 		const	status = deliveredToAll ? 'delivered' : 'sent';
-		chatConnectionManager.replyToMessage(userId, roomId, messageId, status);
+		chatConnectionManager.replyToMessage(userId, roomId, messageId, status, content, 'group');
 
 		console.log(`[CHAT] Room message from user ${userId} to ${roomId} sent successfully`);
 	}
@@ -144,8 +143,6 @@ async function	handleChatMessage(userId, data, chatDb)
 	}
 }
 
-// TO DO [CHAT] Fetching chats for user 1 after private message is sent
-//	client fetch again the chats to get the new one, should just take the new message from the server websocket reply
 async function handlePrivateMessage(userId, data, chatDb)
 {
 	try
@@ -186,7 +183,7 @@ async function handlePrivateMessage(userId, data, chatDb)
 
 		// Acknowledge to sender
 		const	status = delivered ? 'delivered' : 'sent';
-		chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content);
+		chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content, 'dm');
 
 		console.log(`[CHAT] Private message from user ${userId} to user ${toUserId} sent successfully`);
 	}

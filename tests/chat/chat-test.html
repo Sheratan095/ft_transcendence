@@ -976,23 +976,33 @@
             } else {
                 console.log(`Message is for chat ${chatId}, but current chat is ${currentChatId}`);
             }
-
-            // Reload chat list to update unread counts (if implemented)
-            loadChats();
         }
 
         // Handle incoming private message
-        async function handleIncomingPrivateMessage(data) {
+        function handleIncomingPrivateMessage(data) {
             console.log('handleIncomingPrivateMessage called with data:', data);
             
             // Find or create chat for this private message
             let chat = chats.find(c => c.chatType === 'dm' && c.members.some(m => m.userId === data.senderId));
 
             if (!chat) {
-                console.log('Chat not found, reloading chats...');
-                // Reload chats to get the new chat
-                await loadChats();
-                chat = chats.find(c => c.chatType === 'dm' && c.members.some(m => m.userId === data.senderId));
+                console.log('Chat not found, creating minimal DM chat for sender:', data.senderId);
+                // Create a minimal DM chat locally
+                // Use a temporary ID until we get the real chat_id
+                const tempChatId = `temp-dm-${data.senderId}`;
+                chat = {
+                    id: tempChatId,
+                    name: null,
+                    chatType: 'dm',
+                    members: [
+                        { userId: userId, username: 'You' },
+                        { userId: data.senderId, username: `User ${data.senderId}` }
+                    ],
+                    createdAt: data.timestamp
+                };
+                chats.push(chat);
+                renderChatList();
+                console.log('Created new DM chat locally:', chat);
             }
 
             if (chat) {
@@ -1012,7 +1022,7 @@
                     content: data.content,
                     createdAt: data.timestamp,
                     messageStatus: pendingStatus,
-                    isPrivate: true
+                    isPrivate: false  // DM messages are regular messages, not "private" in UI
                 };
 
                 console.log('Adding private message to UI:', msg);
@@ -1064,6 +1074,26 @@
 
             console.log(`Message ${messageId} sent with status: ${status}`, data);
 
+            // Check if we know about this chat
+            let chat = chats.find(c => c.id === chatId);
+            if (!chat && data.chat_type) {
+                // New chat created - create it locally from the existing chat_type in response
+                console.log(`Chat ${chatId} not found locally, creating from chat_type: ${data.chat_type}`);
+                
+                // Create minimal chat object (usernames will be "User X" until properly loaded)
+                chat = {
+                    id: chatId,
+                    name: data.chat_type === 'dm' ? null : 'New Group',
+                    chatType: data.chat_type,
+                    members: [], // Will be populated as messages arrive
+                    createdAt: data.timestamp || new Date().toISOString()
+                };
+                
+                chats.push(chat);
+                renderChatList();
+                console.log('Created new chat locally:', chat);
+            }
+
             // Check if message already exists (from incoming message event)
             const chatMessages = messages.get(chatId) || [];
             const existingMsg = chatMessages.find(m => m.id === messageId);
@@ -1099,9 +1129,6 @@
                 } else {
                     console.log(`Message is for chat ${chatId}, but current chat is ${currentChatId}`);
                 }
-
-                // Update chat list
-                loadChats();
             }
         }
 
@@ -1189,8 +1216,8 @@
                 document.getElementById('privateUserIdInput').value = '';
                 document.getElementById('privateMessageInput').value = '';
 
-                // Reload chats to see the new chat
-                setTimeout(() => loadChats(), 500);
+                // Note: chat list will be updated automatically when chat.messageSent arrives
+                // with the new chat_id, which will trigger loadChats() only if needed
 
             } else {
                 alert('WebSocket not connected');
