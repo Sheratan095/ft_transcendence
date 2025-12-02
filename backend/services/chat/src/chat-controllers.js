@@ -123,10 +123,9 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
-		if (!(await checkBlock(toUserId, userId)))
+		if (await checkBlock(userId, toUserId))
 		{
-			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
-			// chatConnectionManager.sendErrorMessage(userId, 'Can\'t invite in chat');
+			console.log(`[CHAT] Failed to send message because the relation between ${toUserId} and ${userId} is blocked`);
 			return;
 		}
 
