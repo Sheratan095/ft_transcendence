@@ -5,7 +5,7 @@ import {
 	handleError
 } from './event-handlers.js';
 
-export function	pongRoutes(fastify)
+export function	trisRoutes(fastify)
 {
 	// Actual WebSocket endpoint
 	fastify.get('/ws', { websocket: true }, (socket, req) =>

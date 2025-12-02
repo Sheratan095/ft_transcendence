@@ -5,6 +5,7 @@ gateway:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     CHAT_SERVICE_URL=http://localhost:3004
     PONG_SERVICE_URL=http://localhost:3005
+    TRIS_SERVICE_URL=http://localhost:3006
     FRONTEND_URL=http://localhost:443
     PORT=3000
     DOC_USERNAME=admin
@@ -49,3 +50,7 @@ services/chat:
 services/pong:
     INTERNAL_API_KEY=1234
     PORT=3005
+
+services/tris:
+    INTERNAL_API_KEY=1234
+    PORT=3006

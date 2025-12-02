@@ -1,0 +1,28 @@
+{
+  "name": "tris",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/tris.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/tris.js",
+    "dev": "nodemon src/tris.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/swagger": "^9.5.2",
+    "ajv-errors": "^3.0.0",
+    "axios": "^1.13.0",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.1",
+    "sqlite3": "^5.1.7",
+    "uuid": "^13.0.0",
+    "@fastify/websocket": "^11.2.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.5",
+    "nodemon": "^3.1.10"
+  }
+}
