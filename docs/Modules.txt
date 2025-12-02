@@ -239,3 +239,23 @@ evaluation. Creating an AI that does nothing is strictly prohibited;
 it must have the capability to win occasionally.
 This major module aims to enhance the game by introducing an AI opponent that
 adds excitement and competitiveness without relying on the A* algorithm.
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+• Major module: Implementing Advanced 3D Techniques
+This major module,"Graphics," focuses on enhancing the visual aspects of the Pong
+game. It introduces the use of advanced 3D techniques to create a more immersive
+gaming experience. Specifically, the Pong game will be developed using Babylon.js
+to achieve the desired visual effects.
+◦ Advanced 3D Graphics: The primary goal of this module is to implement
+advanced 3D graphics techniques to elevate the visual quality of the Pong
+game. By utilizing Babylon.js , the goal is to create stunning visual effects
+that immerse players in the gaming environment.
+◦ Immersive Gameplay: The incorporation of advanced 3D techniques enhances
+the overall gameplay experience by providing users with a visually engaging
+and captivating Pong game.
+◦ Technology Integration: The chosen technology for this module is Babylon.js .
+These tools will be used to create the 3D graphics, ensuring compatibility and
+optimal performance.
+This major module aims to revolutionize the Pong game’s visual elements by introducing advanced 3D techniques. Through the use of Babylon.js , we aim to provide
+players with an immersive and visually stunning gaming experience.
