@@ -86,25 +86,6 @@ for an enjoyable gaming experience.
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-• Minor module: Game customization options.
-In this minor module, the goal is to provide customization options for all available
-games on the platform. Key features and objectives include:
-◦ Offer customization features, such as power-ups, attacks, or different maps,
-that enhance the gameplay experience.
-◦ Allow users to choose a default version of the game with basic features if they
-prefer a simpler experience.
-◦ Ensure that customization options are available and applicable to all games
-offered on the platform.
-◦ Implement user-friendly settings menus or interfaces for adjusting game parameters.
-◦ Maintain consistency in customization features across all games to provide a
-unified user experience.
-This module aims to give users the flexibility to tailor their gaming experience
-across all available games by providing a variety of customization options while
-also offering a default version for those who prefer a straightforward gameplay
-experience.
-
----------------------------------------------------------------------------------------------------------------------------------
-
 • Major module: Live Chat.
 In this module, you need to create a chat feature for users:
 ◦ The user should be able to send direct messages to other users.
@@ -236,14 +217,25 @@ international audience.
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-• Minor module: Add accessibility for Visually Impaired Users.
-In this minor module, the goal is to make your website more accessible for visually
-impaired users. Key features include:
-◦ Support for screen readers and assistive technologies.
-◦ Clear and descriptive alt text for images.
-◦ High-contrast color scheme for readability.
-◦ Keyboard navigation and focus management.
-◦ Options for adjusting text size.
-◦ Regular updates to meet accessibility standards.
-This module aims to improve the website’s usability for individuals with visual
-impairments and ensure compliance with accessibility standards.
+
+• Major module: Introduce an AI opponent.
+In this major module, the objective is to incorporate an AI player into the game.
+Notably, the use of the A* algorithm is not permitted for this task. Key features
+and goals include:
+◦ Develop an AI opponent that provides a challenging and engaging gameplay
+experience for users.
+◦ The AI must replicate human behavior, which means that in your AI implementation, you must simulate keyboard input. The constraint here is that
+the AI can only refresh its view of the game once per second, requiring it to
+anticipate bounces and other actions.
+The AI must utilize power-ups if you have chosen to implement the
+Game customization options module.
+◦ Implement AI logic and decision-making processes that enable the AI player
+to make intelligent and strategic moves.
+◦ Explore alternative algorithms and techniques to create an effective AI player
+without relying on A*.
+◦ Ensure that the AI adapts to different gameplay scenarios and user interactions.
+You will need to explain in detail how your AI works during your
+evaluation. Creating an AI that does nothing is strictly prohibited;
+it must have the capability to win occasionally.
+This major module aims to enhance the game by introducing an AI opponent that
+adds excitement and competitiveness without relying on the A* algorithm.
