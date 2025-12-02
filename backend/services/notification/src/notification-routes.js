@@ -208,11 +208,11 @@ const	sendChatUserAddedOpts =
 		body:
 		{
 			type: 'object',
-			required: ['userId', 'chatId', 'addedByUserId'],
+			required: ['from', 'senderId', 'targetId', 'chatId'],
 			properties:
 			{
-				from: { type: 'string' },
-				senderId: { type: 'string' },
+				from: { type: 'string' }, // Username of who added the user
+				senderId: { type: 'string' }, // User ID of who added the user
 				targetId: { type: 'string' }, // WHO TO SENT THE NOTIFICATION TO
 				chatId: { type: 'string' }, // CHAT ID
 			}

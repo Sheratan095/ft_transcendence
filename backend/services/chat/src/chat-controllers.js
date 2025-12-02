@@ -135,25 +135,32 @@ export const	addUserToChat = async (req, reply) =>
 		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
 		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
 
-		notifyUserAddedToChat(toUserId, userId, fromUsername, chatId);
+		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)
+			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
 		chatConnectionManager.sendSystemMsgToRoom(chatId, `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`, chatDb);
 
-		console.log(`[CHAT] User ${userId} invited user ${toUserId} to chat ${chatId}`);
+		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 
 		return (reply.code(200).send({ success: true }));
 	}
 	catch (err)
 	{
-		console.error('[CHAT] Error in inviteInChat controller:', err);
-
 		// Catch error if user is already in chat
 		if (err.code === 'USER_ALREADY_IN_CHAT')
+		{
+			console.log(`[CHAT] Attempted to add user to chat but user is already a member`);
 			return (reply.code(400).send({ error: 'Bad Request', message: 'User is already a member of the chat' }));
+		}
 
 		// Catch error if the chat isn't group type
 		if (err.code === 'CHAT_NOT_GROUP_TYPE')
+		{
+			console.log(`[CHAT] Attempted to invite user to a non-group chat`);
 			return (reply.code(400).send({ error: 'Bad Request', message: 'Cannot invite users to a non-group chat' }));
+		}
+
+		console.error('[CHAT] Error in inviteInChat controller:', err);
 
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
