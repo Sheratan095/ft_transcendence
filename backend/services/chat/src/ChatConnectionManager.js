@@ -125,16 +125,18 @@ class	ChatConnectionManager
 		{
 			console.log(`[CHAT] Sending private message from user ${senderId} to user ${toUserId}`);
 			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
-			if (chatDb)
-				await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
+
+			await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
+			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
 
 			return (true);
 		}
 		else
 		{
 			console.log(`[CHAT] User ${toUserId} not connected, message is pending (status 'sent')`);
-			if (chatDb)
-				await chatDb.createMessageStatus(messageId, toUserId, 'sent');
+
+			await chatDb.createMessageStatus(messageId, toUserId, 'sent'); // Status for receiver
+			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
 
 			return (false);
 		}
