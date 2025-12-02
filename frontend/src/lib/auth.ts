@@ -1,10 +1,14 @@
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://localhost:3000';
 
+const TOKEN_REFRESH_INTERVAL = 10 * 60 * 1000;
+let refreshTokenTimer: ReturnType<typeof setInterval> | null = null;
+
 export interface User {
     id: string;
     username: string;
     email: string;
     avatarUrl?: string;
+    tfaEnabled?: boolean;
 }
 
 export function getUserId(): string | null {
@@ -75,9 +79,11 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
 
   if (!user) {
     localStorage.removeItem('userId');
+    localStorage.removeItem('tfaEnabled');
     location.reload();
     return null;
   }
+  user.tfaEnabled = localStorage.getItem('tfaEnabled') === 'true';
 
   // Clone template
   const template = document.getElementById('profile-card-template') as HTMLTemplateElement;
@@ -92,9 +98,81 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
   // Populate template with user data
   const avatar = card.querySelector('#profile-avatar') as HTMLImageElement;
   if (avatar) avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
+  const avatarInput = card.querySelector('#input-avatar') as HTMLInputElement;
+
+  // attach avatar upload handler
+  if (avatarInput) {
+    avatarInput.addEventListener('change', async () => {
+      const file = avatarInput.files ? avatarInput.files[0] : null;
+      if (!file) return;
+      
+      const formData = new FormData();
+      formData.append('avatar', file);
+      try {
+        const res = await fetch(`${API_BASE}/users/upload-avatar`, {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        if (!res.ok) throw new Error(`Avatar upload failed: ${res.status}`);
+        const body = await res.json();
+        if (body && body.avatarUrl) {
+          avatar.src = body.avatarUrl;
+        }
+      }
+      catch (err) {
+        console.error('Avatar upload error:', err);
+      }
+    });
+  }
+
 
   const username = card.querySelector('#profile-username') as HTMLElement;
   if (username) username.textContent = user.username || user.email || 'User';
+
+  const enabled2FA = card.querySelector('#profile-tfa') as HTMLElement;
+  const input2FA = card.querySelector('#input-lock') as HTMLInputElement;
+
+  
+  if (enabled2FA) {
+    if (user.tfaEnabled) {
+      enabled2FA.textContent = 'DISABLE TWO FACTOR AUTHENTICATION';
+    } else {
+      enabled2FA.textContent = 'ENABLE TWO FACTOR AUTHENTICATION';
+    }
+  }
+  // attach 2FA status
+  console.log("input2FA:", input2FA);
+
+  if (input2FA) {
+    input2FA.addEventListener('change', async () => {
+        console.log("input:", input2FA.checked);
+        const tfaEnabled = input2FA.checked;
+      try {
+        const res = await fetch(`${API_BASE}/auth/enable-2fa`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ tfaEnabled }),
+        });
+        if (!res.ok) throw new Error(`2FA update failed: ${res.status}`);
+        user.tfaEnabled = tfaEnabled;
+        localStorage.setItem('tfaEnabled', tfaEnabled ? 'true' : 'false');
+        if (user.tfaEnabled)
+        {
+          enabled2FA.textContent = 'DISABLE TWO FACTOR AUTHENTICATION'; 
+        }
+        else
+        {
+          enabled2FA.textContent = 'ENABLE TWO FACTOR AUTHENTICATION';
+        }
+      } catch (err) {
+        console.error('2FA update error:', err);
+        input2FA.checked = !tfaEnabled;
+      }
+    });
+  }
+
 
   const email = card.querySelector('#profile-email') as HTMLElement;
   if (email) email.textContent = user.email || '';
@@ -111,12 +189,7 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
   // Attach event listeners
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      localStorage.removeItem('userId');
-      await fetch(`${API_BASE}/auth/logout`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        credentials: 'include',
-      });
+      await logout();
       window.location.reload();
     });
   }
@@ -129,4 +202,101 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
   }
 
   return cardEl;
+}
+
+/**
+ * Refresh JWT access token using the refresh token cookie
+ * Called periodically to maintain session validity
+ */
+export async function refreshAccessToken(): Promise<boolean> {
+  if (!isLoggedInClient()) {
+    return false;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/auth/token`, {
+      method: 'POST',
+      credentials: 'include', // Send and receive cookies
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+    });
+
+    if (res.ok) {
+      console.log('Token refreshed successfully');
+      return true;
+    } else if (res.status === 401) {
+      // Refresh token expired or invalid, logout user
+      console.warn('Refresh token invalid or expired, logging out');
+      await logout();
+      return false;
+    } else {
+      console.error('Token refresh failed:', res.status);
+      return false;
+    }
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    return false;
+  }
+}
+
+/**
+ * Start periodic token refresh
+ * Call this after user logs in to maintain session
+ */
+export function startTokenRefresh(): void {
+  if (refreshTokenTimer) {
+    clearInterval(refreshTokenTimer);
+  }
+
+  if (!isLoggedInClient()) {
+    console.warn('startTokenRefresh: user not logged in');
+    return;
+  }
+
+  // Refresh immediately on first call, then periodically
+  refreshAccessToken();
+  
+  refreshTokenTimer = setInterval(() => {
+    if (isLoggedInClient()) {
+      refreshAccessToken();
+    } else {
+      stopTokenRefresh();
+    }
+  }, TOKEN_REFRESH_INTERVAL);
+
+  console.log('Token refresh started, interval:', TOKEN_REFRESH_INTERVAL / 1000 / 60, 'minutes');
+}
+
+/**
+ * Stop periodic token refresh
+ * Call this when user logs out
+ */
+export function stopTokenRefresh(): void {
+  if (refreshTokenTimer) {
+    clearInterval(refreshTokenTimer);
+    refreshTokenTimer = null;
+    console.log('Token refresh stopped');
+  }
+}
+
+/**
+ * Logout user and stop token refresh
+ */
+export async function logout(): Promise<void> {
+  stopTokenRefresh();
+  localStorage.removeItem('userId');
+  localStorage.removeItem('tfaEnabled');
+  localStorage.removeItem('_tfa_userId');
+  
+  try {
+    await fetch(`${API_BASE}/auth/logout`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      credentials: 'include',
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
 }

@@ -5,7 +5,8 @@ const routes: Record<string, RouteConfig> = {
   '/': { html: './pages/profile-page/profilepage.html', script: './pages/profile-page/profilepage.ts' },
   '/login': { html: './pages/login/login.html', script: './pages/login/login.ts' },
   '/register': { html: './pages/register/register.html', script: './pages/register/register.ts' },
-  '/profile': { html: './pages/profile-info/profile.html', script: './pages/profile-info/profile.ts' }
+  '/profile': { html: './pages/profile-info/profile.html', script: './pages/profile-info/profile.ts' },
+  '/pong': { html: './pages/pong/pong.html' }
 };
 
 async function navigate(path: string) {

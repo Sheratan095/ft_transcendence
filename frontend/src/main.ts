@@ -1,4 +1,4 @@
-import { renderProfile, getUserId } from './lib/auth';
+import { renderProfile, getUserId, startTokenRefresh } from './lib/auth';
 
 
 class AuthUI {
@@ -15,6 +15,7 @@ class AuthUI {
 
     getUserCount();
     if (getUserId()) {
+        startTokenRefresh(); // Start periodic token refresh if user is logged in
         renderProfile(el);
       return;
     }
@@ -140,12 +141,14 @@ class AuthUI {
         const body = await res.json().catch(() => null);
         if (res.ok) {
           // Check if 2FA is required
-          if (body?.tfaRequired) {
-            localStorage.setItem('_tfa_userId', body.userId);
+          if (body?.User?.tfaEnabled) {
+            localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
             authError.textContent = '';
             this.render2FA();
           } else {
             if (body?.user?.id) localStorage.setItem('userId', body.user.id);
+            localStorage.setItem('tfaEnabled', 'false');
+            startTokenRefresh(); // Start periodic token refresh
             authError.textContent = 'Login successful.';
             authError.className = 'text-xl mt-2 text-center text-green-600';
             setTimeout(() => { location.href = '/'; }, 600);
@@ -286,6 +289,11 @@ class AuthUI {
         const body = await res.json().catch(() => null);
         if (res.ok) {
           if (body?.user?.id) localStorage.setItem('userId', body.user.id);
+          if (body?.user?.TfaEnabled)
+            localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
+          else 
+            localStorage.setItem('tfaEnabled', 'false');
+          startTokenRefresh(); // Start periodic token refresh
           authError.textContent = 'Registration successful.';
           authError.className = 'text-xl mt-2 text-center text-green-600';
           setTimeout(() => { location.href = '/'; }, 600);
@@ -399,8 +407,10 @@ class AuthUI {
 
         const body = await res.json().catch(() => null);
         if (res.ok) {
-          localStorage.removeItem('_tfa_userId');
           if (body?.user?.id) localStorage.setItem('userId', body.user.id);
+          if (body?.user?.tfaEnabled) localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
+          else localStorage.setItem('tfaEnabled', 'false');
+          startTokenRefresh(); // Start periodic token refresh
           authError.textContent = '2FA verified successfully!';
           authError.className = 'text-xl mt-2 text-center text-green-600';
           setTimeout(() => { location.href = '/'; }, 600);
