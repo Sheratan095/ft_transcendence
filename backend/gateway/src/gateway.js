@@ -3,7 +3,7 @@ import { exit } from 'process';
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'CHAT_SERVICE_URL', 
-'PORT', 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS', 'RATE_LIMIT_ACTIVE']);
+'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS', 'RATE_LIMIT_ACTIVE']);
 
 import Fastify from 'fastify'
 import { readFileSync } from 'fs';

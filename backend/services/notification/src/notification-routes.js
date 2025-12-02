@@ -13,7 +13,7 @@ import {
 	handleMessage,
 	handleClose,
 	handleError
-} from './event-hanlders.js';
+} from './event-handlers.js';
 
 // Reusable error response schemas
 const	ErrorResponse =
