@@ -3,7 +3,7 @@ import { exit } from 'process';
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'CHAT_SERVICE_URL', 
-'PORT', 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS', 'RATE_LIMIT_ACTIVE']);
+'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS', 'RATE_LIMIT_ACTIVE']);
 
 import Fastify from 'fastify'
 import { readFileSync } from 'fs';
@@ -26,7 +26,6 @@ if (process.env.USE_HTTPS === 'true')
 			key: readFileSync(path.join(certsPath, 'key.pem')),
 			cert: readFileSync(path.join(certsPath, 'cert.pem'))
 		};
-		console.log('[GATEWAY] HTTPS enabled');
 	}
 	catch (err)
 	{
@@ -259,7 +258,7 @@ await fastify.register(async function (fastify)
 	// CHAT routes
 	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
 	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
-	fastify.post('/chat/add-user-to-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
+	fastify.post('/chat/add-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
 	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
 });
 
@@ -291,8 +290,12 @@ const	start = async () =>
 			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
 		})
 
-		const protocol = httpsOptions ? 'https' : 'http';
-		console.log(`[GATEWAY] Server is running on ${protocol}://localhost:${process.env.PORT}`)
+		const	protocol = httpsOptions ? 'https' : 'http';
+
+		console.log(`[GATEWAY] Server is running:`);
+		console.log(`[GATEWAY] Protocol: ${protocol} `);
+		console.log(`[GATEWAY] URL: ${protocol}://localhost:${process.env.PORT}`);
+		console.log(`[GATEWAY] Rate limiting: ${process.env.RATE_LIMIT_ACTIVE === 'true' ? 'Enabled' : 'Disabled'}`);
 	}
 	catch (err)
 	{

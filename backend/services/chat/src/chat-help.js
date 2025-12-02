@@ -111,10 +111,12 @@ export async function	notifyMessageStatusUpdates(roomId, updatedTime, chatDb)
 {
 	try
 	{
+		// Get all messages just updated at the given time (when they were marked delivered/read)
 		const	justUpdatedMessages = await chatDb.getMessagesUpdatedAt(roomId, updatedTime);
 
 		for (const { message_id, sender_id } of justUpdatedMessages)
 		{
+			// Notify sender about the overall status of the message
 			const	overallStatus = await chatDb.getOverallMessageStatus(message_id);
 			chatConnectionManager.notifyMessageStatusUpdate(sender_id, roomId, message_id, overallStatus);
 		}
@@ -147,4 +149,12 @@ export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, 
 	{
 		console.error(`[CHAT] Error notifying user ${toUserId} about being added to chat ${chatId}:`, err.message);
 	}
+}
+
+export async function	getChatsForUser(userId, chatDb)
+{
+	// Fetch all chats for the user from the database
+	const	chats = await chatDb.getChatsForUser(userId);
+
+	return (chats);
 }

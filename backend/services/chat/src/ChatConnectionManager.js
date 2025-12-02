@@ -1,4 +1,4 @@
-import { getUsernameById } from './chat-help.js';
+import { getUsernameById, notifyMessageStatusUpdates } from './chat-help.js';
 
 // Chat connection manager handles WebSocket connections and message routing
 class	ChatConnectionManager
@@ -11,10 +11,19 @@ class	ChatConnectionManager
 		this._cachedUsersInRooms = new Map(); // userId -> Username
 	}
 
-	addConnection(userId, socket)
+	async	addConnection(userId, socket, chatDb)
 	{
 		this._connections.set(userId, socket);
-		console.log(`[CHAT] User ${userId} connected`);
+
+		// Mark all chat messages as delivered for this user
+		const	chats = await chatDb.getChatsForUser(userId);
+		for (const chat of chats)
+		{
+			const	timestamp = await chatDb.markMessagesAsDelivered(chat.chat_id, userId);
+			notifyMessageStatusUpdates(chat.chat_id, timestamp, chatDb);
+		}
+
+		console.log(`[CHAT] User ${userId} connected, all messages received are now marked as delivered`);
 	}
 
 	removeConnection(userId)
@@ -125,16 +134,18 @@ class	ChatConnectionManager
 		{
 			console.log(`[CHAT] Sending private message from user ${senderId} to user ${toUserId}`);
 			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
-			if (chatDb)
-				await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
+
+			await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
+			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
 
 			return (true);
 		}
 		else
 		{
 			console.log(`[CHAT] User ${toUserId} not connected, message is pending (status 'sent')`);
-			if (chatDb)
-				await chatDb.createMessageStatus(messageId, toUserId, 'sent');
+
+			await chatDb.createMessageStatus(messageId, toUserId, 'sent'); // Status for receiver
+			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
 
 			return (false);
 		}
@@ -147,13 +158,15 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'error', { message });
 	}
 
-	async	replyToMessage(userId, chatId, messageId, status)
+	async	replyToMessage(userId, chatId, messageId, status, content, chatType)
 	{
 		const	socket = this._connections.get(userId);
 		const	data = {
 			chat_id: chatId,
 			message_id: messageId,
+			content: content,
 			status: status,
+			chat_type: chatType,
 		};
 
 		if (socket)

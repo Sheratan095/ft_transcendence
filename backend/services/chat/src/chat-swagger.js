@@ -53,7 +53,7 @@ Reponse:
 }
 \`\`\`
 
-- **chat.visualize** - A user visualized that chat [TO DO]
+- **chat.read** - A user visualized that chat [TO DO]
 \`\`\`json
 {
   "event": "chat.read",
@@ -80,7 +80,9 @@ Response (acknowledgment to sender):
   "data": {
     "chat_id": "room123",
     "message_id": "msg789",
-    "status": "delivered" // or "pending" if some users are offline
+    "content": "Hello everyone!",
+    "status": "delivered", // or "sent" if some users are offline,
+    "chat_type": "group"
   }
 }
 \`\`\`
@@ -101,7 +103,9 @@ Response (acknowledgment to sender):
   "data": {
     "chat_id": "chat789",
     "message_id": "msg123",
-    "status": "delivered" // or "pending" if recipient is offline
+    "content": "Hello everyone!",
+    "status": "delivered", // or "sent" if recipient is offline,
+    "chat_type": "dm"
   }
 }
 \`\`\`
@@ -189,7 +193,7 @@ Response (acknowledgment to sender):
   "data": {
     "chat_id": "chat789",
     "message_id": "msg123",
-    "status": "delivered" // "delivered" if sent to all recipients, "pending" if some are offline
+    "status": "delivered" // "delivered" if sent to all recipients, "sent" if some are offline
   }
 }
 \`\`\`

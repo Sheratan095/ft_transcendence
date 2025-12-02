@@ -59,7 +59,7 @@ export const	addUserToChat = async (req, reply) =>
 {
 	try
 	{
-		const	response = await axios.post(`${CHAT_URL}/add-user-to-chat`, req.body, {
+		const	response = await axios.post(`${CHAT_URL}/add-user`, req.body, {
 			headers: getAuthHeaders(req)
 		})
 

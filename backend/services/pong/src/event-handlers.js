@@ -23,7 +23,6 @@ export function	handleNewConnection(socket, req)
 		return (null);
 	}
 
-	console.log(`[PONG] WebSocket client connected - User: ${userId}`);
 	pongConnectionManager.addConnection(userId, socket);
 
 	return (userId);

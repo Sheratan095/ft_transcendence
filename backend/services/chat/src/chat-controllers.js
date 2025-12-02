@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData, checkBlock, notifyUserAddedToChat } from './chat-help.js';
+import { extractUserData, checkBlock, notifyUserAddedToChat, notifyMessageStatusUpdates } from './chat-help.js';
 
 export const	getChats = async (req, reply) =>
 {
@@ -93,8 +93,9 @@ export const	getMessages = async (req, reply) =>
 
 		// Update messages in requested chat statuses to 'delivered' for this user
 		const	deliveredTime = await chatDb.markMessagesAsDelivered(chatId, userId);
+
 		// Notify senders about the status update if the overall status changed
-		await chatConnectionManager.notifyMessageStatusUpdate(chatId, deliveredTime, chatDb);
+		await notifyMessageStatusUpdates(chatId, deliveredTime, chatDb);
 
 		return (reply.code(200).send(messages));
 
@@ -122,10 +123,9 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
-		if (!(await checkBlock(toUserId, userId)))
+		if (await checkBlock(userId, toUserId))
 		{
-			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
-			// chatConnectionManager.sendErrorMessage(userId, 'Can\'t invite in chat');
+			console.log(`[CHAT] Failed to send message because the relation between ${toUserId} and ${userId} is blocked`);
 			return;
 		}
 
@@ -166,17 +166,33 @@ export const	createGroupChat = async (req, reply) =>
 		const	chatDb = req.server.chatDb;
 		const	userId = extractUserData(req).id;
 
-		const	{ groupName } = req.body;
+		const	{ name } = req.body;
 
 		// Create the group chat
-		const	chatId = await chatDb.createGroupChat(groupName);
+		const	chatId = await chatDb.createGroupChat(name);
+		console.log(`[CHAT] User ${userId} created group chat ${chatId} with name "${name}"`);
 
 		// Add creator to the chat
 		await chatDb.addUserToChat(chatId, userId);
+		console.log(`[CHAT] User ${userId} added to newly created group chat ${chatId}`);
 
-		console.log(`[CHAT] User ${userId} created group chat ${chatId} with name "${groupName}"`);
+		// Get the created chat with all details
+		const	chat = await chatDb.getChatById(chatId);
+		
+		// Add creator's username to the response
+		const	creatorUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
+		const	chatResponse = {
+			id: chat.id,
+			name: chat.name,
+			chatType: chat.chat_type,
+			createdAt: chat.created_at,
+			members: [{
+				userId: userId,
+				username: creatorUsername
+			}]
+		};
 
-		return (reply.code(200).send({ chatId }));
+		return reply.code(201).send(chatResponse);
 	}
 	catch (err)
 	{

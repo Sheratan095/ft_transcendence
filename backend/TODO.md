@@ -116,3 +116,6 @@
 []	When frontend doesn't implement http only cookies, try to change message
 	[AUTH] User logged in:  1
 	[AUTH] Token validation error: Invalid token
+
+[x] When try to send a message or add a person to group, if you blocked him, return an error
+	with message "unblock user to send a message" and noting when he blocked you
