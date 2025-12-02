@@ -429,6 +429,7 @@
                 <div>
                     <button class="btn btn-secondary" id="loadMoreBtn" onclick="loadMoreMessages()" style="display: none;">Load More</button>
                     <button class="btn btn-secondary" onclick="showPrivateMessageModal()">+ Private Message</button>
+                    <button class="btn btn-secondary" id="addUserBtn" onclick="showAddUserModal()" style="display: none;">+ Add User</button>
                 </div>
             </div>
             <div class="messages-container" id="messagesContainer">
@@ -468,6 +469,18 @@
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="hidePrivateMessageModal()">Cancel</button>
                 <button class="btn" onclick="sendPrivateMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal" id="addUserModal">
+        <div class="modal-content">
+            <h3>Add User to Group</h3>
+            <input type="text" id="addUserIdInput" placeholder="User ID" />
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="hideAddUserModal()">Cancel</button>
+                <button class="btn" onclick="addUserToChat()">Add User</button>
             </div>
         </div>
     </div>
@@ -648,6 +661,14 @@
             const chat = chats.find(c => c.id === chatId);
             if (chat) {
                 document.getElementById('chatTitle').textContent = getChatDisplayName(chat);
+                
+                // Show/hide add user button based on chat type
+                const addUserBtn = document.getElementById('addUserBtn');
+                if (chat.chatType === 'group') {
+                    addUserBtn.style.display = 'inline-block';
+                } else {
+                    addUserBtn.style.display = 'none';
+                }
             }
 
             document.getElementById('messageInput').disabled = false;
@@ -1224,6 +1245,51 @@
             }
         }
 
+        // Add user to chat
+        async function addUserToChat() {
+            const toUserId = document.getElementById('addUserIdInput').value.trim();
+
+            if (!toUserId) {
+                alert('Please enter a user ID');
+                return;
+            }
+
+            if (!currentChatId) {
+                alert('No chat selected');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${GATEWAY_URL}/chat/add-user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        chatId: currentChatId,
+                        toUserId: toUserId
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to add user to chat');
+                }
+
+                alert('User added successfully!');
+                hideAddUserModal();
+                document.getElementById('addUserIdInput').value = '';
+
+                // Reload chats to update member list
+                await loadChats();
+
+            } catch (err) {
+                console.error('Error adding user to chat:', err);
+                alert('Failed to add user: ' + err.message);
+            }
+        }
+
         // Modal functions
         function showCreateGroupModal() {
             document.getElementById('createGroupModal').classList.add('show');
@@ -1239,6 +1305,14 @@
 
         function hidePrivateMessageModal() {
             document.getElementById('privateMessageModal').classList.remove('show');
+        }
+
+        function showAddUserModal() {
+            document.getElementById('addUserModal').classList.add('show');
+        }
+
+        function hideAddUserModal() {
+            document.getElementById('addUserModal').classList.remove('show');
         }
 
         // Utility functions

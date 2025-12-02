@@ -310,6 +310,22 @@ export class	ChatDatabase
 		await this.db.run(insertMemberQuery, [chatId, userId]);
 	}
 
+	async	getChatById(chatId)
+	{
+		const	query = `
+			SELECT 
+				id,
+				name,
+				chat_type,
+				created_at
+			FROM chats
+			WHERE id = ?
+		`;
+
+		const	chat = await this.db.get(query, [chatId]);
+		return (chat);
+	}
+
 	//-----------------------------MESSAGE QUERIES----------------------------
 
 	async	addMessageToChat(chatId, senderId, message)

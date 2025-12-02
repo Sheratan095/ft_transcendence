@@ -165,10 +165,10 @@ async function handlePrivateMessage(userId, data, chatDb)
 			return;
 		}
 
-		if (!(await checkBlock(toUserId, userId)))
+		if (await checkBlock(userId, toUserId))
 		{
-			console.log(`[CHAT] Blocked: Relation between ${toUserId} and ${userId} is blocked`);
-			// chatConnectionManager.sendErrorMessage(userId, 'Can\'t send message');
+			console.log(`[CHAT] Failed to send message because the relation between ${toUserId} and ${userId} is blocked`);
+			chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to this user');
 			return;
 		}
 
