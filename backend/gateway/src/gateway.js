@@ -26,7 +26,6 @@ if (process.env.USE_HTTPS === 'true')
 			key: readFileSync(path.join(certsPath, 'key.pem')),
 			cert: readFileSync(path.join(certsPath, 'cert.pem'))
 		};
-		console.log('[GATEWAY] HTTPS enabled');
 	}
 	catch (err)
 	{
@@ -291,8 +290,12 @@ const	start = async () =>
 			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
 		})
 
-		const protocol = httpsOptions ? 'https' : 'http';
-		console.log(`[GATEWAY] Server is running on ${protocol}://localhost:${process.env.PORT}`)
+		const	protocol = httpsOptions ? 'https' : 'http';
+
+		console.log(`[GATEWAY] Server is running:`);
+		console.log(`[GATEWAY] Protocol: ${protocol} `);
+		console.log(`[GATEWAY] URL: ${protocol}://localhost:${process.env.PORT}`);
+		console.log(`[GATEWAY] Rate limiting: ${process.env.RATE_LIMIT_ACTIVE === 'true' ? 'Enabled' : 'Disabled'}`);
 	}
 	catch (err)
 	{

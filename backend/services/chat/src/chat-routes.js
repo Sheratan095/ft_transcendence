@@ -263,7 +263,7 @@ export function	chatRoutes(fastify)
 	fastify.get('/ws', { websocket: true }, (socket, req) =>
 	{
 		// if the request is invalid, reject it
-		let	userId = handleNewConnection(socket, req);
+		let	userId = handleNewConnection(socket, req, fastify.chatDb);
 		if (!userId)
 			return ;
 

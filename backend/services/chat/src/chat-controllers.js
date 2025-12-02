@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData, checkBlock, notifyUserAddedToChat } from './chat-help.js';
+import { extractUserData, checkBlock, notifyUserAddedToChat, notifyMessageStatusUpdates } from './chat-help.js';
 
 export const	getChats = async (req, reply) =>
 {
@@ -93,8 +93,9 @@ export const	getMessages = async (req, reply) =>
 
 		// Update messages in requested chat statuses to 'delivered' for this user
 		const	deliveredTime = await chatDb.markMessagesAsDelivered(chatId, userId);
+
 		// Notify senders about the status update if the overall status changed
-		await chatConnectionManager.notifyMessageStatusUpdate(chatId, deliveredTime, chatDb);
+		await notifyMessageStatusUpdates(chatId, deliveredTime, chatDb);
 
 		return (reply.code(200).send(messages));
 
