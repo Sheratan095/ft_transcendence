@@ -94,7 +94,8 @@ class	ChatConnectionManager
 		return (status);
 	}
 
-	async	sendSystemMsgToRoom(roomId, message, chatDb)
+	// The message is added to database
+	async	sendSystemMsgToRoom(messageId, roomId, message, chatDb)
 	{
 		const	data = {
 			roomId: roomId,
@@ -110,7 +111,24 @@ class	ChatConnectionManager
 		{
 			const	socket = this._connections.get(userId);
 			if (socket)
-				this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
+			{
+				this.#dispatchEventToSocket(socket, 'chat.message', data);
+
+				await chatDb.createMessageStatus(
+					messageId,
+					null,
+					"delivered"
+				);
+			}
+			else
+			{
+				// Add the message to db as sent for offline users
+				await chatDb.createMessageStatus(
+					messageId,
+					null,
+					"sent"
+				);
+			}
 		}
 	}
 

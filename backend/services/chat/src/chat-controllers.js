@@ -80,7 +80,7 @@ export const	getMessages = async (req, reply) =>
 		}
 
 		// map to match the response schema
-		const messages = rawMessages.map(msg => ({
+		const	messages = rawMessages.map(msg => ({
 			id: msg.id,
 			chatId: msg.chat_id,
 			senderId: msg.sender_id,
@@ -88,6 +88,8 @@ export const	getMessages = async (req, reply) =>
 			createdAt: msg.created_at,
 			messageStatus: msg.message_status
 		}));
+
+		console.log(messages);
 
 		console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
 
@@ -138,7 +140,10 @@ export const	addUserToChat = async (req, reply) =>
 		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)
 			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
-		chatConnectionManager.sendSystemMsgToRoom(chatId, `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`, chatDb);
+		// Add sytem message to chat and notify room
+		const	message = `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`;
+		const	messageId = await chatDb.addSystemMessageToChat(chatId, message);
+		chatConnectionManager.sendSystemMsgToRoom(messageId, chatId, message, chatDb);
 
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 

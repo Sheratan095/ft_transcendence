@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS messages
 (
 	id				TEXT NOT NULL,
 	chat_id			TEXT NOT NULL,
-	sender_id		TEXT NOT NULL,
+	sender_id		TEXT, -- Null for system messages
 	content			TEXT NOT NULL,
 	created_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS messages
 CREATE TABLE IF NOT EXISTS message_statuses
 (
 	message_id		TEXT NOT NULL,
-	user_id			TEXT NOT NULL, -- represents the user who is receiving the message
+	user_id			TEXT, -- represents the user who is receiving the message, NULL for system messages
 	status			TEXT NOT NULL CHECK(status IN ('sent', 'delivered', 'read')),
 	updated_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

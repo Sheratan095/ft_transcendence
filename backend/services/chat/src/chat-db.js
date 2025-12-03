@@ -150,6 +150,7 @@ export class	ChatDatabase
 	}
 
 	// Fecth just the messages for a chat that a user is part of and that he has received
+	//	system messages are included
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
 		const query = `
@@ -339,6 +340,21 @@ export class	ChatDatabase
 		`;
 
 		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, timestamp]);
+
+		return (messageId);
+	}
+
+	async	addSystemMessageToChat(chatId, message)
+	{
+		const	messageId = await this.#generateUUID();
+		const	timestamp = new Date().toISOString();
+
+		const	insertMessageQuery = `
+			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
+			VALUES (?, ?, NULL, ?, ?)
+		`;
+
+		await this.db.run(insertMessageQuery, [messageId, chatId, message, timestamp]);
 
 		return (messageId);
 	}

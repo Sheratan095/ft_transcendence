@@ -772,6 +772,15 @@
                 const createdAt = msg.createdAt || msg.created_at;
                 const messageStatus = msg.messageStatus || msg.message_status;
                 const isPrivate = msg.isPrivate || false;
+                const isSystem = msg.isSystem || senderId === 'system';
+                
+                // Handle system messages
+                if (isSystem) {
+                    messageDiv.className = 'message message-system';
+                    messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
+                    container.appendChild(messageDiv);
+                    return;
+                }
                 
                 // Compare as strings since backend returns string IDs
                 const isSent = String(senderId) === String(userId);
