@@ -1,4 +1,4 @@
-import { renderProfile, getUserId, startTokenRefresh } from './lib/auth';
+import { renderProfile, getUserId, startTokenRefresh, type User } from './lib/auth';
 
 
 class AuthUI {
@@ -15,7 +15,6 @@ class AuthUI {
 
     getUserCount();
     if (getUserId()) {
-        startTokenRefresh(); // Start periodic token refresh if user is logged in
         renderProfile(el);
       return;
     }
@@ -140,15 +139,16 @@ class AuthUI {
 
         const body = await res.json().catch(() => null);
         if (res.ok) {
+          console.log('Login successful:', body);
           // Check if 2FA is required
-          if (body?.User?.tfaEnabled) {
-            localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
+          if (body?.tfaRequired) {
+            localStorage.setItem('tfaEnabled', 'true');
+            localStorage.setItem('userId', body.userId);
             authError.textContent = '';
             this.render2FA();
           } else {
-            if (body?.user?.id) localStorage.setItem('userId', body.user.id);
+            if (body?.user?.id) localStorage.setItem('userId', body.user?.id);
             localStorage.setItem('tfaEnabled', 'false');
-            startTokenRefresh(); // Start periodic token refresh
             authError.textContent = 'Login successful.';
             authError.className = 'text-xl mt-2 text-center text-green-600';
             setTimeout(() => { location.href = '/'; }, 600);
@@ -293,7 +293,6 @@ class AuthUI {
             localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
           else 
             localStorage.setItem('tfaEnabled', 'false');
-          startTokenRefresh(); // Start periodic token refresh
           authError.textContent = 'Registration successful.';
           authError.className = 'text-xl mt-2 text-center text-green-600';
           setTimeout(() => { location.href = '/'; }, 600);
@@ -307,6 +306,8 @@ class AuthUI {
       }
     });
   }
+
+  // 2FA 
 
   private render2FA() {
     this.clear();
@@ -389,16 +390,16 @@ class AuthUI {
         return;
       }
 
-      const userId = localStorage.getItem('_tfa_userId');
+      const userId = localStorage.getItem('userId');
       if (!userId) {
-        authError.textContent = 'TFA code sent to email.';
+        authError.textContent = 'TFA failed.';
         authError.classList.add('text-red-600');
         return;
       }
 
       try {
         authError.textContent = 'Verifying...';
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/auth/verify-2fa`, {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/auth/2fa`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           credentials: 'include',
@@ -407,10 +408,7 @@ class AuthUI {
 
         const body = await res.json().catch(() => null);
         if (res.ok) {
-          if (body?.user?.id) localStorage.setItem('userId', body.user.id);
-          if (body?.user?.tfaEnabled) localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
-          else localStorage.setItem('tfaEnabled', 'false');
-          startTokenRefresh(); // Start periodic token refresh
+          console.log('2FA verification successful:', body);
           authError.textContent = '2FA verified successfully!';
           authError.className = 'text-xl mt-2 text-center text-green-600';
           setTimeout(() => { location.href = '/'; }, 600);
@@ -435,7 +433,6 @@ async function getUserCount()
     const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/users/stats`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      credentials: 'include'
     });
     if (res.ok) {
       const body = await res.json();

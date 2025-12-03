@@ -84,6 +84,7 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
     return null;
   }
   user.tfaEnabled = localStorage.getItem('tfaEnabled') === 'true';
+  console.log('User 2FA status:', user.tfaEnabled, localStorage.getItem('tfaEnabled'));
 
   // Clone template
   const template = document.getElementById('profile-card-template') as HTMLTemplateElement;
@@ -97,6 +98,7 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
 
   // Populate template with user data
   const avatar = card.querySelector('#profile-avatar') as HTMLImageElement;
+  if (user.avatarUrl) user.avatarUrl = `${API_BASE}${user.avatarUrl}`;
   if (avatar) avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
   const avatarInput = card.querySelector('#input-avatar') as HTMLInputElement;
 
@@ -252,6 +254,7 @@ export function startTokenRefresh(): void {
 
   if (!isLoggedInClient()) {
     console.warn('startTokenRefresh: user not logged in');
+    logout();
     return;
   }
 
@@ -285,10 +288,8 @@ export function stopTokenRefresh(): void {
  * Logout user and stop token refresh
  */
 export async function logout(): Promise<void> {
-  stopTokenRefresh();
   localStorage.removeItem('userId');
   localStorage.removeItem('tfaEnabled');
-  localStorage.removeItem('_tfa_userId');
   
   try {
     await fetch(`${API_BASE}/auth/logout`, {
