@@ -110,26 +110,10 @@ class	ChatConnectionManager
 		for (const userId of userIds)
 		{
 			const	socket = this._connections.get(userId);
-			if (socket)
-			{
-				this.#dispatchEventToSocket(socket, 'chat.message', data);
-
-				await chatDb.createMessageStatus(
-					messageId,
-					null,
-					"delivered"
-				);
-			}
-			else
-			{
-				// Add the message to db as sent for offline users
-				await chatDb.createMessageStatus(
-					messageId,
-					null,
-					"sent"
-				);
-			}
+			this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
 		}
+
+		console.log(`[CHAT] System message ${messageId} in room ${roomId}`);
 	}
 
 	// Return if the message was delivered to the user

@@ -17,6 +17,7 @@ export class	ChatDatabase
 	{
 		this.dbPath = dbPath;
 		this.db = null;
+		this.systemSenderId = 'system';
 	}
 
 	async	initialize()
@@ -149,7 +150,7 @@ export class	ChatDatabase
 		return (chats);
 	}
 
-	// Fecth just the messages for a chat that a user is part of and that he has received
+	// Fetch just the messages for a chat that a user is part of and that he has received
 	//	system messages are included
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
@@ -160,19 +161,20 @@ export class	ChatDatabase
 				m.sender_id,
 				m.content,
 				m.created_at,
-				ms.status AS message_status
+				COALESCE(ms.status, 'system') AS message_status
 			FROM messages m
-			INNER JOIN message_statuses ms 
-				ON m.id = ms.message_id
+			LEFT JOIN message_statuses ms 
+				ON m.id = ms.message_id AND ms.user_id = ?
 			WHERE m.chat_id = ?
-			AND ms.user_id = ?
+			AND (ms.user_id = ? OR m.sender_id = ?)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
 		// Fetch all messages in the chat received by the user (exclude messages before join and after leave)
-		// Included messages sent by the user as well
+		// Include messages sent by the user as well
+		// Include system messages (sender_id = 'system') regardless of message_statuses
 
-		const	messages = await this.db.all(query, [chatId, userId, limit, offset]);
+		const	messages = await this.db.all(query, [userId, chatId, userId, this.systemSenderId, limit, offset]);
 		return (messages);
 	}
 
@@ -351,10 +353,10 @@ export class	ChatDatabase
 
 		const	insertMessageQuery = `
 			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
-			VALUES (?, ?, NULL, ?, ?)
+			VALUES (?, ?, ?, ?, ?)
 		`;
 
-		await this.db.run(insertMessageQuery, [messageId, chatId, message, timestamp]);
+		await this.db.run(insertMessageQuery, [messageId, chatId, this.systemSenderId, message, timestamp]);
 
 		return (messageId);
 	}

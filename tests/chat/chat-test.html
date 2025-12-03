@@ -772,7 +772,7 @@
                 const createdAt = msg.createdAt || msg.created_at;
                 const messageStatus = msg.messageStatus || msg.message_status;
                 const isPrivate = msg.isPrivate || false;
-                const isSystem = msg.isSystem || senderId === 'system';
+                const isSystem = msg.isSystem || senderId === 'system' || senderId === null;
                 
                 // Handle system messages
                 if (isSystem) {
@@ -1279,9 +1279,9 @@
             const chatId = data.roomId;
 
             const msg = {
-                id: 'system-' + Date.now(),
+                id: data.messageId || 'system-' + Date.now(),
                 chatId: chatId,
-                senderId: 'system',
+                senderId: null, // Use null to match database format
                 content: data.message,
                 createdAt: data.timestamp,
                 isSystem: true
@@ -1292,11 +1292,7 @@
             messages.set(chatId, chatMessages);
 
             if (chatId === currentChatId) {
-                const container = document.getElementById('messagesContainer');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message message-system';
-                messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
-                container.appendChild(messageDiv);
+                renderMessages();
                 scrollToBottom();
             }
         }
