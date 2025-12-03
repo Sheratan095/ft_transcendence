@@ -17,6 +17,7 @@ export class	ChatDatabase
 	{
 		this.dbPath = dbPath;
 		this.db = null;
+		this.systemSenderId = 'system';
 	}
 
 	async	initialize()
@@ -149,7 +150,8 @@ export class	ChatDatabase
 		return (chats);
 	}
 
-	// Fecth just the messages for a chat that a user is part of and that he has received
+	// Fetch just the messages for a chat that a user is part of and that he has received
+	//	system messages are included
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
 		const query = `
@@ -159,19 +161,20 @@ export class	ChatDatabase
 				m.sender_id,
 				m.content,
 				m.created_at,
-				ms.status AS message_status
+				COALESCE(ms.status, 'system') AS message_status
 			FROM messages m
-			INNER JOIN message_statuses ms 
-				ON m.id = ms.message_id
+			LEFT JOIN message_statuses ms 
+				ON m.id = ms.message_id AND ms.user_id = ?
 			WHERE m.chat_id = ?
-			AND ms.user_id = ?
+			AND (ms.user_id = ? OR m.sender_id = ?)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
 		// Fetch all messages in the chat received by the user (exclude messages before join and after leave)
-		// Included messages sent by the user as well
+		// Include messages sent by the user as well
+		// Include system messages (sender_id = 'system') regardless of message_statuses
 
-		const	messages = await this.db.all(query, [chatId, userId, limit, offset]);
+		const	messages = await this.db.all(query, [userId, chatId, userId, this.systemSenderId, limit, offset]);
 		return (messages);
 	}
 
@@ -343,6 +346,21 @@ export class	ChatDatabase
 		return (messageId);
 	}
 
+	async	addSystemMessageToChat(chatId, message)
+	{
+		const	messageId = await this.#generateUUID();
+		const	timestamp = new Date().toISOString();
+
+		const	insertMessageQuery = `
+			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
+			VALUES (?, ?, ?, ?, ?)
+		`;
+
+		await this.db.run(insertMessageQuery, [messageId, chatId, this.systemSenderId, message, timestamp]);
+
+		return (messageId);
+	}
+
 	//-----------------------------MESSAGE STATUS QUERIES----------------------------
 
 	async	updateMessageStatus(messageId, userId, status)
@@ -387,7 +405,7 @@ export class	ChatDatabase
 
 	// Returns aggregated status for a message across all recipients (excluding sender)
 	// DELIVERED if it's delivered to all recipients
-	// READ if it's read by all recipients [future implementation]
+	// READ if it's read by all recipients
 	// Return "sent" if at least one recipient has not received it yet OR in case of error
 	async	getOverallMessageStatus(messageId)
 	{
@@ -405,14 +423,16 @@ export class	ChatDatabase
 
 			const	row = await this.db.get(query, [messageId]);
 
+			// The message HAS TO BE A SENDER that VISUALIZE THE MESSAGE
+			//	so, if there are no rows, it means there are no recipients (e.g., only the sender exists)
 			if (!row || row.min_status === null)
-				return ("sent");
+				return ("read");
 
 			const	{ min_status, max_status } = row;
 
 			// ---- AGGREGATION LOGIC ----
 
-			// Future: if you add "read" status
+			// All read
 			if (min_status === "read" && max_status === "read")
 				return ("read");
 

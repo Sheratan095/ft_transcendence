@@ -59,7 +59,6 @@ class	ChatConnectionManager
 
 		// Get users in room
 		const	userIds = await chatDb.getUsersInRoom(roomId);
-		let		deliveredCount = 0;
 
 		// Send to each user in the room
 		for (const userId of userIds)
@@ -76,8 +75,6 @@ class	ChatConnectionManager
 					userId,
 					userId === senderId ? "read" : "delivered"
 				);
-
-				deliveredCount++;
 			}
 			else
 			{
@@ -91,10 +88,14 @@ class	ChatConnectionManager
 			}
 		}
 
-		return (deliveredCount != userIds.length);
+		const	status = await chatDb.getOverallMessageStatus(messageId);
+		console.log(`[CHAT] Message ${messageId} in room ${roomId} has overall status: ${status}`);
+
+		return (status);
 	}
 
-	async	sendSystemMsgToRoom(roomId, message, chatDb)
+	// The message is added to database
+	async	sendSystemMsgToRoom(messageId, roomId, message, chatDb)
 	{
 		const	data = {
 			roomId: roomId,
@@ -109,9 +110,10 @@ class	ChatConnectionManager
 		for (const userId of userIds)
 		{
 			const	socket = this._connections.get(userId);
-			if (socket)
-				this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
+			this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
 		}
+
+		console.log(`[CHAT] System message ${messageId} in room ${roomId}`);
 	}
 
 	// Return if the message was delivered to the user

@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS messages
 (
 	id				TEXT NOT NULL,
 	chat_id			TEXT NOT NULL,
-	sender_id		TEXT NOT NULL,
+	sender_id		TEXT, -- Null for system messages
 	content			TEXT NOT NULL,
 	created_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

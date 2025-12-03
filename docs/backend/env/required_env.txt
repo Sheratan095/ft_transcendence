@@ -45,7 +45,7 @@ services/chat:
     INTERNAL_API_KEY=1234
     PORT=3004
     USERS_SERVICE_URL=http://localhost:3002
-    NOTIFICATION_SERVICE_URL=http://localhost:3004
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
 
 services/pong:
     INTERNAL_API_KEY=1234

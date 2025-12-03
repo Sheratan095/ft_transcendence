@@ -131,7 +131,7 @@ export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, 
 {
 	try
 	{
-		const	response = await fetch(`${process.env.NOTIFICATION_SERVICE_URL}/notification/send-chat-user-added`, {
+		const	response = await fetch(`${process.env.NOTIFICATION_SERVICE_URL}/send-chat-user-added`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -144,10 +144,13 @@ export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, 
 				chatId: chatId,
 			}),
 		});
+
+		return (response.ok);
 	}
 	catch (err)
 	{
 		console.error(`[CHAT] Error notifying user ${toUserId} about being added to chat ${chatId}:`, err.message);
+		return (false);
 	}
 }
 

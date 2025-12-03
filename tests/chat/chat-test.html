@@ -445,7 +445,7 @@
     <!-- Status bar -->
     <div class="status-bar">
         <span id="statusText">Disconnected</span>
-        <span id="connectionCount">Active connections: 0</span>
+        <span id="connectionCount">Online friends: 0</span>
     </div>
 
     <!-- Create Group Modal -->
@@ -489,9 +489,11 @@
         // Configuration
         const GATEWAY_URL = 'https://localhost:3000';
         const WS_URL = 'wss://localhost:3000/chat/ws';
+        const NOTIFICATION_WS_URL = 'wss://localhost:3000/notifications/ws';
 
         // State
         let ws = null;
+        let notificationWs = null;
         let userId = null;
         let userEmail = null;
         let currentChatId = null;
@@ -500,7 +502,9 @@
         let messageOffset = 0;
         const MESSAGE_LIMIT = 50;
         let pingInterval = null; // Store interval ID to prevent duplicates
+        let notificationPingInterval = null;
         let pendingConfirmations = new Map(); // messageId -> status (store confirmations that arrive before the message)
+        let onlineFriends = new Set(); // Track online friends
 
         // Login function
         async function login() {
@@ -548,6 +552,7 @@
                 // Small delay to ensure cookies are properly set
                 setTimeout(() => {
                     connectWebSocket();
+                    connectNotificationWebSocket();
                 }, 100);
 
             } catch (err) {
@@ -556,24 +561,33 @@
                 updateStatus('Login failed', false);
             }
         }
-
         // Logout function
         function logout() {
             if (ws) {
                 ws.close();
             }
+            if (notificationWs) {
+                notificationWs.close();
+            }
 
-            // Clear ping interval
+            // Clear ping intervals
             if (pingInterval) {
                 clearInterval(pingInterval);
                 pingInterval = null;
             }
+            if (notificationPingInterval) {
+                clearInterval(notificationPingInterval);
+                notificationPingInterval = null;
+            }
 
             ws = null;
+            notificationWs = null;
             userId = null;
             userEmail = null;
             currentChatId = null;
             chats = [];
+            messages.clear();
+            onlineFriends.clear();
             messages.clear();
 
             document.getElementById('userInfo').innerHTML = '';
@@ -758,6 +772,15 @@
                 const createdAt = msg.createdAt || msg.created_at;
                 const messageStatus = msg.messageStatus || msg.message_status;
                 const isPrivate = msg.isPrivate || false;
+                const isSystem = msg.isSystem || senderId === 'system' || senderId === null;
+                
+                // Handle system messages
+                if (isSystem) {
+                    messageDiv.className = 'message message-system';
+                    messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
+                    container.appendChild(messageDiv);
+                    return;
+                }
                 
                 // Compare as strings since backend returns string IDs
                 const isSent = String(senderId) === String(userId);
@@ -865,7 +888,198 @@
             }
         }
 
-        // Connect to WebSocket
+        // Connect to Notification WebSocket
+        // Connect to Chat WebSocket
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+
+            // Clear any existing ping interval
+            if (pingInterval) {
+                clearInterval(pingInterval);
+                pingInterval = null;
+            }
+
+            updateStatus('Connecting...', false);
+
+            // WebSocket connections automatically include cookies from the same domain
+            ws = new WebSocket(WS_URL);
+
+            ws.onopen = () => {
+                console.log('Chat WebSocket connected');
+                updateConnectionStatus();
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleWebSocketMessage(message);
+                } catch (err) {
+                    console.error('Error parsing chat WebSocket message:', err);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('Chat WebSocket closed');
+                updateConnectionStatus();
+                
+                // Clear ping interval when connection closes
+                if (pingInterval) {
+                    clearInterval(pingInterval);
+                    pingInterval = null;
+                }
+            };
+
+            ws.onerror = (err) => {
+                console.error('Chat WebSocket error:', err);
+                console.error('Chat WebSocket readyState:', ws?.readyState);
+                alert('Chat WebSocket connection failed. Check console for details.');
+                updateConnectionStatus();
+            };
+        }
+        // Handle Notification WebSocket messages
+        function handleNotificationWebSocketMessage(message) {
+            console.log('Received notification WebSocket message:', message);
+
+            switch (message.event) {
+                case 'friends.onlineList':
+                    handleFriendsOnlineList(message.data);
+                    break;
+
+                case 'friend.online':
+                    handleFriendOnline(message.data);
+                    break;
+
+                case 'friend.offline':
+                    handleFriendOffline(message.data);
+                    break;
+
+                case 'friend.request':
+                    handleFriendRequest(message.data);
+                    break;
+
+                case 'friend.accept':
+                    handleFriendAccept(message.data);
+                    break;
+
+                case 'chat.userAdded':
+                    handleChatUserAdded(message.data);
+                    break;
+
+                default:
+                    console.log('Unknown notification event:', message.event);
+            }
+        }
+
+        // Handle friends online list
+        function handleFriendsOnlineList(data) {
+            console.log('Friends online list received:', data);
+            onlineFriends.clear();
+            if (data.onlineFriends) {
+                data.onlineFriends.forEach(friend => {
+                    onlineFriends.add(friend.userId);
+                });
+            }
+            showNotification('Friends Online', `${onlineFriends.size} friends are online`);
+            updateFriendStatus();
+        }
+
+        // Handle friend coming online
+        function handleFriendOnline(data) {
+            console.log('Friend came online:', data);
+            onlineFriends.add(data.userId);
+            showNotification('Friend Online', `Friend ${data.userId} is now online`);
+            updateFriendStatus();
+        }
+
+        // Handle friend going offline
+        function handleFriendOffline(data) {
+            console.log('Friend went offline:', data);
+            onlineFriends.delete(data.userId);
+            showNotification('Friend Offline', `Friend ${data.userId} went offline`);
+            updateFriendStatus();
+        }
+
+        // Handle friend request
+        function handleFriendRequest(data) {
+            console.log('Friend request received:', data);
+            showNotification('Friend Request', `${data.from} sent you a friend request`);
+        }
+
+        // Handle friend accept
+        function handleFriendAccept(data) {
+            console.log('Friend request accepted:', data);
+            showNotification('Friend Request Accepted', `${data.from} accepted your friend request`);
+        }
+
+        // Handle chat user added
+        function handleChatUserAdded(data) {
+            console.log('User added to chat:', data);
+            showNotification('Added to Chat', `${data.from} added you to a chat`);
+            
+            // Refresh chats to show the new chat
+            loadChats().then(() => {
+                console.log('Chats refreshed after being added to new chat');
+            });
+        }
+
+        // Update friend status display
+        function updateFriendStatus() {
+            const connectionCount = document.getElementById('connectionCount');
+            connectionCount.textContent = `Online friends: ${onlineFriends.size}`;
+        }
+
+        // Show notification
+        function showNotification(title, message) {
+            // Create a simple notification div
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 300px;
+                font-size: 14px;
+            `;
+            notification.innerHTML = `<strong>${title}</strong><br>${message}`;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Update connection status
+        function updateConnectionStatus() {
+            const chatConnected = ws && ws.readyState === WebSocket.OPEN;
+            const notificationConnected = notificationWs && notificationWs.readyState === WebSocket.OPEN;
+            
+            let status = 'Disconnected';
+            let isConnected = false;
+            
+            if (chatConnected && notificationConnected) {
+                status = 'Connected (Chat + Notifications)';
+                isConnected = true;
+            } else if (chatConnected) {
+                status = 'Connected (Chat only)';
+                isConnected = true;
+            } else if (notificationConnected) {
+                status = 'Connected (Notifications only)';
+                isConnected = true;
+            }
+            
+            updateStatus(status, isConnected);
+        }
         function connectWebSocket() {
             if (ws) {
                 ws.close();
@@ -914,9 +1128,9 @@
                 updateStatus('Connection error', false);
             };
         }
-
         // Handle WebSocket messages
         function handleWebSocketMessage(message) {
+            console.log('Received chat WebSocket message:', message);
             console.log('Received WebSocket message:', message);
 
             switch (message.event) {
@@ -1065,9 +1279,9 @@
             const chatId = data.roomId;
 
             const msg = {
-                id: 'system-' + Date.now(),
+                id: data.messageId || 'system-' + Date.now(),
                 chatId: chatId,
-                senderId: 'system',
+                senderId: null, // Use null to match database format
                 content: data.message,
                 createdAt: data.timestamp,
                 isSystem: true
@@ -1078,11 +1292,7 @@
             messages.set(chatId, chatMessages);
 
             if (chatId === currentChatId) {
-                const container = document.getElementById('messagesContainer');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message message-system';
-                messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
-                container.appendChild(messageDiv);
+                renderMessages();
                 scrollToBottom();
             }
         }
