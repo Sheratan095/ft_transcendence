@@ -152,6 +152,7 @@ export class	ChatDatabase
 
 	// Fetch just the messages for a chat that a user is part of and that he has received
 	//	system messages are included
+	//	only messages created after the user joined the chat are returned
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
 		const query = `
@@ -165,16 +166,19 @@ export class	ChatDatabase
 			FROM messages m
 			LEFT JOIN message_statuses ms 
 				ON m.id = ms.message_id AND ms.user_id = ?
+			INNER JOIN chat_members cm
+				ON cm.chat_id = m.chat_id AND cm.user_id = ?
 			WHERE m.chat_id = ?
+			AND m.created_at >= cm.joined_at
 			AND (ms.user_id = ? OR m.sender_id = ?)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
-		// Fetch all messages in the chat received by the user (exclude messages before join and after leave)
+		// Fetch all messages in the chat received by the user (exclude messages before join)
 		// Include messages sent by the user as well
 		// Include system messages (sender_id = 'system') regardless of message_statuses
 
-		const	messages = await this.db.all(query, [userId, chatId, userId, this.systemSenderId, limit, offset]);
+		const	messages = await this.db.all(query, [userId, userId, chatId, userId, this.systemSenderId, limit, offset]);
 		return (messages);
 	}
 

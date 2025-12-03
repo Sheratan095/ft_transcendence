@@ -70,7 +70,6 @@ export const	getMessages = async (req, reply) =>
 		}
 
 		const	rawMessages = await chatDb.getMessagesByChatIdForUser(chatId, userId, limit, offset);
-		console.log('Raw messages:', rawMessages);
 		// Add the overallor message status just if the message is sent from the requestor user
 		for (const message of rawMessages)
 		{
