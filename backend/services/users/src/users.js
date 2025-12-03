@@ -26,11 +26,33 @@ await fastify.register(multipart,
 	}
 });
 
-// Register static file serving for avatars
-await fastify.register(fastifyStatic,
+// Register static file serving for avatars (protected - only accessible via gateway)
+await fastify.register(async function(fastify)
 {
-	root: path.join(__dirname, '../data/avatars'),
-	prefix: '/avatars/', // URL prefix to access avatars
+	// Validate internal API key before serving avatars
+	fastify.addHook('preHandler', async (request, reply) =>
+	{
+		const	apiKey = request.headers['x-internal-api-key'];
+		if (apiKey !== process.env.INTERNAL_API_KEY)
+		{
+			console.error('[USERS] Unauthorized access attempt to avatars');
+			return (reply.code(403).send({ error: 'Forbidden: Direct access not allowed' }));
+		}
+	});
+
+	// Log when avatar is sent
+	fastify.addHook('onSend', async (request, reply, payload) =>
+	{
+		console.log(`[USERS] Avatar served: ${request.url} -> ${reply.statusCode}`);
+
+		return (payload);
+	});
+
+	await fastify.register(fastifyStatic,
+	{
+		root: path.join(__dirname, '../data/avatars'),
+		prefix: '/avatars/', // URL prefix to access avatars
+	});
 });
 
 // Load environment variables from .env file
@@ -68,7 +90,7 @@ const	start = async () =>
 		fastify.register(relationshipsRoutes)
 
 		fastify.listen({ port: process.env.PORT })
-		console.log(`[USERS] Server is running on port ${process.env.PORT}]`)
+		console.log(`[USERS] Server is running on port ${process.env.PORT}`)
 	}
 	catch (err)
 	{
