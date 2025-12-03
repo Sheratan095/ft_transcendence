@@ -387,7 +387,7 @@ export class	ChatDatabase
 
 	// Returns aggregated status for a message across all recipients (excluding sender)
 	// DELIVERED if it's delivered to all recipients
-	// READ if it's read by all recipients [future implementation]
+	// READ if it's read by all recipients
 	// Return "sent" if at least one recipient has not received it yet OR in case of error
 	async	getOverallMessageStatus(messageId)
 	{
@@ -405,14 +405,16 @@ export class	ChatDatabase
 
 			const	row = await this.db.get(query, [messageId]);
 
+			// The message HAS TO BE A SENDER that VISUALIZE THE MESSAGE
+			//	so, if there are no rows, it means there are no recipients (e.g., only the sender exists)
 			if (!row || row.min_status === null)
-				return ("sent");
+				return ("read");
 
 			const	{ min_status, max_status } = row;
 
 			// ---- AGGREGATION LOGIC ----
 
-			// Future: if you add "read" status
+			// All read
 			if (min_status === "read" && max_status === "read")
 				return ("read");
 

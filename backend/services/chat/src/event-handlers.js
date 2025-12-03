@@ -100,45 +100,55 @@ async function	handleChatMessage(userId, data, chatDb)
 	{
 		const	{ roomId, content } = data;
 
-		// Validation
-		if (!roomId || !content)
+		// Enhanced validation
+		if (!roomId || typeof roomId !== 'string')
 		{
-			console.log(`[CHAT] Invalid room message data`);
-			chatConnectionManager.sendErrorMessage(userId, 'Missing required fields');
+			console.log(`[CHAT] Invalid roomId from user ${userId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Invalid room ID');
+			return;
+		}
+
+		if (!content || typeof content !== 'string' || content.trim().length === 0)
+		{
+			console.log(`[CHAT] Empty or invalid content from user ${userId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Message content cannot be empty');
 			return;
 		}
 
 		// Check if room exists and user is in the room
 		if (!(await chatDb.isUserInChat(userId, roomId)))
 		{
-			console.log(`[CHAT] ${userId} try to sent message ${roomId} but he isn't in the room`);
+			console.log(`[CHAT] User ${userId} attempted to send message to room ${roomId} without membership`);
 			chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to this room');
 			return;
 		}
 
-		if ((await chatDb.getChatType(roomId)) !== 'group')
+		// Verify it's a group chat
+		const	chatType = await chatDb.getChatType(roomId);
+		if (chatType !== 'group')
 		{
-			console.log(`[CHAT] ${userId} try to sent room message to non-group chat ${roomId}`);
+			console.log(`[CHAT] User ${userId} attempted to send room message to non-group chat ${roomId}`);
 			chatConnectionManager.sendErrorMessage(userId, 'Cannot send room message to a non-group chat');
 			return;
 		}
 
+		// Trim and limit content length
+		const	sanitizedContent = content.trim().substring(0, 2000); // 2000 char limit
 
-		const	messageId = await chatDb.addMessageToChat(roomId, userId, content);
+		// Store message in database
+		const	messageId = await chatDb.addMessageToChat(roomId, userId, sanitizedContent);
 
-		// Send to recipients
-		// It's returned if the message was delivered to all users in the room
-		const	deliveredToAll = await chatConnectionManager.sendMsgToRoom(roomId, userId, messageId, content, chatDb);
+		// Send to recipients (including sender)
+		const	status = await chatConnectionManager.sendMsgToRoom(roomId, userId, messageId, sanitizedContent, chatDb);
 
-		// Acknowledge to sender
-		const	status = deliveredToAll ? 'delivered' : 'sent';
-		chatConnectionManager.replyToMessage(userId, roomId, messageId, status, content, 'group');
+		// Always acknowledge to sender to ensure they see their own message
+		await chatConnectionManager.replyToMessage(userId, roomId, messageId, status, sanitizedContent, 'group');
 
 		console.log(`[CHAT] Room message from user ${userId} to ${roomId} sent successfully`);
 	}
 	catch (err)
 	{
-		console.error(`[CHAT] Error handling room message:`, err.message);
+		console.error(`[CHAT] Error handling room message from user ${userId}:`, err.message);
 		chatConnectionManager.sendErrorMessage(userId, 'Failed to send message');
 	}
 }

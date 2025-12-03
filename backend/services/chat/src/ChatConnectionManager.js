@@ -59,7 +59,6 @@ class	ChatConnectionManager
 
 		// Get users in room
 		const	userIds = await chatDb.getUsersInRoom(roomId);
-		let		deliveredCount = 0;
 
 		// Send to each user in the room
 		for (const userId of userIds)
@@ -76,8 +75,6 @@ class	ChatConnectionManager
 					userId,
 					userId === senderId ? "read" : "delivered"
 				);
-
-				deliveredCount++;
 			}
 			else
 			{
@@ -91,7 +88,10 @@ class	ChatConnectionManager
 			}
 		}
 
-		return (deliveredCount != userIds.length);
+		const	status = await chatDb.getOverallMessageStatus(messageId);
+		console.log(`[CHAT] Message ${messageId} in room ${roomId} has overall status: ${status}`);
+
+		return (status);
 	}
 
 	async	sendSystemMsgToRoom(roomId, message, chatDb)
