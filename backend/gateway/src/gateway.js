@@ -89,7 +89,7 @@ fastify.register(helmet,
 	},
 });
 
-// Register static file serving for avatars (proxy to users service)
+// Register static file serving for avatars (proxy to users service with auth)
 import proxy from '@fastify/http-proxy';
 await fastify.register(proxy,
 {
@@ -98,27 +98,36 @@ await fastify.register(proxy,
 	rewritePrefix: '/avatars',
 	http2: false, // Disable HTTP/2 for better compatibility
 
+	// Add internal API key header before proxying
+	preHandler: async (request, reply) =>
+	{
+		request.headers['x-internal-api-key'] = process.env.INTERNAL_API_KEY;
+	},
+
 	onError: (reply, { error }) =>
 	{
 		console.error('[GATEWAY] Avatar proxy error:', error.message);
 		reply.code(503).send({ error: 'Avatar service temporarily unavailable' });
-	},
-
-	replyOptions:
-	{
-		// Add cache headers for better performance
-		onSent: (request, reply) =>
-		{
-			if (reply.statusCode === 200)
-				reply.header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-		}
 	}
 });
 
-// Register rate limiting plugin (global: false means we'll apply it selectively)
-await fastify.register(import('@fastify/rate-limit'), {
-  global: false
+// Add a hook to set CORS headers for avatar responses
+fastify.addHook('onSend', async (request, reply, payload) =>
+{
+	if (request.url.startsWith('/avatars/'))
+	{
+		const	origin = request.headers.origin;
+		reply.header('Access-Control-Allow-Origin', origin || '*');
+		reply.header('Access-Control-Allow-Credentials', 'true');
+		reply.header('Cross-Origin-Resource-Policy', 'cross-origin');
+		reply.header('Cache-Control', 'public, max-age=3600');
+	}
+
+	return (payload);
 });
+
+// Register rate limiting plugin (global: false means we'll apply it selectively)
+await fastify.register(import('@fastify/rate-limit'), { global: false });
 
 import cookie from "@fastify/cookie";
 fastify.register(cookie, {

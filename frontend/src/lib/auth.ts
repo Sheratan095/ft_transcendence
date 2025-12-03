@@ -98,8 +98,14 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
 
   // Populate template with user data
   const avatar = card.querySelector('#profile-avatar') as HTMLImageElement;
-  if (user.avatarUrl) user.avatarUrl = `${API_BASE}${user.avatarUrl}`;
-  if (avatar) avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
+  if (avatar) {
+    if (user.avatarUrl) {
+      // If avatarUrl already starts with http/https, use as-is, otherwise prefix with API_BASE
+      avatar.src = user.avatarUrl.startsWith('http') ? user.avatarUrl : `${API_BASE}${user.avatarUrl}`;
+    } else {
+      avatar.src = '/assets/placeholder-avatar.jpg';
+    }
+  }
   const avatarInput = card.querySelector('#input-avatar') as HTMLInputElement;
 
   // attach avatar upload handler
@@ -109,7 +115,7 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
       if (!file) return;
       
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('file', file);
       try {
         const res = await fetch(`${API_BASE}/users/upload-avatar`, {
           method: 'POST',
@@ -119,7 +125,10 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
         if (!res.ok) throw new Error(`Avatar upload failed: ${res.status}`);
         const body = await res.json();
         if (body && body.avatarUrl) {
-          avatar.src = body.avatarUrl;
+          // Update the avatar image with the new URL
+          avatar.src = body.avatarUrl.startsWith('http') ? body.avatarUrl : `${API_BASE}${body.avatarUrl}`;
+          // Also update the user object for consistency
+          user.avatarUrl = body.avatarUrl;
         }
       }
       catch (err) {
