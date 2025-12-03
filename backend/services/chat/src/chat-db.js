@@ -151,7 +151,7 @@ export class	ChatDatabase
 	}
 
 	// Fetch just the messages for a chat that a user is part of and that he has received
-	//	system messages are included
+	//	system messages are included (only those after user joined)
 	//	only messages created after the user joined the chat are returned
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
@@ -169,16 +169,16 @@ export class	ChatDatabase
 			INNER JOIN chat_members cm
 				ON cm.chat_id = m.chat_id AND cm.user_id = ?
 			WHERE m.chat_id = ?
-			AND m.created_at >= cm.joined_at
-			AND (ms.user_id = ? OR m.sender_id = ?)
+			AND datetime(m.created_at) > datetime(cm.joined_at)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
 		// Fetch all messages in the chat received by the user (exclude messages before join)
-		// Include messages sent by the user as well
-		// Include system messages (sender_id = 'system') regardless of message_statuses
+		// The joined_at filter ensures users only see messages after they joined
+		// Using datetime() to normalize timestamp formats for proper comparison
+		// System messages are also filtered by joined_at (no special treatment)
 
-		const	messages = await this.db.all(query, [userId, userId, chatId, userId, this.systemSenderId, limit, offset]);
+		const	messages = await this.db.all(query, [userId, userId, chatId, limit, offset]);
 		return (messages);
 	}
 
@@ -219,13 +219,15 @@ export class	ChatDatabase
 		await this.db.run(insertChatQuery, [chatId]);
 
 		// Add both users to the chat_members table
+		const	joinedAt = new Date(Date.now()).toISOString();
+
 		const insertMemberQuery = `
-			INSERT INTO chat_members (chat_id, user_id)
-			VALUES (?, ?)
+			INSERT INTO chat_members (chat_id, user_id, joined_at)
+			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId1]);
-		await this.db.run(insertMemberQuery, [chatId, userId2]);
+		await this.db.run(insertMemberQuery, [chatId, userId1, joinedAt]);
+		await this.db.run(insertMemberQuery, [chatId, userId2, joinedAt]);
 
 		return (chatId);
 	}
@@ -309,12 +311,14 @@ export class	ChatDatabase
 			throw error;
 		}
 
+		const	joinedAt = new Date(Date.now()).toISOString();
+
 		const	insertMemberQuery = `
-			INSERT INTO chat_members (chat_id, user_id)
-			VALUES (?, ?)
+			INSERT INTO chat_members (chat_id, user_id, joined_at)
+			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId]);
+		await this.db.run(insertMemberQuery, [chatId, userId, joinedAt]);
 	}
 
 	async	getChatById(chatId)

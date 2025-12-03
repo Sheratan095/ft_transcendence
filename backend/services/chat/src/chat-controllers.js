@@ -138,7 +138,7 @@ export const	addUserToChat = async (req, reply) =>
 		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)
 			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
-		// Add sytem message to chat and notify room
+		// Add system message to chat and notify room
 		const	message = `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`;
 		const	messageId = await chatDb.addSystemMessageToChat(chatId, message);
 		chatConnectionManager.sendSystemMsgToRoom(messageId, chatId, message, chatDb);
