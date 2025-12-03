@@ -7,6 +7,10 @@ export default defineConfig({
   server: {
     port: 443,
     strictPort: true,
+	https: {
+		key: './certs/certs/key.pem',
+		cert: './certs/certs/cert.pem',
+	},
     proxy: {
       '/api': 'http://localhost:3000'
     }
