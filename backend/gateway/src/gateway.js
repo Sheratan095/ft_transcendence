@@ -84,16 +84,35 @@ fastify.register(helmet,
 			scriptSrc: ["'self'"],
 			objectSrc: ["'none'"],
 			baseUri: ["'self'"],
+			imgSrc: ["'self'", "data:", "blob:"], // Allow images from same origin, data URLs, and blob URLs
 		},
 	},
 });
 
 // Register static file serving for avatars (proxy to users service)
 import proxy from '@fastify/http-proxy';
-await fastify.register(proxy, {
-  upstream: process.env.USERS_SERVICE_URL,
-  prefix: '/avatars',
-  rewritePrefix: '/avatars',
+await fastify.register(proxy,
+{
+	upstream: process.env.USERS_SERVICE_URL,
+	prefix: '/avatars',
+	rewritePrefix: '/avatars',
+	http2: false, // Disable HTTP/2 for better compatibility
+
+	onError: (reply, { error }) =>
+	{
+		console.error('[GATEWAY] Avatar proxy error:', error.message);
+		reply.code(503).send({ error: 'Avatar service temporarily unavailable' });
+	},
+
+	replyOptions:
+	{
+		// Add cache headers for better performance
+		onSent: (request, reply) =>
+		{
+			if (reply.statusCode === 200)
+				reply.header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+		}
+	}
 });
 
 // Register rate limiting plugin (global: false means we'll apply it selectively)
