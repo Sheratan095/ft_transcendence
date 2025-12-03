@@ -1,4 +1,4 @@
-import { renderProfile, getUserId, startTokenRefresh, type User } from './lib/auth';
+import { renderProfile, getUserId, startTokenRefresh, type User, refreshAccessToken } from './lib/auth';
 
 
 class AuthUI {
@@ -15,6 +15,7 @@ class AuthUI {
 
     getUserCount();
     if (getUserId()) {
+        startTokenRefresh();
         renderProfile(el);
       return;
     }

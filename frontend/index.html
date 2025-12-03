@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ft_transcendence</title>
-  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="icon" type="image/png" href="/42_Logo.svg" />
   <link href="./tailwind.css" rel="stylesheet" />
   <script type="module" src="./src/main.ts"></script>
 </head>
@@ -124,30 +124,57 @@
       </div>
           <!-- Title section -->
         <div class="flex flex-col justify-end w-full overflow-hidden">
-          <div class="relative flex items-end gap-[10vw] mb-2">
-            <h1 id="profile-username" class="z-30 text-2xl font-bold capitalize">User</h1>
-            <!-- 2fa enable button-->
-            <input id="input-lock" type="checkbox" class="hidden peer">
+         <div class="relative flex items-center gap-10 mb-2">
+  <h1 id="profile-username" class="z-30 text-2xl font-bold capitalize">User</h1>
 
-            <label
-              for="input-lock"
-              class="btn-lock peer-checked:bg-[#0abe4c]
-                    top-[calc(50%-32px)] left-[calc(50%-32px)]
-                    inline-flex items-center gap-2 w-full h-12
-                    bg-[#bd4747] box-border p-3
-                    rounded-full cursor-pointer select-none">
+  <!-- 2FA toggle -->
+  <div class="flex items-start gap-2">
+  <input id="input-lock" type="checkbox" class="hidden peer">
 
-              <svg viewBox="0 0 40 40" class="w-9 h-9 transform-gpu opacity-100">
-                <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
-                <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
-                <path class="bling" d="M29 20L31 22"></path>
-                <path class="bling" d="M31.5 15H34.5"></path>
-                <path class="bling" d="M29 10L31 8"></path>
-              </svg>
+  <label for="input-lock" class="btn-lock group inline-flex items-center
+               h-12 bg-[#bd4747]
+               rounded-full cursor-pointer select-none
+               overflow-hidden
+               w-12 hover:w-full
+               transition-[max-width,background-color,filter]
+               duration-500 ease-linear
+               peer-checked:bg-[#0abe4c]
+               hover:brightness-110">
 
-              <span id="profile-tfa" class="text-white font-semibold capitalize"></span>
-            </label>
-          </input>
+    <div class="flex items-center justify-center w-12 h-12 shrink-0">
+        <svg viewBox="0 0 40 40" class="w-9 h-9 transform-gpu opacity-100">
+        <path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+        <path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+        <path class="bling" d="M29 20L31 22"></path>
+        <path class="bling" d="M31.5 15H34.5"></path>
+        <path class="bling" d="M29 10L31 8"></path>
+      </svg>
+    </div>
+
+    <span id="profile-tfa"
+      class="text-white font-semibold whitespace-nowrap pr-5
+             opacity-0 translate-x-4
+             group-hover:opacity-100
+             group-hover:translate-x-0
+             transition-all duration-300">
+      Enable 2FA
+    </span>
+
+  </label>
+</div>
+
+  <!-- Logout button -->
+  <button id="profile-logout-btn" class="bg-neutral-800 text-white border border-neutral-700 px-4 py-2 rounded-md hover:bg-neutral-700 transition">
+    Logout
+  </button>
+
+  <!-- Delete account button -->
+  <button id="profile-delete-btn" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500 transition">
+    Delete
+  </button>
+</div>
+        <div class="h-1 w-full bg-neutral-800 rounded-full mb-2">
+          <br>
         </div>
           <!-- Content section -->
           <div class="px-6 py-6">

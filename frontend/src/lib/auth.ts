@@ -144,16 +144,17 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
   const enabled2FA = card.querySelector('#profile-tfa') as HTMLElement;
   const input2FA = card.querySelector('#input-lock') as HTMLInputElement;
 
-  
-  if (enabled2FA) {
-    if (user.tfaEnabled) {
-      enabled2FA.textContent = 'DISABLE TWO FACTOR AUTHENTICATION';
-    } else {
-      enabled2FA.textContent = 'ENABLE TWO FACTOR AUTHENTICATION';
-    }
-  }
   // attach 2FA status
   console.log("input2FA:", input2FA);
+  input2FA.checked = user.tfaEnabled || false;
+  if (user.tfaEnabled)
+  {
+    enabled2FA.textContent = 'DISABLE 2FA'; 
+  }
+  else
+  {
+    enabled2FA.textContent = 'ENABLE 2FA';
+  }
 
   if (input2FA) {
     input2FA.addEventListener('change', async () => {
@@ -171,11 +172,11 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
         localStorage.setItem('tfaEnabled', tfaEnabled ? 'true' : 'false');
         if (user.tfaEnabled)
         {
-          enabled2FA.textContent = 'DISABLE TWO FACTOR AUTHENTICATION'; 
+          enabled2FA.textContent = 'DISABLE 2FA'; 
         }
         else
         {
-          enabled2FA.textContent = 'ENABLE TWO FACTOR AUTHENTICATION';
+          enabled2FA.textContent = 'ENABLE 2FA';
         }
       } catch (err) {
         console.error('2FA update error:', err);
