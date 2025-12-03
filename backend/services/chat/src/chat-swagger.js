@@ -180,6 +180,7 @@ Response (acknowledgment to sender):
     "from": "jane_smith",
     "senderId": "456",
     "messageId": "msg123",
+    "chatId": "chat789",
     "content": "Hello everyone!",
     "timestamp": "2025-11-19T10:30:00.000Z"
   }

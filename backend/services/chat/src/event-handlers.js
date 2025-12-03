@@ -189,7 +189,7 @@ async function handlePrivateMessage(userId, data, chatDb)
 		const	messageId = await chatDb.addMessageToChat(chatId, userId, content);
 
 		// Send to recipient
-		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb);
+		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb, chatId);
 
 		// Acknowledge to sender
 		const	status = delivered ? 'delivered' : 'sent';

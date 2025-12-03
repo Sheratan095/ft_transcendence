@@ -75,6 +75,8 @@ export const	sendChatUserAdded = async (req, reply) =>
 
 		userConnectionManager.sendChatUserAddedNotification(targetId, senderId, from, chatId);
 
+		console.log(`[NOTIFICATION] Notifying user ${targetId} about being added to chat ${chatId} by ${senderId}`);
+	
 		return (reply.code(200).send());
 	}
 	catch (err)

@@ -117,7 +117,7 @@ class	ChatConnectionManager
 	}
 
 	// Return if the message was delivered to the user
-	async	sendToUser(senderId, toUserId, messageId, content, chatDb)
+	async	sendToUser(senderId, toUserId, messageId, content, chatDb, chatId)
 	{
 		// Refresh username cache (refresh = true)
 		const	senderUsername = await this.getUsernameFromCache(senderId, true);
@@ -126,6 +126,7 @@ class	ChatConnectionManager
 			from: senderUsername,
 			senderId: senderId,
 			messageId: messageId,
+			chatId: chatId,
 			content: content,
 			timestamp: new Date().toISOString(),
 		};

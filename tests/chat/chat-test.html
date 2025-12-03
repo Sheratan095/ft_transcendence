@@ -1080,6 +1080,53 @@
             
             updateStatus(status, isConnected);
         }
+
+        // Connect to Notification WebSocket
+        function connectNotificationWebSocket() {
+            if (notificationWs) {
+                notificationWs.close();
+            }
+
+            // Clear any existing ping interval
+            if (notificationPingInterval) {
+                clearInterval(notificationPingInterval);
+                notificationPingInterval = null;
+            }
+
+            console.log('Connecting to Notification WebSocket...');
+
+            notificationWs = new WebSocket(NOTIFICATION_WS_URL);
+
+            notificationWs.onopen = () => {
+                console.log('Notification WebSocket connected');
+                updateConnectionStatus();
+            };
+
+            notificationWs.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleNotificationWebSocketMessage(message);
+                } catch (err) {
+                    console.error('Error parsing Notification WebSocket message:', err);
+                }
+            };
+
+            notificationWs.onclose = () => {
+                console.log('Notification WebSocket closed');
+                updateConnectionStatus();
+                
+                if (notificationPingInterval) {
+                    clearInterval(notificationPingInterval);
+                    notificationPingInterval = null;
+                }
+            };
+
+            notificationWs.onerror = (err) => {
+                console.error('Notification WebSocket error:', err);
+                updateConnectionStatus();
+            };
+        }
+
         function connectWebSocket() {
             if (ws) {
                 ws.close();
@@ -1217,27 +1264,32 @@
         function handleIncomingPrivateMessage(data) {
             console.log('handleIncomingPrivateMessage called with data:', data);
             
+            // Server now sends chatId, use it directly
+            const chatId = data.chatId;
+            if (!chatId) {
+                console.error('No chatId received in private message!', data);
+                return;
+            }
+
             // Find or create chat for this private message
-            let chat = chats.find(c => c.chatType === 'dm' && c.members.some(m => m.userId === data.senderId));
+            let chat = chats.find(c => c.id === chatId);
 
             if (!chat) {
-                console.log('Chat not found, creating minimal DM chat for sender:', data.senderId);
-                // Create a minimal DM chat locally
-                // Use a temporary ID until we get the real chat_id
-                const tempChatId = `temp-dm-${data.senderId}`;
+                console.log('Chat not found locally, creating DM chat with server chatId:', chatId);
+                // Create a DM chat locally with the real server chatId
                 chat = {
-                    id: tempChatId,
+                    id: chatId,
                     name: null,
                     chatType: 'dm',
                     members: [
                         { userId: userId, username: 'You' },
-                        { userId: data.senderId, username: `User ${data.senderId}` }
+                        { userId: data.senderId, username: data.from || `User ${data.senderId}` }
                     ],
                     createdAt: data.timestamp
                 };
                 chats.push(chat);
                 renderChatList();
-                console.log('Created new DM chat locally:', chat);
+                console.log('Created new DM chat locally with real chatId:', chat);
             }
 
             if (chat) {
