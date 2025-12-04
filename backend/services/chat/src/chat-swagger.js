@@ -78,19 +78,19 @@ Response (acknowledgment to sender):
 {
   "event": "chat.messageSent",
   "data": {
-    "chat_id": "room123",
-    "message_id": "msg789",
+    "chatId": "room123",
+    "messageId": "msg789",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if some users are offline,
-    "chat_type": "group"
+    "chatType": "group"
   }
 }
 \`\`\`
 
-- **chat.private_message** - Send a private message to a user
+- **chat.privateMessage** - Send a private message to a user
 \`\`\`json
 {
-  "event": "chat.private_message",
+  "event": "chat.privateMessage",
   "data": {
     "toUserId": "user456",
     "content": "Hello everyone!"
@@ -101,11 +101,11 @@ Response (acknowledgment to sender):
 {
   "event": "chat.messageSent",
   "data": {
-    "chat_id": "chat789",
-    "message_id": "msg123",
+    "chatId": "chat789",
+    "messageId": "msg123",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if recipient is offline,
-    "chat_type": "dm"
+    "chatType": "dm"
   }
 }
 \`\`\`
@@ -172,10 +172,10 @@ Response (acknowledgment to sender):
 }
 \`\`\`
 
-- **chat.private_message** - Message received from a user
+- **chat.privateMessage** - Message received from a user
 \`\`\`json
 {
-  "event": "chat.private_message",
+  "event": "chat.privateMessage",
   "data": {
     "from": "jane_smith",
     "senderId": "456",
@@ -192,8 +192,8 @@ Response (acknowledgment to sender):
 {
   "event": "chat.messageSent",
   "data": {
-    "chat_id": "chat789",
-    "message_id": "msg123",
+    "chatId": "chat789",
+    "messageId": "msg123",
     "status": "delivered" // "delivered" if sent to all recipients, "sent" if some are offline
   }
 }
@@ -204,9 +204,9 @@ Response (acknowledgment to sender):
 {
   event: "chat.messageStatusUpdate",
   data: {
-    chat_id: "456",
-    message_id: "456",
-    overall_status: "delivered"
+    chatId: "456",
+    messageId: "456",
+    overallStatus: "delivered"
   }
 }
 \`\`\`
@@ -309,7 +309,7 @@ export async function	setupSwagger(fastify)
 	// Manually register the JSON endpoint since we're not using swagger-ui
 	fastify.get('/docs/json', docsRouteOptions, async (request, reply) =>
 	{
-		return fastify.swagger();
+		return (fastify.swagger());
 	});
 
 	// WebSocket documentation endpoint (for Swagger only - doesn't actually work as HTTP GET)

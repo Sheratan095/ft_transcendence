@@ -94,28 +94,6 @@ class	ChatConnectionManager
 		return (status);
 	}
 
-	// The message is added to database
-	async	sendSystemMsgToRoom(messageId, roomId, message, chatDb)
-	{
-		const	data = {
-			roomId: roomId,
-			message: message,
-			timestamp: new Date().toISOString(),
-		};
-
-		// Get users in room
-		const	userIds = await chatDb.getUsersInRoom(roomId);
-
-		// Send to each user in the room
-		for (const userId of userIds)
-		{
-			const	socket = this._connections.get(userId);
-			this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
-		}
-
-		console.log(`[CHAT] System message ${messageId} in room ${roomId}`);
-	}
-
 	// Return if the message was delivered to the user
 	async	sendToUser(senderId, toUserId, messageId, content, chatDb, chatId)
 	{
@@ -136,7 +114,7 @@ class	ChatConnectionManager
 		if (socket)
 		{
 			console.log(`[CHAT] Sending private message from user ${senderId} to user ${toUserId}`);
-			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
+			this.#dispatchEventToSocket(socket, 'chat.privateMessage', data);
 
 			await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
 			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
@@ -165,11 +143,11 @@ class	ChatConnectionManager
 	{
 		const	socket = this._connections.get(userId);
 		const	data = {
-			chat_id: chatId,
-			message_id: messageId,
+			chatId: chatId,
+			messageId: messageId,
 			content: content,
 			status: status,
-			chat_type: chatType,
+			chatType: chatType,
 		};
 
 		if (socket)
@@ -180,9 +158,9 @@ class	ChatConnectionManager
 	{
 		const	socket = this._connections.get(userId);
 		const	data = {
-			chat_id: chatId,
-			message_id: messageId,
-			overall_status: status,
+			chatId: chatId,
+			messageId: messageId,
+			overallStatus: status,
 		};
 
 		if (socket)

@@ -85,6 +85,7 @@ export const	getMessages = async (req, reply) =>
 			chatId: msg.chat_id,
 			senderId: msg.sender_id,
 			content: msg.content,
+			type: msg.type,
 			createdAt: msg.created_at,
 			messageStatus: msg.message_status
 		}));
@@ -140,7 +141,7 @@ export const	addUserToChat = async (req, reply) =>
 
 		// Add system message to chat and notify room
 		const	message = `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`;
-		const	messageId = await chatDb.addSystemMessageToChat(chatId, message);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, message, 'user_join');
 		chatConnectionManager.sendSystemMsgToRoom(messageId, chatId, message, chatDb);
 
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);

@@ -150,8 +150,8 @@ export class	ChatDatabase
 		return (chats);
 	}
 
-	// Fetch just the messages for a chat that a user is part of and that he has received
-	//	system messages are included (only those after user joined)
+	// Fetch all messages for a chat that a user is part of
+	//	includes all message types (text, system, user_join)
 	//	only messages created after the user joined the chat are returned
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
@@ -161,11 +161,9 @@ export class	ChatDatabase
 				m.chat_id,
 				m.sender_id,
 				m.content,
-				m.created_at,
-				COALESCE(ms.status, 'system') AS message_status
+				m.type,
+				m.created_at
 			FROM messages m
-			LEFT JOIN message_statuses ms 
-				ON m.id = ms.message_id AND ms.user_id = ?
 			INNER JOIN chat_members cm
 				ON cm.chat_id = m.chat_id AND cm.user_id = ?
 			WHERE m.chat_id = ?
@@ -173,12 +171,12 @@ export class	ChatDatabase
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
-		// Fetch all messages in the chat received by the user (exclude messages before join)
+		// Fetch all messages in the chat after user joined
 		// The joined_at filter ensures users only see messages after they joined
 		// Using datetime() to normalize timestamp formats for proper comparison
-		// System messages are also filtered by joined_at (no special treatment)
+		// Status should be computed in the controller using getOverallMessageStatus()
 
-		const	messages = await this.db.all(query, [userId, userId, chatId, limit, offset]);
+		const	messages = await this.db.all(query, [userId, chatId, limit, offset]);
 		return (messages);
 	}
 
@@ -339,33 +337,20 @@ export class	ChatDatabase
 
 	//-----------------------------MESSAGE QUERIES----------------------------
 
-	async	addMessageToChat(chatId, senderId, message)
+	async	addMessageToChat(chatId, senderId, message, type = "text")
 	{
 		const	messageId = await this.#generateUUID();
 		const	timestamp = new Date().toISOString();
 
-		const	insertMessageQuery = `
-			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
-			VALUES (?, ?, ?, ?, ?)
-		`;
-
-		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, timestamp]);
-
-		return (messageId);
-	}
-
-	async	addSystemMessageToChat(chatId, message)
-	{
-		const	messageId = await this.#generateUUID();
-		const	timestamp = new Date().toISOString();
+		if (type !== 'text')
+			senderId = this.systemSenderId;
 
 		const	insertMessageQuery = `
-			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
-			VALUES (?, ?, ?, ?, ?)
+			INSERT INTO messages (id, chat_id, sender_id, content, type, created_at)
+			VALUES (?, ?, ?, ?, ?, ?)
 		`;
 
-		await this.db.run(insertMessageQuery, [messageId, chatId, this.systemSenderId, message, timestamp]);
-
+		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, type, timestamp]);
 		return (messageId);
 	}
 

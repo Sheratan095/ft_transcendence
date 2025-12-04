@@ -73,7 +73,7 @@ export function	handleMessage(socket, msg, userId, chatDb)
 				handleChatMessage(userId, message.data, chatDb);
 				break;
 
-			case 'chat.private_message':
+			case 'chat.privateMessage':
 				handlePrivateMessage(userId, message.data, chatDb);
 				break;
 
