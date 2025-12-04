@@ -180,7 +180,7 @@ export class	ChatDatabase
 		return (messages);
 	}
 
-	async	getUsersInRoom(chatId)
+	async	getUsersInChat(chatId)
 	{
 		const	query = `
 			SELECT user_id

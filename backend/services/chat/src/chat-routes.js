@@ -70,7 +70,7 @@ const	withCookieAuth =
 
 const	chatType =
 {
-	chat_type: 'string',
+	type: 'string',
 	enum: ['dm', 'group'],
 }
 

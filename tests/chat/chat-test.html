@@ -851,11 +851,11 @@
                         }
                     };
                 } else {
-                    // For group chats, send as room message
+                    // For group chats, send as chat message
                     message = {
                         event: 'chat.message',
                         data: {
-                            roomId: currentChatId,
+                            chatId: currentChatId,
                             content: content
                         }
                     };
@@ -880,7 +880,7 @@
                 const message = {
                     event: 'chat.read',
                     data: {
-                        roomId: chatId
+                        chatId: chatId
                     }
                 };
 
@@ -1217,10 +1217,10 @@
             }
         }
 
-        // Handle incoming room message
+        // Handle incoming chat message
         function handleIncomingMessage(data) {
             console.log('handleIncomingMessage called with data:', data);
-            const chatId = data.roomId;
+            const chatId = data.chatId;
 
             // Check if we have a pending confirmation for this message
             const pendingStatus = pendingConfirmations.get(data.messageId);
@@ -1328,7 +1328,7 @@
 
         // Handle system message
         function handleSystemMessage(data) {
-            const chatId = data.roomId;
+            const chatId = data.chatId;
 
             const msg = {
                 id: data.messageId || 'system-' + Date.now(),
@@ -1351,23 +1351,23 @@
 
         // Handle message sent confirmation
         function handleMessageSent(data) {
-            const chatId = data.chat_id;
-            const messageId = data.message_id;
+            const chatId = data.chatId;
+            const messageId = data.messageId;
             const status = data.status;
 
             console.log(`Message ${messageId} sent with status: ${status}`, data);
 
             // Check if we know about this chat
             let chat = chats.find(c => c.id === chatId);
-            if (!chat && data.chat_type) {
-                // New chat created - create it locally from the existing chat_type in response
-                console.log(`Chat ${chatId} not found locally, creating from chat_type: ${data.chat_type}`);
+            if (!chat && data.chatType) {
+                // New chat created - create it locally from the existing chatType in response
+                console.log(`Chat ${chatId} not found locally, creating from chatType: ${data.chatType}`);
                 
                 // Create minimal chat object (usernames will be "User X" until properly loaded)
                 chat = {
                     id: chatId,
-                    name: data.chat_type === 'dm' ? null : 'New Group',
-                    chatType: data.chat_type,
+                    name: data.chatType === 'dm' ? null : 'New Group',
+                    chatType: data.chatType,
                     members: [], // Will be populated as messages arrive
                     createdAt: data.timestamp || new Date().toISOString()
                 };
@@ -1398,7 +1398,7 @@
                     content: data.content || data.message || '',
                     createdAt: data.timestamp || new Date().toISOString(),
                     messageStatus: status,
-                    isPrivate: data.is_private || false
+                    isPrivate: data.isPrivate || false
                 };
 
                 chatMessages.push(msg);
@@ -1417,9 +1417,9 @@
 
         // Handle message status update
         function handleMessageStatusUpdate(data) {
-            const chatId = data.chat_id;
-            const messageId = data.message_id;
-            const status = data.overall_status;
+            const chatId = data.chatId;
+            const messageId = data.messageId;
+            const status = data.overallStatus;
 
             console.log(`Message ${messageId} status updated to: ${status}`);
 

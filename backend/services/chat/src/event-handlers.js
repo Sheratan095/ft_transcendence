@@ -57,14 +57,6 @@ export function	handleMessage(socket, msg, userId, chatDb)
 				socket.send(JSON.stringify({ event: 'pong', data: { timestamp: Date.now() } }));
 				break;
 
-			// case 'chat.join':
-			// 	handleJoinRoom(userId, message.data);
-			// 	break;
-
-			// case 'chat.leave':
-			// 	handleLeaveRoom(userId, message.data);
-			// 	break;
-
 			case 'chat.read':
 				handleChatRead(userId, message.data, chatDb);
 				break;
@@ -98,13 +90,13 @@ async function	handleChatMessage(userId, data, chatDb)
 {
 	try
 	{
-		const	{ roomId, content } = data;
+		const	{ chatId, content } = data;
 
 		// Enhanced validation
-		if (!roomId || typeof roomId !== 'string')
+		if (!chatId || typeof chatId !== 'string')
 		{
-			console.log(`[CHAT] Invalid roomId from user ${userId}`);
-			chatConnectionManager.sendErrorMessage(userId, 'Invalid room ID');
+			console.log(`[CHAT] Invalid chatId from user ${userId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Invalid chat ID');
 			return;
 		}
 
@@ -115,20 +107,20 @@ async function	handleChatMessage(userId, data, chatDb)
 			return;
 		}
 
-		// Check if room exists and user is in the room
-		if (!(await chatDb.isUserInChat(userId, roomId)))
+		// Check if chat exists and user is in the chat
+		if (!(await chatDb.isUserInChat(userId, chatId)))
 		{
-			console.log(`[CHAT] User ${userId} attempted to send message to room ${roomId} without membership`);
-			chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to this room');
+			console.log(`[CHAT] User ${userId} attempted to send message to chat ${chatId} without membership`);
+			chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to this chat');
 			return;
 		}
 
 		// Verify it's a group chat
-		const	chatType = await chatDb.getChatType(roomId);
+		const	chatType = await chatDb.getChatType(chatId);
 		if (chatType !== 'group')
 		{
-			console.log(`[CHAT] User ${userId} attempted to send room message to non-group chat ${roomId}`);
-			chatConnectionManager.sendErrorMessage(userId, 'Cannot send room message to a non-group chat');
+			console.log(`[CHAT] User ${userId} attempted to send group message to non-group chat ${chatId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Cannot send group message to a non-group chat');
 			return;
 		}
 
@@ -136,19 +128,19 @@ async function	handleChatMessage(userId, data, chatDb)
 		const	sanitizedContent = content.trim().substring(0, 2000); // 2000 char limit
 
 		// Store message in database
-		const	messageId = await chatDb.addMessageToChat(roomId, userId, sanitizedContent);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, sanitizedContent);
 
 		// Send to recipients (including sender)
-		const	status = await chatConnectionManager.sendMsgToRoom(roomId, userId, messageId, sanitizedContent, chatDb);
+		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, sanitizedContent, chatDb);
 
 		// Always acknowledge to sender to ensure they see their own message
-		await chatConnectionManager.replyToMessage(userId, roomId, messageId, status, sanitizedContent, 'group');
+		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, sanitizedContent, 'group');
 
-		console.log(`[CHAT] Room message from user ${userId} to ${roomId} sent successfully`);
+		console.log(`[CHAT] Group message from user ${userId} to ${chatId} sent successfully`);
 	}
 	catch (err)
 	{
-		console.error(`[CHAT] Error handling room message from user ${userId}:`, err.message);
+		console.error(`[CHAT] Error handling group message from user ${userId}:`, err.message);
 		chatConnectionManager.sendErrorMessage(userId, 'Failed to send message');
 	}
 }
@@ -208,30 +200,30 @@ async function	handleChatRead(userId, data, chatDb)
 {
 	try
 	{
-		const	{ roomId } = data;
+		const	{ chatId } = data;
 
 		// Validation
-		if (!roomId)
+		if (!chatId)
 		{
 			console.log(`[CHAT] Invalid chat read data from user ${userId}`);
 			chatConnectionManager.sendErrorMessage(userId, 'Missing required fields for chat read');
 			return;
 		}
 
-		// Check if room exists and user is in the room
-		if (!(await chatDb.isUserInChat(userId, roomId)))
+		// Check if chat exists and user is in the chat
+		if (!(await chatDb.isUserInChat(userId, chatId)))
 		{
-			console.log(`[CHAT] ${userId} try to mark messages as read in ${roomId} but he isn't in the room`);
-			chatConnectionManager.sendErrorMessage(userId, 'Cannot mark messages as read in this room');
+			console.log(`[CHAT] ${userId} try to mark messages as read in ${chatId} but he isn't in the chat`);
+			chatConnectionManager.sendErrorMessage(userId, 'Cannot mark messages as read in this chat');
 			return;
 		}
 
 		// Mark all message status for this user in this chat as read
 		//  only updates messages that aren't already 'read' to reduce writes
-		const	updatedTime = await chatDb.markMessagesAsRead(roomId, userId);
+		const	updatedTime = await chatDb.markMessagesAsRead(chatId, userId);
 
 		// Notify senders about the status update
-		await notifyMessageStatusUpdates(roomId, updatedTime, chatDb);
+		await notifyMessageStatusUpdates(chatId, updatedTime, chatDb);
 	}
 	catch (err)
 	{

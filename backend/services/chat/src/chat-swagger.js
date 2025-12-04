@@ -33,43 +33,23 @@ Reponse:
 }
 \`\`\`
 
-- **chat.join** - Join a chat room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.join",
-  "data": {
-    "roomId": "room123"
-  }
-}
-\`\`\`
-
-- **chat.leave** - Leave a chat room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.leave",
-  "data": {
-    "roomId": "room123"
-  }
-}
-\`\`\`
-
 - **chat.read** - A user visualized that chat [TO DO]
 \`\`\`json
 {
   "event": "chat.read",
   "data": {
-    "roomId": "room123"
+    "chatId": "chat123"
   }
 }
 
 \`\`\`
 
-- **chat.message** - Send a message to a room
+- **chat.message** - Send a message to a chat
 \`\`\`json
 {
   "event": "chat.message",
   "data": {
-    "roomId": "room123",
+    "chatId": "chat123",
     "content": "Hello everyone!"
   }
 }
@@ -78,7 +58,7 @@ Response (acknowledgment to sender):
 {
   "event": "chat.messageSent",
   "data": {
-    "chatId": "room123",
+    "chatId": "chat123",
     "messageId": "msg789",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if some users are offline,
@@ -115,7 +95,7 @@ Response (acknowledgment to sender):
 {
   "event": "chat.typing",
   "data": {
-    "roomId": "room123",
+    "chatId": "chat123",
     "isTyping": true
   }
 }
@@ -125,44 +105,24 @@ Response (acknowledgment to sender):
 
 **SERVER → CLIENT EVENTS**
 
-- **chat.joined** - Confirmation that you joined a room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.joined",
-  "data": {
-    "roomId": "room123"
-  }
-}
-\`\`\`
 
-- **chat.userJoined** - Another user joined the room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.userJoined",
-  "data": {
-    "userId": "456",
-    "roomId": "room123"
-  }
-}
-\`\`\`
-
-- **chat.userLeft** - A user left the room [NOT IMPLEMENTED YET]
+- **chat.userLeft** - A user left the chat [NOT IMPLEMENTED YET]
 \`\`\`json
 {
   "event": "chat.userLeft",
   "data": {
     "userId": "456",
-    "roomId": "room123"
+    "chatId": "chat123"
   }
 }
 \`\`\`
 
-- **chat.message** - Message received in a room
+- **chat.message** - Message received in a chat
 \`\`\`json
 {
   "event": "chat.message",
   "data": {
-    "roomId": "room123",
+    "chatId": "chat123",
     "from": "jane_smith",
     "senderId": "456",
     "messageId": "msg789",
@@ -216,7 +176,7 @@ Response (acknowledgment to sender):
 {
   "event": "chat.typing",
   "data": {
-    "roomId": "room123",
+    "chatId": "chat123",
     "userId": "456",
     "username": "jane_smith",
     "isTyping": true
@@ -224,13 +184,13 @@ Response (acknowledgment to sender):
 }
 \`\`\`
 
-- **chat.systemMessage** - System message to a room
+- **chat.systemMessage** - System message to a chat
 \`\`\`json
 {
   "event": "chat.systemMessage",
   "data": {
-    "roomId": "room123",
-    "message": "Welcome to the chat room!",
+    "chatId": "chat123",
+    "message": "Welcome to the chat!",
     "timestamp": "2025-11-19T10:30:00.000Z"
   }
 }
