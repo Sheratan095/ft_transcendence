@@ -20,12 +20,57 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
+        #board {
+            width: 500px;
+            height: 500px;
+            background-color: red;
+            padding: 1em;
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            /* justify-content: center; */
+            align-items: center;
+        }
+
+        .row {
+            height: 30%;
+            width: 100%;
+            background-color: green;
+            padding: 0.5em;
+            border: 1px solid black;
+            display: flex;
+        }
+
+        .cell {
+            height: 100%;
+            width: 30%;
+            border: 1px, solid, black;
+        }
+
     </style>
 
-    <main>
-        <button id="startBtn" class="button">Start</button>
+    <main id="app" hidden>
+        <div id="board">
+            <div class="row">
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+            </div>
+            <div class="row">
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+            </div>
+            <div class="row">
+                <div class="cell"></div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+            </div>
+        </div>
     </main>
-
+    <button id="startBtn" class="button">Start</button>
+    
     <script>
         const GATEWAY_URL = 'https://localhost:3000';
         let accessToken = null;
@@ -37,6 +82,8 @@
 
         const email = "test1@gmail.com";
         const password = "1234";
+        const startBtn = document.getElementById('startBtn');
+        const appEl = document.getElementById('app');
 
         window.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`${GATEWAY_URL}/auth/login`, {
@@ -54,16 +101,37 @@
             console.log(response);
         });
 
+
         startBtn.addEventListener('click', async () => {
-            //console.log("hello worldsino");
-            const response = await fetch(`${GATEWAY_URL}/tris/init`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include', // Important for cookies
-                //body: JSON.stringify({ email, password })
-            });
+            console.log('startBtn clicked');
+             if (appEl) appEl.hidden = false;
+            try
+            {
+                //console.log("hello worldsino");
+                const response = await fetch(`${GATEWAY_URL}/tris/init`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', // Important for cookies
+                    //body: JSON.stringify({ email, password })
+                });
+                console.log("request working");
+            }
+            catch (err)
+            {
+                console.log("error");
+            }
+
+            // if (response.ok) {
+                    // show the main UI only after successful login
+            console.log('init status', response.status);
+            appEl.hidden = false;
+            console.log(appEl);
+            //document.getElementById('app').hidden = false;
+               //}
+            console.log(response);
+            return (response);
         });
    
     </script>
