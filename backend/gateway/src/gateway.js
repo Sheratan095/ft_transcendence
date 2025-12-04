@@ -140,6 +140,10 @@ import {
 } from './routes/users-routes.js'
 
 import {
+	getTrisTest
+}	from './routes/tris-routes.js'
+
+import {
 	getUserRelationships,
 	getFriends,
 	getIncomingRequests,
@@ -260,6 +264,9 @@ await fastify.register(async function (fastify)
 	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
 	fastify.post('/chat/add-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
 	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
+
+	// TRIS routes
+	fastify.get('/tris/init', {schema: {hide:true}, preHandler: authenticateJwt, handler: getTrisTest})
 });
 
 // SEARCH route – tighter rate limit

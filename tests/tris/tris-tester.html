@@ -6,6 +6,26 @@
     <title>Document</title>
 </head>
 <body>
+
+    <style>
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+    </style>
+
+    <main>
+        <button id="startBtn" class="button">Start</button>
+    </main>
+
     <script>
         const GATEWAY_URL = 'https://localhost:3000';
         let accessToken = null;
@@ -31,7 +51,19 @@
 
             const cookies = response.headers.get('set-cookie');
 
-            console.log(cookies);
+            console.log(response);
+        });
+
+        startBtn.addEventListener('click', async () => {
+            //console.log("hello worldsino");
+            const response = await fetch(`${GATEWAY_URL}/tris/init`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include', // Important for cookies
+                //body: JSON.stringify({ email, password })
+            });
         });
    
     </script>

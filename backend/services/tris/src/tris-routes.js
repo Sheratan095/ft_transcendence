@@ -22,4 +22,8 @@ export function	trisRoutes(fastify)
 		socket.on('error', (err) => {handleError(socket, err, userId);});
 	});
 
+	fastify.get('/init', () => 
+	{
+		console.log("hello from init");
+	});
 }
