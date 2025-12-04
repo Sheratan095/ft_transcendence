@@ -61,17 +61,13 @@ export function	handleMessage(socket, msg, userId, chatDb)
 				handleChatRead(userId, message.data, chatDb);
 				break;
 
-			case 'chat.message':
+			case 'chat.chatMessage':
 				handleChatMessage(userId, message.data, chatDb);
 				break;
 
 			case 'chat.privateMessage':
 				handlePrivateMessage(userId, message.data, chatDb);
 				break;
-
-			// case 'chat.typing':
-			// 	handleTypingIndicator(userId, message.data);
-			// 	break;
 
 			default:
 				console.log(`[CHAT] Unknown event: ${message.event}`);

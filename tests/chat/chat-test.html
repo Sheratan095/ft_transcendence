@@ -853,7 +853,7 @@
                 } else {
                     // For group chats, send as chat message
                     message = {
-                        event: 'chat.message',
+                        event: 'chat.chatMessage',
                         data: {
                             chatId: currentChatId,
                             content: content
@@ -1185,13 +1185,13 @@
                     // Heartbeat response
                     break;
 
-                case 'chat.message':
-                    console.log('Handling chat.message event:', message.data);
+                case 'chat.chatMessage':
+                    console.log('Handling chat.chatMessage event:', message.data);
                     handleIncomingMessage(message.data);
                     break;
 
-                case 'chat.private_message':
-                    console.log('Handling chat.private_message event:', message.data);
+                case 'chat.privateMessage':
+                    console.log('Handling chat.privateMessage event:', message.data);
                     handleIncomingPrivateMessage(message.data);
                     break;
 

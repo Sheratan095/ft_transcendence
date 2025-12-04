@@ -33,7 +33,7 @@ Reponse:
 }
 \`\`\`
 
-- **chat.read** - A user visualized that chat [TO DO]
+- **chat.read** - A user visualized that chat
 \`\`\`json
 {
   "event": "chat.read",
@@ -41,13 +41,12 @@ Reponse:
     "chatId": "chat123"
   }
 }
-
 \`\`\`
 
-- **chat.message** - Send a message to a chat
+- **chat.chatMessage** - Send a message to a chat
 \`\`\`json
 {
-  "event": "chat.message",
+  "event": "chat.chatMessage",
   "data": {
     "chatId": "chat123",
     "content": "Hello everyone!"
@@ -90,37 +89,15 @@ Response (acknowledgment to sender):
 }
 \`\`\`
 
-- **chat.typing** - Send typing indicator [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.typing",
-  "data": {
-    "chatId": "chat123",
-    "isTyping": true
-  }
-}
-\`\`\`
-
 ---
 
 **SERVER → CLIENT EVENTS**
 
 
-- **chat.userLeft** - A user left the chat [NOT IMPLEMENTED YET]
+- **chat.chatMessage** - Message received in a chat
 \`\`\`json
 {
-  "event": "chat.userLeft",
-  "data": {
-    "userId": "456",
-    "chatId": "chat123"
-  }
-}
-\`\`\`
-
-- **chat.message** - Message received in a chat
-\`\`\`json
-{
-  "event": "chat.message",
+  "event": "chat.chatMessage",
   "data": {
     "chatId": "chat123",
     "from": "jane_smith",
@@ -167,19 +144,6 @@ Response (acknowledgment to sender):
     chatId: "456",
     messageId: "456",
     overallStatus: "delivered"
-  }
-}
-\`\`\`
-
-- **chat.typing** - Typing indicator from another user [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.typing",
-  "data": {
-    "chatId": "chat123",
-    "userId": "456",
-    "username": "jane_smith",
-    "isTyping": true
   }
 }
 \`\`\`
