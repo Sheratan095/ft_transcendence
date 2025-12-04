@@ -12,7 +12,13 @@ export default defineConfig({
 		cert: './certs/certs/cert.pem',
 	},
     proxy: {
-      '/api': 'http://localhost:3000'
+      '/api': {
+        target: 'https://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false,
+        logLevel: 'debug', // Enable debug logging to see what's happening
+      },
     }
   },
   resolve: {

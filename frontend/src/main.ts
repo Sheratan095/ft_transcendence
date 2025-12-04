@@ -1,4 +1,6 @@
-import { renderProfile, getUserId, startTokenRefresh, type User, refreshAccessToken } from './lib/auth';
+import { getUserId, type User } from './lib/auth';
+import { startTokenRefresh } from './lib/token';
+import { renderProfile } from './lib/profile';
 
 
 class AuthUI {
@@ -131,7 +133,7 @@ class AuthUI {
 
       try {
         authError.textContent = 'Signing in...';
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/auth/login`, {
+        const res = await fetch(`/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           credentials: 'include',
@@ -280,7 +282,7 @@ class AuthUI {
 
       try {
         authError.textContent = 'Registering...';
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/auth/register`, {
+        const res = await fetch(`/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           credentials: 'include',
@@ -400,7 +402,7 @@ class AuthUI {
 
       try {
         authError.textContent = 'Verifying...';
-        const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/auth/2fa`, {
+        const res = await fetch(`/api/auth/2fa`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           credentials: 'include',
@@ -431,7 +433,7 @@ async function getUserCount()
   if (!onlineCount) return;
 
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_BASE || 'https://localhost:3000'}/users/stats`, {
+    const res = await fetch(`/api/users/stats`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     });
