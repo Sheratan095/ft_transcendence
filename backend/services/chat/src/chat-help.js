@@ -107,18 +107,18 @@ export async function	checkBlock(userA, userB)
 }
 
 // Helper to notify message senders about status updates (delivered/read)
-export async function	notifyMessageStatusUpdates(roomId, updatedTime, chatDb)
+export async function	notifyMessageStatusUpdates(chatId, updatedTime, chatDb)
 {
 	try
 	{
 		// Get all messages just updated at the given time (when they were marked delivered/read)
-		const	justUpdatedMessages = await chatDb.getMessagesUpdatedAt(roomId, updatedTime);
+		const	justUpdatedMessages = await chatDb.getMessagesUpdatedAt(chatId, updatedTime);
 
 		for (const { message_id, sender_id } of justUpdatedMessages)
 		{
 			// Notify sender about the overall status of the message
 			const	overallStatus = await chatDb.getOverallMessageStatus(message_id);
-			chatConnectionManager.notifyMessageStatusUpdate(sender_id, roomId, message_id, overallStatus);
+			chatConnectionManager.notifyMessageStatusUpdate(sender_id, chatId, message_id, overallStatus);
 		}
 	}
 	catch (err)

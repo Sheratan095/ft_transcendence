@@ -70,7 +70,7 @@ const	withCookieAuth =
 
 const	chatType =
 {
-	chat_type: 'string',
+	type: 'string',
 	enum: ['dm', 'group'],
 }
 
@@ -111,6 +111,7 @@ const	message =
 		chatId: { type: 'string' },
 		senderId: { type: 'string' },
 		content: { type: 'string' },
+		type: { type: 'string', enum: ['text', 'user_join', 'system'] },
 		createdAt: { type: 'string', format: 'date-time' },
 		messageStatus: { type: 'string', enum: ['sent', 'delivered', 'read', 'undefined'] } // undefined for messages not sent by the requestor user
 	}

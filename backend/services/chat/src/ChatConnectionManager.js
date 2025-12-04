@@ -8,7 +8,7 @@ class	ChatConnectionManager
 		this._connections = new Map(); // userId -> WebSocket
 		// Cache for usernames to reduce DB lookups 
 		//	refresh every time a user sends a message
-		this._cachedUsersInRooms = new Map(); // userId -> Username
+		this._cachedUsersInChats = new Map(); // userId -> Username
 	}
 
 	async	addConnection(userId, socket, chatDb)
@@ -42,14 +42,14 @@ class	ChatConnectionManager
 		return (this._connections.size);
 	}
 
-	// Return if the message was delivered to all users in the room
-	async	sendMsgToRoom(roomId, senderId, messageId, content, chatDb)
+	// Return if the message was delivered to all users in the chat
+	async	sendMsgToChat(chatId, senderId, messageId, content, chatDb)
 	{
 		// Refresh username cache
 		const	username = await this.getUsernameFromCache(senderId, true);
 
 		const	data = {
-			roomId: roomId,
+			chatId: chatId,
 			from: username,
 			senderId: senderId,
 			messageId: messageId,
@@ -57,16 +57,16 @@ class	ChatConnectionManager
 			timestamp: new Date().toISOString(),
 		};
 
-		// Get users in room
-		const	userIds = await chatDb.getUsersInRoom(roomId);
+		// Get users in chat
+		const	userIds = await chatDb.getUsersInChat(chatId);
 
-		// Send to each user in the room
+		// Send to each user in the chat
 		for (const userId of userIds)
 		{
 			const	socket = this._connections.get(userId);
 			if (socket)
 			{
-				this.#dispatchEventToSocket(socket, 'chat.message', data);
+				this.#dispatchEventToSocket(socket, 'chat.chatMessage', data);
 				// Create message status as 'delivered' for each connected user
 
 				// Add the row also for the sender as 'read'
@@ -89,35 +89,55 @@ class	ChatConnectionManager
 		}
 
 		const	status = await chatDb.getOverallMessageStatus(messageId);
-		console.log(`[CHAT] Message ${messageId} in room ${roomId} has overall status: ${status}`);
+		console.log(`[CHAT] Message ${messageId} in chat ${chatId} has overall status: ${status}`);
 
 		return (status);
 	}
 
-	// The message is added to database
-	async	sendSystemMsgToRoom(messageId, roomId, message, chatDb)
+	// Send system message to chat members
+	// excludeUserId: optional user to exclude from receiving the message (e.g., newly added user)
+	async	sendSystemMsgToChat(messageId, chatId, message, chatDb, excludeUserId = null)
 	{
 		const	data = {
-			roomId: roomId,
+			chatId: chatId,
 			message: message,
 			timestamp: new Date().toISOString(),
 		};
 
-		// Get users in room
-		const	userIds = await chatDb.getUsersInRoom(roomId);
+		// Get users in chat
+		const	userIds = await chatDb.getUsersInChat(chatId);
 
-		// Send to each user in the room
+		// Send to each user in the chat (except excluded user)
 		for (const userId of userIds)
 		{
+			if (excludeUserId && String(userId) === String(excludeUserId))
+				continue;
+
 			const	socket = this._connections.get(userId);
 			this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
 		}
 
-		console.log(`[CHAT] System message ${messageId} in room ${roomId}`);
+		console.log(`[CHAT] System message ${messageId} in chat ${chatId}`);
+	}
+
+	// Send chat.joined event to the newly added user
+	async	sendChatJoinedToUser(chatId, addedUserId, invitedByUsername, systemMessage)
+	{
+		const	data = {
+			chatId: chatId,
+			invitedBy: invitedByUsername,
+			systemMessage: systemMessage,
+			timestamp: new Date().toISOString(),
+		};
+
+		const	socket = this._connections.get(addedUserId);
+		this.#dispatchEventToSocket(socket, 'chat.joined', data);
+
+		console.log(`[CHAT] Sent chat.joined event to user ${addedUserId} for chat ${chatId}`);
 	}
 
 	// Return if the message was delivered to the user
-	async	sendToUser(senderId, toUserId, messageId, content, chatDb)
+	async	sendToUser(senderId, toUserId, messageId, content, chatDb, chatId)
 	{
 		// Refresh username cache (refresh = true)
 		const	senderUsername = await this.getUsernameFromCache(senderId, true);
@@ -126,6 +146,7 @@ class	ChatConnectionManager
 			from: senderUsername,
 			senderId: senderId,
 			messageId: messageId,
+			chatId: chatId,
 			content: content,
 			timestamp: new Date().toISOString(),
 		};
@@ -135,7 +156,7 @@ class	ChatConnectionManager
 		if (socket)
 		{
 			console.log(`[CHAT] Sending private message from user ${senderId} to user ${toUserId}`);
-			this.#dispatchEventToSocket(socket, 'chat.private_message', data);
+			this.#dispatchEventToSocket(socket, 'chat.privateMessage', data);
 
 			await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
 			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
@@ -164,11 +185,11 @@ class	ChatConnectionManager
 	{
 		const	socket = this._connections.get(userId);
 		const	data = {
-			chat_id: chatId,
-			message_id: messageId,
+			chatId: chatId,
+			messageId: messageId,
 			content: content,
 			status: status,
-			chat_type: chatType,
+			chatType: chatType,
 		};
 
 		if (socket)
@@ -179,9 +200,9 @@ class	ChatConnectionManager
 	{
 		const	socket = this._connections.get(userId);
 		const	data = {
-			chat_id: chatId,
-			message_id: messageId,
-			overall_status: status,
+			chatId: chatId,
+			messageId: messageId,
+			overallStatus: status,
 		};
 
 		if (socket)
@@ -206,11 +227,11 @@ class	ChatConnectionManager
 	// Used also in chat-controllers.js
 	async	getUsernameFromCache(userId, refresh=false)
 	{
-		let	username = this._cachedUsersInRooms.get(userId);
+		let	username = this._cachedUsersInChats.get(userId);
 		if (!username || refresh)
 		{
 			username = await getUsernameById(userId);
-			this._cachedUsersInRooms.set(userId, username);
+			this._cachedUsersInChats.set(userId, username);
 		}
 
 		return (username);

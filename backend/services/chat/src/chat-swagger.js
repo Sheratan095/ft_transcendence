@@ -33,43 +33,22 @@ Reponse:
 }
 \`\`\`
 
-- **chat.join** - Join a chat room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.join",
-  "data": {
-    "roomId": "room123"
-  }
-}
-\`\`\`
-
-- **chat.leave** - Leave a chat room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.leave",
-  "data": {
-    "roomId": "room123"
-  }
-}
-\`\`\`
-
-- **chat.read** - A user visualized that chat [TO DO]
+- **chat.read** - A user visualized that chat
 \`\`\`json
 {
   "event": "chat.read",
   "data": {
-    "roomId": "room123"
+    "chatId": "chat123"
   }
 }
-
 \`\`\`
 
-- **chat.message** - Send a message to a room
+- **chat.chatMessage** - Send a message to a chat
 \`\`\`json
 {
-  "event": "chat.message",
+  "event": "chat.chatMessage",
   "data": {
-    "roomId": "room123",
+    "chatId": "chat123",
     "content": "Hello everyone!"
   }
 }
@@ -78,19 +57,19 @@ Response (acknowledgment to sender):
 {
   "event": "chat.messageSent",
   "data": {
-    "chat_id": "room123",
-    "message_id": "msg789",
+    "chatId": "chat123",
+    "messageId": "msg789",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if some users are offline,
-    "chat_type": "group"
+    "chatType": "group"
   }
 }
 \`\`\`
 
-- **chat.private_message** - Send a private message to a user
+- **chat.privateMessage** - Send a private message to a user
 \`\`\`json
 {
-  "event": "chat.private_message",
+  "event": "chat.privateMessage",
   "data": {
     "toUserId": "user456",
     "content": "Hello everyone!"
@@ -101,22 +80,11 @@ Response (acknowledgment to sender):
 {
   "event": "chat.messageSent",
   "data": {
-    "chat_id": "chat789",
-    "message_id": "msg123",
+    "chatId": "chat789",
+    "messageId": "msg123",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if recipient is offline,
-    "chat_type": "dm"
-  }
-}
-\`\`\`
-
-- **chat.typing** - Send typing indicator [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.typing",
-  "data": {
-    "roomId": "room123",
-    "isTyping": true
+    "chatType": "dm"
   }
 }
 \`\`\`
@@ -125,44 +93,13 @@ Response (acknowledgment to sender):
 
 **SERVER → CLIENT EVENTS**
 
-- **chat.joined** - Confirmation that you joined a room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.joined",
-  "data": {
-    "roomId": "room123"
-  }
-}
-\`\`\`
 
-- **chat.userJoined** - Another user joined the room [NOT IMPLEMENTED YET]
+- **chat.chatMessage** - Message received in a chat
 \`\`\`json
 {
-  "event": "chat.userJoined",
+  "event": "chat.chatMessage",
   "data": {
-    "userId": "456",
-    "roomId": "room123"
-  }
-}
-\`\`\`
-
-- **chat.userLeft** - A user left the room [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.userLeft",
-  "data": {
-    "userId": "456",
-    "roomId": "room123"
-  }
-}
-\`\`\`
-
-- **chat.message** - Message received in a room
-\`\`\`json
-{
-  "event": "chat.message",
-  "data": {
-    "roomId": "room123",
+    "chatId": "chat123",
     "from": "jane_smith",
     "senderId": "456",
     "messageId": "msg789",
@@ -172,14 +109,15 @@ Response (acknowledgment to sender):
 }
 \`\`\`
 
-- **chat.private_message** - Message received from a user
+- **chat.privateMessage** - Message received from a user
 \`\`\`json
 {
-  "event": "chat.private_message",
+  "event": "chat.privateMessage",
   "data": {
     "from": "jane_smith",
     "senderId": "456",
     "messageId": "msg123",
+    "chatId": "chat789",
     "content": "Hello everyone!",
     "timestamp": "2025-11-19T10:30:00.000Z"
   }
@@ -191,8 +129,8 @@ Response (acknowledgment to sender):
 {
   "event": "chat.messageSent",
   "data": {
-    "chat_id": "chat789",
-    "message_id": "msg123",
+    "chatId": "chat789",
+    "messageId": "msg123",
     "status": "delivered" // "delivered" if sent to all recipients, "sent" if some are offline
   }
 }
@@ -203,33 +141,20 @@ Response (acknowledgment to sender):
 {
   event: "chat.messageStatusUpdate",
   data: {
-    chat_id: "456",
-    message_id: "456",
-    overall_status: "delivered"
+    chatId: "456",
+    messageId: "456",
+    overallStatus: "delivered"
   }
 }
 \`\`\`
 
-- **chat.typing** - Typing indicator from another user [NOT IMPLEMENTED YET]
-\`\`\`json
-{
-  "event": "chat.typing",
-  "data": {
-    "roomId": "room123",
-    "userId": "456",
-    "username": "jane_smith",
-    "isTyping": true
-  }
-}
-\`\`\`
-
-- **chat.systemMessage** - System message to a room
+- **chat.systemMessage** - System message to a chat
 \`\`\`json
 {
   "event": "chat.systemMessage",
   "data": {
-    "roomId": "room123",
-    "message": "Welcome to the chat room!",
+    "chatId": "chat123",
+    "message": "Welcome to the chat!",
     "timestamp": "2025-11-19T10:30:00.000Z"
   }
 }
@@ -308,7 +233,7 @@ export async function	setupSwagger(fastify)
 	// Manually register the JSON endpoint since we're not using swagger-ui
 	fastify.get('/docs/json', docsRouteOptions, async (request, reply) =>
 	{
-		return fastify.swagger();
+		return (fastify.swagger());
 	});
 
 	// WebSocket documentation endpoint (for Swagger only - doesn't actually work as HTTP GET)

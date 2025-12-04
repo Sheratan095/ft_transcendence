@@ -108,7 +108,7 @@ export async function	setupSwagger(fastify)
 	// Manually register the JSON endpoint since we're not using swagger-ui
 	fastify.get('/docs/json', docsRouteOptions, async (request, reply) =>
 	{
-		return fastify.swagger();
+		return (fastify.swagger());
 	});
 
 	// WebSocket documentation endpoint (for Swagger only - doesn't actually work as HTTP GET)
