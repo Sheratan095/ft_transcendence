@@ -66,7 +66,7 @@ class	ChatConnectionManager
 			const	socket = this._connections.get(userId);
 			if (socket)
 			{
-				this.#dispatchEventToSocket(socket, 'chat.message', data);
+				this.#dispatchEventToSocket(socket, 'chat.chatMessage', data);
 				// Create message status as 'delivered' for each connected user
 
 				// Add the row also for the sender as 'read'

@@ -844,7 +844,7 @@
                     }
                     
                     message = {
-                        event: 'chat.private_message',
+                        event: 'chat.privateMessage',
                         data: {
                             toUserId: String(otherMember.userId),
                             content: content
@@ -1486,7 +1486,7 @@
 
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const message = {
-                    event: 'chat.private_message',
+                    event: 'chat.privateMessage',
                     data: {
                         toUserId: toUserId,
                         content: content

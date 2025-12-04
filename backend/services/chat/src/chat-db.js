@@ -397,17 +397,25 @@ export class	ChatDatabase
 	}
 
 	// Returns aggregated status for a message across all recipients (excluding sender)
-	// DELIVERED if it's delivered to all recipients
-	// READ if it's read by all recipients
+	// Logic: return the MINIMUM status across all recipients
+	// sent (0) < delivered (1) < read (2)
 	// Return "sent" if at least one recipient has not received it yet OR in case of error
 	async	getOverallMessageStatus(messageId)
 	{
 		try
 		{
+			// Use CASE to convert status to numeric values for proper MIN comparison
+			// sent=0, delivered=1, read=2 - we want the minimum status
 			const query = `
 				SELECT 
-					MIN(ms.status) AS min_status,
-					MAX(ms.status) AS max_status
+					MIN(
+						CASE ms.status
+							WHEN 'sent' THEN 0
+							WHEN 'delivered' THEN 1
+							WHEN 'read' THEN 2
+							ELSE 0
+						END
+					) AS min_status_num
 				FROM message_statuses ms
 				JOIN messages m ON ms.message_id = m.id
 				WHERE ms.message_id = ?
@@ -416,25 +424,18 @@ export class	ChatDatabase
 
 			const	row = await this.db.get(query, [messageId]);
 
-			// The message HAS TO BE A SENDER that VISUALIZE THE MESSAGE
-			//	so, if there are no rows, it means there are no recipients (e.g., only the sender exists)
-			if (!row || row.min_status === null)
+			// If no recipients (only sender), consider it read
+			if (!row || row.min_status_num === null)
 				return ("read");
 
-			const	{ min_status, max_status } = row;
-
-			// ---- AGGREGATION LOGIC ----
-
-			// All read
-			if (min_status === "read" && max_status === "read")
-				return ("read");
-
-			// All delivered
-			if (min_status === "delivered" && max_status === "delivered")
-				return ("delivered");
-
-			// Otherwise: at least one recipient still has only "sent"
-			return ("sent");
+			// Convert numeric back to status string
+			switch (row.min_status_num)
+			{
+				case 0: return ("sent");
+				case 1: return ("delivered");
+				case 2: return ("read");
+				default: return ("sent");
+			}
 		}
 		catch (err)
 		{
