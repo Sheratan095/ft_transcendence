@@ -844,18 +844,18 @@
                     }
                     
                     message = {
-                        event: 'chat.private_message',
+                        event: 'chat.privateMessage',
                         data: {
                             toUserId: String(otherMember.userId),
                             content: content
                         }
                     };
                 } else {
-                    // For group chats, send as room message
+                    // For group chats, send as chat message
                     message = {
-                        event: 'chat.message',
+                        event: 'chat.chatMessage',
                         data: {
-                            roomId: currentChatId,
+                            chatId: currentChatId,
                             content: content
                         }
                     };
@@ -880,7 +880,7 @@
                 const message = {
                     event: 'chat.read',
                     data: {
-                        roomId: chatId
+                        chatId: chatId
                     }
                 };
 
@@ -1080,6 +1080,53 @@
             
             updateStatus(status, isConnected);
         }
+
+        // Connect to Notification WebSocket
+        function connectNotificationWebSocket() {
+            if (notificationWs) {
+                notificationWs.close();
+            }
+
+            // Clear any existing ping interval
+            if (notificationPingInterval) {
+                clearInterval(notificationPingInterval);
+                notificationPingInterval = null;
+            }
+
+            console.log('Connecting to Notification WebSocket...');
+
+            notificationWs = new WebSocket(NOTIFICATION_WS_URL);
+
+            notificationWs.onopen = () => {
+                console.log('Notification WebSocket connected');
+                updateConnectionStatus();
+            };
+
+            notificationWs.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleNotificationWebSocketMessage(message);
+                } catch (err) {
+                    console.error('Error parsing Notification WebSocket message:', err);
+                }
+            };
+
+            notificationWs.onclose = () => {
+                console.log('Notification WebSocket closed');
+                updateConnectionStatus();
+                
+                if (notificationPingInterval) {
+                    clearInterval(notificationPingInterval);
+                    notificationPingInterval = null;
+                }
+            };
+
+            notificationWs.onerror = (err) => {
+                console.error('Notification WebSocket error:', err);
+                updateConnectionStatus();
+            };
+        }
+
         function connectWebSocket() {
             if (ws) {
                 ws.close();
@@ -1138,13 +1185,13 @@
                     // Heartbeat response
                     break;
 
-                case 'chat.message':
-                    console.log('Handling chat.message event:', message.data);
+                case 'chat.chatMessage':
+                    console.log('Handling chat.chatMessage event:', message.data);
                     handleIncomingMessage(message.data);
                     break;
 
-                case 'chat.private_message':
-                    console.log('Handling chat.private_message event:', message.data);
+                case 'chat.privateMessage':
+                    console.log('Handling chat.privateMessage event:', message.data);
                     handleIncomingPrivateMessage(message.data);
                     break;
 
@@ -1170,10 +1217,10 @@
             }
         }
 
-        // Handle incoming room message
+        // Handle incoming chat message
         function handleIncomingMessage(data) {
             console.log('handleIncomingMessage called with data:', data);
-            const chatId = data.roomId;
+            const chatId = data.chatId;
 
             // Check if we have a pending confirmation for this message
             const pendingStatus = pendingConfirmations.get(data.messageId);
@@ -1217,27 +1264,32 @@
         function handleIncomingPrivateMessage(data) {
             console.log('handleIncomingPrivateMessage called with data:', data);
             
+            // Server now sends chatId, use it directly
+            const chatId = data.chatId;
+            if (!chatId) {
+                console.error('No chatId received in private message!', data);
+                return;
+            }
+
             // Find or create chat for this private message
-            let chat = chats.find(c => c.chatType === 'dm' && c.members.some(m => m.userId === data.senderId));
+            let chat = chats.find(c => c.id === chatId);
 
             if (!chat) {
-                console.log('Chat not found, creating minimal DM chat for sender:', data.senderId);
-                // Create a minimal DM chat locally
-                // Use a temporary ID until we get the real chat_id
-                const tempChatId = `temp-dm-${data.senderId}`;
+                console.log('Chat not found locally, creating DM chat with server chatId:', chatId);
+                // Create a DM chat locally with the real server chatId
                 chat = {
-                    id: tempChatId,
+                    id: chatId,
                     name: null,
                     chatType: 'dm',
                     members: [
                         { userId: userId, username: 'You' },
-                        { userId: data.senderId, username: `User ${data.senderId}` }
+                        { userId: data.senderId, username: data.from || `User ${data.senderId}` }
                     ],
                     createdAt: data.timestamp
                 };
                 chats.push(chat);
                 renderChatList();
-                console.log('Created new DM chat locally:', chat);
+                console.log('Created new DM chat locally with real chatId:', chat);
             }
 
             if (chat) {
@@ -1276,7 +1328,7 @@
 
         // Handle system message
         function handleSystemMessage(data) {
-            const chatId = data.roomId;
+            const chatId = data.chatId;
 
             const msg = {
                 id: data.messageId || 'system-' + Date.now(),
@@ -1299,23 +1351,23 @@
 
         // Handle message sent confirmation
         function handleMessageSent(data) {
-            const chatId = data.chat_id;
-            const messageId = data.message_id;
+            const chatId = data.chatId;
+            const messageId = data.messageId;
             const status = data.status;
 
             console.log(`Message ${messageId} sent with status: ${status}`, data);
 
             // Check if we know about this chat
             let chat = chats.find(c => c.id === chatId);
-            if (!chat && data.chat_type) {
-                // New chat created - create it locally from the existing chat_type in response
-                console.log(`Chat ${chatId} not found locally, creating from chat_type: ${data.chat_type}`);
+            if (!chat && data.chatType) {
+                // New chat created - create it locally from the existing chatType in response
+                console.log(`Chat ${chatId} not found locally, creating from chatType: ${data.chatType}`);
                 
                 // Create minimal chat object (usernames will be "User X" until properly loaded)
                 chat = {
                     id: chatId,
-                    name: data.chat_type === 'dm' ? null : 'New Group',
-                    chatType: data.chat_type,
+                    name: data.chatType === 'dm' ? null : 'New Group',
+                    chatType: data.chatType,
                     members: [], // Will be populated as messages arrive
                     createdAt: data.timestamp || new Date().toISOString()
                 };
@@ -1346,7 +1398,7 @@
                     content: data.content || data.message || '',
                     createdAt: data.timestamp || new Date().toISOString(),
                     messageStatus: status,
-                    isPrivate: data.is_private || false
+                    isPrivate: data.isPrivate || false
                 };
 
                 chatMessages.push(msg);
@@ -1365,9 +1417,9 @@
 
         // Handle message status update
         function handleMessageStatusUpdate(data) {
-            const chatId = data.chat_id;
-            const messageId = data.message_id;
-            const status = data.overall_status;
+            const chatId = data.chatId;
+            const messageId = data.messageId;
+            const status = data.overallStatus;
 
             console.log(`Message ${messageId} status updated to: ${status}`);
 
@@ -1434,7 +1486,7 @@
 
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const message = {
-                    event: 'chat.private_message',
+                    event: 'chat.privateMessage',
                     data: {
                         toUserId: toUserId,
                         content: content

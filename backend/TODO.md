@@ -119,3 +119,5 @@
 
 [x] When try to send a message or add a person to group, if you blocked him, return an error
 	with message "unblock user to send a message" and noting when he blocked you
+
+[] Normalize date type

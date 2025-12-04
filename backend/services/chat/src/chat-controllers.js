@@ -70,7 +70,6 @@ export const	getMessages = async (req, reply) =>
 		}
 
 		const	rawMessages = await chatDb.getMessagesByChatIdForUser(chatId, userId, limit, offset);
-		console.log('Raw messages:', rawMessages);
 		// Add the overallor message status just if the message is sent from the requestor user
 		for (const message of rawMessages)
 		{
@@ -86,6 +85,7 @@ export const	getMessages = async (req, reply) =>
 			chatId: msg.chat_id,
 			senderId: msg.sender_id,
 			content: msg.content,
+			type: msg.type,
 			createdAt: msg.created_at,
 			messageStatus: msg.message_status
 		}));
@@ -139,10 +139,10 @@ export const	addUserToChat = async (req, reply) =>
 		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)
 			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
-		// Add sytem message to chat and notify room
+		// Add system message to chat and notify chat
 		const	message = `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`;
-		const	messageId = await chatDb.addSystemMessageToChat(chatId, message);
-		chatConnectionManager.sendSystemMsgToRoom(messageId, chatId, message, chatDb);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, message, 'user_join');
+		chatConnectionManager.sendSystemMsgToChat(messageId, chatId, message, chatDb, toUserId);
 
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 

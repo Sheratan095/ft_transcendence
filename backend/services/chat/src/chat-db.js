@@ -150,8 +150,9 @@ export class	ChatDatabase
 		return (chats);
 	}
 
-	// Fetch just the messages for a chat that a user is part of and that he has received
-	//	system messages are included
+	// Fetch all messages for a chat that a user is part of
+	//	includes all message types (text, system, user_join)
+	//	only messages created after the user joined the chat are returned
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
 		const query = `
@@ -160,25 +161,26 @@ export class	ChatDatabase
 				m.chat_id,
 				m.sender_id,
 				m.content,
-				m.created_at,
-				COALESCE(ms.status, 'system') AS message_status
+				m.type,
+				m.created_at
 			FROM messages m
-			LEFT JOIN message_statuses ms 
-				ON m.id = ms.message_id AND ms.user_id = ?
+			INNER JOIN chat_members cm
+				ON cm.chat_id = m.chat_id AND cm.user_id = ?
 			WHERE m.chat_id = ?
-			AND (ms.user_id = ? OR m.sender_id = ?)
+			AND datetime(m.created_at) > datetime(cm.joined_at)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
-		// Fetch all messages in the chat received by the user (exclude messages before join and after leave)
-		// Include messages sent by the user as well
-		// Include system messages (sender_id = 'system') regardless of message_statuses
+		// Fetch all messages in the chat after user joined
+		// The joined_at filter ensures users only see messages after they joined
+		// Using datetime() to normalize timestamp formats for proper comparison
+		// Status should be computed in the controller using getOverallMessageStatus()
 
-		const	messages = await this.db.all(query, [userId, chatId, userId, this.systemSenderId, limit, offset]);
+		const	messages = await this.db.all(query, [userId, chatId, limit, offset]);
 		return (messages);
 	}
 
-	async	getUsersInRoom(chatId)
+	async	getUsersInChat(chatId)
 	{
 		const	query = `
 			SELECT user_id
@@ -215,13 +217,15 @@ export class	ChatDatabase
 		await this.db.run(insertChatQuery, [chatId]);
 
 		// Add both users to the chat_members table
+		const	joinedAt = new Date(Date.now()).toISOString();
+
 		const insertMemberQuery = `
-			INSERT INTO chat_members (chat_id, user_id)
-			VALUES (?, ?)
+			INSERT INTO chat_members (chat_id, user_id, joined_at)
+			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId1]);
-		await this.db.run(insertMemberQuery, [chatId, userId2]);
+		await this.db.run(insertMemberQuery, [chatId, userId1, joinedAt]);
+		await this.db.run(insertMemberQuery, [chatId, userId2, joinedAt]);
 
 		return (chatId);
 	}
@@ -305,12 +309,14 @@ export class	ChatDatabase
 			throw error;
 		}
 
+		const	joinedAt = new Date(Date.now()).toISOString();
+
 		const	insertMemberQuery = `
-			INSERT INTO chat_members (chat_id, user_id)
-			VALUES (?, ?)
+			INSERT INTO chat_members (chat_id, user_id, joined_at)
+			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId]);
+		await this.db.run(insertMemberQuery, [chatId, userId, joinedAt]);
 	}
 
 	async	getChatById(chatId)
@@ -331,33 +337,20 @@ export class	ChatDatabase
 
 	//-----------------------------MESSAGE QUERIES----------------------------
 
-	async	addMessageToChat(chatId, senderId, message)
+	async	addMessageToChat(chatId, senderId, message, type = "text")
 	{
 		const	messageId = await this.#generateUUID();
 		const	timestamp = new Date().toISOString();
 
-		const	insertMessageQuery = `
-			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
-			VALUES (?, ?, ?, ?, ?)
-		`;
-
-		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, timestamp]);
-
-		return (messageId);
-	}
-
-	async	addSystemMessageToChat(chatId, message)
-	{
-		const	messageId = await this.#generateUUID();
-		const	timestamp = new Date().toISOString();
+		if (type !== 'text')
+			senderId = this.systemSenderId;
 
 		const	insertMessageQuery = `
-			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
-			VALUES (?, ?, ?, ?, ?)
+			INSERT INTO messages (id, chat_id, sender_id, content, type, created_at)
+			VALUES (?, ?, ?, ?, ?, ?)
 		`;
 
-		await this.db.run(insertMessageQuery, [messageId, chatId, this.systemSenderId, message, timestamp]);
-
+		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, type, timestamp]);
 		return (messageId);
 	}
 
@@ -404,17 +397,25 @@ export class	ChatDatabase
 	}
 
 	// Returns aggregated status for a message across all recipients (excluding sender)
-	// DELIVERED if it's delivered to all recipients
-	// READ if it's read by all recipients
+	// Logic: return the MINIMUM status across all recipients
+	// sent (0) < delivered (1) < read (2)
 	// Return "sent" if at least one recipient has not received it yet OR in case of error
 	async	getOverallMessageStatus(messageId)
 	{
 		try
 		{
+			// Use CASE to convert status to numeric values for proper MIN comparison
+			// sent=0, delivered=1, read=2 - we want the minimum status
 			const query = `
 				SELECT 
-					MIN(ms.status) AS min_status,
-					MAX(ms.status) AS max_status
+					MIN(
+						CASE ms.status
+							WHEN 'sent' THEN 0
+							WHEN 'delivered' THEN 1
+							WHEN 'read' THEN 2
+							ELSE 0
+						END
+					) AS min_status_num
 				FROM message_statuses ms
 				JOIN messages m ON ms.message_id = m.id
 				WHERE ms.message_id = ?
@@ -423,25 +424,18 @@ export class	ChatDatabase
 
 			const	row = await this.db.get(query, [messageId]);
 
-			// The message HAS TO BE A SENDER that VISUALIZE THE MESSAGE
-			//	so, if there are no rows, it means there are no recipients (e.g., only the sender exists)
-			if (!row || row.min_status === null)
+			// If no recipients (only sender), consider it read
+			if (!row || row.min_status_num === null)
 				return ("read");
 
-			const	{ min_status, max_status } = row;
-
-			// ---- AGGREGATION LOGIC ----
-
-			// All read
-			if (min_status === "read" && max_status === "read")
-				return ("read");
-
-			// All delivered
-			if (min_status === "delivered" && max_status === "delivered")
-				return ("delivered");
-
-			// Otherwise: at least one recipient still has only "sent"
-			return ("sent");
+			// Convert numeric back to status string
+			switch (row.min_status_num)
+			{
+				case 0: return ("sent");
+				case 1: return ("delivered");
+				case 2: return ("read");
+				default: return ("sent");
+			}
 		}
 		catch (err)
 		{
