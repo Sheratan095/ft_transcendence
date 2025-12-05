@@ -154,8 +154,12 @@ Response (acknowledgment to sender):
   "event": "chat.systemMessage",
   "data": {
     "chatId": "chat123",
-    "message": "Welcome to the chat!",
-    "timestamp": "2025-11-19T10:30:00.000Z"
+    "messageId": "msg123",
+    "message": "User jane_smith has joined the chat.",
+    "targetId": "user456", // optional, only for user-specific messages like join or leave
+    "targetUsername": "jane_smith", // optional, username of the user who joined/left
+    "timestamp": "2025-11-19T10:30:00.000Z",
+    "type": "userJoin" ("userJoin", "userLeave")
   }
 }
 \`\`\`

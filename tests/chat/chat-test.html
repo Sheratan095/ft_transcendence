@@ -166,14 +166,46 @@
             padding: 15px 20px;
             background: #2d2d2d;
             border-bottom: 2px solid #3d3d3d;
+        }
+
+        .chat-header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 8px;
         }
 
         .chat-header h2 {
             font-size: 18px;
             color: #4CAF50;
+        }
+
+        .members-list {
+            font-size: 12px;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .member-badge {
+            background: #3d3d3d;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #e0e0e0;
+            border: 1px solid #4d4d4d;
+        }
+
+        .member-badge.online {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .members-count {
+            color: #666;
+            font-style: italic;
         }
 
         .messages-container {
@@ -224,6 +256,14 @@
             color: white;
             font-style: italic;
             font-size: 13px;
+        }
+
+        .message-system.user-join {
+            background: #4CAF50;
+        }
+
+        .message-system.user-leave {
+            background: #FF9800;
         }
 
         .message-header {
@@ -425,11 +465,16 @@
         <!-- Chat area -->
         <div class="chat-container">
             <div class="chat-header">
-                <h2 id="chatTitle">Select a chat</h2>
-                <div>
-                    <button class="btn btn-secondary" id="loadMoreBtn" onclick="loadMoreMessages()" style="display: none;">Load More</button>
-                    <button class="btn btn-secondary" onclick="showPrivateMessageModal()">+ Private Message</button>
-                    <button class="btn btn-secondary" id="addUserBtn" onclick="showAddUserModal()" style="display: none;">+ Add User</button>
+                <div class="chat-header-top">
+                    <h2 id="chatTitle">Select a chat</h2>
+                    <div>
+                        <button class="btn btn-secondary" id="loadMoreBtn" onclick="loadMoreMessages()" style="display: none;">Load More</button>
+                        <button class="btn btn-secondary" onclick="showPrivateMessageModal()">+ Private Message</button>
+                        <button class="btn btn-secondary" id="addUserBtn" onclick="showAddUserModal()" style="display: none;">+ Add User</button>
+                    </div>
+                </div>
+                <div class="members-list" id="membersList" style="display: none;">
+                    <span class="members-count">Members:</span>
                 </div>
             </div>
             <div class="messages-container" id="messagesContainer">
@@ -499,6 +544,7 @@
         let currentChatId = null;
         let chats = [];
         let messages = new Map(); // chatId -> messages array
+        let chatMembers = new Map(); // chatId -> array of member objects {userId, username}
         let messageOffset = 0;
         const MESSAGE_LIMIT = 50;
         let pingInterval = null; // Store interval ID to prevent duplicates
@@ -587,8 +633,8 @@
             currentChatId = null;
             chats = [];
             messages.clear();
+            chatMembers.clear();
             onlineFriends.clear();
-            messages.clear();
 
             document.getElementById('userInfo').innerHTML = '';
             document.getElementById('loginBtn').style.display = 'inline-block';
@@ -618,6 +664,14 @@
                 }
 
                 chats = await response.json();
+                
+                // Store members for each chat
+                chats.forEach(chat => {
+                    if (chat.members) {
+                        chatMembers.set(chat.id, chat.members);
+                    }
+                });
+                
                 renderChatList();
 
             } catch (err) {
@@ -683,6 +737,9 @@
                 } else {
                     addUserBtn.style.display = 'none';
                 }
+                
+                // Update members list
+                updateMembersList(chatId);
             }
 
             document.getElementById('messageInput').disabled = false;
@@ -1336,16 +1393,25 @@
                 senderId: null, // Use null to match database format
                 content: data.message,
                 createdAt: data.timestamp,
-                isSystem: true
+                isSystem: true,
+                systemType: data.type // userJoin, userLeave, etc.
             };
 
             const chatMessages = messages.get(chatId) || [];
             chatMessages.push(msg);
             messages.set(chatId, chatMessages);
 
+            // Update member list if it's a user join/leave event
+            if (data.type === 'userJoin' && data.targetId) {
+                addMemberToChat(chatId, data.targetId, data.targetUsername);
+            } else if (data.type === 'userLeave' && data.targetId) {
+                removeMemberFromChat(chatId, data.targetId);
+            }
+
             if (chatId === currentChatId) {
                 renderMessages();
                 scrollToBottom();
+                updateMembersList(chatId);
             }
         }
 
@@ -1593,6 +1659,53 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Update members list display
+        function updateMembersList(chatId) {
+            const membersList = document.getElementById('membersList');
+            const members = chatMembers.get(chatId) || [];
+            
+            if (members.length === 0) {
+                membersList.style.display = 'none';
+                return;
+            }
+            
+            membersList.style.display = 'flex';
+            
+            // Clear existing badges except the count label
+            const badges = membersList.querySelectorAll('.member-badge');
+            badges.forEach(badge => badge.remove());
+            
+            // Add member badges
+            members.forEach(member => {
+                const badge = document.createElement('span');
+                badge.className = 'member-badge';
+                if (onlineFriends.has(member.userId)) {
+                    badge.classList.add('online');
+                }
+                badge.textContent = member.username || `User ${member.userId}`;
+                badge.title = member.userId;
+                membersList.appendChild(badge);
+            });
+        }
+
+        // Add member to chat
+        function addMemberToChat(chatId, userId, username) {
+            const members = chatMembers.get(chatId) || [];
+            if (!members.find(m => m.userId === userId)) {
+                members.push({ userId, username });
+                chatMembers.set(chatId, members);
+                console.log(`Added member ${username} (${userId}) to chat ${chatId}`);
+            }
+        }
+
+        // Remove member from chat
+        function removeMemberFromChat(chatId, userId) {
+            const members = chatMembers.get(chatId) || [];
+            const filtered = members.filter(m => m.userId !== userId);
+            chatMembers.set(chatId, filtered);
+            console.log(`Removed member ${userId} from chat ${chatId}`);
         }
 
         // Close modals on outside click

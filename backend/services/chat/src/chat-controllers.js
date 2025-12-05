@@ -136,13 +136,14 @@ export const	addUserToChat = async (req, reply) =>
 		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
 		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
 
+		// Notify the user newly added to the chat
 		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)
 			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
 		// Add system message to chat and notify chat
 		const	message = `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`;
 		const	messageId = await chatDb.addMessageToChat(chatId, userId, message, 'user_join');
-		chatConnectionManager.sendSystemMsgToChat(messageId, chatId, message, chatDb, toUserId);
+		chatConnectionManager.sendSystemMsgToChat(toUserId, messageId, chatId, message, chatDb, 'userJoin');
 
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 
@@ -208,6 +209,50 @@ export const	createGroupChat = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[CHAT] Error in createGroupChat controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	leaveGroupChat = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	{ chatId } = req.body;
+
+		// Check if the chat is a group chat
+		const	chatType = await chatDb.getChatType(chatId);
+		if (chatType !== 'group')
+		{
+			console.log(`[CHAT] User ${userId} attempted to leave non-group chat ${chatId}`);
+			return (reply.code(400).send({ error: 'Bad Request', message: 'Cannot leave a non-group chat' }));
+		}
+
+		// Check if the user is a member of the chat
+		if (await chatDb.isUserInChat(userId, chatId) === false)
+		{
+			console.log(`[CHAT] User ${userId} attempted to leave chat ${chatId} without membership`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
+		}
+
+		// Remove the user from the chat
+		await chatDb.removeUserFromChat(chatId, userId);
+		console.log(`[CHAT] User ${userId} left group chat ${chatId}`);
+
+		// Add system message to chat and notify chat
+		const	username = await chatConnectionManager.getUsernameFromCache(userId, true);
+
+		const	message = `User ${username || userId} has left the chat.`;
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, message, 'user_leave');
+		chatConnectionManager.sendSystemMsgToChat(userId, messageId, chatId, message, chatDb, 'userLeave');
+
+		return (reply.code(200).send({ success: true }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in leaveGroupChat controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }

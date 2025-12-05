@@ -122,3 +122,4 @@
 
 [] Normalize date type
 [] Leave group
+[] rework of user-specific messages in group chat to add the username

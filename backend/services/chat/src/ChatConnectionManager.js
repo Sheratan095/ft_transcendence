@@ -96,12 +96,14 @@ class	ChatConnectionManager
 
 	// Send system message to chat members
 	// excludeUserId: optional user to exclude from receiving the message (e.g., newly added user)
-	async	sendSystemMsgToChat(messageId, chatId, message, chatDb, excludeUserId = null)
+	async	sendSystemMsgToChat(targetId, messageId, chatId, message, chatDb, type, excludeUserId = null)
 	{
 		const	data = {
 			chatId: chatId,
 			message: message,
+			targetId: targetId,
 			timestamp: new Date().toISOString(),
+			type: type
 		};
 
 		// Get users in chat
@@ -134,6 +136,20 @@ class	ChatConnectionManager
 		this.#dispatchEventToSocket(socket, 'chat.joined', data);
 
 		console.log(`[CHAT] Sent chat.joined event to user ${addedUserId} for chat ${chatId}`);
+	}
+
+	async	sendChatLeftToUser(chatId, leftUserId, systemMessage)
+	{
+		const	data = {
+			chatId: chatId,
+			systemMessage: systemMessage,
+			timestamp: new Date().toISOString(),
+		};
+
+		const	socket = this._connections.get(leftUserId);
+		this.#dispatchEventToSocket(socket, 'chat.left', data);
+
+		console.log(`[CHAT] Sent chat.left event to user ${leftUserId} for chat ${chatId}`);
 	}
 
 	// Return if the message was delivered to the user
@@ -232,10 +248,3 @@ class	ChatConnectionManager
 		{
 			username = await getUsernameById(userId);
 			this._cachedUsersInChats.set(userId, username);
-		}
-
-		return (username);
-	}
-}
-
-export const	chatConnectionManager = new ChatConnectionManager();
