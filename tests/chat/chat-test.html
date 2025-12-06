@@ -1242,8 +1242,8 @@
                     // Heartbeat response
                     break;
 
-                case 'chat.chatMessage':
-                    console.log('Handling chat.chatMessage event:', message.data);
+                case 'chat.message':
+                    console.log('Handling chat.message event:', message.data);
                     handleIncomingMessage(message.data);
                     break;
 
@@ -1252,7 +1252,11 @@
                     handleIncomingPrivateMessage(message.data);
                     break;
 
-                case 'chat.systemMessage':
+                case 'chat.userJoin':
+                    handleSystemMessage(message.data);
+                    break;
+
+                case 'chat.userLeave':
                     handleSystemMessage(message.data);
                     break;
 

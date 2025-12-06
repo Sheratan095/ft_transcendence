@@ -141,9 +141,7 @@ export const	addUserToChat = async (req, reply) =>
 			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
 		// Add system message to chat and notify chat
-		const	message = `User ${toUsername || toUserId} has been added to the chat by ${fromUsername || userId}.`;
-		const	messageId = await chatDb.addMessageToChat(chatId, userId, message, 'user_join');
-		chatConnectionManager.sendSystemMsgToChat(toUserId, messageId, chatId, message, chatDb, 'userJoin');
+		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, fromUsername, chatDb);
 
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 
@@ -244,9 +242,7 @@ export const	leaveGroupChat = async (req, reply) =>
 		// Add system message to chat and notify chat
 		const	username = await chatConnectionManager.getUsernameFromCache(userId, true);
 
-		const	message = `User ${username || userId} has left the chat.`;
-		const	messageId = await chatDb.addMessageToChat(chatId, userId, message, 'user_leave');
-		chatConnectionManager.sendSystemMsgToChat(userId, messageId, chatId, message, chatDb, 'userLeave');
+		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb);
 
 		return (reply.code(200).send({ success: true }));
 	}

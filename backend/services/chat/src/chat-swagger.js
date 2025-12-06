@@ -97,7 +97,7 @@ Response (acknowledgment to sender):
 - **chat.chatMessage** - Message received in a chat
 \`\`\`json
 {
-  "event": "chat.chatMessage",
+  "event": "chat.message",
   "data": {
     "chatId": "chat123",
     "from": "jane_smith",
@@ -148,18 +148,34 @@ Response (acknowledgment to sender):
 }
 \`\`\`
 
-- **chat.systemMessage** - System message to a chat
+- **chat.userJoin** - User joined a chat
 \`\`\`json
 {
-  "event": "chat.systemMessage",
+  "event": "chat.userJoin",
   "data": {
     "chatId": "chat123",
     "messageId": "msg123",
-    "message": "User jane_smith has joined the chat.",
-    "targetId": "user456", // optional, only for user-specific messages like join or leave
-    "targetUsername": "jane_smith", // optional, username of the user who joined/left
+    "message": "User jane_smith has been added to the chat by john_doe.",
+    "targetId": "user456",
+    "targetUsername": "jane_smith",
     "timestamp": "2025-11-19T10:30:00.000Z",
-    "type": "userJoin" ("userJoin", "userLeave")
+    "type": "userJoin"
+  }
+}
+\`\`\`
+
+- **chat.userLeave** - User left a chat
+\`\`\`json
+{
+  "event": "chat.userLeave",
+  "data": {
+    "chatId": "chat123",
+    "messageId": "msg123",
+    "message": "User jane_smith has left the chat.",
+    "targetId": "user456",
+    "targetUsername": "jane_smith",
+    "timestamp": "2025-11-19T10:30:00.000Z",
+    "type": "userLeave"
   }
 }
 \`\`\`
