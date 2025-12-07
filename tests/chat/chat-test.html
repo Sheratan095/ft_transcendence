@@ -1252,11 +1252,7 @@
                     handleIncomingPrivateMessage(message.data);
                     break;
 
-                case 'chat.userJoin':
-                    handleSystemMessage(message.data);
-                    break;
-
-                case 'chat.userLeave':
+                case 'chat.systemMessage':
                     handleSystemMessage(message.data);
                     break;
 
@@ -1398,7 +1394,7 @@
                 content: data.message,
                 createdAt: data.timestamp,
                 isSystem: true,
-                systemType: data.type // userJoin, userLeave, etc.
+                systemType: data.event // userJoin, userLeave, etc.
             };
 
             const chatMessages = messages.get(chatId) || [];
@@ -1406,10 +1402,10 @@
             messages.set(chatId, chatMessages);
 
             // Update member list if it's a user join/leave event
-            if (data.type === 'userJoin' && data.targetId) {
-                addMemberToChat(chatId, data.targetId, data.targetUsername);
-            } else if (data.type === 'userLeave' && data.targetId) {
-                removeMemberFromChat(chatId, data.targetId);
+            if (data.event === 'userJoin' && data.userId) {
+                addMemberToChat(chatId, data.userId, data.username);
+            } else if (data.event === 'userLeave' && data.userId) {
+                removeMemberFromChat(chatId, data.userId);
             }
 
             if (chatId === currentChatId) {

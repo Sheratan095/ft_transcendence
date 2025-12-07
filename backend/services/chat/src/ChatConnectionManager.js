@@ -74,16 +74,16 @@ class	ChatConnectionManager
 		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_join');
 
 		const	data = {
+			event: 'userJoin',
 			chatId: chatId,
+			userId: newUserId,
+			username: newUsername,
 			messageId: messageId,
 			message: message,
-			targetId: newUserId,
-			targetUsername: newUsername,
 			timestamp: new Date().toISOString(),
-			type: 'userJoin',
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.userJoin');
+		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
 	
 	}
 
@@ -94,16 +94,16 @@ class	ChatConnectionManager
 		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_leave');
 
 		const	data = {
+			event: 'userLeave',
 			chatId: chatId,
+			userId: leftUserId,
+			username: leftUsername,
 			messageId: messageId,
 			message: message,
-			targetId: leftUserId,
-			targetUsername: leftUsername,
 			timestamp: new Date().toISOString(),
-			type: 'userLeave',
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.userLeave');
+		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
 	}
 
 	// Send chat.joined event to the newly added user
