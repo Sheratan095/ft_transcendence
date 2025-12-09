@@ -53,19 +53,19 @@
     <main id="app" hidden>
         <div id="board">
             <div class="row">
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
             </div>
             <div class="row">
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
             </div>
             <div class="row">
-                <div class="cell"></div>
-                <div class="cell"></div>
-                <div class="cell"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
             </div>
         </div>
     </main>
@@ -125,7 +125,7 @@
 
             // if (response.ok) {
                     // show the main UI only after successful login
-            console.log('init status', response.status);
+            //console.log('init status', response.status);
             appEl.hidden = false;
             console.log(appEl);
             //document.getElementById('app').hidden = false;
