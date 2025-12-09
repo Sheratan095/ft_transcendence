@@ -1,9 +1,9 @@
 
-export const initBoard = async () =>
+export const initBoard = async (req, reply) =>
 {
     console.log("Initializing board");
-    return (0);
-    //return Array(9).fill('empty');
+    const board = Array(9).fill('empty');
+    return reply.code(200).send(board);
 }
 
 export const init = async () => {

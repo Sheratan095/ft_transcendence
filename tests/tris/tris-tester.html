@@ -69,7 +69,7 @@
             </div>
         </div>
     </main>
-    <button id="startBtn" class="button">Start</button>
+    <button id="startBtn" class="button" disabled>Start</button>
     
     <script>
         const GATEWAY_URL = 'https://localhost:3000';
@@ -86,52 +86,60 @@
         const appEl = document.getElementById('app');
 
         window.addEventListener('DOMContentLoaded', async () => {
-            const response = await fetch(`${GATEWAY_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include', // Important for cookies
-                body: JSON.stringify({ email, password })
-            });
-            //console.log(response);
+            try {
+                const response = await fetch(`${GATEWAY_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include', // Important for cookies
+                    body: JSON.stringify({ email, password })
+                });
 
-            const cookies = response.headers.get('set-cookie');
-
-            console.log(response);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Login successful:', data);
+                    startBtn.disabled = false;
+                } else {
+                    console.error('Login failed with status:', response.status);
+                    alert('Login failed');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                alert('Error during login: ' + err.message);
+            }
         });
 
 
         startBtn.addEventListener('click', async () => {
             console.log('startBtn clicked');
-             if (appEl) appEl.hidden = false;
-            try
-            {
-                //console.log("hello worldsino");
+            
+            try {
                 const response = await fetch(`${GATEWAY_URL}/tris/init`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    credentials: 'include', // Important for cookies
-                    //body: JSON.stringify({ email, password })
+                    credentials: 'include' // Important for cookies
                 });
-                console.log("request working");
+                
+                console.log('Init response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Init data:', data);
+                    
+                    // Show the main UI only after successful init
+                    appEl.hidden = false;
+                    console.log('App shown');
+                } else {
+                    console.error('Init failed with status:', response.status);
+                    alert('Failed to initialize game');
+                }
+            } catch (err) {
+                console.error('Error initializing game:', err);
+                alert('Error: ' + err.message);
             }
-            catch (err)
-            {
-                console.log("error");
-            }
-
-            // if (response.ok) {
-                    // show the main UI only after successful login
-            //console.log('init status', response.status);
-            appEl.hidden = false;
-            console.log(appEl);
-            //document.getElementById('app').hidden = false;
-               //}
-            console.log(response);
-            return (response);
         });
    
     </script>

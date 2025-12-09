@@ -20,6 +20,8 @@ export const	getTrisTest = async (req, reply) =>
 			headers: getAuthHeaders(req)
 		})
 
+		console.log('[GATEWAY] Tris service response:', response.data)
+
 		return (reply.send(response.data))
 	}
 	catch (err)
