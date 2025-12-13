@@ -51,21 +51,25 @@
     </style>
 
     <main id="app" hidden>
+        <div class="turn">
+            <h2 id="myTurn" hidden>it's your turn</h2>
+            <h2 id="oppoTurn" hidden>it's opponent turn</h2>
+        </div>
         <div id="board">
             <div class="row">
-                <div class="cell" data-index="0"></div>
-                <div class="cell" data-index="1"></div>
-                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="0" id="0"></div>
+                <div class="cell" data-index="1" id="1"></div>
+                <div class="cell" data-index="2" id="2"></div>
             </div>
             <div class="row">
-                <div class="cell" data-index="3"></div>
-                <div class="cell" data-index="4"></div>
-                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="3" id="3"></div>
+                <div class="cell" data-index="4" id="4"></div>
+                <div class="cell" data-index="5" id="5"></div>
             </div>
             <div class="row">
-                <div class="cell" data-index="6"></div>
-                <div class="cell" data-index="7"></div>
-                <div class="cell" data-index="8"></div>
+                <div class="cell" data-index="6" id="6"></div>
+                <div class="cell" data-index="7" id="7"></div>
+                <div class="cell" data-index="8" id="8"></div>
             </div>
         </div>
     </main>
@@ -74,6 +78,11 @@
     <script>
         const GATEWAY_URL = 'https://localhost:3000';
         let accessToken = null;
+
+        function getInt(max)
+        {   
+            return Math.floor(Math.random() * max);
+        }
 
         // function greet(string)
         // {
@@ -84,6 +93,12 @@
         const password = "1234";
         const startBtn = document.getElementById('startBtn');
         const appEl = document.getElementById('app');
+
+        const myTurn = document.getElementById('myTurn');
+        const oppoTurn = document.getElementById('oppoTurn');
+        const table = document.getElementById('board');
+
+        let turn;
 
         window.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -123,6 +138,7 @@
                     credentials: 'include' // Important for cookies
                 });
                 
+
                 console.log('Init response status:', response.status);
                 
                 if (response.ok) {
@@ -132,6 +148,12 @@
                     // Show the main UI only after successful init
                     appEl.hidden = false;
                     console.log('App shown');
+                    turn = getInt(2);
+                    console.log(turn);
+                    if (turn === 0)
+                        myTurn.hidden = false;
+                    else
+                        oppoTurn.hidden = false;
                 } else {
                     console.error('Init failed with status:', response.status);
                     alert('Failed to initialize game');
@@ -140,6 +162,11 @@
                 console.error('Error initializing game:', err);
                 alert('Error: ' + err.message);
             }
+        });
+
+        table.addEventListener('click', async (event) => {
+            //console.log('table clicked');
+            console.log(event.srcElement.id);
         });
    
     </script>
