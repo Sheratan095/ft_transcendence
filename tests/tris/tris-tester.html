@@ -79,15 +79,46 @@
         const GATEWAY_URL = 'https://localhost:3000';
         let accessToken = null;
 
+        function nextTurn()
+        {
+            if (turn === 0)
+                handlePlayerTurn();
+            else
+                handleIaTurn(); 
+        }
+
+        function handlePlayerTurn()
+        {
+            table.addEventListener('click', async (event) => {
+                let value;
+                //console.log('table clicked');
+                //console.log(event.srcElement.id);
+                value = event.srcElement.id;
+                //finish = 1;
+                //console.log("value: " ,value);
+                let valueStr = value.toString();
+                //console.log(valueStr);
+                let cell = document.getElementById(valueStr).innerHTML = "X";
+                //console.log(cell);
+                turn = 1;
+                nextTurn();
+            });
+        }
+
+        function handleIaTurn()
+        {
+            let value = getInt(8);
+            let valueStr = value.toString();
+            //console.log(valueStr);
+            let cell = document.getElementById(valueStr).innerHTML = "O";
+            turn = 0;
+            nextTurn();
+        }
+
         function getInt(max)
         {   
             return Math.floor(Math.random() * max);
         }
-
-        // function greet(string)
-        // {
-        //     console.log("hello world");
-        // }
 
         const email = "test1@gmail.com";
         const password = "1234";
@@ -97,9 +128,12 @@
         const myTurn = document.getElementById('myTurn');
         const oppoTurn = document.getElementById('oppoTurn');
         const table = document.getElementById('board');
-
+        
+        let total = 0;
         let turn;
+        let finish = 0;
 
+        // login
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 const response = await fetch(`${GATEWAY_URL}/auth/login`, {
@@ -125,7 +159,7 @@
             }
         });
 
-
+        // game init
         startBtn.addEventListener('click', async () => {
             console.log('startBtn clicked');
             
@@ -154,7 +188,14 @@
                         myTurn.hidden = false;
                     else
                         oppoTurn.hidden = false;
-                } else {
+
+                    if (turn === 0)
+                        handlePlayerTurn();
+                    else
+                        handleIaTurn();
+                }
+                else
+                {
                     console.error('Init failed with status:', response.status);
                     alert('Failed to initialize game');
                 }
@@ -164,10 +205,21 @@
             }
         });
 
-        table.addEventListener('click', async (event) => {
-            //console.log('table clicked');
-            console.log(event.srcElement.id);
-        });
+
+        // if (finish < 1)
+        // {
+        //     console.log("game in progress");
+        //     console.log("turn: ", turn);
+        //     if (turn === 0)
+        //     {
+        //         console.log("turn is 0000");
+        //         handlePlayerTurn();
+        //     }
+        //     else
+        //     {
+        //         console.log("cpu turn");
+        //     }
+        // }
    
     </script>
     
