@@ -4,52 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
-
-    <style>
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        #board {
-            width: 500px;
-            height: 500px;
-            background-color: red;
-            padding: 1em;
-            border: 1px solid black;
-            display: flex;
-            flex-direction: column;
-            /* justify-content: center; */
-            align-items: center;
-        }
-
-        .row {
-            height: 30%;
-            width: 100%;
-            background-color: green;
-            padding: 0.5em;
-            border: 1px solid black;
-            display: flex;
-        }
-
-        .cell {
-            height: 100%;
-            width: 30%;
-            border: 1px, solid, black;
-        }
-
-    </style>
-
     <main id="app" hidden>
         <div class="turn">
             <h2 id="myTurn" hidden>it's your turn</h2>
@@ -57,19 +14,19 @@
         </div>
         <div id="board">
             <div class="row">
-                <div class="cell" data-index="0" id="0"></div>
-                <div class="cell" data-index="1" id="1"></div>
-                <div class="cell" data-index="2" id="2"></div>
+                <div class="cell" id="0"></div>
+                <div class="cell" id="1"></div>
+                <div class="cell" id="2"></div>
             </div>
             <div class="row">
-                <div class="cell" data-index="3" id="3"></div>
-                <div class="cell" data-index="4" id="4"></div>
-                <div class="cell" data-index="5" id="5"></div>
+                <div class="cell" id="3"></div>
+                <div class="cell" id="4"></div>
+                <div class="cell" id="5"></div>
             </div>
             <div class="row">
-                <div class="cell" data-index="6" id="6"></div>
-                <div class="cell" data-index="7" id="7"></div>
-                <div class="cell" data-index="8" id="8"></div>
+                <div class="cell" id="6"></div>
+                <div class="cell" id="7"></div>
+                <div class="cell" id="8"></div>
             </div>
         </div>
     </main>
@@ -87,31 +44,26 @@
                 handleIaTurn(); 
         }
 
-        function handlePlayerTurn()
+        function handlePlayerTurn(event)
         {
-            table.addEventListener('click', async (event) => {
-                let value;
-                //console.log('table clicked');
-                //console.log(event.srcElement.id);
-                value = event.srcElement.id;
-                //finish = 1;
-                //console.log("value: " ,value);
-                let valueStr = value.toString();
-                //console.log(valueStr);
-                let cell = document.getElementById(valueStr).innerHTML = "X";
-                //console.log(cell);
-                turn = 1;
-                nextTurn();
-            });
+            console.log("player turn");
         }
 
         function handleIaTurn()
         {
             let value = getInt(8);
             let valueStr = value.toString();
-            //console.log(valueStr);
+
+            if (board[value] === "X"
+                || board.value === "O")
+            {
+                console.log("invalid cell");
+            }
             let cell = document.getElementById(valueStr).innerHTML = "O";
+            iaHistory.push(value);
             turn = 0;
+            board[value] = "O";
+            console.log(board);
             nextTurn();
         }
 
@@ -120,6 +72,9 @@
             return Math.floor(Math.random() * max);
         }
 
+        const playerHistory = [];
+        const iaHistory = [];
+    
         const email = "test1@gmail.com";
         const password = "1234";
         const startBtn = document.getElementById('startBtn');
@@ -132,6 +87,23 @@
         let total = 0;
         let turn;
         let finish = 0;
+        let board;
+        let event;
+        let val;
+
+        // moves listener
+        table.addEventListener('click', async (event) => {
+            let value = event.target.id;
+            let valueStr = value.toString();
+            //console.log(valueStr);
+            let cell = document.getElementById(valueStr).innerHTML = "X";
+            //console.log(cell);
+            playerHistory.push(value);
+            turn = 1;
+            board[value] = "X";
+            //console.log(board);
+            nextTurn();
+        });
 
         // login
         window.addEventListener('DOMContentLoaded', async () => {
@@ -176,14 +148,14 @@
                 console.log('Init response status:', response.status);
                 
                 if (response.ok) {
-                    const data = await response.json();
-                    console.log('Init data:', data);
+                    board = await response.json();
+                    //console.log('Init data:', data);
                     
                     // Show the main UI only after successful init
                     appEl.hidden = false;
-                    console.log('App shown');
+                    //console.log('App shown');
                     turn = getInt(2);
-                    console.log(turn);
+                    //console.log(turn);
                     if (turn === 0)
                         myTurn.hidden = false;
                     else
@@ -204,22 +176,6 @@
                 alert('Error: ' + err.message);
             }
         });
-
-
-        // if (finish < 1)
-        // {
-        //     console.log("game in progress");
-        //     console.log("turn: ", turn);
-        //     if (turn === 0)
-        //     {
-        //         console.log("turn is 0000");
-        //         handlePlayerTurn();
-        //     }
-        //     else
-        //     {
-        //         console.log("cpu turn");
-        //     }
-        // }
    
     </script>
     
