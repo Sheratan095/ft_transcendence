@@ -471,6 +471,7 @@
                         <button class="btn btn-secondary" id="loadMoreBtn" onclick="loadMoreMessages()" style="display: none;">Load More</button>
                         <button class="btn btn-secondary" onclick="showPrivateMessageModal()">+ Private Message</button>
                         <button class="btn btn-secondary" id="addUserBtn" onclick="showAddUserModal()" style="display: none;">+ Add User</button>
+                        <button class="btn btn-danger" id="leaveGroupBtn" onclick="leaveGroupChat()" style="display: none;">Leave Group</button>
                     </div>
                 </div>
                 <div class="members-list" id="membersList" style="display: none;">
@@ -551,6 +552,7 @@
         let notificationPingInterval = null;
         let pendingConfirmations = new Map(); // messageId -> status (store confirmations that arrive before the message)
         let onlineFriends = new Set(); // Track online friends
+        let pendingDmTarget = null; // Store toUserId when sending new DM, cleared after chat created
 
         // Login function
         async function login() {
@@ -665,10 +667,17 @@
 
                 chats = await response.json();
                 
-                // Store members for each chat
+                // Store members for each chat and extract otherUserId for DM chats
                 chats.forEach(chat => {
                     if (chat.members) {
                         chatMembers.set(chat.id, chat.members);
+                        // For DM chats, store the other user's ID directly on the chat object
+                        if (chat.chatType === 'dm') {
+                            const otherMember = chat.members.find(m => String(m.userId) !== String(userId));
+                            if (otherMember) {
+                                chat.otherUserId = String(otherMember.userId);
+                            }
+                        }
                     }
                 });
                 
@@ -734,15 +743,18 @@
             if (chat) {
                 document.getElementById('chatTitle').textContent = getChatDisplayName(chat);
                 
-                // Show/hide add user button and members list based on chat type
+                // Show/hide add user button, leave group button and members list based on chat type
                 const addUserBtn = document.getElementById('addUserBtn');
+                const leaveGroupBtn = document.getElementById('leaveGroupBtn');
                 const membersList = document.getElementById('membersList');
                 if (chat.chatType === 'group') {
                     addUserBtn.style.display = 'inline-block';
+                    leaveGroupBtn.style.display = 'inline-block';
                     // Update members list only for group chats
                     updateMembersList(chatId);
                 } else {
                     addUserBtn.style.display = 'none';
+                    leaveGroupBtn.style.display = 'none';
                     // Hide members list for DM chats
                     membersList.style.display = 'none';
                 }
@@ -895,13 +907,11 @@
 
             if (ws && ws.readyState === WebSocket.OPEN) {
                 let message;
-                const tempId = 'temp-' + Date.now();
                 
                 // Use different event types based on chat type
                 if (chat.chatType === 'dm') {
                     // For DM chats, send as private message to the other user
-                    const otherMember = chat.members.find(m => String(m.userId) !== String(userId));
-                    if (!otherMember) {
+                    if (!chat.otherUserId) {
                         alert('Cannot find recipient in DM chat');
                         return;
                     }
@@ -909,7 +919,7 @@
                     message = {
                         event: 'chat.privateMessage',
                         data: {
-                            toUserId: String(otherMember.userId),
+                            toUserId: chat.otherUserId,
                             content: content
                         }
                     };
@@ -939,6 +949,13 @@
 
         // Mark chat as read
         function markChatAsRead(chatId) {
+            // Only send if we're still a member of this chat
+            const chat = chats.find(c => c.id === chatId);
+            if (!chat) {
+                console.log(`Not marking chat ${chatId} as read - not a member`);
+                return;
+            }
+
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const message = {
                     event: 'chat.read',
@@ -1342,15 +1359,17 @@
                 // Create a DM chat locally with the real server chatId
                 chat = {
                     id: chatId,
-                    name: null,
+                    name: data.from || `User ${data.senderId}`,
                     chatType: 'dm',
                     members: [
                         { userId: userId, username: 'You' },
                         { userId: data.senderId, username: data.from || `User ${data.senderId}` }
                     ],
+                    otherUserId: String(data.senderId), // Set for DM replies
                     createdAt: data.timestamp
                 };
                 chats.push(chat);
+                chatMembers.set(chatId, chat.members);
                 renderChatList();
                 console.log('Created new DM chat locally with real chatId:', chat);
             }
@@ -1392,6 +1411,28 @@
         // Handle system message
         function handleSystemMessage(data) {
             const chatId = data.chatId;
+
+            // If this is a userLeave event for the current user, remove the chat
+            if (data.event === 'userLeave' && String(data.userId) === String(userId)) {
+                console.log('Current user left chat, removing from local list');
+                chats = chats.filter(c => c.id !== chatId);
+                messages.delete(chatId);
+                chatMembers.delete(chatId);
+                
+                if (chatId === currentChatId) {
+                    currentChatId = null;
+                    document.getElementById('chatTitle').textContent = 'Select a chat';
+                    document.getElementById('messagesContainer').innerHTML = '<div class="placeholder">Select a chat to start messaging</div>';
+                    document.getElementById('messageInput').disabled = true;
+                    document.getElementById('sendBtn').disabled = true;
+                    document.getElementById('addUserBtn').style.display = 'none';
+                    document.getElementById('leaveGroupBtn').style.display = 'none';
+                    document.getElementById('membersList').style.display = 'none';
+                }
+                
+                renderChatList();
+                return;
+            }
 
             const msg = {
                 id: data.messageId || 'system-' + Date.now(),
@@ -1440,9 +1481,20 @@
                     id: chatId,
                     name: data.name || (data.chatType === 'dm' ? null : 'New Group'),
                     chatType: data.chatType,
-                    members: [], // Will be populated as messages arrive
+                    members: [],
                     createdAt: data.timestamp || new Date().toISOString()
                 };
+
+                // For DM chats, set otherUserId from pendingDmTarget
+                if (data.chatType === 'dm' && pendingDmTarget) {
+                    chat.otherUserId = String(pendingDmTarget);
+                    chat.members = [
+                        { userId: userId, username: 'You' },
+                        { userId: pendingDmTarget, username: data.name || `User ${pendingDmTarget}` }
+                    ];
+                    chatMembers.set(chatId, chat.members);
+                    pendingDmTarget = null; // Clear after use
+                }
                 
                 chats.push(chat);
                 renderChatList();
@@ -1569,6 +1621,9 @@
                     }
                 };
 
+                // Store target for when handleMessageSent creates the new chat
+                pendingDmTarget = toUserId;
+
                 ws.send(JSON.stringify(message));
 
                 hidePrivateMessageModal();
@@ -1580,6 +1635,65 @@
 
             } else {
                 alert('WebSocket not connected');
+            }
+        }
+
+        // Leave group chat
+        async function leaveGroupChat() {
+            if (!currentChatId) {
+                alert('No chat selected');
+                return;
+            }
+
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat || chat.chatType !== 'group') {
+                alert('Can only leave group chats');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to leave this group?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${GATEWAY_URL}/chat/leave-group-chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        chatId: currentChatId
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to leave group');
+                }
+
+                alert('You have left the group');
+
+                // Remove chat from local list
+                chats = chats.filter(c => c.id !== currentChatId);
+                messages.delete(currentChatId);
+                chatMembers.delete(currentChatId);
+                currentChatId = null;
+
+                // Reset UI
+                document.getElementById('chatTitle').textContent = 'Select a chat';
+                document.getElementById('messagesContainer').innerHTML = '<div class="placeholder">Select a chat to start messaging</div>';
+                document.getElementById('messageInput').disabled = true;
+                document.getElementById('sendBtn').disabled = true;
+                document.getElementById('addUserBtn').style.display = 'none';
+                document.getElementById('leaveGroupBtn').style.display = 'none';
+                document.getElementById('membersList').style.display = 'none';
+
+                renderChatList();
+
+            } catch (err) {
+                console.error('Error leaving group:', err);
+                alert('Failed to leave group: ' + err.message);
             }
         }
 

@@ -171,6 +171,15 @@ async function handlePrivateMessage(userId, data, chatDb)
 			return;
 		}
 
+		// Validate that receiver exists before creating chat
+		const	receiverUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
+		if (!receiverUsername)
+		{
+			console.log(`[CHAT] User ${userId} attempted to send private message to non-existent user ${toUserId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Recipient user does not exist');
+			return;
+		}
+
 		// If chat already exists, returns the existing one
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
 

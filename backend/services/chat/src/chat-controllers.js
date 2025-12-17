@@ -137,8 +137,8 @@ export const	addUserToChat = async (req, reply) =>
 
 		if (await checkBlock(userId, toUserId))
 		{
-			console.log(`[CHAT] Failed to send message because the relation between ${toUserId} and ${userId} is blocked`);
-			return;
+			console.log(`[CHAT] Failed to add user because the relation between ${toUserId} and ${userId} is blocked`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'Cannot add this user to the chat' }));
 		}
 
 		// Add the user to the chat
@@ -248,12 +248,16 @@ export const	leaveGroupChat = async (req, reply) =>
 
 		// Remove the user from the chat
 		await chatDb.removeUserFromChat(chatId, userId);
-		console.log(`[CHAT] User ${userId} left group chat ${chatId}`);
+
+		// Cleanup: Remove user's message statuses for this chat
+		await chatDb.removeUserMessageStatusesFromChat(chatId, userId);
 
 		// Add system message to chat and notify chat
 		const	username = await chatConnectionManager.getUsernameFromCache(userId, true);
 
 		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb);
+
+		console.log(`[CHAT] User ${userId} left group chat ${chatId}`);
 
 		return (reply.code(200).send({ success: true }));
 	}
