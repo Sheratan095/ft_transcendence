@@ -128,9 +128,10 @@ async function	handleChatMessage(userId, data, chatDb)
 
 		// Send to recipients (including sender)
 		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, sanitizedContent, chatDb);
+		const	targetName = await chatDb.getChatName(chatId);
 
 		// Always acknowledge to sender to ensure they see their own message
-		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, sanitizedContent, 'group');
+		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, sanitizedContent, 'group', targetName);
 
 		console.log(`[CHAT] Group message from user ${userId} to ${chatId} sent successfully`);
 	}
@@ -179,9 +180,11 @@ async function handlePrivateMessage(userId, data, chatDb)
 		// Send to recipient
 		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb, chatId);
 
+		const	targetName = await chatConnectionManager.getUsernameFromCache(toUserId);
+
 		// Acknowledge to sender
 		const	status = delivered ? 'delivered' : 'sent';
-		chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content, 'dm');
+		chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content, 'dm', targetName);
 
 		console.log(`[CHAT] Private message from user ${userId} to user ${toUserId} sent successfully`);
 	}

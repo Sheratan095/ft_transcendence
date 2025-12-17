@@ -167,7 +167,7 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'error', { message });
 	}
 
-	async	replyToMessage(userId, chatId, messageId, status, content, chatType)
+	async	replyToMessage(userId, chatId, messageId, status, content, chatType, targetName)
 	{
 		const	socket = this._connections.get(userId);
 		const	data = {
@@ -175,6 +175,7 @@ class	ChatConnectionManager
 			messageId: messageId,
 			content: content,
 			status: status,
+			name: targetName,
 			chatType: chatType,
 		};
 

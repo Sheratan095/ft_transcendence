@@ -61,6 +61,7 @@ Response (acknowledgment to sender):
     "messageId": "msg789",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if some users are offline,
+    "name": "Wonderful Chat",
     "chatType": "group"
   }
 }
@@ -84,6 +85,7 @@ Response (acknowledgment to sender):
     "messageId": "msg123",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if recipient is offline,
+    "targetName": "jane_smith",
     "chatType": "dm"
   }
 }

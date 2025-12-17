@@ -712,12 +712,16 @@
 
         // Get display name for a chat
         function getChatDisplayName(chat) {
+            // Use chat.name if available (set from targetName in messageSent response)
+            if (chat.name) {
+                return chat.name;
+            }
             if (chat.chatType === 'dm') {
                 // For DM, show the other user's name
                 const otherMember = chat.members.find(m => m.userId !== userId);
                 return otherMember ? otherMember.username : 'Unknown User';
             }
-            return chat.name || 'Unnamed Group';
+            return 'Unnamed Group';
         }
 
         // Select a chat
@@ -730,16 +734,18 @@
             if (chat) {
                 document.getElementById('chatTitle').textContent = getChatDisplayName(chat);
                 
-                // Show/hide add user button based on chat type
+                // Show/hide add user button and members list based on chat type
                 const addUserBtn = document.getElementById('addUserBtn');
+                const membersList = document.getElementById('membersList');
                 if (chat.chatType === 'group') {
                     addUserBtn.style.display = 'inline-block';
+                    // Update members list only for group chats
+                    updateMembersList(chatId);
                 } else {
                     addUserBtn.style.display = 'none';
+                    // Hide members list for DM chats
+                    membersList.style.display = 'none';
                 }
-                
-                // Update members list
-                updateMembersList(chatId);
             }
 
             document.getElementById('messageInput').disabled = false;
@@ -1429,10 +1435,10 @@
                 // New chat created - create it locally from the existing chatType in response
                 console.log(`Chat ${chatId} not found locally, creating from chatType: ${data.chatType}`);
                 
-                // Create minimal chat object (usernames will be "User X" until properly loaded)
+                // Create minimal chat object using name from the response (targetName on backend)
                 chat = {
                     id: chatId,
-                    name: data.chatType === 'dm' ? null : 'New Group',
+                    name: data.name || (data.chatType === 'dm' ? null : 'New Group'),
                     chatType: data.chatType,
                     members: [], // Will be populated as messages arrive
                     createdAt: data.timestamp || new Date().toISOString()
@@ -1441,6 +1447,10 @@
                 chats.push(chat);
                 renderChatList();
                 console.log('Created new chat locally:', chat);
+            } else if (chat && data.name) {
+                // Update the chat name if name is provided and chat exists
+                chat.name = data.name;
+                renderChatList();
             }
 
             // Check if message already exists (from incoming message event)

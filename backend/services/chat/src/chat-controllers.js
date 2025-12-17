@@ -22,7 +22,7 @@ export const	getChats = async (req, reply) =>
 			{
 				chatsMap.set(row.chat_id, {
 					id: row.chat_id,
-					name: row.name || null,
+					name: row.name, // Will be updated for DM chats after collecting all members
 					chatType: row.chat_type,
 					createdAt: row.created_at,
 					joinedAt: row.joined_at,
@@ -38,6 +38,17 @@ export const	getChats = async (req, reply) =>
 					userId: row.user_id,
 					username: await chatConnectionManager.getUsernameFromCache(row.user_id)
 				});
+			}
+		}
+
+		// For DM chats, set the name as the other user's username
+		for (const chat of chatsMap.values())
+		{
+			if (chat.chatType === 'dm')
+			{
+				const	otherMember = chat.members.find(m => String(m.userId) !== String(userId));
+				if (otherMember)
+					chat.name = otherMember.username;
 			}
 		}
 
