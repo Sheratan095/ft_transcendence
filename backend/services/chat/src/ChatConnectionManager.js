@@ -9,6 +9,7 @@ class	ChatConnectionManager
 		// Cache for usernames to reduce DB lookups 
 		//	refresh every time a user sends a message
 		this._cachedUsersInChats = new Map(); // userId -> Username
+		this._cachedChatNames = new Map(); // chatId -> chatName
 	}
 
 	async	addConnection(userId, socket, chatDb)
@@ -57,67 +58,52 @@ class	ChatConnectionManager
 			timestamp: new Date().toISOString(),
 		};
 
-		// Get users in chat
-		const	userIds = await chatDb.getUsersInChat(chatId);
-
-		// Send to each user in the chat
-		for (const userId of userIds)
-		{
-			const	socket = this._connections.get(userId);
-			if (socket)
-			{
-				this.#dispatchEventToSocket(socket, 'chat.chatMessage', data);
-				// Create message status as 'delivered' for each connected user
-
-				// Add the row also for the sender as 'read'
-				await chatDb.createMessageStatus(
-					messageId,
-					userId,
-					userId === senderId ? "read" : "delivered"
-				);
-			}
-			else
-			{
-				// Add the message to db as sent for offline users
-				//	and as read for the sender anyway
-				await chatDb.createMessageStatus(
-					messageId,
-					userId,
-					userId === senderId ? "read" : "sent"
-				);
-			}
-		}
+		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message');
 
 		const	status = await chatDb.getOverallMessageStatus(messageId);
-		console.log(`[CHAT] Message ${messageId} in chat ${chatId} has overall status: ${status}`);
 
 		return (status);
 	}
 
 	// Send system message to chat members
 	// excludeUserId: optional user to exclude from receiving the message (e.g., newly added user)
-	async	sendSystemMsgToChat(messageId, chatId, message, chatDb, excludeUserId = null)
+	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedByUsername, chatDb)
 	{
+		const	message = `User ${newUsername} has been added to the chat by ${invitedByUsername}.`;
+
+		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_join');
+
 		const	data = {
+			event: 'userJoin',
 			chatId: chatId,
+			userId: newUserId,
+			username: newUsername,
+			messageId: messageId,
 			message: message,
 			timestamp: new Date().toISOString(),
 		};
 
-		// Get users in chat
-		const	userIds = await chatDb.getUsersInChat(chatId);
+		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
+	
+	}
 
-		// Send to each user in the chat (except excluded user)
-		for (const userId of userIds)
-		{
-			if (excludeUserId && String(userId) === String(excludeUserId))
-				continue;
+	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb)
+	{
+		const	message = `User ${leftUsername} has left the chat.`;
 
-			const	socket = this._connections.get(userId);
-			this.#dispatchEventToSocket(socket, 'chat.systemMessage', data);
-		}
+		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_leave');
 
-		console.log(`[CHAT] System message ${messageId} in chat ${chatId}`);
+		const	data = {
+			event: 'userLeave',
+			chatId: chatId,
+			userId: leftUserId,
+			username: leftUsername,
+			messageId: messageId,
+			message: message,
+			timestamp: new Date().toISOString(),
+		};
+
+		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
 	}
 
 	// Send chat.joined event to the newly added user
@@ -181,14 +167,16 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'error', { message });
 	}
 
-	async	replyToMessage(userId, chatId, messageId, status, content, chatType)
+	async	replyToMessage(userId, chatId, messageId, status, content, chatType, targetName)
 	{
 		const	socket = this._connections.get(userId);
+
 		const	data = {
 			chatId: chatId,
 			messageId: messageId,
 			content: content,
 			status: status,
+			name: targetName,
 			chatType: chatType,
 		};
 
@@ -207,6 +195,41 @@ class	ChatConnectionManager
 
 		if (socket)
 			this.#dispatchEventToSocket(socket, 'chat.messageStatusUpdate', data);
+	}
+
+	async	#dispatchEventToChat(chatId, data, chatDb, createMessageStatus=false, eventType)
+	{
+		// Get users in chat
+		const	userIds = await chatDb.getUsersInChat(chatId);
+
+		// Send to each user in the chat
+		for (const userId of userIds)
+		{
+			const	socket = this._connections.get(userId);
+			if (socket)
+			{
+				this.#dispatchEventToSocket(socket, eventType, data);
+				if (createMessageStatus)
+				{
+					await chatDb.createMessageStatus(
+						data.messageId,
+						userId,
+						"delivered"
+					);
+				}
+			}
+			else
+			{
+				if (createMessageStatus)
+				{
+					await chatDb.createMessageStatus(
+						data.messageId,
+						userId,
+						"sent"
+					);
+				}
+			}
+		}
 	}
 
 	#dispatchEventToSocket(socket, event, data)
@@ -235,6 +258,18 @@ class	ChatConnectionManager
 		}
 
 		return (username);
+	}
+
+	async	getGroupChatNameFromCache(chatId, chatDb, refresh=false)
+	{
+		let	chatName = this._cachedChatNames.get(chatId);
+		if (!chatName || refresh)
+		{
+			chatName = await chatDb.getGroupChatName(chatId);
+			this._cachedChatNames.set(chatId, chatName);
+		}
+		
+		return (chatName);
 	}
 }
 

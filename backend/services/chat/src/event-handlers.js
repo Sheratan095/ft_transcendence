@@ -128,11 +128,12 @@ async function	handleChatMessage(userId, data, chatDb)
 
 		// Send to recipients (including sender)
 		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, sanitizedContent, chatDb);
+		const	targetName = await chatConnectionManager.getGroupChatNameFromCache(chatId, chatDb);
 
 		// Always acknowledge to sender to ensure they see their own message
-		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, sanitizedContent, 'group');
+		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, sanitizedContent, 'group', targetName);
 
-		console.log(`[CHAT] Group message from user ${userId} to ${chatId} sent successfully`);
+		console.log(`[CHAT] Group message from user ${userId} to ${chatId} sent successfully, overall status: ${status}`);
 	}
 	catch (err)
 	{
@@ -170,6 +171,15 @@ async function handlePrivateMessage(userId, data, chatDb)
 			return;
 		}
 
+		// Validate that receiver exists before creating chat
+		const	receiverUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
+		if (!receiverUsername)
+		{
+			console.log(`[CHAT] User ${userId} attempted to send private message to non-existent user ${toUserId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Recipient user does not exist');
+			return;
+		}
+
 		// If chat already exists, returns the existing one
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
 
@@ -179,9 +189,11 @@ async function handlePrivateMessage(userId, data, chatDb)
 		// Send to recipient
 		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb, chatId);
 
+		const	targetName = await chatConnectionManager.getUsernameFromCache(toUserId);
+
 		// Acknowledge to sender
 		const	status = delivered ? 'delivered' : 'sent';
-		chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content, 'dm');
+		chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content, 'dm', targetName);
 
 		console.log(`[CHAT] Private message from user ${userId} to user ${toUserId} sent successfully`);
 	}

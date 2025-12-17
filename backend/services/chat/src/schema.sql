@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS messages
 	chat_id			TEXT NOT NULL,
 	sender_id		TEXT NOT NULL,
 	content			TEXT NOT NULL,
-	type			TEXT NOT NULL CHECK(type IN ('text', 'user_join', 'system')),
+	type			TEXT NOT NULL CHECK(type IN ('text', 'user_join', 'system', 'user_leave')),
 	created_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 	PRIMARY KEY (id),

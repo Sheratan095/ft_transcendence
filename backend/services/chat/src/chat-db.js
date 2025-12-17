@@ -167,7 +167,7 @@ export class	ChatDatabase
 			INNER JOIN chat_members cm
 				ON cm.chat_id = m.chat_id AND cm.user_id = ?
 			WHERE m.chat_id = ?
-			AND datetime(m.created_at) > datetime(cm.joined_at)
+			AND datetime(m.created_at) >= datetime(cm.joined_at)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
@@ -194,6 +194,10 @@ export class	ChatDatabase
 
 	async	createPrivateChat(userId1, userId2)
 	{
+		// Ensure userIds are strings to match TEXT column type
+		const	strUserId1 = String(userId1);
+		const	strUserId2 = String(userId2);
+
 		// Check if a private chat already exists between these two users
 		const	existingChatQuery = `
 			SELECT chats.id
@@ -203,7 +207,7 @@ export class	ChatDatabase
 			WHERE chats.chat_type = 'dm'
 		`;
 
-		const	existingChat = await this.db.get(existingChatQuery, [userId1, userId2]);
+		const	existingChat = await this.db.get(existingChatQuery, [strUserId1, strUserId2]);
 		if (existingChat)
 			return (existingChat.id);
 
@@ -224,8 +228,8 @@ export class	ChatDatabase
 			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId1, joinedAt]);
-		await this.db.run(insertMemberQuery, [chatId, userId2, joinedAt]);
+		await this.db.run(insertMemberQuery, [chatId, strUserId1, joinedAt]);
+		await this.db.run(insertMemberQuery, [chatId, strUserId2, joinedAt]);
 
 		return (chatId);
 	}
@@ -268,7 +272,8 @@ export class	ChatDatabase
 			WHERE chat_id = ? AND user_id = ?
 		`;
 
-		const	result = await this.db.get(query, [chatId, userId]);
+		// Ensure userId is a string to match TEXT column type
+		const	result = await this.db.get(query, [chatId, String(userId)]);
 		return (result.count > 0);
 	}
 
@@ -316,7 +321,34 @@ export class	ChatDatabase
 			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId, joinedAt]);
+		// Ensure userId is a string to match TEXT column type
+		await this.db.run(insertMemberQuery, [chatId, String(userId), joinedAt]);
+	}
+
+	async	removeUserFromChat(chatId, userId)
+	{
+		const	deleteMemberQuery = `
+			DELETE FROM chat_members
+			WHERE chat_id = ? AND user_id = ?
+		`;
+
+		// Ensure userId is a string to match TEXT column type
+		await this.db.run(deleteMemberQuery, [chatId, String(userId)]);
+	}
+
+	// Remove all message statuses for a user in a specific chat
+	// Used when a user leaves a group chat to cleanup their status entries
+	async	removeUserMessageStatusesFromChat(chatId, userId)
+	{
+		const	query = `
+			DELETE FROM message_statuses
+			WHERE user_id = ?
+			AND message_id IN (
+				SELECT id FROM messages WHERE chat_id = ?
+			)
+		`;
+
+		await this.db.run(query, [String(userId), chatId]);
 	}
 
 	async	getChatById(chatId)
@@ -333,6 +365,19 @@ export class	ChatDatabase
 
 		const	chat = await this.db.get(query, [chatId]);
 		return (chat);
+	}
+
+	async	getGroupChatName(chatId)
+	{
+		const	query = `
+			SELECT name
+			FROM chats
+			WHERE id = ? AND chat_type = 'group'
+		`;
+
+		const	chat = await this.db.get(query, [chatId]);
+		return (chat ? chat.name : null);
+
 	}
 
 	//-----------------------------MESSAGE QUERIES----------------------------
