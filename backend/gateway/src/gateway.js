@@ -185,6 +185,7 @@ import {
 	getAllChats,
 	getMessages,
 	addUserToChat,
+	leaveGroupChat,
 	createGroupChat
 } from './routes/chat-routes.js'
 
@@ -287,6 +288,7 @@ await fastify.register(async function (fastify)
 	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
 	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
 	fastify.post('/chat/add-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
+	fastify.post('/chat/leave-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: leaveGroupChat })
 	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
 });
 

@@ -4,7 +4,8 @@ import {
 	getChats,
 	getMessages,
 	addUserToChat,
-	createGroupChat
+	createGroupChat,
+	leaveGroupChat
 } from './chat-controllers.js';
 
 import {
@@ -258,6 +259,44 @@ const	createGroupChatOpts =
 	handler: createGroupChat
 }
 
+const	leaveGroupChatOpts = 
+{
+	schema:
+	{
+		summary: 'Leave a group chat',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['chatId'],
+			properties:
+			{
+				chatId: { type: 'string' },
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: { success: { type: 'boolean' } }
+			},
+			403: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: leaveGroupChat
+};
+
+//-----------------------------EXPORT ROUTES-----------------------------
+
 export function	chatRoutes(fastify)
 {
 	// WebSocket route for real-time chat
@@ -281,4 +320,5 @@ export function	chatRoutes(fastify)
 	// HTTP routes for internal service communication
 	fastify.post('/add-user', addUserToChatOpts);
 	fastify.post('/create-group-chat', createGroupChatOpts);
+	fastify.post('/leave-group-chat', leaveGroupChatOpts);
 }

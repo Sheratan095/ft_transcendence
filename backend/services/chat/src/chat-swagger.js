@@ -61,6 +61,7 @@ Response (acknowledgment to sender):
     "messageId": "msg789",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if some users are offline,
+    "name": "Wonderful Chat",
     "chatType": "group"
   }
 }
@@ -84,6 +85,7 @@ Response (acknowledgment to sender):
     "messageId": "msg123",
     "content": "Hello everyone!",
     "status": "delivered", // or "sent" if recipient is offline,
+    "targetName": "jane_smith",
     "chatType": "dm"
   }
 }
@@ -97,7 +99,7 @@ Response (acknowledgment to sender):
 - **chat.chatMessage** - Message received in a chat
 \`\`\`json
 {
-  "event": "chat.chatMessage",
+  "event": "chat.message",
   "data": {
     "chatId": "chat123",
     "from": "jane_smith",
@@ -148,14 +150,18 @@ Response (acknowledgment to sender):
 }
 \`\`\`
 
-- **chat.systemMessage** - System message to a chat
+- **chat.sytemMessage** - System message in a chat (e.g., user joined/left)
 \`\`\`json
 {
-  "event": "chat.systemMessage",
+  "event": "chat.sytemMessage",
   "data": {
+    "event": "userJoin",
     "chatId": "chat123",
-    "message": "Welcome to the chat!",
-    "timestamp": "2025-11-19T10:30:00.000Z"
+    "userId": "user456", // Empty for system messages
+    "username": "jane_smith", // Empty for system messages
+    "messageId": "msg123",
+    "message": "User jane_smith has been added to the chat by Alice9023.",
+    "timestamp": "2025-11-19T10:30:00.000Z",
   }
 }
 \`\`\`
