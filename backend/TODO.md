@@ -113,7 +113,8 @@
 [] prisma? for db interactions
 [x] dark swagger ui 
 
-[]	When frontend doesn't implement http only cookies, try to change message
+I think it's ok
+[x]	When frontend doesn't implement http only cookies, try to change message
 	[AUTH] User logged in:  1
 	[AUTH] Token validation error: Invalid token
 
@@ -123,3 +124,5 @@
 [] Normalize date type
 [] Leave group
 [] rework of user-specific messages in group chat to add the username
+[] force users to be friend to interact with eachother
+[] be blocked == not friend in chat behaviur
