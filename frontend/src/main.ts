@@ -1,6 +1,9 @@
 import { getUserId, type User } from './lib/auth';
 import { startTokenRefresh } from './lib/token';
 import { renderProfile } from './lib/profile';
+import { getIntlayer } from "intlayer";
+
+const content = getIntlayer("app");
 
 
 class AuthUI {
@@ -126,7 +129,7 @@ class AuthUI {
       const password = passInput.value;
 
       if (!email || !password) {
-        authError.textContent = 'Enter email and password.';
+        authError.textContent = content.title;
         authError.classList.add('text-red-600');
         return;
       }
