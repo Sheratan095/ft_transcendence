@@ -6,6 +6,9 @@
     <title>Document</title>
     <link href="style.css" rel="stylesheet">
 </head>
+
+<!-- no inner html
+     -->
 <body>
     <main id="app" hidden>
         <div class="turn">
@@ -35,35 +38,78 @@
     <script>
         const GATEWAY_URL = 'https://localhost:3000';
         let accessToken = null;
+        let totalPlayer = 0;
+        let totalIa = 0;
+        let total = 0;
+
+        function removeFromBoard(index)
+        {
+            let valueStr = index.toString();
+            board[index] = "empty";
+            document.getElementById(valueStr).textContent = "";
+            //console.log(board);
+            //console.log("removed index: ", index);
+        }
 
         function nextTurn()
-        {
+        {               
             if (turn === 0)
+            {
+                myTurn.hidden = false;
+                oppoTurn.hidden = true;
+                if (totalPlayer >= 4)
+                {
+                    removeFromBoard(playerHistory[totalPlayer - 4]);
+                    //console.log(playerHistory);
+                }
+                //console.log("totalPlayer: ", totalPlayer);
                 handlePlayerTurn();
+            }
             else
-                handleIaTurn(); 
+            {
+                oppoTurn.hidden = false;
+                myTurn.hidden = true;
+                totalIa++;
+                if (totalIa >= 4)
+                {
+                    //removeFromBoard()
+                    removeFromBoard(iaHistory[totalIa - 4]);
+                    console.log(iaHistory);
+                }
+                console.log("totalIa: ", totalIa);
+                handleIaTurn();
+            }
+            total++;
         }
 
         function handlePlayerTurn(event)
         {
             console.log("player turn");
+            totalPlayer++;
         }
 
         function handleIaTurn()
         {
             let value = getInt(8);
-            let valueStr = value.toString();
 
             if (board[value] === "X"
-                || board.value === "O")
+                || board[value] === "O")
             {
-                console.log("invalid cell");
+                let i = 0;
+                while(board[i] != 'empty')
+                {
+                    i++;
+                }
+                console.log("invalid cell, new cell: ", i);
+                value = i;
+
             }
-            let cell = document.getElementById(valueStr).innerHTML = "O";
+            let valueStr = value.toString();
+            let cell = document.getElementById(valueStr).textContent = "O";
             iaHistory.push(value);
             turn = 0;
             board[value] = "O";
-            console.log(board);
+            //console.log(iaHistory);
             nextTurn();
         }
 
@@ -84,7 +130,6 @@
         const oppoTurn = document.getElementById('oppoTurn');
         const table = document.getElementById('board');
         
-        let total = 0;
         let turn;
         let finish = 0;
         let board;
@@ -95,13 +140,17 @@
         table.addEventListener('click', async (event) => {
             let value = event.target.id;
             let valueStr = value.toString();
-            //console.log(valueStr);
-            let cell = document.getElementById(valueStr).innerHTML = "X";
-            //console.log(cell);
+
+            if (board[value] === "X"
+                || board[value] === "O")
+            {
+                console.log("invalid cell");
+                return;
+            }
+            let cell = document.getElementById(valueStr).textContent = "X";
             playerHistory.push(value);
             turn = 1;
             board[value] = "X";
-            //console.log(board);
             nextTurn();
         });
 
@@ -149,22 +198,9 @@
                 
                 if (response.ok) {
                     board = await response.json();
-                    //console.log('Init data:', data);
-                    
-                    // Show the main UI only after successful init
                     appEl.hidden = false;
-                    //console.log('App shown');
                     turn = getInt(2);
-                    //console.log(turn);
-                    if (turn === 0)
-                        myTurn.hidden = false;
-                    else
-                        oppoTurn.hidden = false;
-
-                    if (turn === 0)
-                        handlePlayerTurn();
-                    else
-                        handleIaTurn();
+                    nextTurn();
                 }
                 else
                 {
