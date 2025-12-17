@@ -167,7 +167,7 @@ export class	ChatDatabase
 			INNER JOIN chat_members cm
 				ON cm.chat_id = m.chat_id AND cm.user_id = ?
 			WHERE m.chat_id = ?
-			AND datetime(m.created_at) > datetime(cm.joined_at)
+			AND datetime(m.created_at) >= datetime(cm.joined_at)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
@@ -333,6 +333,19 @@ export class	ChatDatabase
 
 		const	chat = await this.db.get(query, [chatId]);
 		return (chat);
+	}
+
+	async	getGroupChatName(chatId)
+	{
+		const	query = `
+			SELECT name
+			FROM chats
+			WHERE id = ? AND chat_type = 'group'
+		`;
+
+		const	chat = await this.db.get(query, [chatId]);
+		return (chat ? chat.name : null);
+
 	}
 
 	//-----------------------------MESSAGE QUERIES----------------------------

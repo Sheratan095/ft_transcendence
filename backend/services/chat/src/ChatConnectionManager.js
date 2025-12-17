@@ -9,6 +9,7 @@ class	ChatConnectionManager
 		// Cache for usernames to reduce DB lookups 
 		//	refresh every time a user sends a message
 		this._cachedUsersInChats = new Map(); // userId -> Username
+		this._cachedChatNames = new Map(); // chatId -> chatName
 	}
 
 	async	addConnection(userId, socket, chatDb)
@@ -60,7 +61,6 @@ class	ChatConnectionManager
 		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message');
 
 		const	status = await chatDb.getOverallMessageStatus(messageId);
-		console.log(`[CHAT] Message ${messageId} in chat ${chatId} has overall status: ${status}`);
 
 		return (status);
 	}
@@ -170,6 +170,7 @@ class	ChatConnectionManager
 	async	replyToMessage(userId, chatId, messageId, status, content, chatType, targetName)
 	{
 		const	socket = this._connections.get(userId);
+
 		const	data = {
 			chatId: chatId,
 			messageId: messageId,
@@ -257,6 +258,18 @@ class	ChatConnectionManager
 		}
 
 		return (username);
+	}
+
+	async	getGroupChatNameFromCache(chatId, chatDb, refresh=false)
+	{
+		let	chatName = this._cachedChatNames.get(chatId);
+		if (!chatName || refresh)
+		{
+			chatName = await chatDb.getGroupChatName(chatId);
+			this._cachedChatNames.set(chatId, chatName);
+		}
+		
+		return (chatName);
 	}
 }
 

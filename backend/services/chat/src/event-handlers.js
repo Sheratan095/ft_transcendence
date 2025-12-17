@@ -128,12 +128,12 @@ async function	handleChatMessage(userId, data, chatDb)
 
 		// Send to recipients (including sender)
 		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, sanitizedContent, chatDb);
-		const	targetName = await chatDb.getChatName(chatId);
+		const	targetName = await chatConnectionManager.getGroupChatNameFromCache(chatId, chatDb);
 
 		// Always acknowledge to sender to ensure they see their own message
 		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, sanitizedContent, 'group', targetName);
 
-		console.log(`[CHAT] Group message from user ${userId} to ${chatId} sent successfully`);
+		console.log(`[CHAT] Group message from user ${userId} to ${chatId} sent successfully, overall status: ${status}`);
 	}
 	catch (err)
 	{
