@@ -1589,71 +1589,75 @@
 
                 const newChat = await response.json();
                 chats.push(newChat);
-                renderChatList();
-
-                hideCreateGroupModal();
-                document.getElementById('groupNameInput').value = '';
-
-                alert('Group chat created successfully!');
-
-            } catch (err) {
-                console.error('Error creating group:', err);
-                alert('Failed to create group: ' + err.message);
+            
+            // Store members for the new chat
+            if (newChat.members) {
+                chatMembers.set(newChat.id, newChat.members);
             }
+            
+            renderChatList();
+            
+            hideCreateGroupModal();
+            document.getElementById('groupNameInput').value = '';
+
+        } catch (err) {
+            console.error('Error creating group:', err);
+            alert('Failed to create group: ' + err.message);
+        }
+    }
+
+    // Send private message
+    function sendPrivateMessage() {
+        const toUserId = document.getElementById('privateUserIdInput').value.trim();
+        const content = document.getElementById('privateMessageInput').value.trim();
+
+        if (!toUserId || !content) {
+            alert('Please enter user ID and message');
+            return;
         }
 
-        // Send private message
-        function sendPrivateMessage() {
-            const toUserId = document.getElementById('privateUserIdInput').value.trim();
-            const content = document.getElementById('privateMessageInput').value.trim();
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            const message = {
+                event: 'chat.privateMessage',
+                data: {
+                    toUserId: toUserId,
+                    content: content
+                }
+            };
 
-            if (!toUserId || !content) {
-                alert('Please enter user ID and message');
-                return;
-            }
+            // Store target for when handleMessageSent creates the new chat
+            pendingDmTarget = toUserId;
 
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = {
-                    event: 'chat.privateMessage',
-                    data: {
-                        toUserId: toUserId,
-                        content: content
-                    }
-                };
+            ws.send(JSON.stringify(message));
 
-                // Store target for when handleMessageSent creates the new chat
-                pendingDmTarget = toUserId;
+            hidePrivateMessageModal();
+            document.getElementById('privateUserIdInput').value = '';
+            document.getElementById('privateMessageInput').value = '';
 
-                ws.send(JSON.stringify(message));
+            // Note: chat list will be updated automatically when chat.messageSent arrives
+            // with the new chat_id, which will trigger loadChats() only if needed
 
-                hidePrivateMessageModal();
-                document.getElementById('privateUserIdInput').value = '';
-                document.getElementById('privateMessageInput').value = '';
+        } else {
+            alert('WebSocket not connected');
+        }
+    }
 
-                // Note: chat list will be updated automatically when chat.messageSent arrives
-                // with the new chat_id, which will trigger loadChats() only if needed
-
-            } else {
-                alert('WebSocket not connected');
-            }
+    // Leave group chat
+    async function leaveGroupChat() {
+        if (!currentChatId) {
+            alert('No chat selected');
+            return;
         }
 
-        // Leave group chat
-        async function leaveGroupChat() {
-            if (!currentChatId) {
-                alert('No chat selected');
-                return;
-            }
+        const chat = chats.find(c => c.id === currentChatId);
+        if (!chat || chat.chatType !== 'group') {
+            alert('Can only leave group chats');
+            return;
+        }
 
-            const chat = chats.find(c => c.id === currentChatId);
-            if (!chat || chat.chatType !== 'group') {
-                alert('Can only leave group chats');
-                return;
-            }
-
-            if (!confirm('Are you sure you want to leave this group?')) {
-                return;
-            }
+        if (!confirm('Are you sure you want to leave this group?')) {
+            return;
+        }
 
             try {
                 const response = await fetch(`${GATEWAY_URL}/chat/leave-group-chat`, {

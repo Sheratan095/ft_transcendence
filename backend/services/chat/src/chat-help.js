@@ -136,11 +136,26 @@ export async function	getRelationship(req, otherUserId)
 			return (null);
 		}
 
+		// Debug: log raw response
 		const	text = await response.text();
-		if (!text)
+		console.log('[CHAT] Raw response text:', text);
+		
+		let data;
+		try {
+			data = JSON.parse(text);
+			console.log('[CHAT] Relationship data received:', data);
+		} catch (err) {
+			console.error('[CHAT] Failed to parse JSON:', err.message);
 			return (null);
+		}
+		
+		// Return null if the response is an empty object (no relationship exists)
+		if (!data || Object.keys(data).length === 0)
+		{
+			console.log('[CHAT] No relationship found (empty or null data)');
+			return (null);
+		}
 
-		const	data = JSON.parse(text);
 		return (data);
 	}
 	catch (err)

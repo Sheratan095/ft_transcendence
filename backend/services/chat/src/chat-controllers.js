@@ -137,10 +137,10 @@ export const	addUserToChat = async (req, reply) =>
 
 		// The users must be friends to be added to the chat
 		const	relation = await getRelationship(req, toUserId);
-		if (!relation || relation.relationship_status !== 'accepted')
+		if (!relation || relation.relationshipStatus !== 'accepted')
 		{
-			console.log(`[CHAT] Failed to add user because ${userId} and ${toUserId} are not friends`);
-			return (reply.code(403).send({ error: 'Forbidden', message: 'Users must be friends to add to chat' }));
+			console.log(`[CHAT] User ${userId} attempted to add non-friend user ${toUserId} to chat ${chatId}`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only add friends to the chat' }));
 		}
 
 		// Add the user to the chat

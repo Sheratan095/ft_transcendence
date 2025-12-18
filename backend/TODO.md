@@ -122,7 +122,7 @@ I think it's ok
 	with message "unblock user to send a message" and noting when he blocked you
 
 [] Normalize date type
-[] Leave group
-[] rework of user-specific messages in group chat to add the username
-[] should the user stats row be created at user registration? i think so
+[x] Leave group
+[x] rework of user-specific messages in group chat to add the username
+[x] should the user stats row be created at user registration? i think so
 	-> user deletion
