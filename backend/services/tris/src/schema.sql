@@ -41,3 +41,12 @@ CREATE TABLE user_stats
 
 	-- FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+INSERT INTO user_stats (user_id, games_played, wins, losses, draws)
+VALUES ('1', 0, 0, 0, 0);
+
+INSERT INTO user_stats (user_id, games_played, wins, losses, draws)
+VALUES ('2', 0, 0, 0, 0);
+
+INSERT INTO user_stats (user_id, games_played, wins, losses, draws)
+VALUES ('3', 0, 0, 0, 0);

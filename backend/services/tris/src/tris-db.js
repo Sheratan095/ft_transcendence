@@ -97,6 +97,7 @@ export class	TrisDatabase
 
 	//-----------------------------MATCHES QUERIES---------------------------------//
 
+	// When a user is deleted, his name musn't appear in past matches, it will be "Deleted User" or something like that
 	async	getMatchesForUser(userId)
 	{
 		const	query = `

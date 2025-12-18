@@ -25,6 +25,8 @@ services/auth:
     OTP_EXPIRATION_MINUTES=5
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3003
+    PONG_SERVICE_URL=http://localhost:3005
+    TRIS_SERVICE_URL=http://localhost:3006
 
 services/users:
     INTERNAL_API_KEY=1234
