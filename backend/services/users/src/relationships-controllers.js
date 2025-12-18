@@ -44,22 +44,21 @@ export async function	getUsersRelationship(req, reply)
 		const	relationship = await usersDb.getUsersRelationship(userA, userB);
 
 		console.log(`[RELATIONSHIPS] GetUsersRelationship between ${userA} and ${userB} : ${relationship? relationship.relationship_status : 'none'}`);
-	console.log('[RELATIONSHIPS] Full relationship object:', JSON.stringify(relationship));
 
-	// Return empty object if no relationship exists
-	if (!relationship)
-		return (reply.code(200).send({}));
+		// Return empty object if no relationship exists
+		if (!relationship)
+			return (reply.code(200).send({}));
 
-	// Map snake_case to camelCase to match the response schema
-	const	mappedRelationship = {
-		requesterId: relationship.requester_id,
-		targetId: relationship.target_id,
-		relationshipStatus: relationship.relationship_status,
-		createdAt: relationship.created_at,
-		updatedAt: relationship.updated_at
-	};
+		// Map snake_case to camelCase to match the response schema
+		const	mappedRelationship = {
+			requesterId: relationship.requester_id,
+			targetId: relationship.target_id,
+			relationshipStatus: relationship.relationship_status,
+			createdAt: relationship.created_at,
+			updatedAt: relationship.updated_at
+		};
 
-	return (reply.code(200).send(mappedRelationship));
+		return (reply.code(200).send(mappedRelationship));
 	}
 	catch (err)
 	{

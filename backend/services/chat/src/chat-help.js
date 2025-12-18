@@ -106,19 +106,12 @@ export async function	checkBlock(userA, userB)
 	}
 }
 
-// It may return when two users has no relationship too
-export async function	getRelationship(req, otherUserId)
+export async function	getRelationshipByIds(userId, otherUserId)
 {
 	try
 	{
-		const	userData = extractUserData(req);
-		const	userA = userData?.id;
-
-		if (!userA)
-		{
-			console.error('[CHAT] Failed to extract user data from request');
-			return (null);
-		}
+		// Build user data header for the internal request
+		const	userDataHeader = JSON.stringify({ id: userId });
 
 		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/getUsersRelationship?userId=${otherUserId}`,
 		{
@@ -126,35 +119,19 @@ export async function	getRelationship(req, otherUserId)
 			headers: {
 				'Content-Type': 'application/json',
 				'x-internal-api-key': process.env.INTERNAL_API_KEY,
-				'x-user-data': req.headers['x-user-data']
+				'x-user-data': userDataHeader
 			},
 		});
 
 		if (!response.ok)
 		{
-			console.error(`[CHAT] Failed to check friend status between ${userA} and ${otherUserId}: ${response.statusText}`);
+			console.error(`[CHAT] Failed to check friend status between ${userId} and ${otherUserId}: ${response.statusText}`);
 			return (null);
 		}
 
-		// Debug: log raw response
 		const	text = await response.text();
-		console.log('[CHAT] Raw response text:', text);
 		
-		let data;
-		try {
-			data = JSON.parse(text);
-			console.log('[CHAT] Relationship data received:', data);
-		} catch (err) {
-			console.error('[CHAT] Failed to parse JSON:', err.message);
-			return (null);
-		}
-		
-		// Return null if the response is an empty object (no relationship exists)
-		if (!data || Object.keys(data).length === 0)
-		{
-			console.log('[CHAT] No relationship found (empty or null data)');
-			return (null);
-		}
+		const	data = JSON.parse(text);
 
 		return (data);
 	}

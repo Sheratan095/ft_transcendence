@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData, notifyUserAddedToChat, notifyMessageStatusUpdates, getRelationship } from './chat-help.js';
+import { extractUserData, notifyUserAddedToChat, notifyMessageStatusUpdates, getRelationshipByIds } from './chat-help.js';
 
 export const	getChats = async (req, reply) =>
 {
@@ -136,7 +136,7 @@ export const	addUserToChat = async (req, reply) =>
 		}
 
 		// The users must be friends to be added to the chat
-		const	relation = await getRelationship(req, toUserId);
+		const	relation = await getRelationshipByIds(userId, toUserId);
 		if (!relation || relation.relationshipStatus !== 'accepted')
 		{
 			console.log(`[CHAT] User ${userId} attempted to add non-friend user ${toUserId} to chat ${chatId}`);

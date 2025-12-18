@@ -39,4 +39,4 @@ INSERT INTO users (id, username, language, created_at, avatar_url)
 VALUES ('3', 'test3', 'en', CURRENT_TIMESTAMP, NULL);
 
 INSERT INTO user_relationships (requester_id, target_id, relationship_status, created_at, updated_at)
-VALUES ('1', '2', 'accepted', '2025-11-18 17:03:35', '2025-11-18 17:03:35');
+VALUES ('1', '2', 'blocked', '2025-11-18 17:03:35', '2025-11-18 17:03:35');
