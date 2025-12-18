@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS matches
 	ended_at	DATETIME,
 	-- TEXT ELO is calculated in the application layer because it's a business logic not a db logic
 
-	CHECK (player_one != player_two)
+	CHECK (player_one != player_two),
 
 	-- Ensure consistency between status and ended_at
 	CHECK
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS matches
 	-- FOREIGN KEY (player_one) REFERENCES users(id) ON DELETE CASCADE,
 	-- FOREIGN KEY (player_two) REFERENCES users(id) ON DELETE CASCADE,
 	-- FOREIGN KEY (winner) REFERENCES users(id) ON DELETE SET NULL
-)
+);
 
 -- ------------------------------------------------------------
 -- USER MATCH STATS
@@ -37,7 +37,7 @@ CREATE TABLE user_stats
 	games_played	INTEGER DEFAULT 0,
 	wins			INTEGER DEFAULT 0,
 	losses			INTEGER DEFAULT 0,
-	draws			INTEGER DEFAULT 0,
+	draws			INTEGER DEFAULT 0
 
 	-- FOREIGN KEY (user_id) REFERENCES users(id)
 );
