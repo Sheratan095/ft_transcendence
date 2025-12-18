@@ -185,8 +185,8 @@ export async function	createUserStatsInGames(userId)
 	}
 	catch (err)
 	{
-		console.error('[AUTH] Error creating user stats in games services:', err);
-		throw (err);
+		console.error('[AUTH] Error creating user stats in games services:');
+		// throw (err);
 	}
 }
 

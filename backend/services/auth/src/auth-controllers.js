@@ -38,7 +38,7 @@ export const	register = async (req, reply) =>
 		// Create user in auth database
 		user = await authDb.createUser(email, hashedpassword);
 		// Create user profile in users service
-		await createUserProfileInUsersService(user.id, username)
+		// await createUserProfileInUsersService(user.id, username)
 		// Create initial stats in games services
 		await createUserStatsInGames(user.id);
 

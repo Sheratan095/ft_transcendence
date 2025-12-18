@@ -7,13 +7,13 @@ export const	createUserStats = async (req, reply) =>
 		const	userId = extractUserData(req).id;
 
 		// Check if stats already exist for the user
-		const	existingStats = await trisDb.getUserStats(userId);
-		if (existingStats)
-			return (reply.code(400).send({error: 'User stats already exist' }));
+		// const	existingStats = await trisDb.getUserStats(userId);
+		// if (existingStats)
+		// 	return (reply.code(400).send({error: 'User stats already exist' }));
 
-		// Create new stats entry
-		await trisDb.createUserStats(userId);
-		console.log(`[TRIS] Created stats for user ${userId}`);
+		// // Create new stats entry
+		// await trisDb.createUserStats(userId);
+		// console.log(`[TRIS] Created stats for user ${userId}`);
 
 		return (reply.code(201).send({message: 'User stats created successfully' }));
 	}
