@@ -106,32 +106,47 @@ export async function	checkBlock(userA, userB)
 	}
 }
 
-export async function	checkFriend(userA, userB)
+// It may return when two users has no relationship too
+export async function	getRelationship(req, otherUserId)
 {
 	try
 	{
-		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/check-friend?userA=${userA}&userB=${userB}`,
+		const	userData = extractUserData(req);
+		const	userA = userData?.id;
+
+		if (!userA)
+		{
+			console.error('[CHAT] Failed to extract user data from request');
+			return (null);
+		}
+
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/getUsersRelationship?userId=${otherUserId}`,
 		{
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
 				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+				'x-user-data': req.headers['x-user-data']
 			},
 		});
 
 		if (!response.ok)
 		{
-			console.error(`[CHAT] Failed to check friend status between ${userA} and ${userB}: ${response.statusText}`);
-			return (false);
+			console.error(`[CHAT] Failed to check friend status between ${userA} and ${otherUserId}: ${response.statusText}`);
+			return (null);
 		}
 
-		const	data = await response.json();
-		return (data.isFriend);
+		const	text = await response.text();
+		if (!text)
+			return (null);
+
+		const	data = JSON.parse(text);
+		return (data);
 	}
 	catch (err)
 	{
 		console.error('[CHAT] Error checking friend status:', err.message);
-		return (false);
+		return (null);
 	}
 }
 

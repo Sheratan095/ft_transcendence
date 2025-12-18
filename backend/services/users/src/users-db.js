@@ -226,6 +226,18 @@ export class	UsersDatabase
 		return (relationships);
 	}
 
+	async	getUsersRelationship(userA, userB)
+	{
+		const	query =`
+			SELECT * FROM user_relationships
+			WHERE (requester_id = ? AND target_id = ?) OR (requester_id = ? AND target_id = ?)`;
+
+		const	relationship = await this.db.get(query, [userA, userB, userB, userA]);
+
+
+		return (relationship);
+	}
+
 	// Get only accepted friends
 	async	getFriends(userId)
 	{

@@ -45,7 +45,8 @@ export async function	getUsersRelationship(req, reply)
 
 		console.log('[RELATIONSHIPS] GetUsersRelationship success between ', userA, ' and ', userB);
 
-		return (reply.code(200).send(relationship));
+		// Return null explicitly if no relationship exists
+		return (reply.code(200).send(relationship || null));
 	}
 	catch (err)
 	{
