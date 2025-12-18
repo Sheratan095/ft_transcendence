@@ -106,6 +106,42 @@ export async function	checkBlock(userA, userB)
 	}
 }
 
+export async function	getRelationshipByIds(userId, otherUserId)
+{
+	try
+	{
+		// Build user data header for the internal request
+		const	userDataHeader = JSON.stringify({ id: userId });
+
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/getUsersRelationship?userId=${otherUserId}`,
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+				'x-user-data': userDataHeader
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to check friend status between ${userId} and ${otherUserId}: ${response.statusText}`);
+			return (null);
+		}
+
+		const	text = await response.text();
+		
+		const	data = JSON.parse(text);
+
+		return (data);
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error checking friend status:', err.message);
+		return (null);
+	}
+}
+
 // Helper to notify message senders about status updates (delivered/read)
 export async function	notifyMessageStatusUpdates(chatId, updatedTime, chatDb)
 {

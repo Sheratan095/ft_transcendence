@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData, checkBlock, notifyUserAddedToChat, notifyMessageStatusUpdates } from './chat-help.js';
+import { extractUserData, notifyUserAddedToChat, notifyMessageStatusUpdates, getRelationshipByIds } from './chat-help.js';
 
 export const	getChats = async (req, reply) =>
 {
@@ -135,10 +135,12 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
-		if (await checkBlock(userId, toUserId))
+		// The users must be friends to be added to the chat
+		const	relation = await getRelationshipByIds(userId, toUserId);
+		if (!relation || relation.relationshipStatus !== 'accepted')
 		{
-			console.log(`[CHAT] Failed to add user because the relation between ${toUserId} and ${userId} is blocked`);
-			return (reply.code(403).send({ error: 'Forbidden', message: 'Cannot add this user to the chat' }));
+			console.log(`[CHAT] User ${userId} attempted to add non-friend user ${toUserId} to chat ${chatId}`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only add friends to the chat' }));
 		}
 
 		// Add the user to the chat

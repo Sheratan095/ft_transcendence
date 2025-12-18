@@ -11,6 +11,7 @@ import {
 	unblockUser,
 	cancelFriendRequest,
 	removeFriend,
+	getUsersRelationship,
 	checkBlock
 } from './relationships-controllers.js';
 
@@ -171,6 +172,39 @@ const	getFriendsOpts =
 	handler	: getFriends
 };
 
+const	getUsersRelationshipOpts =
+{
+	schema:
+	{
+		summary: 'Get the relationship between two users',
+		description: 'Get the relationship status between the authenticated user and another user specified by userId query parameter. Requires accessToken cookie for authentication.',
+		tags: ['Relationships'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties:
+			{
+				userId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200: UserRelationship,
+			400: ErrorResponse,
+			500: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler	: getUsersRelationship
+}
+ 
 const	getIncomingRequestsOpts =
 {
 	schema:
@@ -581,6 +615,7 @@ export function	relationshipsRoutes(fastify)
 	fastify.get('/relationships/requests/incoming', getIncomingRequestsOpts);
 	fastify.get('/relationships/requests/outgoing', getOutgoingRequestsOpts);
 	fastify.get('/relationships/check-block', checkBlockOpts);
+	fastify.get('/relationships/getUsersRelationship', getUsersRelationshipOpts);
 
 	// POST routes
 	fastify.post('/relationships/request', sendFriendRequestOpts);

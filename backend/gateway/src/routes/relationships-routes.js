@@ -244,3 +244,25 @@ export const	removeFriend = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
 };
+
+export const	getUsersRelationship = async (req, reply) =>
+{
+	try
+	{
+		const	response = await axios.get(`${USERS_URL}/relationships/getUsersRelationship`, {
+			params: req.query,
+			headers: getAuthHeaders(req)
+		});
+
+		return (reply.send(response.data));
+	}
+	catch (err)
+	{
+		console.log('[GATEWAY] GetUsersRelationship error:', err.message);
+
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data));
+
+		return (reply.code(500).send({ error: 'Users service unavailable' }));
+	}
+}

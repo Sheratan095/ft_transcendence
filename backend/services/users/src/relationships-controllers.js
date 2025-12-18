@@ -33,6 +33,44 @@ export async function	getUserRelationships(req, reply)
 	}
 }
 
+export async function	getUsersRelationship(req, reply)
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userA = extractUserData(req).id;
+		const	userB = req.query.userId;
+
+		const	relationship = await usersDb.getUsersRelationship(userA, userB);
+
+		console.log(`[RELATIONSHIPS] GetUsersRelationship between ${userA} and ${userB} : ${relationship? relationship.relationship_status : 'none'}`);
+
+		// Return empty object if no relationship exists
+		if (!relationship)
+			return (reply.code(200).send({}));
+
+		// Map snake_case to camelCase to match the response schema
+		const	mappedRelationship = {
+			requesterId: relationship.requester_id,
+			targetId: relationship.target_id,
+			relationshipStatus: relationship.relationship_status,
+			createdAt: relationship.created_at,
+			updatedAt: relationship.updated_at
+		};
+
+		return (reply.code(200).send(mappedRelationship));
+	}
+	catch (err)
+	{
+		console.log('[RELATIONSHIPS] GetUsersRelationship error: ', err.message);
+
+		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
+			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
 export async function	getFriends(req, reply)
 {
 	try

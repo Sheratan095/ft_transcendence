@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { checkBlock, notifyMessageStatusUpdates } from './chat-help.js';
+import { notifyMessageStatusUpdates, getRelationshipByIds } from './chat-help.js';
 
 export function	handleNewConnection(socket, req, chatDb)
 {
@@ -164,11 +164,12 @@ async function handlePrivateMessage(userId, data, chatDb)
 			return;
 		}
 
-		if (await checkBlock(userId, toUserId))
+		// The users must be friends to send private messages
+		const	relation = await getRelationshipByIds(userId, toUserId);
+		if (!relation || relation.relationshipStatus !== 'accepted')
 		{
-			console.log(`[CHAT] Failed to send message because the relation between ${toUserId} and ${userId} is blocked`);
-			chatConnectionManager.sendErrorMessage(userId, 'Cannot send message to this user');
-			return;
+			console.log(`[CHAT] User ${userId} attempted to send a private message to non-friend user ${toUserId}`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only send private messages to friends' }));
 		}
 
 		// Validate that receiver exists before creating chat
