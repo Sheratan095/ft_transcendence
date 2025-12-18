@@ -33,6 +33,31 @@ export async function	getUserRelationships(req, reply)
 	}
 }
 
+export async function	getUsersRelationship(req, reply)
+{
+	try
+	{
+		const	usersDb = req.server.usersDb;
+		const	userA = extractUserData(req).id;
+		const	userB = req.query.userId;
+
+		const	relationship = await usersDb.getUsersRelationship(userA, userB);
+
+		console.log('[RELATIONSHIPS] GetUsersRelationship success between ', userA, ' and ', userB);
+
+		return (reply.code(200).send(relationship));
+	}
+	catch (err)
+	{
+		console.log('[RELATIONSHIPS] GetUsersRelationship error: ', err.message);
+
+		if (err.message && err.message.includes('SQLITE_CONSTRAINT'))
+			return reply.code(400).send({ error: 'SQL constraint error', details: err.message });
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
 export async function	getFriends(req, reply)
 {
 	try

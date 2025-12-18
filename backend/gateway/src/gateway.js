@@ -178,7 +178,8 @@ import {
 	blockUser,
 	unblockUser,
 	cancelFriendRequest,
-	removeFriend
+	removeFriend,
+	getUsersRelationship
 } from './routes/relationships-routes.js'
 
 import {
@@ -276,6 +277,7 @@ await fastify.register(async function (fastify)
 	fastify.get('/users/relationships/friends', { schema: { hide: true }, preHandler: authenticateJwt, handler: getFriends })
 	fastify.get('/users/relationships/requests/incoming', { schema: { hide: true }, preHandler: authenticateJwt, handler: getIncomingRequests })
 	fastify.get('/users/relationships/requests/outgoing', { schema: { hide: true }, preHandler: authenticateJwt, handler: getOutgoingRequests })
+	fastify.get('/users/relationships/getUsersRelationship', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsersRelationship })
 	fastify.post('/users/relationships/request', { schema: { hide: true }, preHandler: authenticateJwt, handler: sendFriendRequest })
 	fastify.put('/users/relationships/accept', { schema: { hide: true }, preHandler: authenticateJwt, handler: acceptFriendRequest })
 	fastify.put('/users/relationships/reject', { schema: { hide: true }, preHandler: authenticateJwt, handler: rejectFriendRequest })

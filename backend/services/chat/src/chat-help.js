@@ -106,6 +106,35 @@ export async function	checkBlock(userA, userB)
 	}
 }
 
+export async function	checkFriend(userA, userB)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/check-friend?userA=${userA}&userB=${userB}`,
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to check friend status between ${userA} and ${userB}: ${response.statusText}`);
+			return (false);
+		}
+
+		const	data = await response.json();
+		return (data.isFriend);
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error checking friend status:', err.message);
+		return (false);
+	}
+}
+
 // Helper to notify message senders about status updates (delivered/read)
 export async function	notifyMessageStatusUpdates(chatId, updatedTime, chatDb)
 {

@@ -135,10 +135,18 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
+		// Check if the relation between the users is blocked
 		if (await checkBlock(userId, toUserId))
 		{
 			console.log(`[CHAT] Failed to add user because the relation between ${toUserId} and ${userId} is blocked`);
 			return (reply.code(403).send({ error: 'Forbidden', message: 'Cannot add this user to the chat' }));
+		}
+
+		// Must be friends
+		if (await checkFriend(userId, toUserId) === false)
+		{
+			console.log(`[CHAT] Failed to add user because ${userId} and ${toUserId} are not friends`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'Users must be friends to add to chat' }));
 		}
 
 		// Add the user to the chat
