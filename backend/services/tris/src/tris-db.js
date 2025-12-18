@@ -95,6 +95,97 @@ export class	TrisDatabase
 		return (id);
 	}
 
+	//-----------------------------MATCHES QUERIES---------------------------------//
+
+	async	getMatchesForUser(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE player_x_id = ? OR player_o_id = ?
+		`;
+		const	matches = await this.db.all(query, [userId, userId]);
+
+		return (matches);
+	}
+
+	async	createMatch(playerXId, playerOId)
+	{
+		const	matchId = await this.#generateUUID();
+		const	query = `
+			INSERT INTO matches (id, player_x_id, player_o_id, status)
+			VALUES (?, ?, ?, ?)
+		`;
+
+		await this.db.run(query, [matchId, playerXId, playerOId, 'ongoing']);
+		return (matchId);
+	}
+
+	async	endMatch(matchId, winnerId = null)
+	{
+		const	query = `
+			UPDATE matches
+			SET
+				winner_id = ?,
+				status = 'finished',
+				ended_at = CURRENT_TIMESTAMP
+			WHERE id = ?
+		`;
+
+		await this.db.run(query, [winnerId, matchId]);
+	}
+
+	//-----------------------------USER STATS QUERIES---------------------------------//
+
+	// Called by auth service when a new user is created
+	async	createUserStats(userId)
+	{
+		const	query = `
+			INSERT INTO user_stats (user_id)
+			VALUES (?)
+		`;
+
+		await this.db.run(query, [userId]);
+	}
+
+	// Called by auth service when a user is deleted (GDPR compliance)
+	async	deleteUserStats(userId)
+	{
+		const	query = `
+			DELETE FROM user_stats
+			WHERE user_id = ?
+		`;
+
+		await this.db.run(query, [userId]);
+	}
+
+	// TEXT ELO is added in controller level beacause it's a business logic not a db logic
+	async	getUserStats(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM user_stats
+			WHERE user_id = ?
+		`;
+		const	stats = await this.db.get(query, [userId]);
+
+		return (stats);
+	}
+
+	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0, drawsDelta = 0)
+	{
+		const	query = `
+			UPDATE user_stats
+			SET
+				wins = wins + ?,
+				losses = losses + ?,
+				draws = draws + ?
+			WHERE user_id = ?
+		`;
+
+		await this.db.run(query, [winsDelta, lossesDelta, drawsDelta, userId]);
+	}
+
 	async	#close()
 	{
 		if (this.db)

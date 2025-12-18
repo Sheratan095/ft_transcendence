@@ -123,3 +123,5 @@
 [] Normalize date type
 [] Leave group
 [] rework of user-specific messages in group chat to add the username
+[] should the user stats row be created at user registration? i think so
+	-> user deletion
