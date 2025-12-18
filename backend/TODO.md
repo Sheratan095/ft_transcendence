@@ -124,5 +124,5 @@ I think it's ok
 [] Normalize date type
 [] Leave group
 [] rework of user-specific messages in group chat to add the username
-[] force users to be friend to interact with eachother
-[] be blocked == not friend in chat behaviur
+[] should the user stats row be created at user registration? i think so
+	-> user deletion
