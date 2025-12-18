@@ -196,12 +196,12 @@ export async function	deleteUserStatsInGames(userId)
 	{
 		// await axios.delete(`${process.env.PONG_SERVICE_URL}/delete-user-stats`, {
 		// 	headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
-		// 	data: { userId: userData.id }
+		// 	data: { userId: userId }
 		// });
 
 		await axios.delete(`${process.env.TRIS_SERVICE_URL}/delete-user-stats`, {
 			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
-			data: { userId: userData.id }
+			data: { userId: userId }
 		});
 	}
 	catch (err)
