@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite'
 import tailwindcss from "@tailwindcss/vite";
+import { intlayer } from "vite-intlayer";
+
 import path from "path";
 
 export default defineConfig({
@@ -7,8 +9,18 @@ export default defineConfig({
   server: {
     port: 443,
     strictPort: true,
+	https: {
+		key: './certs/certs/key.pem',
+		cert: './certs/certs/cert.pem',
+	},
     proxy: {
-      '/api': 'http://localhost:3000'
+      '/api': {
+        target: 'https://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false,
+        logLevel: 'debug', // Enable debug logging to see what's happening
+      },
     }
   },
   resolve: {
@@ -19,6 +31,7 @@ export default defineConfig({
   publicDir: 'public',
   plugins: [
 		tailwindcss(),
+		intlayer(),
 
 		{
 			name: 'reload-on-frontend-ts',
