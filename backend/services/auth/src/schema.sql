@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 -- COLLATE NOCASE for case-insensitive unique constraints on email and username
 
 -- ------------------------------------------------------------

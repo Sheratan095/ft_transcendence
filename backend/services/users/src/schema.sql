@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 -- ------------------------------------------------------------
 -- USERS
 -- ------------------------------------------------------------
@@ -24,7 +26,7 @@ CREATE TABLE IF NOT EXISTS user_relationships
 	updated_at			DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 	PRIMARY KEY (requester_id, target_id),
-	CHECK (requester_id != target_id),
+	CHECK (requester_id != target_id)
 
 	-- FOREIGN KEY (requester_id) REFERENCES auth_accounts(id) ON DELETE CASCADE -> auth/auth_accounts
 	-- FOREIGN KEY (target_id) REFERENCES auth_accounts(id) ON DELETE CASCADE -> auth/auth_accounts

@@ -126,3 +126,6 @@ I think it's ok
 [x] rework of user-specific messages in group chat to add the username
 [x] should the user stats row be created at user registration? i think so
 	-> user deletion
+
+[] Explain date formats differences in docs (specially function formatExpirationDate)
+	and check all of db and microservice-db.js for sql injection or other shit around
