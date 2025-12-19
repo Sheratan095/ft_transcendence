@@ -70,6 +70,7 @@ export function	validator(username, password, email)
 export function	formatExpirationDate(date)
 {
 	// Keep the ISO format to preserve timezone information for proper parsing
+	// don't need to slice anything off beacause Sqlite can handle the full ISO format
 	return (date.toISOString());
 }
 

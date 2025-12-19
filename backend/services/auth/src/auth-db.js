@@ -179,7 +179,7 @@ export class	AuthDatabase
 		const	expiresAtStr = formatExpirationDate(expiresAt);
 
 		await this.db.run(
-			"UPDATE refresh_tokens SET refresh_token = ?, expires_at = ?, created_at = datetime('now') WHERE user_id = ?",
+			"UPDATE refresh_tokens SET refresh_token = ?, expires_at = ?, created_at = CURRENT_TIMESTAMP WHERE user_id = ?",
 			[new_refresh_token, expiresAtStr, userId]
 		);
 	}

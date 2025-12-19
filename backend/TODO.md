@@ -121,7 +121,7 @@ I think it's ok
 [x] When try to send a message or add a person to group, if you blocked him, return an error
 	with message "unblock user to send a message" and noting when he blocked you
 
-[] Normalize date type
+[x] Normalize date type
 [x] Leave group
 [x] rework of user-specific messages in group chat to add the username
 [x] should the user stats row be created at user registration? i think so
