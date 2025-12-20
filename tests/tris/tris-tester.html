@@ -41,18 +41,211 @@
         let totalPlayer = 0;
         let totalIa = 0;
         let total = 0;
+        let board = Array(3);
+        board[0] = Array("empty", "empty", "empty");
+        board[1] = Array("empty", "empty", "empty");
+        board[2] = Array("empty", "empty", "empty");
+        let score = 0;
+        let i = 0;
+        let iter = 0;
 
-        function removeFromBoard(index)
+        function checkAdiacent(y, x, dir, score)
         {
-            let valueStr = index.toString();
-            board[index] = "empty";
-            document.getElementById(valueStr).textContent = "";
-            //console.log(board);
-            //console.log("removed index: ", index);
+            console.log("score: ", score);
+            console.log("dir: ", dir);
+            console.log("iteration: ", iter++);
+            if (score === 2)
+                return (1);
+            // if (dir === 0)
+            //     score--;
+            // check left & right
+            if (x + 1 < 3 && (dir === 0 || dir === 1))
+            {
+                if (board[y][x + 1] == 'X')
+                {
+                    //console.log("checking square: ", y, x);
+                    //console.log(count);
+                    console.log("found right");
+                    score++;
+                    if (checkAdiacent(y, x + 1, 1, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+                //return (0);
+            }
+            if (x - 1 <= 0 && (dir === 0 || dir === 2))
+            {
+                if (board[y][x - 1] == 'X')
+                {
+                    console.log("found left");
+                    score++;
+                    if (checkAdiacent(y, x - 1, 2, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+                //return (0);
+            }
+            // check under & over
+            if (y + 1 < 3 && (dir === 0 || dir === 3))
+            {
+                if (board[y + 1][x] == 'X')
+                {
+                    console.log("found bottom");
+                    score++;
+                    if (checkAdiacent(y + 1, x, 3, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+            }
+            if (y - 1 >= 0 && (dir === 0 || dir === 4))
+            {
+                if (board[y - 1][x] == 'X')
+                {
+                    console.log("found top");
+                    score++;
+                    if (checkAdiacent(y - 1, x, 4, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+            }
+            // check diagonally 1
+            if (y + 1 < 3 && x + 1 < 3 && (dir === 0 || dir === 5))
+            {
+                if (board[y + 1][x + 1] == 'X')
+                {
+                    score++;
+                    if (checkAdiacent(y + 1, x + 1, 5, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+            }
+            if (y - 1 >= 0 && x - 1 >= 0 && (dir === 0 || dir === 6))
+            {
+                if (board[y - 1][x - 1] == 'X')
+                {
+                    score++;
+                    if (checkAdiacent(y - 1, x - 1, 6, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+            }
+            // check diagonally 2
+            if (y + 1 < 3 && x - 1 >= 0 && (dir === 0 || dir === 7))
+            {
+                if (board[y + 1][x - 1] == 'X')
+                {
+                    score++;
+                    if (checkAdiacent(y + 1, x - 1, 7, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+            }
+            if (y - 1 >= 0 && x + 1 < 3 && (dir === 0 || dir === 8))
+            {
+                if (board[y - 1][x + 1] == 'X')
+                {
+                    score++;
+                    if (checkAdiacent(y - 1, x + 1, 8, score))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+            }
+            return (0);
         }
 
+        function checkWin()
+        {
+            // score = 3;
+            console.log("new turn");
+            for (let i = 0; i < 3; i++)
+            {
+                for (let j = 0; j < 3; j++)
+                {
+                    //console.log("y - x", i, j);
+                    if (board[i][j] === 'X')
+                    {
+                        score = 0;
+                        iter = 0;
+                        //ret = checkAdiacent(i, j);
+                        console.log("checking");
+                        console.log("y - x", i, j);
+                        if (checkAdiacent(i, j, 0, score))
+                        {
+                            console.log("player won");
+                            return (1);
+                        }
+                        //console.log(checkAdiacent(i, j, 0, score));
+                        //recursiveHelper(i, j);
+                        //console.log(ret);
+                    }
+                }
+            }
+            // if (score >= 3)
+            //     console.log("player win");
+        }
+
+        // remove a move from the board
+        function removeFromBoard(index)
+        {
+            let value = index;
+            let fixed = value;
+            if (value === 0)
+                fixed++;
+            let x = value % 3;
+            let y = Math.floor(fixed / 3);
+
+            let valueStr = value.toString();
+            board[y][x] = "empty";
+            document.getElementById(valueStr).textContent = "";
+            //console.log(board);
+            console.log("removed index: ", index);
+            console.log("y - x: ", y, x);
+        }
+
+        // change turn logic
         function nextTurn()
-        {               
+        {   
+            //console.log("player won");            
             if (turn === 0)
             {
                 myTurn.hidden = false;
@@ -60,9 +253,7 @@
                 if (totalPlayer >= 4)
                 {
                     removeFromBoard(playerHistory[totalPlayer - 4]);
-                    //console.log(playerHistory);
                 }
-                //console.log("totalPlayer: ", totalPlayer);
                 handlePlayerTurn();
             }
             else
@@ -74,48 +265,69 @@
                 {
                     //removeFromBoard()
                     removeFromBoard(iaHistory[totalIa - 4]);
-                    console.log(iaHistory);
+                    //console.log(iaHistory);
                 }
-                console.log("totalIa: ", totalIa);
+                //console.log("totalIa: ", totalIa);
                 handleIaTurn();
             }
             total++;
         }
 
+        // handle player move
         function handlePlayerTurn(event)
         {
-            console.log("player turn");
+            //console.log("player turn");
+            checkWin();
             totalPlayer++;
         }
 
+        // handle ia move
         function handleIaTurn()
         {
             let value = getInt(8);
+            let fixed = value;
+            if (value === 0)
+                fixed++;
+            let x = value % 3;
+            let y = Math.floor(fixed / 3);
+            let z = 0;
+            let holder = 0;
 
-            if (board[value] === "X"
-                || board[value] === "O")
+            if (board[y][x] === "X"
+                || board[y][x] === "O")
             {
                 let i = 0;
-                while(board[i] != 'empty')
+                let j = 0;
+                let found = 0;
+                while(i < 3)
                 {
+                    j = 0;
+                    if (found)
+                        break;
+                    while(j < 3)
+                    {
+                        if (board[i][j] === 'empty')
+                        {
+                            y = i;
+                            x = j;
+                            value = z;
+                            //console.log("invalid cell, new cell: ", i, j);
+                            found = 1;
+                        }
+                        j++;
+                        z++;
+                    }
                     i++;
                 }
-                console.log("invalid cell, new cell: ", i);
-                value = i;
-
             }
             let valueStr = value.toString();
             let cell = document.getElementById(valueStr).textContent = "O";
             iaHistory.push(value);
             turn = 0;
-            board[value] = "O";
+            board[y][x] = "O";
+            //console.log(board);
             //console.log(iaHistory);
             nextTurn();
-        }
-
-        function getInt(max)
-        {   
-            return Math.floor(Math.random() * max);
         }
 
         const playerHistory = [];
@@ -132,25 +344,37 @@
         
         let turn;
         let finish = 0;
-        let board;
         let event;
         let val;
+
+        // get random number
+        function getInt(max)
+        {   
+            return Math.floor(Math.random() * max);
+        }
 
         // moves listener
         table.addEventListener('click', async (event) => {
             let value = event.target.id;
-            let valueStr = value.toString();
-
-            if (board[value] === "X"
-                || board[value] === "O")
+            let fixed = value;
+            if (value === 0)
+                fixed++;
+            let x = value % 3;
+            let y = Math.floor(fixed / 3);
+        
+            //console.log("x - y : ", x, y);
+            if (board[y][x] === "X"
+                || board[y][x] === "O")
             {
+                console.log(board);
                 console.log("invalid cell");
                 return;
             }
+            let valueStr = value.toString();
             let cell = document.getElementById(valueStr).textContent = "X";
             playerHistory.push(value);
             turn = 1;
-            board[value] = "X";
+            board[y][x] = "X";
             nextTurn();
         });
 
@@ -194,10 +418,10 @@
                 });
                 
 
-                console.log('Init response status:', response.status);
+                //console.log('Init response status:', response.status);
                 
                 if (response.ok) {
-                    board = await response.json();
+                    //board = await response.json();
                     appEl.hidden = false;
                     turn = getInt(2);
                     nextTurn();
