@@ -67,10 +67,10 @@ export function	validator(username, password, email)
 		throw (Object.assign(new Error('Password is too similar to username or email.'), { statusCode: 442 }));
 }
 
-export function	formatExpirationDate(date)
+export function	formatDate(date)
 {
 	// Convert date to 'YYYY-MM-DD HH:MM:SS' format (sqlite format)
-	//	from 
+	//	from js format 'YYYY-MM-DDTHH:MM:SS.sssZ'
 	const	pad = n => String(n).padStart(2, '0');
 
 	return (

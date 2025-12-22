@@ -127,5 +127,7 @@ I think it's ok
 [x] should the user stats row be created at user registration? i think so
 	-> user deletion
 
-[] Explain date formats differences in docs (specially function formatExpirationDate)
+[x] Explain date formats differences in docs (specially function formatDate)
 	and check all of db and microservice-db.js for sql injection or other shit around
+
+[] Add ws docs in std-microservice architecture
