@@ -131,3 +131,5 @@ I think it's ok
 	and check all of db and microservice-db.js for sql injection or other shit around
 
 [] Add ws docs in std-microservice architecture
+
+[] Solve the print problme in make stop
