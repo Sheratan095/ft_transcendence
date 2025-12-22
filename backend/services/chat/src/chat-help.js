@@ -31,6 +31,22 @@ export function	checkEnvVariables(requiredEnvVars)
 		process.exit(1);
 }
 
+export function	formatDate(date)
+{
+	// Convert date to 'YYYY-MM-DD HH:MM:SS' format (sqlite format)
+	//	from 
+	const	pad = n => String(n).padStart(2, '0');
+
+	return (
+		date.getUTCFullYear() + '-' +
+		pad(date.getUTCMonth() + 1) + '-' +
+		pad(date.getUTCDate()) + ' ' +
+		pad(date.getUTCHours()) + ':' +
+		pad(date.getUTCMinutes()) + ':' +
+		pad(date.getUTCSeconds())
+	);
+}
+
 // Helper function to extract user data from gateway headers
 // This function parses the user data passed from the gateway after JWT authentication
 export function	extractUserData(request)
