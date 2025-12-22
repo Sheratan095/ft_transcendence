@@ -69,14 +69,18 @@ export function	validator(username, password, email)
 
 export function	formatExpirationDate(date)
 {
-	// Keep the ISO format to preserve timezone information for proper parsing
+	// Convert date to 'YYYY-MM-DD HH:MM:SS' format (sqlite format)
+	//	from 
+	const	pad = n => String(n).padStart(2, '0');
 
-	const	date = date.toISOString()
-	.replace('T', ' ')
-	.replace('Z', '')
-	.slice(0, 19);
-
-	return (date);
+	return (
+		date.getUTCFullYear() + '-' +
+		pad(date.getUTCMonth() + 1) + '-' +
+		pad(date.getUTCDate()) + ' ' +
+		pad(date.getUTCHours()) + ':' +
+		pad(date.getUTCMinutes()) + ':' +
+		pad(date.getUTCSeconds())
+	);
 }
 
 export function	isTokenExpired(expirationDate)

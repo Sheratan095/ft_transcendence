@@ -225,6 +225,13 @@ help:
 	@echo "    make install  - Install dependencies"
 	@echo "    make help     - Show this help"
 
+.PHONY: remove-databases
+remove-databases:
+	@echo "Removing all database files (*.db)..."
+	@find . -path "*/data/*.db" -type f -delete
+	@echo "Database files removed."
+
+
 # Clean build artifacts and temporary files
 .PHONY: clean
 clean:
