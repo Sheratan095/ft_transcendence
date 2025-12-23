@@ -85,3 +85,23 @@ export const	sendChatUserAdded = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
+
+//-----------------------------GAME NOTIFICATIONS-----------------------------
+
+export const	sendGameInvite = async (req, reply) =>
+{
+	try
+	{
+		const	{ senderId, senderUsername, targetId, gameId, gameType } = req.body;
+
+		userConnectionManager.sendGameInviteNotification(targetId, senderId, senderUsername, gameId, gameType);
+		console.log(`[NOTIFICATION] Notifying user ${targetId} about ${gameType} game invite from ${senderUsername} (game ID: ${gameId})`);
+	
+		return (reply.code(200).send());
+	}
+	catch (err)
+	{
+		console.error('[NOTIFICATION] Error in sendPongGameInvite handler:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}

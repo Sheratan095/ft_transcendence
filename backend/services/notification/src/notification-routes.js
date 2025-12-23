@@ -5,7 +5,8 @@ import {
 	sendFriendAccept,
 	send2FaCode,
 	getActiveUsersCount,
-	sendChatUserAdded
+	sendChatUserAdded,
+	sendGameInvite,
 } from './notification-controllers.js';
 
 import {
@@ -69,6 +70,7 @@ const	withCookieAuth =
 	}
 };
 
+const	availableGameTypes = ['pong', 'tris'];
 
 //-----------------------------INTERAL ROUTES-----------------------------
 
@@ -229,6 +231,43 @@ const	sendChatUserAddedOpts =
 	handler: sendChatUserAdded,
 }
 
+//-----------------------------ROUTES FOR GAME NOTIFICATIONS-----------------------------
+
+const	sendGameInviteOpts = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Send game invite',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['senderId', 'senderUsername', 'targetId', 'gameId', 'gameType'],
+			properties:
+			{
+				senderId: { type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+				senderUsername: { type: 'string'}, // USERNAME OF WHO SENT THE GAME INVITE
+				targetId: { type: 'string'}, // WHO SENT THE GAME INVITE
+				gameId: { type: 'string'}, // GAME ID
+				gameType: { type: 'string', enum: availableGameTypes }, // TYPE OF THE GAME
+			}
+		},
+
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: sendGameInvite
+}
+
+
 //-----------------------------EXPORT ROUTES-----------------------------
 
 export function	notificationRoutes(fastify)
@@ -254,4 +293,5 @@ export function	notificationRoutes(fastify)
 	fastify.post('/send-friend-accept', sendFriendAcceptOpts);
 	fastify.post('/send-2fa-code', send2FaOpts);
 	fastify.post('/send-chat-user-added', sendChatUserAddedOpts);
+	fastify.post('/send-game-invite', sendGameInviteOpts);
 }
