@@ -14,6 +14,8 @@
         <div class="turn">
             <h2 id="myTurn" hidden>it's your turn</h2>
             <h2 id="oppoTurn" hidden>it's opponent turn</h2>
+            <h2 id="playerWin" hidden>you Won</h2>
+            <h2 id="iaTurn" hidden>opponent Won</h2>
         </div>
         <div id="board">
             <div class="row">
@@ -36,38 +38,62 @@
     <button id="startBtn" class="button" disabled>Start</button>
     
     <script>
+        const playerHistory = [];
+        const iaHistory = [];
+    
+        const email = "test1@gmail.com";
+        const password = "1234";
+        const startBtn = document.getElementById('startBtn');
+        const appEl = document.getElementById('app');
+
+        const myTurn = document.getElementById('myTurn');
+        const oppoTurn = document.getElementById('oppoTurn');
+        const table = document.getElementById('board');
         const GATEWAY_URL = 'https://localhost:3000';
+        const pWin = document.getElementById('playerWin');
+        const eWin = document.getElementById('enemyWin');
+
+        let endFlag = 0;
+        let turn;
+        let finish = 0;
+        let event;
+        let val;
         let accessToken = null;
         let totalPlayer = 0;
         let totalIa = 0;
         let total = 0;
         let board = Array(3);
-        board[0] = Array("empty", "empty", "empty");
-        board[1] = Array("empty", "empty", "empty");
-        board[2] = Array("empty", "empty", "empty");
         let score = 0;
         let i = 0;
         let iter = 0;
+        board[0] = Array("empty", "empty", "empty");
+        board[1] = Array("empty", "empty", "empty");
+        board[2] = Array("empty", "empty", "empty");
+        // let charSym;
 
-        function checkAdiacent(y, x, dir, score)
+        /**
+         * function:
+         *  recursively check for pairs in a given direction until score == 2
+         * return:
+         *  0 if the winning combination is not found, 1 if does
+         * */
+        function checkAdiacent(y, x, dir, score, charSym)
         {
-            console.log("score: ", score);
-            console.log("dir: ", dir);
-            console.log("iteration: ", iter++);
+            //  console.log("score: ", score);
+            //  console.log("dir: ", dir);
+            //  console.log("iteration: ", iter++);
+            console.log(charSym);
             if (score === 2)
                 return (1);
-            // if (dir === 0)
-            //     score--;
-            // check left & right
             if (x + 1 < 3 && (dir === 0 || dir === 1))
             {
-                if (board[y][x + 1] == 'X')
+                if (board[y][x + 1] === charSym)
                 {
-                    //console.log("checking square: ", y, x);
-                    //console.log(count);
-                    console.log("found right");
+                    // console.log("checking square: ", y, x);
+                    // console.log(count);
+                    // console.log("found right");
                     score++;
-                    if (checkAdiacent(y, x + 1, 1, score))
+                    if (checkAdiacent(y, x + 1, 1, score, charSym))
                     {
                         return (1);
                     }
@@ -80,11 +106,11 @@
             }
             if (x - 1 <= 0 && (dir === 0 || dir === 2))
             {
-                if (board[y][x - 1] == 'X')
+                if (board[y][x - 1] === charSym)
                 {
                     console.log("found left");
                     score++;
-                    if (checkAdiacent(y, x - 1, 2, score))
+                    if (checkAdiacent(y, x - 1, 2, score, charSym))
                     {
                         return (1);
                     }
@@ -98,11 +124,11 @@
             // check under & over
             if (y + 1 < 3 && (dir === 0 || dir === 3))
             {
-                if (board[y + 1][x] == 'X')
+                if (board[y + 1][x] == charSym)
                 {
-                    console.log("found bottom");
+                    // console.log("found bottom");
                     score++;
-                    if (checkAdiacent(y + 1, x, 3, score))
+                    if (checkAdiacent(y + 1, x, 3, score, charSym))
                     {
                         return (1);
                     }
@@ -114,11 +140,11 @@
             }
             if (y - 1 >= 0 && (dir === 0 || dir === 4))
             {
-                if (board[y - 1][x] == 'X')
+                if (board[y - 1][x] === charSym)
                 {
-                    console.log("found top");
+                    // console.log("found top");
                     score++;
-                    if (checkAdiacent(y - 1, x, 4, score))
+                    if (checkAdiacent(y - 1, x, 4, score, charSym))
                     {
                         return (1);
                     }
@@ -128,13 +154,14 @@
                     }
                 }
             }
-            // check diagonally 1
+            // check diagonally down - right
             if (y + 1 < 3 && x + 1 < 3 && (dir === 0 || dir === 5))
             {
-                if (board[y + 1][x + 1] == 'X')
+                //console.log("case down right");
+                if (board[y + 1][x + 1] === charSym)
                 {
                     score++;
-                    if (checkAdiacent(y + 1, x + 1, 5, score))
+                    if (checkAdiacent(y + 1, x + 1, 5, score, charSym))
                     {
                         return (1);
                     }
@@ -144,12 +171,13 @@
                     }
                 }
             }
+            // check diagonally up - left
             if (y - 1 >= 0 && x - 1 >= 0 && (dir === 0 || dir === 6))
             {
-                if (board[y - 1][x - 1] == 'X')
+                if (board[y - 1][x - 1] === charSym)
                 {
                     score++;
-                    if (checkAdiacent(y - 1, x - 1, 6, score))
+                    if (checkAdiacent(y - 1, x - 1, 6, score, charSym))
                     {
                         return (1);
                     }
@@ -159,28 +187,31 @@
                     }
                 }
             }
-            // check diagonally 2
-            if (y + 1 < 3 && x - 1 >= 0 && (dir === 0 || dir === 7))
-            {
-                if (board[y + 1][x - 1] == 'X')
-                {
-                    score++;
-                    if (checkAdiacent(y + 1, x - 1, 7, score))
-                    {
-                        return (1);
-                    }
-                    else
-                    {
-                        score = 0;
-                    }
-                }
-            }
+            // check diagonally up - right
             if (y - 1 >= 0 && x + 1 < 3 && (dir === 0 || dir === 8))
             {
-                if (board[y - 1][x + 1] == 'X')
+                //console.log("case diagonal2");
+                if (board[y - 1][x + 1] == charSym)
                 {
                     score++;
-                    if (checkAdiacent(y - 1, x + 1, 8, score))
+                    if (checkAdiacent(y - 1, x + 1, 8, score, charSym))
+                    {
+                        return (1);
+                    }
+                    else
+                    {
+                        score = 0;
+                    }
+                }
+            }
+            // check diagonally down - left
+            if (y + 1 < 3 && x - 1 >= 0 && (dir === 0 || dir === 7))
+            {
+                if (board[y + 1][x - 1] === charSym)
+                {
+                    //console.log("case diagonal");
+                    score++;
+                    if (checkAdiacent(y + 1, x - 1, 7, score, charSym))
                     {
                         return (1);
                     }
@@ -193,37 +224,52 @@
             return (0);
         }
 
-        function checkWin()
+        /**
+         * function:
+         *  calls a checkAdiacent on each cell of the board 
+         * return:
+         *  1 if the player won, 0 if not
+         * */
+        function checkWin(charSym)
         {
             // score = 3;
-            console.log("new turn");
+            //console.log("new turn");
             for (let i = 0; i < 3; i++)
             {
                 for (let j = 0; j < 3; j++)
                 {
                     //console.log("y - x", i, j);
-                    if (board[i][j] === 'X')
+                    if (board[i][j] === charSym)
                     {
                         score = 0;
                         iter = 0;
-                        //ret = checkAdiacent(i, j);
-                        console.log("checking");
-                        console.log("y - x", i, j);
-                        if (checkAdiacent(i, j, 0, score))
+                        //  console.log("checking");
+                        //  console.log("y - x", i, j);
+                        if (checkAdiacent(i, j, 0, score, charSym))
                         {
-                            console.log("player won");
+                            if (charSym === 'X')
+                            {
+                                console.log("player won");
+                                pWin.hidden = false;
+                                endFlag = 1;
+                            }
+
+                            else
+                            {
+                                endFlag = 1;
+                                console.log("enemyWon");
+                                pWin.hidden = false;
+                            }
                             return (1);
                         }
-                        //console.log(checkAdiacent(i, j, 0, score));
-                        //recursiveHelper(i, j);
-                        //console.log(ret);
                     }
                 }
             }
-            // if (score >= 3)
-            //     console.log("player win");
+            return (0);
         }
-
+        
+        
+////////////////////////////////////////
         // remove a move from the board
         function removeFromBoard(index)
         {
@@ -245,21 +291,25 @@
         // change turn logic
         function nextTurn()
         {   
-            //console.log("player won");            
+            //console.log("player won");      
             if (turn === 0)
             {
                 myTurn.hidden = false;
-                oppoTurn.hidden = true;
+                //oppoTurn.hidden = true;
                 if (totalPlayer >= 4)
                 {
                     removeFromBoard(playerHistory[totalPlayer - 4]);
                 }
-                handlePlayerTurn();
+                if (handlePlayerTurn())
+                {
+                    console.log("shutting down");
+                    return (1);
+                }
             }
             else
             {
                 oppoTurn.hidden = false;
-                myTurn.hidden = true;
+                //myTurn.hidden = true;
                 totalIa++;
                 if (totalIa >= 4)
                 {
@@ -268,7 +318,11 @@
                     //console.log(iaHistory);
                 }
                 //console.log("totalIa: ", totalIa);
-                handleIaTurn();
+                if (handleIaTurn())
+                {
+                    console.log("shutting down");
+                    return (1);
+                }
             }
             total++;
         }
@@ -277,7 +331,10 @@
         function handlePlayerTurn(event)
         {
             //console.log("player turn");
-            checkWin();
+            if (checkWin('X'))
+            {
+                return (1);
+            }
             totalPlayer++;
         }
 
@@ -325,27 +382,16 @@
             iaHistory.push(value);
             turn = 0;
             board[y][x] = "O";
-            //console.log(board);
-            //console.log(iaHistory);
+
+            if (checkWin('O'))
+            {
+                endFlag = 1;
+                return (1);
+            }
             nextTurn();
         }
 
-        const playerHistory = [];
-        const iaHistory = [];
-    
-        const email = "test1@gmail.com";
-        const password = "1234";
-        const startBtn = document.getElementById('startBtn');
-        const appEl = document.getElementById('app');
-
-        const myTurn = document.getElementById('myTurn');
-        const oppoTurn = document.getElementById('oppoTurn');
-        const table = document.getElementById('board');
-        
-        let turn;
-        let finish = 0;
-        let event;
-        let val;
+////////////////////////////////////////
 
         // get random number
         function getInt(max)
@@ -355,34 +401,71 @@
 
         // moves listener
         table.addEventListener('click', async (event) => {
-            let value = event.target.id;
-            let fixed = value;
-            if (value === 0)
-                fixed++;
-            let x = value % 3;
-            let y = Math.floor(fixed / 3);
-        
-            //console.log("x - y : ", x, y);
-            if (board[y][x] === "X"
-                || board[y][x] === "O")
+            if (endFlag === 0)
             {
-                console.log(board);
-                console.log("invalid cell");
-                return;
+                let value = event.target.id;
+                let fixed = value;
+                if (value === 0)
+                    fixed++;
+                let x = value % 3;
+                let y = Math.floor(fixed / 3);
+            
+                //console.log("x - y : ", x, y);
+                if (board[y][x] === "X"
+                    || board[y][x] === "O")
+                {
+                    console.log(board);
+                    console.log("invalid cell");
+                    return;
+                }
+                let valueStr = value.toString();
+                let cell = document.getElementById(valueStr).textContent = "X";
+                playerHistory.push(value);
+                turn = 1;
+                board[y][x] = "X";
+                nextTurn();
             }
-            let valueStr = value.toString();
-            let cell = document.getElementById(valueStr).textContent = "X";
-            playerHistory.push(value);
-            turn = 1;
-            board[y][x] = "X";
-            nextTurn();
+        });
+
+        // game init
+        startBtn.addEventListener('click', async () => {
+            console.log('startBtn clicked');
+            
+            try {
+                const response = await fetch(`${GATEWAY_URL}/tris/init`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include' // Important for cookies
+                });
+                
+                if (response.ok) {
+                    //board = await response.json();
+                    appEl.hidden = false;
+                    turn = getInt(2);
+                    // if (turn === 0)
+                    //     myTurn.hidden = false;
+                    // else
+                    //     oppoTurn.hidden = false;
+                    nextTurn();
+                }
+                else
+                {
+                    console.error('Init failed with status:', response.status);
+                    alert('Failed to initialize game');
+                }
+            } catch (err) {
+                console.error('Error initializing game:', err);
+                alert('Error: ' + err.message);
+            }
         });
 
         // login
         window.addEventListener('DOMContentLoaded', async () => {
             try {
-                const response = await fetch(`${GATEWAY_URL}/auth/login`, {
-                    method: 'POST',
+            const response = await fetch(`${GATEWAY_URL}/auth/login`, {
+                method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -401,39 +484,6 @@
             } catch (err) {
                 console.error('Login error:', err);
                 alert('Error during login: ' + err.message);
-            }
-        });
-
-        // game init
-        startBtn.addEventListener('click', async () => {
-            console.log('startBtn clicked');
-            
-            try {
-                const response = await fetch(`${GATEWAY_URL}/tris/init`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include' // Important for cookies
-                });
-                
-
-                //console.log('Init response status:', response.status);
-                
-                if (response.ok) {
-                    //board = await response.json();
-                    appEl.hidden = false;
-                    turn = getInt(2);
-                    nextTurn();
-                }
-                else
-                {
-                    console.error('Init failed with status:', response.status);
-                    alert('Failed to initialize game');
-                }
-            } catch (err) {
-                console.error('Error initializing game:', err);
-                alert('Error: ' + err.message);
             }
         });
    
