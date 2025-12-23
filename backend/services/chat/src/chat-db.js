@@ -380,7 +380,7 @@ export class	ChatDatabase
 
 	//-----------------------------MESSAGE QUERIES----------------------------
 
-	async	addMessageToChat(chatId, senderId, message, type = "text", timestamp)
+	async	addMessageToChat(chatId, senderId, message, timestamp, type = "text")
 	{
 		const	messageId = await this.#generateUUID();
 

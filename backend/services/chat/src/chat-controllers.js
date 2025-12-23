@@ -112,10 +112,10 @@ export const	getMessages = async (req, reply) =>
 		const timestamp = formatDate(new Date());
 
 		// Update messages in requested chat statuses to 'delivered' for this user
-		const	deliveredTime = await chatDb.markMessagesAsDelivered(chatId, userId, timestamp);
+		await chatDb.markMessagesAsDelivered(chatId, userId, timestamp);
 
 		// Notify senders about the status update if the overall status changed
-		await notifyMessageStatusUpdates(chatId, deliveredTime, chatDb);
+		await notifyMessageStatusUpdates(chatId, timestamp, chatDb);
 
 		return (reply.code(200).send(messages));
 
@@ -151,13 +151,13 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only add friends to the chat' }));
 		}
 
+		const	timestamp = formatDate(new Date());
+
 		// Add the user to the chat
-		await chatDb.addUserToChat(chatId, toUserId);
+		await chatDb.addUserToChat(chatId, toUserId, timestamp);
 
 		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
 		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
-
-		const	timestamp = formatDate(new Date());
 
 		// Notify the user newly added to the chat
 		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)

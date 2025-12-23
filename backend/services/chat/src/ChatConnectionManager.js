@@ -12,7 +12,7 @@ class	ChatConnectionManager
 		this._cachedChatNames = new Map(); // chatId -> chatName
 	}
 
-	async	addConnection(userId, socket, chatDb)
+	async	addConnection(userId, socket, chatDb, timestamp)
 	{
 		this._connections.set(userId, socket);
 
@@ -20,7 +20,7 @@ class	ChatConnectionManager
 		const	chats = await chatDb.getChatsForUser(userId);
 		for (const chat of chats)
 		{
-			const	timestamp = await chatDb.markMessagesAsDelivered(chat.chat_id, userId);
+			await chatDb.markMessagesAsDelivered(chat.chat_id, userId, timestamp);
 			notifyMessageStatusUpdates(chat.chat_id, timestamp, chatDb);
 		}
 
@@ -71,7 +71,7 @@ class	ChatConnectionManager
 	{
 		const	message = `User ${newUsername} has been added to the chat by ${invitedByUsername}.`;
 
-		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_join', timestamp);
+		const	messageId = await chatDb.addMessageToChat(chatId, null, message, timestamp, 'user_join');
 		const	data = {
 			event: 'userJoin',
 			chatId: chatId,
@@ -86,11 +86,11 @@ class	ChatConnectionManager
 	
 	}
 
-	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb)
+	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb, timestamp)
 	{
 		const	message = `User ${leftUsername} has left the chat.`;
 
-		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_leave', timestamp);
+		const	messageId = await chatDb.addMessageToChat(chatId, null, message, timestamp, 'user_leave');
 
 		const	data = {
 			event: 'userLeave',

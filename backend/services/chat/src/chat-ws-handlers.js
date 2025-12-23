@@ -27,7 +27,9 @@ export function	handleNewConnection(socket, req, chatDb)
 		return (null);
 	}
 
-	chatConnectionManager.addConnection(userId, socket, chatDb);
+	const	timestamp = formatDate(new Date());
+
+	chatConnectionManager.addConnection(userId, socket, chatDb, timestamp);
 
 	return (userId);
 }
@@ -171,7 +173,7 @@ async function handlePrivateMessage(userId, data, chatDb)
 		if (!relation || relation.relationshipStatus !== 'accepted')
 		{
 			console.log(`[CHAT] User ${userId} attempted to send a private message to non-friend user ${toUserId}`);
-			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only send private messages to friends' }));
+			return (chatConnectionManager.sendErrorMessage(userId, 'Can only send private messages to friends'));
 		}
 
 		// Validate that receiver exists before creating chat
@@ -188,7 +190,7 @@ async function handlePrivateMessage(userId, data, chatDb)
 		const	chatId = await chatDb.createPrivateChat(userId, toUserId, timestamp);
 		
 		// Store message in database
-		const	messageId = await chatDb.addMessageToChat(chatId, userId, content);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, content, timestamp);
 
 		// Send to recipient
 		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb, chatId, timestamp);
@@ -234,10 +236,10 @@ async function	handleChatRead(userId, data, chatDb)
 
 		// Mark all message status for this user in this chat as read
 		//  only updates messages that aren't already 'read' to reduce writes
-		const	updatedTime = await chatDb.markMessagesAsRead(chatId, userId, timestamp);
+		await chatDb.markMessagesAsRead(chatId, userId, timestamp);
 
 		// Notify senders about the status update
-		await notifyMessageStatusUpdates(chatId, updatedTime, chatDb);
+		await notifyMessageStatusUpdates(chatId, timestamp, chatDb);
 	}
 	catch (err)
 	{
