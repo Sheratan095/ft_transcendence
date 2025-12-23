@@ -192,7 +192,7 @@ export class	ChatDatabase
 		return (users.map(u => u.user_id));
 	}
 
-	async	createPrivateChat(userId1, userId2)
+	async	createPrivateChat(userId1, userId2, timestamp)
 	{
 		// Ensure userIds are strings to match TEXT column type
 		const	strUserId1 = String(userId1);
@@ -221,7 +221,7 @@ export class	ChatDatabase
 		await this.db.run(insertChatQuery, [chatId]);
 
 		// Add both users to the chat_members table
-		const	joinedAt = new Date(Date.now()).toISOString();
+		const	joinedAt = timestamp;
 
 		const insertMemberQuery = `
 			INSERT INTO chat_members (chat_id, user_id, joined_at)
@@ -234,17 +234,17 @@ export class	ChatDatabase
 		return (chatId);
 	}
 
-	async	createGroupChat(name)
+	async	createGroupChat(name, timestamp)
 	{
 		// Create new group chat
 		const	chatId = await this.#generateUUID();
 
 		const	insertChatQuery = `
-			INSERT INTO chats (id, name, chat_type)
-			VALUES (?, ?, 'group')
+			INSERT INTO chats (id, name, chat_type, created_at)
+			VALUES (?, ?, 'group', ?)
 		`;
 
-		await this.db.run(insertChatQuery, [chatId, name]);
+		await this.db.run(insertChatQuery, [chatId, name, timestamp]);
 
 		return (chatId);
 	}
@@ -289,7 +289,7 @@ export class	ChatDatabase
 		return (result ? result.chat_type : null);
 	}
 
-	async	addUserToChat(chatId, userId)
+	async	addUserToChat(chatId, userId, timestamp)
 	{
 		// Check if user is already in chat
 		if (await this.isUserInChat(userId, chatId))
@@ -314,15 +314,13 @@ export class	ChatDatabase
 			throw error;
 		}
 
-		const	joinedAt = new Date(Date.now()).toISOString();
-
 		const	insertMemberQuery = `
 			INSERT INTO chat_members (chat_id, user_id, joined_at)
 			VALUES (?, ?, ?)
 		`;
 
 		// Ensure userId is a string to match TEXT column type
-		await this.db.run(insertMemberQuery, [chatId, String(userId), joinedAt]);
+		await this.db.run(insertMemberQuery, [chatId, String(userId), timestamp]);
 	}
 
 	async	removeUserFromChat(chatId, userId)
@@ -382,10 +380,9 @@ export class	ChatDatabase
 
 	//-----------------------------MESSAGE QUERIES----------------------------
 
-	async	addMessageToChat(chatId, senderId, message, type = "text")
+	async	addMessageToChat(chatId, senderId, message, timestamp, type = "text")
 	{
 		const	messageId = await this.#generateUUID();
-		const	timestamp = new Date().toISOString();
 
 		if (type !== 'text')
 			senderId = this.systemSenderId;
@@ -401,10 +398,8 @@ export class	ChatDatabase
 
 	//-----------------------------MESSAGE STATUS QUERIES----------------------------
 
-	async	updateMessageStatus(messageId, userId, status)
+	async	updateMessageStatus(messageId, userId, status, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		// Update existing status entry
 		const	updateStatusQuery = `
 			UPDATE message_statuses
@@ -414,10 +409,8 @@ export class	ChatDatabase
 		await this.db.run(updateStatusQuery, [status, timestamp, messageId, userId]);
 	}
 
-	async	createMessageStatus(messageId, userId, status)
+	async	createMessageStatus(messageId, userId, status, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		const	insertStatusQuery = `
 			INSERT INTO message_statuses (message_id, user_id, status, updated_at)
 			VALUES (?, ?, ?, ?)
@@ -489,10 +482,8 @@ export class	ChatDatabase
 		}
 	}
 
-	async	markMessagesAsRead(chatId, userId)
+	async	markMessagesAsRead(chatId, userId, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		const	query = `
 			UPDATE message_statuses
 			SET status = 'read', 
@@ -511,10 +502,8 @@ export class	ChatDatabase
 	}
 
 	// Used when a user fetch messages from a chat
-	async	markMessagesAsDelivered(chatId, userId)
+	async	markMessagesAsDelivered(chatId, userId, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		const	query = `
 			UPDATE message_statuses
 			SET status = 'delivered', 

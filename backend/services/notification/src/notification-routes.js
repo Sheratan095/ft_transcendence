@@ -13,7 +13,7 @@ import {
 	handleMessage,
 	handleClose,
 	handleError
-} from './event-handlers.js';
+} from './notification-ws-handlers.js';
 
 // Reusable error response schemas
 const	ErrorResponse =

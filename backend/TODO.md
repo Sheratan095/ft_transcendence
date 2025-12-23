@@ -74,10 +74,6 @@
 	keyGenerator: (req) => req.body.username || req.ip
 	});
 
-[] delete user data? (GDPR)
-	Don’t do the actual profile deletion inside the Auth service —
-	let Auth trigger a system-wide cascade via events or APIs.
-	Each service deletes what it owns.
 [x] change checkForEnvVars and display all the missing vars
 [x] add checks on user existing and token expiration directly in gatewat jwt validation
 [x] how can we check if a user is online? : ping on websocket notification service
@@ -103,14 +99,12 @@
 	[GATEWAY] Auth service error: Request failed with status code 409
 
 [x] add user/... to all relationships routes in gateway registrations
-[] add a "starting script" that generate the env, install packages and create the certificates(they shouldn't be posted in the repo)
 [x] refactor of backend_design
 
 [x] move email send in to notification service (endpoing called by auth service during login)
 [x] "real friends online" instead of all online users
 
 [x] refactor of all db's like chat db (indenting, "type_like" enums)
-[] prisma? for db interactions
 [x] dark swagger ui 
 
 I think it's ok
@@ -121,8 +115,20 @@ I think it's ok
 [x] When try to send a message or add a person to group, if you blocked him, return an error
 	with message "unblock user to send a message" and noting when he blocked you
 
-[] Normalize date type
+[x] Normalize date type
 [x] Leave group
 [x] rework of user-specific messages in group chat to add the username
 [x] should the user stats row be created at user registration? i think so
 	-> user deletion
+
+[x] Explain date formats differences in docs (specially function formatDate)
+	and check all of db and microservice-db.js for sql injection or other shit around
+
+[x] Add ws docs in std-microservice architecture
+
+[] add a "starting script" that generate the env, install packages and create the certificates(they shouldn't be posted in the repo)
+
+[] delete user data? (GDPR)
+	Don’t do the actual profile deletion inside the Auth service —
+	let Auth trigger a system-wide cascade via events or APIs.
+	Each service deletes what it owns.

@@ -3,7 +3,7 @@ import {
 	handleMessage,
 	handleClose,
 	handleError
-} from './event-handlers.js';
+} from './tris-ws-handlers.js';
 
 import {
 	createUserStats as createUserStatsHandler,

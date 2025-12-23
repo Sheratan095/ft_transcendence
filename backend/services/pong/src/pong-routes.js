@@ -3,7 +3,7 @@ import {
 	handleMessage,
 	handleClose,
 	handleError
-} from './event-handlers.js';
+} from './pong-ws-handlers.js';
 
 export function	pongRoutes(fastify)
 {

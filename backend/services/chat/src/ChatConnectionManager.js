@@ -12,7 +12,7 @@ class	ChatConnectionManager
 		this._cachedChatNames = new Map(); // chatId -> chatName
 	}
 
-	async	addConnection(userId, socket, chatDb)
+	async	addConnection(userId, socket, chatDb, timestamp)
 	{
 		this._connections.set(userId, socket);
 
@@ -20,7 +20,7 @@ class	ChatConnectionManager
 		const	chats = await chatDb.getChatsForUser(userId);
 		for (const chat of chats)
 		{
-			const	timestamp = await chatDb.markMessagesAsDelivered(chat.chat_id, userId);
+			await chatDb.markMessagesAsDelivered(chat.chat_id, userId, timestamp);
 			notifyMessageStatusUpdates(chat.chat_id, timestamp, chatDb);
 		}
 
@@ -44,7 +44,7 @@ class	ChatConnectionManager
 	}
 
 	// Return if the message was delivered to all users in the chat
-	async	sendMsgToChat(chatId, senderId, messageId, content, chatDb)
+	async	sendMsgToChat(chatId, senderId, messageId, content, chatDb, timestamp)
 	{
 		// Refresh username cache
 		const	username = await this.getUsernameFromCache(senderId, true);
@@ -55,10 +55,10 @@ class	ChatConnectionManager
 			senderId: senderId,
 			messageId: messageId,
 			content: content,
-			timestamp: new Date().toISOString(),
+			timestamp: timestamp,
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message');
+		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message', timestamp);
 
 		const	status = await chatDb.getOverallMessageStatus(messageId);
 
@@ -67,12 +67,11 @@ class	ChatConnectionManager
 
 	// Send system message to chat members
 	// excludeUserId: optional user to exclude from receiving the message (e.g., newly added user)
-	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedByUsername, chatDb)
+	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedByUsername, chatDb, timestamp)
 	{
 		const	message = `User ${newUsername} has been added to the chat by ${invitedByUsername}.`;
 
-		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_join');
-
+		const	messageId = await chatDb.addMessageToChat(chatId, null, message, timestamp, 'user_join');
 		const	data = {
 			event: 'userJoin',
 			chatId: chatId,
@@ -80,18 +79,18 @@ class	ChatConnectionManager
 			username: newUsername,
 			messageId: messageId,
 			message: message,
-			timestamp: new Date().toISOString(),
+			timestamp: timestamp,
 		};
 
 		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
 	
 	}
 
-	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb)
+	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb, timestamp)
 	{
 		const	message = `User ${leftUsername} has left the chat.`;
 
-		const	messageId = await chatDb.addMessageToChat(chatId, null, message, 'user_leave');
+		const	messageId = await chatDb.addMessageToChat(chatId, null, message, timestamp, 'user_leave');
 
 		const	data = {
 			event: 'userLeave',
@@ -100,20 +99,20 @@ class	ChatConnectionManager
 			username: leftUsername,
 			messageId: messageId,
 			message: message,
-			timestamp: new Date().toISOString(),
+			timestamp: timestamp,
 		};
 
 		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
 	}
 
 	// Send chat.joined event to the newly added user
-	async	sendChatJoinedToUser(chatId, addedUserId, invitedByUsername, systemMessage)
+	async	sendChatJoinedToUser(chatId, addedUserId, invitedByUsername, systemMessage, timestamp)
 	{
 		const	data = {
 			chatId: chatId,
 			invitedBy: invitedByUsername,
 			systemMessage: systemMessage,
-			timestamp: new Date().toISOString(),
+			timestamp: timestamp,
 		};
 
 		const	socket = this._connections.get(addedUserId);
@@ -123,7 +122,7 @@ class	ChatConnectionManager
 	}
 
 	// Return if the message was delivered to the user
-	async	sendToUser(senderId, toUserId, messageId, content, chatDb, chatId)
+	async	sendToUser(senderId, toUserId, messageId, content, chatDb, chatId, timestamp)
 	{
 		// Refresh username cache (refresh = true)
 		const	senderUsername = await this.getUsernameFromCache(senderId, true);
@@ -134,7 +133,7 @@ class	ChatConnectionManager
 			messageId: messageId,
 			chatId: chatId,
 			content: content,
-			timestamp: new Date().toISOString(),
+			timestamp: timestamp,
 		};
 
 		// Check if user is connected to socket
@@ -144,8 +143,8 @@ class	ChatConnectionManager
 			console.log(`[CHAT] Sending private message from user ${senderId} to user ${toUserId}`);
 			this.#dispatchEventToSocket(socket, 'chat.privateMessage', data);
 
-			await chatDb.createMessageStatus(messageId, toUserId, 'delivered');
-			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
+			await chatDb.createMessageStatus(messageId, toUserId, 'delivered', timestamp);
+			await chatDb.createMessageStatus(messageId, senderId, 'read', timestamp); // Status for sender (always read)
 
 			return (true);
 		}
@@ -153,8 +152,8 @@ class	ChatConnectionManager
 		{
 			console.log(`[CHAT] User ${toUserId} not connected, message is pending (status 'sent')`);
 
-			await chatDb.createMessageStatus(messageId, toUserId, 'sent'); // Status for receiver
-			await chatDb.createMessageStatus(messageId, senderId, 'read'); // Status for sender (always read)
+			await chatDb.createMessageStatus(messageId, toUserId, 'sent', timestamp); // Status for receiver
+			await chatDb.createMessageStatus(messageId, senderId, 'read', timestamp); // Status for sender (always read)
 
 			return (false);
 		}
@@ -197,7 +196,7 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'chat.messageStatusUpdate', data);
 	}
 
-	async	#dispatchEventToChat(chatId, data, chatDb, createMessageStatus=false, eventType)
+	async	#dispatchEventToChat(chatId, data, chatDb, createMessageStatus=false, eventType, timestamp=null)
 	{
 		// Get users in chat
 		const	userIds = await chatDb.getUsersInChat(chatId);
@@ -214,7 +213,8 @@ class	ChatConnectionManager
 					await chatDb.createMessageStatus(
 						data.messageId,
 						userId,
-						"delivered"
+						"delivered",
+						timestamp
 					);
 				}
 			}
@@ -225,7 +225,8 @@ class	ChatConnectionManager
 					await chatDb.createMessageStatus(
 						data.messageId,
 						userId,
-						"sent"
+						"sent",
+						timestamp
 					);
 				}
 			}

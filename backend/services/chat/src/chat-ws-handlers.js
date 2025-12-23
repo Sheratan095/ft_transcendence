@@ -1,6 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { notifyMessageStatusUpdates, getRelationshipByIds } from './chat-help.js';
+import { notifyMessageStatusUpdates, getRelationshipByIds, formatDate } from './chat-help.js';
 
 export function	handleNewConnection(socket, req, chatDb)
 {
@@ -27,7 +27,9 @@ export function	handleNewConnection(socket, req, chatDb)
 		return (null);
 	}
 
-	chatConnectionManager.addConnection(userId, socket, chatDb);
+	const	timestamp = formatDate(new Date());
+
+	chatConnectionManager.addConnection(userId, socket, chatDb, timestamp);
 
 	return (userId);
 }
@@ -123,11 +125,13 @@ async function	handleChatMessage(userId, data, chatDb)
 		// Trim and limit content length
 		const	sanitizedContent = content.trim().substring(0, 2000); // 2000 char limit
 
+		const	timestamp = formatDate(new Date());
+
 		// Store message in database
-		const	messageId = await chatDb.addMessageToChat(chatId, userId, sanitizedContent);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, sanitizedContent, timestamp);
 
 		// Send to recipients (including sender)
-		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, sanitizedContent, chatDb);
+		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, sanitizedContent, chatDb, timestamp);
 		const	targetName = await chatConnectionManager.getGroupChatNameFromCache(chatId, chatDb);
 
 		// Always acknowledge to sender to ensure they see their own message
@@ -169,7 +173,7 @@ async function handlePrivateMessage(userId, data, chatDb)
 		if (!relation || relation.relationshipStatus !== 'accepted')
 		{
 			console.log(`[CHAT] User ${userId} attempted to send a private message to non-friend user ${toUserId}`);
-			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only send private messages to friends' }));
+			return (chatConnectionManager.sendErrorMessage(userId, 'Can only send private messages to friends'));
 		}
 
 		// Validate that receiver exists before creating chat
@@ -181,14 +185,15 @@ async function handlePrivateMessage(userId, data, chatDb)
 			return;
 		}
 
-		// If chat already exists, returns the existing one
-		const	chatId = await chatDb.createPrivateChat(userId, toUserId);
+		const	timestamp = formatDate(new Date());
 
+		const	chatId = await chatDb.createPrivateChat(userId, toUserId, timestamp);
+		
 		// Store message in database
-		const	messageId = await chatDb.addMessageToChat(chatId, userId, content);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, content, timestamp);
 
 		// Send to recipient
-		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb, chatId);
+		const	delivered = await chatConnectionManager.sendToUser(userId, toUserId, messageId, content, chatDb, chatId, timestamp);
 
 		const	targetName = await chatConnectionManager.getUsernameFromCache(toUserId);
 
@@ -227,12 +232,14 @@ async function	handleChatRead(userId, data, chatDb)
 			return;
 		}
 
+		const	timestamp = formatDate(new Date());
+
 		// Mark all message status for this user in this chat as read
 		//  only updates messages that aren't already 'read' to reduce writes
-		const	updatedTime = await chatDb.markMessagesAsRead(chatId, userId);
+		await chatDb.markMessagesAsRead(chatId, userId, timestamp);
 
 		// Notify senders about the status update
-		await notifyMessageStatusUpdates(chatId, updatedTime, chatDb);
+		await notifyMessageStatusUpdates(chatId, timestamp, chatDb);
 	}
 	catch (err)
 	{

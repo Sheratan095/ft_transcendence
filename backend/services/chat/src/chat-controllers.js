@@ -1,6 +1,12 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
-import { extractUserData, notifyUserAddedToChat, notifyMessageStatusUpdates, getRelationshipByIds } from './chat-help.js';
+import {
+	extractUserData,
+	notifyUserAddedToChat,
+	notifyMessageStatusUpdates,
+	getRelationshipByIds,
+	formatDate
+} from './chat-help.js';
 
 export const	getChats = async (req, reply) =>
 {
@@ -103,11 +109,13 @@ export const	getMessages = async (req, reply) =>
 
 		console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
 
+		const timestamp = formatDate(new Date());
+
 		// Update messages in requested chat statuses to 'delivered' for this user
-		const	deliveredTime = await chatDb.markMessagesAsDelivered(chatId, userId);
+		await chatDb.markMessagesAsDelivered(chatId, userId, timestamp);
 
 		// Notify senders about the status update if the overall status changed
-		await notifyMessageStatusUpdates(chatId, deliveredTime, chatDb);
+		await notifyMessageStatusUpdates(chatId, timestamp, chatDb);
 
 		return (reply.code(200).send(messages));
 
@@ -143,8 +151,10 @@ export const	addUserToChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only add friends to the chat' }));
 		}
 
+		const	timestamp = formatDate(new Date());
+
 		// Add the user to the chat
-		await chatDb.addUserToChat(chatId, toUserId);
+		await chatDb.addUserToChat(chatId, toUserId, timestamp);
 
 		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
 		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
@@ -154,8 +164,7 @@ export const	addUserToChat = async (req, reply) =>
 			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
 		// Add system message to chat and notify chat
-		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, fromUsername, chatDb);
-
+		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, fromUsername, chatDb, timestamp);
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 
 		return (reply.code(200).send({ success: true }));
@@ -191,12 +200,14 @@ export const	createGroupChat = async (req, reply) =>
 
 		const	{ name } = req.body;
 
+		const	timestamp = formatDate(new Date());
+
 		// Create the group chat
-		const	chatId = await chatDb.createGroupChat(name);
+		const	chatId = await chatDb.createGroupChat(name, timestamp);
 		console.log(`[CHAT] User ${userId} created group chat ${chatId} with name "${name}"`);
 
 		// Add creator to the chat
-		await chatDb.addUserToChat(chatId, userId);
+		await chatDb.addUserToChat(chatId, userId, timestamp);
 		console.log(`[CHAT] User ${userId} added to newly created group chat ${chatId}`);
 
 		// Get the created chat with all details
@@ -248,6 +259,8 @@ export const	leaveGroupChat = async (req, reply) =>
 			return (reply.code(403).send({ error: 'Forbidden', message: 'User not a member of the chat' }));
 		}
 
+		const	timestamp = formatDate(new Date());
+
 		// Remove the user from the chat
 		await chatDb.removeUserFromChat(chatId, userId);
 
@@ -257,7 +270,7 @@ export const	leaveGroupChat = async (req, reply) =>
 		// Add system message to chat and notify chat
 		const	username = await chatConnectionManager.getUsernameFromCache(userId, true);
 
-		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb);
+		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb, timestamp);
 
 		console.log(`[CHAT] User ${userId} left group chat ${chatId}`);
 
