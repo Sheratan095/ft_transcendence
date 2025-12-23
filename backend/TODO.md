@@ -130,6 +130,6 @@ I think it's ok
 [x] Explain date formats differences in docs (specially function formatDate)
 	and check all of db and microservice-db.js for sql injection or other shit around
 
-[] Add ws docs in std-microservice architecture
+[x] Add ws docs in std-microservice architecture
 
 [] Solve the print problme in make stop
