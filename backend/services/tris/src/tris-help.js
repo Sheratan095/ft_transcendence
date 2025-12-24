@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints
@@ -43,6 +45,51 @@ export function	extractUserData(request)
 	catch (err)
 	{
 		console.log('[CHAT] Error parsing user data from headers:', err.message);
+		return (null);
+	}
+}
+
+export function	sendGameInviteNotification(senderId, senderUsername, targetId, gameId)
+{
+	try
+	{
+		const	response = axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/notifications/send-game-invite`,
+		{ senderId, senderUsername, targetId, gameId, "gameType":"tris" },
+		{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		);
+
+		console.log('[TRIS] Game invite notification sent successfully');
+	}
+	catch (err)
+	{
+		console.error('[TRIS] Error sending game invite notification:', err.message);
+	}
+}
+
+export async function	getUsernameById(userId)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/user?id=${userId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[TRIS] Failed to fetch user data for Id ${userId}: ${response.statusText}`);
+			return (null);
+		}
+
+		const	userData = await response.json();
+		return (userData.username);
+	}
+	catch (error)
+	{
+		console.error(`[TRIS] Error fetching user data for Id ${userId}:`, error.message);
 		return (null);
 	}
 }

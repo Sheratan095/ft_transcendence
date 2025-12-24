@@ -1,6 +1,8 @@
-import { validateInternalApiKey } from './tris-help.js';
+import { validateInternalApiKey, sendGameInviteNotification, getUsernameById } from './tris-help.js';
 // The class is initialized in TrisConnectionManager.js
 import { trisConnectionManager } from './TrisConnectionManager.js';
+
+import { GameManager } from './GameManager.js';
 
 export function	handleNewConnection(socket, req)
 {
@@ -28,7 +30,23 @@ export function	handleNewConnection(socket, req)
 	return (userId);
 }
 
-export function	handleMessage(socket, msg, userId, chatDb)
+export function	handleClose(socket, userId)
+{
+	console.log(`[TRIS] WebSocket connection closed - User: ${userId}`);
+
+	trisConnectionManager.removeConnection(userId);
+}
+
+export function	handleError(socket, err, userId)
+{
+	console.error(`[TRIS] WebSocket error for user ${userId}: ${err.message}`);
+	
+	// Remove the connection as it's likely broken
+	if (userId)
+		trisConnectionManager.removeConnection(userId);
+}
+
+export function	handleMessage(socket, msg, userId, trisDb)
 {
 	try
 	{
@@ -39,6 +57,10 @@ export function	handleMessage(socket, msg, userId, chatDb)
 		{
 			case 'ping': // Handle ping event
 				socket.send(JSON.stringify({ event: 'pong', data: { timestamp: Date.now() } }));
+				break;
+
+			case 'tris.createCustomGame':
+				handleCustomGameCreation(userId, message.data, trisDb);
 				break;
 
 			default:
@@ -54,18 +76,55 @@ export function	handleMessage(socket, msg, userId, chatDb)
 	}
 }
 
-export function	handleClose(socket, userId)
+export async function	handleCustomGameCreation(userId, data, trisDb)
 {
-	console.log(`[TRIS] WebSocket connection closed - User: ${userId}`);
+	try
+	{
+		const	{otherId} = data;
+		const	senderUsername = await getUsernameById(userId);
 
-	trisConnectionManager.removeConnection(userId);
+		const	gameId = GameManager.createCustomGame(userId, otherId);
+
+		// Send game invite notification
+		sendGameInviteNotification(userId, senderUsername, otherId, gameId);
+
+		// Here you would add logic to create a custom game between userId and otherId
+		console.log(`[TRIS] Creating custom game between ${userId} and ${otherId}`);
+
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error creating custom game for user ${userId}:`, err.message);
+		trisConnectionManager.sendErrorMessage(userId, 'Failed to create custom game');
+	}
 }
 
-export function	handleError(socket, err, userId)
+export async function	joinCustomGame(userId, gameId, trisDb)
 {
-	console.error(`[TRIS] WebSocket error for user ${userId}: ${err.message}`);
-	
-	// Remove the connection as it's likely broken
-	if (userId)
-		trisConnectionManager.removeConnection(userId);
+	try
+	{
+		GameManager.joinCustomGame(userId, gameId);
+
+		console.log(`[TRIS] User ${userId} joined custom game ${gameId}`);
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error joining custom game for user ${userId}:`, err.message);
+		trisConnectionManager.sendErrorMessage(userId, 'Failed to join custom game');
+	}
+}
+
+export async function	cancelCustomGame(userId, gameId, trisDb)
+{
+	try
+	{
+		GameManager.cancelCustomGame(userId, gameId);
+
+		console.log(`[TRIS] User ${userId} canceled custom game ${gameId}`);
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error canceling custom game for user ${userId}:`, err.message);
+		trisConnectionManager.sendErrorMessage(userId, 'Failed to cancel custom game');
+	}
 }

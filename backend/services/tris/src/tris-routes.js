@@ -135,7 +135,7 @@ export function	trisRoutes(fastify)
 		if (!userId)
 			return ;
 
-		socket.on('message', msg => {handleMessage(socket, msg, userId);});
+		socket.on('message', msg => {handleMessage(socket, msg, userId, fastify.trisDb);});
 
 		socket.on('close', () => {handleClose(socket, userId);});
 

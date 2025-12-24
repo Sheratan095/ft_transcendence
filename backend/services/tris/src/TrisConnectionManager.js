@@ -14,6 +14,7 @@ class	TrisConnectionManager
 
 	removeConnection(userId)
 	{
+		// TO DO remove all waiting games associated with this user
 		this._connections.delete(userId);
 		console.log(`[TRIS] User ${userId} disconnected`);
 	}
