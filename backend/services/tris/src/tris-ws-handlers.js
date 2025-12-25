@@ -2,7 +2,7 @@ import { validateInternalApiKey, sendGameInviteNotification, getUsernameById } f
 // The class is initialized in TrisConnectionManager.js
 import { trisConnectionManager } from './TrisConnectionManager.js';
 
-import { GameManager } from './GameManager.js';
+import { gameManager } from './GameManager.js';
 
 export function	handleNewConnection(socket, req)
 {
@@ -102,7 +102,7 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 	{
 		const	senderUsername = await getUsernameById(userId);
 
-		const	gameId = GameManager.createCustomGame(userId, otherId);
+		const	gameId = gameManager.createCustomGame(userId, otherId);
 
 		// Send game invite notification
 		sendGameInviteNotification(userId, senderUsername, otherId, gameId);
@@ -122,7 +122,7 @@ export async function	handleJoinCustomGame(userId, gameId, trisDb)
 {
 	try
 	{
-		GameManager.joinCustomGame(userId, gameId);
+		gameManager.joinCustomGame(userId, gameId);
 
 		console.log(`[TRIS] User ${userId} joined custom game ${gameId}`);
 	}
@@ -137,7 +137,7 @@ export async function	handleCancelCustomGame(userId, gameId, trisDb)
 {
 	try
 	{
-		GameManager.cancelCustomGame(userId, gameId);
+		gameManager.cancelCustomGame(userId, gameId);
 
 		console.log(`[TRIS] User ${userId} canceled custom game ${gameId}`);
 	}
@@ -152,7 +152,7 @@ export async function	handleUserQuit(userId, gameId, trisDb)
 {
 	try
 	{
-		GameManager.quitGame(userId, gameId);
+		gameManager.quitGame(userId, gameId);
 
 		console.log(`[TRIS] Handled quit for user ${userId}`);
 	}
@@ -166,7 +166,7 @@ export async function	handleUserReady(userId, gameId, readyStatus, trisDb)
 {
 	try
 	{
-		GameManager.playerReady(userId, gameId, readyStatus);
+		gameManager.playerReady(userId, gameId, readyStatus);
 
 		console.log(`[TRIS] Handled ready for user ${userId}`);
 	}

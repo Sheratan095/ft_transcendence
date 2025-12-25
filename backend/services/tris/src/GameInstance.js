@@ -1,16 +1,17 @@
 
-const	GameStatus =
-{
-	WAITING,
-	IN_PROGRESS,
-	FINISHED,
-}
 
-const	GameType =
+export const	GameStatus =
 {
-	CUSTOM,
-	RANDOM,
-}
+	WAITING: 'WAITING',
+	IN_PROGRESS: 'IN_PROGRESS',
+	FINISHED: 'FINISHED',
+};
+
+export const	GameType =
+{
+	CUSTOM: 'CUSTOM',
+	RANDOM: 'RANDOM',
+};
 
 export class	GameInstance
 {
