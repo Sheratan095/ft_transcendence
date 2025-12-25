@@ -35,6 +35,58 @@ Reponse:
 
 **SERVER → CLIENT EVENTS**
 
+- **tris.playerJoinedCustomGame** - Notification when a player joins a custom game
+\`\`\`json
+{
+  "event": "tris.playerJoinedCustomGame",
+  "data": {
+    "gameId": "some-game-id"
+  }
+}
+
+- **tris.playerReadyStatus** - Notification of a player's ready status
+\`\`\`json
+{
+  "event": "tris.playerReadyStatus",
+  "data": {
+	"gameId": "some-game-id",
+	"readyStatus": true
+  }
+}
+\`\`\`
+
+- **tris.gameStarted** - Notification that the game has started
+\`\`\`json
+{
+  "event": "tris.gameStarted",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.gameCanceled** - Notification that the game has been canceled
+\`\`\`json
+{
+  "event": "tris.gameCanceled",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.gameEnded** - Notification that the game has ended
+\`\`\`json
+{
+  "event": "tris.gameEnded",
+  "data": {
+	"gameId": "some-game-id",
+	"winner": "userId-of-winner", // NOT DRAW because it's infinite tris
+	"message": "You won!" // optional message
+  }
+}
+\`\`\`
+
 - **error** - Error message
 \`\`\`json
 {

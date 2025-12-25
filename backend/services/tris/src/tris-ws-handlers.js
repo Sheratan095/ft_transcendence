@@ -60,7 +60,27 @@ export function	handleMessage(socket, msg, userId, trisDb)
 				break;
 
 			case 'tris.createCustomGame':
-				handleCustomGameCreation(userId, message.data, trisDb);
+				handleCustomGameCreation(userId, message.data.otherId, trisDb);
+				break;
+
+			case 'tris.joinCustomGame':
+				handleJoinCustomGame(userId, message.data.gameId, trisDb);
+				break;
+
+			case 'tris.cancelCustomGame':
+				handleCancelCustomGame(userId, message.data.gameId, trisDb);
+				break;
+
+			case 'tris.userQuit':
+				handleUserQuit(userId, message.data.gameId, trisDb);
+				break;
+
+			case 'tris.userReady':
+				handleUserReady(userId, message.data.gameId, true, trisDb);
+				break;
+
+			case 'tris.userNotReady':
+				handleUserReady(userId, message.data.gameId, false, trisDb);
 				break;
 
 			default:
@@ -76,11 +96,10 @@ export function	handleMessage(socket, msg, userId, trisDb)
 	}
 }
 
-export async function	handleCustomGameCreation(userId, data, trisDb)
+export async function	handleCustomGameCreation(userId, otherId, trisDb)
 {
 	try
 	{
-		const	{otherId} = data;
 		const	senderUsername = await getUsernameById(userId);
 
 		const	gameId = GameManager.createCustomGame(userId, otherId);
@@ -99,7 +118,7 @@ export async function	handleCustomGameCreation(userId, data, trisDb)
 	}
 }
 
-export async function	joinCustomGame(userId, gameId, trisDb)
+export async function	handleJoinCustomGame(userId, gameId, trisDb)
 {
 	try
 	{
@@ -114,7 +133,7 @@ export async function	joinCustomGame(userId, gameId, trisDb)
 	}
 }
 
-export async function	cancelCustomGame(userId, gameId, trisDb)
+export async function	handleCancelCustomGame(userId, gameId, trisDb)
 {
 	try
 	{
@@ -126,5 +145,33 @@ export async function	cancelCustomGame(userId, gameId, trisDb)
 	{
 		console.error(`[TRIS] Error canceling custom game for user ${userId}:`, err.message);
 		trisConnectionManager.sendErrorMessage(userId, 'Failed to cancel custom game');
+	}
+}
+
+export async function	handleUserQuit(userId, gameId, trisDb)
+{
+	try
+	{
+		GameManager.quitGame(userId, gameId);
+
+		console.log(`[TRIS] Handled quit for user ${userId}`);
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error handling quit for user ${userId}:`, err.message);
+	}
+}
+
+export async function	handleUserReady(userId, gameId, readyStatus, trisDb)
+{
+	try
+	{
+		GameManager.playerReady(userId, gameId, readyStatus);
+
+		console.log(`[TRIS] Handled ready for user ${userId}`);
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error handling ready for user ${userId}:`, err.message);
 	}
 }

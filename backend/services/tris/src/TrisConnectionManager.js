@@ -29,6 +29,42 @@ class	TrisConnectionManager
 		return (this._connections.size);
 	}
 
+	async	sendPlayerJoinedCustomGame(otherPlayerId, gameId)
+	{
+		const	socket = this._connections.get(otherPlayerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.playerJoinedCustomGame', { gameId });
+	}
+
+	// Other player is the one who DID NOT change their ready status
+	async	sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus)
+	{
+		const	socket = this._connections.get(otherPlayerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.playerReadyStatus', { gameId, readyStatus });
+	}
+
+	async	sendGameCanceled(playerId, gameId)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.gameCanceled', { gameId });
+	}
+
+	async	sendGameEnded(playerId, gameId, winner, message)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.gameEnded', { gameId, winner, message });
+	}
+
+	async	notifyGameStart(playerId, gameId)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.gameStarted', { gameId });
+	}
+
 	async	sendErrorMessage(userId, message)
 	{
 		const	socket = this._connections.get(userId);
