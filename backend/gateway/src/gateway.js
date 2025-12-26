@@ -190,6 +190,10 @@ import {
 	createGroupChat
 } from './routes/chat-routes.js'
 
+import {
+	getUserStatsRoute
+} from './routes/tris-routes.js'
+
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
 {
@@ -271,6 +275,8 @@ await fastify.register(async function (fastify)
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsers })
 	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUser })
+
+	fastify.get('/tris/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsRoute })
 	
 	// RELATIONSHIPS routes
 	fastify.get('/users/relationships', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserRelationships })

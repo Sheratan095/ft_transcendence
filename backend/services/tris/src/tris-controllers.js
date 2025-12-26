@@ -1,4 +1,6 @@
 
+//-----------------------------INTERNAL ROUTES-----------------------------
+
 export const	createUserStats = async (req, reply) =>
 {
 	try
@@ -46,5 +48,32 @@ export const	deleteUserStats = async (req, reply) =>
 	{
 		console.error('[TRIS] Error in deleteUserStats controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+//-----------------------------PUBLIC ROUTES-----------------------------
+
+export const	getUserStats = async (req, reply) =>
+{
+	try
+	{
+		const	trisDb = req.server.trisDb;
+		const	userId = req.query.id;
+
+		// Retrieve user stats
+		const	userStats = await trisDb.getUserStats(userId);
+		if (!userStats)
+			return (reply.code(404).send({ error: 'User stats not found' }));
+
+		console.log(userStats);
+
+		console.log(`[TRIS] Retrieved stats for user ${userId}`);
+
+		return (reply.code(200).send(userStats));
+	}
+	catch (err)
+	{
+		console.error('[TRIS] Error in getUserStats controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

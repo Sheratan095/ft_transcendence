@@ -1,0 +1,2 @@
+GET https://localhost:3000/tris/stats?id=1
+###

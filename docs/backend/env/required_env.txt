@@ -52,7 +52,9 @@ services/chat:
 services/pong:
     INTERNAL_API_KEY=1234
     PORT=3005
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
 
 services/tris:
     INTERNAL_API_KEY=1234
     PORT=3006
+    NOTIFICATION_SERVICE_URL=http://localhost:3003

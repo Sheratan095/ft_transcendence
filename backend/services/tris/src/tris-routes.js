@@ -7,7 +7,8 @@ import {
 
 import {
 	createUserStats as createUserStatsHandler,
-	deleteUserStats as deleteUserStatsHandler
+	deleteUserStats as deleteUserStatsHandler,
+	getUserStats as getUserStatsHandler
 } from './tris-controllers.js';
 
 import { validateInternalApiKey } from './tris-help.js';
@@ -45,7 +46,28 @@ const	withInternalAuth =
 	}
 };
 
-//-----------------------------INTERAL ROUTES-----------------------------
+const	withCookieAuth =
+{
+	security: [{ cookieAuth: [] }],
+	
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'accessToken':
+			{
+				type: 'string',
+			},
+			'refreshToken':
+			{
+				type: 'string',
+			}
+		}
+	}
+};
+
+//-----------------------------INTERNAL ROUTES-----------------------------
 
 const	createUserStats = 
 {
@@ -125,6 +147,52 @@ const	deleteUserStats =
 	handler: deleteUserStatsHandler
 }
 
+//-----------------------------PUBLIC ROUTES-----------------------------
+
+const	getUserStats =
+{
+	schema:
+	{
+		summary: 'Get user stats',
+		description: 'Retrieve the stats for a given user.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					userId: { type: 'string' },
+					gamesPlayed: { type: 'integer' },
+					gamesWon: { type: 'integer' },
+					gamesLost: { type: 'integer' },
+					gamesDrawn: { type: 'integer' },
+					elo: { type: 'integer' },
+					rank: { type: 'string' }
+				}
+			},
+			404: ErrorResponse, // In case of user's stats not found
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUserStatsHandler
+}
+
 export function	trisRoutes(fastify)
 {
 	// Actual WebSocket endpoint
@@ -141,6 +209,8 @@ export function	trisRoutes(fastify)
 
 		socket.on('error', (err) => {handleError(socket, err, userId);});
 	});
+
+	fastify.get('/stats', getUserStats);
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.delete('/delete-user-stats', deleteUserStats);
