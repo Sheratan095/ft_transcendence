@@ -132,3 +132,5 @@ I think it's ok
 	Don’t do the actual profile deletion inside the Auth service —
 	let Auth trigger a system-wide cascade via events or APIs.
 	Each service deletes what it owns.
+
+[] Rename/move ws routes in gateway

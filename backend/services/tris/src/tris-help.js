@@ -93,3 +93,23 @@ export async function	getUsernameById(userId)
 		return (null);
 	}
 }
+
+export function	calculateElo(win, loss)
+{
+	const	elo = (100 * win) - (50 * loss);
+
+	let	rank;
+
+	if (elo < 200)
+		rank = 'Noob';
+	else if (elo >= 200 && elo <= 399)
+		rank = 'Beginner';
+	else if (elo >= 400 && elo <= 599)
+		rank = 'Intermediate';
+	else if (elo >= 600 && elo <= 899)
+		rank = 'Pro';
+	else if (elo >= 900 )
+		rank = 'Master';
+
+	return ({ elo, rank });
+}

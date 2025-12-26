@@ -1,3 +1,4 @@
+import { calculateElo } from './tris-help.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -61,15 +62,25 @@ export const	getUserStats = async (req, reply) =>
 		const	userId = req.query.id;
 
 		// Retrieve user stats
+		// { user_id: '1', games_played: 0, wins: 0, losses: 0, draws: 0 }
 		const	userStats = await trisDb.getUserStats(userId);
 		if (!userStats)
 			return (reply.code(404).send({ error: 'User stats not found' }));
 
-		console.log(userStats);
+		const	elo = calculateElo(userStats.wins, userStats.losses);
+
+		const	response =
+		{
+			gamesPlayed: userStats.games_played,
+			gamesWon: userStats.wins,
+			gamesLost: userStats.losses,
+			elo: elo.elo,
+			rank: elo.rank
+		}
 
 		console.log(`[TRIS] Retrieved stats for user ${userId}`);
 
-		return (reply.code(200).send(userStats));
+		return (reply.code(200).send(response));
 	}
 	catch (err)
 	{

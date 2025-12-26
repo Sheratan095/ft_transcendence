@@ -175,11 +175,10 @@ const	getUserStats =
 				type: 'object',
 				properties:
 				{
-					userId: { type: 'string' },
 					gamesPlayed: { type: 'integer' },
 					gamesWon: { type: 'integer' },
 					gamesLost: { type: 'integer' },
-					gamesDrawn: { type: 'integer' },
+					// gamesDrawn: { type: 'integer' }, THERE IS NO DRAW IN "INFINITE" TRIS
 					elo: { type: 'integer' },
 					rank: { type: 'string' }
 				}
