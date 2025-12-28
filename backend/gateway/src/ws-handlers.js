@@ -9,7 +9,7 @@ const	pongProxy = httpProxy.createProxyServer({ ws: true });
 
 // Prevent uncaught 'error' events from crashing the process.
 // Handle both HTTP and WebSocket proxy errors and close/destroy sockets gracefully.
-const	handleProxyError = (err, req, resOrSocket) =>
+const	handleWsError = (err, req, resOrSocket) =>
 {
 	console.error('[GATEWAY] Proxy error:', err && err.message ? err.message : err);
 
@@ -45,10 +45,10 @@ const	handleProxyError = (err, req, resOrSocket) =>
 	}
 };
 
-notificationProxy.on('error', handleProxyError);
-chatProxy.on('error', handleProxyError);
-trisProxy.on('error', handleProxyError);
-pongProxy.on('error', handleProxyError);
+notificationProxy.on('error', handleWsError);
+chatProxy.on('error', handleWsError);
+trisProxy.on('error', handleWsError);
+pongProxy.on('error', handleWsError);
 
 export async function	handleSocketUpgrade(req, socket, head)
 {
