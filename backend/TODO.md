@@ -133,4 +133,4 @@ I think it's ok
 	let Auth trigger a system-wide cascade via events or APIs.
 	Each service deletes what it owns.
 
-[] Rename/move ws routes in gateway
+[x] Rename/move ws routes in gateway

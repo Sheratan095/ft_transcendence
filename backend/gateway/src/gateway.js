@@ -144,8 +144,8 @@ import SwaggerAggregator from './swagger/swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
-
-import { handleSocketUpgrade } from './routes/webSocket-routes.js'
+// Import ws handlers
+import { handleSocketUpgrade } from './ws-handlers.js'
 
 import {
 	login,

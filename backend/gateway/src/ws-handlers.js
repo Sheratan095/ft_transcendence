@@ -1,9 +1,11 @@
 import httpProxy from 'http-proxy';
-import { authenticateJwtWebSocket } from '../gateway-help.js';
+import { authenticateJwtWebSocket } from './gateway-help.js';
 
 // Create proxy servers without specific targets - we'll set them dynamically
 const	notificationProxy = httpProxy.createProxyServer({ ws: true });
 const	chatProxy = httpProxy.createProxyServer({ ws: true });
+const	trisProxy = httpProxy.createProxyServer({ ws: true });
+const	pongProxy = httpProxy.createProxyServer({ ws: true });
 
 // Prevent uncaught 'error' events from crashing the process.
 // Handle both HTTP and WebSocket proxy errors and close/destroy sockets gracefully.
@@ -45,6 +47,8 @@ const	handleProxyError = (err, req, resOrSocket) =>
 
 notificationProxy.on('error', handleProxyError);
 chatProxy.on('error', handleProxyError);
+trisProxy.on('error', handleProxyError);
+pongProxy.on('error', handleProxyError);
 
 export async function	handleSocketUpgrade(req, socket, head)
 {
@@ -88,6 +92,20 @@ export async function	handleSocketUpgrade(req, socket, head)
 			// Rewrite the URL to /ws for the notification service
 			req.url = '/ws';
 			notificationProxy.ws(req, socket, head, { target: process.env.NOTIFICATION_SERVICE_URL });
+		}
+		else if (url.pathname === '/tris/ws')
+		{
+			console.log(`[GATEWAY] WebSocket Authenicated, routing connection to TRIS service for user: ${user.id}`);
+			// Rewrite the URL to /ws for the tris service
+			req.url = '/ws';
+			trisProxy.ws(req, socket, head, { target: process.env.TRIS_SERVICE_URL });
+		}
+		else if (url.pathname === '/pong/ws')
+		{
+			console.log(`[GATEWAY] WebSocket Authenicated, routing connection to PONG service for user: ${user.id}`);
+			// Rewrite the URL to /ws for the pong service
+			req.url = '/ws';
+			pongProxy.ws(req, socket, head, { target: process.env.PONG_SERVICE_URL });
 		}
 		else
 		{
