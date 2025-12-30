@@ -83,6 +83,10 @@ export function	handleMessage(socket, msg, userId, trisDb)
 				handleUserReady(userId, message.data.gameId, false, trisDb);
 				break;
 
+			case 'tris.joinMatchmaking':
+				handleJoinMatchmaking(userId, trisDb);
+				break;
+
 			default:
 				console.log(`[TRIS] Unknown event: ${message.event}`);
 				trisConnectionManager.sendErrorMessage(userId, 'Invalid message format');
@@ -173,5 +177,20 @@ export async function	handleUserReady(userId, gameId, readyStatus, trisDb)
 	catch (err)
 	{
 		console.error(`[TRIS] Error handling ready for user ${userId}:`, err.message);
+	}
+}
+
+export async function	handleJoinMatchmaking(userId, trisDb)
+{
+	try
+	{
+		gameManager.joinMatchmaking(userId);
+
+		console.log(`[TRIS] User ${userId} joined matchmaking`);
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error joining matchmaking for user ${userId}:`, err.message);
+		trisConnectionManager.sendErrorMessage(userId, 'Failed to join matchmaking');
 	}
 }

@@ -31,6 +31,16 @@ Reponse:
 	"timestamp": 1625247600000
   }
 }
+
+- **tris.createCustomGame** - Notification when a player joins a custom game
+\`\`\`json
+{
+  "event": "tris.playerJoinedCustomGame",
+  "data": {
+    "gameId": "some-game-id"
+  }
+}
+
 \`\`\`
 
 **SERVER → CLIENT EVENTS**
