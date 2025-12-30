@@ -31,17 +31,68 @@ Reponse:
 	"timestamp": 1625247600000
   }
 }
+\`\`\`
 
-- **tris.createCustomGame** - Notification when a player joins a custom game
+- **tris.createCustomGame** - Create a custom game with another player
 \`\`\`json
 {
   "event": "tris.playerJoinedCustomGame",
   "data": {
-    "gameId": "some-game-id"
+    "otherId": "userId-of-invited-player"
   }
 }
-
 \`\`\`
+
+- **tris.joinCustomGame** - Join a custom game
+\`\`\`json
+{
+  "event": "tris.joinCustomGame",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.cancelCustomGame** - Cancel a custom game
+\`\`\`json
+{
+  "event": "tris.cancelCustomGame",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.userQuit** - Quit a game
+\`\`\`json
+{
+  "event": "tris.userQuit",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.userReady** - Set user ready status
+\`\`\`json
+{
+  "event": "tris.userReady",
+  "data": {
+	"gameId": "some-game-id",
+	"readyStatus": true
+  }
+}
+\`\`\`
+
+- **tris.joinMatchmaking** - Join the matchmaking queue
+\`\`\`json
+{
+  "event": "tris.joinMatchmaking",
+  "data": {}
+}
+\`\`\`
+
+---
 
 **SERVER → CLIENT EVENTS**
 
@@ -53,6 +104,7 @@ Reponse:
     "gameId": "some-game-id"
   }
 }
+\`\`\`
 
 - **tris.playerReadyStatus** - Notification of a player's ready status
 \`\`\`json
