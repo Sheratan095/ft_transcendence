@@ -171,6 +171,13 @@
           document.getElementById('gameId').value = currentGameId;
         }
       };
+      notificationWs.onmessage = function(event) {
+        const msg = JSON.parse(event.data);
+        if (msg.event === "game.invite") {
+          // Handle the game invitation (show notification, update UI, etc.)
+          console.log("Game invite received:", msg.data);
+        }
+      };
     }
 
     document.getElementById('loginBtn').onclick = login;
