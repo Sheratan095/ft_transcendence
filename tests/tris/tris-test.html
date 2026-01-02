@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tris Custom Game Tester</title>
+  <style>
+    body { background: #181818; color: #e0e0e0; font-family: sans-serif; }
+    .container { max-width: 600px; margin: 40px auto; background: #232323; border-radius: 8px; padding: 24px; box-shadow: 0 2px 12px #0008; }
+    h1 { color: #4CAF50; }
+    label { display: block; margin-top: 16px; }
+    input, button, select { margin-top: 8px; padding: 8px; border-radius: 4px; border: 1px solid #444; background: #292929; color: #e0e0e0; }
+    button { background: #4CAF50; border: none; cursor: pointer; font-weight: bold; }
+    button:disabled { background: #666; }
+    .log { background: #111; color: #b2ffb2; padding: 12px; border-radius: 4px; margin-top: 20px; height: 200px; overflow-y: auto; font-size: 14px; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .row > * { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 Tris Custom Game Tester</h1>
+    <div class="login-panel">
+      <input type="email" id="emailInput" placeholder="Email" value="test1@gmail.com" />
+      <input type="password" id="passwordInput" placeholder="Password" value="1234" />
+      <button class="btn" id="loginBtn" onclick="login()">Login & Connect</button>
+      <button class="btn btn-danger" id="logoutBtn" onclick="logout()" style="display: none;">Logout</button>
+      <span class="user-info" id="userInfo"></span>
+    </div>
+  </div>
+  <div class="main-container">
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h3>Custom Game Actions</h3>
+      </div>
+      <div class="action-list" id="actionList">
+        <div style="margin-bottom:10px;">
+          <input id="otherId" type="text" placeholder="Other User ID" style="width:100%;margin-bottom:6px;" />
+          <button class="btn" id="createCustomBtn">Create Custom Game</button>
+        </div>
+        <div style="margin-bottom:10px;">
+          <input id="gameId" type="text" placeholder="Game ID" style="width:100%;margin-bottom:6px;" />
+          <button class="btn" id="joinCustomBtn">Join Custom Game</button>
+        </div>
+        <div style="margin-bottom:10px;">
+          <button class="btn" id="readyBtn">Ready</button>
+          <button class="btn" id="notReadyBtn">Not Ready</button>
+        </div>
+        <div style="margin-bottom:10px;">
+          <input id="movePos" type="number" min="0" max="8" value="0" style="width:60px;" />
+          <button class="btn" id="moveBtn">Make Move</button>
+        </div>
+        <div style="margin-bottom:10px;">
+          <button class="btn btn-secondary" id="cancelGameBtn">Cancel Game</button>
+          <button class="btn btn-danger" id="quitBtn">Quit Game</button>
+        </div>
+        <div style="margin-bottom:10px;">
+          <button class="btn" id="matchmakingBtn">Join Matchmaking</button>
+          <button class="btn" id="leaveMatchmakingBtn">Leave Matchmaking</button>
+        </div>
+        <button class="btn" id="clearLogBtn" style="width:100%;">Clear Log</button>
+      </div>
+    </div>
+    <div class="log-container">
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <span id="statusText">Disconnected</span>
+    <span id="userIdSpan"></span>
+  </div>
+  <script>
+    const WS_URL = 'wss://localhost:3000/tris/ws';
+    const LOGIN_URL = 'https://localhost:3000/auth/login';
+    let ws = null;
+    let userId = '';
+    let currentGameId = '';
+    let pingInterval = null;
+
+    function log(msg) {
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML += new Date().toLocaleTimeString() + ' - ' + msg + '<br>';
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function updateStatus(text, connected) {
+      document.getElementById('statusText').textContent = text;
+      document.getElementById('statusText').className = connected ? 'status-connected' : 'status-disconnected';
+    }
+
+    async function login() {
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      const res = await fetch(LOGIN_URL, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) {
+        log('Login failed: ' + res.status);
+        return;
+      }
+      const data = await res.json();
+      userId = data.user.id;
+      document.getElementById('userInfo').textContent = 'User ID: ' + userId;
+      document.getElementById('userIdSpan').textContent = 'User ID: ' + userId;
+      document.getElementById('loginBtn').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
+      document.getElementById('emailInput').disabled = true;
+      document.getElementById('passwordInput').disabled = true;
+      log('Logged in as ' + userId);
+      connectWs();
+    }
+
+    function logout() {
+      if (ws) ws.close();
+      if (pingInterval) clearInterval(pingInterval);
+      ws = null;
+      userId = '';
+      currentGameId = '';
+      document.getElementById('userInfo').textContent = '';
+      document.getElementById('userIdSpan').textContent = '';
+      document.getElementById('loginBtn').style.display = 'inline-block';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('emailInput').disabled = false;
+      document.getElementById('passwordInput').disabled = false;
+      updateStatus('Disconnected', false);
+      log('Logged out');
+    }
+
+    function connectWs() {
+      if (ws && ws.readyState !== WebSocket.CLOSED) {
+        log('WebSocket already connected');
+        return;
+      }
+      ws = new WebSocket(WS_URL);
+      ws.onopen = () => {
+        log('✓ WebSocket connected');
+        updateStatus('Connected', true);
+        if (pingInterval) clearInterval(pingInterval);
+        pingInterval = setInterval(() => {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ event: 'ping', data: {} }));
+          }
+        }, 30000);
+      };
+      ws.onclose = (e) => {
+        log('✗ WebSocket closed' + (e && e.code ? ' (code: ' + e.code + (e.reason ? ', reason: ' + e.reason : '') + ')' : ''));
+        updateStatus('Disconnected', false);
+        if (pingInterval) clearInterval(pingInterval);
+      };
+      ws.onerror = (e) => {
+        log('✗ WebSocket error: ' + e.message);
+      };
+      ws.onmessage = (event) => {
+        let msg;
+        try { 
+          msg = JSON.parse(event.data); 
+        } catch { 
+          log('Invalid JSON: ' + event.data); 
+          return; 
+        }
+        log('[RX] ' + msg.event + ': ' + JSON.stringify(msg.data));
+        if (msg.event === 'tris.playerJoinedCustomGame' && msg.data.gameId) {
+          currentGameId = msg.data.gameId;
+          document.getElementById('gameId').value = currentGameId;
+        }
+        if (msg.event === 'tris.gameStarted' && msg.data.gameId) {
+          currentGameId = msg.data.gameId;
+          document.getElementById('gameId').value = currentGameId;
+        }
+      };
+    }
+
+    document.getElementById('loginBtn').onclick = login;
+    document.getElementById('logoutBtn').onclick = logout;
+    document.getElementById('createCustomBtn').onclick = function() {
+      const otherId = document.getElementById('otherId').value;
+      if (!otherId) return log('Error: Please enter an other user ID');
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.createCustomGame', data: { otherId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.createCustomGame: ' + JSON.stringify(msg.data));
+    };
+    document.getElementById('joinCustomBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('Error: Please enter a game ID');
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.joinCustomGame', data: { gameId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.joinCustomGame: ' + JSON.stringify(msg.data));
+    };
+    document.getElementById('readyBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('Error: Please enter a game ID');
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.userReady', data: { gameId, readyStatus: true } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.userReady: ' + JSON.stringify(msg.data));
+    };
+    document.getElementById('notReadyBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('Error: Please enter a game ID');
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.userReady', data: { gameId, readyStatus: false } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.userReady: ' + JSON.stringify(msg.data));
+    };
+    document.getElementById('moveBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      const position = parseInt(document.getElementById('movePos').value, 10);
+      if (!gameId) return log('Error: Please enter a game ID');
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.makeMove', data: { gameId, position } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.makeMove: ' + JSON.stringify(msg.data));
+    };
+    document.getElementById('cancelGameBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('Error: Please enter a game ID');
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.cancelCustomGame', data: { gameId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.cancelCustomGame: ' + JSON.stringify(msg.data));
+    };
+    document.getElementById('quitBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('Error: Please enter a game ID');
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.userQuit', data: { gameId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.userQuit: ' + JSON.stringify(msg.data));
+    };
+    document.getElementById('matchmakingBtn').onclick = function() {
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.joinMatchmaking', data: {} };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.joinMatchmaking');
+    };
+    document.getElementById('leaveMatchmakingBtn').onclick = function() {
+      if (!ws || ws.readyState !== 1) return log('Error: WebSocket not connected');
+      const msg = { event: 'tris.leaveMatchmaking', data: {} };
+      ws.send(JSON.stringify(msg));
+      log('[TX] tris.leaveMatchmaking');
+    };
+    document.getElementById('clearLogBtn').onclick = function() {
+      document.getElementById('log').innerHTML = '';
+    };
+  </script>
+</body>
+</html>

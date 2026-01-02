@@ -25,7 +25,7 @@ export function	handleNewConnection(socket, req)
 		return (null);
 	}
 
-	pongConnectionManager.addConnection(userId, socket);
+	trisConnectionManager.addConnection(userId, socket);
 
 	return (userId);
 }
@@ -87,6 +87,12 @@ export function	handleMessage(socket, msg, userId, trisDb)
 				handleJoinMatchmaking(userId, trisDb);
 				break;
 
+			case 'tris.leaveMatchmaking':
+				handleLeaveMatchmaking(userId, trisDb);
+				break;
+
+			case 'tris.makeMove':
+
 			default:
 				console.log(`[TRIS] Unknown event: ${message.event}`);
 				trisConnectionManager.sendErrorMessage(userId, 'Invalid message format');
@@ -105,8 +111,22 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 	try
 	{
 		const	senderUsername = await getUsernameById(userId);
+		if (!senderUsername)
+		{
+			console.error(`[TRIS] Could not fetch username for user ${userId}`);
+			trisConnectionManager.sendErrorMessage(userId, 'User not found');
+			return ;
+		}
 
-		const	gameId = gameManager.createCustomGame(userId, otherId);
+		const	otherUsername = await getUsernameById(otherId);
+		if (!otherUsername)
+		{
+			console.error(`[TRIS] Could not fetch username for user ${otherId}`);
+			trisConnectionManager.sendErrorMessage(userId, 'Invited user not found');
+			return ;
+		}
+
+		const	gameId = gameManager.createCustomGame(userId, senderUsername, otherId, otherUsername);
 
 		// Send game invite notification
 		sendGameInviteNotification(userId, senderUsername, otherId, gameId);
@@ -192,5 +212,35 @@ export async function	handleJoinMatchmaking(userId, trisDb)
 	{
 		console.error(`[TRIS] Error joining matchmaking for user ${userId}:`, err.message);
 		trisConnectionManager.sendErrorMessage(userId, 'Failed to join matchmaking');
+	}
+}
+
+export async function	handleLeaveMatchmaking(userId, trisDb)
+{
+	try
+	{
+		gameManager.leaveMatchmaking(userId);
+
+		console.log(`[TRIS] User ${userId} left matchmaking`);
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error leaving matchmaking for user ${userId}:`, err.message);
+		trisConnectionManager.sendErrorMessage(userId, 'Failed to leave matchmaking');
+	}
+}
+
+export async function	handleMakeMove(userId, gameId, position, trisDb)
+{
+	try
+	{
+		gameManager.makeMove(userId, gameId, position);
+
+		console.log(`[TRIS] User ${userId} made move in game ${gameId}`);
+	}
+	catch (err)
+	{
+		console.error(`[TRIS] Error making move for user ${userId}:`, err.message);
+		trisConnectionManager.sendErrorMessage(userId, 'Failed to make move');
 	}
 }

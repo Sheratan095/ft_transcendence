@@ -92,6 +92,34 @@ Reponse:
 }
 \`\`\`
 
+- **tris.leaveMatchmaking** - Leave the matchmaking queue
+\`\`\`json
+{
+  "event": "tris.leaveMatchmaking",
+  "data": {}
+}
+\`\`\`
+
+- **tris.makeMove** - Make a move in the game
+\`\`\`json
+{
+  "event": "tris.makeMove",
+  "data": {
+	"gameId": "some-game-id",
+	"position": 0-8 0-8 for a 3x3 grid
+  }
+}
+
+Reponse:
+{
+  "event": "invalidMove",
+  "data": {
+	"gameId": "some-game-id",
+    "message": "Invalid move: Position already taken" / "Not your turn" / "Invalid move position"
+  }
+}
+\`\`\`
+
 ---
 
 **SERVER → CLIENT EVENTS**
@@ -145,6 +173,32 @@ Reponse:
 	"gameId": "some-game-id",
 	"winner": "userId-of-winner", // NOT DRAW because it's infinite tris
 	"message": "You won!" // optional message
+  }
+}
+\`\`\`
+
+- **tris.gameStarted** - Notification that the game has started
+\`\`\`json
+{
+  "event": "tris.gameStarted",
+  "data": {
+	"gameId": "some-game-id",
+	"yourSymbol": "X", // or "O"
+	"opponentUsername": "jack",
+	"yourTurn": true // or false
+  }
+}
+\`\`\`
+
+- **tris.moveMade** - Notification that a move has been made
+\`\`\`json
+{
+  "event": "tris.moveMade",
+  "data": {
+	"gameId": "some-game-id",
+	"playerId": "userId-of-player-who-made-move",
+	"position": 0-8, // position of the move made
+	"removedPosition": 0-8 // position of the removed move in infinite tris, null if not applicable
   }
 }
 \`\`\`

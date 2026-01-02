@@ -1,6 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { trisConnectionManager } from './TrisConnectionManager.js';
+import { getUsernameById } from './tris-help.js';
 
 class	GameManager
 {
@@ -10,7 +11,7 @@ class	GameManager
 		this._waitingPlayers = []; // Queue of players waiting for a match
 	}
 
-	createCustomGame(creatorId, otherId)
+	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
 		// Can't create a game with yourself
 		if (creatorId === otherId)
@@ -45,7 +46,7 @@ class	GameManager
 
 		// Generate gameId and GameInstance
 		const	gameId = uuidv4();
-		const	gameInstance = new GameInstance(gameId, playerXId, playerOId, GameType.CUSTOM);
+		const	gameInstance = new GameInstance(gameId, playerXId, playerOId, creatorUsername, otherUsername, GameType.CUSTOM);
 
 		// Add the new game to the games map
 		this._games.set(gameId, gameInstance);
@@ -208,14 +209,7 @@ class	GameManager
 
 		// If both players are ready, start the game
 		if (gameInstance.playerXIdReady && gameInstance.playerOIdReady)
-		{
-			gameInstance.startGame();
-			console.log(`[TRIS] Game ${gameId} between ${gameInstance.playerXId} and ${gameInstance.playerOId} has started`);
-
-			// Notify both players that the game has started
-			trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameId);
-			trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameId);
-		}
+			this.gameStart(gameInstance);
 	}
 
 	gameEnd(gameInstance, winner, loser, quit = false)
@@ -234,6 +228,53 @@ class	GameManager
 
 		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}. Message: ${message}`);
 
+	}
+
+	gameStart(gameInstance)
+	{
+		console.log(`[TRIS] Starting game ${gameInstance.id} between ${gameInstance.playerXId} and ${gameInstance.playerOId}`);
+
+		// Update game status
+		gameInstance.startGame();
+
+		const	playerXUsername = getUsernameById(gameInstance.playerXId);
+		const	playerOUsername = getUsernameById(gameInstance.playerOId);
+
+		// Notify both players that the game has started
+		trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', playerOUsername, true);
+		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', playerXUsername, false);
+	}
+
+	makeMove(playerId, gameId, move)
+	{
+		const	gameInstance = this._games.get(gameId);
+		// Check if game exists
+		if (!gameInstance)
+		{
+			console.error(`[TRIS] Game ${gameId} not found`);
+			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
+			return ;
+		}
+
+		// Check if player is part of the game
+		if (gameInstance.playerXId !== playerId && gameInstance.playerOId !== playerId)
+		{
+			console.error(`[TRIS] Player ${playerId} is not part of game ${gameId}`);
+			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			return ;
+		}
+
+		// Check if game is in progress
+		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
+		{
+			console.error(`[TRIS] Game ${gameId} is not in progress`);
+			trisConnectionManager.sendErrorMessage(playerId, 'Cannot make a move in a game that isn\'t in progress');
+			return ;
+		}
+
+		gameInstance.processMove(playerId, move);
+
+		console.log(`[TRIS] Player ${playerId} made move ${move} in game ${gameId}`);
 	}
 }
 

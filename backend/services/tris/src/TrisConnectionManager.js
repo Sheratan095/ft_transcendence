@@ -58,11 +58,42 @@ class	TrisConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.gameEnded', { gameId, winner, message });
 	}
 
-	async	notifyGameStart(playerId, gameId)
+	async	notifyGameStart(playerId, gameId, symbol, opponentUsername, yourTurn = false)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			yourSymbol: symbol,
+			opponentUsername,
+			yourTurn,
+		}
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.gameStarted', data);
+	}
+
+	// Used to notify both players of a move made
+	async	sendMoveMade(playerId, gameId, position, removedPosition = null)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			playerId, // player who made the move
+			position,
+			removedPosition,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.moveMade', data);
+	}
+
+	async	sendInvalidMoveMessage(playerId, gameId, message)
 	{
 		const	socket = this._connections.get(playerId);
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.gameStarted', { gameId });
+			this.#dispatchEventToSocket(socket, 'tris.invalidMove', { gameId, message });
 	}
 
 	async	sendErrorMessage(userId, message)
