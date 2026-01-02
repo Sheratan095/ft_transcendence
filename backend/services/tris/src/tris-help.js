@@ -53,7 +53,7 @@ export function	sendGameInviteNotification(senderId, senderUsername, targetId, g
 {
 	try
 	{
-		const	response = axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/notifications/send-game-invite`,
+		const	response = axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/send-game-invite`,
 		{ senderId, senderUsername, targetId, gameId, "gameType":"tris" },
 		{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
 		);

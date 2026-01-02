@@ -92,6 +92,8 @@ export function	handleMessage(socket, msg, userId, trisDb)
 				break;
 
 			case 'tris.makeMove':
+				handleMakeMove(userId, message.data.gameId, message.data.position, trisDb);
+				break;
 
 			default:
 				console.log(`[TRIS] Unknown event: ${message.event}`);
