@@ -35,6 +35,7 @@ export function	handleClose(socket, userId)
 	console.log(`[TRIS] WebSocket connection closed - User: ${userId}`);
 
 	trisConnectionManager.removeConnection(userId);
+	gameManager.handleUserDisconnect(userId);
 }
 
 export function	handleError(socket, err, userId)
@@ -226,6 +227,7 @@ export async function	handleJoinMatchmaking(userId, trisDb)
 {
 	try
 	{
+		// TO DO prevent joining matchmaking if already in a game or creating a custom game
 		gameManager.joinMatchmaking(userId);
 	}
 	catch (err)

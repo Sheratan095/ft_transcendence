@@ -86,4 +86,9 @@ export class	GameInstance
 
 		console.log(`[TRIS] Player ${playerId} made a move at position ${position} in game ${this.id}, removed position: ${removedPosition}`);
 	}
+
+	hasPlayer(playerId)
+	{
+		return (this.playerXId === playerId || this.playerOId === playerId);
+	}
 }

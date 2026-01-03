@@ -13,6 +13,12 @@ class	GameManager
 
 	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
+		if (this._waitingPlayers.includes(creatorId))
+		{
+			trisConnectionManager.sendErrorMessage(creatorId, 'Can\'t create a game while in matchmaking');
+			return ;
+		}
+
 		// Can't create a game with yourself
 		if (creatorId === otherId)
 			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with yourself');
@@ -285,6 +291,31 @@ class	GameManager
 		gameInstance.processMove(playerId, move);
 
 		console.log(`[TRIS] Player ${playerId} made move ${move} in game ${gameId}`);
+	}
+
+	handleUserDisconnect(userId)
+	{
+		// Remove user from matchmaking queue if present
+		const	index = this._waitingPlayers.indexOf(userId);
+		if (index !== -1)
+		{
+			this._waitingPlayers.splice(index, 1);
+			console.log(`[TRIS] Removed user ${userId} from matchmaking queue due to disconnection`);
+		}
+
+		// Check if user is in any active games
+		for (const gameInstance of this._games.values())
+		{
+			if (gameInstance.hasPlayer(userId))
+			{
+				// If the game is in progress, the other player wins
+				if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
+				{
+					const	otherPlayerId = (gameInstance.playerXId === userId) ? gameInstance.playerOId : gameInstance.playerXId;
+					this.gameEnd(gameInstance, otherPlayerId, userId, true);
+				}
+			}
+		}
 	}
 }
 
