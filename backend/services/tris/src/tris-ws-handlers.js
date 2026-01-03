@@ -112,6 +112,13 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 {
 	try
 	{
+		if (!otherId)
+		{
+			console.error(`[TRIS] No otherId provided by user ${userId} to create custom game`);
+			trisConnectionManager.sendErrorMessage(userId, 'No opponent ID provided');
+			return ;
+		}
+
 		const	senderUsername = await getUsernameById(userId);
 		if (!senderUsername)
 		{
@@ -132,10 +139,6 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 
 		// Send game invite notification
 		sendGameInviteNotification(userId, senderUsername, otherId, gameId);
-
-		// Here you would add logic to create a custom game between userId and otherId
-		console.log(`[TRIS] Creating custom game between ${userId} and ${otherId}`);
-
 	}
 	catch (err)
 	{
@@ -148,9 +151,14 @@ export async function	handleJoinCustomGame(userId, gameId, trisDb)
 {
 	try
 	{
-		gameManager.joinCustomGame(userId, gameId);
+		if (!gameId)
+		{
+			console.error(`[TRIS] No gameId provided by user ${userId} to join custom game`);
+			trisConnectionManager.sendErrorMessage(userId, 'No game ID provided');
+			return ;
+		}
 
-		console.log(`[TRIS] User ${userId} joined custom game ${gameId}`);
+		gameManager.joinCustomGame(userId, gameId);
 	}
 	catch (err)
 	{
@@ -163,9 +171,14 @@ export async function	handleCancelCustomGame(userId, gameId, trisDb)
 {
 	try
 	{
-		gameManager.cancelCustomGame(userId, gameId);
+		if (!gameId)
+		{
+			console.error(`[TRIS] No gameId provided by user ${userId} to cancel custom game`);
+			trisConnectionManager.sendErrorMessage(userId, 'No game ID provided');
+			return ;
+		}
 
-		console.log(`[TRIS] User ${userId} canceled custom game ${gameId}`);
+		gameManager.cancelCustomGame(userId, gameId);
 	}
 	catch (err)
 	{
@@ -178,9 +191,14 @@ export async function	handleUserQuit(userId, gameId, trisDb)
 {
 	try
 	{
-		gameManager.quitGame(userId, gameId);
+		if (!gameId)
+		{
+			console.error(`[TRIS] No gameId provided by user ${userId} to quit game`);
+			trisConnectionManager.sendErrorMessage(userId, 'No game ID provided');
+			return ;
+		}
 
-		console.log(`[TRIS] Handled quit for user ${userId}`);
+		gameManager.quitGame(userId, gameId);
 	}
 	catch (err)
 	{
@@ -192,9 +210,14 @@ export async function	handleUserReady(userId, gameId, readyStatus, trisDb)
 {
 	try
 	{
-		gameManager.playerReady(userId, gameId, readyStatus);
+		if (!gameId || typeof readyStatus !== 'boolean')
+		{
+			console.error(`[TRIS] Invalid data provided by user ${userId} to set ready status`);
+			trisConnectionManager.sendErrorMessage(userId, 'Invalid data provided');
+			return ;
+		}
 
-		console.log(`[TRIS] Handled ready for user ${userId}`);
+		gameManager.playerReady(userId, gameId, readyStatus);
 	}
 	catch (err)
 	{
@@ -207,8 +230,6 @@ export async function	handleJoinMatchmaking(userId, trisDb)
 	try
 	{
 		gameManager.joinMatchmaking(userId);
-
-		console.log(`[TRIS] User ${userId} joined matchmaking`);
 	}
 	catch (err)
 	{
@@ -222,8 +243,6 @@ export async function	handleLeaveMatchmaking(userId, trisDb)
 	try
 	{
 		gameManager.leaveMatchmaking(userId);
-
-		console.log(`[TRIS] User ${userId} left matchmaking`);
 	}
 	catch (err)
 	{
@@ -236,9 +255,14 @@ export async function	handleMakeMove(userId, gameId, position, trisDb)
 {
 	try
 	{
-		gameManager.makeMove(userId, gameId, position);
+		if (!gameId || typeof position !== 'number')
+		{
+			console.error(`[TRIS] Invalid data provided by user ${userId} to make move`);
+			trisConnectionManager.sendErrorMessage(userId, 'Invalid data provided');
+			return ;
+		}
 
-		console.log(`[TRIS] User ${userId} made move in game ${gameId}`);
+		gameManager.makeMove(userId, gameId, position);
 	}
 	catch (err)
 	{
