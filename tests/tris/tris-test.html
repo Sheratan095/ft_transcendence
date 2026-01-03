@@ -75,7 +75,7 @@
     let ws = null;
     let userId = '';
     let currentGameId = '';
-    let pingInterval = null;
+    // let pingInterval = null;
 
     function log(msg) {
       const logDiv = document.getElementById('log');
@@ -115,7 +115,7 @@
 
     function logout() {
       if (ws) ws.close();
-      if (pingInterval) clearInterval(pingInterval);
+      // Ping interval removed
       ws = null;
       userId = '';
       currentGameId = '';
@@ -138,17 +138,12 @@
       ws.onopen = () => {
         log('✓ WebSocket connected');
         updateStatus('Connected', true);
-        if (pingInterval) clearInterval(pingInterval);
-        pingInterval = setInterval(() => {
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ event: 'ping', data: {} }));
-          }
-        }, 30000);
+        // Ping interval removed
       };
       ws.onclose = (e) => {
         log('✗ WebSocket closed' + (e && e.code ? ' (code: ' + e.code + (e.reason ? ', reason: ' + e.reason : '') + ')' : ''));
         updateStatus('Disconnected', false);
-        if (pingInterval) clearInterval(pingInterval);
+        // Ping interval removed
       };
       ws.onerror = (e) => {
         log('✗ WebSocket error: ' + e.message);
