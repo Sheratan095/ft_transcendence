@@ -29,6 +29,19 @@ class	TrisConnectionManager
 		return (this._connections.size);
 	}
 
+	async	sendCustomGameCreationReply(creatorId, gameId, otherUsername)
+	{
+		const	socket = this._connections.get(creatorId);
+
+		const	data = {
+			gameId,
+			otherUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.customGameCreated', data);
+	}
+
 	async	sendPlayerJoinedCustomGame(otherPlayerId, gameId)
 	{
 		const	socket = this._connections.get(otherPlayerId);

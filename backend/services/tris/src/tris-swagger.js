@@ -41,6 +41,15 @@ Reponse:
     "otherId": "userId-of-invited-player"
   }
 }
+
+Response:
+{
+  "event": "tris.customGameCreated",
+  "data": {
+	"gameId": "some-game-id",
+	"otherUsername": "jack"
+  }
+}
 \`\`\`
 
 - **tris.joinCustomGame** - Join a custom game

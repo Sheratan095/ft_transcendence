@@ -1,4 +1,4 @@
-import { validateInternalApiKey, sendGameInviteNotification, getUsernameById } from './tris-help.js';
+import { validateInternalApiKey, getUsernameById } from './tris-help.js';
 // The class is initialized in TrisConnectionManager.js
 import { trisConnectionManager } from './TrisConnectionManager.js';
 
@@ -136,9 +136,6 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 		}
 
 		const	gameId = gameManager.createCustomGame(userId, senderUsername, otherId, otherUsername);
-
-		// Send game invite notification
-		sendGameInviteNotification(userId, senderUsername, otherId, gameId);
 	}
 	catch (err)
 	{

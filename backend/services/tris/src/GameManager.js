@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { trisConnectionManager } from './TrisConnectionManager.js';
-import { getUsernameById } from './tris-help.js';
+import { sendGameInviteNotification } from './tris-help.js';
 
 class	GameManager
 {
@@ -50,6 +50,12 @@ class	GameManager
 
 		// Add the new game to the games map
 		this._games.set(gameId, gameInstance);
+
+		// Send game invite notification
+		sendGameInviteNotification(creatorId, creatorUsername, otherId, gameId);
+
+		// Reply to creator with gameId
+		trisConnectionManager.sendCustomGameCreationReply(creatorId, gameId, otherUsername);
 
 		console.log(`[TRIS] Created custom game ${gameId} between ${playerXId} and ${playerOId}`);
 
@@ -122,8 +128,15 @@ class	GameManager
 			return ;
 		}
 
-		// Check if player is part of the game
-		if (gameInstance.playerXId !== playerId && gameInstance.playerOId !== playerId)
+		if (gameInstance.playerXId === playerId)
+		{
+			console.error('[TRIS] Player cannot join their own custom game');
+			trisConnectionManager.sendErrorMessage(playerId, 'Cannot join your own game');
+			return ;
+		}
+
+		// Only invitee user can join the custom game
+		if (gameInstance.playerXId !== playerId)
 		{
 			console.error(`[TRIS] Player ${playerId} is not part of game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
@@ -237,12 +250,9 @@ class	GameManager
 		// Update game status
 		gameInstance.startGame();
 
-		const	playerXUsername = getUsernameById(gameInstance.playerXId);
-		const	playerOUsername = getUsernameById(gameInstance.playerOId);
-
 		// Notify both players that the game has started
-		trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', playerOUsername, true);
-		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', playerXUsername, false);
+		trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
+		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
 	}
 
 	makeMove(playerId, gameId, move)
