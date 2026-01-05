@@ -13,13 +13,6 @@ class	GameManager
 
 	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
-		if (this._waitingPlayers.includes(creatorId))
-		{
-			console.error(`[TRIS] ${creatorId} cannot create custom game while in matchmaking`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'Can\'t create a game while in matchmaking');
-			return ;
-		}
-
 		// Can't create a game with yourself
 		if (creatorId === otherId)
 		{
@@ -36,15 +29,12 @@ class	GameManager
 			return ;
 		}
 
-		// Can't create a game if you created another one already
-		for (const game of this._games.values())
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(creatorId))
 		{
-			if (game.playerXId === creatorId && game.gameStatus === GameStatus.WAITING)
-			{
-				console.error(`[TRIS] ${creatorId} already has a waiting custom game`);
-				trisConnectionManager.sendErrorMessage(creatorId, 'You already have a waiting game');
-				return ;
-			}
+			console.error(`[TRIS] ${creatorId} tried to create a custom game while busy`);
+			trisConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
+			return ;
 		}
 
 		// Generate gameId and GameInstance
@@ -100,7 +90,7 @@ class	GameManager
 			return ;
 		}
 
-		// Only allow cancellation if the game hasn't started
+		// Only allow cancellation if the game hasn't started yet
 		if (this._games.get(gameId).gameStatus === GameStatus.IN_PROGRESS)
 		{
 			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} which is already in progress`);
@@ -135,6 +125,7 @@ class	GameManager
 			return ;
 		}
 
+		// Check if player is the creator
 		if (gameInstance.playerXId === playerId)
 		{
 			console.error(`[TRIS] Player ${playerId} cannot join their own custom game (created by ${gameInstance.playerXId})`);
@@ -150,10 +141,11 @@ class	GameManager
 			return ;
 		}
 
-		if (this._waitingPlayers.includes(playerId))
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(playerId))
 		{
-			console.error(`[TRIS] ${playerId} tried to join a custom game while in matchmaking`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Can\'t join a game while in matchmaking');
+			console.error(`[TRIS] ${playerId} tried to join custom game ${gameId} while busy`);
+			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
@@ -201,7 +193,7 @@ class	GameManager
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
 			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
-			this.gameEnd(gameInstance, otherPlayerId, playerId, true);
+			this._gameEnd(gameInstance, otherPlayerId, playerId, true);
 		}
 		else
 		{
@@ -211,10 +203,11 @@ class	GameManager
 
 	joinMatchmaking(playerId)
 	{
-		if (this._waitingPlayers.includes(playerId))
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(playerId))
 		{
-			console.error(`[TRIS] ${playerId} is already in the matchmaking queue`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are already in the matchmaking queue');
+			console.error(`[TRIS] ${playerId} tried to join matchmaking while busy`);
+			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
@@ -258,9 +251,10 @@ class	GameManager
 			return ;
 		}
 
-		if (gameInstance.gameStatus !== GameStatus.WAITING)
+		// Check if game is in waiting status or in lobby (other user joined)
+		if (gameInstance.gameStatus !== GameStatus.WAITING && gameInstance.gameStatus !== GameStatus.IN_LOBBY)
 		{
-			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} which is not in waiting status`);
+			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} that has already started`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Cannot change ready status in a game that has already started');
 			return ;
 		}
@@ -283,39 +277,7 @@ class	GameManager
 
 		// If both players are ready, start the game
 		if (gameInstance.playerXReady && gameInstance.playerOReady)
-			this.gameStart(gameInstance);
-	}
-
-	gameEnd(gameInstance, winner, loser, quit = false)
-	{
-		// Notify both players that the game has ended, not incluging message, it will included handled client-side
-		trisConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit);
-		trisConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit);
-
-		if (gameInstance.gameType === GameType.RANDOM)
-		{
-			// TO DO update user stats
-		}
-
-		// Remove the game from the active games map
-		this._games.delete(gameInstance.id);
-
-		const	result = quit ? `${loser} QUIT` : `WINNER: ${winner}`;
-
-		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}`);
-
-	}
-
-	gameStart(gameInstance)
-	{
-		console.log(`[TRIS] Starting game ${gameInstance.id} between ${gameInstance.playerXId} and ${gameInstance.playerOId}`);
-
-		// Update game status
-		gameInstance.startGame();
-
-		// Notify both players that the game has started
-		trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
-		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
+			this._gameStart(gameInstance);
 	}
 
 	makeMove(playerId, gameId, move)
@@ -346,7 +308,7 @@ class	GameManager
 
 		const	result = gameInstance.processMove(playerId, move);
 		if (result && result.winner && result.loser)
-			this.gameEnd(gameInstance, result.winner, result.loser, false);
+			this._gameEnd(gameInstance, result.winner, result.loser, false);
 	}
 
 	handleUserDisconnect(userId)
@@ -368,7 +330,7 @@ class	GameManager
 				if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 				{
 					const	otherPlayerId = (gameInstance.playerXId === userId) ? gameInstance.playerOId : gameInstance.playerXId;
-					this.gameEnd(gameInstance, otherPlayerId, userId, true);
+					this._gameEnd(gameInstance, otherPlayerId, userId, true);
 				}
 				else
 				{
@@ -377,6 +339,38 @@ class	GameManager
 				}
 			}
 		}
+	}
+
+	_gameStart(gameInstance)
+	{
+		console.log(`[TRIS] Starting game ${gameInstance.id} between ${gameInstance.playerXId} and ${gameInstance.playerOId}`);
+
+		// Update game status
+		gameInstance.startGame();
+
+		// Notify both players that the game has started
+		trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
+		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
+	}
+
+	_gameEnd(gameInstance, winner, loser, quit = false)
+	{
+		// Notify both players that the game has ended, not incluging message, it will included handled client-side
+		trisConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit);
+		trisConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit);
+
+		if (gameInstance.gameType === GameType.RANDOM)
+		{
+			// TO DO update user stats
+		}
+
+		// Remove the game from the active games map
+		this._games.delete(gameInstance.id);
+
+		const	result = quit ? `${loser} QUIT` : `WINNER: ${winner}`;
+
+		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}`);
+
 	}
 
 	// A user is considered busy if they are in matchmaking
