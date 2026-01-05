@@ -99,8 +99,8 @@ class	GameManager
 		}
 
 		// Notify players that the game has been canceled
-		trisConnectionManager.sendGameCanceled(gameInstance.playerXId, gameId);
-		trisConnectionManager.sendGameCanceled(gameInstance.playerOId, gameId);
+		trisConnectionManager.sendCustomGameCanceled(gameInstance.playerXId, gameId);
+		trisConnectionManager.sendCustomGameCanceled(gameInstance.playerOId, gameId);
 
 		this._games.delete(gameId);
 
@@ -117,8 +117,8 @@ class	GameManager
 			return ;
 		}
 
-		// Check if game is a custom game
-		if (gameInstance.gameType !== GameType.CUSTOM)
+		// Check if game is a custom game and in WAITING status
+		if (gameInstance.gameType !== GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
 		{
 			console.error(`[TRIS] ${playerId} tried to join a non-custom game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
@@ -181,23 +181,15 @@ class	GameManager
 			return ;
 		}
 
-		// Check if game is in progress
-		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
-		{
-			console.error(`[TRIS] ${playerId} tried to quit game ${gameId} which is not in progress`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that isn\'t started');
-			return ;
-		}
-
-		// If the player quits, the other player wins
+		// If the match is IN_PROGRESS (started), the other player wins
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
 			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true);
 		}
-		else
+		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY || gameInstance.gameStatus === GameStatus.WAITING)
 		{
-			// TO DO
+			
 		}
 	}
 

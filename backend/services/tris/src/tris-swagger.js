@@ -173,10 +173,10 @@ Reponse:
 }
 \`\`\`
 
-- **tris.gameCanceled** - Notification that the game has been canceled
+- **tris.customGameCanceled** - Notification that the game has been canceled
 \`\`\`json
 {
-  "event": "tris.gameCanceled",
+  "event": "tris.customGameCanceled",
   "data": {
 	"gameId": "some-game-id"
   }
