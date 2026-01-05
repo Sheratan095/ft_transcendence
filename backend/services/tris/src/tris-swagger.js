@@ -190,7 +190,7 @@ Reponse:
   "data": {
 	"gameId": "some-game-id",
 	"winner": "userId-of-winner", // NOT DRAW because it's infinite tris
-	"message": "You won!" // optional message
+	"quit": true/false
   }
 }
 \`\`\`

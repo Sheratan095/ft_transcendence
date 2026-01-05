@@ -254,9 +254,9 @@ class	GameManager
 
 	gameEnd(gameInstance, winner, loser, quit = false)
 	{
-		// Notify both players that the game has ended
-		trisConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit ? 'Your opponent has quit the game' : 'You won!');
-		trisConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, loser, quit ? 'You have quit the game' : 'You lost!');
+		// Notify both players that the game has ended, not incluging message, it will included handled client-side
+		trisConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit);
+		trisConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit);
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{

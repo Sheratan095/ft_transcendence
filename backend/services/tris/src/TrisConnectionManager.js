@@ -77,11 +77,18 @@ class	TrisConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.gameCanceled', { gameId });
 	}
 
-	async	sendGameEnded(playerId, gameId, winner, message)
+	async	sendGameEnded(playerId, gameId, winner, quit)
 	{
 		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			winner,
+			quit,
+		};
+
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.gameEnded', { gameId, winner, message });
+			this.#dispatchEventToSocket(socket, 'tris.gameEnded', data);
 	}
 
 	async	notifyGameStart(playerId, gameId, symbol, opponentUsername, yourTurn = false)
