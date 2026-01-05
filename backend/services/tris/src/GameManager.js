@@ -164,9 +164,13 @@ class	GameManager
 		// Reply to joining player with gameId and creatorUsername (X player)
 		trisConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerXUsername);
 
+		// Both players are now in the lobby, waiting to ready up
+		gameInstance.gameStatus = GameStatus.IN_LOBBY;
+
 		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId} created by ${gameInstance.playerXId}`);
 	}
 
+	// TO DO can a user quit a game while in LOBBY?
 	quitGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
@@ -373,6 +377,23 @@ class	GameManager
 				}
 			}
 		}
+	}
+
+	// A user is considered busy if they are in matchmaking
+	//	or in a game that is in progress or in lobby (waiting for ready)
+	_isUserBusy(userId)
+	{
+		if (this._waitingPlayers.includes(userId))
+			return (true);
+
+		// Check if user is in any active games
+		for (const gameInstance of this._games.values())
+		{
+			if (gameInstance.hasPlayer(userId) && (gameInstance.gameStatus === GameStatus.IN_PROGRESS || gameInstance.gameStatus === GameStatus.IN_LOBBY))
+				return (true);
+		}
+
+		return (false);
 	}
 }
 

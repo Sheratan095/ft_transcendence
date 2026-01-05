@@ -3,7 +3,8 @@ import { checkWin } from './tris-help.js';
 
 export const	GameStatus =
 {
-	WAITING: 'WAITING',
+	WAITING: 'WAITING', // Just for custom games, waiting for opponent to join
+	IN_LOBBY: 'IN_LOBBY',
 	IN_PROGRESS: 'IN_PROGRESS',
 	FINISHED: 'FINISHED',
 };
@@ -29,7 +30,8 @@ export class	GameInstance
 		this.playerOReady = false;
 		this.playerXReady = false;
 
-		this.gameStatus = GameStatus.WAITING;
+		// Custom games start in WAITING, random games start in LOBBY because both players are known
+		this.gameStatus = type === GameType.CUSTOM ? GameStatus.WAITING : GameStatus.IN_LOBBY;
 		this.gameType = type;
 
 		this.board = Array(9).fill(null); // 3x3 board represented as a flat array
