@@ -59,3 +59,4 @@ services/tris:
     PORT=3006
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
+    MAX_MARKS_PER_PLAYER=3

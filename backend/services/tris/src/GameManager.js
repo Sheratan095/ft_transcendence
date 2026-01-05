@@ -15,21 +15,31 @@ class	GameManager
 	{
 		if (this._waitingPlayers.includes(creatorId))
 		{
+			console.error('[TRIS] Cannot create custom game while in matchmaking');
 			trisConnectionManager.sendErrorMessage(creatorId, 'Can\'t create a game while in matchmaking');
 			return ;
 		}
 
 		// Can't create a game with yourself
 		if (creatorId === otherId)
+		{
+			console.error(`[TRIS] ${creatorId} tried to create a custom game with themselves`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with yourself');
+			return ;
+		}
 		// Can't crate a game with a null player
 		if (!otherId)
+		{
+			console.error(`[TRIS] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
+			return ;
+		}
 		// Can't create a game if you created another one already
 		for (const game of this._games.values())
 		{
 			if (game.playerXId === creatorId && game.gameStatus === GameStatus.WAITING)
 			{
+				console.error('[TRIS] Cannot create multiple custom games simultaneously');
 				trisConnectionManager.sendErrorMessage(creatorId, 'You already have a waiting game');
 				return ;
 			}
@@ -63,7 +73,7 @@ class	GameManager
 		// Reply to creator with gameId
 		trisConnectionManager.sendCustomGameCreationReply(creatorId, gameId, otherUsername);
 
-		console.log(`[TRIS] Created custom game ${gameId} between ${playerXId} and ${playerOId}`);
+		console.log(`[TRIS] ${playerXId} created custom game ${gameId} with ${playerOId}`);
 
 		return (gameId);
 	}
@@ -136,16 +146,23 @@ class	GameManager
 
 		if (gameInstance.playerXId === playerId)
 		{
-			console.error('[TRIS] Player cannot join their own custom game');
+			console.error(`[TRIS] Player ${playerId} cannot join their own custom game (created by ${gameInstance.playerXId})`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Cannot join your own game');
 			return ;
 		}
 
 		// Only invitee user can join the custom game
-		if (gameInstance.playerXId !== playerId)
+		if (gameInstance.playerOId !== playerId)
 		{
 			console.error(`[TRIS] Player ${playerId} is not part of game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			return ;
+		}
+
+		if (this._waitingPlayers.includes(playerId))
+		{
+			console.error('[TRIS] Cannot join custom game while in matchmaking');
+			trisConnectionManager.sendErrorMessage(playerId, 'Can\'t join a game while in matchmaking');
 			return ;
 		}
 
@@ -153,9 +170,13 @@ class	GameManager
 		const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 		trisConnectionManager.sendPlayerJoinedCustomGame(otherPlayerId, gameId);
 
-		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId}`);
+		// Reply to joining player with gameId and creatorUsername (X player)
+		trisConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerXUsername);
+
+		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId} with ${otherPlayerId}`);
 	}
 
+	// TO DO check disconnection
 	quitGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
@@ -245,7 +266,9 @@ class	GameManager
 		// Remove the game from the active games map
 		this._games.delete(gameInstance.id);
 
-		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}. Message: ${message}`);
+		const	result = quit ? `${loser} QUIT` : `WINNER: ${winner}`;
+
+		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}`);
 
 	}
 
@@ -289,8 +312,6 @@ class	GameManager
 		}
 
 		gameInstance.processMove(playerId, move);
-
-		console.log(`[TRIS] Player ${playerId} made move ${move} in game ${gameId}`);
 	}
 
 	handleUserDisconnect(userId)
@@ -313,6 +334,11 @@ class	GameManager
 				{
 					const	otherPlayerId = (gameInstance.playerXId === userId) ? gameInstance.playerOId : gameInstance.playerXId;
 					this.gameEnd(gameInstance, otherPlayerId, userId, true);
+				}
+				else
+				{
+					// If the game hasn't started yet, just cancel it
+					this.cancelCustomGame(userId, gameInstance.id);
 				}
 			}
 		}

@@ -34,7 +34,7 @@ export class	GameInstance
 		this.board = Array(9).fill(null); // 3x3 board represented as a flat array
 		this.turn = playerXId; // X always starts first
 
-		this.moves = []; // For infinite tris mode
+		this.moves = []; // To track moves for infinite tris
 	}
 
 	startGame()
@@ -73,16 +73,21 @@ export class	GameInstance
 		// Remove older move for infinte tris
 		this.moves.push(position);
 
-		const	removedPosition = null;
+		let	removedPosition = null;
 
-		// TO DO
-		// If there are more than 5 moves, remove the oldest one
-		// if (this.moves.length > 5)
-		// 	this.board[this.moves.shift()] = null;
+		// MAX MARKS PER PLAYER: 3
+		if (this.moves.length > process.env.TRIS_MAX_MARKS_PER_PLAYER * 2)
+		{
+			// Remove the oldest move and free up the position on the board
+			removedPosition = this.moves.shift();
+			this.board[removedPosition] = null;
+		}
+
+		const	otherPlayerId = (playerId === this.playerXId) ? this.playerOId : this.playerXId;
 
 		// Notify both players of the move
-		trisConnectionManager.sendMoveMade(playerId, this.id, position, removedPosition);
-		trisConnectionManager.sendMoveMade((playerId === this.playerXId) ? this.playerOId : this.playerXId, this.id, position, removedPosition);
+		trisConnectionManager.sendMoveMade(playerId,  playerId, this.id,  this.board[position], position, removedPosition);
+		trisConnectionManager.sendMoveMade(otherPlayerId, playerId, this.id, this.board[position], position, removedPosition);
 
 		console.log(`[TRIS] Player ${playerId} made a move at position ${position} in game ${this.id}, removed position: ${removedPosition}`);
 	}

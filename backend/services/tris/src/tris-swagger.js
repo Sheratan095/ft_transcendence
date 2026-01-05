@@ -60,6 +60,15 @@ Response:
 	"gameId": "some-game-id"
   }
 }
+
+Response:
+{
+  "event": "tris.customGameJoinSuccess",
+  "data": {
+	"gameId": "some-game-id",
+	"otherUsername": "jack"
+  }
+}
 \`\`\`
 
 - **tris.cancelCustomGame** - Cancel a custom game
@@ -205,7 +214,8 @@ Reponse:
   "event": "tris.moveMade",
   "data": {
 	"gameId": "some-game-id",
-	"playerId": "userId-of-player-who-made-move",
+	"moveMakerId": "userId-of-player-who-made-move",
+	"symbol": "X", // or "O"
 	"position": 0-8, // position of the move made
 	"removedPosition": 0-8 // position of the removed move in infinite tris, null if not applicable
   }

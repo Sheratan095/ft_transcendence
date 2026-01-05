@@ -49,6 +49,19 @@ class	TrisConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.playerJoinedCustomGame', { gameId });
 	}
 
+	async	replyCustomGameJoined(playerId, gameId, creatorUsername)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			creatorUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.customGameJoinSuccess', data);
+	}
+
 	// Other player is the one who DID NOT change their ready status
 	async	sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus)
 	{
@@ -87,13 +100,14 @@ class	TrisConnectionManager
 	}
 
 	// Used to notify both players of a move made
-	async	sendMoveMade(playerId, gameId, position, removedPosition = null)
+	async	sendMoveMade(playerId, moveMakerId, gameId, symbol, position, removedPosition = null)
 	{
 		const	socket = this._connections.get(playerId);
 
 		const	data = {
 			gameId,
-			playerId, // player who made the move
+			moveMakerId,
+			symbol,
 			position,
 			removedPosition,
 		};

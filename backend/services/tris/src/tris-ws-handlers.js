@@ -44,7 +44,10 @@ export function	handleError(socket, err, userId)
 	
 	// Remove the connection as it's likely broken
 	if (userId)
+	{
 		trisConnectionManager.removeConnection(userId);
+		gameManager.handleUserDisconnect(userId);
+	}
 }
 
 export function	handleMessage(socket, msg, userId, trisDb)
@@ -52,7 +55,6 @@ export function	handleMessage(socket, msg, userId, trisDb)
 	try
 	{
 		const	message = JSON.parse(msg.toString());
-		console.log(`[TRIS] Message from user ${userId}`);
 
 		switch (message.event)
 		{
