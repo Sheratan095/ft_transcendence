@@ -205,6 +205,37 @@ class	GameManager
 		}
 	}
 
+	joinMatchmaking(playerId)
+	{
+		if (this._waitingPlayers.includes(playerId))
+		{
+			console.error(`[TRIS] ${playerId} is already in the matchmaking queue`);
+			trisConnectionManager.sendErrorMessage(playerId, 'You are already in the matchmaking queue');
+			return ;
+		}
+
+		// Add player to waiting queue
+		this._waitingPlayers.push(playerId);
+		console.log(`[TRIS] Player ${playerId} joined matchmaking queue`);
+
+		// TO DO automatically match players when enough are waiting
+	}
+
+	leaveMatchmaking(playerId)
+	{
+		const	index = this._waitingPlayers.indexOf(playerId);
+		if (index === -1)
+		{
+			console.error(`[TRIS] ${playerId} is not in the matchmaking queue`);
+			trisConnectionManager.sendErrorMessage(playerId, 'You are not in the matchmaking queue');
+			return ;
+		}
+
+		// Remove player from waiting queue
+		this._waitingPlayers.splice(index, 1);
+		console.log(`[TRIS] Player ${playerId} left matchmaking queue`);
+	}
+
 	playerReady(playerId, gameId, readyStatus)
 	{
 		const	gameInstance = this._games.get(gameId);

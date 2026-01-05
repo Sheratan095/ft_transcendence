@@ -229,7 +229,6 @@ export async function	handleJoinMatchmaking(userId, trisDb)
 {
 	try
 	{
-		// TO DO prevent joining matchmaking if already in a game or creating a custom game
 		gameManager.joinMatchmaking(userId);
 	}
 	catch (err)
