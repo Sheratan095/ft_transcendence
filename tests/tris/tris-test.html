@@ -404,8 +404,7 @@
       const cell = document.querySelector(`.cell[data-pos="${position}"]`);
       if (removed) {
         cell.textContent = '';
-        cell.className = 'cell';
-        cell.classList.add('removed');
+        cell.className = 'cell'; // Reset to original state: no mark, no highlight, no fade
         gameState[position] = null;
       } else {
         cell.textContent = symbol;
@@ -413,7 +412,6 @@
         if (symbol === 'X' || symbol === 'O') {
           cell.classList.add('occupied', symbol.toLowerCase());
         }
-        cell.classList.remove('removed');
         gameState[position] = symbol;
       }
     }

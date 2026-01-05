@@ -57,8 +57,6 @@ export function	sendGameInviteNotification(senderId, senderUsername, targetId, g
 		{ senderId, senderUsername, targetId, gameId, "gameType":"tris" },
 		{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
 		);
-
-		console.log('[TRIS] Game invite notification sent successfully');
 	}
 	catch (err)
 	{

@@ -124,7 +124,6 @@ class	GameManager
 		console.log(`[TRIS] Canceled custom game ${gameId} by user ${userId}`);
 	}
 
-	// TO DO something change when joining your own game...
 	joinCustomGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
@@ -132,7 +131,7 @@ class	GameManager
 		// Check if game exists
 		if (!gameInstance)
 		{
-			console.error(`[TRIS] Game ${gameId} not found`);
+			console.error(`${playerId} tried to join a non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -140,7 +139,7 @@ class	GameManager
 		// Check if game is a custom game
 		if (gameInstance.gameType !== GameType.CUSTOM)
 		{
-			console.error(`[TRIS] Game ${gameId} is not a custom game`);
+			console.error(`${playerId} tried to join a non-custom game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
 			return ;
 		}
@@ -155,14 +154,14 @@ class	GameManager
 		// Only invitee user can join the custom game
 		if (gameInstance.playerOId !== playerId)
 		{
-			console.error(`[TRIS] Player ${playerId} is not part of game ${gameId}`);
+			console.error(`${playerId} tried to join a game ${gameId} they are not part of`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
 
 		if (this._waitingPlayers.includes(playerId))
 		{
-			console.error('[TRIS] Cannot join custom game while in matchmaking');
+			console.error(`${playerId} tried to join a custom game while in matchmaking`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Can\'t join a game while in matchmaking');
 			return ;
 		}
@@ -174,7 +173,7 @@ class	GameManager
 		// Reply to joining player with gameId and creatorUsername (X player)
 		trisConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerXUsername);
 
-		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId} with ${otherPlayerId}`);
+		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId} created by ${gameInstance.playerXId}`);
 	}
 
 	// TO DO check disconnection
