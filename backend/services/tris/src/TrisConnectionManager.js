@@ -106,7 +106,7 @@ class	TrisConnectionManager
 
 		const	data = {
 			gameId,
-			moveMakerId,
+			playerId: moveMakerId,
 			symbol,
 			position,
 			removedPosition,

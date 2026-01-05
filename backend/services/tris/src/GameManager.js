@@ -124,6 +124,7 @@ class	GameManager
 		console.log(`[TRIS] Canceled custom game ${gameId} by user ${userId}`);
 	}
 
+	// TO DO something change when joining your own game...
 	joinCustomGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);

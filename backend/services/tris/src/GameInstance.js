@@ -34,7 +34,11 @@ export class	GameInstance
 		this.board = Array(9).fill(null); // 3x3 board represented as a flat array
 		this.turn = playerXId; // X always starts first
 
-		this.moves = []; // To track moves for infinite tris
+		// To track moves for infinite tris (with removal of oldest marks)
+		this.movesX = [];
+		this.movesO = [];
+
+		this.MAX_MARKS = Number(process.env.TRIS_MAX_MARKS_PER_PLAYER ?? 3);
 	}
 
 	startGame()
@@ -62,26 +66,34 @@ export class	GameInstance
 
 		// Check if position is already taken
 		if (this.board[position] !== null)
+		{
 			trisConnectionManager.sendInvalidMoveMessage(playerId, this.id, 'Invalid move: Position already taken');
+			console.error(`[TRIS] Position ${position} already taken in game ${this.id} by user ${playerId}`);
+			return ;
+		}
+
+		const	playerMoves = playerId === this.playerXId ? this.movesX : this.movesO
 
 		// Make the move
 		this.board[position] = (playerId === this.playerXId) ? 'X' : 'O';
-
-		// Switch turn
-		this.turn = (this.turn === this.playerXId) ? this.playerOId : this.playerXId;
-
-		// Remove older move for infinte tris
-		this.moves.push(position);
+		playerMoves.push(position);
 
 		let	removedPosition = null;
 
 		// MAX MARKS PER PLAYER: 3
-		if (this.moves.length > process.env.TRIS_MAX_MARKS_PER_PLAYER * 2)
+		if (playerMoves.length > this.MAX_MARKS)
 		{
 			// Remove the oldest move and free up the position on the board
-			removedPosition = this.moves.shift();
+			removedPosition = playerMoves.shift();
+			console.log(`[TRIS] Removing oldest mark at position ${removedPosition} for player ${playerId} in game ${this.id}`);
 			this.board[removedPosition] = null;
 		}
+
+		// TO DO check win condition here
+		//	after move is completly made
+
+		// Switch turn
+		this.turn = (this.turn === this.playerXId) ? this.playerOId : this.playerXId;
 
 		const	otherPlayerId = (playerId === this.playerXId) ? this.playerOId : this.playerXId;
 

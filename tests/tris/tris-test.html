@@ -539,9 +539,8 @@
           updateGameStatus(isYourTurn ? 'Your turn! (You are ' + yourSymbol + ')' : 'Opponent\'s turn', isYourTurn ? 'your-turn' : 'opponent-turn');
           log('✓ Game started! You are ' + yourSymbol + ' (userId: ' + userId + ')', 'success');
           break;
-        case 'tris.moveMade':
-          // Determine symbol for the move sender and for the board
-            // Use symbol from backend if present, else fallback to old logic
+        case 'tris.moveMade': {
+            // Determine symbol for the move sender and for the board
             let moveSymbol = msg.data.symbol;
             updateBoard(msg.data.position, moveSymbol);
             if (msg.data.removedPosition !== null && msg.data.removedPosition !== undefined) {
@@ -550,8 +549,21 @@
             } else {
               log('Move made at position ' + msg.data.position + ' (userId: ' + msg.data.playerId + ', symbol: ' + moveSymbol + ')', 'info');
             }
-            isYourTurn = msg.data.playerId !== userId;
-            updateGameStatus(isYourTurn ? 'Your turn!' : 'Opponent\'s turn', isYourTurn ? 'your-turn' : 'opponent-turn');
+            // Use nextTurnId from backend if available
+            if (msg.data.nextTurnId !== undefined && msg.data.nextTurnId !== null) {
+              isYourTurn = msg.data.nextTurnId === userId;
+            } else {
+              isYourTurn = msg.data.playerId !== userId;
+            }
+            console.log('yourId:', userId, 'lastMoveId:', msg.data.playerId, 'isYourTurn:', isYourTurn);
+            if (isYourTurn) {
+              updateGameStatus('Your turn!', 'your-turn');
+              console.log('It is now your turn.');
+            } else {
+              updateGameStatus('Opponent\'s turn', 'opponent-turn');
+              console.log('Waiting for opponent\'s move.');
+            }
+          }
           break;
         case 'invalidMove':
           log('✗ Invalid move: ' + msg.data.message, 'error');
