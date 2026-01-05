@@ -15,7 +15,7 @@ class	GameManager
 	{
 		if (this._waitingPlayers.includes(creatorId))
 		{
-			console.error('[TRIS] Cannot create custom game while in matchmaking');
+			console.error(`[TRIS] ${creatorId} cannot create custom game while in matchmaking`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'Can\'t create a game while in matchmaking');
 			return ;
 		}
@@ -45,24 +45,10 @@ class	GameManager
 			}
 		}
 
-		let	playerXId;
-		let	playerOId;
-
-		// Casually assign player X and O
-		if (Math.random() < 0.5)
-		{
-			playerXId = creatorId;
-			playerOId = otherId;
-		}
-		else
-		{
-			playerXId = otherId;
-			playerOId = creatorId;
-		}
-
 		// Generate gameId and GameInstance
 		const	gameId = uuidv4();
-		const	gameInstance = new GameInstance(gameId, playerXId, playerOId, creatorUsername, otherUsername, GameType.CUSTOM);
+		// X is always the creator
+		const	gameInstance = new GameInstance(gameId, creatorId, otherId, creatorUsername, otherUsername, GameType.CUSTOM);
 
 		// Add the new game to the games map
 		this._games.set(gameId, gameInstance);
@@ -82,11 +68,9 @@ class	GameManager
 	cancelCustomGame(userId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
-
-		// Check if game exists
-		if (!gameInstance)
+		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] Attempted to cancel non-existent game ${gameId}`);
+			console.error(`[TRIS] ${userId} tried to cancel non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(userId, 'Game not found');
 			return ;
 		}
@@ -94,7 +78,7 @@ class	GameManager
 		// Check if the game is a custom game
 		if (gameInstance.gameType !== GameType.CUSTOM)
 		{
-			console.error(`[TRIS] Attempted to cancel non-custom game ${gameId}`);
+			console.error(`[TRIS] ${userId} attempted to cancel non-custom game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(userId, 'Cannot cancel a non-custom game');
 			return ;
 		}
@@ -102,7 +86,7 @@ class	GameManager
 		// Check if the requesting user is part of the game
 		if (this._games.get(gameId).playerXId !== userId && this._games.get(gameId).playerOId !== userId)
 		{
-			console.error(`[TRIS] User ${userId} is not part of game ${gameId} and cannot cancel it`);
+			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} they are not part of`);
 			trisConnectionManager.sendErrorMessage(userId, 'You are not part of this game');
 			return ;
 		}
@@ -110,7 +94,7 @@ class	GameManager
 		// Only allow cancellation if the game hasn't started
 		if (this._games.get(gameId).gameStatus === GameStatus.IN_PROGRESS)
 		{
-			console.error(`[TRIS] Cannot cancel game ${gameId} as it is already in progress`);
+			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} which is already in progress`);
 			trisConnectionManager.sendErrorMessage(userId, 'Cannot cancel game in progress');
 			return ;
 		}
@@ -127,9 +111,7 @@ class	GameManager
 	joinCustomGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
-
-		// Check if game exists
-		if (!gameInstance)
+		if (!gameInstance) // Check if game exists
 		{
 			console.error(`${playerId} tried to join a non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
@@ -180,10 +162,9 @@ class	GameManager
 	quitGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
-		// Check if game exists
-		if (!gameInstance)
+		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] Game ${gameId} not found`);
+			console.error(`${playerId} tried to quit non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -191,7 +172,7 @@ class	GameManager
 		// Check if player is part of the game
 		if (gameInstance.playerXId !== playerId && gameInstance.playerOId !== playerId)
 		{
-			console.error(`[TRIS] Player ${playerId} is not part of game ${gameId}`);
+			console.error(`${playerId} tried to quit game ${gameId} they are not part of`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
@@ -199,7 +180,7 @@ class	GameManager
 		// Check if game is in progress
 		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
 		{
-			console.error(`[TRIS] Game ${gameId} is not in progress`);
+			console.error(`${playerId} tried to quit game ${gameId} which is not in progress`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that isn\'t started');
 			return ;
 		}
@@ -215,10 +196,9 @@ class	GameManager
 	playerReady(playerId, gameId, readyStatus)
 	{
 		const	gameInstance = this._games.get(gameId);
-		// Check if game exists
-		if (!gameInstance)
+		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] Game ${gameId} not found`);
+			console.error(`[TRIS] ${playerId} tried to change ready status in non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -226,8 +206,15 @@ class	GameManager
 		// Check if player is part of the game
 		if (gameInstance.playerXId !== playerId && gameInstance.playerOId !== playerId)
 		{
-			console.error(`[TRIS] Player ${playerId} is not part of game ${gameId}`);
+			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} they are not part of`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			return ;
+		}
+
+		if (gameInstance.gameStatus !== GameStatus.WAITING)
+		{
+			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} which is not in waiting status`);
+			trisConnectionManager.sendErrorMessage(playerId, 'Cannot change ready status in a game that has already started');
 			return ;
 		}
 
@@ -290,7 +277,7 @@ class	GameManager
 		// Check if game exists
 		if (!gameInstance)
 		{
-			console.error(`[TRIS] Game ${gameId} not found`);
+			console.error(`[TRIS] ${playerId} tried to make a move in non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -298,7 +285,7 @@ class	GameManager
 		// Check if player is part of the game
 		if (gameInstance.playerXId !== playerId && gameInstance.playerOId !== playerId)
 		{
-			console.error(`[TRIS] Player ${playerId} is not part of game ${gameId}`);
+			console.error(`[TRIS] ${playerId} tried to make a move in game ${gameId} they are not part of`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
@@ -306,7 +293,7 @@ class	GameManager
 		// Check if game is in progress
 		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
 		{
-			console.error(`[TRIS] Game ${gameId} is not in progress`);
+			console.error(`[TRIS] ${playerId} tried to make a move in game ${gameId} which is not in progress`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Cannot make a move in a game that isn\'t in progress');
 			return ;
 		}
