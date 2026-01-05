@@ -167,7 +167,6 @@ class	GameManager
 		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId} created by ${gameInstance.playerXId}`);
 	}
 
-	// TO DO check disconnection
 	quitGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);

@@ -567,11 +567,24 @@
           log('✗ Invalid move: ' + msg.data.message, 'error');
           updateGameStatus('Invalid move: ' + msg.data.message, 'your-turn');
           break;
-        case 'tris.gameEnded':
-          const won = msg.data.winner === userId;
-          const endMsg = won ? '🎉 You won!' : '😔 You lost!';
-          updateGameStatus(endMsg + (msg.data.message ? ' - ' + msg.data.message : ''), 'ended');
-          log(endMsg, won ? 'success' : 'error');
+        case 'tris.gameEnded': {
+          let endMsg = '';
+          // Handle quit event from backend
+          if (msg.data.quit === true) {
+            if (msg.data.winner && msg.data.winner === userId) {
+              endMsg = '🎉 You win! Opponent quit the game.';
+            } else {
+              endMsg = '😔 You quit the game.';
+            }
+          } else if (msg.data.reason && msg.data.reason.toLowerCase().includes('cancel')) {
+            endMsg = 'Game canceled.';
+          } else {
+            const won = msg.data.winner === userId;
+            endMsg = won ? '🎉 You won!' : '😔 You lost!';
+          }
+          if (msg.data.message) endMsg += ' - ' + msg.data.message;
+          updateGameStatus(endMsg, 'ended');
+          log(endMsg, endMsg.includes('win') || endMsg.includes('won') ? 'success' : 'error');
           isYourTurn = false;
           setTimeout(() => {
             document.getElementById('playerInfo').style.display = 'none';
@@ -579,6 +592,7 @@
             updateGameStatus('Game ended. ' + endMsg, 'waiting');
           }, 5000);
           break;
+        }
         case 'tris.gameCanceled':
           updateGameStatus('Game canceled', 'waiting');
           log('Game canceled', 'error');
