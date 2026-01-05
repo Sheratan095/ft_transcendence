@@ -265,12 +265,12 @@ class	GameManager
 		let	otherPlayerId;
 		if (playerId === gameInstance.playerXId)
 		{
-			gameInstance.playerXIdReady = readyStatus;
+			gameInstance.playerXReady = readyStatus;
 			otherPlayerId = gameInstance.playerOId;
 		}
 		else if (playerId === gameInstance.playerOId)
 		{
-			gameInstance.playerOIdReady = readyStatus;
+			gameInstance.playerOReady = readyStatus;
 			otherPlayerId = gameInstance.playerXId;
 		}
 
@@ -278,7 +278,7 @@ class	GameManager
 		trisConnectionManager.sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus);
 
 		// If both players are ready, start the game
-		if (gameInstance.playerXIdReady && gameInstance.playerOIdReady)
+		if (gameInstance.playerXReady && gameInstance.playerOReady)
 			this.gameStart(gameInstance);
 	}
 

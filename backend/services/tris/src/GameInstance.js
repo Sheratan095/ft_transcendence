@@ -26,8 +26,8 @@ export class	GameInstance
 		this.playerXUsername = playerXUsername;
 		this.playerOUsername = playerOUsername;
 
-		this.playerOIdReady = false;
-		this.playerXIdReady = false;
+		this.playerOReady = false;
+		this.playerXReady = false;
 
 		this.gameStatus = GameStatus.WAITING;
 		this.gameType = type;
