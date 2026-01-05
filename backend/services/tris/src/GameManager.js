@@ -27,19 +27,21 @@ class	GameManager
 			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with yourself');
 			return ;
 		}
-		// Can't crate a game with a null player
+
+		// Can't create a game with a null player
 		if (!otherId)
 		{
 			console.error(`[TRIS] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
 			return ;
 		}
+
 		// Can't create a game if you created another one already
 		for (const game of this._games.values())
 		{
 			if (game.playerXId === creatorId && game.gameStatus === GameStatus.WAITING)
 			{
-				console.error('[TRIS] Cannot create multiple custom games simultaneously');
+				console.error(`[TRIS] ${creatorId} already has a waiting custom game`);
 				trisConnectionManager.sendErrorMessage(creatorId, 'You already have a waiting game');
 				return ;
 			}
@@ -59,7 +61,7 @@ class	GameManager
 		// Reply to creator with gameId
 		trisConnectionManager.sendCustomGameCreationReply(creatorId, gameId, otherUsername);
 
-		console.log(`[TRIS] ${playerXId} created custom game ${gameId} with ${playerOId}`);
+		console.log(`[TRIS] ${creatorId} created custom game ${gameId} with ${otherId}`);
 
 		return (gameId);
 	}
@@ -120,7 +122,7 @@ class	GameManager
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
-			console.error(`${playerId} tried to join a non-existent game ${gameId}`);
+			console.error(`[TRIS] ${playerId} tried to join a non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -128,7 +130,7 @@ class	GameManager
 		// Check if game is a custom game
 		if (gameInstance.gameType !== GameType.CUSTOM)
 		{
-			console.error(`${playerId} tried to join a non-custom game ${gameId}`);
+			console.error(`[TRIS] ${playerId} tried to join a non-custom game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
 			return ;
 		}
@@ -171,7 +173,7 @@ class	GameManager
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
-			console.error(`${playerId} tried to quit non-existent game ${gameId}`);
+			console.error(`[TRIS] ${playerId} tried to quit non-existent game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
