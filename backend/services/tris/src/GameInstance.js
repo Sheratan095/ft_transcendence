@@ -1,4 +1,5 @@
 import { trisConnectionManager } from './TrisConnectionManager.js';
+import { checkWin } from './tris-help.js';
 
 export const	GameStatus =
 {
@@ -89,8 +90,18 @@ export class	GameInstance
 			this.board[removedPosition] = null;
 		}
 
-		// TO DO check win condition here
-		//	after move is completly made
+		// Check for win is done only after adding the new move and possibly removing the oldest one
+		const	winner = checkWin(this.board);
+		if (winner == 'X' || winner == 'O')
+		{
+			this.gameStatus = GameStatus.FINISHED;
+			const	winnerId = (winner === 'X') ? this.playerXId : this.playerOId;
+			const	loserId = (winner === 'X') ? this.playerOId : this.playerXId;
+
+			console.log(`[TRIS] Game ${this.id} won by player ${winnerId}`);
+
+			return ({ winner: winnerId, loser: loserId });
+		}
 
 		// Switch turn
 		this.turn = (this.turn === this.playerXId) ? this.playerOId : this.playerXId;

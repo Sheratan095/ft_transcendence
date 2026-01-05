@@ -309,7 +309,9 @@ class	GameManager
 			return ;
 		}
 
-		gameInstance.processMove(playerId, move);
+		const	result = gameInstance.processMove(playerId, move);
+		if (result && result.winner && result.loser)
+			this.gameEnd(gameInstance, result.winner, result.loser, false);
 	}
 
 	handleUserDisconnect(userId)
