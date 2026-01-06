@@ -191,7 +191,8 @@ import {
 } from './routes/chat-routes.js'
 
 import {
-	getUserStatsRoute
+	getUserStatsRoute,
+	getUserMatchHistoryRoute
 } from './routes/tris-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
@@ -277,6 +278,7 @@ await fastify.register(async function (fastify)
 	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUser })
 
 	fastify.get('/tris/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsRoute })
+	fastify.get('/tris/history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryRoute })
 	
 	// RELATIONSHIPS routes
 	fastify.get('/users/relationships', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserRelationships })

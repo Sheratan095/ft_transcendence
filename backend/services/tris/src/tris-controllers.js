@@ -88,3 +88,39 @@ export const	getUserStats = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+export const	getUserMatchHistory = async (req, reply) =>
+{
+	try
+	{
+		const	trisDb = req.server.trisDb;
+		const	userId = req.query.id;
+
+		// Retrieve match history for the user
+		const	matchHistory = await trisDb.getMatchesForUser(userId);
+		if (!matchHistory || matchHistory.length === 0)
+			return (reply.code(404).send({ error: 'No match history found for user' }));
+
+		// Map the match history to a cleaner format if needed
+		for (let match of matchHistory)
+		{
+			match.playerXId = match.player_x_id;
+			match.playerOId = match.player_o_id;
+			match.winnerId = match.winner_id;
+			match.endedAt = match.ended_at;
+			delete match.player_x_id;
+			delete match.player_o_id;
+			delete match.winner_id;
+			delete match.ended_at;
+		}
+
+		console.log(`[TRIS] Retrieved match history for user ${userId}`);
+
+		return (reply.code(200).send(matchHistory));
+	}
+	catch (err)
+	{
+		console.error('[TRIS] Error in getUserMatchHistory controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}

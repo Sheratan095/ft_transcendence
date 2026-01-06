@@ -94,7 +94,10 @@ export async function	getUsernameById(userId)
 
 export function	calculateElo(win, loss)
 {
-	const	elo = (100 * win) - (50 * loss);
+	let	elo = (100 * win) - (50 * loss);
+
+	if (elo < 0)
+		elo = 0;
 
 	let	rank;
 

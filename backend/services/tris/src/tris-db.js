@@ -134,7 +134,7 @@ export class	TrisDatabase
 		return (match);
 	}
 
-	async	getAllMatchesForUser(userId)
+	async	getMatchesForUser(userId)
 	{
 		const	query = `
 			SELECT *

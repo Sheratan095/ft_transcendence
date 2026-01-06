@@ -8,7 +8,8 @@ import {
 import {
 	createUserStats as createUserStatsHandler,
 	deleteUserStats as deleteUserStatsHandler,
-	getUserStats as getUserStatsHandler
+	getUserStats as getUserStatsHandler,
+	getUserMatchHistory as getUserMatchHistoryHandler
 } from './tris-controllers.js';
 
 import { validateInternalApiKey } from './tris-help.js';
@@ -64,6 +65,19 @@ const	withCookieAuth =
 				type: 'string',
 			}
 		}
+	}
+};
+
+const	Match =
+{
+	type: 'object',
+	properties:
+	{
+		id: { type: 'string' },
+		playerXId: { type: 'string' },
+		playerOId: { type: 'string' },
+		winnerId: { type: ['string', 'null'] },
+		endedAt: { type: 'string', format: 'date-time' }
 	}
 };
 
@@ -192,6 +206,40 @@ const	getUserStats =
 	handler: getUserStatsHandler
 }
 
+const	getUserMatchHistory =
+{
+	schema:
+	{
+		summary: 'Get user match history',
+		description: 'Retrieve the match history for a given user.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+		querystring:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: Match
+			},
+			404: ErrorResponse, // In case of user's stats not found
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUserMatchHistoryHandler
+}
+
 export function	trisRoutes(fastify)
 {
 	// Actual WebSocket endpoint
@@ -211,8 +259,7 @@ export function	trisRoutes(fastify)
 
 	fastify.get('/stats', getUserStats);
 
-	// TO DO
-	// fastify.get('/history', getUserMatchHistory);
+	fastify.get('/history', getUserMatchHistory);
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.delete('/delete-user-stats', deleteUserStats);

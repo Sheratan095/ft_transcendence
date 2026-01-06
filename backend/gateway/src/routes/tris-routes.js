@@ -36,3 +36,24 @@ export async function	getUserStatsRoute(request, reply)
 		return (reply.code(500).send({ error: 'Tris service unavailable' }))
 	}
 }
+
+export async function	getUserMatchHistoryRoute(request, reply)
+{
+	try
+	{
+		const	response = await axios.get(`${TRIS_SERVICE_URL}/history`, {
+			headers: getAuthHeaders(request),
+			params: request.query
+		});
+
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		console.log('[GATEWAY] GetUserMatchHistory error:', err.message)
+		if (err.response)
+			console.log('[GATEWAY] GetUserMatchHistory response data:', err.response.data)
+
+		return (reply.code(500).send({ error: 'Tris service unavailable' }))
+	}
+}
