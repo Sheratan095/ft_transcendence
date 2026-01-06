@@ -232,6 +232,20 @@ Reponse:
 }
 \`\`\`
 
+- **tris.matchedInRandomGame** - Notification that the player has been matched in a random game
+\`\`\`json
+{
+  "event": "tris.matchedInRandomGame",
+  "data": {
+	"gameId": "some-game-id",
+	"yourSymbol": "X", // or "O"
+	"opponentUsername": "jack",
+	"yourTurn": true // or false,
+	"coolDownMs": 30000 // cooldown time in ms
+  }
+}
+\`\`\`
+
 - **error** - Error message
 \`\`\`json
 {

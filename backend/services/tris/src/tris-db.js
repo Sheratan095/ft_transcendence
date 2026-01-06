@@ -189,7 +189,7 @@ export class	TrisDatabase
 			UPDATE user_stats
 			SET
 				wins = wins + ?,
-				losses = losses + ?,
+				losses = losses + ?
 			WHERE user_id = ?
 		`;
 

@@ -6,13 +6,13 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS matches
 (
 	id			TEXT PRIMARY KEY,
-	player_one	TEXT NOT NULL,
-	player_two	TEXT NOT NULL,
+	player_x_id	TEXT NOT NULL,
+	player_o_id	TEXT NOT NULL,
 	winner_id	TEXT, -- NULL if the match is ongoing and draws
 	ended_at	DATETIME DEFAULT CURRENT_TIMESTAMP, -- time when the match is added to the db
 	-- TEXT ELO is calculated in the application layer because it's a business logic not a db logic
 
-	CHECK (player_one != player_two)
+	CHECK (player_x_id != player_o_id)
 
 	-- FOREIGN KEY (player_one) REFERENCES users(id) ON DELETE CASCADE,
 	-- FOREIGN KEY (player_two) REFERENCES users(id) ON DELETE CASCADE,

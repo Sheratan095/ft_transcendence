@@ -520,7 +520,50 @@
           document.getElementById('opponentReadyStatus').className = 'badge ' + (msg.data.readyStatus ? 'badge-success' : 'badge-warning');
           log('Opponent is ' + readyMsg, 'info');
           break;
+        case 'tris.matchedInRandomGame': {
+          // Enter lobby mode for random matchmaking
+          currentGameId = msg.data.gameId;
+          yourSymbol = msg.data.yourSymbol;
+          opponentUsername = msg.data.opponentUsername;
+          isYourTurn = false; // Not allowed to move until game starts
+          resetBoard();
+          document.getElementById('gameId').value = currentGameId;
+          document.getElementById('yourSymbol').textContent = yourSymbol;
+          document.getElementById('opponentName').textContent = opponentUsername;
+          document.getElementById('playerInfo').style.display = 'flex';
+          document.getElementById('yourReadyStatus').textContent = 'Not Ready';
+          document.getElementById('yourReadyStatus').className = 'badge badge-warning';
+          document.getElementById('opponentReadyStatus').textContent = 'Not Ready';
+          document.getElementById('opponentReadyStatus').className = 'badge badge-warning';
+          // Show lobby status and cooldown timer
+          let cooldown = msg.data.coolDownMs || 30000;
+          updateGameStatus('Matched! Waiting for both players to set ready. Lobby closes in ' + Math.ceil(cooldown/1000) + 's.', 'waiting');
+          log('✓ Matched in random game! Game ID: ' + currentGameId + ', symbol: ' + yourSymbol + ', opponent: ' + opponentUsername, 'success');
+          // Enable ready/not ready buttons
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
+          // Start cooldown timer
+          window._trisLobbyTimer && clearInterval(window._trisLobbyTimer);
+          window._trisLobbyTimer = setInterval(() => {
+            cooldown -= 1000;
+            if (cooldown > 0) {
+              updateGameStatus('Matched! Waiting for both players to set ready. Lobby closes in ' + Math.ceil(cooldown/1000) + 's.', 'waiting');
+            } else {
+              updateGameStatus('Lobby closed. Waiting for game to start...', 'waiting');
+              document.getElementById('readyBtn').disabled = true;
+              document.getElementById('notReadyBtn').disabled = true;
+              clearInterval(window._trisLobbyTimer);
+              window._trisLobbyTimer = null;
+            }
+          }, 1000);
+          break;
+        }
         case 'tris.gameStarted':
+          // Cancel lobby timer if running
+          if (window._trisLobbyTimer) {
+            clearInterval(window._trisLobbyTimer);
+            window._trisLobbyTimer = null;
+          }
           currentGameId = msg.data.gameId;
           yourSymbol = msg.data.yourSymbol;
           opponentUsername = msg.data.opponentUsername;
@@ -536,6 +579,9 @@
           document.getElementById('playerInfo').style.display = 'flex';
           updateGameStatus(isYourTurn ? 'Your turn! (You are ' + yourSymbol + ')' : 'Opponent\'s turn', isYourTurn ? 'your-turn' : 'opponent-turn');
           log('✓ Game started! You are ' + yourSymbol + ' (userId: ' + userId + ')', 'success');
+          // Enable moves, disable ready buttons
+          document.getElementById('readyBtn').disabled = true;
+          document.getElementById('notReadyBtn').disabled = true;
           break;
         case 'tris.moveMade': {
             // Determine symbol for the move sender and for the board

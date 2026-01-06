@@ -135,3 +135,8 @@ export function	checkWin(board)
 
 	return (null);
 }
+
+export function	sleep(ms)
+{
+	return (new Promise(resolve => setTimeout(resolve, ms)));
+}

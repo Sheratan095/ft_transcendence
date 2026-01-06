@@ -97,6 +97,22 @@ class	TrisConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.gameEnded', data);
 	}
 
+	async	notifyMatchedInRandomGame(playerId, gameId, symbol, opponentUsername, yourTurn = false)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			yourSymbol: symbol,
+			opponentUsername,
+			yourTurn,
+			coolDownMs: process.env.COOLDOWN_MS
+		}
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.matchedInRandomGame', data);
+	}
+
 	async	notifyGameStart(playerId, gameId, symbol, opponentUsername, yourTurn = false)
 	{
 		const	socket = this._connections.get(playerId);

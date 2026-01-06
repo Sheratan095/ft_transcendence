@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram name="Page-1" id="rNN4AwOxWi-3c5t58apC">
-        <mxGraphModel dx="2426" dy="1837" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="2781" dy="1745" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -632,7 +632,7 @@
                         <mxRectangle width="60" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-173" value="&lt;span style=&quot;font-weight: 700; text-decoration-line: underline;&quot;&gt;player_one_id : UUID&lt;/span&gt;" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;fontStyle=0;overflow=hidden;whiteSpace=wrap;html=1;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="bKWbJ0-E0UQl8z5ehJEL-171" vertex="1">
+                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-173" value="&lt;span style=&quot;font-weight: 700; text-decoration-line: underline;&quot;&gt;player_x_id : UUID&lt;/span&gt;" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;fontStyle=0;overflow=hidden;whiteSpace=wrap;html=1;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="bKWbJ0-E0UQl8z5ehJEL-171" vertex="1">
                     <mxGeometry x="60" width="160" height="30" as="geometry">
                         <mxRectangle width="160" height="30" as="alternateBounds"/>
                     </mxGeometry>
@@ -645,7 +645,7 @@
                         <mxRectangle width="60" height="30" as="alternateBounds"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-164" value="player_two_id : UUID" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;fontStyle=5;overflow=hidden;html=1;whiteSpace=wrap;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="bKWbJ0-E0UQl8z5ehJEL-162" vertex="1">
+                <mxCell id="bKWbJ0-E0UQl8z5ehJEL-164" value="player_o_id : UUID" style="shape=partialRectangle;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;fontStyle=5;overflow=hidden;html=1;whiteSpace=wrap;fontColor=light-dark(#FFFFFF,#FFFFFF);" parent="bKWbJ0-E0UQl8z5ehJEL-162" vertex="1">
                     <mxGeometry x="60" width="160" height="30" as="geometry">
                         <mxRectangle width="160" height="30" as="alternateBounds"/>
                     </mxGeometry>
@@ -1440,10 +1440,10 @@
                         <mxPoint x="-460" y="475" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="110" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;Games are saved in&amp;nbsp;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;db just when finished&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="110" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;Games are saved in&amp;nbsp;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;db just when finished&lt;/font&gt;&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="-600.5" y="-490" width="120" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="111" value="Draws don&#39;t exists&lt;div&gt;in infinite tris&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;" vertex="1" parent="1">
+                <mxCell id="111" value="Draws don&#39;t exists&lt;div&gt;in infinite tris&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;" parent="1" vertex="1">
                     <mxGeometry x="-582" y="-410" width="100" height="40" as="geometry"/>
                 </mxCell>
             </root>

@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { trisConnectionManager } from './TrisConnectionManager.js';
-import { sendGameInviteNotification } from './tris-help.js';
+import { sendGameInviteNotification, getUsernameById, sleep } from './tris-help.js';
 import { trisDatabase as trisDb } from './tris.js';
 
 class	GameManager
@@ -10,6 +10,7 @@ class	GameManager
 	{
 		this._games = new Map(); // gameId -> GameInstance
 		this._waitingPlayers = []; // Queue of players waiting for a match
+		this._randomGameCooldowns = new Map(); // gameId -> timeoutId
 	}
 
 	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
@@ -225,7 +226,8 @@ class	GameManager
 		this._waitingPlayers.push(playerId);
 		console.log(`[TRIS] Player ${playerId} joined matchmaking queue`);
 
-		// TO DO automatically match players when enough are waiting
+		// Try to create a random game
+		this._createRandomGameIfPossible();
 	}
 
 	leaveMatchmaking(playerId)
@@ -262,6 +264,7 @@ class	GameManager
 		}
 
 		// Check if game is in waiting status or in lobby (other user joined), so if the game hasn't started yet
+		// WAITING status is possible only for CUSTOM GAMES, creator can ready up before the other player joins
 		if (gameInstance.gameStatus !== GameStatus.WAITING && gameInstance.gameStatus !== GameStatus.IN_LOBBY)
 		{
 			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} that has already started`);
@@ -335,25 +338,81 @@ class	GameManager
 		for (const gameInstance of this._games.values())
 		{
 			if (gameInstance.hasPlayer(userId))
-			{
-				// If the game is in progress, the other player wins
-				if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
-				{
-					const	otherPlayerId = (gameInstance.playerXId === userId) ? gameInstance.playerOId : gameInstance.playerXId;
-					this._gameEnd(gameInstance, otherPlayerId, userId, true);
-				}
-				else
-				{
-					// If the game hasn't started yet, just cancel it
-					this.cancelCustomGame(userId, gameInstance.id);
-				}
-			}
++				this.quitGame(userId, gameInstance.id);
 		}
+	}
+
+	async _createRandomGameIfPossible()
+	{
+		// Slight delay to allow user to leave matchmaking immediately after joining
+		// This prevents instant matches that the user didn't want
+		await sleep(1000);
+
+		if (this._waitingPlayers.length < 2)
+			return ;
+
+		const	player1Id = this._waitingPlayers.shift();
+		const	player2Id = this._waitingPlayers.shift();
+
+		let	playerX;
+		let	playerO;
+		let	playerOUsername;
+		let	playerXUsername;
+
+		// Randomly assign X and O
+		if (Math.random() < 0.5)
+		{
+			playerX = player1Id;
+			playerXUsername = getUsernameById(playerX);
+			playerO = player2Id;
+			playerOUsername = getUsernameById(playerO);
+		}
+		else
+		{
+			playerX = player2Id;
+			playerXUsername = getUsernameById(playerX);
+			playerO = player1Id;
+			playerOUsername = getUsernameById(playerO);
+		}
+
+		// Generate gameId and GameInstance
+		const	gameId = uuidv4();
+		const	gameInstance = new GameInstance(gameId, playerX, playerO, playerXUsername, playerOUsername, GameType.RANDOM);
+
+		this._games.set(gameId, gameInstance);
+
+		// Notify both players that they have been matched
+		trisConnectionManager.notifyMatchedInRandomGame(playerX, gameId, 'X', playerOUsername, true); // X ALWAYS STARTS FIRST
+		trisConnectionManager.notifyMatchedInRandomGame(playerO, gameId, 'O', playerXUsername, false);
+
+		console.log(`[TRIS] Matched players ${playerX} and ${playerO} in random game ${gameId}`);
+
+		// Start cooldown timer before starting the game
+		const	timerId = setTimeout(() =>
+		{
+			const	gameInstance = this._games.get(gameId);
+
+			if (gameInstance && gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
+			{
+				this._gameStart(gameInstance); // Start the game automatically after cooldown
+
+				console.log(`[TRIS] Cooldown for game ${gameId} ended, starting game automatically`);
+			}
+		}, process.env.COOLDOWN_MS || 30000); // Default cooldown is 30 seconds
+
+		this._randomGameCooldowns.set(gameId, timerId);
 	}
 
 	_gameStart(gameInstance)
 	{
 		console.log(`[TRIS] Starting game ${gameInstance.id} between ${gameInstance.playerXId} and ${gameInstance.playerOId}`);
+
+		// Clear cooldown timer if present
+		if (this._randomGameCooldowns.has(gameInstance.id))
+		{
+			clearTimeout(this._randomGameCooldowns.get(gameInstance.id));
+			this._randomGameCooldowns.delete(gameInstance.id);
+		}
 
 		// Update game status
 		gameInstance.startGame();
@@ -373,11 +432,11 @@ class	GameManager
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
 			// Add game to the history
-			trisDb.saveGame(gameInstance.playerXId, gameInstance.playerOId, winner);
+			trisDb.saveMatch(gameInstance.playerXId, gameInstance.playerOId, winner);
 
 			// Update player stats
-			trisDb.updateUserStats(winner, winsDelta=1, lossesDelta=0);
-			trisDb.updateUserStats(loser, winsDelta=0, lossesDelta=1);
+			trisDb.updateUserStats(winner, 1, 0);
+			trisDb.updateUserStats(loser, 0, 1);
 		}
 
 		// Remove the game from the active games map
