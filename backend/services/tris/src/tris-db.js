@@ -110,30 +110,40 @@ export class	TrisDatabase
 		return (matches);
 	}
 
-	async	createMatch(playerXId, playerOId)
+	async	saveMatch(playerXId, playerOId, winnerId)
 	{
 		const	matchId = await this.#generateUUID();
 		const	query = `
-			INSERT INTO matches (id, player_x_id, player_o_id, status)
+			INSERT INTO matches (id, player_x_id, player_o_id, winner_id)
 			VALUES (?, ?, ?, ?)
 		`;
 
-		await this.db.run(query, [matchId, playerXId, playerOId, 'ongoing']);
+		await this.db.run(query, [matchId, playerXId, playerOId, winnerId]);
 		return (matchId);
 	}
 
-	async	endMatch(matchId, winnerId = null)
+	async	getMatchById(matchId)
 	{
 		const	query = `
-			UPDATE matches
-			SET
-				winner_id = ?,
-				status = 'finished',
-				ended_at = CURRENT_TIMESTAMP
+			SELECT *
+			FROM matches
 			WHERE id = ?
 		`;
+		const	match = await this.db.get(query, [matchId]);
 
-		await this.db.run(query, [winnerId, matchId]);
+		return (match);
+	}
+
+	async	getAllMatchesForUser(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE player_x_id = ? OR player_o_id = ?
+		`;
+		const	matches = await this.db.all(query, [userId, userId]);
+
+		return (matches);
 	}
 
 	//-----------------------------USER STATS QUERIES---------------------------------//
@@ -173,18 +183,17 @@ export class	TrisDatabase
 		return (stats);
 	}
 
-	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0, drawsDelta = 0)
+	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0)
 	{
 		const	query = `
 			UPDATE user_stats
 			SET
 				wins = wins + ?,
 				losses = losses + ?,
-				draws = draws + ?
 			WHERE user_id = ?
 		`;
 
-		await this.db.run(query, [winsDelta, lossesDelta, drawsDelta, userId]);
+		await this.db.run(query, [winsDelta, lossesDelta, userId]);
 	}
 
 	async	#close()

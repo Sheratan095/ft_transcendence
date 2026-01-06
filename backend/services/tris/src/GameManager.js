@@ -371,7 +371,7 @@ class	GameManager
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
-			// TO DO update user stats
+			// TO DO update user stats trisDb.saveMatch(...)
 		}
 
 		// Remove the game from the active games map

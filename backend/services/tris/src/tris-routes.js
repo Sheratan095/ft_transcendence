@@ -211,6 +211,9 @@ export function	trisRoutes(fastify)
 
 	fastify.get('/stats', getUserStats);
 
+	// TO DO
+	// fastify.get('/history', getUserMatchHistory);
+
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.delete('/delete-user-stats', deleteUserStats);
 }
