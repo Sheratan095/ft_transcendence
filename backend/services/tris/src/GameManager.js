@@ -15,6 +15,14 @@ class	GameManager
 
 	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(creatorId))
+		{
+			console.error(`[TRIS] ${creatorId} tried to create a custom game while busy`);
+			trisConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
+			return ;
+		}
+
 		// Can't create a game with yourself
 		if (creatorId === otherId)
 		{
@@ -28,14 +36,6 @@ class	GameManager
 		{
 			console.error(`[TRIS] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
-			return ;
-		}
-
-		// User must not be busy (in matchmaking or in another game)
-		if (this._isUserBusy(creatorId))
-		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game while busy`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
@@ -111,6 +111,14 @@ class	GameManager
 
 	joinCustomGame(playerId, gameId)
 	{
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(playerId))
+		{
+			console.error(`[TRIS] ${playerId} tried to join custom game ${gameId} while busy`);
+			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
+			return ;
+		}
+
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
@@ -140,14 +148,6 @@ class	GameManager
 		{
 			console.error(`[TRIS] ${playerId} tried to join a game ${gameId} they are not part of`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
-			return ;
-		}
-
-		// User must not be busy (in matchmaking or in another game)
-		if (this._isUserBusy(playerId))
-		{
-			console.error(`[TRIS] ${playerId} tried to join custom game ${gameId} while busy`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
