@@ -497,6 +497,9 @@
           document.getElementById('gameId').value = currentGameId;
           updateGameStatus('Successfully joined custom game. Waiting for players...', 'waiting');
           log('✓ Successfully joined custom game with ID: ' + currentGameId, 'success');
+          // Enable ready/not ready buttons for custom game lobby
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
           break;
         case 'pong':
           break;
@@ -505,6 +508,9 @@
           document.getElementById('gameId').value = currentGameId;
           updateGameStatus('Custom game created. Waiting for ' + msg.data.otherUsername + ' to join...', 'waiting');
           log('✓ Custom game created with ID: ' + currentGameId, 'success');
+          // Enable ready/not ready buttons for custom game lobby
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
           break;
         case 'tris.playerJoinedCustomGame':
           currentGameId = msg.data.gameId;
@@ -512,6 +518,9 @@
           updateGameStatus('Player joined! Set ready status to start.', 'waiting');
           document.getElementById('playerInfo').style.display = 'flex';
           log('✓ Player joined the game', 'success');
+          // Enable ready/not ready buttons for custom game lobby
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
           break;
         case 'tris.playerReadyStatus':
           const readyMsg = msg.data.readyStatus ? 'ready' : 'not ready';
@@ -620,8 +629,14 @@
             window._trisLobbyTimer = null;
           }
           let endMsg = '';
-          // Handle quit event from backend
-          if (msg.data.quit === true) {
+          // Handle timeout event
+          if (msg.data.timedOut) {
+            if (msg.data.winner && msg.data.winner === userId) {
+              endMsg = '⏰ Opponent timed out. You win!';
+            } else {
+              endMsg = '⏰ You timed out. You lose!';
+            }
+          } else if (msg.data.quit === true) {
             if (msg.data.winner && msg.data.winner === userId) {
               endMsg = '🎉 You win! Opponent quit the game.';
             } else {
@@ -634,8 +649,8 @@
             endMsg = won ? '🎉 You won!' : '😔 You lost!';
           }
           if (msg.data.message) endMsg += ' - ' + msg.data.message;
-          updateGameStatus(endMsg, 'ended');
-          log(endMsg, endMsg.includes('win') || endMsg.includes('won') ? 'success' : 'error');
+          updateGameStatus(endMsg, msg.data.timedOut ? 'ended' : (endMsg.includes('win') || endMsg.includes('won') ? 'your-turn' : 'ended'));
+          log(endMsg, msg.data.timedOut ? 'error' : (endMsg.includes('win') || endMsg.includes('won') ? 'success' : 'error'));
           isYourTurn = false;
           setTimeout(() => {
             document.getElementById('playerInfo').style.display = 'none';

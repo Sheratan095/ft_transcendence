@@ -134,3 +134,5 @@ I think it's ok
 	Each service deletes what it owns.
 
 [x] Rename/move ws routes in gateway
+
+[] check env, required and check for required env in all services

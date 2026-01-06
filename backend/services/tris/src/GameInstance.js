@@ -35,9 +35,9 @@ export class	GameInstance
 		this.gameType = type;
 
 		this.board = Array(9).fill(null); // 3x3 board represented as a flat array
-		this.turn = playerXId; // X always starts first
+		this.turn = playerXId; // X ALWAYS STARTS FIRST
 
-		// To track moves for infinite tris (with removal of oldest marks)
+		// To track moves for infinite tris (with REMOVAL OF OLDEST MARKS)
 		this.movesX = [];
 		this.movesO = [];
 

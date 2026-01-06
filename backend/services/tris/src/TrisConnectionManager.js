@@ -83,7 +83,7 @@ class	TrisConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.playerQuitCustomGameInLobby', { gameId });
 	}
 
-	async	sendGameEnded(playerId, gameId, winner, quit)
+	async	sendGameEnded(playerId, gameId, winner, quit, timedOut)
 	{
 		const	socket = this._connections.get(playerId);
 
@@ -91,6 +91,7 @@ class	TrisConnectionManager
 			gameId,
 			winner,
 			quit,
+			timedOut: timedOut,
 		};
 
 		if (socket)

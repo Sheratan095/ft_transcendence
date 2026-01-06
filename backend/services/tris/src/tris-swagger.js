@@ -190,7 +190,8 @@ Reponse:
   "data": {
 	"gameId": "some-game-id",
 	"winner": "userId-of-winner", // NOT DRAW because it's infinite tris
-	"quit": true/false
+	"quit": true/false,
+	"timedOut": true/false // in case the game ended due to move timeout
   }
 }
 \`\`\`

@@ -11,6 +11,7 @@ class	GameManager
 		this._games = new Map(); // gameId -> GameInstance
 		this._waitingPlayers = []; // Queue of players waiting for a match
 		this._randomGameCooldowns = new Map(); // gameId -> timeoutId
+		this._moveTimeouts = new Map(); // gameId -> timeoutId
 	}
 
 	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
@@ -197,7 +198,7 @@ class	GameManager
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
 			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
-			this._gameEnd(gameInstance, otherPlayerId, playerId, true);
+			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
 		{
@@ -216,7 +217,7 @@ class	GameManager
 			console.log(`[TRIS] Player ${playerId} quit game random game ${gameId}, game is canceled`);
 
 			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
-			this._gameEnd(gameInstance, otherPlayerId, playerId, true);
+			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 	}
 
@@ -327,9 +328,19 @@ class	GameManager
 			return ;
 		}
 
+		// Clear any existing move timeout for this game
+		if (this._moveTimeouts.has(gameId))
+		{
+			clearTimeout(this._moveTimeouts.get(gameId));
+			this._moveTimeouts.delete(gameId);
+		}
+
 		const	result = gameInstance.processMove(playerId, move);
 		if (result && result.winner && result.loser)
-			this._gameEnd(gameInstance, result.winner, result.loser, false);
+			this._gameEnd(gameInstance, result.winner, result.loser, false, false);
+
+		// Start move timeout for the next player
+		this._startMoveTimeout(gameId);
 	}
 
 	handleUserDisconnect(userId)
@@ -427,14 +438,17 @@ class	GameManager
 		// Notify both players that the game has started
 		trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
 		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
+
+		// Start move timeout for the next player
+		this._startMoveTimeout(gameInstance.id);
 	}
 
 	// Both user must be specified by input, can't be calculated from gameInstance because winner and loser depends on quit
-	_gameEnd(gameInstance, winner, loser, quit = false)
+	_gameEnd(gameInstance, winner, loser, quit, timedOut)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side
-		trisConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit);
-		trisConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit);
+		trisConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit, timedOut);
+		trisConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit, timedOut);
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
@@ -446,11 +460,27 @@ class	GameManager
 			trisDb.updateUserStats(loser, 0, 1);
 		}
 
+		if (this._moveTimeouts.has(gameInstance.id))
+		{
+			clearTimeout(this._moveTimeouts.get(gameInstance.id));
+			this._moveTimeouts.delete(gameInstance.id);
+		}
+
+		if (this._randomGameCooldowns.has(gameInstance.id))
+		{
+			clearTimeout(this._randomGameCooldowns.get(gameInstance.id));
+			this._randomGameCooldowns.delete(gameInstance.id);
+		}
+
 		// Remove the game from the active games map
 		this._games.delete(gameInstance.id);
 
-		const	result = quit ? `${loser} QUIT - ${winner} wins` : `WINNER: ${winner}`;
-		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}`);
+		if (quit)
+			console.log(`[TRIS] Game ${gameInstance.id} ended due to player ${loser} quit. Winner: ${winner}`);
+		else if (timedOut)
+			console.log(`[TRIS] Game ${gameInstance.id} ended due to timeout of player ${loser}. Winner: ${winner}`);
+		else
+			console.log(`[TRIS] Game ${gameInstance.id} ended. Winner: ${winner}`);
 	}
 
 	// A user is considered busy if they are in matchmaking
@@ -468,6 +498,27 @@ class	GameManager
 		}
 
 		return (false);
+	}
+
+	_startMoveTimeout(gameId)
+	{
+		// start move timeout for the next player
+		const	timeoutId = setTimeout(() =>
+		{
+			// Check if game is still in progress
+			const	currentGameInstance = this._games.get(gameId);
+			if (!currentGameInstance || currentGameInstance.gameStatus !== GameStatus.IN_PROGRESS)
+				return ;
+
+			const	loserId = currentGameInstance.turn;
+			const	winnerId = (loserId === currentGameInstance.playerXId) ? currentGameInstance.playerOId : currentGameInstance.playerXId;
+			
+			console.log(`[TRIS] Player ${loserId} timed out in game ${gameId}, awarding victory to ${winnerId}`);
+
+			this._gameEnd(currentGameInstance, winnerId, loserId, false, true);
+
+		}, process.env.MOVE_TIMEOUT_MS);
+		this._moveTimeouts.set(gameId, timeoutId);
 	}
 }
 
