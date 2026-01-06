@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tris Game Tester</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+      color: #e0e0e0; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 350px 1fr 350px;
+      gap: 20px;
+    }
+    @media (max-width: 1200px) {
+      .main-container { grid-template-columns: 1fr; }
+    }
+    
+    .panel {
+      background: rgba(35, 35, 35, 0.95);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h1 { 
+      color: #4CAF50; 
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+    }
+    h2 { 
+      color: #64B5F6; 
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      border-bottom: 2px solid rgba(100, 181, 246, 0.3);
+      padding-bottom: 8px;
+    }
+    h3 {
+      color: #FFB74D;
+      font-size: 1em;
+      margin-bottom: 10px;
+    }
+    
+    /* Login Panel */
+    .login-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input[type="email"], input[type="password"], input[type="text"], input[type="number"] {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+    }
+    
+    button {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4); }
+    .btn-secondary {
+      background: linear-gradient(135deg, #64B5F6, #42A5F5);
+      color: white;
+    }
+    .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(100, 181, 246, 0.4); }
+    .btn-danger {
+      background: linear-gradient(135deg, #EF5350, #E53935);
+      color: white;
+    }
+    .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(239, 83, 80, 0.4); }
+    .btn-warning {
+      background: linear-gradient(135deg, #FFB74D, #FFA726);
+      color: #1a1a1a;
+    }
+    .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255, 183, 77, 0.4); }
+    button:disabled {
+      background: #444;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    /* Game Board */
+    .game-board {
+      width: 100%;
+      max-width: 450px;
+      margin: 20px auto;
+      aspect-ratio: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 20px;
+      background: rgba(26, 26, 26, 0.8);
+      border-radius: 12px;
+      box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .cell {
+      background: linear-gradient(135deg, #2a2a3e, #1f1f2e);
+      border: 2px solid #444;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .cell:hover:not(.occupied) {
+      background: linear-gradient(135deg, #3a3a4e, #2f2f3e);
+      border-color: #4CAF50;
+      transform: scale(1.05);
+    }
+    .cell.occupied {
+      cursor: not-allowed;
+    }
+    .cell.x { color: #4CAF50; text-shadow: 0 0 20px rgba(76, 175, 80, 0.8); }
+    .cell.o { color: #64B5F6; text-shadow: 0 0 20px rgba(100, 181, 246, 0.8); }
+    .cell.removed {
+      opacity: 0.3;
+      background: #1a1a1a;
+    }
+    
+    /* Game Status */
+    .game-status {
+      text-align: center;
+      padding: 15px;
+      background: rgba(26, 26, 26, 0.8);
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #4CAF50;
+    }
+    .game-status.your-turn { border-left-color: #4CAF50; animation: pulse 2s infinite; }
+    .game-status.opponent-turn { border-left-color: #FFB74D; }
+    .game-status.waiting { border-left-color: #64B5F6; }
+    .game-status.ended { border-left-color: #EF5350; }
+    
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(76, 175, 80, 0); }
+      50% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.5); }
+    }
+    
+    /* Action Buttons */
+    .action-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .action-row {
+      display: flex;
+      gap: 10px;
+    }
+    .action-row > * { flex: 1; }
+    
+    /* Log */
+    .log {
+      background: #0a0a0a;
+      color: #b2ffb2;
+      padding: 15px;
+      border-radius: 8px;
+      height: 300px;
+      overflow-y: auto;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      border: 1px solid #333;
+    }
+    .log-entry {
+      margin-bottom: 5px;
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .log-time { color: #888; }
+    .log-rx { color: #64B5F6; }
+    .log-tx { color: #FFB74D; }
+    .log-error { color: #EF5350; }
+    .log-success { color: #4CAF50; }
+    
+    /* Status Bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: rgba(26, 26, 26, 0.95);
+      border-radius: 8px;
+      margin-top: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: blink 2s infinite;
+    }
+    .status-connected .status-dot { background: #4CAF50; }
+    .status-disconnected .status-dot { background: #EF5350; animation: none; }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    
+    /* Player Info */
+    .player-info {
+      background: rgba(26, 26, 26, 0.6);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .player-info.ready { border-left: 4px solid #4CAF50; }
+    .player-info.not-ready { border-left: 4px solid #EF5350; }
+    
+    .badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .badge-success { background: #4CAF50; color: white; }
+    .badge-warning { background: #FFB74D; color: #1a1a1a; }
+    .badge-info { background: #64B5F6; color: white; }
+    .badge-danger { background: #EF5350; color: white; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 Tris Game Tester</h1>
+  </div>
+  
+  <div class="main-container">
+    <!-- Left Panel: Login & Actions -->
+    <div class="panel">
+      <h2>🔐 Login & Actions</h2>
+      <div class="login-section">
+        <input type="email" id="emailInput" placeholder="Email" value="test1@gmail.com" />
+        <input type="password" id="passwordInput" placeholder="Password" value="1234" />
+        <button class="btn-primary" id="loginBtn">Login & Connect</button>
+        <button class="btn-danger" id="logoutBtn" style="display: none;">Logout</button>
+      </div>
+      
+      <h3>Custom Game</h3>
+      <div class="action-group">
+        <input id="otherId" type="text" placeholder="Opponent User ID" />
+        <button class="btn-primary" id="createCustomBtn">Create Custom Game</button>
+      </div>
+      
+      <div class="action-group">
+        <input id="gameId" type="text" placeholder="Game ID" />
+        <button class="btn-secondary" id="joinCustomBtn">Join Game</button>
+      </div>
+      
+      <h3>Game Controls</h3>
+      <div class="action-group">
+        <div class="action-row">
+          <button class="btn-primary" id="readyBtn">Ready</button>
+          <button class="btn-warning" id="notReadyBtn">Not Ready</button>
+        </div>
+        <div class="action-row">
+          <button class="btn-warning" id="cancelGameBtn">Cancel Game</button>
+          <button class="btn-danger" id="quitBtn">Quit Game</button>
+        </div>
+      </div>
+      
+      <h3>Matchmaking</h3>
+      <div class="action-group">
+        <button class="btn-primary" id="matchmakingBtn">Join Matchmaking</button>
+        <button class="btn-danger" id="leaveMatchmakingBtn">Leave Matchmaking</button>
+      </div>
+      
+      <button class="btn-secondary" id="clearLogBtn" style="width:100%; margin-top: 20px;">Clear Log</button>
+    </div>
+    
+    <!-- Center Panel: Game Board -->
+    <div class="panel">
+      <h2>🎯 Game Board</h2>
+      <div class="game-status waiting" id="gameStatus">
+        <strong>Status:</strong> <span id="statusMessage">Not in game</span>
+      </div>
+      
+      <div class="player-info" id="playerInfo" style="display: none;">
+          <span id="yourSymbol">-</span>
+        </div>
+        <div>
+          <strong>Opponent:</strong> <span id="opponentName">-</span>
+          <span class="badge badge-info" id="opponentReadyStatus">Not Ready</span>
+        </div>
+        <span class="badge badge-info" id="yourReadyStatus">Not Ready</span>
+      </div>
+      <div class="game-board" id="gameBoard">
+        <div class="cell" data-pos="0"></div>
+        <div class="cell" data-pos="1"></div>
+        <div class="cell" data-pos="2"></div>
+        <div class="cell" data-pos="3"></div>
+        <div class="cell" data-pos="4"></div>
+        <div class="cell" data-pos="5"></div>
+        <div class="cell" data-pos="6"></div>
+        <div class="cell" data-pos="7"></div>
+        <div class="cell" data-pos="8"></div>
+      </div>
+    </div>
+    <!-- Right Panel: Event Log -->
+    <div class="panel">
+      <h2>📋 Event Log</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+  <div class="status-bar">
+    <div class="status-indicator status-disconnected" id="connectionStatus">
+      <div class="status-dot"></div>
+      <span id="statusText">Disconnected</span>
+    </div>
+    <div id="userIdSpan"></div>
+  </div>
+  <script>
+    // Modern, working script block for Tris UI
+    const WS_URL = 'wss://localhost:3000/tris/ws';
+    const LOGIN_URL = 'https://localhost:3000/auth/login';
+    let ws = null;
+    let userId = '';
+    let currentGameId = '';
+    let yourSymbol = '';
+    let opponentUsername = '';
+    let isYourTurn = false;
+    let gameState = Array(9).fill(null);
+
+    function log(msg, type = 'info') {
+      const logDiv = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      const time = `<span class="log-time">[${new Date().toLocaleTimeString()}]</span>`;
+      const typeClass = type === 'rx' ? 'log-rx' : type === 'tx' ? 'log-tx' : type === 'error' ? 'log-error' : type === 'success' ? 'log-success' : '';
+      entry.innerHTML = `${time} <span class="${typeClass}">${msg}</span>`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function updateStatus(text, connected) {
+      const statusIndicator = document.getElementById('connectionStatus');
+      statusIndicator.className = 'status-indicator ' + (connected ? 'status-connected' : 'status-disconnected');
+      document.getElementById('statusText').textContent = text;
+    }
+
+    function updateGameStatus(message, statusClass = 'waiting') {
+      const statusDiv = document.getElementById('gameStatus');
+      statusDiv.className = 'game-status ' + statusClass;
+      document.getElementById('statusMessage').textContent = message;
+    }
+
+    function resetBoard() {
+      gameState = Array(9).fill(null);
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        cell.textContent = '';
+        cell.className = 'cell';
+      });
+    }
+
+    function updateBoard(position, symbol, removed = false) {
+      const cell = document.querySelector(`.cell[data-pos="${position}"]`);
+      if (removed) {
+        cell.textContent = '';
+        cell.className = 'cell'; // Reset to original state: no mark, no highlight, no fade
+        gameState[position] = null;
+      } else {
+        cell.textContent = symbol;
+        cell.className = 'cell';
+        if (symbol === 'X' || symbol === 'O') {
+          cell.classList.add('occupied', symbol.toLowerCase());
+        }
+        gameState[position] = symbol;
+      }
+    }
+
+    async function login() {
+      const email = document.getElementById('emailInput').value;
+      const password = document.getElementById('passwordInput').value;
+      const res = await fetch(LOGIN_URL, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) {
+        log('Login failed: ' + res.status, 'error');
+        return;
+      }
+      const data = await res.json();
+      userId = data.user.id;
+      document.getElementById('userIdSpan').innerHTML = `<strong>User ID:</strong> ${userId}`;
+      document.getElementById('loginBtn').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'inline-block';
+      document.getElementById('emailInput').disabled = true;
+      document.getElementById('passwordInput').disabled = true;
+      log('✓ Logged in as ' + userId, 'success');
+      connectWs();
+    }
+
+    function logout() {
+      if (ws) ws.close();
+      ws = null;
+      userId = '';
+      currentGameId = '';
+      yourSymbol = '';
+      opponentUsername = '';
+      isYourTurn = false;
+      resetBoard();
+      document.getElementById('userIdSpan').textContent = '';
+      document.getElementById('loginBtn').style.display = 'inline-block';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('emailInput').disabled = false;
+      document.getElementById('passwordInput').disabled = false;
+      document.getElementById('playerInfo').style.display = 'none';
+      updateStatus('Disconnected', false);
+      updateGameStatus('Not in game', 'waiting');
+      log('✗ Logged out', 'error');
+    }
+
+    function connectWs() {
+      if (ws && ws.readyState !== WebSocket.CLOSED) {
+        log('WebSocket already connected');
+        return;
+      }
+      ws = new WebSocket(WS_URL);
+      ws.onopen = () => {
+        log('✓ WebSocket connected', 'success');
+        updateStatus('Connected', true);
+      };
+      ws.onclose = (e) => {
+        log('✗ WebSocket closed' + (e && e.code ? ' (code: ' + e.code + (e.reason ? ', reason: ' + e.reason : '') + ')' : ''), 'error');
+        updateStatus('Disconnected', false);
+      };
+      ws.onerror = (e) => {
+        log('✗ WebSocket error: ' + e.message, 'error');
+      };
+      ws.onmessage = (event) => {
+        let msg;
+        try { 
+          msg = JSON.parse(event.data); 
+        } catch { 
+          log('Invalid JSON: ' + event.data, 'error'); 
+          return; 
+        }
+        handleServerMessage(msg);
+      };
+    }
+
+    function handleServerMessage(msg) {
+      log('[RX] ' + msg.event + ': ' + JSON.stringify(msg.data), 'rx');
+      switch(msg.event) {
+        case 'tris.customGameJoinSuccess':
+          currentGameId = msg.data.gameId;
+          document.getElementById('gameId').value = currentGameId;
+          updateGameStatus('Successfully joined custom game. Waiting for players...', 'waiting');
+          log('✓ Successfully joined custom game with ID: ' + currentGameId, 'success');
+          // Enable ready/not ready buttons for custom game lobby
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
+          break;
+        case 'pong':
+          break;
+        case 'tris.customGameCreated':
+          currentGameId = msg.data.gameId;
+          document.getElementById('gameId').value = currentGameId;
+          updateGameStatus('Custom game created. Waiting for ' + msg.data.otherUsername + ' to join...', 'waiting');
+          log('✓ Custom game created with ID: ' + currentGameId, 'success');
+          // Enable ready/not ready buttons for custom game lobby
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
+          break;
+        case 'tris.playerJoinedCustomGame':
+          currentGameId = msg.data.gameId;
+          document.getElementById('gameId').value = currentGameId;
+          updateGameStatus('Player joined! Set ready status to start.', 'waiting');
+          document.getElementById('playerInfo').style.display = 'flex';
+          log('✓ Player joined the game', 'success');
+          // Enable ready/not ready buttons for custom game lobby
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
+          break;
+        case 'tris.playerReadyStatus':
+          const readyMsg = msg.data.readyStatus ? 'ready' : 'not ready';
+          updateGameStatus('Opponent is ' + readyMsg, 'waiting');
+          document.getElementById('opponentReadyStatus').textContent = msg.data.readyStatus ? 'Ready' : 'Not Ready';
+          document.getElementById('opponentReadyStatus').className = 'badge ' + (msg.data.readyStatus ? 'badge-success' : 'badge-warning');
+          log('Opponent is ' + readyMsg, 'info');
+          break;
+        case 'tris.matchedInRandomGame': {
+          // Enter lobby mode for random matchmaking
+          currentGameId = msg.data.gameId;
+          yourSymbol = msg.data.yourSymbol;
+          opponentUsername = msg.data.opponentUsername;
+          isYourTurn = false; // Not allowed to move until game starts
+          resetBoard();
+          document.getElementById('gameId').value = currentGameId;
+          document.getElementById('yourSymbol').textContent = yourSymbol;
+          document.getElementById('opponentName').textContent = opponentUsername;
+          document.getElementById('playerInfo').style.display = 'flex';
+          document.getElementById('yourReadyStatus').textContent = 'Not Ready';
+          document.getElementById('yourReadyStatus').className = 'badge badge-warning';
+          document.getElementById('opponentReadyStatus').textContent = 'Not Ready';
+          document.getElementById('opponentReadyStatus').className = 'badge badge-warning';
+          // Show lobby status and cooldown timer
+          let cooldown = msg.data.coolDownMs || 30000;
+          updateGameStatus('Matched! Waiting for both players to set ready. Lobby closes in ' + Math.ceil(cooldown/1000) + 's.', 'waiting');
+          log('✓ Matched in random game! Game ID: ' + currentGameId + ', symbol: ' + yourSymbol + ', opponent: ' + opponentUsername, 'success');
+          // Enable ready/not ready buttons
+          document.getElementById('readyBtn').disabled = false;
+          document.getElementById('notReadyBtn').disabled = false;
+          // Start cooldown timer
+          window._trisLobbyTimer && clearInterval(window._trisLobbyTimer);
+          window._trisLobbyTimer = setInterval(() => {
+            cooldown -= 1000;
+            if (cooldown > 0) {
+              updateGameStatus('Matched! Waiting for both players to set ready. Lobby closes in ' + Math.ceil(cooldown/1000) + 's.', 'waiting');
+            } else {
+              updateGameStatus('Lobby closed. Waiting for game to start...', 'waiting');
+              document.getElementById('readyBtn').disabled = true;
+              document.getElementById('notReadyBtn').disabled = true;
+              clearInterval(window._trisLobbyTimer);
+              window._trisLobbyTimer = null;
+            }
+          }, 1000);
+          break;
+        }
+        case 'tris.gameStarted':
+          // Cancel lobby timer if running
+          if (window._trisLobbyTimer) {
+            clearInterval(window._trisLobbyTimer);
+            window._trisLobbyTimer = null;
+          }
+          currentGameId = msg.data.gameId;
+          yourSymbol = msg.data.yourSymbol;
+          opponentUsername = msg.data.opponentUsername;
+          isYourTurn = msg.data.yourTurn;
+          resetBoard();
+          document.getElementById('gameId').value = currentGameId;
+          document.getElementById('yourSymbol').textContent = yourSymbol;
+          document.getElementById('opponentName').textContent = opponentUsername;
+          document.getElementById('yourReadyStatus').textContent = 'Ready';
+          document.getElementById('yourReadyStatus').className = 'badge badge-success';
+          document.getElementById('opponentReadyStatus').textContent = 'Ready';
+          document.getElementById('opponentReadyStatus').className = 'badge badge-success';
+          document.getElementById('playerInfo').style.display = 'flex';
+          updateGameStatus(isYourTurn ? 'Your turn! (You are ' + yourSymbol + ')' : 'Opponent\'s turn', isYourTurn ? 'your-turn' : 'opponent-turn');
+          log('✓ Game started! You are ' + yourSymbol + ' (userId: ' + userId + ')', 'success');
+          // Enable moves, disable ready buttons
+          document.getElementById('readyBtn').disabled = true;
+          document.getElementById('notReadyBtn').disabled = true;
+          break;
+        case 'tris.moveMade': {
+            // Determine symbol for the move sender and for the board
+            let moveSymbol = msg.data.symbol;
+            updateBoard(msg.data.position, moveSymbol);
+            if (msg.data.removedPosition !== null && msg.data.removedPosition !== undefined) {
+              updateBoard(msg.data.removedPosition, '', true); // Always clear the removed cell
+              log('Move at position ' + msg.data.position + ', removed position ' + msg.data.removedPosition + ' (userId: ' + msg.data.playerId + ', symbol: ' + moveSymbol + ')', 'info');
+            } else {
+              log('Move made at position ' + msg.data.position + ' (userId: ' + msg.data.playerId + ', symbol: ' + moveSymbol + ')', 'info');
+            }
+            // Use nextTurnId from backend if available
+            if (msg.data.nextTurnId !== undefined && msg.data.nextTurnId !== null) {
+              isYourTurn = msg.data.nextTurnId === userId;
+            } else {
+              isYourTurn = msg.data.playerId !== userId;
+            }
+            console.log('yourId:', userId, 'lastMoveId:', msg.data.playerId, 'isYourTurn:', isYourTurn);
+            if (isYourTurn) {
+              updateGameStatus('Your turn!', 'your-turn');
+              console.log('It is now your turn.');
+            } else {
+              updateGameStatus('Opponent\'s turn', 'opponent-turn');
+              console.log('Waiting for opponent\'s move.');
+            }
+          }
+          break;
+        case 'invalidMove':
+          log('✗ Invalid move: ' + msg.data.message, 'error');
+          updateGameStatus('Invalid move: ' + msg.data.message, 'your-turn');
+          break;
+        case 'tris.gameEnded': {
+          // Stop lobby timer if running (covers random games ended in lobby)
+          if (window._trisLobbyTimer) {
+            clearInterval(window._trisLobbyTimer);
+            window._trisLobbyTimer = null;
+          }
+          let endMsg = '';
+          // Handle timeout event
+          if (msg.data.timedOut) {
+            if (msg.data.winner && msg.data.winner === userId) {
+              endMsg = '⏰ Opponent timed out. You win!';
+            } else {
+              endMsg = '⏰ You timed out. You lose!';
+            }
+          } else if (msg.data.quit === true) {
+            if (msg.data.winner && msg.data.winner === userId) {
+              endMsg = '🎉 You win! Opponent quit the game.';
+            } else {
+              endMsg = '😔 You quit the game.';
+            }
+          } else if (msg.data.reason && msg.data.reason.toLowerCase().includes('cancel')) {
+            endMsg = 'Game canceled.';
+          } else {
+            const won = msg.data.winner === userId;
+            endMsg = won ? '🎉 You won!' : '😔 You lost!';
+          }
+          if (msg.data.message) endMsg += ' - ' + msg.data.message;
+          updateGameStatus(endMsg, msg.data.timedOut ? 'ended' : (endMsg.includes('win') || endMsg.includes('won') ? 'your-turn' : 'ended'));
+          log(endMsg, msg.data.timedOut ? 'error' : (endMsg.includes('win') || endMsg.includes('won') ? 'success' : 'error'));
+          isYourTurn = false;
+          setTimeout(() => {
+            document.getElementById('playerInfo').style.display = 'none';
+            resetBoard();
+            updateGameStatus('Game ended. ' + endMsg, 'waiting');
+          }, 5000);
+          break;
+        }
+        case 'tris.customGameCanceled':
+          updateGameStatus('Game canceled', 'waiting');
+          log('Game canceled', 'error');
+          document.getElementById('playerInfo').style.display = 'none';
+          resetBoard();
+          currentGameId = '';
+          break;
+        case 'error':
+          log('✗ Error: ' + msg.data.message, 'error');
+          updateGameStatus('Error: ' + msg.data.message, 'waiting');
+          break;
+        default:
+          log('Unknown event: ' + msg.event, 'error');
+      }
+    }
+
+    document.getElementById('loginBtn').onclick = login;
+    document.getElementById('logoutBtn').onclick = logout;
+    document.getElementById('createCustomBtn').onclick = function() {
+      const otherId = document.getElementById('otherId').value;
+      if (!otherId) return log('✗ Please enter an opponent user ID', 'error');
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.createCustomGame', data: { otherId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] Creating custom game with user ' + otherId, 'tx');
+    };
+    document.getElementById('joinCustomBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('✗ Please enter a game ID', 'error');
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.joinCustomGame', data: { gameId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] Joining game ' + gameId, 'tx');
+    };
+    document.getElementById('readyBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('✗ Please enter a game ID', 'error');
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.userReady', data: { gameId, readyStatus: true } };
+      ws.send(JSON.stringify(msg));
+      document.getElementById('yourReadyStatus').textContent = 'Ready';
+      document.getElementById('yourReadyStatus').className = 'badge badge-success';
+      log('[TX] Setting ready status: true', 'tx');
+    };
+    document.getElementById('notReadyBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('✗ Please enter a game ID', 'error');
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.userReady', data: { gameId, readyStatus: false } };
+      ws.send(JSON.stringify(msg));
+      document.getElementById('yourReadyStatus').textContent = 'Not Ready';
+      document.getElementById('yourReadyStatus').className = 'badge badge-warning';
+      log('[TX] Setting ready status: false', 'tx');
+    };
+    document.getElementById('cancelGameBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('✗ Please enter a game ID', 'error');
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.cancelCustomGame', data: { gameId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] Canceling game', 'tx');
+    };
+    document.getElementById('quitBtn').onclick = function() {
+      const gameId = document.getElementById('gameId').value;
+      if (!gameId) return log('✗ Please enter a game ID', 'error');
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.userQuit', data: { gameId } };
+      ws.send(JSON.stringify(msg));
+      log('[TX] Quitting game', 'tx');
+    };
+    document.getElementById('matchmakingBtn').onclick = function() {
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.joinMatchmaking', data: {} };
+      ws.send(JSON.stringify(msg));
+      log('[TX] Joining matchmaking', 'tx');
+    };
+    document.getElementById('leaveMatchmakingBtn').onclick = function() {
+      if (!ws || ws.readyState !== 1) return log('✗ WebSocket not connected', 'error');
+      const msg = { event: 'tris.leaveMatchmaking', data: {} };
+      ws.send(JSON.stringify(msg));
+      log('[TX] Leaving matchmaking', 'tx');
+    };
+    document.getElementById('clearLogBtn').onclick = function() {
+      document.getElementById('log').innerHTML = '';
+    };
+    document.querySelectorAll('.cell').forEach(cell => {
+      cell.addEventListener('click', function() {
+        if (!isYourTurn) {
+          log('✗ Wait for your turn!', 'error');
+          return;
+        }
+        if (!currentGameId) {
+          log('✗ Not in a game', 'error');
+          return;
+        }
+        const position = parseInt(this.getAttribute('data-pos'));
+        if (gameState[position] !== null) {
+          log('✗ Position already occupied', 'error');
+          return;
+        }
+        if (!ws || ws.readyState !== 1) {
+          log('✗ WebSocket not connected', 'error');
+          return;
+        }
+        const msg = { event: 'tris.makeMove', data: { gameId: currentGameId, position } };
+        ws.send(JSON.stringify(msg));
+        log('[TX] Making move at position ' + position, 'tx');
+      });
+    });
+  </script>
+</body>
+</html>

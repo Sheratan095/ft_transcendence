@@ -1,0 +1,6 @@
+GET https://localhost:3000/tris/stats?id=1
+###
+
+### Get user's match history
+GET https://localhost:3000/tris/history?id=2
+###

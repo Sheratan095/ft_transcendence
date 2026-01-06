@@ -7,7 +7,9 @@ import {
 
 import {
 	createUserStats as createUserStatsHandler,
-	deleteUserStats as deleteUserStatsHandler
+	deleteUserStats as deleteUserStatsHandler,
+	getUserStats as getUserStatsHandler,
+	getUserMatchHistory as getUserMatchHistoryHandler
 } from './tris-controllers.js';
 
 import { validateInternalApiKey } from './tris-help.js';
@@ -45,7 +47,41 @@ const	withInternalAuth =
 	}
 };
 
-//-----------------------------INTERAL ROUTES-----------------------------
+const	withCookieAuth =
+{
+	security: [{ cookieAuth: [] }],
+	
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'accessToken':
+			{
+				type: 'string',
+			},
+			'refreshToken':
+			{
+				type: 'string',
+			}
+		}
+	}
+};
+
+const	Match =
+{
+	type: 'object',
+	properties:
+	{
+		id: { type: 'string' },
+		playerXId: { type: 'string' },
+		playerOId: { type: 'string' },
+		winnerId: { type: ['string', 'null'] },
+		endedAt: { type: 'string', format: 'date-time' }
+	}
+};
+
+//-----------------------------INTERNAL ROUTES-----------------------------
 
 const	createUserStats = 
 {
@@ -125,6 +161,85 @@ const	deleteUserStats =
 	handler: deleteUserStatsHandler
 }
 
+//-----------------------------PUBLIC ROUTES-----------------------------
+
+const	getUserStats =
+{
+	schema:
+	{
+		summary: 'Get user stats',
+		description: 'Retrieve the stats for a given user.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					gamesPlayed: { type: 'integer' },
+					gamesWon: { type: 'integer' },
+					gamesLost: { type: 'integer' },
+					// gamesDrawn: { type: 'integer' }, THERE IS NO DRAW IN "INFINITE" TRIS
+					elo: { type: 'integer' },
+					rank: { type: 'string' }
+				}
+			},
+			404: ErrorResponse, // In case of user's stats not found
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUserStatsHandler
+}
+
+const	getUserMatchHistory =
+{
+	schema:
+	{
+		summary: 'Get user match history',
+		description: 'Retrieve the match history for a given user.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+		querystring:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: Match
+			},
+			404: ErrorResponse, // In case of user's stats not found
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUserMatchHistoryHandler
+}
+
 export function	trisRoutes(fastify)
 {
 	// Actual WebSocket endpoint
@@ -135,12 +250,16 @@ export function	trisRoutes(fastify)
 		if (!userId)
 			return ;
 
-		socket.on('message', msg => {handleMessage(socket, msg, userId);});
+		socket.on('message', msg => {handleMessage(socket, msg, userId, fastify.trisDb);});
 
 		socket.on('close', () => {handleClose(socket, userId);});
 
 		socket.on('error', (err) => {handleError(socket, err, userId);});
 	});
+
+	fastify.get('/stats', getUserStats);
+
+	fastify.get('/history', getUserMatchHistory);
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.delete('/delete-user-stats', deleteUserStats);

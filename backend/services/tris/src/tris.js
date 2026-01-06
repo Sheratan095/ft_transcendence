@@ -10,7 +10,7 @@ import fastifyWebsocket from '@fastify/websocket';
 await fastify.register(fastifyWebsocket);
 
 import { checkEnvVariables } from './tris-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'NOTIFICATION_SERVICE_URL', 'USERS_SERVICE_URL', 'MAX_MARKS_PER_PLAYER', 'COOLDOWN_MS', 'MOVE_TIMEOUT_MS']);
 
 import { TrisDatabase } from './tris-db.js';
 let		trisDatabase;
@@ -45,3 +45,6 @@ const	start = async () =>
 	}
 }
 start()
+
+// Export the initialized database instance -> so it can be used in GameManager
+export { trisDatabase };

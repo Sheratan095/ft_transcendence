@@ -96,7 +96,20 @@ Reponse:
   "data": {
 	"from": "jane_smith",
 	"senderId": "456",
-	"chatId": "chat789"
+	"chatId": "chat789",
+  }
+}
+\`\`\`
+
+- **game.invite** - Notify the user he has been invited to a game.
+\`\`\`json
+{
+  "event": "game.invite",
+  "data": {
+	"gameType": "pong/tris",
+	"from": "jane_smith",
+	"senderId": "456",
+	"gameId": "game123"
   }
 }
 \`\`\`

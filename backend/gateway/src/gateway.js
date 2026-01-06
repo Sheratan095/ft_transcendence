@@ -2,8 +2,8 @@ import { exit } from 'process';
 
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'CHAT_SERVICE_URL', 
-'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS', 'RATE_LIMIT_ACTIVE']);
+checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'CHAT_SERVICE_URL', 
+'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'FRONTEND_URL', 'PORT', 'DOC_USERNAME', 'DOC_PASSWORD', 'USE_HTTPS', 'HTTPS_CERTS_PATH', 'RATE_LIMIT_ACTIVE']);
 
 import Fastify from 'fastify'
 import { readFileSync } from 'fs';
@@ -144,8 +144,8 @@ import SwaggerAggregator from './swagger/swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
-
-import { handleSocketUpgrade } from './routes/webSocket-routes.js'
+// Import ws handlers
+import { handleSocketUpgrade } from './ws-handlers.js'
 
 import {
 	login,
@@ -189,6 +189,11 @@ import {
 	leaveGroupChat,
 	createGroupChat
 } from './routes/chat-routes.js'
+
+import {
+	getUserStatsRoute,
+	getUserMatchHistoryRoute
+} from './routes/tris-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
@@ -271,6 +276,9 @@ await fastify.register(async function (fastify)
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsers })
 	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUser })
+
+	fastify.get('/tris/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsRoute })
+	fastify.get('/tris/history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryRoute })
 	
 	// RELATIONSHIPS routes
 	fastify.get('/users/relationships', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserRelationships })

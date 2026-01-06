@@ -1,7 +1,6 @@
 ELO is based on
 wins/draws/losses:
 win: +100
-draw: +50
 loss: -50
 
 ELO stat in db is keeped updated when new stats are added

@@ -86,6 +86,25 @@ class	UserConnectionManager
 		}
 	}
 
+	sendGameInviteNotification(targetId, senderId, fromUsername, gameId, gameType)
+	{
+		const	targetSocket = this.getConnection(targetId);
+	
+		if (targetSocket)
+		{
+			this.#dispatchEventToSocket(
+				targetSocket,
+				'game.invite',
+				{
+					gameType: gameType,
+					from: fromUsername,
+					senderId: senderId,
+					gameId : gameId
+				}
+			);
+		}
+	}
+
 	#dispatchEventToFriends(senderUserId, event, data, onlineFriends)
 	{
 		for (const frined of onlineFriends)
