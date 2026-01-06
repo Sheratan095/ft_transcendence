@@ -135,4 +135,4 @@ I think it's ok
 
 [x] Rename/move ws routes in gateway
 
-[] check env, required and check for required env in all services
+[x] check env, required and check for required env in all services

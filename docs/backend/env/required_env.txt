@@ -19,8 +19,8 @@ services/auth:
     ACCESS_TOKEN_SECRET=your_access_token_secret
     ACCESS_TOKEN_EXPIRATION=15m
     REFRESH_TOKEN_SECRET=your_refresh_token_secret
-    PORT=3001
     REFRESH_TOKEN_EXPIRATION_DAYS=7
+    PORT=3001
     HASH_SALT_ROUNDS=10
     OTP_EXPIRATION_MINUTES=5
     USERS_SERVICE_URL=http://localhost:3002
@@ -60,3 +60,5 @@ services/tris:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
     MAX_MARKS_PER_PLAYER=3
+    COOLDOWN_MS = 30000
+    MOVE_TIMEOUT_MS = 60000
