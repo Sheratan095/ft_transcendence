@@ -45,3 +45,6 @@ const	start = async () =>
 	}
 }
 start()
+
+// Export the initialized database instance -> so it can be used in GameManager
+export { trisDatabase };

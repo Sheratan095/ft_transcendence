@@ -2,6 +2,7 @@ import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { trisConnectionManager } from './TrisConnectionManager.js';
 import { sendGameInviteNotification } from './tris-help.js';
+import { trisDatabase as trisDb } from './tris.js';
 
 class	GameManager
 {
@@ -371,16 +372,19 @@ class	GameManager
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
-			// TO DO update user stats trisDb.saveMatch(...)
+			// Add game to the history
+			trisDb.saveGame(gameInstance.playerXId, gameInstance.playerOId, winner);
+
+			// Update player stats
+			trisDb.updateUserStats(winner, winsDelta=1, lossesDelta=0);
+			trisDb.updateUserStats(loser, winsDelta=0, lossesDelta=1);
 		}
 
 		// Remove the game from the active games map
 		this._games.delete(gameInstance.id);
 
 		const	result = quit ? `${loser} QUIT` : `WINNER: ${winner}`;
-
 		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}`);
-
 	}
 
 	// A user is considered busy if they are in matchmaking

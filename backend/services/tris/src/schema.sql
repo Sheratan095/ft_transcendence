@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS matches
 	ended_at	DATETIME DEFAULT CURRENT_TIMESTAMP, -- time when the match is added to the db
 	-- TEXT ELO is calculated in the application layer because it's a business logic not a db logic
 
-	CHECK (player_one != player_two),
+	CHECK (player_one != player_two)
 
 	-- FOREIGN KEY (player_one) REFERENCES users(id) ON DELETE CASCADE,
 	-- FOREIGN KEY (player_two) REFERENCES users(id) ON DELETE CASCADE,
@@ -27,7 +27,7 @@ CREATE TABLE user_stats
 	user_id			TEXT PRIMARY KEY,
 	games_played	INTEGER DEFAULT 0,
 	wins			INTEGER DEFAULT 0,
-	losses			INTEGER DEFAULT 0,
+	losses			INTEGER DEFAULT 0
 
 	-- FOREIGN KEY (user_id) REFERENCES users(id)
 );

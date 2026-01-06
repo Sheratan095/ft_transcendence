@@ -92,6 +92,12 @@ export class	GameInstance
 			this.board[removedPosition] = null;
 		}
 
+		const	otherPlayerId = (playerId === this.playerXId) ? this.playerOId : this.playerXId;
+
+		// Notify both players of the move
+		trisConnectionManager.sendMoveMade(playerId,  playerId, this.id,  this.board[position], position, removedPosition);
+		trisConnectionManager.sendMoveMade(otherPlayerId, playerId, this.id, this.board[position], position, removedPosition);
+
 		// Check for win is done only after adding the new move and possibly removing the oldest one
 		const	winner = checkWin(this.board);
 		if (winner == 'X' || winner == 'O')
@@ -100,19 +106,11 @@ export class	GameInstance
 			const	winnerId = (winner === 'X') ? this.playerXId : this.playerOId;
 			const	loserId = (winner === 'X') ? this.playerOId : this.playerXId;
 
-			console.log(`[TRIS] Game ${this.id} won by player ${winnerId}`);
-
 			return ({ winner: winnerId, loser: loserId });
 		}
 
 		// Switch turn
 		this.turn = (this.turn === this.playerXId) ? this.playerOId : this.playerXId;
-
-		const	otherPlayerId = (playerId === this.playerXId) ? this.playerOId : this.playerXId;
-
-		// Notify both players of the move
-		trisConnectionManager.sendMoveMade(playerId,  playerId, this.id,  this.board[position], position, removedPosition);
-		trisConnectionManager.sendMoveMade(otherPlayerId, playerId, this.id, this.board[position], position, removedPosition);
 
 		console.log(`[TRIS] Player ${playerId} made a move at position ${position} in game ${this.id}, removed position: ${removedPosition}`);
 	}
