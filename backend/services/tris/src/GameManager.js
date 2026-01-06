@@ -210,6 +210,14 @@ class	GameManager
 			// Remove the game from the active games map
 			this._games.delete(gameId);
 		}
+		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.RANDOM)
+		{
+			// If the match is in LOBBY and is a RANDOM game, quitting gives victory to the other player
+			console.log(`[TRIS] Player ${playerId} quit game random game ${gameId}, game is canceled`);
+
+			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
+			this._gameEnd(gameInstance, otherPlayerId, playerId, true);
+		}
 	}
 
 	joinMatchmaking(playerId)
@@ -394,9 +402,8 @@ class	GameManager
 
 			if (gameInstance && gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
 			{
-				this._gameStart(gameInstance); // Start the game automatically after cooldown
-
 				console.log(`[TRIS] Cooldown for game ${gameId} ended, starting game automatically`);
+				this._gameStart(gameInstance); // Start the game automatically after cooldown
 			}
 		}, process.env.COOLDOWN_MS || 30000); // Default cooldown is 30 seconds
 
@@ -442,7 +449,7 @@ class	GameManager
 		// Remove the game from the active games map
 		this._games.delete(gameInstance.id);
 
-		const	result = quit ? `${loser} QUIT` : `WINNER: ${winner}`;
+		const	result = quit ? `${loser} QUIT - ${winner} wins` : `WINNER: ${winner}`;
 		console.log(`[TRIS] Game ${gameInstance.id} ended. Result: ${result}`);
 	}
 

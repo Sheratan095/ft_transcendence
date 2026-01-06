@@ -614,6 +614,11 @@
           updateGameStatus('Invalid move: ' + msg.data.message, 'your-turn');
           break;
         case 'tris.gameEnded': {
+          // Stop lobby timer if running (covers random games ended in lobby)
+          if (window._trisLobbyTimer) {
+            clearInterval(window._trisLobbyTimer);
+            window._trisLobbyTimer = null;
+          }
           let endMsg = '';
           // Handle quit event from backend
           if (msg.data.quit === true) {
