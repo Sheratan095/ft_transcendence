@@ -362,7 +362,7 @@ class	GameManager
 		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
 	}
 
-	// TO DO calculate the loser here and not everywhere it's called
+	// Both user must be specified by input, can't be calculated from gameInstance because winner and loser depends on quit
 	_gameEnd(gameInstance, winner, loser, quit = false)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side
