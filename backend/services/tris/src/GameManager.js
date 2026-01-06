@@ -162,7 +162,9 @@ class	GameManager
 		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId} created by ${gameInstance.playerXId}`);
 	}
 
-	// TO DO can a user quit a game while in LOBBY?
+	//	for ANY IN_PROGRESS games, the other player wins
+	//	for CUSTOM GAMES in WAITING status, only the creator is present and must cancel it
+	//	for CUSTOM GAMES in LOBBY status, quitting cancels the game for both players
 	quitGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
@@ -181,15 +183,30 @@ class	GameManager
 			return ;
 		}
 
+		// Can't quit a game in waiting status, in this case just the owner is present and must cancel it
+		if (gameInstance.gameStatus === GameStatus.WAITING)
+		{
+			console.error(`[TRIS] ${playerId} tried to quit game ${gameId} which is still waiting for an opponent`);
+			trisConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that hasn\'t started yet');
+			return ;
+		}
+
 		// If the match is IN_PROGRESS (started), the other player wins
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
 			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true);
 		}
-		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY || gameInstance.gameStatus === GameStatus.WAITING)
+		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
 		{
-			
+			// If the match is in LOBBY and is a CUSTOM game, quitting cancels the game for both players
+			console.log(`[TRIS] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
+
+			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
+			trisConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
+
+			// Remove the game from the active games map
+			this._games.delete(gameId);
 		}
 	}
 
@@ -243,7 +260,7 @@ class	GameManager
 			return ;
 		}
 
-		// Check if game is in waiting status or in lobby (other user joined)
+		// Check if game is in waiting status or in lobby (other user joined), so if the game hasn't started yet
 		if (gameInstance.gameStatus !== GameStatus.WAITING && gameInstance.gameStatus !== GameStatus.IN_LOBBY)
 		{
 			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} that has already started`);
@@ -345,6 +362,7 @@ class	GameManager
 		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
 	}
 
+	// TO DO calculate the loser here and not everywhere it's called
 	_gameEnd(gameInstance, winner, loser, quit = false)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side

@@ -222,6 +222,16 @@ Reponse:
 }
 \`\`\`
 
+- **tris.playerQuitCustomGameInLobby** - Notification that the other player has quit the custom game lobby
+\`\`\`json
+{
+  "event": "tris.playerQuitCustomGameInLobby",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
 - **error** - Error message
 \`\`\`json
 {

@@ -76,6 +76,13 @@ class	TrisConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.customGameCanceled', { gameId });
 	}
 
+	async	sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId)
+	{
+		const	socket = this._connections.get(otherPlayerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'tris.playerQuitCustomGameInLobby', { gameId });
+	}
+
 	async	sendGameEnded(playerId, gameId, winner, quit)
 	{
 		const	socket = this._connections.get(playerId);
