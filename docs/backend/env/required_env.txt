@@ -53,6 +53,9 @@ services/pong:
     INTERNAL_API_KEY=1234
     PORT=3005
     NOTIFICATION_SERVICE_URL=http://localhost:3003
+    USERS_SERVICE_URL=http://localhost:3002
+    PONG_WIN_SCORE = 10
+    COOLDOWN_MS = 30000
 
 services/tris:
     INTERNAL_API_KEY=1234
