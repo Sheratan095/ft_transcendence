@@ -17,13 +17,30 @@ export const	GameType =
 
 export class	GameInstance
 {
-	constructor(id, player1Id, player2Id, player1Username, player2Username, type)
+	constructor(id, playerLeftId, playerRightId, playerLeftUsername, playerRightUsername, type)
 	{
 		this.id = id;
 
-		this.player1Id = player1Id;
-		this.player2Id = player2Id;
+		this.playerLeftId = playerLeftId;
+		this.playerRightId = playerRightId;
 
+		this.playerLeftUsername = playerLeftUsername;
+		this.playerRightUsername = playerRightUsername;
+
+		this.playerLeftReady = false;
+		this.playerRightReady = false;
+
+		// CUSTOM GAMES start in WAITING, RANDOM GAMES start in LOBBY because both players are known
+		this.gameStatus = type === GameType.CUSTOM ? GameStatus.WAITING : GameStatus.IN_LOBBY;
+		this.gameType = type;
+
+		this.type = type;
+
+		this.scores =
+		{
+			[playerLeftId]: 0,
+			[playerRightId]: 0,
+		};
 	}
 
 	startGame()
@@ -31,12 +48,12 @@ export class	GameInstance
 		this.gameStatus = GameStatus.IN_PROGRESS;
 	}
 
-	processMove(playerId, position)
+	processMove(playerId, direction)
 	{
 	}
 
 	hasPlayer(playerId)
 	{
-		return (this.player1Id === playerId || this.player2Id === playerId);
+		return (this.playerLeftId === playerId || this.playerRightId === playerId);
 	}
 }

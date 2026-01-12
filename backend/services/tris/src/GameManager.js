@@ -10,7 +10,7 @@ class	GameManager
 	{
 		this._games = new Map(); // gameId -> GameInstance
 		this._waitingPlayers = []; // Queue of players waiting for a match
-		this._randomGameCooldowns = new Map(); // gameId -> timeoutId
+		this._randomGameCooldowns = new Map(); // gameId -> timeoutId used to start the game after cooldown
 		this._moveTimeouts = new Map(); // gameId -> timeoutId
 	}
 
