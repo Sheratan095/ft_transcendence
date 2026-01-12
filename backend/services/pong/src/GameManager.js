@@ -31,6 +31,7 @@ class	GameManager
 			return ;
 		}
 
+		// Can't create a game with a player who blocked you or whom you blocked
 		if (await checkBlock(creatorId, otherId))
 		{
 			console.error(`[TRIS] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
