@@ -298,45 +298,8 @@ class	GameManager
 			this._gameStart(gameInstance);
 	}
 
-	makeMove(playerId, gameId, move)
+	makeMove(playerId, gameId, direction)
 	{
-		const	gameInstance = this._games.get(gameId);
-		if (!gameInstance) // Check if game exists
-		{
-			console.error(`[PONG] ${playerId} tried to make a move in non-existent game ${gameId}`);
-			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
-			return ;
-		}
-
-		// Check if player is part of the game
-		if (gameInstance.hasPlayer(playerId) === false)
-		{
-			console.error(`[PONG] ${playerId} tried to make a move in game ${gameId} they are not part of`);
-			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
-			return ;
-		}
-
-		// Check if game is in progress
-		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
-		{
-			console.error(`[PONG] ${playerId} tried to make a move in game ${gameId} which is not in progress`);
-			pongConnectionManager.sendErrorMessage(playerId, 'Cannot make a move in a game that isn\'t in progress');
-			return ;
-		}
-
-		// Clear any existing move timeout for this game
-		if (this._moveTimeouts.has(gameId))
-		{
-			clearTimeout(this._moveTimeouts.get(gameId));
-			this._moveTimeouts.delete(gameId);
-		}
-
-		const	result = gameInstance.processMove(playerId, move);
-		if (result && result.winner && result.loser)
-			this._gameEnd(gameInstance, result.winner, result.loser, false, false);
-
-		// Start move timeout for the next player
-		this._startMoveTimeout(gameId);
 	}
 
 	handleUserDisconnect(userId)
@@ -353,7 +316,7 @@ class	GameManager
 		for (const gameInstance of this._games.values())
 		{
 			if (gameInstance.hasPlayer(userId))
-+				this.quitGame(userId, gameInstance.id);
+				this.quitGame(userId, gameInstance.id);
 		}
 	}
 
