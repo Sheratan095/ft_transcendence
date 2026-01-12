@@ -56,8 +56,8 @@ services/pong:
     USERS_SERVICE_URL=http://localhost:3002
     PONG_WIN_SCORE = 10
     COOLDOWN_MS = 30000
+    WIN_TARGET_POINTS=11
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
-    EARNED_DRAW_POINTS=25 # Points awarded for drawing a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
 
 services/tris:
