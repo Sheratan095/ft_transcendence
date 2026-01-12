@@ -146,7 +146,7 @@ async function	handleChatMessage(userId, data, chatDb)
 	}
 }
 
-async function handlePrivateMessage(userId, data, chatDb)
+async function	handlePrivateMessage(userId, data, chatDb)
 {
 	try
 	{
