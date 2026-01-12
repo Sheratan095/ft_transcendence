@@ -354,8 +354,11 @@ class	GameManager
 		// Check if user is in any active games
 		for (const gameInstance of this._games.values())
 		{
-			if (gameInstance.hasPlayer(userId))
-+				this.quitGame(userId, gameInstance.id);
+			// The creator of a CUSTOM game in WAITING status must cancel it, can't just quit
+			if (gameInstance.gameType === GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING && gameInstance.playerXId === userId)
+				this.cancelCustomGame(userId, gameInstance.id);
+			else if (gameInstance.hasPlayer(userId))
+				this.quitGame(userId, gameInstance.id);
 		}
 	}
 
