@@ -222,14 +222,14 @@ class	GameManager
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(playerId))
 		{
-			console.error(`[TRIS] ${playerId} tried to join matchmaking while busy`);
+			console.error(`[PONG] ${playerId} tried to join matchmaking while busy`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
 		// Add player to waiting queue
 		this._waitingPlayers.push(playerId);
-		console.log(`[TRIS] Player ${playerId} joined matchmaking queue`);
+		console.log(`[PONG] Player ${playerId} joined matchmaking queue`);
 
 		// Try to create a random game
 		this._createRandomGameIfPossible();
@@ -240,14 +240,14 @@ class	GameManager
 		const	index = this._waitingPlayers.indexOf(playerId);
 		if (index === -1)
 		{
-			console.error(`[TRIS] ${playerId} is not in the matchmaking queue`);
+			console.error(`[PONG] ${playerId} is not in the matchmaking queue`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are not in the matchmaking queue');
 			return ;
 		}
 
 		// Remove player from waiting queue
 		this._waitingPlayers.splice(index, 1);
-		console.log(`[TRIS] Player ${playerId} left matchmaking queue`);
+		console.log(`[PONG] Player ${playerId} left matchmaking queue`);
 	}
 
 	playerReady(playerId, gameId, readyStatus)
