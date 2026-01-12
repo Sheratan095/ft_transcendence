@@ -335,38 +335,38 @@ class	GameManager
 		const	player1Id = this._waitingPlayers.shift();
 		const	player2Id = this._waitingPlayers.shift();
 
-		let	playerX;
-		let	playerO;
-		let	playerOUsername;
-		let	playerXUsername;
+		let	playerLeftId;
+		let	playerRightId;
+		let	playerLeftUsername;
+		let	playerRightUsername;
 
 		// Randomly assign X and O
 		if (Math.random() < 0.5)
 		{
-			playerX = player1Id;
-			playerXUsername = getUsernameById(playerX);
-			playerO = player2Id;
-			playerOUsername = getUsernameById(playerO);
+			playerLeftId = player1Id;
+			playerLeftUsername = getUsernameById(playerLeftId);
+			playerRightId = player2Id;
+			playerRightUsername = getUsernameById(playerRightId);
 		}
 		else
 		{
-			playerX = player2Id;
-			playerXUsername = getUsernameById(playerX);
-			playerO = player1Id;
-			playerOUsername = getUsernameById(playerO);
+			playerLeftId = player2Id;
+			playerLeftUsername = getUsernameById(playerLeftId);
+			playerRightId = player1Id;
+			playerRightUsername = getUsernameById(playerRightId);
 		}
 
 		// Generate gameId and GameInstance
 		const	gameId = uuidv4();
-		const	gameInstance = new GameInstance(gameId, playerX, playerO, playerXUsername, playerOUsername, GameType.RANDOM);
+		const	gameInstance = new GameInstance(gameId, playerLeftId, playerRightId, playerLeftUsername, playerRightUsername, GameType.RANDOM);
 
 		this._games.set(gameId, gameInstance);
 
 		// Notify both players that they have been matched
-		pongConnectionManager.notifyMatchedInRandomGame(playerX, gameId, 'X', playerOUsername, true); // X ALWAYS STARTS FIRST
-		pongConnectionManager.notifyMatchedInRandomGame(playerO, gameId, 'O', playerXUsername, false);
+		pongConnectionManager.notifyMatchedInRandomGame(playerLeftId, gameId, 'LEFT', playerRightUsername);
+		pongConnectionManager.notifyMatchedInRandomGame(playerRightId, gameId, 'RIGHT', playerLeftUsername);
 
-		console.log(`[PONG] Matched players ${playerX} and ${playerO} in random game ${gameId}`);
+		console.log(`[PONG] Matched players ${playerLeftId} and ${playerRightId} in random game ${gameId}`);
 
 		// Start cooldown timer before starting the game
 		const	timerId = setTimeout(() =>
@@ -378,7 +378,7 @@ class	GameManager
 				console.log(`[PONG] Cooldown for game ${gameId} ended, starting game automatically`);
 				this._gameStart(gameInstance); // Start the game automatically after cooldown
 			}
-		}, process.env.COOLDOWN_MS || 30000); // Default cooldown is 30 seconds
+		}, process.env.COOLDOWN_MS); // Default cooldown is 30 seconds
 
 		this._randomGameCooldowns.set(gameId, timerId);
 	}

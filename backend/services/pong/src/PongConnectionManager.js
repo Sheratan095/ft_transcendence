@@ -98,20 +98,19 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.gameEnded', data);
 	}
 
-	async	notifyMatchedInRandomGame(playerId, gameId, symbol, opponentUsername, yourTurn = false)
+	async	notifyMatchedInRandomGame(playerId, gameId, side, opponentUsername)
 	{
 		const	socket = this._connections.get(playerId);
 
 		const	data = {
 			gameId,
-			yourSymbol: symbol,
+			yourSide: side,
 			opponentUsername,
-			yourTurn,
 			coolDownMs: process.env.COOLDOWN_MS
 		}
 
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.matchedInRandomGame', data);
+			this.#dispatchEventToSocket(socket, 'pong.matchedInRandomGame', data);
 	}
 
 	async	notifyGameStart(playerId, gameId, symbol, opponentUsername, yourTurn = false)
