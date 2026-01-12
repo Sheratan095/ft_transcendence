@@ -18,7 +18,7 @@ class	GameManager
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(creatorId))
 		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game while busy`);
+			console.error(`[PONG] ${creatorId} tried to create a custom game while busy`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
 			return ;
 		}
