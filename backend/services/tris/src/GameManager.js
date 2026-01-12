@@ -59,7 +59,7 @@ class	GameManager
 		return (gameId);
 	}
 
-	// Could be used also to decline an invitation
+	// Could be used also to decline an invitation, actually isn't
 	cancelCustomGame(userId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);

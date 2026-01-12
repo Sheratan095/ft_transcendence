@@ -17,6 +17,7 @@ export const	GameType =
 
 export class	GameInstance
 {
+	// By defaualt, the left player is the creator
 	constructor(id, playerLeftId, playerRightId, playerLeftUsername, playerRightUsername, type)
 	{
 		this.id = id;

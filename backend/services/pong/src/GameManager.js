@@ -58,13 +58,13 @@ class	GameManager
 		return (gameId);
 	}
 
-	// Could be used also to decline an invitation
+	// Could be used also to decline an invitation, actually isn't
 	cancelCustomGame(userId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] ${userId} tried to cancel non-existent game ${gameId}`);
+			console.error(`[PONG] ${userId} tried to cancel non-existent game ${gameId}`);
 			pongConnectionManager.sendErrorMessage(userId, 'Game not found');
 			return ;
 		}
@@ -72,7 +72,7 @@ class	GameManager
 		// Check if the game is a custom game
 		if (gameInstance.gameType !== GameType.CUSTOM)
 		{
-			console.error(`[TRIS] ${userId} attempted to cancel non-custom game ${gameId}`);
+			console.error(`[PONG] ${userId} attempted to cancel non-custom game ${gameId}`);
 			pongConnectionManager.sendErrorMessage(userId, 'Cannot cancel a non-custom game');
 			return ;
 		}
@@ -80,14 +80,14 @@ class	GameManager
 		// Check if the requesting user is part of the game
 		if (gameInstance.hasPlayer(userId) === false)
 		{
-			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} they are not part of`);
+			console.error(`[PONG] ${userId} tried to cancel game ${gameId} they are not part of`);
 			pongConnectionManager.sendErrorMessage(userId, 'You are not part of this game');
 			return ;
 		}
 
-		if (gameInstance.playerXId !== userId)
+		if (gameInstance.playerLeftId !== userId)
 		{
-			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} but is not the creator`);
+			console.error(`[PONG] ${userId} tried to cancel game ${gameId} but is not the creator`);
 			pongConnectionManager.sendErrorMessage(userId, 'Only the game creator can cancel the game');
 			return ;
 		}
@@ -95,7 +95,7 @@ class	GameManager
 		// Only allow cancellation if the game hasn't started yet
 		if (this._games.get(gameId).gameStatus === GameStatus.IN_PROGRESS)
 		{
-			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} which is already in progress`);
+			console.error(`[PONG] ${userId} tried to cancel game ${gameId} which is already in progress`);
 			pongConnectionManager.sendErrorMessage(userId, 'Cannot cancel game in progress');
 			return ;
 		}
@@ -106,7 +106,7 @@ class	GameManager
 
 		this._games.delete(gameId);
 
-		console.log(`[TRIS] Canceled custom game ${gameId} by user ${userId}`);
+		console.log(`[PONG] Canceled custom game ${gameId} by user ${userId}`);
 	}
 
 	joinCustomGame(playerId, gameId)
