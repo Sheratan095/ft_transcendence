@@ -403,11 +403,11 @@ class	GameManager
 	}
 
 	// Both user must be specified by input, can't be calculated from gameInstance because winner and loser depends on quit
-	_gameEnd(gameInstance, winner, loser, quit, timedOut)
+	_gameEnd(gameInstance, winner, loser, quit)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side
-		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, quit, timedOut);
-		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, quit, timedOut);
+		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, quit);
+		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, quit);
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
@@ -417,12 +417,6 @@ class	GameManager
 			// Update player stats
 			pongDb.updateUserStats(winner, 1, 0);
 			pongDb.updateUserStats(loser, 0, 1);
-		}
-
-		if (this._moveTimeouts.has(gameInstance.id))
-		{
-			clearTimeout(this._moveTimeouts.get(gameInstance.id));
-			this._moveTimeouts.delete(gameInstance.id);
 		}
 
 		if (this._randomGameCooldowns.has(gameInstance.id))
@@ -436,8 +430,6 @@ class	GameManager
 
 		if (quit)
 			console.log(`[PONG] Game ${gameInstance.id} ended due to player ${loser} quit. Winner: ${winner}`);
-		else if (timedOut)
-			console.log(`[PONG] Game ${gameInstance.id} ended due to timeout of player ${loser}. Winner: ${winner}`);
 		else
 			console.log(`[PONG] Game ${gameInstance.id} ended. Winner: ${winner}`);
 	}
@@ -457,27 +449,6 @@ class	GameManager
 		}
 
 		return (false);
-	}
-
-	_startMoveTimeout(gameId)
-	{
-		// start move timeout for the next player
-		const	timeoutId = setTimeout(() =>
-		{
-			// Check if game is still in progress
-			const	currentGameInstance = this._games.get(gameId);
-			if (!currentGameInstance || currentGameInstance.gameStatus !== GameStatus.IN_PROGRESS)
-				return ;
-
-			const	loserId = currentGameInstance.turn;
-			const	winnerId = (loserId === currentGameInstance.playerLeftId) ? currentGameInstance.playerRightId : currentGameInstance.playerLeftId;
-			
-			console.log(`[PONG] Player ${loserId} timed out in game ${gameId}, awarding victory to ${winnerId}`);
-
-			this._gameEnd(currentGameInstance, winnerId, loserId, false, true);
-
-		}, process.env.MOVE_TIMEOUT_MS);
-		this._moveTimeouts.set(gameId, timeoutId);
 	}
 }
 
