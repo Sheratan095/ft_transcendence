@@ -1,6 +1,6 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
-import { pongConnectionManager } from './pongConnectionManager.js';
+import { pongConnectionManager } from './PongConnectionManager.js';
 import { sendGameInviteNotification, getUsernameById, sleep } from './pong-help.js';
 import { pongDatabase as pongDb } from './pong.js';
 

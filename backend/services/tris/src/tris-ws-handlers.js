@@ -1,14 +1,13 @@
-import { validateInternalApiKey, getUsernameById } from './tris-help.js';
 // The class is initialized in TrisConnectionManager.js
 import { trisConnectionManager } from './TrisConnectionManager.js';
-
+import { validateInternalApiKey, getUsernameById } from './tris-help.js';
 import { gameManager } from './GameManager.js';
 
 export function	handleNewConnection(socket, req)
 {
 	// Validate internal API key
 	const	isValid = validateInternalApiKey(req, socket);
-	
+
 	if (!isValid)
 	{
 		console.log('[TRIS] Rejecting WebSocket connection due to invalid API key');
@@ -138,7 +137,7 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 			return ;
 		}
 
-		const	gameId = gameManager.createCustomGame(userId, senderUsername, otherId, otherUsername);
+		gameManager.createCustomGame(userId, senderUsername, otherId, otherUsername);
 	}
 	catch (err)
 	{
