@@ -138,6 +138,8 @@ I think it's ok
 [x] check env, required and check for required env in all services
 
 [] Create a matchmaking system to allow users to find opponents and participate
-in FAIR AND BALANCED MATCHES
+	in FAIR AND BALANCED MATCHES
+	two players "blocked" can find each other?? now they can't
 
-[] Check block before inviting in a custom game 
+
+[x] Check block before inviting in a custom game 
