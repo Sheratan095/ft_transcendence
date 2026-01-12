@@ -101,8 +101,8 @@ class	GameManager
 		}
 
 		// Notify players that the game has been canceled
-		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerXId, gameId);
-		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerOId, gameId);
+		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerLeftId, gameId);
+		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerRightId, gameId);
 
 		this._games.delete(gameId);
 
@@ -146,7 +146,7 @@ class	GameManager
 		// Only invitee user can join the custom game
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
-			console.error(`[TRIS] ${playerId} tried to join a game ${gameId} they are not part of`);
+			console.error(`[PONG] ${playerId} tried to join a game ${gameId} they are not part of`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
@@ -255,7 +255,7 @@ class	GameManager
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] ${playerId} tried to change ready status in non-existent game ${gameId}`);
+			console.error(`[PONG] ${playerId} tried to change ready status in non-existent game ${gameId}`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -263,38 +263,38 @@ class	GameManager
 		// Check if player is part of the game
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
-			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} they are not part of`);
+			console.error(`[PONG] ${playerId} tried to change ready status in game ${gameId} they are not part of`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
 
 		// Check if game is in waiting status or in lobby (other user joined), so if the game hasn't started yet
-		// WAITING status is possible only for CUSTOM GAMES, creator can ready up before the other player joins
+		// WAITING status is possible only for CUSTOM GAMES
 		if (gameInstance.gameStatus !== GameStatus.WAITING && gameInstance.gameStatus !== GameStatus.IN_LOBBY)
 		{
-			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} that has already started`);
+			console.error(`[PONG] ${playerId} tried to change ready status in game ${gameId} that has already started`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Cannot change ready status in a game that has already started');
 			return ;
 		}
 
 		// Change the ready status of the player
 		let	otherPlayerId;
-		if (playerId === gameInstance.playerXId)
+		if (playerId === gameInstance.playerLeftId)
 		{
-			gameInstance.playerXReady = readyStatus;
-			otherPlayerId = gameInstance.playerOId;
+			gameInstance.playerLeftReady = readyStatus;
+			otherPlayerId = gameInstance.playerRightId;
 		}
-		else if (playerId === gameInstance.playerOId)
+		else if (playerId === gameInstance.playerRightId)
 		{
-			gameInstance.playerOReady = readyStatus;
-			otherPlayerId = gameInstance.playerXId;
+			gameInstance.playerRightReady = readyStatus;
+			otherPlayerId = gameInstance.playerLeftId;
 		}
 
 		// Notify other player of ready status change
 		pongConnectionManager.sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus);
 
 		// If both players are ready, start the game
-		if (gameInstance.playerXReady && gameInstance.playerOReady)
+		if (gameInstance.playerLeftReady && gameInstance.playerRightReady)
 			this._gameStart(gameInstance);
 	}
 
@@ -303,7 +303,7 @@ class	GameManager
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] ${playerId} tried to make a move in non-existent game ${gameId}`);
+			console.error(`[PONG] ${playerId} tried to make a move in non-existent game ${gameId}`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -311,7 +311,7 @@ class	GameManager
 		// Check if player is part of the game
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
-			console.error(`[TRIS] ${playerId} tried to make a move in game ${gameId} they are not part of`);
+			console.error(`[PONG] ${playerId} tried to make a move in game ${gameId} they are not part of`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
@@ -319,7 +319,7 @@ class	GameManager
 		// Check if game is in progress
 		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
 		{
-			console.error(`[TRIS] ${playerId} tried to make a move in game ${gameId} which is not in progress`);
+			console.error(`[PONG] ${playerId} tried to make a move in game ${gameId} which is not in progress`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Cannot make a move in a game that isn\'t in progress');
 			return ;
 		}
@@ -346,7 +346,7 @@ class	GameManager
 		if (index !== -1)
 		{
 			this._waitingPlayers.splice(index, 1);
-			console.log(`[TRIS] Removed user ${userId} from matchmaking queue due to disconnection`);
+			console.log(`[PONG] Removed user ${userId} from matchmaking queue due to disconnection`);
 		}
 
 		// Check if user is in any active games
@@ -400,7 +400,7 @@ class	GameManager
 		pongConnectionManager.notifyMatchedInRandomGame(playerX, gameId, 'X', playerOUsername, true); // X ALWAYS STARTS FIRST
 		pongConnectionManager.notifyMatchedInRandomGame(playerO, gameId, 'O', playerXUsername, false);
 
-		console.log(`[TRIS] Matched players ${playerX} and ${playerO} in random game ${gameId}`);
+		console.log(`[PONG] Matched players ${playerX} and ${playerO} in random game ${gameId}`);
 
 		// Start cooldown timer before starting the game
 		const	timerId = setTimeout(() =>
@@ -409,7 +409,7 @@ class	GameManager
 
 			if (gameInstance && gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
 			{
-				console.log(`[TRIS] Cooldown for game ${gameId} ended, starting game automatically`);
+				console.log(`[PONG] Cooldown for game ${gameId} ended, starting game automatically`);
 				this._gameStart(gameInstance); // Start the game automatically after cooldown
 			}
 		}, process.env.COOLDOWN_MS || 30000); // Default cooldown is 30 seconds
@@ -419,7 +419,7 @@ class	GameManager
 
 	_gameStart(gameInstance)
 	{
-		console.log(`[TRIS] Starting game ${gameInstance.id} between ${gameInstance.playerXId} and ${gameInstance.playerOId}`);
+		console.log(`[PONG] Starting game ${gameInstance.id} between ${gameInstance.playerLeftId} and ${gameInstance.playerRightId}`);
 
 		// Clear cooldown timer if present
 		if (this._randomGameCooldowns.has(gameInstance.id))
@@ -432,8 +432,8 @@ class	GameManager
 		gameInstance.startGame();
 
 		// Notify both players that the game has started
-		pongConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
-		pongConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
+		pongConnectionManager.notifyGameStart(gameInstance.playerLeftId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
+		pongConnectionManager.notifyGameStart(gameInstance.playerRightId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
 
 		// Start move timeout for the next player
 		this._startMoveTimeout(gameInstance.id);
@@ -443,13 +443,13 @@ class	GameManager
 	_gameEnd(gameInstance, winner, loser, quit, timedOut)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side
-		pongConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit, timedOut);
-		pongConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit, timedOut);
+		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, quit, timedOut);
+		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, quit, timedOut);
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
 			// Add game to the history
-			pongDb.saveMatch(gameInstance.playerXId, gameInstance.playerOId, winner);
+			pongDb.saveMatch(gameInstance.playerLeftId, gameInstance.playerRightId, winner);
 
 			// Update player stats
 			pongDb.updateUserStats(winner, 1, 0);
@@ -472,11 +472,11 @@ class	GameManager
 		this._games.delete(gameInstance.id);
 
 		if (quit)
-			console.log(`[TRIS] Game ${gameInstance.id} ended due to player ${loser} quit. Winner: ${winner}`);
+			console.log(`[PONG] Game ${gameInstance.id} ended due to player ${loser} quit. Winner: ${winner}`);
 		else if (timedOut)
-			console.log(`[TRIS] Game ${gameInstance.id} ended due to timeout of player ${loser}. Winner: ${winner}`);
+			console.log(`[PONG] Game ${gameInstance.id} ended due to timeout of player ${loser}. Winner: ${winner}`);
 		else
-			console.log(`[TRIS] Game ${gameInstance.id} ended. Winner: ${winner}`);
+			console.log(`[PONG] Game ${gameInstance.id} ended. Winner: ${winner}`);
 	}
 
 	// A user is considered busy if they are in matchmaking
@@ -507,9 +507,9 @@ class	GameManager
 				return ;
 
 			const	loserId = currentGameInstance.turn;
-			const	winnerId = (loserId === currentGameInstance.playerXId) ? currentGameInstance.playerOId : currentGameInstance.playerXId;
+			const	winnerId = (loserId === currentGameInstance.playerLeftId) ? currentGameInstance.playerRightId : currentGameInstance.playerLeftId;
 			
-			console.log(`[TRIS] Player ${loserId} timed out in game ${gameId}, awarding victory to ${winnerId}`);
+			console.log(`[PONG] Player ${loserId} timed out in game ${gameId}, awarding victory to ${winnerId}`);
 
 			this._gameEnd(currentGameInstance, winnerId, loserId, false, true);
 

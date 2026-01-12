@@ -271,7 +271,7 @@ class	GameManager
 		}
 
 		// Check if game is in waiting status or in lobby (other user joined), so if the game hasn't started yet
-		// WAITING status is possible only for CUSTOM GAMES, creator can ready up before the other player joins
+		// WAITING status is possible only for CUSTOM GAMES
 		if (gameInstance.gameStatus !== GameStatus.WAITING && gameInstance.gameStatus !== GameStatus.IN_LOBBY)
 		{
 			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} that has already started`);
