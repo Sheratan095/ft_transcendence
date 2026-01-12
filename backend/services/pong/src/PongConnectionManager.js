@@ -98,14 +98,14 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'tris.gameEnded', data);
 	}
 
-	async	notifyMatchedInRandomGame(playerId, gameId, side, opponentUsername)
+	async	notifyMatchedInRandomGame(playerId, gameId, opponentUsername, side)
 	{
 		const	socket = this._connections.get(playerId);
 
 		const	data = {
 			gameId,
-			yourSide: side,
 			opponentUsername,
+			"yourSide": side,
 			coolDownMs: process.env.COOLDOWN_MS
 		}
 
@@ -113,19 +113,18 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.matchedInRandomGame', data);
 	}
 
-	async	notifyGameStart(playerId, gameId, symbol, opponentUsername, yourTurn = false)
+	async	notifyGameStart(playerId, gameId, side, opponentUsername)
 	{
 		const	socket = this._connections.get(playerId);
 
 		const	data = {
 			gameId,
-			yourSymbol: symbol,
 			opponentUsername,
-			yourTurn,
+			"yourSide": side,
 		}
 
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.gameStarted', data);
+			this.#dispatchEventToSocket(socket, 'pong.gameStarted', data);
 	}
 
 	// Used to notify both players of a move made

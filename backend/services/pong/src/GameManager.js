@@ -398,11 +398,8 @@ class	GameManager
 		gameInstance.startGame();
 
 		// Notify both players that the game has started
-		pongConnectionManager.notifyGameStart(gameInstance.playerLeftId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
-		pongConnectionManager.notifyGameStart(gameInstance.playerRightId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
-
-		// Start move timeout for the next player
-		this._startMoveTimeout(gameInstance.id);
+		pongConnectionManager.notifyGameStart(gameInstance.playerLeftId, gameInstance.id, 'LEFT', gameInstance.playerRightUsername);
+		pongConnectionManager.notifyGameStart(gameInstance.playerRightId, gameInstance.id, 'RIGHT', gameInstance.playerLeftUsername);
 	}
 
 	// Both user must be specified by input, can't be calculated from gameInstance because winner and loser depends on quit
