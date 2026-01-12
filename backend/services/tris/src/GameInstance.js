@@ -41,7 +41,7 @@ export class	GameInstance
 		this.movesX = [];
 		this.movesO = [];
 
-		this.MAX_MARKS = Number(process.env.TRIS_MAX_MARKS_PER_PLAYER ?? 3);
+		this.MAX_MARKS = Number(process.env.MAX_MARKS_PER_PLAYER);
 	}
 
 	startGame()
@@ -52,7 +52,7 @@ export class	GameInstance
 	processMove(playerId, position)
 	{
 		// Check if position is valid
-		if (!Number.isInteger(position) || position < 0 || position > 9)
+		if (!Number.isInteger(position) || position < 0 || position > 8)
 		{
 			console.error(`[TRIS] Invalid move position ${position} by user ${playerId}`);
 			trisConnectionManager.sendInvalidMoveMessage(playerId, this.id, 'Invalid move position');

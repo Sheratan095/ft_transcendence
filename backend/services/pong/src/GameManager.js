@@ -217,7 +217,7 @@ class	GameManager
 		}
 	}
 
-	joinMatchmaking(playerId)
+	async joinMatchmaking(playerId)
 	{
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(playerId))
@@ -227,12 +227,14 @@ class	GameManager
 			return ;
 		}
 
-		// Add player to waiting queue
-		this._waitingPlayers.push(playerId);
 		console.log(`[PONG] Player ${playerId} joined matchmaking queue`);
 
+		// Slight delay to allow user to leave matchmaking immediately after joining
+		// This prevents instant matches that the user didn't want
+		await sleep(1000);
+
 		// Try to create a random game
-		this._createRandomGameIfPossible();
+		this._createRandomGameIfPossible(playerId);
 	}
 
 	leaveMatchmaking(playerId)
@@ -323,17 +325,42 @@ class	GameManager
 		}
 	}
 
-	async _createRandomGameIfPossible()
+	async _createRandomGameIfPossible(justJoinedPlayerId)
 	{
-		// Slight delay to allow user to leave matchmaking immediately after joining
-		// This prevents instant matches that the user didn't want
-		await sleep(1000);
+		let	opponentId = null;
 
-		if (this._waitingPlayers.length < 2)
+		for (let i = 0; i < this._waitingPlayers.length; i++)
+		{
+			if (this._waitingPlayers[i] === justJoinedPlayerId)
+				continue ;
+
+			// If blocks must be considered
+			if (process.env.MATCHMAKING_IGNORE_BLOCKS === 'false')
+			{
+				// Check if the two players have blocked each other
+				const	blocked = await checkBlock(justJoinedPlayerId, this._waitingPlayers[i]);
+				if (blocked)
+					continue ;
+			}
+
+			opponentId = this._waitingPlayers[i];
+
+			// Remove opponent from waiting queue
+			this._waitingPlayers.splice(i, 1);
+
+			// Exit loop after finding the first suitable opponent
+			break ;
+		}
+
+		// If no opponent found, add the player to the waiting queue
+		if (opponentId === null)
+		{
+			this._waitingPlayers.push(justJoinedPlayerId);
 			return ;
+		}
 
-		const	player1Id = this._waitingPlayers.shift();
-		const	player2Id = this._waitingPlayers.shift();
+		const	player1Id = justJoinedPlayerId;
+		const	player2Id = opponentId;
 
 		let	playerLeftId;
 		let	playerRightId;
