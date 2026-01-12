@@ -1,8 +1,8 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
-import { trisConnectionManager } from './TrisConnectionManager.js';
-import { sendGameInviteNotification, getUsernameById, sleep } from './tris-help.js';
-import { trisDatabase as trisDb } from './tris.js';
+import { pongConnectionManager } from './pongConnectionManager.js';
+import { sendGameInviteNotification, getUsernameById, sleep } from './pong-help.js';
+import { pongDatabase as pongDb } from './pong.js';
 
 class	GameManager
 {
@@ -19,23 +19,23 @@ class	GameManager
 		if (this._isUserBusy(creatorId))
 		{
 			console.error(`[PONG] ${creatorId} tried to create a custom game while busy`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
+			pongConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
 		// Can't create a game with yourself
 		if (creatorId === otherId)
 		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game with themselves`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with yourself');
+			console.error(`[PONG] ${creatorId} tried to create a custom game with themselves`);
+			pongConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with yourself');
 			return ;
 		}
 
 		// Can't create a game with a null player
 		if (!otherId)
 		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
+			console.error(`[PONG] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
+			pongConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
 			return ;
 		}
 
@@ -51,9 +51,9 @@ class	GameManager
 		sendGameInviteNotification(creatorId, creatorUsername, otherId, gameId);
 
 		// Reply to creator with gameId
-		trisConnectionManager.sendCustomGameCreationReply(creatorId, gameId, otherUsername);
+		pongConnectionManager.sendCustomGameCreationReply(creatorId, gameId, otherUsername);
 
-		console.log(`[TRIS] ${creatorId} created custom game ${gameId} with ${otherId}`);
+		console.log(`[PONG] ${creatorId} created custom game ${gameId} with ${otherId}`);
 
 		return (gameId);
 	}
@@ -65,7 +65,7 @@ class	GameManager
 		if (!gameInstance) // Check if game exists
 		{
 			console.error(`[TRIS] ${userId} tried to cancel non-existent game ${gameId}`);
-			trisConnectionManager.sendErrorMessage(userId, 'Game not found');
+			pongConnectionManager.sendErrorMessage(userId, 'Game not found');
 			return ;
 		}
 
@@ -73,7 +73,7 @@ class	GameManager
 		if (gameInstance.gameType !== GameType.CUSTOM)
 		{
 			console.error(`[TRIS] ${userId} attempted to cancel non-custom game ${gameId}`);
-			trisConnectionManager.sendErrorMessage(userId, 'Cannot cancel a non-custom game');
+			pongConnectionManager.sendErrorMessage(userId, 'Cannot cancel a non-custom game');
 			return ;
 		}
 
@@ -81,14 +81,14 @@ class	GameManager
 		if (gameInstance.hasPlayer(userId) === false)
 		{
 			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} they are not part of`);
-			trisConnectionManager.sendErrorMessage(userId, 'You are not part of this game');
+			pongConnectionManager.sendErrorMessage(userId, 'You are not part of this game');
 			return ;
 		}
 
 		if (gameInstance.playerXId !== userId)
 		{
 			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} but is not the creator`);
-			trisConnectionManager.sendErrorMessage(userId, 'Only the game creator can cancel the game');
+			pongConnectionManager.sendErrorMessage(userId, 'Only the game creator can cancel the game');
 			return ;
 		}
 
@@ -96,13 +96,13 @@ class	GameManager
 		if (this._games.get(gameId).gameStatus === GameStatus.IN_PROGRESS)
 		{
 			console.error(`[TRIS] ${userId} tried to cancel game ${gameId} which is already in progress`);
-			trisConnectionManager.sendErrorMessage(userId, 'Cannot cancel game in progress');
+			pongConnectionManager.sendErrorMessage(userId, 'Cannot cancel game in progress');
 			return ;
 		}
 
 		// Notify players that the game has been canceled
-		trisConnectionManager.sendCustomGameCanceled(gameInstance.playerXId, gameId);
-		trisConnectionManager.sendCustomGameCanceled(gameInstance.playerOId, gameId);
+		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerXId, gameId);
+		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerOId, gameId);
 
 		this._games.delete(gameId);
 
@@ -115,7 +115,7 @@ class	GameManager
 		if (this._isUserBusy(playerId))
 		{
 			console.error(`[TRIS] ${playerId} tried to join custom game ${gameId} while busy`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
+			pongConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
@@ -123,7 +123,7 @@ class	GameManager
 		if (!gameInstance) // Check if game exists
 		{
 			console.error(`[TRIS] ${playerId} tried to join a non-existent game ${gameId}`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
+			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
 
@@ -131,7 +131,7 @@ class	GameManager
 		if (gameInstance.gameType !== GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
 		{
 			console.error(`[TRIS] ${playerId} tried to join a non-custom game ${gameId}`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
+			pongConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
 			return ;
 		}
 
@@ -139,7 +139,7 @@ class	GameManager
 		if (gameInstance.playerXId === playerId)
 		{
 			console.error(`[TRIS] Player ${playerId} cannot join their own custom game (created by ${gameInstance.playerXId})`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Cannot join your own game');
+			pongConnectionManager.sendErrorMessage(playerId, 'Cannot join your own game');
 			return ;
 		}
 
@@ -147,16 +147,16 @@ class	GameManager
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
 			console.error(`[TRIS] ${playerId} tried to join a game ${gameId} they are not part of`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
 
 		// Notify the other player that the invited player has joined
 		const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
-		trisConnectionManager.sendPlayerJoinedCustomGame(otherPlayerId, gameId);
+		pongConnectionManager.sendPlayerJoinedCustomGame(otherPlayerId, gameId);
 
 		// Reply to joining player with gameId and creatorUsername (X player)
-		trisConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerXUsername);
+		pongConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerXUsername);
 
 		// Both players are now in the lobby, waiting to ready up
 		gameInstance.gameStatus = GameStatus.IN_LOBBY;
@@ -173,7 +173,7 @@ class	GameManager
 		if (!gameInstance) // Check if game exists
 		{
 			console.error(`[TRIS] ${playerId} tried to quit non-existent game ${gameId}`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
+			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
 
@@ -181,7 +181,7 @@ class	GameManager
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
 			console.error(`[TRIS] ${playerId} tried to quit game ${gameId} they are not part of`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
 
@@ -189,7 +189,7 @@ class	GameManager
 		if (gameInstance.gameStatus === GameStatus.WAITING)
 		{
 			console.error(`[TRIS] ${playerId} tried to quit game ${gameId} which is still waiting for an opponent`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that hasn\'t started yet');
+			pongConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that hasn\'t started yet');
 			return ;
 		}
 
@@ -205,7 +205,7 @@ class	GameManager
 			console.log(`[TRIS] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
 
 			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
-			trisConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
+			pongConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
 
 			// Remove the game from the active games map
 			this._games.delete(gameId);
@@ -226,7 +226,7 @@ class	GameManager
 		if (this._isUserBusy(playerId))
 		{
 			console.error(`[TRIS] ${playerId} tried to join matchmaking while busy`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
+			pongConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
 			return ;
 		}
 
@@ -244,7 +244,7 @@ class	GameManager
 		if (index === -1)
 		{
 			console.error(`[TRIS] ${playerId} is not in the matchmaking queue`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are not in the matchmaking queue');
+			pongConnectionManager.sendErrorMessage(playerId, 'You are not in the matchmaking queue');
 			return ;
 		}
 
@@ -259,7 +259,7 @@ class	GameManager
 		if (!gameInstance) // Check if game exists
 		{
 			console.error(`[TRIS] ${playerId} tried to change ready status in non-existent game ${gameId}`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
+			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
 
@@ -267,7 +267,7 @@ class	GameManager
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
 			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} they are not part of`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
 
@@ -276,7 +276,7 @@ class	GameManager
 		if (gameInstance.gameStatus !== GameStatus.WAITING && gameInstance.gameStatus !== GameStatus.IN_LOBBY)
 		{
 			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} that has already started`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Cannot change ready status in a game that has already started');
+			pongConnectionManager.sendErrorMessage(playerId, 'Cannot change ready status in a game that has already started');
 			return ;
 		}
 
@@ -294,7 +294,7 @@ class	GameManager
 		}
 
 		// Notify other player of ready status change
-		trisConnectionManager.sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus);
+		pongConnectionManager.sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus);
 
 		// If both players are ready, start the game
 		if (gameInstance.playerXReady && gameInstance.playerOReady)
@@ -307,7 +307,7 @@ class	GameManager
 		if (!gameInstance) // Check if game exists
 		{
 			console.error(`[TRIS] ${playerId} tried to make a move in non-existent game ${gameId}`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Game not found');
+			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
 
@@ -315,7 +315,7 @@ class	GameManager
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
 			console.error(`[TRIS] ${playerId} tried to make a move in game ${gameId} they are not part of`);
-			trisConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
 
@@ -323,7 +323,7 @@ class	GameManager
 		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
 		{
 			console.error(`[TRIS] ${playerId} tried to make a move in game ${gameId} which is not in progress`);
-			trisConnectionManager.sendErrorMessage(playerId, 'Cannot make a move in a game that isn\'t in progress');
+			pongConnectionManager.sendErrorMessage(playerId, 'Cannot make a move in a game that isn\'t in progress');
 			return ;
 		}
 
@@ -400,8 +400,8 @@ class	GameManager
 		this._games.set(gameId, gameInstance);
 
 		// Notify both players that they have been matched
-		trisConnectionManager.notifyMatchedInRandomGame(playerX, gameId, 'X', playerOUsername, true); // X ALWAYS STARTS FIRST
-		trisConnectionManager.notifyMatchedInRandomGame(playerO, gameId, 'O', playerXUsername, false);
+		pongConnectionManager.notifyMatchedInRandomGame(playerX, gameId, 'X', playerOUsername, true); // X ALWAYS STARTS FIRST
+		pongConnectionManager.notifyMatchedInRandomGame(playerO, gameId, 'O', playerXUsername, false);
 
 		console.log(`[TRIS] Matched players ${playerX} and ${playerO} in random game ${gameId}`);
 
@@ -435,8 +435,8 @@ class	GameManager
 		gameInstance.startGame();
 
 		// Notify both players that the game has started
-		trisConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
-		trisConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
+		pongConnectionManager.notifyGameStart(gameInstance.playerXId, gameInstance.id, 'X', gameInstance.playerOUsername, true);
+		pongConnectionManager.notifyGameStart(gameInstance.playerOId, gameInstance.id, 'O', gameInstance.playerXUsername, false);
 
 		// Start move timeout for the next player
 		this._startMoveTimeout(gameInstance.id);
@@ -446,17 +446,17 @@ class	GameManager
 	_gameEnd(gameInstance, winner, loser, quit, timedOut)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side
-		trisConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit, timedOut);
-		trisConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit, timedOut);
+		pongConnectionManager.sendGameEnded(gameInstance.playerXId, gameInstance.id, winner, quit, timedOut);
+		pongConnectionManager.sendGameEnded(gameInstance.playerOId, gameInstance.id, winner, quit, timedOut);
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
 			// Add game to the history
-			trisDb.saveMatch(gameInstance.playerXId, gameInstance.playerOId, winner);
+			pongDb.saveMatch(gameInstance.playerXId, gameInstance.playerOId, winner);
 
 			// Update player stats
-			trisDb.updateUserStats(winner, 1, 0);
-			trisDb.updateUserStats(loser, 0, 1);
+			pongDb.updateUserStats(winner, 1, 0);
+			pongDb.updateUserStats(loser, 0, 1);
 		}
 
 		if (this._moveTimeouts.has(gameInstance.id))

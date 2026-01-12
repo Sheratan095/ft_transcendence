@@ -38,7 +38,7 @@ class	PongConnectionManager
 		};
 
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.customGameCreated', data);
+			this.#dispatchEventToSocket(socket, 'pong.customGameCreated', data);
 	}
 
 	async	sendPlayerJoinedCustomGame(otherPlayerId, gameId)
@@ -170,7 +170,7 @@ class	PongConnectionManager
 			}
 			catch (e)
 			{
-				console.error(`[TRIS] Failed to send ${event}:`, e.message);
+				console.error(`[PONG] Failed to send ${event}:`, e.message);
 			}
 		}
 	}
