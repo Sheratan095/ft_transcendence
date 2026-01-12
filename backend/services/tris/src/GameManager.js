@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { trisConnectionManager } from './TrisConnectionManager.js';
-import { sendGameInviteNotification, getUsernameById, sleep } from './tris-help.js';
+import { sendGameInviteNotification, getUsernameById, sleep, checkBlock } from './tris-help.js';
 import { trisDatabase as trisDb } from './tris.js';
 
 class	GameManager
@@ -14,7 +14,7 @@ class	GameManager
 		this._moveTimeouts = new Map(); // gameId -> timeoutId
 	}
 
-	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
+	async createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(creatorId))
@@ -37,6 +37,13 @@ class	GameManager
 		{
 			console.error(`[TRIS] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
+			return ;
+		}
+
+		if (await checkBlock(creatorId, otherId))
+		{
+			console.error(`[TRIS] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
+			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with this user');
 			return ;
 		}
 
@@ -129,7 +136,7 @@ class	GameManager
 		}
 
 		// Check if game is a custom game and in WAITING status
-		if (gameInstance.gameType !== GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
+		if (gameInstance.gameType !== GameType.CUSTOM || gameInstance.gameStatus !== GameStatus.WAITING)
 		{
 			console.error(`[TRIS] ${playerId} tried to join a non-custom game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
@@ -383,16 +390,16 @@ class	GameManager
 		if (Math.random() < 0.5)
 		{
 			playerX = player1Id;
-			playerXUsername = getUsernameById(playerX);
+			playerXUsername = await getUsernameById(playerX);
 			playerO = player2Id;
-			playerOUsername = getUsernameById(playerO);
+			playerOUsername = await getUsernameById(playerO);
 		}
 		else
 		{
 			playerX = player2Id;
-			playerXUsername = getUsernameById(playerX);
+			playerXUsername = await getUsernameById(playerX);
 			playerO = player1Id;
-			playerOUsername = getUsernameById(playerO);
+			playerOUsername = await getUsernameById(playerO);
 		}
 
 		// Generate gameId and GameInstance

@@ -13,7 +13,7 @@ class	GameManager
 		this._randomGameCooldowns = new Map(); // gameId -> timeoutId used to start the game after cooldown
 	}
 
-	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
+	async createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(creatorId))
@@ -36,6 +36,13 @@ class	GameManager
 		{
 			console.error(`[PONG] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
 			pongConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
+			return ;
+		}
+
+		if (await checkBlock(creatorId, otherId))
+		{
+			console.error(`[TRIS] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
+			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with this user');
 			return ;
 		}
 
@@ -344,16 +351,16 @@ class	GameManager
 		if (Math.random() < 0.5)
 		{
 			playerLeftId = player1Id;
-			playerLeftUsername = getUsernameById(playerLeftId);
+			playerLeftUsername = await getUsernameById(playerLeftId);
 			playerRightId = player2Id;
-			playerRightUsername = getUsernameById(playerRightId);
+			playerRightUsername = await getUsernameById(playerRightId);
 		}
 		else
 		{
 			playerLeftId = player2Id;
-			playerLeftUsername = getUsernameById(playerLeftId);
+			playerLeftUsername = await getUsernameById(playerLeftId);
 			playerRightId = player1Id;
-			playerRightUsername = getUsernameById(playerRightId);
+			playerRightUsername = await getUsernameById(playerRightId);
 		}
 
 		// Generate gameId and GameInstance

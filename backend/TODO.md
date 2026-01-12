@@ -139,3 +139,5 @@ I think it's ok
 
 [] Create a matchmaking system to allow users to find opponents and participate
 in FAIR AND BALANCED MATCHES
+
+[] Check block before inviting in a custom game 
