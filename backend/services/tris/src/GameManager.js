@@ -194,10 +194,10 @@ class	GameManager
 			return ;
 		}
 
+		const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 		// If the match is IN_PROGRESS (started), the other player wins
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
@@ -205,7 +205,6 @@ class	GameManager
 			// If the match is in LOBBY and is a CUSTOM game, quitting cancels the game for both players
 			console.log(`[TRIS] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
 
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			trisConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
 
 			// Remove the game from the active games map
@@ -216,7 +215,6 @@ class	GameManager
 			// If the match is in LOBBY and is a RANDOM game, quitting gives victory to the other player
 			console.log(`[TRIS] Player ${playerId} quit game random game ${gameId}, game is canceled`);
 
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 	}

@@ -171,7 +171,7 @@ class	GameManager
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] ${playerId} tried to quit non-existent game ${gameId}`);
+			console.error(`[PONG] ${playerId} tried to quit non-existent game ${gameId}`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -179,7 +179,7 @@ class	GameManager
 		// Check if player is part of the game
 		if (gameInstance.hasPlayer(playerId) === false)
 		{
-			console.error(`[TRIS] ${playerId} tried to quit game ${gameId} they are not part of`);
+			console.error(`[PONG] ${playerId} tried to quit game ${gameId} they are not part of`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
 			return ;
 		}
@@ -187,23 +187,22 @@ class	GameManager
 		// Can't quit a game in waiting status, in this case just the owner is present and must cancel it
 		if (gameInstance.gameStatus === GameStatus.WAITING)
 		{
-			console.error(`[TRIS] ${playerId} tried to quit game ${gameId} which is still waiting for an opponent`);
+			console.error(`[PONG] ${playerId} tried to quit game ${gameId} which is still waiting for an opponent`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that hasn\'t started yet');
 			return ;
 		}
 
+		const	otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
 		// If the match is IN_PROGRESS (started), the other player wins
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
 		{
 			// If the match is in LOBBY and is a CUSTOM game, quitting cancels the game for both players
-			console.log(`[TRIS] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
+			console.log(`[PONG] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
 
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			pongConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
 
 			// Remove the game from the active games map
@@ -212,9 +211,8 @@ class	GameManager
 		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.RANDOM)
 		{
 			// If the match is in LOBBY and is a RANDOM game, quitting gives victory to the other player
-			console.log(`[TRIS] Player ${playerId} quit game random game ${gameId}, game is canceled`);
+			console.log(`[PONG] Player ${playerId} quit game random game ${gameId}, game is canceled`);
 
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 	}
