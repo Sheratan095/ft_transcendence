@@ -45,7 +45,7 @@ class	PongConnectionManager
 	{
 		const	socket = this._connections.get(otherPlayerId);
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.playerJoinedCustomGame', { gameId });
+			this.#dispatchEventToSocket(socket, 'pong.playerJoinedCustomGame', { gameId });
 	}
 
 	async	replyCustomGameJoined(playerId, gameId, creatorUsername)
@@ -58,7 +58,7 @@ class	PongConnectionManager
 		};
 
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.customGameJoinSuccess', data);
+			this.#dispatchEventToSocket(socket, 'pong.customGameJoinSuccess', data);
 	}
 
 	// Other player is the one who DID NOT change their ready status

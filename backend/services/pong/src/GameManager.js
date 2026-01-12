@@ -114,7 +114,7 @@ class	GameManager
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(playerId))
 		{
-			console.error(`[TRIS] ${playerId} tried to join custom game ${gameId} while busy`);
+			console.error(`[PONG] ${playerId} tried to join custom game ${gameId} while busy`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
 			return ;
 		}
@@ -122,7 +122,7 @@ class	GameManager
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
 		{
-			console.error(`[TRIS] ${playerId} tried to join a non-existent game ${gameId}`);
+			console.error(`[PONG] ${playerId} tried to join a non-existent game ${gameId}`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
 			return ;
 		}
@@ -130,15 +130,15 @@ class	GameManager
 		// Check if game is a custom game and in WAITING status
 		if (gameInstance.gameType !== GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
 		{
-			console.error(`[TRIS] ${playerId} tried to join a non-custom game ${gameId}`);
+			console.error(`[PONG] ${playerId} tried to join a non-custom game ${gameId}`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
 			return ;
 		}
 
 		// Check if player is the creator
-		if (gameInstance.playerXId === playerId)
+		if (gameInstance.playerLeftId === playerId)
 		{
-			console.error(`[TRIS] Player ${playerId} cannot join their own custom game (created by ${gameInstance.playerXId})`);
+			console.error(`[PONG] Player ${playerId} cannot join their own custom game (created by ${gameInstance.playerLeftId})`);
 			pongConnectionManager.sendErrorMessage(playerId, 'Cannot join your own game');
 			return ;
 		}
@@ -152,16 +152,15 @@ class	GameManager
 		}
 
 		// Notify the other player that the invited player has joined
-		const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
+		const	otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
 		pongConnectionManager.sendPlayerJoinedCustomGame(otherPlayerId, gameId);
 
 		// Reply to joining player with gameId and creatorUsername (X player)
-		pongConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerXUsername);
-
+		pongConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerLeftUsername);
 		// Both players are now in the lobby, waiting to ready up
 		gameInstance.gameStatus = GameStatus.IN_LOBBY;
 
-		console.log(`[TRIS] Player ${playerId} joined custom game ${gameId} created by ${gameInstance.playerXId}`);
+		console.log(`[PONG] Player ${playerId} joined custom game ${gameId} created by ${gameInstance.playerLeftId}`);
 	}
 
 	//	for ANY IN_PROGRESS games, the other player wins
