@@ -31,14 +31,6 @@ class	GameManager
 			return ;
 		}
 
-		// Can't create a game with a null player
-		if (!otherId)
-		{
-			console.error(`[PONG] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
-			pongConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
-			return ;
-		}
-
 		if (await checkBlock(creatorId, otherId))
 		{
 			console.error(`[TRIS] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
