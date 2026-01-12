@@ -68,16 +68,15 @@ const	withCookieAuth =
 	}
 };
 
-// TO DO what about draws?
 const	Match =
 {
 	type: 'object',
 	properties:
 	{
 		id: { type: 'string' },
-		playerXId: { type: 'string' },
-		playerOId: { type: 'string' },
-		winnerId: { type: ['string', 'null'] },
+		playerLeftId: { type: 'string' },
+		playerRightId: { type: 'string' },
+		winnerId: { type: 'string'},
 		endedAt: { type: 'string', format: 'date-time' }
 	}
 };
@@ -193,7 +192,6 @@ const	getUserStats =
 					gamesPlayed: { type: 'integer' },
 					gamesWon: { type: 'integer' },
 					gamesLost: { type: 'integer' },
-					// gamesDrawn: { type: 'integer' }, TO DO
 					elo: { type: 'integer' },
 					rank: { type: 'string' }
 				}
