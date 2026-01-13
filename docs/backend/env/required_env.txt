@@ -6,7 +6,7 @@ gateway:
     CHAT_SERVICE_URL=http://localhost:3004
     PONG_SERVICE_URL=http://localhost:3005
     TRIS_SERVICE_URL=http://localhost:3006
-    FRONTEND_URL=http://localhost:443
+    FRONTEND_URL=http://localhost:4000
     PORT=3000
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
