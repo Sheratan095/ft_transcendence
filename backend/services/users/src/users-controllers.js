@@ -184,9 +184,9 @@ export const	uploadAvatar = async (req, reply) =>
 		if (!allowedMimeTypes.includes(data.mimetype))
 			return (reply.code(400).send({ error: 'Only image files are allowed (jpeg, png, gif, webp)' }));
 
-		// Generate unique filename with extension
+		// Generate unique filename with extension with user ID
 		const	fileExtension = data.filename.split('.').pop();
-		const	filename = `${user.id}_${Date.now()}.${fileExtension}`;
+		const	filename = `${user.id}.${fileExtension}`;
 
 		// Define paths
 		const	avatarsDir = path.join(__dirname, '../data/avatars');
