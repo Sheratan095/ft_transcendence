@@ -6,6 +6,8 @@ export interface User {
     email: string;
     avatarUrl?: string;
     tfaEnabled?: boolean;
+	rank?: string;
+	wins?: number;
 }
 
 export function getUserId(): string | null {
@@ -63,5 +65,21 @@ export async function logout(): Promise<void> {
     });
   } catch (err) {
     console.error('Logout error:', err);
+  }
+}
+
+export async function deleteAccout(): Promise<void> {
+  localStorage.removeItem('userId');
+  localStorage.removeItem('tfaEnabled');
+  stopTokenRefresh();
+  
+  try {
+	await fetch(`/api/users/delete-account`, {
+	  method: 'DELETE',
+	  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+	  credentials: 'include',
+	});
+  } catch (err) {
+	console.error('Delete account error:', err);
   }
 }

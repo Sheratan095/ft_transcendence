@@ -14,12 +14,34 @@
 		bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]
 		animate-[gridMove_12s_linear_infinite] opacity-60 mix-blend-lighten [mask-image:radial-gradient(ellipse_at_top_left,transparent_15%,black)]">
 	</div>
-	
 	<div class="absolute inset-0 z-20 mix-blend-difference pointer-events-none
 	bg-[#ff009d] [clip-path:polygon(0_0,45%_0,25%_100%,0%_100%)]">
-</div>
+	</div>
+
+<div class=" shadow-[10px_10px_0_0_#0dff66]"> </div>
+<!-- Search User Bar at Top -->
+	<div class="sticky top-0 z-50 w-full border-b-2 border-neutral-700 hover:border-[#0dff66] transition-colors duration-300">
+		<div class="max-w-full mx-auto flex gap-2">
+			<form id="search-user-form" class="flex gap-2 w-full">
+				<input 
+					id="search-user-input"
+					type="text" 
+					placeholder="Search user by name or ID..." 
+					class="flex-1 px-4 py-2 bg-neutral-800 border-2 border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-[#0dff66] hover:border-neutral-600 uppercase tracking-tight font-semibold text-sm transition-colors duration-300"
+				/>
+				<button 
+					type="submit"
+					class="px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 hover:shadow-[0_0_10px_#0dff66] transition border-2 border-neutral-700 text-sm"
+				>
+					Search
+				</button>
+			</form>
+		</div>
+		<div id="search-error" class="mt-2 text-red-500 text-sm hidden max-w-4xl mx-auto"></div>
+	</div>
 
 <br>
+
 <h1 class="text-[10vw] font-extrabold uppercase tracking-tighter leading-[0.8] text-gay-100 float-start mt-5">
 	FT/<br />TRASCENDENCE
 </h1>
@@ -106,136 +128,146 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 no-underline bl
 
 <!-- Profile card template (hidden) -->
 <template id="profile-card-template">
-	<div class="text-card-foreground border flex flex-col gap-12 border-neutral-700 bg-neutral-900/50 rounded-xl pb-6 shadow-[10px_10px_0_0_#0dff66] transition-all duration-[0.4s] hover:shadow-lg w-full h-full">
+	<div class="p-10 w-full border-2 border-neutral-700 rounded-xl bg-neutral-900 shadow-[10px_10px_0_0_#00ffff] overflow-hidden hover:shadow-lg hover:brightness-110 transition-all duration-300">
 		<!-- Header with avatar and title -->
-		<div class="flex items-start gap-4 p-6 pb-4">
+		<div class="flex flex-col md:flex-row items-start gap-8 mb-8">
 			<!-- Avatar -->
-			<div class="text-center">
+			<div class="flex-shrink-0">
 				<label class="cursor-pointer">
 					<input id="input-avatar" type="file" class="hidden" />
 					
-					<div class="relative w-[20vw] min-w-24 max-w-48 min-h-24 max-h-48 z-30 aspect-square rounded-xl overflow-hidden border-[2px] border-neutral-400 flex items-center justify-center shrink">
-						<img id="profile-avatar" alt="avatar" class="w-full h-full object-cover" src="/assets/placeholder-avatar.jpg" />
-						<figcaption class="absolute w-full h-full rounded-xl opacity-0 bg-black/0 transition duration-300 ease-in-out hover:opacity-100 hover:bg-black/50 cursor-pointer flex items-center justify-center">
-							<img src="https://raw.githubusercontent.com/ThiagoLuizNunes/angular-boilerplate/master/src/assets/imgs/camera-white.png" class="w-10 h-10 object-contain"/>
+					<div class="relative w-40 h-40 aspect-square rounded-md overflow-hidden border-4 border-neutral-400 flex items-center justify-center bg-neutral-800">
+						<img id="profile-avatar" alt="avatar" class="w-15 h-15 z-10 object-cover" src="/assets/placeholder-avatar.jpg" />
+						<figcaption class="absolute w-full h-full opacity-0 bg-black/0 transition duration-300 ease-in-out hover:opacity-100 hover:bg-black/70 cursor-pointer flex items-center justify-center">
+							<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.217A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.217A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+							</svg>
 						</figcaption>
 					</div>
 				</label>
 			</div>
-			<!-- Title section -->
-			<div class="flex flex-wrap justify-normal w-full overflow-hidden">
-				<div class="relative flex flex-wrap items-start gap-10 mb-2">
-					<h1 id="profile-username" class="z-30 text-2xl font-bold capitalize">User</h1>
-					<!-- 2FA toggle -->
-					<div class="flex items-start gap-2">
-						<input id="input-lock" type="checkbox" class="hidden peer">
 
+			<!-- Title and info section -->
+			<div class="flex-1 w-full">
+				<!-- Username -->
+				<h1 id="profile-username" class="text-4xl font-extrabold uppercase tracking-tight text-[#0dff66] mb-6 capitalize">User</h1>
+				
+				<!-- Email and ID -->
+				<div class="space-y-3 mb-6 text-lg">
+					<div class="flex items-center gap-2">
+						<span class="font-extrabold text-white">Email:</span> 
+						<span class="text-neutral-400" id="profile-email">email@example.com</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="font-extrabold text-white">User ID:</span> 
+						<span class="text-neutral-400" id="profile-id">0</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="font-extrabold text-white">Rank:</span> 
+						<span class="text-neutral-400" id="profile-rank">Rookie</span>
+					</div>
+					<div class="flex items-center gap-2">
+						<span class="font-extrabold text-white">Wins:</span> 
+						<span class="text-neutral-400" id="profile-wins">0</span>
+					</div>
+				</div>
+
+				<!-- Action buttons and 2FA toggle -->
+				<div class="flex flex-wrap gap-3 items-center">
+					<!-- Chat button -->
+					<button id="profile-chat-btn" class="px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition">
+						Chat
+					</button>
+					<!-- Logout button -->
+					<button id="profile-logout-btn" class="px-6 py-2 bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-neutral-600 hover:bg-neutral-600 transition">
+						Logout
+					</button>
+					<!-- Delete account button -->
+					<button command="show-modal" commandfor="delete-dialog" class="px-6 py-2 bg-[#f73c3c] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition">
+						Delete
+					</button>
+
+					<!-- 2FA toggle -->
+					<div class="flex items-center gap-2 ml-auto">
+						<input id="input-lock" type="checkbox" class="hidden peer">
 						<label
 							for="input-lock"
-							class="btn-lock group inline-flex items-center
-							h-12 bg-[#bd4747]
-							rounded-full cursor-pointer select-none
-							overflow-hidden
-							w-12 hover:w-full
-							transition-all
-							duration-2000 ease-in-out
-							peer-checked:bg-[#0abe4c]
-							hover:brightness-110"
+							class="btn-lock group inline-flex items-center h-10 px-4 bg-[#bd4747] border-2 border-neutral-600 font-extrabold text-white uppercase tracking-tight text-sm cursor-pointer select-none transition-all duration-300 hover:brightness-110 peer-checked:bg-[#0abe4c]"
 						>
-
-							<!-- SVG ICON (unchanged) -->
-							<div class="flex items-center justify-center w-12 h-12 shrink-0">
-							<svg viewBox="0 0 30 40" class="w-8 h-8 transform-gpu opacity-100">
+							<svg viewBox="0 0 30 40" class="w-5 h-5 mr-2">
 								<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
 								<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
-								<path class="bling" d="M29 20L31 22"></path>
-								<path class="bling" d="M31.5 15H34.5"></path>
-								<path class="bling" d="M29 10L31 8"></path>
 							</svg>
-							</div>
-
-							<!-- ✅ SMOOTH WIDTH-ANIMATED TEXT -->
-							<span
-							id="profile-tfa"
-							class="text-white font-semibold whitespace-nowrap overflow-hidden
-							max-w-0 group-hover:max-w-full
-							transition-[max-width] duration-2000 ease-in-out
-							pr-10"
-							>
-							Enable 2FA
-							</span>
-
+							<span id="profile-tfa" class="whitespace-nowrap">2FA</span>
 						</label>
 					</div>
 				</div>
-				<div class="flex justify-end w-full gap-4">
-					<!-- Logout button -->
-					<button id="profile-logout-btn" class="bg-neutral-800 text-white border border-neutral-700 px-4 py-2 rounded-md hover:bg-neutral-700 transition">
-					Logout
-					</button>
-					<!-- Delete account button (modal trigger) -->
-					<button
-						id="profile-delete-btn"
-						data-modal-target="delete-modal"
-						data-modal-toggle="delete-modal"
-						class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500 transition"
-						type="button">
-						Delete
-					</button>
-				</div>
 			</div>
 		</div>
-		<div class="h-1 w-full bg-neutral-800 rounded-full mb-2">
-			<br>
-		</div>
-		<!-- Content section -->
-		<div class="px-6 py-6">
-			<div class="space-y-4">
-				<!-- Info group -->
-				<div class="space-y-2">
-					<div class="flex items-center gap-2">
-						<p class="text-sm"><span class="font-extrabold">Email:</span> <span class=" text-gray-500" id="profile-email">email@example.com</span></p>
-					</div>
-					<div class="flex items-center gap-2">
-						<p class="text-sm"><span class="font-extrabold">User ID:</span> <span class=" text-gray-500" id="profile-id">0</span></p>
-					</div>
-					<div class="flex items-center gap-2">
-						<p class="text-sm"><span class="font-extrabold">Rank:</span> <span class=" text-gray-500" id="profile-rank">Rookie</span></p>
-					</div>
-					<div class="flex items-center gap-2">
-						<p class="text-sm"><span class="font-extrabold">Wins:</span> <span class=" text-gray-500" id="profile-wins">0</span></p>
-					</div>
-				</div>
-				<!-- About group -->
-				<div>
-					<h3 class="text-sm font-semibold text-neutral-400 mb-2">Account info</h3>
-					<div class="text-xs text-neutral-500 space-y-2">
-						<p>This is your personal profile card.</p>
-						<p>Your email and ID are used for account authentication.</p>
-					</div>
-				</div>
-			</div>
+
+		<!-- Divider -->
+		<div class="h-1 w-full bg-neutral-700 mb-6"></div>
+
+		<!-- About section -->
+		<div>
+			<h3 class="text-xl font-extrabold uppercase tracking-tight text-neutral-300 mb-3">Account Info</h3>
+			<p class="text-neutral-400 leading-relaxed">
+				This is your personal profile card. Your email and ID are used for account authentication and security purposes.
+			</p>
 		</div>
 	</div>
-</div>
-</div>
 </template>
+<el-dialog>
+  <dialog id="delete-dialog" aria-labelledby="dialog-title" class="fixed inset-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent backdrop:bg-transparent">
+    <el-dialog-backdrop class="fixed inset-0 bg-gray-950/50 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"></el-dialog-backdrop>
+
+    <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline-none sm:items-center sm:p-0">
+      <el-dialog-panel class="relative transform overflow-hidden border-neutral-700 bg-neutral-900 rounded-xl pb-6 
+	  						shadow-[10px_10px_0_0_#f73c3c] transition-all duration-[0.4s] hover:shadow-lg w-full h-full 
+							outline -outline-offset-1 outline-white/10 data-closed:translate-y-4 data-closed:opacity-0
+							data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8
+							 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95">
+        <div class="bg-neutral-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div class="sm:flex sm:items-start">
+            <div class="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-500/10 sm:mx-0 sm:size-10">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-red-400">
+                <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+              <h3 id="dialog-title" class="text-base font-semibold text-white">Deactivate account</h3>
+              <div class="mt-2">
+                <p class="text-sm text-gray-400">Are you sure you want to deactivate your account? All of your data will be permanently removed. This action cannot be undone.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-800/25 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+          <button type="button" id="confirm-delete-btn" command="close" commandfor="delete-dialog" class="inline-flex w-full justify-center rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white hover:bg-red-400 sm:ml-3 sm:w-auto">Deactivate</button>
+          <button type="button" command="close" commandfor="delete-dialog" class="mt-3 inline-flex w-full justify-center rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white inset-ring inset-ring-white/5 hover:bg-white/20 sm:mt-0 sm:w-auto">Cancel</button>
+        </div>
+      </el-dialog-panel>
+    </div>
+  </dialog>
+</el-dialog>
+<!-- Chat Modal -->
 <div
-  id="delete-modal"
+  id="chat-modal"
   tabindex="-1"
   class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
          justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
 >
-  <div class="relative p-4 w-full max-w-md max-h-full">
-    <div class="relative bg-neutral-900 border border-neutral-700 rounded-xl shadow-lg p-6">
+  <div class="relative p-4 w-full max-w-4xl max-h-full">
+    <div class="relative bg-neutral-900 border border-neutral-700 rounded-xl shadow-lg h-[80vh] flex flex-col md:flex-row">
 
       <!-- Close button -->
       <button
         type="button"
-        class="absolute top-3 end-2.5 text-neutral-400 bg-transparent 
+        class="absolute top-3 right-3 z-10 text-neutral-400 bg-transparent 
                hover:bg-neutral-800 hover:text-white rounded-lg text-sm 
-               w-9 h-9 ms-auto inline-flex justify-center items-center"
-        data-modal-hide="delete-modal"
+               w-9 h-9 inline-flex justify-center items-center"
+        id="chat-close-btn"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -244,39 +276,49 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 no-underline bl
         <span class="sr-only">Close modal</span>
       </button>
 
-      <!-- Modal content -->
-      <div class="text-center">
-        <svg class="mx-auto mb-4 text-red-500 w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 9v3m0 4h.01M5.07 19h13.86c1.1 0 1.78-1.2 1.2-2.16L13.2 4.84c-.55-.96-1.85-.96-2.4 0L3.87 16.84C3.29 17.8 3.97 19 5.07 19z"/>
-        </svg>
+      <!-- Sidebar with chat list -->
+      <div class="w-80 bg-neutral-800 border-r border-neutral-700 flex flex-col">
+        <div class="p-4 border-b border-neutral-700">
+          <h3 class="text-lg font-semibold text-white">Chats</h3>
+        </div>
+        <div id="chat-list" class="flex-1 overflow-y-auto p-2">
+          <!-- Chat items will be populated here -->
+        </div>
+      </div>
 
-        <h3 class="mb-5 text-lg font-semibold text-white">
-          Are you sure you want to delete your account?
-        </h3>
+      <!-- Main chat area -->
+      <div class="flex-1 flex flex-col">
+        <!-- Chat header -->
+        <div class="p-4 border-b border-neutral-700 bg-neutral-800">
+          <h2 id="chat-header" class="text-xl font-semibold text-white">Select a chat</h2>
+        </div>
 
-        <div class="flex justify-center gap-4">
-          <!-- Confirm delete -->
-          <button
-            id="confirm-delete-btn"
-            type="button"
-            class="text-white bg-red-600 hover:bg-red-700 
-                   focus:ring-4 focus:ring-red-300 
-                   font-medium rounded-lg text-sm px-5 py-2.5"
-          >
-            Yes, delete
+        <!-- Messages container with load more button -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-neutral-900 flex flex-col">
+          <button id="load-more-btn" class="btn btn-secondary mx-auto mb-4" style="display: none;">
+            Load More Messages
           </button>
+          <div id="chat-messages" class="space-y-3">
+            <!-- Messages will be appended here -->
+          </div>
+        </div>
 
-          <!-- Cancel -->
-          <button
-            data-modal-hide="delete-modal"
-            type="button"
-            class="text-neutral-300 bg-neutral-800 hover:bg-neutral-700 
-                   rounded-lg border border-neutral-700 text-sm font-medium 
-                   px-5 py-2.5"
-          >
-            Cancel
-          </button>
+        <!-- Chat input -->
+        <div class="p-4 border-t border-neutral-700 bg-neutral-800">
+          <div class="flex gap-2">
+            <input
+              id="chat-input"
+              type="text"
+              class="flex-1 bg-neutral-700 text-white px-3 py-2 rounded-md border border-neutral-600 focus:outline-none focus:border-blue-500"
+              placeholder="Type a message..."
+            />
+            <button
+              id="chat-send-btn"
+              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-500 transition"
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
 

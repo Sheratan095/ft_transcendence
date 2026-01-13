@@ -77,5 +77,7 @@ clean:
 	@rm -rf node_modules dist $(TAILWIND_OUT)
 
 gen-certs:
-	@echo "Generating self-signed SSL certificates..."
-	@cd ./certs/ && bash ./generate-certs.sh 
+	@if [ ! -f ./certs/certs/cert.pem ] || [ ! -f ./certs/certs/key.pem ]; then\
+		echo "Generating self-signed SSL certificates...";\
+		cd ./certs/ && bash ./generate-certs.sh;\
+	fi
