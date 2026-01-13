@@ -2,6 +2,12 @@
 node_modules/
 **/node_modules/
 
+# css
+*.css
+
+#package files
+package-lock.json
+
 # Logs
 logs
 *.log
