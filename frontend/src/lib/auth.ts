@@ -74,10 +74,10 @@ export async function deleteAccout(): Promise<void> {
   stopTokenRefresh();
   
   try {
-	await fetch(`/api/users/delete-account`, {
+	await fetch(`/api/auth/delete-account`, {
 	  method: 'DELETE',
-	  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-	  credentials: 'include',
+    credentials: 'include',
+	  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
 	});
   } catch (err) {
 	console.error('Delete account error:', err);

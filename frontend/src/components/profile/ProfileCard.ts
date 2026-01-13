@@ -19,7 +19,8 @@ export async function renderProfileCard(user: User, root: HTMLElement): Promise<
   const avatar = card.querySelector('#profile-avatar') as HTMLImageElement;
   if (avatar) {
     if (user.avatarUrl) {
-      avatar.src = user.avatarUrl.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl}`;
+      console.log('Setting avatar URL:', user.avatarUrl);
+      avatar.src = user.avatarUrl.startsWith('http') ? user.avatarUrl : `https://localhost:3000${user.avatarUrl}`;
     } else {
       avatar.src = '/assets/placeholder-avatar.jpg';
     }
@@ -43,7 +44,7 @@ export async function renderProfileCard(user: User, root: HTMLElement): Promise<
         if (!res.ok) throw new Error(`Avatar upload failed: ${res.status}`);
         const body = await res.json();
         if (body && body.avatarUrl) {
-          avatar.src = body.avatarUrl.startsWith('http') ? body.avatarUrl : `/api${body.avatarUrl}`;
+          avatar.src = body.avatarUrl.startsWith('http') ? body.avatarUrl : `https://localhost:3000${body.avatarUrl}`;
           user.avatarUrl = body.avatarUrl;
         }
       } catch (err) {

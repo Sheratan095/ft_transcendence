@@ -26,7 +26,7 @@ export async function searchUser(query: string): Promise<SearchResult | null> {
     }
 
     // Search by username/name
-    const res = await fetch(`/api/users/search?query=${encodeURIComponent(query)}`, {
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`, {
       credentials: 'include',
     });
 
