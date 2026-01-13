@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            display: flex;
+            gap: 20px;
+        }
+        .controls {
+            width: 300px;
+        }
+        .canvas-container {
+            flex: 1;
+        }
+        canvas {
+            border: 2px solid #333;
+            background-color: #000;
+            display: block;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background-color: #333;
+            color: #00ff00;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .paddle-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .scores {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .game-info {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-weight: bold;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .status.connected { background-color: #d4edda; color: #155724; }
+        .status.disconnected { background-color: #f8d7da; color: #721c24; }
+        .status.in-game { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Pong Game Test Client</h1>
+    
+    <div class="game-info">
+        <h3>Connection Status: <span id="status" class="status disconnected">Disconnected</span></h3>
+        <p><strong>User ID:</strong> <span id="userId">test-user-1</span></p>
+        <p><strong>Game ID:</strong> <span id="gameId">None</span></p>
+        <p><strong>Your Side:</strong> <span id="playerSide">None</span></p>
+    </div>
+
+    <div class="game-container">
+        <div class="controls">
+            <h3>Connection</h3>
+            <button id="connectBtn" onclick="connect()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnect()">Disconnect</button>
+            
+            <h3>Game Controls</h3>
+            <button id="joinMatchmakingBtn" onclick="joinMatchmaking()" disabled>Join Matchmaking</button>
+            <button id="leaveMatchmakingBtn" onclick="leaveMatchmaking()" disabled>Leave Matchmaking</button>
+            <button id="readyBtn" onclick="setReady(true)" disabled>Ready</button>
+            <button id="notReadyBtn" onclick="setReady(false)" disabled>Not Ready</button>
+
+            <div class="paddle-controls">
+                <h3>Paddle Controls</h3>
+                <button id="upBtn" onmousedown="startPaddleMove('up')" onmouseup="stopPaddleMove()" disabled>▲ UP</button>
+                <button id="downBtn" onmousedown="startPaddleMove('down')" onmouseup="stopPaddleMove()" disabled>▼ DOWN</button>
+            </div>
+
+            <div class="scores">
+                <div>Left Player: <span id="leftScore">0</span></div>
+                <div>Right Player: <span id="rightScore">0</span></div>
+            </div>
+
+            <h3>Log</h3>
+            <div id="log" class="log"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let currentGameId = null;
+        let playerSide = null;
+        let paddleMoveInterval = null;
+        let gameState = {
+            ball: { x: 400, y: 200, vx: 0, vy: 0 },
+            paddles: {},
+            scores: {}
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff5555' : type === 'success' ? '#55ff55' : '#00ff00';
+            logElement.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function updateUI() {
+            const connected = ws && ws.readyState === WebSocket.OPEN;
+            const inGame = currentGameId !== null;
+
+            document.getElementById('status').textContent = connected ? 'Connected' : 'Disconnected';
+            document.getElementById('status').className = `status ${connected ? 'connected' : 'disconnected'}`;
+            document.getElementById('gameId').textContent = currentGameId || 'None';
+            document.getElementById('playerSide').textContent = playerSide || 'None';
+
+            // Enable/disable buttons based on connection and game state
+            document.getElementById('connectBtn').disabled = connected;
+            document.getElementById('disconnectBtn').disabled = !connected;
+            document.getElementById('joinMatchmakingBtn').disabled = !connected || inGame;
+            document.getElementById('leaveMatchmakingBtn').disabled = !connected;
+            document.getElementById('readyBtn').disabled = !connected || !inGame;
+            document.getElementById('notReadyBtn').disabled = !connected || !inGame;
+            document.getElementById('upBtn').disabled = !connected || !inGame;
+            document.getElementById('downBtn').disabled = !connected || !inGame;
+        }
+
+        function connect() {
+            // You'll need to replace this with your actual WebSocket URL and authentication
+            const wsUrl = 'ws://localhost:3002/ws?internal_api_key=your-internal-api-key&user_id=test-user-1';
+            
+            try {
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = function(event) {
+                    log('Connected to Pong service', 'success');
+                    updateUI();
+                    
+                    // Send ping to test connection
+                    sendMessage('ping', {});
+                };
+
+                ws.onmessage = function(event) {
+                    try {
+                        const message = JSON.parse(event.data);
+                        handleMessage(message);
+                    } catch (e) {
+                        log('Error parsing message: ' + e.message, 'error');
+                    }
+                };
+
+                ws.onclose = function(event) {
+                    log('Connection closed', 'error');
+                    ws = null;
+                    currentGameId = null;
+                    playerSide = null;
+                    updateUI();
+                };
+
+                ws.onerror = function(error) {
+                    log('WebSocket error: ' + error, 'error');
+                };
+            } catch (e) {
+                log('Failed to connect: ' + e.message, 'error');
+            }
+        }
+
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+
+        function sendMessage(event, data) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({ event, data });
+                ws.send(message);
+                log(`[TX] ${event}: ${JSON.stringify(data)}`, 'info');
+            } else {
+                log('Cannot send message: not connected', 'error');
+            }
+        }
+
+        function handleMessage(message) {
+            log(`[RX] ${message.event}: ${JSON.stringify(message.data)}`, 'info');
+
+            switch (message.event) {
+                case 'pong':
+                    log('Pong received', 'success');
+                    break;
+
+                case 'pong.matchedInRandomGame':
+                    currentGameId = message.data.gameId;
+                    playerSide = message.data.yourSide;
+                    log(`Matched in game ${currentGameId} as ${playerSide} player`, 'success');
+                    updateUI();
+                    break;
+
+                case 'pong.gameStarted':
+                    log(`Game ${message.data.gameId} started!`, 'success');
+                    document.getElementById('status').textContent = 'In Game';
+                    document.getElementById('status').className = 'status in-game';
+                    updateUI();
+                    break;
+
+                case 'pong.gameState':
+                    updateGameState(message.data);
+                    break;
+
+                case 'pong.paddleMove':
+                    updatePaddlePosition(message.data);
+                    break;
+
+                case 'pong.score':
+                    updateScores(message.data);
+                    log(`Score! Player ${message.data.scorerId} scored`, 'success');
+                    break;
+
+                case 'pong.gameEnded':
+                    handleGameEnd(message.data);
+                    break;
+
+                case 'error':
+                    log(`Error: ${message.data.message}`, 'error');
+                    break;
+
+                default:
+                    log(`Unknown event: ${message.event}`, 'error');
+            }
+        }
+
+        function joinMatchmaking() {
+            sendMessage('pong.joinMatchmaking', {});
+        }
+
+        function leaveMatchmaking() {
+            sendMessage('pong.leaveMatchmaking', {});
+        }
+
+        function setReady(ready) {
+            if (currentGameId) {
+                const event = ready ? 'pong.userReady' : 'pong.userNotReady';
+                sendMessage(event, { gameId: currentGameId });
+            }
+        }
+
+        function startPaddleMove(direction) {
+            if (currentGameId && paddleMoveInterval === null) {
+                // Send immediate paddle move
+                sendMessage('pong.paddleMove', {
+                    gameId: currentGameId,
+                    direction: direction
+                });
+
+                // Start continuous paddle movement
+                paddleMoveInterval = setInterval(() => {
+                    sendMessage('pong.paddleMove', {
+                        gameId: currentGameId,
+                        direction: direction
+                    });
+                }, 50); // Send every 50ms for smooth movement
+            }
+        }
+
+        function stopPaddleMove() {
+            if (paddleMoveInterval) {
+                clearInterval(paddleMoveInterval);
+                paddleMoveInterval = null;
+            }
+        }
+
+        function updateGameState(data) {
+            gameState = {
+                ball: data.ball,
+                paddles: data.paddles,
+                scores: data.scores
+            };
+            renderGame();
+        }
+
+        function updatePaddlePosition(data) {
+            if (gameState.paddles[data.playerId]) {
+                gameState.paddles[data.playerId].y = data.paddleY;
+                renderGame();
+            }
+        }
+
+        function updateScores(data) {
+            gameState.scores = data.scores;
+            // Update score display
+            const leftScore = Object.values(data.scores)[0] || 0;
+            const rightScore = Object.values(data.scores)[1] || 0;
+            document.getElementById('leftScore').textContent = leftScore;
+            document.getElementById('rightScore').textContent = rightScore;
+        }
+
+        function handleGameEnd(data) {
+            log(`Game ended! Winner: ${data.winnerUsername}`, 'success');
+            currentGameId = null;
+            playerSide = null;
+            updateUI();
+            
+            // Reset game state
+            gameState = {
+                ball: { x: 400, y: 200, vx: 0, vy: 0 },
+                paddles: {},
+                scores: {}
+            };
+            renderGame();
+        }
+
+        function renderGame() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw center line
+            ctx.strokeStyle = '#fff';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw ball
+            if (gameState.ball) {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(gameState.ball.x, gameState.ball.y, 10, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            // Draw paddles
+            ctx.fillStyle = '#fff';
+            Object.values(gameState.paddles).forEach(paddle => {
+                if (paddle) {
+                    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
+                }
+            });
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', function(event) {
+            if (currentGameId) {
+                switch(event.key) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        event.preventDefault();
+                        startPaddleMove('up');
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        event.preventDefault();
+                        startPaddleMove('down');
+                        break;
+                }
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            switch(event.key) {
+                case 'ArrowUp':
+                case 'ArrowDown':
+                case 'w':
+                case 'W':
+                case 's':
+                case 'S':
+                    event.preventDefault();
+                    stopPaddleMove();
+                    break;
+            }
+        });
+
+        // Initialize UI
+        updateUI();
+        renderGame();
+
+        // Prevent right-click context menu on canvas
+        canvas.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
