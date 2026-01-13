@@ -3,11 +3,12 @@ import tailwindcss from "@tailwindcss/vite";
 import { intlayer } from "vite-intlayer";
 
 import path from "path";
+import { toUSVString } from 'util';
 
 export default defineConfig({
   base: '/',
   server: {
-    port: 443,
+    port: 4000,
     strictPort: true,
 	https: {
 		key: './certs/certs/key.pem',
@@ -15,6 +16,7 @@ export default defineConfig({
 	},
     proxy: {
       '/api': {
+		port:3000,
         target: 'https://localhost:3000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
