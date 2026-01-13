@@ -188,7 +188,7 @@ export async function	createUserStatsInGames(userId)
 			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
 		);
 
-		axios.post(`${process.env.TRIS_SERVICE_URL}/create-user-stats`,
+		await axios.post(`${process.env.TRIS_SERVICE_URL}/create-user-stats`,
 			{ userId: userId },
 			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
 		);
