@@ -13,13 +13,13 @@ export function isLoggedInClient(): boolean {
 
 
 export async function refreshAccessToken(): Promise<boolean> {
-  if (!isLoggedInClient()) return false;
+//  if (!isLoggedInClient()) return false;
 
   if (isRefreshing) return true;
   isRefreshing = true;
 
   try {
-    const res = await fetch(`/api/auth/token`, {
+    const res = await fetch(`/auth/token`, {
       method: 'POST',
       credentials: 'include',
       headers: {
