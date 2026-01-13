@@ -67,6 +67,7 @@
         let score = 0;
         let i = 0;
         let iter = 0;
+        let bestMove = null;
 
         /**
          * function:
@@ -264,15 +265,118 @@
             return (0);
         }
         
-        // function findBestMove()
-        // {
+        // check if a given move is valid
+        function isMoveValid(value)
+        {
+            let fixed = value;
+            if (fixed === 0)
+                fixed++;
+            let x = value % 3;
+            let y = Math.floor(fixed / 3);
 
-        // }
+            if (board[y][x] === "X"
+                || board[y][x] === "O")
+            {
+                return (1);
+            }
+            return (0);
+        }
+
+        // return the highest number of an array
+        function indexOfMax(arr)
+        {
+            if (arr.length === 0) {
+                return -1;
+            }
+
+            var max = arr[0];
+            var maxIndex = 0;
+
+            for (var i = 1; i < arr.length; i++) {
+                if (arr[i] > max) {
+                    maxIndex = i;
+                    max = arr[i];
+                }
+            }
+
+            return maxIndex;
+        }
+
+        // calculate score for a given move index
+        function calculateScore(index)
+        {
+            let score = 0;
+            let fixed = index;
+            if (fixed === 0)
+                fixed++;
+            let x = index % 3;
+            let y = Math.floor(fixed / 3);
+
+            //console.log(checkAdiacent(y, x, 0, 2, 'O'));
+
+            if (checkAdiacent(y, x, 0, score, 'O'))
+            {
+                console.log("found winning move at: ", index);
+                return (10);
+            }
+            return (0);
+        }
+
+        // find best move for IA
+        function findBestMove(board)
+        {
+            let possibleMoves = [];
+            let value = 0;
+            let selectedIndex = null;
+            let moveScores = [];
+            while (value < 9)
+            {
+                if (!isMoveValid(value))
+                    possibleMoves.push(value);
+                value++;
+            }
+
+            // console.log(value);
+            console.log("possible moves: ", possibleMoves);
+            let movesNum = possibleMoves.length;
+            //console.log(movesNum);
+
+            let i = 0;
+            possibleMoves.forEach(element => {
+                moveScores[i] = calculateScore(element);
+                i++;
+            });
+
+            console.log("move scores: ", moveScores);
+            let selected = indexOfMax(moveScores);
+
+            value = possibleMoves[selected];
+            let fixed = value;
+            if (fixed === 0)
+                fixed++;
+            let x = value % 3;
+            let y = Math.floor(fixed / 3);
+
+            //console.log(x, y);
+            let valueStr = value.toString();
+            let cell = document.getElementById(valueStr).textContent = "O";
+            iaHistory.push(value);
+            let move = Array(y, x);
+            // console.log(board);
+            return (move);
+        }
 
         // function minMax()
         // {
 
         // }
+
+        // puts the selected move on UI
+        function executeMove(x, y)
+        {
+            board[y][x] = "O";
+            return (0);
+        }
 
         // remove a move from the board
         function removeFromBoard(index)
@@ -288,15 +392,15 @@
             board[y][x] = "empty";
             document.getElementById(valueStr).textContent = "";
             //console.log(board);
-            console.log("removed index: ", index);
-            console.log("y - x: ", y, x);
+            // console.log("removed index: ", index);
+            // console.log("y - x: ", y, x);
         }
 
         // change turn logic
         function nextTurn()
         {
-            console.log("passing trough next turn");
-            console.log(endFlag);
+            // console.log("passing trough next turn");
+            // console.log(endFlag);
             if (endFlag)
             {
                 console.log("exiting correctly");
@@ -347,52 +451,20 @@
         // handle ia move
         function handleIaTurn()
         {
+            let selectedMove = null;
+
             if (endFlag === 1)
             {
                 console.log("game already ended, skipping");
                 return (1);
             }
-            let value = getInt(8);
-            let fixed = value;
-            if (value === 0)
-                fixed++;
-            let x = value % 3;
-            let y = Math.floor(fixed / 3);
-            let z = 0;
-            let holder = 0;
 
-            if (board[y][x] === "X"
-                || board[y][x] === "O")
-            {
-                let i = 0;
-                let j = 0;
-                let found = 0;
-                while(i < 3)
-                {
-                    j = 0;
-                    if (found)
-                        break;
-                    while(j < 3)
-                    {
-                        if (board[i][j] === 'empty')
-                        {
-                            y = i;
-                            x = j;
-                            value = z;
-                            //console.log("invalid cell, new cell: ", i, j);
-                            found = 1;
-                        }
-                        j++;
-                        z++;
-                    }
-                    i++;
-                }
-            }
-            let valueStr = value.toString();
-            let cell = document.getElementById(valueStr).textContent = "O";
-            iaHistory.push(value);
+            selectedMove = findBestMove(board);
             turn = 0;
-            board[y][x] = "O";
+            
+            let y = selectedMove[0];
+            let x = selectedMove[1];
+            executeMove(x, y);
 
             if (totalIa >= 4)
             {
@@ -449,7 +521,7 @@
                 
                 if (endFlag < 1)
                 {
-                    console.log("calling next turn after a move");
+                    // console.log("calling next turn after a move");
                     if (nextTurn())
                     {
                         console.log("exiting from move listener");
