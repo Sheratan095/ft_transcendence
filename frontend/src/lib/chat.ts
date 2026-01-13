@@ -286,9 +286,10 @@ function escapeHtml(text: string): string {
 
 function connectChatWebSocket() {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = window.location.host;
+  const host = "localhost:3000";
   const wsUrl = `${protocol}//${host}/chat/ws`;
 
+  console.log('Connecting to chat WebSocket at', wsUrl);
   chatSocket = new WebSocket(wsUrl);
 
   chatSocket.addEventListener('open', () => {
