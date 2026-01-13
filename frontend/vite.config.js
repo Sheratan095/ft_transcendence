@@ -7,7 +7,7 @@ import path from "path";
 export default defineConfig({
   base: '/',
   server: {
-    port: 443,
+    port: 4000,
     strictPort: true,
 	https: {
 		key: './certs/certs/key.pem',
