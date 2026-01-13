@@ -183,10 +183,10 @@ export async function	createUserStatsInGames(userId)
 {
 	try
 	{
-		// await axios.post(`${process.env.PONG_SERVICE_URL}/create-user-stats`,
-		// 	{ userId: userId },
-		// 	{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
-		// );
+		await axios.post(`${process.env.PONG_SERVICE_URL}/create-user-stats`,
+			{ userId: userId },
+			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		);
 
 		axios.post(`${process.env.TRIS_SERVICE_URL}/create-user-stats`,
 			{ userId: userId },
@@ -195,7 +195,7 @@ export async function	createUserStatsInGames(userId)
 	}
 	catch (err)
 	{
-		console.error('[AUTH] Error creating user stats in games services:');
+		console.error('[AUTH] Error creating user stats in games services: ', err);
 		// throw (err);
 	}
 }
@@ -204,10 +204,10 @@ export async function	deleteUserStatsInGames(userId)
 {
 	try
 	{
-		// await axios.delete(`${process.env.PONG_SERVICE_URL}/delete-user-stats`, {
-		// 	headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
-		// 	data: { userId: userId }
-		// });
+		await axios.delete(`${process.env.PONG_SERVICE_URL}/delete-user-stats`, {
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+			data: { userId: userId }
+		});
 
 		await axios.delete(`${process.env.TRIS_SERVICE_URL}/delete-user-stats`, {
 			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
