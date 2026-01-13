@@ -93,8 +93,8 @@ export function	handleMessage(socket, msg, userId)
 				handleLeaveMatchmaking(userId);
 				break;
 
-			case 'pong.makeMove':
-				handleMakeMove(userId, message.data.gameId, message.data.position);
+			case 'pong.paddleMove':
+				handlePaddleMove(userId, message.data.gameId, message.data.direction);
 				break;
 
 			default:
@@ -250,22 +250,29 @@ export async function	handleLeaveMatchmaking(userId)
 	}
 }
 
-export async function	handleMakeMove(userId, gameId, position)
+export async function	handlePaddleMove(userId, gameId, direction)
 {
 	try
 	{
-		if (!gameId || typeof position !== 'number')
+		if (!gameId || !direction)
 		{
-			console.error(`[PONG] Invalid data provided by user ${userId} to make move`);
-			pongConnectionManager.sendErrorMessage(userId, 'Invalid data provided');
+			console.error(`[PONG] Invalid data provided by user ${userId} for paddle move`);
+			pongConnectionManager.sendErrorMessage(userId, 'Invalid paddle move data');
 			return ;
 		}
 
-		gameManager.makeMove(userId, gameId, position);
+		if (!['up', 'down'].includes(direction))
+		{
+			console.error(`[PONG] Invalid paddle direction ${direction} from user ${userId}`);
+			pongConnectionManager.sendErrorMessage(userId, 'Invalid paddle direction');
+			return ;
+		}
+
+		gameManager.processPaddleMove(userId, gameId, direction);
 	}
 	catch (err)
 	{
-		console.error(`[PONG] Error making move for user ${userId}:`, err.message);
-		pongConnectionManager.sendErrorMessage(userId, 'Failed to make move');
+		console.error(`[PONG] Error processing paddle move for user ${userId}:`, err.message);
+		pongConnectionManager.sendErrorMessage(userId, 'Failed to process paddle move');
 	}
 }

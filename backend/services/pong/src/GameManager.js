@@ -300,8 +300,34 @@ class	GameManager
 			this._gameStart(gameInstance);
 	}
 
-	makeMove(playerId, gameId, direction)
+	processPaddleMove(playerId, gameId, direction)
 	{
+		const	gameInstance = this._games.get(gameId);
+		if (!gameInstance) // Check if game exists
+		{
+			console.error(`[PONG] ${playerId} tried to move paddle in non-existent game ${gameId}`);
+			pongConnectionManager.sendErrorMessage(playerId, 'Game not found');
+			return;
+		}
+
+		// Check if player is part of the game
+		if (!gameInstance.hasPlayer(playerId))
+		{
+			console.error(`[PONG] ${playerId} tried to move paddle in game ${gameId} they are not part of`);
+			pongConnectionManager.sendErrorMessage(playerId, 'You are not part of this game');
+			return;
+		}
+
+		// Check if game is in progress
+		if (gameInstance.gameStatus !== GameStatus.IN_PROGRESS)
+		{
+			console.error(`[PONG] ${playerId} tried to move paddle in game ${gameId} that is not in progress`);
+			pongConnectionManager.sendErrorMessage(playerId, 'Game is not in progress');
+			return;
+		}
+
+		// Process the paddle move
+		gameInstance.processMove(playerId, direction);
 	}
 
 	handleUserDisconnect(userId)

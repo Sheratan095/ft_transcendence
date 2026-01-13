@@ -83,18 +83,40 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.playerQuitCustomGameInLobby', { gameId });
 	}
 
-	async	sendGameEnded(playerId, gameId, winner, quit)
+	async	sendGameEnd(playerId, gameId, winner, quit)
 	{
 		const	socket = this._connections.get(playerId);
 
-		const	data = {
+		const	data =
+		{
 			gameId,
 			winner,
 			quit,
 		};
 
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.gameEnded', data);
+			this.#dispatchEventToSocket(socket, 'pong.gameEnded', data);
+	}
+
+	async	sendGameState(playerId, gameStateData)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.gameState', gameStateData);
+	}
+
+	async	sendPaddleMove(playerId, paddleMoveData)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.paddleMove', paddleMoveData);
+	}
+
+	async	sendScore(playerId, scoreData)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.score', scoreData);
 	}
 
 	async	notifyMatchedInRandomGame(playerId, gameId, opponentUsername, side)
