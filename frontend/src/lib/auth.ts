@@ -77,7 +77,6 @@ export async function deleteAccout(): Promise<void> {
 	await fetch(`/api/auth/delete-account`, {
 	  method: 'DELETE',
     credentials: 'include',
-	  headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
 	});
   } catch (err) {
 	console.error('Delete account error:', err);

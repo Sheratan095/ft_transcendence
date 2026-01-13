@@ -76,7 +76,7 @@ const	Match =
 		id: { type: 'string' },
 		playerXId: { type: 'string' },
 		playerOId: { type: 'string' },
-		winnerId: { type: ['string', 'null'] },
+		winnerId: { type: 'string'},
 		endedAt: { type: 'string', format: 'date-time' }
 	}
 };
@@ -250,7 +250,7 @@ export function	trisRoutes(fastify)
 		if (!userId)
 			return ;
 
-		socket.on('message', msg => {handleMessage(socket, msg, userId, fastify.trisDb);});
+		socket.on('message', msg => {handleMessage(socket, msg, userId);});
 
 		socket.on('close', () => {handleClose(socket, userId);});
 
@@ -258,9 +258,9 @@ export function	trisRoutes(fastify)
 	});
 
 	fastify.get('/stats', getUserStats);
-
 	fastify.get('/history', getUserMatchHistory);
 
 	fastify.post('/create-user-stats', createUserStats);
+
 	fastify.delete('/delete-user-stats', deleteUserStats);
 }

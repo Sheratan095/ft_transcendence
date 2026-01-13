@@ -95,6 +95,109 @@ export class	PongDatabase
 		return (id);
 	}
 
+	//-----------------------------MATCHES QUERIES---------------------------------//
+
+	// When a user is deleted, his name musn't appear in past matches, it will be "Deleted User" or something like that
+	async	getMatchesForUser(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE player_left_id = ? OR player_right_id = ?
+		`;
+		const	matches = await this.db.all(query, [userId, userId]);
+
+		return (matches);
+	}
+
+	// Ended at datetime is set by default to CURRENT_TIMESTAMP from db
+	async	saveMatch(playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId)
+	{
+		const	matchId = await this.#generateUUID();
+		const	query = `
+			INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id)
+			VALUES (?, ?, ?, ?, ?, ?)
+		`;
+
+		await this.db.run(query, [matchId, playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId]);
+		return (matchId);
+	}
+
+	async	getMatchById(matchId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE id = ?
+		`;
+		const	match = await this.db.get(query, [matchId]);
+
+		return (match);
+	}
+
+	async	getMatchesForUser(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE player_left_id = ? OR player_right_id = ?
+		`;
+		const	matches = await this.db.all(query, [userId, userId]);
+
+		return (matches);
+	}
+
+	//-----------------------------USER STATS QUERIES---------------------------------//
+
+	// Called by auth service when a new user is created
+	async	createUserStats(userId)
+	{
+		const	query = `
+			INSERT INTO user_stats (user_id)
+			VALUES (?)
+		`;
+
+		await this.db.run(query, [userId]);
+	}
+
+	// Called by auth service when a user is deleted (GDPR compliance)
+	async	deleteUserStats(userId)
+	{
+		const	query = `
+			DELETE FROM user_stats
+			WHERE user_id = ?
+		`;
+
+		await this.db.run(query, [userId]);
+	}
+
+	// TEXT ELO is added in controller level beacause it's a business logic not a db logic
+	async	getUserStats(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM user_stats
+			WHERE user_id = ?
+		`;
+		const	stats = await this.db.get(query, [userId]);
+
+		return (stats);
+	}
+
+	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0, tournamentWinsDelta = 0)
+	{
+		const	query = `
+			UPDATE user_stats
+			SET
+				wins = wins + ?,
+				losses = losses + ?,
+				tournament_wins = tournament_wins + ?
+			WHERE user_id = ?
+		`;
+
+		await this.db.run(query, [winsDelta, lossesDelta, tournamentWinsDelta, userId]);
+	}
+
 	async	#close()
 	{
 		if (this.db)

@@ -10,7 +10,8 @@ import fastifyWebsocket from '@fastify/websocket';
 await fastify.register(fastifyWebsocket);
 
 import { checkEnvVariables } from './tris-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'NOTIFICATION_SERVICE_URL', 'USERS_SERVICE_URL', 'MAX_MARKS_PER_PLAYER', 'COOLDOWN_MS', 'MOVE_TIMEOUT_MS']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'NOTIFICATION_SERVICE_URL', 'USERS_SERVICE_URL', 'MAX_MARKS_PER_PLAYER',
+	'COOLDOWN_MS', 'MOVE_TIMEOUT_MS' , 'MATCHMAKING_IGNORE_BLOCKS', 'EARNED_WIN_POINTS', 'LOST_LOSS_POINTS']);
 
 import { TrisDatabase } from './tris-db.js';
 let		trisDatabase;

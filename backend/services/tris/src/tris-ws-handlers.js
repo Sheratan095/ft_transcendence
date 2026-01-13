@@ -1,14 +1,13 @@
-import { validateInternalApiKey, getUsernameById } from './tris-help.js';
 // The class is initialized in TrisConnectionManager.js
 import { trisConnectionManager } from './TrisConnectionManager.js';
-
+import { validateInternalApiKey, getUsernameById } from './tris-help.js';
 import { gameManager } from './GameManager.js';
 
 export function	handleNewConnection(socket, req)
 {
 	// Validate internal API key
 	const	isValid = validateInternalApiKey(req, socket);
-	
+
 	if (!isValid)
 	{
 		console.log('[TRIS] Rejecting WebSocket connection due to invalid API key');
@@ -50,7 +49,7 @@ export function	handleError(socket, err, userId)
 	}
 }
 
-export function	handleMessage(socket, msg, userId, trisDb)
+export function	handleMessage(socket, msg, userId)
 {
 	try
 	{
@@ -63,39 +62,39 @@ export function	handleMessage(socket, msg, userId, trisDb)
 				break;
 
 			case 'tris.createCustomGame':
-				handleCustomGameCreation(userId, message.data.otherId, trisDb);
+				handleCustomGameCreation(userId, message.data.otherId);
 				break;
 
 			case 'tris.joinCustomGame':
-				handleJoinCustomGame(userId, message.data.gameId, trisDb);
+				handleJoinCustomGame(userId, message.data.gameId);
 				break;
 
 			case 'tris.cancelCustomGame':
-				handleCancelCustomGame(userId, message.data.gameId, trisDb);
+				handleCancelCustomGame(userId, message.data.gameId);
 				break;
 
 			case 'tris.userQuit':
-				handleUserQuit(userId, message.data.gameId, trisDb);
+				handleUserQuit(userId, message.data.gameId);
 				break;
 
 			case 'tris.userReady':
-				handleUserReady(userId, message.data.gameId, true, trisDb);
+				handleUserReady(userId, message.data.gameId, true);
 				break;
 
 			case 'tris.userNotReady':
-				handleUserReady(userId, message.data.gameId, false, trisDb);
+				handleUserReady(userId, message.data.gameId, false);
 				break;
 
 			case 'tris.joinMatchmaking':
-				handleJoinMatchmaking(userId, trisDb);
+				handleJoinMatchmaking(userId);
 				break;
 
 			case 'tris.leaveMatchmaking':
-				handleLeaveMatchmaking(userId, trisDb);
+				handleLeaveMatchmaking(userId);
 				break;
 
 			case 'tris.makeMove':
-				handleMakeMove(userId, message.data.gameId, message.data.position, trisDb);
+				handleMakeMove(userId, message.data.gameId, message.data.position);
 				break;
 
 			default:
@@ -111,7 +110,7 @@ export function	handleMessage(socket, msg, userId, trisDb)
 	}
 }
 
-export async function	handleCustomGameCreation(userId, otherId, trisDb)
+export async function	handleCustomGameCreation(userId, otherId)
 {
 	try
 	{
@@ -138,7 +137,7 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 			return ;
 		}
 
-		const	gameId = gameManager.createCustomGame(userId, senderUsername, otherId, otherUsername);
+		gameManager.createCustomGame(userId, senderUsername, otherId, otherUsername);
 	}
 	catch (err)
 	{
@@ -147,7 +146,7 @@ export async function	handleCustomGameCreation(userId, otherId, trisDb)
 	}
 }
 
-export async function	handleJoinCustomGame(userId, gameId, trisDb)
+export async function	handleJoinCustomGame(userId, gameId)
 {
 	try
 	{
@@ -167,7 +166,7 @@ export async function	handleJoinCustomGame(userId, gameId, trisDb)
 	}
 }
 
-export async function	handleCancelCustomGame(userId, gameId, trisDb)
+export async function	handleCancelCustomGame(userId, gameId)
 {
 	try
 	{
@@ -187,7 +186,7 @@ export async function	handleCancelCustomGame(userId, gameId, trisDb)
 	}
 }
 
-export async function	handleUserQuit(userId, gameId, trisDb)
+export async function	handleUserQuit(userId, gameId)
 {
 	try
 	{
@@ -206,7 +205,7 @@ export async function	handleUserQuit(userId, gameId, trisDb)
 	}
 }
 
-export async function	handleUserReady(userId, gameId, readyStatus, trisDb)
+export async function	handleUserReady(userId, gameId, readyStatus)
 {
 	try
 	{
@@ -225,7 +224,7 @@ export async function	handleUserReady(userId, gameId, readyStatus, trisDb)
 	}
 }
 
-export async function	handleJoinMatchmaking(userId, trisDb)
+export async function	handleJoinMatchmaking(userId)
 {
 	try
 	{
@@ -238,7 +237,7 @@ export async function	handleJoinMatchmaking(userId, trisDb)
 	}
 }
 
-export async function	handleLeaveMatchmaking(userId, trisDb)
+export async function	handleLeaveMatchmaking(userId)
 {
 	try
 	{
@@ -251,7 +250,7 @@ export async function	handleLeaveMatchmaking(userId, trisDb)
 	}
 }
 
-export async function	handleMakeMove(userId, gameId, position, trisDb)
+export async function	handleMakeMove(userId, gameId, position)
 {
 	try
 	{

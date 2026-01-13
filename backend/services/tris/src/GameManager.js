@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { trisConnectionManager } from './TrisConnectionManager.js';
-import { sendGameInviteNotification, getUsernameById, sleep } from './tris-help.js';
+import { sendGameInviteNotification, getUsernameById, sleep, checkBlock } from './tris-help.js';
 import { trisDatabase as trisDb } from './tris.js';
 
 class	GameManager
@@ -10,11 +10,11 @@ class	GameManager
 	{
 		this._games = new Map(); // gameId -> GameInstance
 		this._waitingPlayers = []; // Queue of players waiting for a match
-		this._randomGameCooldowns = new Map(); // gameId -> timeoutId
+		this._randomGameCooldowns = new Map(); // gameId -> timeoutId used to start the game after cooldown
 		this._moveTimeouts = new Map(); // gameId -> timeoutId
 	}
 
-	createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
+	async createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(creatorId))
@@ -32,11 +32,11 @@ class	GameManager
 			return ;
 		}
 
-		// Can't create a game with a null player
-		if (!otherId)
+		// Can't create a game with a player who blocked you or whom you blocked
+		if (await checkBlock(creatorId, otherId))
 		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game with invalid opponent (${otherId})`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'Invalid opponent ID');
+			console.error(`[TRIS] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
+			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with this user');
 			return ;
 		}
 
@@ -59,7 +59,7 @@ class	GameManager
 		return (gameId);
 	}
 
-	// Could be used also to decline an invitation
+	// Could be used also to decline an invitation, actually isn't
 	cancelCustomGame(userId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
@@ -129,7 +129,7 @@ class	GameManager
 		}
 
 		// Check if game is a custom game and in WAITING status
-		if (gameInstance.gameType !== GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
+		if (gameInstance.gameType !== GameType.CUSTOM || gameInstance.gameStatus !== GameStatus.WAITING)
 		{
 			console.error(`[TRIS] ${playerId} tried to join a non-custom game ${gameId}`);
 			trisConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
@@ -194,10 +194,10 @@ class	GameManager
 			return ;
 		}
 
+		const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 		// If the match is IN_PROGRESS (started), the other player wins
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
@@ -205,7 +205,6 @@ class	GameManager
 			// If the match is in LOBBY and is a CUSTOM game, quitting cancels the game for both players
 			console.log(`[TRIS] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
 
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			trisConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
 
 			// Remove the game from the active games map
@@ -216,12 +215,11 @@ class	GameManager
 			// If the match is in LOBBY and is a RANDOM game, quitting gives victory to the other player
 			console.log(`[TRIS] Player ${playerId} quit game random game ${gameId}, game is canceled`);
 
-			const	otherPlayerId = (gameInstance.playerXId === playerId) ? gameInstance.playerOId : gameInstance.playerXId;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
 		}
 	}
 
-	joinMatchmaking(playerId)
+	async joinMatchmaking(playerId)
 	{
 		// User must not be busy (in matchmaking or in another game)
 		if (this._isUserBusy(playerId))
@@ -231,12 +229,14 @@ class	GameManager
 			return ;
 		}
 
-		// Add player to waiting queue
-		this._waitingPlayers.push(playerId);
 		console.log(`[TRIS] Player ${playerId} joined matchmaking queue`);
 
+		// Slight delay to allow user to leave matchmaking immediately after joining
+		// This prevents instant matches that the user didn't want
+		await sleep(1000);
+
 		// Try to create a random game
-		this._createRandomGameIfPossible();
+		this._createRandomGameIfPossible(playerId);
 	}
 
 	leaveMatchmaking(playerId)
@@ -273,7 +273,7 @@ class	GameManager
 		}
 
 		// Check if game is in waiting status or in lobby (other user joined), so if the game hasn't started yet
-		// WAITING status is possible only for CUSTOM GAMES, creator can ready up before the other player joins
+		// WAITING status is possible only for CUSTOM GAMES
 		if (gameInstance.gameStatus !== GameStatus.WAITING && gameInstance.gameStatus !== GameStatus.IN_LOBBY)
 		{
 			console.error(`[TRIS] ${playerId} tried to change ready status in game ${gameId} that has already started`);
@@ -356,22 +356,50 @@ class	GameManager
 		// Check if user is in any active games
 		for (const gameInstance of this._games.values())
 		{
-			if (gameInstance.hasPlayer(userId))
-+				this.quitGame(userId, gameInstance.id);
+			// The creator of a CUSTOM game in WAITING status must cancel it, can't just quit
+			if (gameInstance.gameType === GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING && gameInstance.playerXId === userId)
+				this.cancelCustomGame(userId, gameInstance.id);
+			else if (gameInstance.hasPlayer(userId))
+				this.quitGame(userId, gameInstance.id);
 		}
 	}
 
-	async _createRandomGameIfPossible()
+	async _createRandomGameIfPossible(justJoinedPlayerId)
 	{
-		// Slight delay to allow user to leave matchmaking immediately after joining
-		// This prevents instant matches that the user didn't want
-		await sleep(1000);
+		let	opponentId = null;
 
-		if (this._waitingPlayers.length < 2)
+		for (let i = 0; i < this._waitingPlayers.length; i++)
+		{
+			if (this._waitingPlayers[i] === justJoinedPlayerId)
+				continue ;
+
+			// If blocks must be considered
+			if (process.env.MATCHMAKING_IGNORE_BLOCKS === 'false')
+			{
+				// Check if the two players have blocked each other
+				const	blocked = await checkBlock(justJoinedPlayerId, this._waitingPlayers[i]);
+				if (blocked)
+					continue ;
+			}
+
+			opponentId = this._waitingPlayers[i];
+
+			// Remove opponent from waiting queue
+			this._waitingPlayers.splice(i, 1);
+
+			// Exit loop after finding the first suitable opponent
+			break ;
+		}
+
+		// If no opponent found, add the player to the waiting queue
+		if (opponentId === null)
+		{
+			this._waitingPlayers.push(justJoinedPlayerId);
 			return ;
+		}
 
-		const	player1Id = this._waitingPlayers.shift();
-		const	player2Id = this._waitingPlayers.shift();
+		const	player1Id = justJoinedPlayerId;
+		const	player2Id = opponentId;
 
 		let	playerX;
 		let	playerO;
@@ -382,16 +410,16 @@ class	GameManager
 		if (Math.random() < 0.5)
 		{
 			playerX = player1Id;
-			playerXUsername = getUsernameById(playerX);
+			playerXUsername = await getUsernameById(playerX);
 			playerO = player2Id;
-			playerOUsername = getUsernameById(playerO);
+			playerOUsername = await getUsernameById(playerO);
 		}
 		else
 		{
 			playerX = player2Id;
-			playerXUsername = getUsernameById(playerX);
+			playerXUsername = await getUsernameById(playerX);
 			playerO = player1Id;
-			playerOUsername = getUsernameById(playerO);
+			playerOUsername = await getUsernameById(playerO);
 		}
 
 		// Generate gameId and GameInstance

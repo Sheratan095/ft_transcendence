@@ -46,3 +46,103 @@ export function	extractUserData(request)
 		return (null);
 	}
 }
+
+export function	sendGameInviteNotification(senderId, senderUsername, targetId, gameId)
+{
+	try
+	{
+		const	response = axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/send-game-invite`,
+		{ senderId, senderUsername, targetId, gameId, "gameType":"pong" },
+		{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		);
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error sending game invite notification:', err.message);
+	}
+}
+
+export async function	getUsernameById(userId)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/user?id=${userId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[PONG] Failed to fetch user data for Id ${userId}: ${response.statusText}`);
+			return (null);
+		}
+
+		const	userData = await response.json();
+		return (userData.username);
+	}
+	catch (error)
+	{
+		console.error(`[PONG] Error fetching user data for Id ${userId}:`, error.message);
+		return (null);
+	}
+}
+
+export function	calculateElo(win, loss)
+{
+	let	elo = (process.env.EARNED_WIN_POINTS * win) - (process.env.LOST_LOSS_POINTS * loss);
+
+	if (elo < 0)
+		elo = 0;
+
+	let	rank;
+
+	if (elo < 200)
+		rank = 'Noob';
+	else if (elo >= 200 && elo <= 399)
+		rank = 'Beginner';
+	else if (elo >= 400 && elo <= 599)
+		rank = 'Intermediate';
+	else if (elo >= 600 && elo <= 899)
+		rank = 'Pro';
+	else if (elo >= 900 )
+		rank = 'Master';
+
+	return ({ elo, rank });
+}
+
+export function	sleep(ms)
+{
+	return (new Promise(resolve => setTimeout(resolve, ms)));
+}
+
+export async function	checkBlock(userA, userB)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/check-block?userA=${userA}&userB=${userB}`,
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to check block status between ${userA} and ${userB}: ${response.statusText}`);
+			return (false);
+		}
+
+		const	data = await response.json();
+		return (data.isBlocked);
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error checking block status:', err.message);
+		return (false);
+	}
+}

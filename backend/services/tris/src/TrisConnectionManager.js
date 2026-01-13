@@ -1,4 +1,4 @@
-// Chat connection manager handles WebSocket connections and message routing
+// TRIS connection manager handles WebSocket connections and message routing
 class	TrisConnectionManager
 {
 	constructor()

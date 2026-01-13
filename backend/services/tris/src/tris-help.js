@@ -94,7 +94,7 @@ export async function	getUsernameById(userId)
 
 export function	calculateElo(win, loss)
 {
-	let	elo = (100 * win) - (50 * loss);
+	let	elo = (process.env.EARNED_WIN_POINTS * win) - (process.env.LOST_LOSS_POINTS * loss);
 
 	if (elo < 0)
 		elo = 0;
@@ -142,4 +142,33 @@ export function	checkWin(board)
 export function	sleep(ms)
 {
 	return (new Promise(resolve => setTimeout(resolve, ms)));
+}
+
+export async function	checkBlock(userA, userB)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/check-block?userA=${userA}&userB=${userB}`,
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to check block status between ${userA} and ${userB}: ${response.statusText}`);
+			return (false);
+		}
+
+		const	data = await response.json();
+		return (data.isBlocked);
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error checking block status:', err.message);
+		return (false);
+	}
 }

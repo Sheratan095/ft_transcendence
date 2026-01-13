@@ -43,3 +43,6 @@ VALUES ('3', 'test3', 'en', CURRENT_TIMESTAMP, NULL);
 
 INSERT INTO user_relationships (requester_id, target_id, relationship_status, created_at, updated_at)
 VALUES ('1', '2', 'accepted', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+INSERT INTO user_relationships (requester_id, target_id, relationship_status, created_at, updated_at)
+VALUES ('2', '3', 'blocked', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
