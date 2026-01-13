@@ -76,6 +76,8 @@ const	Match =
 		id: { type: 'string' },
 		playerXId: { type: 'string' },
 		playerOId: { type: 'string' },
+		playerXUsername: { type: 'string' },
+		playerOUsername: { type: 'string' },
 		winnerId: { type: 'string'},
 		endedAt: { type: 'string', format: 'date-time' }
 	}

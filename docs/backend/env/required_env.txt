@@ -60,6 +60,7 @@ services/pong:
     WIN_TARGET_POINTS=11
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
+    PLACEHOLDER_DELETED_USERNAMES=Anonymous player
 
 services/tris:
     INTERNAL_API_KEY=1234
@@ -72,3 +73,4 @@ services/tris:
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
+    PLACEHOLDER_DELETED_USERNAMES=Anonymous player

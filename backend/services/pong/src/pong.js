@@ -11,7 +11,7 @@ await fastify.register(fastifyWebsocket);
 
 import { checkEnvVariables } from './pong-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'NOTIFICATION_SERVICE_URL', 'USERS_SERVICE_URL', 'PONG_WIN_SCORE', 'COOLDOWN_MS',
-	'MATCHMAKING_IGNORE_BLOCKS', 'WIN_TARGET_POINTS', 'EARNED_WIN_POINTS' ,'LOST_LOSS_POINTS'] );
+	'MATCHMAKING_IGNORE_BLOCKS', 'WIN_TARGET_POINTS', 'EARNED_WIN_POINTS' ,'LOST_LOSS_POINTS', 'PLACEHOLDER_DELETED_USERNAMES'] );
 
 import { PongDatabase } from './pong-db.js';
 let		pongDatabase;
