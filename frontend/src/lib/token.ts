@@ -19,7 +19,7 @@ export async function refreshAccessToken(): Promise<boolean> {
   isRefreshing = true;
 
   try {
-    const res = await fetch(`/auth/token`, {
+    const res = await fetch(`api/auth/token`, {
       method: 'POST',
       credentials: 'include',
       headers: {
