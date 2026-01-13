@@ -131,10 +131,10 @@ export async function	token(request, reply)
 {
 	try
 	{
-		const	response = await axios.post(`${AUTH_SERVICE_URL}/token`, request.body, {
+		const	response = await axios.post(`${AUTH_SERVICE_URL}/token`, {}, {
 			headers: {
 					...getAuthHeaders(request),
-					cookie: request.headers.cookie
+					Cookie: request.headers.cookie
 				},
 			withCredentials: true
 		});
