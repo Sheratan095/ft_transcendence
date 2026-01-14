@@ -1,5 +1,5 @@
 import { pongConnectionManager } from './PongConnectionManager.js';
-import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision, calculateBallComponents } from './pong-physics.js';
+import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision, calculateBallPosition } from './pong-physics.js';
 
 export const	GameStatus =
 {
@@ -138,18 +138,20 @@ export class	GameInstance
 
 		// Broadcast game state every few frames (reduce network traffic)
 		//	now its EVERY 2 FRAMES
-		if (Math.floor(now / this.frameInterval) % 50 === 0)
+		if (Math.floor(now / this.frameInterval) % 2 === 0)
+		{
 			this._broadcastGameState();
+			console.log(this.gameState.ball);	
+		}
 	}
 
 	_updateBallPosition(deltaTime)
 	{
 		const	ball = this.gameState.ball;
-		const	newComponents = calculateBallComponents(ball, 0);
 		
-		// Update ball position
-		ball.x += newComponents.newVx;
-		ball.y += newComponents.newVy;
+		// Update ball position directly with velocity
+		ball.x += ball.vx;
+		ball.y += ball.vy;
 
 		// Ball collision with top and bottom walls
 		if (ball.y <= this.BALL_RADIUS || ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS)
@@ -163,7 +165,7 @@ export class	GameInstance
 		const	rightPaddle = this.gameState.paddles[this.playerRightId];
 
 		// Left paddle collision
-		if (ball.x <= leftPaddle.x + leftPaddle.width + this.BALL_RADIUS &&
+		if (ball.x <= leftPaddle.x + this.BALL_RADIUS &&
 			ball.y >= leftPaddle.y &&
 			ball.y <= leftPaddle.y + leftPaddle.height &&
 			ball.vx < 0)
@@ -290,8 +292,8 @@ export class	GameInstance
 			finalScores: this.scores
 		};
 
-		pongConnectionManager.sendGameEnd(this.playerLeftId, gameEndData);
-		pongConnectionManager.sendGameEnd(this.playerRightId, gameEndData);
+		pongConnectionManager.sendGameEnded(this.playerLeftId, gameEndData);
+		pongConnectionManager.sendGameEnded(this.playerRightId, gameEndData);
 	}
 
 	// Cleanup method

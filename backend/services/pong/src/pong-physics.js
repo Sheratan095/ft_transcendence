@@ -1,7 +1,7 @@
 
 export function	initGameState(playerLeftId, playerRightId)
 {
-	const	ballComponents = generateStartingBallComponents(parseFloat(process.env.INITIAL_BALL_SPEED));
+	const	ballComponents = generateStartingBallComponents(parseFloat(process.env.BALL_INITIAL_SPEED));
 
 	const gameState =
 	{
@@ -11,7 +11,7 @@ export function	initGameState(playerLeftId, playerRightId)
 			y: 0.5, // Middle of canvas
 			vx: ballComponents.newVx,
 			vy: ballComponents.newVy,
-			speed: parseFloat(process.env.INITIAL_BALL_SPEED)
+			speed: parseFloat(process.env.BALL_INITIAL_SPEED)
 		},
 		paddles:
 		{
@@ -33,16 +33,12 @@ export function	initGameState(playerLeftId, playerRightId)
 	return (gameState);
 }
 
-// Direction: 1 = right, -1 = left
-export function	calculateBallComponents(ball, angleDegrees)
+export function	calculateBallPosition(ball, deltaTime)
 {
-	const	direction = ball.vx > 0 ? 1 : -1;
-	const	theta = Math.atan2(ball.vy, ball.vx) * angleDegrees;
-
-	ball.vx = direction * ball.speed * Math.cos(theta);
-	ball.vy	 = ball.speed * Math.sin(theta);
+	const	ballNewX = ball.vx * deltaTime;
+	const	ballNewY = ball.vy * deltaTime;
 	
-	return (ball);
+	return ({ newX: ballNewX, newY: ballNewY });
 }
 
 export function	randomInitialBallComponents()
@@ -95,8 +91,10 @@ export function	generateStartingBallComponents(initialSpeed)
 
 	const	theta = (angleDegrees * Math.PI) / 180; // Convert to radians
 
-	const	vx = direction * initialSpeed * Math.cos(theta);
-	const	vy = initialSpeed * Math.sin(theta);
+	// Scale speed for 60 FPS (divide by 60 to get per-frame velocity)
+	const	frameSpeed = (initialSpeed || 0.01) / 60;
+	const	vx = direction * frameSpeed * Math.cos(theta);
+	const	vy = frameSpeed * Math.sin(theta);
 
 	return ({ newVx: vx, newVy: vy });
 }
