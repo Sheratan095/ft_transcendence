@@ -12,7 +12,7 @@ await fastify.register(fastifyWebsocket);
 import { checkEnvVariables } from './pong-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'NOTIFICATION_SERVICE_URL', 'USERS_SERVICE_URL', 'PONG_WIN_SCORE', 'COOLDOWN_MS',
 	'MATCHMAKING_IGNORE_BLOCKS', 'WINNING_SCORE', 'EARNED_WIN_POINTS' ,'LOST_LOSS_POINTS', 'PLACEHOLDER_DELETED_USERNAMES',
-	'PADDLE_HEIGHT'] );
+	'COLLDOWN_BETWEEN_POINTS_MS', 'PADDLE_HEIGHT', 'PADDLE_SPEED', 'MAX_BOUNCE_ANGLE', 'BALL_RADIUS', 'BALL_INITIAL_SPEED', 'BALL_SPEED_FACTOR'] );
 
 import { PongDatabase } from './pong-db.js';
 let		pongDatabase;

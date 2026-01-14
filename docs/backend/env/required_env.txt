@@ -57,11 +57,17 @@ services/pong:
     PONG_WIN_SCORE = 10
     COOLDOWN_MS = 30000
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
-    WIN_TARGET_POINTS=11
+    WINNING_SCORE=11
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
     PLACEHOLDER_DELETED_USERNAMES=Anonymous player
-    PADDLE_HEIGHT=0.5 # Height of the paddle in % of the game area height
+    COLLDOWN_BETWEEN_POINTS_MS=3000 # Time between points in milliseconds
+    PADDLE_HEIGHT=0.3 # Height of the paddle respective to the game area (0.5 = half the game area)
+    PADDLE_SPEED=0.03 # Speed of the paddle respective to the game area per frame (0.1 = 10% of the game area per frame)
+    MAX_BOUNCE_ANGLE=60 # Maximum angle (in degrees) for ball deflection upon paddle hit
+    BALL_RADIUS=0.02 # Radius of the ball respective to the game area (0.02 = 2% of the game area)
+    BALL_INITIAL_SPEED=15 # Initial speed of the ball respective to the game area per frame (0.03 = 3% of the game area per frame)
+    BALL_SPEED_FACTOR=1.1 # Factor by which the ball speed increases after each paddle hit
 
 services/tris:
     INTERNAL_API_KEY=1234
