@@ -141,14 +141,14 @@ export class	GameInstance
 		if (Math.floor(now / this.frameInterval) % 2 === 0)
 		{
 			this._broadcastGameState();
-			console.log(this.gameState.ball);	
+			// console.log(this.gameState.ball);	
 		}
 	}
 
 	_updateBallPosition(deltaTime)
 	{
-		const	ball = this.gameState.ball;
-		
+		let	ball = this.gameState.ball;
+
 		// Update ball position directly with velocity
 		ball.x += ball.vx;
 		ball.y += ball.vy;
@@ -160,7 +160,7 @@ export class	GameInstance
 
 	_checkCollisions()
 	{
-		const	ball = this.gameState.ball;
+		let		ball = this.gameState.ball;
 		const	leftPaddle = this.gameState.paddles[this.playerLeftId];
 		const	rightPaddle = this.gameState.paddles[this.playerRightId];
 
@@ -170,7 +170,7 @@ export class	GameInstance
 			ball.y <= leftPaddle.y + leftPaddle.height &&
 			ball.vx < 0)
 		{
-			elaboratePaddleCollision(ball, leftPaddle, -1);
+			ball = elaboratePaddleCollision(ball, leftPaddle, +1);
 		}
 
 		// Right paddle collision
@@ -179,7 +179,7 @@ export class	GameInstance
 			ball.y <= rightPaddle.y + rightPaddle.height &&
 			ball.vx > 0)
 		{
-			elaboratePaddleCollision(ball, rightPaddle, 1);
+			ball = elaboratePaddleCollision(ball, rightPaddle, -1);
 		}
 
 	}
@@ -193,7 +193,7 @@ export class	GameInstance
 		{
 			this.scores[this.playerLeftId]++;
 			this._broadcastScore(this.playerLeftId);
-			this._resetBall();
+			this._resetGameState();
 			
 			if (this.scores[this.playerLeftId] >= this.WINNING_SCORE)
 				this._endGame(this.playerLeftId);
@@ -203,21 +203,16 @@ export class	GameInstance
 		{
 			this.scores[this.playerRightId]++;
 			this._broadcastScore(this.playerRightId);
-			this._resetBall();
+			this._resetGameState();
 			
 			if (this.scores[this.playerRightId] >= this.WINNING_SCORE)
 				this._endGame(this.playerRightId);
 		}
 	}
 
-	_resetBall()
+	_resetGameState()
 	{
-		const	ball = this.gameState.ball;
-		ball.x = this.CANVAS_WIDTH / 2;
-		ball.y = this.CANVAS_HEIGHT / 2;
-		ball.vx = Math.random() > 0.5 ? 3 : -3;
-		ball.vy = Math.random() * 2 - 1;
-		ball.speed = 3;
+		this.gameState = initGameState(this.playerLeftId, this.playerRightId);
 	}
 
 	_endGame(winnerId)

@@ -66,17 +66,20 @@ export function	movePaddle(startingY, direction)
 	}
 }
 
-export function	elaboratePaddleCollision(paddle, ball, direction)
+export function	elaboratePaddleCollision(ball, paddle, direction)
 {
-	ball.vx = -ball.vx;
-	ball.x = paddle.x - parseFloat(process.env.BALL_RADIUS);
-	
-	// Add some spin based on where the ball hit the paddle
-	const	hitPos = (ball.y - paddle.y) / paddle.height - 0.5;
-	ball.vy += hitPos * 2;
-	
-	// Increase speed slightly
-	// ball.speed = Math.min(ball.speed * 1.05, 8);
+	// Map hit position from -1 (top) to +1 (bottom)
+	const	deltaYHitNorm = (ball.y - paddle.y) / paddle.height;
+	const	clampedDeltaY = clamp(deltaYHitNorm, -1, 1); // Prevent extreme angles
+	const	maxBounceAngle = parseFloat(process.env.MAX_BOUNCE_ANGLE) || 60; // Max 60 degrees
+	const	bounceAngle = clampedDeltaY * maxBounceAngle;
+
+	const	{ vx, vy } = calculateBallComponents(ball.speed, bounceAngle, direction);
+
+	ball.vx = vx;
+	ball.vy = vy;
+
+	return (ball);
 }
 
 export function	elaborateWallCollision(ball)
@@ -89,12 +92,29 @@ export function	generateStartingBallComponents(initialSpeed)
 	const	angleDegrees = (Math.random() * 120) - 60; // Random angle between -60 and +60 degrees
 	const	direction = Math.random() < 0.5 ? -1 : 1; // Randomly left or right
 
+	const	{ vx, vy } = calculateBallComponents(initialSpeed, angleDegrees, direction);
+
+	return ({ newVx: vx, newVy: vy });
+}
+
+export function	calculateBallComponents(speed, angleDegrees, direction)
+{
 	const	theta = (angleDegrees * Math.PI) / 180; // Convert to radians
 
 	// Scale speed for 60 FPS (divide by 60 to get per-frame velocity)
-	const	frameSpeed = (initialSpeed || 0.01) / 60;
+	const	frameSpeed = (speed || 0.01) / 60;
+
 	const	vx = direction * frameSpeed * Math.cos(theta);
 	const	vy = frameSpeed * Math.sin(theta);
 
-	return ({ newVx: vx, newVy: vy });
+	return ({ vx, vy });
+}
+
+export function	clamp(value, min, max)
+{
+	if (value < min)
+		return (min);
+	if (value > max)
+		return (max);
+	return (value);
 }

@@ -763,7 +763,7 @@
                 if (paddle) {
                     const paddleX = paddle.x * canvas.width;
                     const paddleY = paddle.y * canvas.height;
-                    const paddleWidth = paddle.width * canvas.width;
+                    const paddleWidth = PADDLE_WIDTH; // Use local constant
                     const paddleHeight = paddle.height * canvas.height;
                     
                     // Determine if this is the player's paddle
