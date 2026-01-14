@@ -2,13 +2,14 @@
 export function	initGameState(playerLeftId, playerRightId)
 {
 	const	ballComponents = generateStartingBallComponents(parseFloat(process.env.BALL_INITIAL_SPEED));
+	const	paddleHeight = parseFloat(process.env.PADDLE_HEIGHT);
 
 	const gameState =
 	{
 		ball:
 		{
-			x: 0.5, // Middle of canvas
-			y: 0.5, // Middle of canvas
+			x: 0.5, // Middle of canvas orizontally
+			y: 0.5, // Middle of canvas vertically
 			vx: ballComponents.newVx,
 			vy: ballComponents.newVy,
 			speed: parseFloat(process.env.BALL_INITIAL_SPEED)
@@ -17,14 +18,14 @@ export function	initGameState(playerLeftId, playerRightId)
 		{
 			[playerLeftId]:
 			{
-				y: 0.5, // Middle of paddle area
-				height: parseFloat(process.env.PADDLE_HEIGHT),
+				y: 0.5 - paddleHeight / 2, // Center paddle on screen
+				height: paddleHeight,
 				x: 0 // Start of canvas
 			},
 			[playerRightId]:
 			{
-				y: 0.5,
-				height: parseFloat(process.env.PADDLE_HEIGHT),
+				y: 0.5 - paddleHeight / 2, // Center paddle on screen
+				height: paddleHeight,
 				x: 1 // End of canvas
 			}
 		}
@@ -69,7 +70,7 @@ export function	movePaddle(startingY, direction)
 export function	elaboratePaddleCollision(ball, paddle, direction)
 {
 	// Increase ball speed upon paddle hit
-	ball.speed *= parseFloat(process.env.BALL_SPEED_FACTOR) || 1.05;
+	ball.speed *= parseFloat(process.env.BALL_SPEED_FACTOR);
 
 	// Map hit position from -1 (top) to +1 (bottom)
 	const	deltaYHitNorm = (ball.y - paddle.y) / paddle.height;
