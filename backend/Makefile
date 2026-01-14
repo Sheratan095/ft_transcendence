@@ -200,7 +200,7 @@ logs:
 	@echo "=== Gateway Logs ==="  
 	@tail -f gateway/gateway.log 2>/dev/null || echo "No gateway logs found"
 
-# Help
+# HelpGetUser 5be11af4-4ae9-4b33-8b8d-a4df61b806a5 requested by 5be11af4-4ae9-4b33-8b8d-a4df61b806a5
 .PHONY: help
 help:
 	@echo "Available commands:"

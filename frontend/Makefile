@@ -56,7 +56,7 @@ typecheck:
 tailwind-watch:
 	@echo "=> Running Tailwind in watch mode:"
 	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT) --watch
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT)
 
 tailwind-build:
 	@echo "=> Building Tailwind CSS for production:"

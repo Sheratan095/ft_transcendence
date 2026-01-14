@@ -1,5 +1,6 @@
 import { openChatModal } from '../../lib/chat';
 import type { User } from '../../lib/auth';
+import { sendChatInvite } from '../../lib/chat';
 
 export interface SearchProfileCardOptions {
   onAddFriend?: (userId: string) => void;
@@ -91,7 +92,8 @@ export async function renderSearchProfileCard(
   chatBtn.addEventListener('click', () => {
     // Open chat with this user
     localStorage.setItem('chatUserId', user.id);
-    openChatModal();
+    sendChatInvite(user.id);
+    console.log('Chat invite sent to user:', user.id);
   });
   buttonsDiv.appendChild(chatBtn);
 
