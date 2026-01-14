@@ -1,4 +1,5 @@
 import { pongConnectionManager } from './PongConnectionManager.js';
+import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision } from './pong-physics.js';
 
 export const	GameStatus =
 {
@@ -43,41 +44,14 @@ export class	GameInstance
 		};
 
 		// Game physics state
-		this.gameState =
-		{
-			ball:
-			{
-				x: 400, // Middle of 800px canvas
-				y: 200, // Middle of 400px canvas
-				vx: Math.random() > 0.5 ? 3 : -3, // Random initial direction
-				vy: Math.random() * 2 - 1, // Random Y velocity
-				speed: 3
-			},
-			paddles:
-			{
-				[playerLeftId]:
-				{
-					y: 150, // Middle of paddle area
-					height: 100,
-					width: 10,
-					x: 10
-				},
-				[playerRightId]:
-				{
-					y: 150,
-					height: 100,
-					width: 10,
-					x: 780
-				}
-			}
-		};
+		this.gameState = initGameState();
 
 		// Game constants
-		this.CANVAS_WIDTH = 800;
-		this.CANVAS_HEIGHT = 400;
-		this.WINNING_SCORE = 5;
-		this.PADDLE_SPEED = 5;
-		this.BALL_RADIUS = 10;
+		this.CANVAS_WIDTH = 1;
+		this.CANVAS_HEIGHT = 1;
+		this.WINNING_SCORE = parseInt(process.env.WIN_TARGET_POINTS);
+		this.PADDLE_SPEED = parseFloat(process.env.PADDLE_SPEED);
+		this.BALL_RADIUS = parseFloat(process.env.BALL_RADIUS);
 
 		// Game loop control
 		this.gameLoop = null;
@@ -97,23 +71,14 @@ export class	GameInstance
 	processMove(playerId, direction)
 	{
 		const	paddle = this.gameState.paddles[playerId];
-		if (!paddle) return;
+		if (!paddle)
+			return;
 
-		// Update paddle position based on direction
-		switch (direction)
-		{
-			case 'up':
-				paddle.y = Math.max(0, paddle.y - this.PADDLE_SPEED);
-				break;
-
-			case 'down':
-				paddle.y = Math.min(this.CANVAS_HEIGHT - paddle.height, paddle.y + this.PADDLE_SPEED);
-				break;
-
-				default:
-				console.error(`[PONG] Invalid direction: ${direction}`);
-				return;
-		}
+		const	newY = movePaddle(paddle.y, direction);
+		if (newY === null)
+			return;
+		
+		paddle.y = newY;
 
 		// Broadcast paddle position to both players
 		this._broadcastPaddleMove(playerId, paddle.y);
@@ -127,9 +92,11 @@ export class	GameInstance
 	// Game loop methods
 	_startGameLoop()
 	{
+		// Clear any existing game loop, in case of restart/pause
 		if (this.gameLoop)
 			clearInterval(this.gameLoop);
 
+		// Every frameInterval milliseconds, update the game state
 		this.gameLoop = setInterval(() =>
 		{
 			this._updateGameState();
@@ -138,6 +105,7 @@ export class	GameInstance
 
 	_stopGameLoop()
 	{
+		// Clear the game loop interval
 		if (this.gameLoop)
 		{
 			clearInterval(this.gameLoop);
@@ -147,12 +115,14 @@ export class	GameInstance
 
 	_updateGameState()
 	{
+		// If the game is not in progress, stop the loop
 		if (this.gameStatus !== GameStatus.IN_PROGRESS)
 		{
 			this._stopGameLoop();
 			return;
 		}
 
+		// Retrieve delta time since last update
 		const	now = Date.now();
 		const	deltaTime = (now - this.lastUpdateTime) / 1000; // Convert to seconds
 		this.lastUpdateTime = now;
@@ -167,6 +137,7 @@ export class	GameInstance
 		this._checkScoring();
 
 		// Broadcast game state every few frames (reduce network traffic)
+		//	now its EVERY 2 FRAMES
 		if (Math.floor(now / this.frameInterval) % 2 === 0)
 			this._broadcastGameState();
 	}
@@ -174,17 +145,15 @@ export class	GameInstance
 	_updateBallPosition(deltaTime)
 	{
 		const	ball = this.gameState.ball;
+		const	newComponents = calculateBallComponents(ball, 0);
 		
 		// Update ball position
-		ball.x += ball.vx * ball.speed * (deltaTime * 60); // Normalize to 60 FPS
-		ball.y += ball.vy * ball.speed * (deltaTime * 60);
+		ball.x += newComponents.newVx;
+		ball.y += newComponents.newVy;
 
 		// Ball collision with top and bottom walls
 		if (ball.y <= this.BALL_RADIUS || ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS)
-		{
-			ball.vy = -ball.vy;
-			ball.y = Math.max(this.BALL_RADIUS, Math.min(this.CANVAS_HEIGHT - this.BALL_RADIUS, ball.y));
-		}
+			elaborateWallCollision(ball);
 	}
 
 	_checkCollisions()
@@ -199,16 +168,7 @@ export class	GameInstance
 			ball.y <= leftPaddle.y + leftPaddle.height &&
 			ball.vx < 0)
 		{
-			
-			ball.vx = -ball.vx;
-			ball.x = leftPaddle.x + leftPaddle.width + this.BALL_RADIUS;
-			
-			// Add some spin based on where the ball hit the paddle
-			const	hitPos = (ball.y - leftPaddle.y) / leftPaddle.height - 0.5;
-			ball.vy += hitPos * 2;
-			
-			// Increase speed slightly
-			ball.speed = Math.min(ball.speed * 1.05, 8);
+			elaboratePaddleCollision(ball, leftPaddle, -1);
 		}
 
 		// Right paddle collision
@@ -217,17 +177,9 @@ export class	GameInstance
 			ball.y <= rightPaddle.y + rightPaddle.height &&
 			ball.vx > 0)
 		{
-			
-			ball.vx = -ball.vx;
-			ball.x = rightPaddle.x - this.BALL_RADIUS;
-			
-			// Add some spin based on where the ball hit the paddle
-			const	hitPos = (ball.y - rightPaddle.y) / rightPaddle.height - 0.5;
-			ball.vy += hitPos * 2;
-			
-			// Increase speed slightly
-			ball.speed = Math.min(ball.speed * 1.05, 8);
+			elaboratePaddleCollision(ball, rightPaddle, 1);
 		}
+
 	}
 
 	_checkScoring()

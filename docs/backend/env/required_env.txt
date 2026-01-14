@@ -61,6 +61,7 @@ services/pong:
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
     PLACEHOLDER_DELETED_USERNAMES=Anonymous player
+    PADDLE_HEIGHT=0.5 # Height of the paddle in % of the game area height
 
 services/tris:
     INTERNAL_API_KEY=1234
