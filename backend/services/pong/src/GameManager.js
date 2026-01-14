@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { pongConnectionManager } from './PongConnectionManager.js';
-import { sendGameInviteNotification, getUsernameById, sleep } from './pong-help.js';
+import { sendGameInviteNotification, getUsernameById, sleep, checkBlock } from './pong-help.js';
 import { pongDatabase as pongDb } from './pong.js';
 
 class	GameManager
@@ -34,8 +34,8 @@ class	GameManager
 		// Can't create a game with a player who blocked you or whom you blocked
 		if (await checkBlock(creatorId, otherId))
 		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with this user');
+			console.error(`[PONG] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
+			pongConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with this user');
 			return ;
 		}
 

@@ -149,30 +149,6 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.gameStarted', data);
 	}
 
-	// Used to notify both players of a move made
-	async	sendMoveMade(playerId, moveMakerId, gameId, symbol, position, removedPosition = null)
-	{
-		const	socket = this._connections.get(playerId);
-
-		const	data = {
-			gameId,
-			playerId: moveMakerId,
-			symbol,
-			position,
-			removedPosition,
-		};
-
-		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.moveMade', data);
-	}
-
-	async	sendInvalidMoveMessage(playerId, gameId, message)
-	{
-		const	socket = this._connections.get(playerId);
-		if (socket)
-			this.#dispatchEventToSocket(socket, 'tris.invalidMove', { gameId, message });
-	}
-
 	async	sendErrorMessage(userId, message)
 	{
 		const	socket = this._connections.get(userId);
