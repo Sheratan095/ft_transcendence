@@ -705,18 +705,22 @@
             
             document.getElementById('gameTitle').textContent = resultText;
             
-            // Reset after a delay
+            // Immediately stop game - clear gameId to disable controls and clear game state
+            currentGameId = null;
+            playerSide = null;
+            gameState = {
+                ball: { x: 0.5, y: 0.5, vx: 0, vy: 0, speed: 0 },
+                paddles: {},
+                scores: {}
+            };
+            renderGame(); // Render cleared state immediately
+            updateUI();
+            
+            // Reset UI after a delay
             setTimeout(() => {
-                currentGameId = null;
-                playerSide = null;
                 opponentUsername = null;
-                gameState = {
-                    ball: { x: 0.5, y: 0.5, vx: 0, vy: 0, speed: 0 },
-                    paddles: {},
-                    scores: {}
-                };
+                document.getElementById('gameTitle').textContent = 'Ready to Play';
                 updateUI();
-                renderGame();
             }, 3000);
         }
 

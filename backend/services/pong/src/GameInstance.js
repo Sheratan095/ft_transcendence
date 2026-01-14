@@ -65,7 +65,6 @@ export class	GameInstance
 	{
 		this.gameStatus = GameStatus.IN_PROGRESS;
 		this._startGameLoop();
-		console.log(`[PONG] Game ${this.id} started between ${this.playerLeftUsername} and ${this.playerRightUsername}`);
 	}
 
 	processMove(playerId, direction)
@@ -105,7 +104,7 @@ export class	GameInstance
 		}, this.frameInterval);
 	}
 
-	_stopGameLoop()
+	stopGameLoop()
 	{
 		// Clear the game loop interval
 		if (this.gameLoop)
@@ -120,7 +119,7 @@ export class	GameInstance
 		// If the game is not in progress, stop the loop
 		if (this.gameStatus !== GameStatus.IN_PROGRESS)
 		{
-			this._stopGameLoop();
+			this.stopGameLoop();
 			return;
 		}
 
@@ -227,7 +226,7 @@ export class	GameInstance
 		this._updateGameState();
 
 		// Small delay before restarting next point
-		this._stopGameLoop();
+		this.stopGameLoop();
 
 		setTimeout(() => {
 			this.lastUpdateTime = Date.now();
@@ -238,7 +237,7 @@ export class	GameInstance
 	_endGame(winnerId)
 	{
 		this.gameStatus = GameStatus.FINISHED;
-		this._stopGameLoop();
+		this.stopGameLoop();
 
 		const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
@@ -292,7 +291,6 @@ export class	GameInstance
 	// Cleanup method
 	destroy()
 	{
-		this._stopGameLoop();
-		console.log(`[PONG] Game instance ${this.id} destroyed`);
+		this.stopGameLoop();
 	}
 }

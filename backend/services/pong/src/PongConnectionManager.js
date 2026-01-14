@@ -90,7 +90,7 @@ class	PongConnectionManager
 		const	data =
 		{
 			gameId: gameId,
-			winnerId: winner,
+			winner: winner,
 			winnerUsername: winnerUsername,
 			quit: quit,
 		};
