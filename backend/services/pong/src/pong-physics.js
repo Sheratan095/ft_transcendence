@@ -1,9 +1,9 @@
 
-export function	initGameState()
+export function	initGameState(playerLeftId, playerRightId)
 {
 	const	ballComponents = generateStartingBallComponents(parseFloat(process.env.INITIAL_BALL_SPEED));
 
-	gameState =
+	const gameState =
 	{
 		ball:
 		{

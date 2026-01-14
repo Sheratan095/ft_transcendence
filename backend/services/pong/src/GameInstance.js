@@ -1,5 +1,5 @@
 import { pongConnectionManager } from './PongConnectionManager.js';
-import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision } from './pong-physics.js';
+import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision, calculateBallComponents } from './pong-physics.js';
 
 export const	GameStatus =
 {
@@ -44,7 +44,7 @@ export class	GameInstance
 		};
 
 		// Game physics state
-		this.gameState = initGameState();
+		this.gameState = initGameState(playerLeftId, playerRightId);
 
 		// Game constants
 		this.CANVAS_WIDTH = 1;
