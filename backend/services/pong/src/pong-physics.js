@@ -68,6 +68,9 @@ export function	movePaddle(startingY, direction)
 
 export function	elaboratePaddleCollision(ball, paddle, direction)
 {
+	// Increase ball speed upon paddle hit
+	ball.speed *= parseFloat(process.env.BALL_SPEED_FACTOR) || 1.05;
+
 	// Map hit position from -1 (top) to +1 (bottom)
 	const	deltaYHitNorm = (ball.y - paddle.y) / paddle.height;
 	const	clampedDeltaY = clamp(deltaYHitNorm, -1, 1); // Prevent extreme angles

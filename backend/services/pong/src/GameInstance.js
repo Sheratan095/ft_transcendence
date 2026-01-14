@@ -150,8 +150,8 @@ export class	GameInstance
 		let	ball = this.gameState.ball;
 
 		// Update ball position directly with velocity
-		ball.x += ball.vx;
-		ball.y += ball.vy;
+		ball.x += ball.vx * deltaTime;
+		ball.y += ball.vy * deltaTime;
 
 		// Ball collision with top and bottom walls
 		if (ball.y <= this.BALL_RADIUS || ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS)
