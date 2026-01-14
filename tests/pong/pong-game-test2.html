@@ -703,8 +703,6 @@
             const resultText = isWinner ? '🎉 YOU WON!' : '😢 You Lost';
             log(`${resultText} ${data.quit ? '(opponent quit)' : ''}`, isWinner ? 'success' : 'warn');
             
-            document.getElementById('gameTitle').textContent = resultText;
-            
             // Immediately stop game - clear gameId to disable controls and clear game state
             currentGameId = null;
             playerSide = null;
@@ -714,7 +712,9 @@
                 scores: {}
             };
             renderGame(); // Render cleared state immediately
-            updateUI();
+            
+            // Set title immediately (before updateUI so it doesn't get overwritten)
+            document.getElementById('gameTitle').textContent = resultText;
             
             // Reset UI after a delay
             setTimeout(() => {

@@ -194,16 +194,20 @@ class	GameManager
 			return ;
 		}
 
+		// Immediately set status to FINISHED and stop the game loop
+		// This prevents any further game state updates from being sent
+		const originalStatus = gameInstance.gameStatus;
+		gameInstance.gameStatus = GameStatus.FINISHED;
 		gameInstance.stopGameLoop();
 
 		const	otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
 		// If the match is IN_PROGRESS (started), the other player wins
-		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
+		if (originalStatus === GameStatus.IN_PROGRESS)
 		{
 			const	winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
 			this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
 		}
-		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
+		else if (originalStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
 		{
 			// If the match is in LOBBY and is a CUSTOM game, quitting cancels the game for both players
 			console.log(`[PONG] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
@@ -214,7 +218,7 @@ class	GameManager
 			gameInstance.destroy();
 			this._games.delete(gameId);
 		}
-		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.RANDOM)
+		else if (originalStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.RANDOM)
 		{
 			// If the match is in LOBBY and is a RANDOM game, quitting gives victory to the other player
 			console.log(`[PONG] Player ${playerId} quit game random game ${gameId}, game is canceled`);

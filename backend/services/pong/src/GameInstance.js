@@ -142,7 +142,7 @@ export class	GameInstance
 		if (Math.floor(now / this.frameInterval) % 2 === 0)
 		{
 			this._broadcastGameState();
-			// console.log(this.gameState.ball);	
+			// console.log(this.gameState.ball);
 		}
 	}
 
