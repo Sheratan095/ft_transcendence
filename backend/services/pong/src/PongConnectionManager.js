@@ -83,7 +83,7 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.playerQuitCustomGameInLobby', { gameId });
 	}
 
-	async	sendGameEnd(playerId, gameId, winner, quit)
+	async	sendGameEnded(playerId, gameId, winner, quit)
 	{
 		const	socket = this._connections.get(playerId);
 

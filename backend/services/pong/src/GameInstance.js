@@ -138,7 +138,7 @@ export class	GameInstance
 
 		// Broadcast game state every few frames (reduce network traffic)
 		//	now its EVERY 2 FRAMES
-		if (Math.floor(now / this.frameInterval) % 2 === 0)
+		if (Math.floor(now / this.frameInterval) % 50 === 0)
 			this._broadcastGameState();
 	}
 

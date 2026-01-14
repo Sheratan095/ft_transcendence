@@ -31,7 +31,7 @@ CREATE TABLE user_stats
 	games_played		INTEGER DEFAULT 0,
 	wins				INTEGER DEFAULT 0,
 	losses				INTEGER DEFAULT 0,
-	tournaments_wins	INTEGER DEFAULT 0
+	tournament_wins	INTEGER DEFAULT 0
 
 	-- FOREIGN KEY (user_id) REFERENCES users(id)
 );
