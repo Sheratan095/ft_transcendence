@@ -96,6 +96,8 @@ export class	GameInstance
 		if (this.gameLoop)
 			clearInterval(this.gameLoop);
 
+		this._timerBeforeBallMove();
+
 		// Every frameInterval milliseconds, update the game state
 		this.gameLoop = setInterval(() =>
 		{
@@ -213,6 +215,24 @@ export class	GameInstance
 	_resetGameState()
 	{
 		this.gameState = initGameState(this.playerLeftId, this.playerRightId);
+
+		this._timerBeforeBallMove();
+	}
+
+	_timerBeforeBallMove()
+	{
+		// Update once to set ball position
+		this._updateGameState();
+		this._updateGameState();
+		this._updateGameState();
+
+		// Small delay before restarting next point
+		this._stopGameLoop();
+
+		setTimeout(() => {
+			this.lastUpdateTime = Date.now();
+			this._startGameLoop();
+		}, parseInt(process.env.COLLDOWN_BETWEEN_POINTS_MS));
 	}
 
 	_endGame(winnerId)
