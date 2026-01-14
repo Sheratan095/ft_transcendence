@@ -196,7 +196,8 @@ class	GameManager
 		// If the match is IN_PROGRESS (started), the other player wins
 		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
 		{
-			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
+			const	winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+			this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
 		}
 		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
 		{
@@ -213,7 +214,8 @@ class	GameManager
 			// If the match is in LOBBY and is a RANDOM game, quitting gives victory to the other player
 			console.log(`[PONG] Player ${playerId} quit game random game ${gameId}, game is canceled`);
 
-			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
+			const	winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+			this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
 		}
 	}
 
@@ -416,8 +418,8 @@ class	GameManager
 		this._games.set(gameId, gameInstance);
 
 		// Notify both players that they have been matched
-		pongConnectionManager.notifyMatchedInRandomGame(playerLeftId, gameId, 'LEFT', playerRightUsername);
-		pongConnectionManager.notifyMatchedInRandomGame(playerRightId, gameId, 'RIGHT', playerLeftUsername);
+		pongConnectionManager.notifyMatchedInRandomGame(playerLeftId, gameId, playerRightUsername, 'LEFT');
+		pongConnectionManager.notifyMatchedInRandomGame(playerRightId, gameId, playerLeftUsername, 'RIGHT');
 
 		console.log(`[PONG] Matched players ${playerLeftId} and ${playerRightId} in random game ${gameId}`);
 
@@ -456,11 +458,11 @@ class	GameManager
 	}
 
 	// Both user must be specified by input, can't be calculated from gameInstance because winner and loser depends on quit
-	_gameEnd(gameInstance, winner, loser, quit)
+	_gameEnd(gameInstance, winner, loser, winnerUsername, quit)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side
-		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, quit);
-		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, quit);
+		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, winnerUsername, quit);
+		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, winnerUsername, quit);
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{

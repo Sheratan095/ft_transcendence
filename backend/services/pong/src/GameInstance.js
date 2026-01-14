@@ -1,3 +1,4 @@
+import { gameManager } from './GameManager.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
 import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision, calculateBallPosition } from './pong-physics.js';
 
@@ -64,7 +65,6 @@ export class	GameInstance
 	{
 		this.gameStatus = GameStatus.IN_PROGRESS;
 		this._startGameLoop();
-		this._broadcastGameStart();
 		console.log(`[PONG] Game ${this.id} started between ${this.playerLeftUsername} and ${this.playerRightUsername}`);
 	}
 
@@ -239,20 +239,13 @@ export class	GameInstance
 	{
 		this.gameStatus = GameStatus.FINISHED;
 		this._stopGameLoop();
-		
+
 		const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
 		
-		this._broadcastGameEnd(winnerId, loserId, winnerUsername);
+		gameManager._gameEnd(this, winnerId, loserId, winnerUsername, false);
 		
 		console.log(`[PONG] Game ${this.id} ended. Winner: ${winnerUsername}`);
-	}
-
-	// Communication methods
-	_broadcastGameStart()
-	{
-		pongConnectionManager.notifyGameStart(this.playerLeftId, this.id, 'left', this.playerRightUsername);
-		pongConnectionManager.notifyGameStart(this.playerRightId, this.id, 'right', this.playerLeftUsername);
 	}
 
 	_broadcastGameState()
@@ -294,21 +287,6 @@ export class	GameInstance
 
 		pongConnectionManager.sendScore(this.playerLeftId, scoreData);
 		pongConnectionManager.sendScore(this.playerRightId, scoreData);
-	}
-
-	_broadcastGameEnd(winnerId, loserId, winnerUsername)
-	{
-		const	gameEndData =
-		{
-			gameId: this.id,
-			winnerId: winnerId,
-			loserId: loserId,
-			winnerUsername: winnerUsername,
-			finalScores: this.scores
-		};
-
-		pongConnectionManager.sendGameEnded(this.playerLeftId, gameEndData);
-		pongConnectionManager.sendGameEnded(this.playerRightId, gameEndData);
 	}
 
 	// Cleanup method
