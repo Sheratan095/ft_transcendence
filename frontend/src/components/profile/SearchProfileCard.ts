@@ -91,7 +91,6 @@ export async function renderSearchProfileCard(
   chatBtn.textContent = '💬 Send Message';
   chatBtn.addEventListener('click', () => {
     // Open chat with this user
-    localStorage.setItem('chatUserId', user.id);
     sendChatInvite(user.id);
     console.log('Chat invite sent to user:', user.id);
   });
