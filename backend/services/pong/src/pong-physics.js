@@ -82,16 +82,14 @@ export function	elaboratePaddleCollision(ball, paddle, direction)
 
 export function	elaborateWallCollision(ball)
 {
-	const	ballRadius = parseFloat(process.env.BALL_RADIUS);
-
 	// Invert vertical velocity
 	ball.vy = -ball.vy;
 	
 	// Clamp ball position to stay within bounds
-	if (ball.y < ballRadius)
-		ball.y = ballRadius;
-	else if (ball.y > 1 - ballRadius)
-		ball.y = 1 - ballRadius;
+	if (ball.y < ball.radius)
+		ball.y = ball.radius;
+	else if (ball.y > 1 - ball.radius)
+		ball.y = 1 - ball.radius;
 }
 
 export function	generateStartingBallComponents(initialSpeed)
