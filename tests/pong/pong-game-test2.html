@@ -292,7 +292,6 @@
         const ctx = canvas.getContext('2d');
         
         // Rendering constants
-        const BALL_RADIUS = 8;
         const PADDLE_WIDTH = 15;
         const PADDLE_HEIGHT = 100;
 
@@ -744,41 +743,53 @@
             if (gameState.ball) {
                 const ballX = gameState.ball.x * canvas.width;
                 const ballY = gameState.ball.y * canvas.height;
+                const ballRadius = (gameState.ball.radius || 0.02) * canvas.width; // Use dynamic radius or fallback
                 
                 // Ball glow effect
-                const gradient = ctx.createRadialGradient(ballX, ballY, 0, ballX, ballY, BALL_RADIUS * 2);
+                const gradient = ctx.createRadialGradient(ballX, ballY, 0, ballX, ballY, ballRadius * 2);
                 gradient.addColorStop(0, '#ffffff');
                 gradient.addColorStop(0.5, '#00ff00');
                 gradient.addColorStop(1, 'rgba(0, 255, 0, 0)');
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
-                ctx.arc(ballX, ballY, BALL_RADIUS * 2, 0, 2 * Math.PI);
+                ctx.arc(ballX, ballY, ballRadius * 2, 0, 2 * Math.PI);
                 ctx.fill();
                 
                 // Ball solid
                 ctx.fillStyle = '#fff';
                 ctx.beginPath();
-                ctx.arc(ballX, ballY, BALL_RADIUS, 0, 2 * Math.PI);
+                ctx.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
                 ctx.fill();
             }
 
             // Draw paddles - convert from normalized to pixel coordinates
-            Object.entries(gameState.paddles).forEach(([playerId, paddle]) => {
+            Object.entries(gameState.paddles).forEach(([playerId, paddle], idx, arr) => {
                 if (paddle) {
-                    const paddleX = paddle.x * canvas.width;
+                    let paddleX = paddle.x * canvas.width;
                     const paddleY = paddle.y * canvas.height;
                     const paddleWidth = PADDLE_WIDTH; // Use local constant
                     const paddleHeight = paddle.height * canvas.height;
-                    
+
+                    // If there are two paddles, assume the rightmost one is the one with the highest x
+                    // and shift it left by paddleWidth so it is fully visible
+                    if (arr.length === 2) {
+                        // Find the max x value
+                        const xs = arr.map(([_, p]) => p && p.x || 0);
+                        const maxX = Math.max(...xs);
+                        if (paddle.x === maxX) {
+                            paddleX = paddleX - paddleWidth;
+                        }
+                    }
+
                     // Determine if this is the player's paddle
                     const isMyPaddle = playerId === currentUserId;
-                    
+
                     // Paddle glow
                     ctx.shadowBlur = 20;
                     ctx.shadowColor = isMyPaddle ? '#00ff00' : '#ff0000';
                     ctx.fillStyle = isMyPaddle ? '#00ff00' : '#ff0000';
                     ctx.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
-                    
+
                     // Reset shadow
                     ctx.shadowBlur = 0;
                 }

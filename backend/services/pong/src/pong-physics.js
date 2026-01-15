@@ -12,7 +12,8 @@ export function	initGameState(playerLeftId, playerRightId)
 			y: 0.5, // Middle of canvas vertically
 			vx: ballComponents.newVx,
 			vy: ballComponents.newVy,
-			speed: parseFloat(process.env.BALL_INITIAL_SPEED)
+			speed: parseFloat(process.env.BALL_INITIAL_SPEED),
+			radius: parseFloat(process.env.BALL_RADIUS)
 		},
 		paddles:
 		{

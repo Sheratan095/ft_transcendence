@@ -225,7 +225,8 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
       "y": 0.5,
       "vx": 3,
       "vy": 1,
-      "speed": 3
+      "speed": 3,
+      "radius": 0.02
     },
     "paddles": {
       "player1": { "x": 0.05, "y": 0.4, "width": 0.02, "height": 0.2 },

@@ -53,6 +53,7 @@ export class	GameInstance
 		this.WINNING_SCORE = parseInt(process.env.WINNING_SCORE);
 		this.PADDLE_SPEED = parseFloat(process.env.PADDLE_SPEED);
 		this.BALL_RADIUS = parseFloat(process.env.BALL_RADIUS);
+		this.COOLDOWN_BETWEEN_POINTS_MS = parseInt(process.env.COOLDOWN_BETWEEN_POINTS_MS);
 
 		// Game loop control
 		this.gameLoop = null;
@@ -220,10 +221,8 @@ export class	GameInstance
 
 	_timerBeforeBallMove()
 	{
-		// Update once to set ball position
-		this._updateGameState();
-		this._updateGameState();
-		this._updateGameState();
+		// Broadcast the reset game state without checking scoring
+		this._broadcastGameState();
 
 		// Small delay before restarting next point
 		this.stopGameLoop();
@@ -231,7 +230,7 @@ export class	GameInstance
 		setTimeout(() => {
 			this.lastUpdateTime = Date.now();
 			this._startGameLoop();
-		}, parseInt(process.env.COOLDOWN_BETWEEN_POINTS_MS));
+		}, this.COOLDOWN_BETWEEN_POINTS_MS);
 	}
 
 	_endGame(winnerId)
