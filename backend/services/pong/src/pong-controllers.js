@@ -1,4 +1,5 @@
-import { calculateElo } from './pong-help.js';
+import { calculateElo, extractUserData } from './pong-help.js';
+import { tournamentManager } from './TournamentManager.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -121,6 +122,23 @@ export const	getUserMatchHistory = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[PONG] Error in getUserMatchHistory controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	createTournament = async (req, reply) =>
+{
+	try
+	{
+		const	name = req.body.name;
+		const	creatorId = extractUserData(req).id;
+
+		// Create a new tournament
+		const	tournament = tournamentManager.createTournament(creatorId, name);
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in createTournament controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

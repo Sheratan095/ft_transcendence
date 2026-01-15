@@ -9,7 +9,8 @@ import {
 	createUserStats as createUserStatsHandler,
 	deleteUserStats as deleteUserStatsHandler,
 	getUserStats as getUserStatsHandler,
-	getUserMatchHistory as getUserMatchHistoryHandler
+	getUserMatchHistory as getUserMatchHistoryHandler,
+	createTournament as createTournamentHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -253,12 +254,10 @@ const	createTournament =
 		body:
 		{
 			type: 'object',
-			required: ['name', 'maxPlayers', 'startTime'],
+			required: ['name'],
 			properties:
 			{
 				name: { type: 'string' },
-				maxPlayers: { type: 'integer' },
-				startTime: { type: 'string', format: 'date-time' }
 			}
 		},
 
@@ -276,7 +275,9 @@ const	createTournament =
 			400: ErrorResponse,
 			500: ErrorResponse
 		}
-	}
+	},
+	preHandler: validateInternalApiKey,
+	handler: createTournamentHandler
 }
 
 export function	pongRoutes(fastify)
@@ -300,6 +301,7 @@ export function	pongRoutes(fastify)
 	fastify.get('/match-history', getUserMatchHistory);
 
 	fastify.post('/create-user-stats', createUserStats);
+	fastify.post('/create-tournament', createTournament);
 
 	fastify.delete('/delete-user-stats', deleteUserStats);
 
