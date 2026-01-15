@@ -7,19 +7,25 @@ export const	TournamentStatus =
 
 export class	TournamentInstance
 {
-	constructor(creatorId, name)
+	constructor(name, creatorId, creatorUsername)
 	{
 		this.id = generateUniqueId();
 		this.createdAt = new Date();
 
-		this.creatorId = creatorId;
 		this.name = name;
+
+		this.creatorId = creatorId;
+		this.creatorUsername = creatorUsername;
+		this.addParticipant(creatorId, creatorUsername);
 
 		this.status = TournamentStatus.WAITING;
 
-		this.participants = new Set();
+		this.participants = new Set(); // id of participants and usernames
 		this.matches = [];
 	}
+
+	addParticipant(userId, username)
+	{
+		this.participants.add({ id: userId, username: username });
+	}
 }
-
-

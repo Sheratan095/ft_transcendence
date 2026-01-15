@@ -1,0 +1,12 @@
+### Create a tournament
+
+POST https://localhost:3000/pong/create-tournament
+Content-Type: application/json
+
+{
+  "name": "name"
+}
+
+### Get all tournaments
+
+GET https://localhost:3000/pong/get-all-tournaments

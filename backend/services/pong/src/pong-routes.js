@@ -10,7 +10,8 @@ import {
 	deleteUserStats as deleteUserStatsHandler,
 	getUserStats as getUserStatsHandler,
 	getUserMatchHistory as getUserMatchHistoryHandler,
-	createTournament as createTournamentHandler
+	createTournament as createTournamentHandler,
+	getAllTournaments as getAllTournamentsHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -79,6 +80,20 @@ const	Match =
 		playerRightId: { type: 'string' },
 		winnerId: { type: 'string'},
 		endedAt: { type: 'string', format: 'date-time' }
+	}
+};
+
+const	TournamentInfo =
+{
+	type: 'object',
+	properties:
+	{
+		id: { type: 'string' },
+		name: { type: 'string' },
+		status: { type: 'string' },
+		createdAt: { type: 'string', format: 'date-time' },
+		creatorUsername: { type: 'string' },
+		participantCount: { type: 'integer' }
 	}
 };
 
@@ -280,6 +295,32 @@ const	createTournament =
 	handler: createTournamentHandler
 }
 
+const	getAllTournaments =
+{
+	schema:
+	{
+		summary: 'Get all tournaments',
+		description: 'Retrieve a list of all tournaments.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: TournamentInfo
+			},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getAllTournamentsHandler
+}
+
 export function	pongRoutes(fastify)
 {
 	// Actual WebSocket endpoint
@@ -299,6 +340,7 @@ export function	pongRoutes(fastify)
 
 	fastify.get('/stats', getUserStats);
 	fastify.get('/match-history', getUserMatchHistory);
+	fastify.get('/get-all-tournaments', getAllTournaments);
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.post('/create-tournament', createTournament);

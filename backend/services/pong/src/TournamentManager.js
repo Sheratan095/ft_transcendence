@@ -1,4 +1,5 @@
 import { TournamentInstance, TournamentStatus } from './TournamentIstance.js';
+import { pongConnectionManager } from './PongConnectionManager.js';
 
 class	TournamentManager
 {
@@ -7,17 +8,38 @@ class	TournamentManager
 		this._tournaments = new Map(); // tournamentId -> TournamentInstance
 	}
 	
-	createTournament(creatorId, name)
+	createTournament(name, creatorId, creatorUsername)
 	{
-		const	tournament = new TournamentInstance(creatorId, name);
+		// Create a new tournament instance
+		const	tournament = new TournamentInstance(name, creatorId, creatorUsername);
+	
+
+
 		this._tournaments.set(tournament.id, tournament);
+
+		pongConnectionManager.replyTournamentCreated(creatorId, name, tournament.id);
 
 		return (tournament);
 	}
 
 	getAllTournaments()
 	{
-		
+		// Map the tournaments to a simpler format
+		const	tournamentList = [];
+
+		for (let tournament of this._tournaments.values())
+		{
+			tournamentList.push({
+				id: tournament.id,
+				name: tournament.name,
+				status: tournament.status,
+				createdAt: tournament.createdAt,
+				creatorUsername: tournament.creatorUsername,
+				participantCount: tournament.participants.size,
+			});
+		}
+
+		return (tournamentList);
 	}
 }
 

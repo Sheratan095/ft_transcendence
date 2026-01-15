@@ -120,6 +120,19 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.score', scoreData);
 	}
 
+	async	replyTournamentCreated(creatorId, torunamentName, tournamentId)
+	{
+		const	socket = this._connections.get(creatorId);
+
+		const	data = {
+			"name": torunamentName,
+			tournamentId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentCreated', data);
+	}
+
 	async	notifyMatchedInRandomGame(playerId, gameId, opponentUsername, side)
 	{
 		const	socket = this._connections.get(playerId);
