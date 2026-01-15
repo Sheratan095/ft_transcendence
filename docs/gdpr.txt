@@ -33,14 +33,14 @@ TODO LIST - GDPR COMPLIANCE IMPLEMENTATION
 
 1. USER ANONYMIZATION
    [X] Create endpoint for user anonymization request (auth/delete-account)
-   [ ] Implement anonymization process that:
+   [X] Implement anonymization process that: => remove entirerly the account
        - Replaces username with "Anonymous User [ID]" or similar
        - Removes email address
        - Removes avatar/profile picture
        - Keeps game history but anonymizes user identity
        - Preserves game statistics for system integrity
    [ ] Add database migration for anonymized user flag
-   [ ] Test anonymization on all user-related tables (users, game_history, etc.)
+   [X] Test anonymization on all user-related tables (users, game_history, etc.)
    [ ] Removed chats
    [X] Ensure anonymized users cannot log in anymore
    [X] Add UI button/option for users to request anonymization
@@ -62,10 +62,10 @@ TODO LIST - GDPR COMPLIANCE IMPLEMENTATION
    [ ] Display what data is collected and why
 
 3. ACCOUNT DELETION
-   [ ] Create endpoint for account deletion request
+   [X] Create endpoint for account deletion request
    [ ] Implement soft delete vs hard delete options
    [ ] Add confirmation step (email verification or password re-entry)
-   [ ] Implement cascading deletion:
+   [X] Implement cascading deletion:
        - Remove user profile
        - Delete or anonymize game history
        - Remove chat messages or anonymize
@@ -73,8 +73,8 @@ TODO LIST - GDPR COMPLIANCE IMPLEMENTATION
        - Remove all user sessions/tokens
    [ ] Add grace period (e.g., 30 days) before permanent deletion
    [ ] Send confirmation email when account is deleted
-   [ ] Add UI for account deletion in settings
-   [ ] Test deletion process thoroughly
+   [X] Add UI for account deletion in settings
+   [X] Test deletion process thoroughly
 
 4. DATA PRIVACY RIGHTS & TRANSPARENCY
    [ ] Create Privacy Policy page with:
