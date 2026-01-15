@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
-    "intlayer": "^7.4.0"
+    "@vitejs/plugin-react": "^5.1.2",
+    "intlayer": "^7.4.0",
+    "react": "^19.2.3"
   }
 }

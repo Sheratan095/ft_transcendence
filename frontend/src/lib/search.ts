@@ -63,6 +63,10 @@ export async function renderSearchResult(user: SearchResult, container: HTMLElem
   // Clear container
   container.innerHTML = '';
 
+  // Create wrapper with back button
+  const wrapper = document.createElement('div');
+  wrapper.className = 'w-full';
+
   // Create back button
   const backBtn = document.createElement('button');
   backBtn.className = 'mb-6 px-4 py-2 bg-neutral-700 text-white font-semibold uppercase tracking-tight hover:bg-neutral-600 transition border-2 border-neutral-600';
@@ -70,13 +74,16 @@ export async function renderSearchResult(user: SearchResult, container: HTMLElem
   backBtn.addEventListener('click', () => {
     location.reload();
   });
-  container.appendChild(backBtn);
+  wrapper.appendChild(backBtn);
 
-  // Import and render profile card
-  const { renderProfileCard } = await import('../components/profile');
-  const cardEl = await renderProfileCard(user, container);
+  // Import and render custom search profile card
+  const { renderSearchProfileCard } = await import('../components/profile/SearchProfileCard');
+  const cardEl = await renderSearchProfileCard(user, wrapper);
 
   if (!cardEl) {
     container.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load user profile</div>';
+    return;
   }
+
+  container.appendChild(wrapper);
 }

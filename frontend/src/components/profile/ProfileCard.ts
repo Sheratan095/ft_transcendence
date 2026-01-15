@@ -123,7 +123,7 @@ export async function renderProfileCard(user: User, root: HTMLElement): Promise<
         await deleteAccout();
         localStorage.removeItem('userId');
         localStorage.removeItem('tfaEnabled');
-        window.location.reload();
+        //window.location.reload();
       } catch (err) {
         console.error('Delete account error:', err);
         alert('Failed to delete account');

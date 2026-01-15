@@ -26,7 +26,6 @@ export async function openChatModal() {
   if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
     connectChatWebSocket();
   }
-
   // Render chat list
   renderChatList();
 }
@@ -286,9 +285,10 @@ function escapeHtml(text: string): string {
 
 function connectChatWebSocket() {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = window.location.host;
+  const host = "localhost:3000";
   const wsUrl = `${protocol}//${host}/chat/ws`;
 
+  console.log('Connecting to chat WebSocket at', wsUrl);
   chatSocket = new WebSocket(wsUrl);
 
   chatSocket.addEventListener('open', () => {
@@ -382,8 +382,27 @@ function markChatAsRead(chatId: string) {
   }
 }
 
+export async function sendChatInvite(otherUserId: string) {
+  
+  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+    connectChatWebSocket();
+  }
+  if (!chatSocket) {
+    console.error('Chat WebSocket not connected');
+    return;
+  }
+  const message = {
+    event: 'chat.privateMessage',
+    data: { toUserId: otherUserId, content: 'This is the beginning of a wonderful conversation.' }
+  };
+
+  console.log('Sending chat invite:', message);
+  chatSocket.send(JSON.stringify(message));
+  chatSocket.close();
+}
+
 export function sendChatMessage(message: string) {
-  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN || !currentChatId) {
+  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
     console.error('Not connected to chat or no chat selected');
     return;
   }

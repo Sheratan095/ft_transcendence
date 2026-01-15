@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import tailwindcss from "@tailwindcss/vite";
 import { intlayer } from "vite-intlayer";
+import react from '@vitejs/plugin-react'
 
 import path from "path";
 import { toUSVString } from 'util';
@@ -32,6 +33,7 @@ export default defineConfig({
   },
   publicDir: 'public',
   plugins: [
+		react(),
 		tailwindcss(),
 		intlayer(),
 

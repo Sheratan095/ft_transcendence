@@ -1,4 +1,6 @@
 import type { User } from '../../lib/auth';
+import type { FriendsManager } from './FriendsManager';
+import { openChatModal } from '../../lib/chat';
 
 export interface UserCardOptions {
   showActions?: boolean;
@@ -7,6 +9,7 @@ export interface UserCardOptions {
   onBlock?: (userId: string) => void;
   onMessage?: (userId: string) => void;
   relationshipStatus?: 'friend' | 'pending' | 'blocked' | 'none';
+  friendsManager?: FriendsManager;
 }
 
 export interface UserCardCallbacks extends Omit<UserCardOptions, 'relationshipStatus'> {
@@ -20,7 +23,8 @@ export function createUserCard(user: User, options: UserCardOptions = {}): HTMLD
     onRemoveFriend,
     onBlock,
     onMessage,
-    relationshipStatus = 'none'
+    relationshipStatus = 'none',
+    friendsManager
   } = options;
 
   const card = document.createElement('div');
@@ -109,7 +113,11 @@ export function createUserCard(user: User, options: UserCardOptions = {}): HTMLD
       actionBtn.textContent = 'Remove';
       actionBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (onRemoveFriend) onRemoveFriend(user.id);
+        if (friendsManager) {
+          friendsManager.removeFriend(user.id);
+        } else if (onRemoveFriend) {
+          onRemoveFriend(user.id);
+        }
       });
     } else if (relationshipStatus === 'pending') {
       actionBtn.className = 'flex-1 px-3 py-1 text-xs font-medium bg-yellow-600/80 hover:bg-yellow-600 text-white rounded transition-colors cursor-not-allowed';
@@ -120,14 +128,22 @@ export function createUserCard(user: User, options: UserCardOptions = {}): HTMLD
       actionBtn.textContent = 'Unblock';
       actionBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (onRemoveFriend) onRemoveFriend(user.id);
+        if (friendsManager) {
+          friendsManager.unblockUser(user.id);
+        } else if (onRemoveFriend) {
+          onRemoveFriend(user.id);
+        }
       });
     } else {
       actionBtn.className = 'flex-1 px-3 py-1 text-xs font-medium bg-green-600/80 hover:bg-green-600 text-white rounded transition-colors';
       actionBtn.textContent = 'Add Friend';
       actionBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (onAddFriend) onAddFriend(user.id);
+        if (friendsManager) {
+          friendsManager.addFriend(user.id);
+        } else if (onAddFriend) {
+          onAddFriend(user.id);
+        }
       });
     }
     
@@ -140,7 +156,15 @@ export function createUserCard(user: User, options: UserCardOptions = {}): HTMLD
     blockBtn.title = relationshipStatus === 'blocked' ? 'Unblock user' : 'Block user';
     blockBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (onBlock) onBlock(user.id);
+      if (friendsManager) {
+        if (relationshipStatus === 'blocked') {
+          friendsManager.unblockUser(user.id);
+        } else {
+          friendsManager.blockUser(user.id);
+        }
+      } else if (onBlock) {
+        onBlock(user.id);
+      }
     });
     actionsDiv.appendChild(blockBtn);
 

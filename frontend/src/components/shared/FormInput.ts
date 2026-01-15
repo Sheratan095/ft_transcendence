@@ -7,7 +7,7 @@ export interface FormInputOptions {
   required?: boolean;
   inputMode?: string;
   maxLength?: number;
-  focusRingColor?: string; // e.g., '#0dff66', '#00ffff'
+  focusRingColor?: string;
 }
 
 export function createFormInput(options: FormInputOptions): { wrapper: HTMLDivElement; input: HTMLInputElement } {
