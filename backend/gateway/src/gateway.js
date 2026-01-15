@@ -187,7 +187,8 @@ import {
 	getMessages,
 	addUserToChat,
 	leaveGroupChat,
-	createGroupChat
+	createGroupChat,
+	createPrivateChat
 } from './routes/chat-routes.js'
 
 import {
@@ -308,6 +309,7 @@ await fastify.register(async function (fastify)
 	fastify.post('/chat/add-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
 	fastify.post('/chat/leave-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: leaveGroupChat })
 	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
+	fastify.post('/chat/start-private-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createPrivateChat })
 
 	// PONG routes
 	fastify.get('/pong/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsHandler })

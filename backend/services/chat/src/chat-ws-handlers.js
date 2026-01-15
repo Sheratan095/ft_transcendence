@@ -185,10 +185,17 @@ async function	handlePrivateMessage(userId, data, chatDb)
 			return;
 		}
 
+		// Check if a private chat between these users exists
+		let	chatId = await chatDb.getPrivateChatIdBetweenUsers(userId, toUserId);
+		if (chatId === null)
+		{
+			console.log(`[CHAT] No private chat exists between users ${userId} and ${toUserId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Private chat does not exist');
+			return;
+		}
+
 		const	timestamp = formatDate(new Date());
 
-		const	chatId = await chatDb.createPrivateChat(userId, toUserId, timestamp);
-		
 		// Store message in database
 		const	messageId = await chatDb.addMessageToChat(chatId, userId, content, timestamp);
 
