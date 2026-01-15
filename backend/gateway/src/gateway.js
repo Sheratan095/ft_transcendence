@@ -195,6 +195,13 @@ import {
 	getUserMatchHistoryRoute
 } from './routes/tris-routes.js'
 
+import {
+	getUserStats as getUserStatsHandler,
+	getUserMatchHistory as getUserMatchHistoryHandler,
+	getAllTournaments as getAllTournamentsHandler,
+	createTournament as createTournamentHandler,
+} from './routes/pong-routes.js'
+
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
 {
@@ -277,6 +284,7 @@ await fastify.register(async function (fastify)
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsers })
 	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUser })
 
+	// TRIS routes
 	fastify.get('/tris/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsRoute })
 	fastify.get('/tris/history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryRoute })
 	
@@ -300,6 +308,12 @@ await fastify.register(async function (fastify)
 	fastify.post('/chat/add-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
 	fastify.post('/chat/leave-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: leaveGroupChat })
 	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
+
+	// PONG routes
+	fastify.get('/pong/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsHandler })
+	fastify.get('/pong/match-history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryHandler })
+	fastify.get('/pong/get-all-tournaments', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllTournamentsHandler })
+	fastify.post('/pong/create-tournament', { schema: { hide: true }, preHandler: authenticateJwt, handler: createTournamentHandler })
 });
 
 // SEARCH route – tighter rate limit

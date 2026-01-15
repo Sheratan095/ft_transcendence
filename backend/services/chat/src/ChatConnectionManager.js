@@ -72,6 +72,7 @@ class	ChatConnectionManager
 		const	message = `User ${newUsername} has been added to the chat by ${invitedByUsername}.`;
 
 		const	messageId = await chatDb.addMessageToChat(chatId, null, message, timestamp, 'user_join');
+
 		const	data = {
 			event: 'userJoin',
 			chatId: chatId,

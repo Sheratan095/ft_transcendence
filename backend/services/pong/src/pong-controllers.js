@@ -1,4 +1,6 @@
-import { calculateElo } from './pong-help.js';
+import { calculateElo, extractUserData } from './pong-help.js';
+import { tournamentManager } from './TournamentManager.js';
+import { getUsernameById, sleep, checkBlock } from './pong-help.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -121,6 +123,70 @@ export const	getUserMatchHistory = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[PONG] Error in getUserMatchHistory controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	createTournament = async (req, reply) =>
+{
+	try
+	{
+		const	name = req.body.name;
+		const	creatorId = extractUserData(req).id;
+		console.log(`[PONG] User ${creatorId} is creating a tournament named "${name}"`);
+		const	creatorUsername = await getUsernameById(creatorId);
+		if (!creatorUsername)
+			return (reply.code(404).send({ error: 'Creator user not found' }));
+
+		// Create a new tournament
+		const	tournament = tournamentManager.createTournament(name, creatorId, creatorUsername);
+
+		return (reply.code(201).send({
+			tournamentId: tournament.id,
+			message: 'Tournament created successfully'
+		}));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in createTournament controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	getAllTournaments = async (req, reply) =>
+{
+	try
+	{
+		// Retrieve all tournaments
+		const	tournaments = tournamentManager.getAllTournaments();
+		
+		return (reply.code(200).send(tournaments));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in getAllTournaments controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	joinTournament = async (req, reply) =>
+{
+	try
+	{
+		const	tournamentId = req.body.tournamentId;
+		const	userId = extractUserData(req).id;
+		const	username = await getUsernameById(userId);
+		if (!username)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		// Add participant to the tournament
+		tournamentManager.addParticipant(tournamentId, userId, username);
+
+		return (reply.code(200).send({ message: 'Joined tournament successfully' }));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in joinTournament controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

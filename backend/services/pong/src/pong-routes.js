@@ -9,7 +9,10 @@ import {
 	createUserStats as createUserStatsHandler,
 	deleteUserStats as deleteUserStatsHandler,
 	getUserStats as getUserStatsHandler,
-	getUserMatchHistory as getUserMatchHistoryHandler
+	getUserMatchHistory as getUserMatchHistoryHandler,
+	createTournament as createTournamentHandler,
+	getAllTournaments as getAllTournamentsHandler,
+	joinTournament as joinTournamentHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -78,6 +81,20 @@ const	Match =
 		playerRightId: { type: 'string' },
 		winnerId: { type: 'string'},
 		endedAt: { type: 'string', format: 'date-time' }
+	}
+};
+
+const	TournamentInfo =
+{
+	type: 'object',
+	properties:
+	{
+		id: { type: 'string' },
+		name: { type: 'string' },
+		status: { type: 'string' },
+		createdAt: { type: 'string', format: 'date-time' },
+		creatorUsername: { type: 'string' },
+		participantCount: { type: 'integer' }
 	}
 };
 
@@ -253,12 +270,10 @@ const	createTournament =
 		body:
 		{
 			type: 'object',
-			required: ['name', 'maxPlayers', 'startTime'],
+			required: ['name'],
 			properties:
 			{
 				name: { type: 'string' },
-				maxPlayers: { type: 'integer' },
-				startTime: { type: 'string', format: 'date-time' }
 			}
 		},
 
@@ -276,8 +291,79 @@ const	createTournament =
 			400: ErrorResponse,
 			500: ErrorResponse
 		}
-	}
+	},
+	preHandler: validateInternalApiKey,
+	handler: createTournamentHandler
 }
+
+const	getAllTournaments =
+{
+	schema:
+	{
+		summary: 'Get all tournaments',
+		description: 'Retrieve a list of all tournaments.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: TournamentInfo
+			},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getAllTournamentsHandler
+}
+
+const	joinTournament =
+{
+	schema:
+	{
+		summary: 'Join a tournament',
+		description: 'Join an existing tournament.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['tournamentId'],
+			properties:
+			{
+				tournamentId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			404: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: joinTournamentHandler
+}
+
+//-----------------------------EXPORT ROUTES-----------------------------
 
 export function	pongRoutes(fastify)
 {
@@ -298,8 +384,12 @@ export function	pongRoutes(fastify)
 
 	fastify.get('/stats', getUserStats);
 	fastify.get('/match-history', getUserMatchHistory);
+	fastify.get('/get-all-tournaments', getAllTournaments);
+	// fastify.get('/get-tournament', getTournament); // TO DO return single tournament info
 
 	fastify.post('/create-user-stats', createUserStats);
+	fastify.post('/create-tournament', createTournament);
+	fastify.post('/join-tournament', joinTournament);
 
 	fastify.delete('/delete-user-stats', deleteUserStats);
 

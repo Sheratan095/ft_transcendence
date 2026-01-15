@@ -279,6 +279,40 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
+- **pong.torunamentCreated** - Tournament has been created
+\`\`\`json
+{
+  "event": "pong.tournamentCreated",
+  "data": {
+    "tournamentId": "tourney123",
+    "name": "Summer Cup",
+  }
+}
+\`\`\`
+
+- **pong.tournamentJoined** - Successfully joined a tournament
+\`\`\`json
+{
+  "event": "pong.tournamentJoined",
+  "data": {
+    "tournamentId": "tourney123",
+    "name": "Summer Cup",
+  }
+}
+\`\`\`
+
+- **pong.tournamentParticipantJoined** - A new participant joined the tournament
+\`\`\`json
+{
+  "event": "pong.tournamentParticipantJoined",
+  "data": {
+    "tournamentId": "tourney123",
+    "tournamentName": "Summer Cup",
+    "participantUsername": "newPlayer"
+  }
+}
+\`\`\`
+
 - **error** - Error message
 \`\`\`json
 {
