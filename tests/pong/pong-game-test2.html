@@ -481,7 +481,9 @@
             if (ws && ws.readyState === WebSocket.OPEN) {
                 const message = JSON.stringify({ event, data });
                 ws.send(message);
-                log(`→ ${event}`, 'info');
+                if (event !== 'pong.paddleMove') {
+                    log(`→ ${event}`, 'info');
+                }
             } else {
                 log('Cannot send: not connected', 'error');
             }
@@ -489,7 +491,6 @@
 
         function handleMessage(message) {
             const eventName = message.event.replace('pong.', '');
-            log(`← ${message.event}`, 'success');
 
             switch (message.event) {
                 case 'pong':
@@ -582,7 +583,7 @@
 
                 case 'pong.score':
                     updateScores(message.data.scores);
-                    log(`Point scored!`, 'success');
+                    // log(`Point scored!`, 'success');
                     break;
 
                 case 'pong.gameEnded':
