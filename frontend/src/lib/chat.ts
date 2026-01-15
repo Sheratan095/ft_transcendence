@@ -485,13 +485,13 @@ export async function sendChatInvite(otherUserId: string) {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       credentials: 'include',
       method: 'POST',
-      body: JSON.stringify({ otherUserId }),
+      body: JSON.stringify({ toUserId: otherUserId }),
       
     });
     if (!res.ok) {
       throw new Error(`Failed to send chat invite: ${res.statusText}`);
     }
-    const chatId = await res.json();
+    const { chatId } = await res.json();
     openChatModal();
     selectChat(chatId);
     console.log('Private chat started:', chatId);
