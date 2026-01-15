@@ -1,5 +1,6 @@
 import { TournamentInstance, TournamentStatus } from './TournamentIstance.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
+import { v4 as uuidv4 } from 'uuid';
 
 class	TournamentManager
 {
@@ -10,14 +11,14 @@ class	TournamentManager
 	
 	createTournament(name, creatorId, creatorUsername)
 	{
+		const	id = uuidv4();
+
 		// Create a new tournament instance
-		const	tournament = new TournamentInstance(name, creatorId, creatorUsername);
-	
+		const	tournament = new TournamentInstance(id, name, creatorId, creatorUsername);
 
+		this._tournaments.set(id, tournament);
 
-		this._tournaments.set(tournament.id, tournament);
-
-		pongConnectionManager.replyTournamentCreated(creatorId, name, tournament.id);
+		pongConnectionManager.replyTournamentCreated(creatorId, name, id);
 
 		return (tournament);
 	}

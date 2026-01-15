@@ -134,12 +134,17 @@ export const	createTournament = async (req, reply) =>
 		const	name = req.body.name;
 		const	creatorId = extractUserData(req).id;
 		console.log(`[PONG] User ${creatorId} is creating a tournament named "${name}"`);
-		const	creatorUsername = await getUsernameById(req.server.pongDb, creatorId);
+		const	creatorUsername = await getUsernameById(creatorId);
 		if (!creatorUsername)
 			return (reply.code(404).send({ error: 'Creator user not found' }));
 
 		// Create a new tournament
 		const	tournament = tournamentManager.createTournament(name, creatorId, creatorUsername);
+
+		return (reply.code(201).send({
+			tournamentId: tournament.id,
+			message: 'Tournament created successfully'
+		}));
 	}
 	catch (err)
 	{
