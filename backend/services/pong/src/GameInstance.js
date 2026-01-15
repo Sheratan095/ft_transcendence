@@ -1,4 +1,6 @@
+import { gameManager } from './GameManager.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
+import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision } from './pong-physics.js';
 
 export const	GameStatus =
 {
@@ -43,41 +45,13 @@ export class	GameInstance
 		};
 
 		// Game physics state
-		this.gameState =
-		{
-			ball:
-			{
-				x: 400, // Middle of 800px canvas
-				y: 200, // Middle of 400px canvas
-				vx: Math.random() > 0.5 ? 3 : -3, // Random initial direction
-				vy: Math.random() * 2 - 1, // Random Y velocity
-				speed: 3
-			},
-			paddles:
-			{
-				[playerLeftId]:
-				{
-					y: 150, // Middle of paddle area
-					height: 100,
-					width: 10,
-					x: 10
-				},
-				[playerRightId]:
-				{
-					y: 150,
-					height: 100,
-					width: 10,
-					x: 780
-				}
-			}
-		};
+		this.gameState = initGameState(playerLeftId, playerRightId);
 
 		// Game constants
-		this.CANVAS_WIDTH = 800;
-		this.CANVAS_HEIGHT = 400;
-		this.WINNING_SCORE = 5;
-		this.PADDLE_SPEED = 5;
-		this.BALL_RADIUS = 10;
+		this.CANVAS_WIDTH = 1;
+		this.CANVAS_HEIGHT = 1;
+		this.WINNING_SCORE = parseInt(process.env.WINNING_SCORE);
+		this.COOLDOWN_BETWEEN_POINTS_MS = parseInt(process.env.COOLDOWN_BETWEEN_POINTS_MS);
 
 		// Game loop control
 		this.gameLoop = null;
@@ -90,30 +64,19 @@ export class	GameInstance
 	{
 		this.gameStatus = GameStatus.IN_PROGRESS;
 		this._startGameLoop();
-		this._broadcastGameStart();
-		console.log(`[PONG] Game ${this.id} started between ${this.playerLeftUsername} and ${this.playerRightUsername}`);
 	}
 
 	processMove(playerId, direction)
 	{
 		const	paddle = this.gameState.paddles[playerId];
-		if (!paddle) return;
+		if (!paddle)
+			return;
 
-		// Update paddle position based on direction
-		switch (direction)
-		{
-			case 'up':
-				paddle.y = Math.max(0, paddle.y - this.PADDLE_SPEED);
-				break;
-
-			case 'down':
-				paddle.y = Math.min(this.CANVAS_HEIGHT - paddle.height, paddle.y + this.PADDLE_SPEED);
-				break;
-
-				default:
-				console.error(`[PONG] Invalid direction: ${direction}`);
-				return;
-		}
+		const	newY = movePaddle(paddle.y, direction);
+		if (newY === null)
+			return;
+		
+		paddle.y = newY;
 
 		// Broadcast paddle position to both players
 		this._broadcastPaddleMove(playerId, paddle.y);
@@ -127,17 +90,22 @@ export class	GameInstance
 	// Game loop methods
 	_startGameLoop()
 	{
+		// Clear any existing game loop, in case of restart/pause
 		if (this.gameLoop)
 			clearInterval(this.gameLoop);
 
+		this._timerBeforeBallMove();
+
+		// Every frameInterval milliseconds, update the game state
 		this.gameLoop = setInterval(() =>
 		{
 			this._updateGameState();
 		}, this.frameInterval);
 	}
 
-	_stopGameLoop()
+	stopGameLoop()
 	{
+		// Clear the game loop interval
 		if (this.gameLoop)
 		{
 			clearInterval(this.gameLoop);
@@ -147,12 +115,14 @@ export class	GameInstance
 
 	_updateGameState()
 	{
+		// If the game is not in progress, stop the loop
 		if (this.gameStatus !== GameStatus.IN_PROGRESS)
 		{
-			this._stopGameLoop();
+			this.stopGameLoop();
 			return;
 		}
 
+		// Retrieve delta time since last update
 		const	now = Date.now();
 		const	deltaTime = (now - this.lastUpdateTime) / 1000; // Convert to seconds
 		this.lastUpdateTime = now;
@@ -167,67 +137,51 @@ export class	GameInstance
 		this._checkScoring();
 
 		// Broadcast game state every few frames (reduce network traffic)
+		//	now its EVERY 2 FRAMES
 		if (Math.floor(now / this.frameInterval) % 2 === 0)
+		{
 			this._broadcastGameState();
+			// console.log(this.gameState.ball);
+		}
 	}
 
 	_updateBallPosition(deltaTime)
 	{
-		const	ball = this.gameState.ball;
-		
-		// Update ball position
-		ball.x += ball.vx * ball.speed * (deltaTime * 60); // Normalize to 60 FPS
-		ball.y += ball.vy * ball.speed * (deltaTime * 60);
+		let	ball = this.gameState.ball;
+
+		// Update ball position directly with velocity
+		ball.x += ball.vx * deltaTime;
+		ball.y += ball.vy * deltaTime;
 
 		// Ball collision with top and bottom walls
-		if (ball.y <= this.BALL_RADIUS || ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS)
-		{
-			ball.vy = -ball.vy;
-			ball.y = Math.max(this.BALL_RADIUS, Math.min(this.CANVAS_HEIGHT - this.BALL_RADIUS, ball.y));
-		}
+		if (ball.y <= ball.radius || ball.y >= this.CANVAS_HEIGHT - ball.radius)
+			elaborateWallCollision(ball);
 	}
 
 	_checkCollisions()
 	{
-		const	ball = this.gameState.ball;
+		let		ball = this.gameState.ball;
 		const	leftPaddle = this.gameState.paddles[this.playerLeftId];
 		const	rightPaddle = this.gameState.paddles[this.playerRightId];
 
 		// Left paddle collision
-		if (ball.x <= leftPaddle.x + leftPaddle.width + this.BALL_RADIUS &&
+		if (ball.x <= leftPaddle.x + ball.radius &&
 			ball.y >= leftPaddle.y &&
 			ball.y <= leftPaddle.y + leftPaddle.height &&
 			ball.vx < 0)
 		{
-			
-			ball.vx = -ball.vx;
-			ball.x = leftPaddle.x + leftPaddle.width + this.BALL_RADIUS;
-			
-			// Add some spin based on where the ball hit the paddle
-			const	hitPos = (ball.y - leftPaddle.y) / leftPaddle.height - 0.5;
-			ball.vy += hitPos * 2;
-			
-			// Increase speed slightly
-			ball.speed = Math.min(ball.speed * 1.05, 8);
+			ball = elaboratePaddleCollision(ball, leftPaddle, +1);
 		}
 
 		// Right paddle collision
-		if (ball.x >= rightPaddle.x - this.BALL_RADIUS &&
+		if (ball.x >= rightPaddle.x - ball.radius &&
 			ball.y >= rightPaddle.y &&
 			ball.y <= rightPaddle.y + rightPaddle.height &&
 			ball.vx > 0)
 		{
-			
-			ball.vx = -ball.vx;
-			ball.x = rightPaddle.x - this.BALL_RADIUS;
-			
-			// Add some spin based on where the ball hit the paddle
-			const	hitPos = (ball.y - rightPaddle.y) / rightPaddle.height - 0.5;
-			ball.vy += hitPos * 2;
-			
-			// Increase speed slightly
-			ball.speed = Math.min(ball.speed * 1.05, 8);
+			ball = elaboratePaddleCollision(ball, rightPaddle, -1);
 		}
+
 	}
 
 	_checkScoring()
@@ -239,7 +193,7 @@ export class	GameInstance
 		{
 			this.scores[this.playerLeftId]++;
 			this._broadcastScore(this.playerLeftId);
-			this._resetBall();
+			this._resetGameState();
 			
 			if (this.scores[this.playerLeftId] >= this.WINNING_SCORE)
 				this._endGame(this.playerLeftId);
@@ -249,41 +203,43 @@ export class	GameInstance
 		{
 			this.scores[this.playerRightId]++;
 			this._broadcastScore(this.playerRightId);
-			this._resetBall();
+			this._resetGameState();
 			
 			if (this.scores[this.playerRightId] >= this.WINNING_SCORE)
 				this._endGame(this.playerRightId);
 		}
 	}
 
-	_resetBall()
+	_resetGameState()
 	{
-		const	ball = this.gameState.ball;
-		ball.x = this.CANVAS_WIDTH / 2;
-		ball.y = this.CANVAS_HEIGHT / 2;
-		ball.vx = Math.random() > 0.5 ? 3 : -3;
-		ball.vy = Math.random() * 2 - 1;
-		ball.speed = 3;
+		this.gameState = initGameState(this.playerLeftId, this.playerRightId);
+
+		this._timerBeforeBallMove();
+	}
+
+	_timerBeforeBallMove()
+	{
+		// Broadcast the reset game state without checking scoring
+		this._broadcastGameState();
+
+		// Small delay before restarting next point
+		this.stopGameLoop();
+
+		setTimeout(() => {
+			this.lastUpdateTime = Date.now();
+			this._startGameLoop();
+		}, this.COOLDOWN_BETWEEN_POINTS_MS);
 	}
 
 	_endGame(winnerId)
 	{
 		this.gameStatus = GameStatus.FINISHED;
-		this._stopGameLoop();
-		
+		this.stopGameLoop();
+
 		const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
 		
-		this._broadcastGameEnd(winnerId, loserId, winnerUsername);
-		
-		console.log(`[PONG] Game ${this.id} ended. Winner: ${winnerUsername}`);
-	}
-
-	// Communication methods
-	_broadcastGameStart()
-	{
-		pongConnectionManager.notifyGameStart(this.playerLeftId, this.id, 'left', this.playerRightUsername);
-		pongConnectionManager.notifyGameStart(this.playerRightId, this.id, 'right', this.playerLeftUsername);
+		gameManager._gameEnd(this, winnerId, loserId, winnerUsername, false);
 	}
 
 	_broadcastGameState()
@@ -327,25 +283,9 @@ export class	GameInstance
 		pongConnectionManager.sendScore(this.playerRightId, scoreData);
 	}
 
-	_broadcastGameEnd(winnerId, loserId, winnerUsername)
-	{
-		const	gameEndData =
-		{
-			gameId: this.id,
-			winnerId: winnerId,
-			loserId: loserId,
-			winnerUsername: winnerUsername,
-			finalScores: this.scores
-		};
-
-		pongConnectionManager.sendGameEnd(this.playerLeftId, gameEndData);
-		pongConnectionManager.sendGameEnd(this.playerRightId, gameEndData);
-	}
-
 	// Cleanup method
 	destroy()
 	{
-		this._stopGameLoop();
-		console.log(`[PONG] Game instance ${this.id} destroyed`);
+		this.stopGameLoop();
 	}
 }

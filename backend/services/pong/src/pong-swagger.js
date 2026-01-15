@@ -17,23 +17,267 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 
 **CLIENT → SERVER EVENTS**
 
-- **ping**
+- **ping** - Health check
 \`\`\`json
 {
   "event": "ping",
   "data": {}
 }
+\`\`\`
 
-Reponse:
+- **pong.createCustomGame** - Create a custom game with a specific opponent
+\`\`\`json
 {
-  "event": "pong",
+  "event": "pong.createCustomGame",
   "data": {
-	"timestamp": 1625247600000
+    "otherId": "user123"
   }
 }
 \`\`\`
 
+- **pong.joinCustomGame** - Join an existing custom game
+\`\`\`json
+{
+  "event": "pong.joinCustomGame",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.cancelCustomGame** - Cancel a custom game (creator only)
+\`\`\`json
+{
+  "event": "pong.cancelCustomGame",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.userQuit** - Quit the current game
+\`\`\`json
+{
+  "event": "pong.userQuit",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.userReady** - Mark yourself as ready in lobby
+\`\`\`json
+{
+  "event": "pong.userReady",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.userNotReady** - Mark yourself as not ready in lobby
+\`\`\`json
+{
+  "event": "pong.userNotReady",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.joinMatchmaking** - Join random matchmaking queue
+\`\`\`json
+{
+  "event": "pong.joinMatchmaking",
+  "data": {}
+}
+\`\`\`
+
+- **pong.leaveMatchmaking** - Leave random matchmaking queue
+\`\`\`json
+{
+  "event": "pong.leaveMatchmaking",
+  "data": {}
+}
+\`\`\`
+
+- **pong.paddleMove** - Move your paddle
+\`\`\`json
+{
+  "event": "pong.paddleMove",
+  "data": {
+    "gameId": "game123",
+    "direction": "up" // or "down"
+  }
+}
+\`\`\`
+
+---
+
 **SERVER → CLIENT EVENTS**
+
+- **pong** - Response to ping
+\`\`\`json
+{
+  "event": "pong",
+  "data": {
+    "timestamp": 1625247600000
+  }
+}
+\`\`\`
+
+- **pong.customGameCreated** - Custom game was created
+\`\`\`json
+{
+  "event": "pong.customGameCreated",
+  "data": {
+    "gameId": "game123",
+    "otherUsername": "opponent"
+  }
+}
+\`\`\`
+
+- **pong.playerJoinedCustomGame** - Opponent joined your custom game
+\`\`\`json
+{
+  "event": "pong.playerJoinedCustomGame",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.customGameJoinSuccess** - Successfully joined a custom game
+\`\`\`json
+{
+  "event": "pong.customGameJoinSuccess",
+  "data": {
+    "gameId": "game123",
+    "creatorUsername": "creator"
+  }
+}
+\`\`\`
+
+- **pong.playerReadyStatus** - Opponent's ready status changed
+\`\`\`json
+{
+  "event": "pong.playerReadyStatus",
+  "data": {
+    "gameId": "game123",
+    "readyStatus": true
+  }
+}
+\`\`\`
+
+- **pong.customGameCanceled** - Custom game was canceled
+\`\`\`json
+{
+  "event": "pong.customGameCanceled",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.playerQuitCustomGameInLobby** - Opponent quit before game started
+\`\`\`json
+{
+  "event": "pong.playerQuitCustomGameInLobby",
+  "data": {
+    "gameId": "game123"
+  }
+}
+\`\`\`
+
+- **pong.matchedInRandomGame** - Matched with opponent in matchmaking
+\`\`\`json
+{
+  "event": "pong.matchedInRandomGame",
+  "data": {
+    "gameId": "game123",
+    "opponentUsername": "opponent",
+    "yourSide": "left",
+    "coolDownMs": 3000
+  }
+}
+\`\`\`
+
+- **pong.gameStarted** - Game is starting
+\`\`\`json
+{
+  "event": "pong.gameStarted",
+  "data": {
+    "gameId": "game123",
+    "opponentUsername": "opponent",
+    "yourSide": "left"
+  }
+}
+\`\`\`
+
+- **pong.gameState** - Real-time game state update (sent every 2 frames)
+\`\`\`json
+{
+  "event": "pong.gameState",
+  "data": {
+    "gameId": "game123",
+    "ball": {
+      "x": 0.5,
+      "y": 0.5,
+      "vx": 3,
+      "vy": 1,
+      "speed": 3,
+      "radius": 0.02
+    },
+    "paddles": {
+      "player1": { "x": 0.05, "y": 0.4, "width": 0.02, "height": 0.2 },
+      "player2": { "x": 0.93, "y": 0.4, "width": 0.02, "height": 0.2 }
+    },
+    "scores": {
+      "player1": 0,
+      "player2": 0
+    }
+  }
+}
+\`\`\`
+
+- **pong.paddleMove** - Paddle position update
+\`\`\`json
+{
+  "event": "pong.paddleMove",
+  "data": {
+    "gameId": "game123",
+    "playerId": "user123",
+    "paddleY": 0.4
+  }
+}
+\`\`\`
+
+- **pong.score** - A player scored
+\`\`\`json
+{
+  "event": "pong.score",
+  "data": {
+    "gameId": "game123",
+    "scorerId": "user123",
+    "scores": {
+      "player1": 1,
+      "player2": 0
+    }
+  }
+}
+\`\`\`
+
+- **pong.gameEnded** - Game has ended
+\`\`\`json
+{
+  "event": "pong.gameEnded",
+  "data": {
+    "gameId": "game123",
+    "winner": "user123",
+    "quit": false
+  }
+}
+\`\`\`
 
 - **error** - Error message
 \`\`\`json
@@ -50,7 +294,7 @@ Reponse:
 **ERROR HANDLING**
 
 - Invalid API Key: Connection refused with 401 Unauthorized
-- Missing User ID: Connection refused with 401 Unauthorized
+- Missing User ID: Connection closed with code 1008
 - Invalid Message Format: Server sends error event
 - Unknown Event Type: Server sends error event
 `

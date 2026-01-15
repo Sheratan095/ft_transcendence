@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { pongConnectionManager } from './PongConnectionManager.js';
-import { sendGameInviteNotification, getUsernameById, sleep } from './pong-help.js';
+import { sendGameInviteNotification, getUsernameById, sleep, checkBlock } from './pong-help.js';
 import { pongDatabase as pongDb } from './pong.js';
 
 class	GameManager
@@ -34,8 +34,8 @@ class	GameManager
 		// Can't create a game with a player who blocked you or whom you blocked
 		if (await checkBlock(creatorId, otherId))
 		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
-			trisConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with this user');
+			console.error(`[PONG] ${creatorId} tried to create a custom game with ${otherId} but is blocked`);
+			pongConnectionManager.sendErrorMessage(creatorId, 'Cannot create a game with this user');
 			return ;
 		}
 
@@ -104,6 +104,8 @@ class	GameManager
 		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerLeftId, gameId);
 		pongConnectionManager.sendCustomGameCanceled(gameInstance.playerRightId, gameId);
 
+		// Clean up the game instance
+		gameInstance.destroy();
 		this._games.delete(gameId);
 
 		console.log(`[PONG] Canceled custom game ${gameId} by user ${userId}`);
@@ -192,28 +194,37 @@ class	GameManager
 			return ;
 		}
 
+		// Immediately set status to FINISHED and stop the game loop
+		// This prevents any further game state updates from being sent
+		const originalStatus = gameInstance.gameStatus;
+		gameInstance.gameStatus = GameStatus.FINISHED;
+		gameInstance.stopGameLoop();
+
 		const	otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
 		// If the match is IN_PROGRESS (started), the other player wins
-		if (gameInstance.gameStatus === GameStatus.IN_PROGRESS)
+		if (originalStatus === GameStatus.IN_PROGRESS)
 		{
-			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
+			const	winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+			this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
 		}
-		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
+		else if (originalStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
 		{
 			// If the match is in LOBBY and is a CUSTOM game, quitting cancels the game for both players
 			console.log(`[PONG] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
 
 			pongConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
 
-			// Remove the game from the active games map
+			// Clean up the game instance and remove from active games map
+			gameInstance.destroy();
 			this._games.delete(gameId);
 		}
-		else if (gameInstance.gameStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.RANDOM)
+		else if (originalStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.RANDOM)
 		{
 			// If the match is in LOBBY and is a RANDOM game, quitting gives victory to the other player
 			console.log(`[PONG] Player ${playerId} quit game random game ${gameId}, game is canceled`);
 
-			this._gameEnd(gameInstance, otherPlayerId, playerId, true, false);
+			const	winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+			this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
 		}
 	}
 
@@ -341,7 +352,8 @@ class	GameManager
 		}
 
 		// Check if user is in any active games
-		for (const gameInstance of this._games.values())
+		// Convert to array to avoid modification during iteration
+		for (const gameInstance of Array.from(this._games.values()))
 		{
 			// The creator of a CUSTOM game in WAITING status must cancel it, can't just quit
 			if (gameInstance.gameType === GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING && gameInstance.playerLeftId === userId)
@@ -416,8 +428,8 @@ class	GameManager
 		this._games.set(gameId, gameInstance);
 
 		// Notify both players that they have been matched
-		pongConnectionManager.notifyMatchedInRandomGame(playerLeftId, gameId, 'LEFT', playerRightUsername);
-		pongConnectionManager.notifyMatchedInRandomGame(playerRightId, gameId, 'RIGHT', playerLeftUsername);
+		pongConnectionManager.notifyMatchedInRandomGame(playerLeftId, gameId, playerRightUsername, 'LEFT');
+		pongConnectionManager.notifyMatchedInRandomGame(playerRightId, gameId, playerLeftUsername, 'RIGHT');
 
 		console.log(`[PONG] Matched players ${playerLeftId} and ${playerRightId} in random game ${gameId}`);
 
@@ -456,11 +468,11 @@ class	GameManager
 	}
 
 	// Both user must be specified by input, can't be calculated from gameInstance because winner and loser depends on quit
-	_gameEnd(gameInstance, winner, loser, quit)
+	_gameEnd(gameInstance, winner, loser, winnerUsername, quit)
 	{
 		// Notify both players that the game has ended, not incluging message, it will included handled client-side
-		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, quit);
-		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, quit);
+		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, winnerUsername, quit);
+		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, winnerUsername, quit);
 
 		if (gameInstance.gameType === GameType.RANDOM)
 		{
@@ -478,7 +490,8 @@ class	GameManager
 			this._randomGameCooldowns.delete(gameInstance.id);
 		}
 
-		// Remove the game from the active games map
+		// Clean up the game instance and remove from active games map
+		gameInstance.destroy();
 		this._games.delete(gameInstance.id);
 
 		if (quit)
@@ -488,16 +501,16 @@ class	GameManager
 	}
 
 	// A user is considered busy if they are in matchmaking
-	//	or in a game that is in progress or in lobby (waiting for ready)
+	//	or in a game that is waiting, in lobby, or in progress
 	_isUserBusy(userId)
 	{
 		if (this._waitingPlayers.includes(userId))
 			return (true);
 
-		// Check if user is in any active games
+		// Check if user is in any active games (WAITING, IN_LOBBY, or IN_PROGRESS)
 		for (const gameInstance of this._games.values())
 		{
-			if (gameInstance.hasPlayer(userId) && (gameInstance.gameStatus === GameStatus.IN_PROGRESS || gameInstance.gameStatus === GameStatus.IN_LOBBY))
+			if (gameInstance.hasPlayer(userId) && gameInstance.gameStatus !== GameStatus.FINISHED)
 				return (true);
 		}
 

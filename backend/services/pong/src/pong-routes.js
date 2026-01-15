@@ -239,6 +239,46 @@ const	getUserMatchHistory =
 	handler: getUserMatchHistoryHandler
 }
 
+const	createTournament =
+{
+	schema:
+	{
+		summary: 'Create a new tournament',
+		description: 'Create a new tournament with the given parameters.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['name', 'maxPlayers', 'startTime'],
+			properties:
+			{
+				name: { type: 'string' },
+				maxPlayers: { type: 'integer' },
+				startTime: { type: 'string', format: 'date-time' }
+			}
+		},
+
+		response:
+		{
+			201:
+			{
+				type: 'object',
+				properties:
+				{
+					tournamentId: { type: 'string' },
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	}
+}
+
 export function	pongRoutes(fastify)
 {
 	// Actual WebSocket endpoint

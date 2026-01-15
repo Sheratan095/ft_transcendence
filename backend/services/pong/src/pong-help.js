@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
 //	this ensures that only internal services can access protected endpoints

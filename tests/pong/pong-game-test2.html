@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Test - Player 1</title>
+    <title>Pong Test - Player 2</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -186,7 +186,7 @@
     </style>
 </head>
 <body>
-    <h1>🏓 Pong Game Test - Player 1</h1>
+    <h1>🏓 Pong Game Test - Player 2</h1>
     
     <div class="game-info">
         <div class="info-box">
@@ -211,7 +211,7 @@
         <div class="controls">
             <div class="section">
                 <h3>🔐 Login</h3>
-                <input type="email" id="emailInput" placeholder="Email" value="test1@gmail.com">
+                <input type="email" id="emailInput" placeholder="Email" value="test2@gmail.com">
                 <input type="password" id="passwordInput" placeholder="Password" value="1234">
                 <button id="loginBtn" onclick="login()" class="full-width success">Login & Connect</button>
                 <button id="logoutBtn" onclick="logout()" class="full-width danger" disabled style="display: none;">Logout</button>
@@ -481,7 +481,7 @@
                 const message = JSON.stringify({ event, data });
                 ws.send(message);
                 if (event !== 'pong.paddleMove') {
-                log(`→ ${event}`, 'info');
+                    log(`→ ${event}`, 'info');
                 }
             } else {
                 log('Cannot send: not connected', 'error');

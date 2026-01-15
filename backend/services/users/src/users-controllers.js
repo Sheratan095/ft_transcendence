@@ -272,6 +272,29 @@ export const	deleteUser = async (req, reply) =>
 
 		deleteUserRelationships(req, reply);
 
+		// Remove avatar file if exists
+		const	user = await usersDb.getUserById(userId);
+		if (user && user.avatar_url)
+		{
+			const	avatarsDir = path.join(__dirname, '../data/avatars');
+			const	avatarFilename = path.basename(user.avatar_url);
+			const	avatarFilePath = path.join(avatarsDir, avatarFilename);
+
+			if (existsSync(avatarFilePath))
+			{
+				try
+				{
+					await unlink(avatarFilePath);
+					console.log(`Deleted avatar for user ${userId}: ${avatarFilename}`);
+				}
+				catch (unlinkErr)
+				{
+					console.log(`Failed to delete avatar for user ${userId}: ${unlinkErr.message}`);
+					// Continue even if deletion fails
+				}
+			}
+		}
+
 		// Delete user from database
 		await usersDb.deleteUserById(userId);
 

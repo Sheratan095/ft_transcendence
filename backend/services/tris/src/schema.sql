@@ -25,18 +25,20 @@ CREATE TABLE IF NOT EXISTS matches
 CREATE TABLE user_stats
 (
 	user_id			TEXT PRIMARY KEY,
-	games_played	INTEGER DEFAULT 0,
 	wins			INTEGER DEFAULT 0,
 	losses			INTEGER DEFAULT 0
 
 	-- FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-INSERT INTO user_stats (user_id, games_played, wins, losses)
-VALUES ('1', 0, 0, 0);
+INSERT INTO user_stats (user_id, wins, losses)
+VALUES ('1', 1, 0);
 
-INSERT INTO user_stats (user_id, games_played, wins, losses)
-VALUES ('2', 0, 0, 0);
+INSERT INTO user_stats (user_id, wins, losses)
+VALUES ('2', 0, 1);
 
-INSERT INTO user_stats (user_id, games_played, wins, losses)
-VALUES ('3', 0, 0, 0);
+INSERT INTO user_stats (user_id, wins, losses)
+VALUES ('3', 0, 0);
+
+INSERT INTO matches (id, player_x_id, player_o_id, winner_id, ended_at)
+VALUES ('match1', '1', '2', '1', '2024-01-01 10:00:00');

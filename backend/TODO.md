@@ -128,7 +128,7 @@ I think it's ok
 
 [] add a "starting script" that generate the env, install packages and create the certificates(they shouldn't be posted in the repo)
 
-[] delete user data? (GDPR)
+[x] delete user data? (GDPR)
 	Don’t do the actual profile deletion inside the Auth service —
 	let Auth trigger a system-wide cascade via events or APIs.
 	Each service deletes what it owns.
