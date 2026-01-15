@@ -5,7 +5,8 @@ import {
 	getMessages,
 	addUserToChat,
 	createGroupChat,
-	leaveGroupChat
+	leaveGroupChat,
+	startPrivateChat
 } from './chat-controllers.js';
 
 import {
@@ -112,7 +113,7 @@ const	message =
 		chatId: { type: 'string' },
 		senderId: { type: 'string' },
 		content: { type: 'string' },
-		type: { type: 'string', enum: ['text', 'user_join', 'system'] },
+		type: { type: 'string', enum: ['text', 'user_join', 'system', 'user_leave', 'chat_created'] },
 		createdAt: { type: 'string', format: 'date-time' },
 		messageStatus: { type: 'string', enum: ['sent', 'delivered', 'read', 'undefined'] } // undefined for messages not sent by the requestor user
 	}
@@ -227,6 +228,43 @@ const	addUserToChatOpts =
 	handler: addUserToChat
 }
 
+const	startPrivateChatOpts = 
+{
+	schema:
+	{
+		summary: 'Start a private one-on-one chat with another user',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['toUserId'],
+			properties:
+			{
+				toUserId: { type: 'string' },
+			}
+		},
+
+		response:
+		{
+			// Return just the chat id
+			200:
+			{
+				type: 'object',
+				properties: { chatId: { type: 'string' } }
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: startPrivateChat
+}
+
 const	createGroupChatOpts = 
 {
 	schema:
@@ -317,7 +355,7 @@ export function	chatRoutes(fastify)
 	fastify.get('/', getChatsOpts);
 	fastify.get('/messages', getMessagesOpts);
 
-	// HTTP routes for internal service communication
+	fastify.post('/start-private-chat', startPrivateChatOpts);
 	fastify.post('/add-user', addUserToChatOpts);
 	fastify.post('/create-group-chat', createGroupChatOpts);
 	fastify.post('/leave-group-chat', leaveGroupChatOpts);

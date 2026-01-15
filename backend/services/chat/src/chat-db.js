@@ -365,6 +365,20 @@ export class	ChatDatabase
 		return (chat);
 	}
 
+	async	getPrivateChatByUsers(userId1, userId2)
+	{
+		const	query = `
+			SELECT c.id, c.name, c.chat_type, c.created_at
+			FROM chats c
+			JOIN chat_members cm1 ON c.id = cm1.chat_id AND cm1.user_id = ?
+			JOIN chat_members cm2 ON c.id = cm2.chat_id AND cm2.user_id = ?
+			WHERE c.chat_type = 'dm'
+		`;
+
+		const	chat = await this.db.get(query, [String(userId1), String(userId2)]);
+		return (chat);
+	}
+
 	async	getGroupChatName(chatId)
 	{
 		const	query = `

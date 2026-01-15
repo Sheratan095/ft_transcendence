@@ -1,5 +1,6 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
+
 import {
 	extractUserData,
 	notifyUserAddedToChat,
@@ -279,6 +280,63 @@ export const	leaveGroupChat = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[CHAT] Error in leaveGroupChat controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	startPrivateChat = async (req, reply) =>
+{
+	try
+	{
+		const	chatDb = req.server.chatDb;
+		const	userId = extractUserData(req).id;
+
+		const	{ toUserId } = req.body;
+
+		if (userId === toUserId)
+		{
+			console.log(`[CHAT] User ${userId} attempted to start a private chat with themselves`);
+			return (reply.code(400).send({ error: 'Bad Request', message: 'Cannot start a private chat with yourself' }));
+		}
+
+		// The users must be friends to start a private chat
+		const	relation = await getRelationshipByIds(userId, toUserId);
+		if (!relation || relation.relationshipStatus !== 'accepted')
+		{
+			console.log(`[CHAT] User ${userId} attempted to start a private chat with non-friend user ${toUserId}`);
+			return (reply.code(403).send({ error: 'Forbidden', message: 'Can only start private chats with friends' }));
+		}
+
+		// Validate that receiver exists before creating chat
+		const	receiverUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
+		if (!receiverUsername)
+		{
+			console.log(`[CHAT] User ${userId} attempted to send private message to non-existent user ${toUserId}`);
+			chatConnectionManager.sendErrorMessage(userId, 'Recipient user does not exist');
+			return;
+		}
+
+		// If a private chat between these users already exists, return that chat id
+		const	existingChat = await chatDb.getPrivateChatByUsers(userId, toUserId);
+		if (existingChat)
+		{
+			console.log(`[CHAT] User ${userId} requested existing private chat with user ${toUserId}: chat ${existingChat.id}`);
+			return (reply.code(200).send({ chatId: existingChat.id }));
+		}
+
+		// Create new DM chat
+		const	chatId = await chatDb.createPrivateChat(userId, toUserId, formatDate(new Date()));
+
+		const	message = `${fromUsername} want to chat with you.`;
+		await chatDb.addMessageToChat(chatId, null, message, timestamp, 'chat_created');
+
+		console.log(`[CHAT] Created new DM chat ${chatId} between users ${userId} and ${toUserId}`);
+
+		return (reply.code(200).send({ chatId }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in startPrivateChat controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
