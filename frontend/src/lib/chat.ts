@@ -19,7 +19,11 @@ export async function openChatModal() {
 
   // Load chats if not already loaded
   if (chats.length === 0) {
-    await loadChats();
+    try {
+      await loadChats();
+    } catch (err) {
+      console.error('Failed to open chat modal:', err);
+    }
   }
 
   // Connect to WebSocket if not already connected
@@ -123,7 +127,11 @@ async function selectChat(chatId: string) {
   messageOffset = 0;
 
   renderChatList();
-  await loadMessages(chatId, 0);
+  try {
+    await loadMessages(chatId, 0);
+  } catch (err) {
+    console.error('Failed to select chat:', err);
+  }
 
   // Update chat header
   const chatHeader = document.getElementById('chat-header');
@@ -186,7 +194,11 @@ async function loadMoreMessages() {
   if (!currentChatId) return;
 
   messageOffset += MESSAGE_LIMIT;
-  await loadMessages(currentChatId, messageOffset);
+  try {
+    await loadMessages(currentChatId, messageOffset);
+  } catch (err) {
+    console.error('Failed to load more messages:', err);
+  }
 }
 
 export async function renderMessages() {
@@ -469,11 +481,12 @@ function markChatAsRead(chatId: string) {
 }
 
 export async function sendChatInvite(otherUserId: string) {
-      const res = await fetch(`api/chat/start-private-chat`, {
+    const res = await fetch(`/api/chat/start-private-chat`, {
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       credentials: 'include',
       method: 'POST',
       body: JSON.stringify({ otherUserId }),
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      
     });
     if (!res.ok) {
       throw new Error(`Failed to send chat invite: ${res.statusText}`);

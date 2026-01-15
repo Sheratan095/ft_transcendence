@@ -1,0 +1,7 @@
+### Create a tournament
+POST https://localhost:3000/chat/start-private-chat
+Content-Type: application/json
+
+{
+  "toUserId": 1
+}
