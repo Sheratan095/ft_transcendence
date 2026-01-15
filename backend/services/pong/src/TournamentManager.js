@@ -42,6 +42,23 @@ class	TournamentManager
 
 		return (tournamentList);
 	}
+
+	addParticipant(tournamentId, userId, username)
+	{
+		const	tournament = this._tournaments.get(tournamentId);
+		if (!tournament)
+			throw new Error('Tournament not found');
+
+		tournament.addParticipant(userId, username);
+
+		// Reply to the user and notify other participants
+		pongConnectionManager.replyTournamentJoined(userId, tournament.name, tournamentId);
+		for (let participant of tournament.participants)
+		{
+			if (participant.userId !== userId)
+				pongConnectionManager.notifyTournamentParticipantJoined(participant.userId, username, tournament.name, tournamentId);
+		}
+	}
 }
 
 export const	tournamentManager = new TournamentManager();

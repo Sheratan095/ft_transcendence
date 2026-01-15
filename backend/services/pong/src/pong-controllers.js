@@ -168,3 +168,25 @@ export const	getAllTournaments = async (req, reply) =>
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
+
+export const	joinTournament = async (req, reply) =>
+{
+	try
+	{
+		const	tournamentId = req.body.tournamentId;
+		const	userId = extractUserData(req).id;
+		const	username = await getUsernameById(userId);
+		if (!username)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		// Add participant to the tournament
+		tournamentManager.addParticipant(tournamentId, userId, username);
+
+		return (reply.code(200).send({ message: 'Joined tournament successfully' }));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in joinTournament controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
