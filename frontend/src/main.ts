@@ -5,6 +5,7 @@ import { setupChatEventListeners } from './lib/chat';
 import { searchUser, renderSearchResult } from './lib/search';
 import { createLoginForm, createRegisterForm, createTwoFactorForm } from './components/auth';
 import { getIntlayer } from "intlayer";
+import { connectNotificationsWebSocket } from './components/profile/Notifications';
 
 getIntlayer("app"); // Initialize intlayer
 
@@ -25,6 +26,7 @@ class AuthUI {
     if (getUserId()) {
         startTokenRefresh();
         renderProfile(el);
+        connectNotificationsWebSocket();
       return;
     }
     else

@@ -10,7 +10,7 @@ PUT https://localhost:3000/users/update-user
 Content-Type: application/json
 
 {
-	  "newLanguage": "fr"
+	  "newLanguage": "jkj"
 }
 
 ###

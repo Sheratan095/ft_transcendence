@@ -19,7 +19,11 @@ export async function openChatModal() {
 
   // Load chats if not already loaded
   if (chats.length === 0) {
-    await loadChats();
+    try {
+      await loadChats();
+    } catch (err) {
+      console.error('Failed to open chat modal:', err);
+    }
   }
 
   // Connect to WebSocket if not already connected
@@ -123,7 +127,11 @@ async function selectChat(chatId: string) {
   messageOffset = 0;
 
   renderChatList();
-  await loadMessages(chatId, 0);
+  try {
+    await loadMessages(chatId, 0);
+  } catch (err) {
+    console.error('Failed to select chat:', err);
+  }
 
   // Update chat header
   const chatHeader = document.getElementById('chat-header');
@@ -136,6 +144,7 @@ async function selectChat(chatId: string) {
 
   // Mark as read
   markChatAsRead(chatId);
+  scrollToBottom();
 }
 
 async function loadMessages(chatId: string, offset = 0) {
@@ -185,10 +194,14 @@ async function loadMoreMessages() {
   if (!currentChatId) return;
 
   messageOffset += MESSAGE_LIMIT;
-  await loadMessages(currentChatId, messageOffset);
+  try {
+    await loadMessages(currentChatId, messageOffset);
+  } catch (err) {
+    console.error('Failed to load more messages:', err);
+  }
 }
 
-function renderMessages() {
+export async function renderMessages() {
   const messagesContainer = document.getElementById('chat-messages');
   if (!messagesContainer) return;
 
@@ -268,7 +281,7 @@ function renderMessages() {
   });
 }
 
-function scrollToBottom() {
+export function scrollToBottom() {
   const messagesContainer = document.getElementById('chat-messages');
   if (messagesContainer) {
     setTimeout(() => {
@@ -285,7 +298,7 @@ function escapeHtml(text: string): string {
 
 function connectChatWebSocket() {
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = "localhost:3000";
+  const host = window.location.host;
   const wsUrl = `${protocol}//${host}/chat/ws`;
 
   console.log('Connecting to chat WebSocket at', wsUrl);
@@ -320,9 +333,12 @@ function handleWebSocketMessage(data: any) {
     handleChatMessage(data);
   } else if (data.event === 'chat.systemMessage') {
     handleSystemMessage(data);
-  } else if (data.event === 'pong') {
-    // Handle pong response
-    console.log('Pong received');
+  } else if (data.event === 'chat.messageSent') {
+    handleMessageSent(data);
+  } else if (data.event === 'chat.messageStatusUpdate') {
+    handleMessageStatusUpdate(data);
+  } else if (data.event === 'chat.privateMessage') {
+    handlePrivateMessage(data);
   }
 }
 
@@ -372,6 +388,88 @@ function handleSystemMessage(data: any) {
   }
 }
 
+function handleMessageSent(data: any) {
+  console.log('Message sent confirmation:', data);
+  const { messageId, chatId, timestamp } = data;
+  
+  // Update message status to 'sent' if it exists
+  if (messages.has(chatId)) {
+    const chatMessages = messages.get(chatId)!;
+    const message = chatMessages.find(m => m.id === messageId);
+    if (message) {
+      message.messageStatus = 'sent';
+      if (currentChatId === chatId) {
+        renderMessages();
+      }
+    }
+  }
+}
+
+function handleMessageStatusUpdate(data: any) {
+  console.log('Message status updated:', data);
+  const { messageId, chatId, status } = data;
+  
+  // Update message status
+  if (messages.has(chatId)) {
+    const chatMessages = messages.get(chatId)!;
+    const message = chatMessages.find(m => m.id === messageId);
+    if (message) {
+      message.messageStatus = status;
+      if (currentChatId === chatId) {
+        renderMessages();
+      }
+    }
+  }
+}
+
+function handlePrivateMessage(data: any) {
+  console.log('Private message received:', data);
+  const { fromUserId, from, content, timestamp } = data;
+  
+  // Find or create a DM chat with this user
+  let dmChat = chats.find(c => c.chatType === 'dm' && c.otherUserId === String(fromUserId));
+  
+  if (!dmChat) {
+    // Create a new DM chat entry
+    dmChat = {
+      id: `dm_${fromUserId}`,
+      chatType: 'dm',
+      otherUserId: String(fromUserId),
+      members: [
+        { userId: fromUserId, username: from },
+        { userId: currentUserId, username: 'You' }
+      ]
+    };
+    chats.push(dmChat);
+    chatMembers.set(dmChat.id, dmChat.members);
+  }
+  
+  // Add message to the chat
+  if (!messages.has(dmChat.id)) {
+    messages.set(dmChat.id, []);
+  }
+  
+  const chatMessages = messages.get(dmChat.id)!;
+  chatMessages.push({
+    id: data.messageId || `msg_${Date.now()}`,
+    senderId: String(fromUserId),
+    from: from,
+    content: content,
+    createdAt: timestamp,
+    messageStatus: 'delivered',
+    isPrivate: true
+  });
+  
+  // Re-render if this chat is currently open
+  if (currentChatId === dmChat.id) {
+    renderMessages();
+    scrollToBottom();
+  }
+  
+  // Update chat list to show the new/updated chat
+  renderChatList();
+}
+
 function markChatAsRead(chatId: string) {
   if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
     const message = {
@@ -383,25 +481,23 @@ function markChatAsRead(chatId: string) {
 }
 
 export async function sendChatInvite(otherUserId: string) {
-  
-  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-    connectChatWebSocket();
-  }
-  if (!chatSocket) {
-    console.error('Chat WebSocket not connected');
-    return;
-  }
-  const message = {
-    event: 'chat.privateMessage',
-    data: { toUserId: otherUserId, content: 'This is the beginning of a wonderful conversation.' }
-  };
-
-  console.log('Sending chat invite:', message);
-  chatSocket.send(JSON.stringify(message));
-  chatSocket.close();
+    const res = await fetch(`/api/chat/start-private-chat`, {
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      credentials: 'include',
+      method: 'POST',
+      body: JSON.stringify({ toUserId: otherUserId }),
+      
+    });
+    if (!res.ok) {
+      throw new Error(`Failed to send chat invite: ${res.statusText}`);
+    }
+    const { chatId } = await res.json();
+    openChatModal();
+    selectChat(chatId);
+    console.log('Private chat started:', chatId);
 }
 
-export function sendChatMessage(message: string) {
+export async function sendChatMessage(message: string) {
   if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
     console.error('Not connected to chat or no chat selected');
     return;
@@ -440,8 +536,11 @@ export function sendChatMessage(message: string) {
     };
   }
 
-  console.log('Sending message:', wsMessage);
   chatSocket.send(JSON.stringify(wsMessage));
+  if (currentChatId)
+    await loadMessages(currentChatId, 0);
+  renderMessages();
+  scrollToBottom();
 }
 
 function handleMessageKeyPress(event: KeyboardEvent) {

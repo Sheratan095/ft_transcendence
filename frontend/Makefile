@@ -39,7 +39,7 @@ dev: tailwind-build gen-certs
 	@echo "   tailwind: input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
 	@mkdir -p $(dir $(TAILWIND_OUT))
 	@echo "=> Starting Vite dev server"
-	@$(DEV)
+	@bash -c 'source ~/.nvm/nvm.sh && nvm use 20 && $(DEV)'
 
 build:
 	@echo "=> Building production bundle"
