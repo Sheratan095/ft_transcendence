@@ -51,8 +51,6 @@ export class	GameInstance
 		this.CANVAS_WIDTH = 1;
 		this.CANVAS_HEIGHT = 1;
 		this.WINNING_SCORE = parseInt(process.env.WINNING_SCORE);
-		this.PADDLE_SPEED = parseFloat(process.env.PADDLE_SPEED);
-		this.BALL_RADIUS = parseFloat(process.env.BALL_RADIUS);
 		this.COOLDOWN_BETWEEN_POINTS_MS = parseInt(process.env.COOLDOWN_BETWEEN_POINTS_MS);
 
 		// Game loop control
@@ -156,7 +154,7 @@ export class	GameInstance
 		ball.y += ball.vy * deltaTime;
 
 		// Ball collision with top and bottom walls
-		if (ball.y <= this.BALL_RADIUS || ball.y >= this.CANVAS_HEIGHT - this.BALL_RADIUS)
+		if (ball.y <= ball.radius || ball.y >= this.CANVAS_HEIGHT - ball.radius)
 			elaborateWallCollision(ball);
 	}
 
@@ -167,7 +165,7 @@ export class	GameInstance
 		const	rightPaddle = this.gameState.paddles[this.playerRightId];
 
 		// Left paddle collision
-		if (ball.x <= leftPaddle.x + this.BALL_RADIUS &&
+		if (ball.x <= leftPaddle.x + ball.radius &&
 			ball.y >= leftPaddle.y &&
 			ball.y <= leftPaddle.y + leftPaddle.height &&
 			ball.vx < 0)
@@ -176,7 +174,7 @@ export class	GameInstance
 		}
 
 		// Right paddle collision
-		if (ball.x >= rightPaddle.x - this.BALL_RADIUS &&
+		if (ball.x >= rightPaddle.x - ball.radius &&
 			ball.y >= rightPaddle.y &&
 			ball.y <= rightPaddle.y + rightPaddle.height &&
 			ball.vx > 0)
