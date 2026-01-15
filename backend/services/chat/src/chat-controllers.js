@@ -325,8 +325,10 @@ export const	startPrivateChat = async (req, reply) =>
 		}
 
 		// Create new DM chat
-		const	chatId = await chatDb.createPrivateChat(userId, toUserId, formatDate(new Date()));
+		const	timestamp = formatDate(new Date());
+		const	chatId = await chatDb.createPrivateChat(userId, toUserId, timestamp);
 
+		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
 		const	message = `${fromUsername} want to chat with you.`;
 		await chatDb.addMessageToChat(chatId, null, message, timestamp, 'chat_created');
 
