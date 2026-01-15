@@ -59,6 +59,11 @@ export function	elaboratePaddleCollision(ball, paddle, direction)
 {
 	// Increase ball speed upon paddle hit
 	ball.speed *= parseFloat(process.env.BALL_SPEED_FACTOR);
+	
+	// Cap ball speed to prevent infinite acceleration
+	const	maxSpeed = parseFloat(process.env.BALL_MAX_SPEED);
+	if (ball.speed > maxSpeed)
+		ball.speed = maxSpeed;
 
 	// Map hit position from -1 (top) to +1 (bottom)
 	const	deltaYHitNorm = (ball.y - paddle.y) / (paddle.height / 2);

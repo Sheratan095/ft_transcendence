@@ -50,7 +50,7 @@ export class	GameInstance
 		// Game constants
 		this.CANVAS_WIDTH = 1;
 		this.CANVAS_HEIGHT = 1;
-		this.WINNING_SCORE = parseInt(process.env.WIN_TARGET_POINTS);
+		this.WINNING_SCORE = parseInt(process.env.WINNING_SCORE);
 		this.PADDLE_SPEED = parseFloat(process.env.PADDLE_SPEED);
 		this.BALL_RADIUS = parseFloat(process.env.BALL_RADIUS);
 
@@ -231,7 +231,7 @@ export class	GameInstance
 		setTimeout(() => {
 			this.lastUpdateTime = Date.now();
 			this._startGameLoop();
-		}, parseInt(process.env.COLLDOWN_BETWEEN_POINTS_MS));
+		}, parseInt(process.env.COOLDOWN_BETWEEN_POINTS_MS));
 	}
 
 	_endGame(winnerId)
@@ -243,8 +243,6 @@ export class	GameInstance
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
 		
 		gameManager._gameEnd(this, winnerId, loserId, winnerUsername, false);
-		
-		console.log(`[PONG] Game ${this.id} ended. Winner: ${winnerUsername}`);
 	}
 
 	_broadcastGameState()

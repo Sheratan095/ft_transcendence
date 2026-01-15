@@ -61,13 +61,14 @@ services/pong:
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
     PLACEHOLDER_DELETED_USERNAMES=Anonymous player
-    COLLDOWN_BETWEEN_POINTS_MS=3000 # Time between points in milliseconds
+    COOLDOWN_BETWEEN_POINTS_MS=3000 # Time between points in milliseconds
     PADDLE_HEIGHT=0.3 # Height of the paddle respective to the game area (0.5 = half the game area)
-    PADDLE_SPEED=0.03 # Speed of the paddle respective to the game area per frame (0.1 = 10% of the game area per frame)
+    PADDLE_SPEED=1.5 # Speed of the paddle per SECOND (1.5 = 150% of the game area per second)
     MAX_BOUNCE_ANGLE=60 # Maximum angle (in degrees) for ball deflection upon paddle hit
     BALL_RADIUS=0.02 # Radius of the ball respective to the game area (0.02 = 2% of the game area)
-    BALL_INITIAL_SPEED=15 # Initial speed of the ball respective to the game area per frame (0.03 = 3% of the game area per frame)
+    BALL_INITIAL_SPEED=0.5 # Initial ball speed per SECOND (0.5 = 50% of the game area per second)
     BALL_SPEED_FACTOR=1.1 # Factor by which the ball speed increases after each paddle hit
+    BALL_MAX_SPEED=2.0 # Maximum ball speed per SECOND to prevent infinite acceleration
 
 services/tris:
     INTERNAL_API_KEY=1234
