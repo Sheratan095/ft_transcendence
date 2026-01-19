@@ -17,6 +17,8 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
     "@vitejs/plugin-react": "^5.1.2",
+    "browserslist": "^4.28.1",
+    "caniuse-lite": "^1.0.30001765",
     "intlayer": "^7.4.0",
     "react": "^19.2.3"
   }
