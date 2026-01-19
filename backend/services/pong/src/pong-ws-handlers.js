@@ -104,6 +104,10 @@ export function	handleMessage(socket, msg, userId)
 				handleTournamentLeave(userId, message.data.tournamentId);
 				break;
 
+			case 'tournament.start':
+				handleTournamentStart(message.data.tournamentId);
+				break;
+
 			default:
 				console.log(`[PONG] Unknown event: ${message.event}`);
 				pongConnectionManager.sendErrorMessage(userId, 'Invalid message format');
@@ -301,5 +305,23 @@ export async function	handleTournamentLeave(userId, tournamentId)
 	{
 		console.error(`[PONG] Error leaving tournament for user ${userId}:`, err.message);
 		pongConnectionManager.sendErrorMessage(userId, 'Failed to leave tournament');
+	}
+}
+
+export async function	handleTournamentStart(tournamentId)
+{
+	try
+	{
+		if (!tournamentId)
+		{
+			console.error(`[PONG] No tournamentId provided to start tournament`);
+			return ;
+		}
+
+		tournamentManager.startTournament(tournamentId);
+	}
+	catch (err)
+	{
+		console.error(`[PONG] Error starting tournament ${tournamentId}:`, err.message);
 	}
 }
