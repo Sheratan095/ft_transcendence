@@ -1,15 +1,12 @@
 import { TournamentInstance, TournamentStatus } from './TournamentIstance.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
-import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { gameManager } from './GameManager.js';
-import { v4 as uuidv4 } from 'uuid';
 
 class	TournamentManager
 {
 	constructor()
 	{
 		this._tournaments = new Map(); // tournamentId -> TournamentInstance
-		this._tournamentGames = new Map(); // gameId -> tournamentId
 
 		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START);
 	}
@@ -169,14 +166,14 @@ class	TournamentManager
 		{
 			console.log(`[PONG] User ${userId} tried to ready up in non-existent tournament ${tournamentId}`);
 			pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
-			return;
+			return ;
 		}
 
 		if (tournament.status !== TournamentStatus.IN_PROGRESS)
 		{
 			console.log(`[PONG] User ${userId} tried to ready up but tournament ${tournamentId} is not in progress`);
 			pongConnectionManager.sendErrorMessage(userId, 'Tournament is not in progress');
-			return;
+			return ;
 		}
 
 		const	match = tournament.playerReady(userId);
@@ -184,105 +181,80 @@ class	TournamentManager
 		{
 			console.log(`[PONG] User ${userId} tried to ready up but has no active match in tournament ${tournamentId}`);
 			pongConnectionManager.sendErrorMessage(userId, 'You have no active match');
-			return;
+			return ;
 		}
 
 		// Notify opponent that this player is ready
-		const	opponentId = match.player1.userId === userId ? match.player2?.userId : match.player1.userId;
+		const	opponentId = match.playerLeftId === userId ? match.playerRightId : match.playerLeftId;
 		if (opponentId)
-			pongConnectionManager.notifyTournamentPlayerReady(opponentId, userId, match.matchId);
+			pongConnectionManager.notifyTournamentPlayerReady(opponentId, userId, match.id);
 
-		// If both players are ready, create and start the game
-		if (tournament.isMatchReady(match.matchId))
+		// If both players are ready, start the match
+		if (tournament.isMatchReady(match.id))
 		{
 			this._startMatch(tournament, match);
 		}
 
-		console.log(`[PONG] User ${userId} ready for match ${match.matchId}`);
+		console.log(`[PONG] User ${userId} ready for match ${match.id}`);
 	}
 
-	_startMatch(tournament, match)
+	_startMatch(tournament, gameInstance)
 	{
-		const	gameId = uuidv4();
-		const	gameInstance = new GameInstance(
-			gameId,
-			match.player1.userId,
-			match.player2.userId,
-			match.player1.username,
-			match.player2.username,
-			GameType.CUSTOM // Tournament games use custom game type
-		);
+		// The gameInstance is already created by TournamentInstance, just need to:
+		// 1. Register it with GameManager for game loop processing
+		// 2. Start the game
+		// 3. Notify players
 
-		// Mark as tournament game
-		gameInstance.isTournamentGame = true;
-		gameInstance.tournamentId = tournament.id;
-		gameInstance.matchId = match.matchId;
+		gameManager._games.set(gameInstance.id, gameInstance);
 
-		// Set game to IN_LOBBY and both players ready (skip normal ready-up since we did it already)
-		gameInstance.gameStatus = GameStatus.IN_LOBBY;
-		gameInstance.playerLeftReady = true;
-		gameInstance.playerRightReady = true;
-
-		// Register game with GameManager
-		gameManager._games.set(gameId, gameInstance);
-
-		// Track this game
-		this._tournamentGames.set(gameId, tournament.id);
-		tournament.setMatchInProgress(match.matchId, gameId);
-
-		// Start the game immediately
-		gameInstance.startGame();
+		// Start the match
+		const	startedMatch = tournament.startMatch(gameInstance.id);
+		if (!startedMatch)
+		{
+			console.error(`[PONG] Failed to start match ${gameInstance.id}`);
+			return;
+		}
 
 		// Notify both players
-		pongConnectionManager.sendTournamentMatchStarted(match.player1.userId, gameId, match.matchId);
-		pongConnectionManager.sendTournamentMatchStarted(match.player2.userId, gameId, match.matchId);
+		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerLeftId, gameInstance.id, gameInstance.id);
+		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerRightId, gameInstance.id, gameInstance.id);
 
-		console.log(`[PONG] Tournament match ${match.matchId} started (gameId: ${gameId})`);
-
-		return gameInstance;
+		console.log(`[PONG] Tournament match ${gameInstance.id} started`);
 	}
 
 	handleGameEnd(gameId, winnerId, loserId)
 	{
-		const	tournamentId = this._tournamentGames.get(gameId);
-		if (!tournamentId)
-			return; // Not a tournament game
-
-		const	tournament = this._tournaments.get(tournamentId);
-		if (!tournament)
+		// Find which tournament this game belongs to
+		let tournament = null;
+		for (const t of this._tournaments.values())
 		{
-			console.error(`[PONG] Tournament ${tournamentId} not found for game ${gameId}`);
-			return;
-		}
-
-		// Find the match by gameId
-		let match = null;
-		for (const m of tournament.getCurrentMatches())
-		{
-			if (m.gameId === gameId)
+			const games = t.getAllGames();
+			if (games.find(g => g.id === gameId))
 			{
-				match = m;
+				tournament = t;
 				break;
 			}
 		}
 
+		if (!tournament)
+			return; // Not a tournament game
+
+		// Find the match
+		const match = tournament._findMatchByGameId(gameId);
 		if (!match)
 		{
-			console.error(`[PONG] Match not found for game ${gameId} in tournament ${tournamentId}`);
+			console.error(`[PONG] Match not found for game ${gameId} in tournament ${tournament.id}`);
 			return;
 		}
 
 		// Set match winner
-		tournament.setMatchWinner(match.matchId, winnerId);
-
-		// Clean up game tracking
-		this._tournamentGames.delete(gameId);
+		tournament.setMatchWinner(gameId, winnerId);
 
 		// Notify all participants about match result
+		const winnerUsername = match.playerLeftId === winnerId ? match.playerLeftUsername : match.playerRightUsername;
 		for (let participant of tournament.participants)
 		{
-			const	winnerUsername = match.player1.userId === winnerId ? match.player1.username : match.player2.username;
-			pongConnectionManager.notifyTournamentMatchEnded(participant.userId, match.matchId, winnerId, winnerUsername);
+			pongConnectionManager.notifyTournamentMatchEnded(participant.userId, match.id, winnerId, winnerUsername);
 		}
 
 		// Check if tournament is finished
@@ -294,17 +266,17 @@ class	TournamentManager
 		else if (tournament.currentRound < tournament.rounds.length - 1)
 		{
 			// New round was created, broadcast it
-			this._broadcastCurrentRound(tournamentId);
+			this._broadcastCurrentRound(tournament.id);
 		}
 
-		console.log(`[PONG] Tournament match ${match.matchId} ended, winner: ${winnerId}`);
+		console.log(`[PONG] Tournament match ${match.id} ended, winner: ${winnerId}`);
 	}
 
 	_broadcastCurrentRound(tournamentId)
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
-			return;
+			return ;
 
 		const	currentMatches = tournament.getCurrentMatches();
 		
@@ -340,11 +312,6 @@ class	TournamentManager
 		this._tournaments.delete(tournament.id);
 
 		console.log(`[PONG] Tournament ${tournament.id} ended, winner: ${tournament.winner.username}`);
-	}
-
-	isTournamentGame(gameId)
-	{
-		return this._tournamentGames.has(gameId);
 	}
 }
 

@@ -3,6 +3,14 @@
 ## Overview
 The tournament system supports **parallel matches** with **ready-up mechanics** and **automatic bracket progression**. No third-place match is included.
 
+**Architecture**: TournamentInstance **owns and creates** all GameInstance objects, forming a clean tree structure:
+```
+TournamentInstance
+  └── rounds[]
+       └── GameInstance[] (matches)
+           └── game state, physics, scores
+```
+
 ## Tournament Flow
 
 ### 1. Creation & Joining Phase
@@ -21,14 +29,19 @@ The tournament system supports **parallel matches** with **ready-up mechanics** 
 ### 3. Ready-Up Phase (Per Match)
 - Players receive round info via `pong.tournamentRoundInfo` event
 - Each player sends: `tournament.ready` with `tournamentId`
-- When **both players ready**, match auto-starts
-- Match status: `IN_PROGRESS`
-- GameInstance created and game begins immediately
+- When **both players ready**, TournamentInstance starts the match
+- GameInstance already exists (created during round creation), just starts game loop
+- Match registered with GameManager for paddle moves and physics processing
+- GameInstance marked with:
+  - `isTournamentGame: true`
+  - `tournamentId`
+  - `matchId`
+- Game begins immediately
 
 ### 4. Match Execution
 - Standard pong game runs (same as regular games)
 - GameInstance marked with:
-  - `isTournamentGame: true`
+  - `type: 'TOURNAMENT'`
   - `tournamentId`
   - `matchId`
 - Game tracked in both GameManager and TournamentManager
@@ -98,24 +111,55 @@ Final:   [W12 vs W34]
   status: 'WAITING' | 'IN_PROGRESS' | 'FINISHED',
   participants: Set<{userId, username}>,
   currentRound: number,
-  rounds: Array<Match[]>,
+  rounds: Array<(GameInstance|ByeMatch)[]>, // Owns all game instances
   winner: {userId, username} // Only when finished
 }
 ```
 
-### Match
+### GameInstance (in Tournament)
 ```javascript
 {
+  id: string (gameId),
   matchId: string,
-  player1: {userId, username},
-  player2: {userId, username} | null, // null for bye
-  player1Ready: boolean,
-  player2Ready: boolean,
-  gameId: string | null,
-  status: 'WAITING_READY' | 'IN_PROGRESS' | 'FINISHED',
-  winner: {userId, username} | null
+  tournamentId: string,
+  isTournamentGame: true,
+  playerLeftId: string,
+  playerRightId: string,
+  playerLeftUsername: string,
+  playerRightUsername: string,
+  playerLeftReady: boolean,
+  playerRightReady: boolean,
+  gameStatus: 'WAITING' | 'IN_PROGRESS' | 'FINISHED',
+  winner: {userId, username} | null,
+  // ... standard game state (ball, paddles, scores, etc.)
 }
 ```
+
+### ByeMatch (for odd-numbered rounds)
+```javascript
+{
+  id: string,
+  matchId: string,
+  player1: {userId, username},
+  player2: null,
+  gameStatus: 'FINISHED',
+  winner: {userId, username},
+  isBye: true
+}
+```
+
+## Architecture Benefits
+
+**Clean Tree Structure:**
+- TournamentInstance owns all GameInstances
+- No separate tracking maps needed
+- Easy to find games: `tournament.getAllGames()`
+- Automatic cleanup when tournament ends
+
+**Separation of Concerns:**
+- TournamentInstance: Game creation, bracket logic, round progression
+- GameManager: Game loop processing, paddle moves, physics
+- TournamentManager: Coordination, WebSocket communication
 
 ## Client Implementation Guide
 

@@ -1,4 +1,5 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
+import { v4 as uuidv4 } from 'uuid';
 
 export const	TournamentStatus =
 {
@@ -70,7 +71,9 @@ export class	TournamentInstance
 			// Pair participants into matches
 			if (i + 1 < players.length)
 			{
-				const	newGameInstance =  new GameInstance(
+				// Normal match
+				const	gameInstance = new GameInstance(
+					uuidv4(),
 					players[i].userId,
 					players[i + 1].userId,
 					players[i].username,
@@ -78,23 +81,29 @@ export class	TournamentInstance
 					GameType.TOURNAMENT
 				);
 
-				matches.push(newGameInstance);
+				gameInstance.tournamentId = this.id;
+				gameInstance.gameStatus = GameStatus.WAITING;
+
+				matches.push(gameInstance);
 			}
 			else
 			{
 				// Bye: player automatically advances
-				const	newGameInstance =  new GameInstance(
+				const	gameInstance = new GameInstance(
+					uuidv4(),
 					players[i].userId,
 					null,
 					players[i].username,
 					null,
-					GameType.TOURNAMENT,
+					GameType.TOURNAMENT
 				);
 
-				newGameInstance.winner = { userId: players[i].userId, username: players[i].username };
-				newGameInstance.status = GameStatus.FINISHED;
+				gameInstance.tournamentId = this.id;
+				gameInstance.isBye = true;
+				gameInstance.gameStatus = GameStatus.FINISHED;
+				gameInstance.winner = players[i];
 
-				matches.push(newGameInstance);
+				matches.push(gameInstance);
 			}
 		}
 
@@ -111,51 +120,66 @@ export class	TournamentInstance
 		// Find the match this player is in
 		for (const match of currentMatches)
 		{
-			if (match.status !== GameStatus.WAITING)
+			// Skip bye matches
+			if (match.isBye)
 				continue;
 
-			if (match.player1.userId === userId)
+			if (match.gameStatus !== GameStatus.WAITING)
+				continue;
+
+			if (match.playerLeftId === userId)
 			{
-				match.player1Ready = true;
-				return (match);
+				match.playerLeftReady = true;
+				return match;
 			}
-			else if (match.player2?.userId === userId)
+			else if (match.playerRightId === userId)
 			{
-				match.player2Ready = true;
-				return (match);
+				match.playerRightReady = true;
+				return match;
 			}
 		}
 
-		return (null);
+		return null;
 	}
 
-	isMatchReady(matchId)
+	isMatchReady(gameId)
 	{
-		const	match = this._findMatch(matchId);
-		if (!match || match.status !== GameStatus.WAITING)
+		const	match = this._findMatchByGameId(gameId);
+		if (!match || match.isBye)
 			return false;
 
-		return match.player1Ready && match.player2Ready;
+		if (match.gameStatus !== GameStatus.WAITING)
+			return false;
+
+		return match.playerLeftReady && match.playerRightReady;
 	}
 
-	setMatchInProgress(matchId, gameId)
+	startMatch(gameId)
 	{
-		const	match = this._findMatch(matchId);
-		if (match)
-		{
-			match.status = GameStatus.IN_PROGRESS;
-			match.gameId = gameId;
-		}
+		const	match = this._findMatchByGameId(gameId);
+		if (!match || match.isBye)
+			return null;
+
+		// Start the game (change status to IN_PROGRESS and start game loop)
+		match.gameStatus = GameStatus.IN_PROGRESS;
+		match.startGame();
+
+		return match;
 	}
 
-	setMatchWinner(matchId, winnerId)
+	setMatchWinner(gameId, winnerId)
 	{
-		const	match = this._findMatch(matchId);
+		const	match = this._findMatchByGameId(gameId);
 		if (!match)
 			return;
 
-		match.status = GameStatus.FINISHED;
-		match.winner = match.player1.userId === winnerId ? match.player1 : match.player2;
+		match.gameStatus = GameStatus.FINISHED;
+		
+		// Store winner info
+		if (match.playerLeftId === winnerId)
+			match.winner = { userId: match.playerLeftId, username: match.playerLeftUsername };
+		else if (match.playerRightId === winnerId)
+			match.winner = { userId: match.playerRightId, username: match.playerRightUsername };
 
 		// Check if this round is complete
 		if (this._isRoundComplete())
@@ -168,9 +192,9 @@ export class	TournamentInstance
 	{
 		const	currentMatches = this.rounds[this.currentRound];
 		if (!currentMatches)
-			return (false);
+			return false;
 
-		return (currentMatches.every(match => match.status === GameStatus.FINISHED));
+		return currentMatches.every(match => match.gameStatus === GameStatus.FINISHED);
 	}
 
 	_advanceToNextRound()
@@ -191,27 +215,46 @@ export class	TournamentInstance
 		this.currentRound++;
 	}
 
-	_findMatch(matchId)
+	_findMatchByGameId(gameId)
 	{
 		for (const round of this.rounds)
 		{
-			const	match = round.find(m => m.matchId === matchId);
+			const	match = round.find(m => !m.isBye && m.id === gameId);
 			if (match)
-				return (match);
+				return match;
 		}
 
-		return (null);
+		return null;
 	}
 
 	getCurrentMatches()
 	{
-		return (this.rounds[this.currentRound] || []);
+		return this.rounds[this.currentRound] || [];
 	}
 
 	getMatchForPlayer(userId)
 	{
 		const	currentMatches = this.getCurrentMatches();
 
-		return (currentMatches.find(m =>  m.player1.userId === userId || m.player2?.userId === userId ) || null);
+		return currentMatches.find(m => {
+			if (m.isBye)
+				return m.player1?.userId === userId;
+			return m.playerLeftId === userId || m.playerRightId === userId;
+		}) || null;
+	}
+
+	getAllGames()
+	{
+		// Return all GameInstance objects from all rounds (excluding bye matches)
+		const	games = [];
+		for (const round of this.rounds)
+		{
+			for (const match of round)
+			{
+				if (!match.isBye)
+					games.push(match);
+			}
+		}
+		return games;
 	}
 }

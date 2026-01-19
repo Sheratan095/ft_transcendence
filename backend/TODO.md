@@ -145,3 +145,5 @@ I think it's ok
 [x] Check block before inviting in a custom game 
 
 [] Pong mnhgUser stats aren't up to date
+
+[] Is busy has to be done in both games and tournaments
