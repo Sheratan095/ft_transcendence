@@ -47,11 +47,19 @@ class	TournamentManager
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
-			throw new Error('Tournament not found');
+		{
+			console.log(`[PONG] User ${userId} tried to join non-existent tournament ${tournamentId}`);
+			pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
+			return ;
+		}
 
 		// Only allow joining if the tournament is in WAITING status
 		if (tournament.status !== TournamentStatus.WAITING)
-			throw new Error('Cannot join a tournament that is not in the WAITING status');
+		{
+			console.log(`[PONG] User ${userId} tried to join tournament ${tournamentId} which is not in WAITING status`);
+			pongConnectionManager.sendErrorMessage(userId, 'Tournament is not open for joining');
+			return ;
+		}
 
 		tournament.addParticipant(userId, username);
 
@@ -67,12 +75,54 @@ class	TournamentManager
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
-			throw new Error('Tournament not found');
+		{
+			console.log(`[PONG] Tried to get participants of non-existent tournament ${tournamentId}`);
+			return ([]); // Return empty array if tournament does not exist
+		}
 
 		return (Array.from(tournament.participants).map(participant => ({
 			userId: participant.userId,
 			username: participant.username
 		})));
+	}
+
+	// TO DO
+	handleUserDisconnect(userId)
+	{
+		for (let tournament of this._tournaments.values())
+		{
+			if (tournament.hasParticipant(userId))
+			{
+				tournament.removeParticipant(userId);
+
+				// Notify remaining participants
+				for (let participant of tournament.participants)
+					pongConnectionManager.notifyTournamentParticipantLeft(participant.userId, userId, tournament.name, tournament.id);
+			}
+		}
+	}
+
+	removeParticipant(tournamentId, userId)
+	{
+		const	tournament = this._tournaments.get(tournamentId);
+		if (!tournament)
+		{
+			console.log(`[PONG] User ${userId} tried to leave non-existent tournament ${tournamentId}`);
+			pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
+			return ;
+		}
+
+		if (!tournament.hasParticipant(userId))
+		{
+			console.log(`[PONG] User ${userId} tried to leave tournament ${tournamentId} but is not a participant`);
+			pongConnectionManager.sendErrorMessage(userId, 'You are not a participant of this tournament');
+		}
+
+		tournament.removeParticipant(userId);
+
+		// Notify remaining participants
+		for (let participant of tournament.participants)
+			pongConnectionManager.notifyTournamentParticipantLeft(participant.userId, userId, tournament.name, tournamentId);
 	}
 }
 

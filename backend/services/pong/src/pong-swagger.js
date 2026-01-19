@@ -112,6 +112,16 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
+- **tournament.leave** - Leave a tournament
+\`\`\`json
+{
+  "event": "tournament.leave",
+  "data": {
+    "tournamentId": "tourney123"
+  }
+}
+\`\`\`
+
 ---
 
 **SERVER → CLIENT EVENTS**

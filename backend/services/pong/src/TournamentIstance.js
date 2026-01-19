@@ -28,4 +28,20 @@ export class	TournamentInstance
 	{
 		this.participants.add({ userId, username });
 	}
+
+	hasParticipant(userId)
+	{
+		for (let participant of this.participants)
+		{
+			if (participant.userId === userId)
+				return (true);
+		}
+		return (false);
+	}
+
+	removeParticipant(userId)
+	{
+		// TO DO
+		this.partecipants.delete(userId);
+	}
 }
