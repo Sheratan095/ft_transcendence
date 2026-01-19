@@ -91,37 +91,145 @@ class	TournamentManager
 		})));
 	}
 
-	// TO DO
 	handleUserDisconnect(userId)
 	{
 		for (let tournament of this._tournaments.values())
 		{
 			if (tournament.hasParticipant(userId))
-				this.removeParticipant(tournament.id, userId);
+			{
+				console.log(`[PONG] User ${userId} disconnected from tournament ${tournament.id}`);
+				this.removeParticipant(tournament.id, userId, true);
+			}
 		}
 	}
 
-	removeParticipant(tournamentId, userId)
+	removeParticipant(tournamentId, userId, isDisconnect = false)
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
 		{
-			console.log(`[PONG] User ${userId} tried to leave non-existent tournament ${tournamentId}`);
-			pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
+			if (!isDisconnect)
+			{
+				console.log(`[PONG] User ${userId} tried to leave non-existent tournament ${tournamentId}`);
+				pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
+			}
+
 			return ;
 		}
 
 		if (!tournament.hasParticipant(userId))
 		{
-			console.log(`[PONG] User ${userId} tried to leave tournament ${tournamentId} but is not a participant`);
-			pongConnectionManager.sendErrorMessage(userId, 'You are not a participant of this tournament');
+			if (!isDisconnect)
+			{
+				console.log(`[PONG] User ${userId} tried to leave tournament ${tournamentId} but is not a participant`);
+				pongConnectionManager.sendErrorMessage(userId, 'You are not a participant of this tournament');
+			}
+			return ;
 		}
 
+		const	isCreator = tournament.creatorId === userId;
+
+		// If the tournament is in progress, handle forfeiting active match
+		if (tournament.status === TournamentStatus.IN_PROGRESS)
+		{
+			const	match = tournament.getActiveMatchForPlayer(userId);
+			if (match)
+			{
+				// Clear any ready timer for this match
+				this._clearMatchTimer(match.id);
+
+				// Clean up game instance if it exists
+				if (match.gameStatus === GameStatus.IN_PROGRESS)
+				{
+					const	game = gameManager._games.get(match.id);
+					if (game)
+					{
+						game.forceEnd();
+						gameManager._games.delete(match.id);
+					}
+				}
+
+				// Forfeit the match - opponent wins
+				const	opponentId = match.playerLeftId === userId ? match.playerRightId : match.playerLeftId;
+				const	opponentUsername = match.playerLeftId === opponentId ? match.playerLeftUsername : match.playerRightUsername;
+
+				tournament.setMatchWinner(match.id, opponentId);
+
+				// Notify all participants about the forfeit
+				for (let participant of tournament.participants)
+				{
+					pongConnectionManager.notifyTournamentMatchEnded(
+						participant.userId, 
+						match.id, 
+						opponentId, 
+						opponentUsername,
+						true // forfeit flag
+					);
+				}
+
+				console.log(`[PONG] User ${userId} forfeited match ${match.id}, opponent ${opponentId} wins`);
+
+				// Check if tournament finished or new round should start
+				if (tournament.status === TournamentStatus.FINISHED)
+				{
+					this._endTournament(tournament);
+					return ; // Don't continue processing, tournament is done
+				}
+				else if (tournament.isRoundComplete())
+				{
+					// Advance to next round
+					this._startNewRound(tournament.id);
+				}
+			}
+		}
+
+		// Remove participant from tournament
 		tournament.removeParticipant(userId);
+
+		// Check if tournament should be cancelled or ended
+		if (tournament.participants.size === 0)
+		{
+			// No participants left, clean up tournament
+			console.log(`[PONG] Tournament ${tournamentId} has no participants left, cleaning up`);
+			this._cleanupTournament(tournamentId);
+			return ;
+		}
+		else if (isCreator && tournament.status === TournamentStatus.WAITING)
+		{
+			// Creator left before tournament started, cancel it
+			console.log(`[PONG] Tournament creator left ${tournamentId}, cancelling tournament`);
+
+			for (let participant of tournament.participants)
+				pongConnectionManager.notifyTournamentCancelled(participant.userId, tournamentId);
+
+			this._cleanupTournament(tournamentId);
+
+			return ;
+		}
+		else if (tournament.status === TournamentStatus.IN_PROGRESS && tournament.participants.size === 1)
+		{
+			// Only one participant left during tournament, declare them winner
+			const	remainingPlayer = Array.from(tournament.participants)[0];
+
+			tournament.winner = remainingPlayer;
+			tournament.status = TournamentStatus.FINISHED;
+
+			console.log(`[PONG] Only one player remains in tournament ${tournamentId}, declaring winner: ${remainingPlayer.username}`);
+			this._endTournament(tournament);
+
+			return ;
+		}
 
 		// Notify remaining participants
 		for (let participant of tournament.participants)
-			pongConnectionManager.notifyTournamentParticipantLeft(participant.userId, userId, tournament.name, tournamentId);
+		{
+			pongConnectionManager.notifyTournamentParticipantLeft(
+				participant.userId, 
+				userId, 
+				tournament.name, 
+				tournamentId
+			);
+		}
 	}
 
 	startTournament(tournamentId, userId)
@@ -216,7 +324,7 @@ class	TournamentManager
 		if (!startedMatch)
 		{
 			console.error(`[PONG] Failed to start match ${gameInstance.id}`);
-			return;
+			return ;
 		}
 
 		// Notify both players
@@ -229,33 +337,33 @@ class	TournamentManager
 	handleGameEnd(gameId, winnerId, loserId)
 	{
 		// Find which tournament this game belongs to
-		let tournament = null;
+		let	tournament = null;
 		for (const t of this._tournaments.values())
 		{
-			const games = t.getAllGames();
+			const	games = t.getAllGames();
 			if (games.find(g => g.id === gameId))
 			{
 				tournament = t;
-				break;
+				break ;
 			}
 		}
 
 		if (!tournament)
-			return; // Not a tournament game
+			return ; // Not a tournament game
 
 		// Find the match
-		const match = tournament._findMatchByGameId(gameId);
+		const	match = tournament._findMatchByGameId(gameId);
 		if (!match)
 		{
 			console.error(`[PONG] Match not found for game ${gameId} in tournament ${tournament.id}`);
-			return;
+			return ;
 		}
 
 		// Set match winner
 		tournament.setMatchWinner(gameId, winnerId);
 
 		// Notify all participants about match result
-		const winnerUsername = match.playerLeftId === winnerId ? match.playerLeftUsername : match.playerRightUsername;
+		const	winnerUsername = match.playerLeftId === winnerId ? match.playerLeftUsername : match.playerRightUsername;
 		for (let participant of tournament.participants)
 		{
 			pongConnectionManager.notifyTournamentMatchEnded(participant.userId, match.id, winnerId, winnerUsername);
@@ -350,9 +458,38 @@ class	TournamentManager
 		}
 
 		// Clean up
-		this._tournaments.delete(tournament.id);
+		this._cleanupTournament(tournament.id);
 
 		console.log(`[PONG] Tournament ${tournament.id} ended, winner: ${tournament.winner.username}`);
+	}
+
+	_cleanupTournament(tournamentId)
+	{
+		const	tournament = this._tournaments.get(tournamentId);
+		if (!tournament)
+			return ;
+
+		// Clear all match timers
+		const	allMatches = tournament.getAllGames();
+		for (let match of allMatches)
+		{
+			this._clearMatchTimer(match.id);
+			
+			// Clean up any active games
+			if (match.gameStatus === GameStatus.IN_PROGRESS)
+			{
+				const	game = gameManager._games.get(match.id);
+				if (game)
+				{
+					game.forceEnd();
+					gameManager._games.delete(match.id);
+				}
+			}
+		}
+
+		// Remove tournament
+		this._tournaments.delete(tournamentId);
+		console.log(`[PONG] Tournament ${tournamentId} cleaned up`);
 	}
 }
 

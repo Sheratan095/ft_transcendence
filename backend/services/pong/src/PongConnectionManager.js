@@ -273,6 +273,18 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentEnded', data);
 	}
 
+	async	notifyTournamentCancelled(userId, tournamentId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			tournamentId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentCancelled', data);
+	}
+
 	//------------------------------------------
 
 	async	sendErrorMessage(userId, message)

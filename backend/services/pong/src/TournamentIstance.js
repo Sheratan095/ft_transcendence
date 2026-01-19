@@ -45,7 +45,7 @@ export class	TournamentInstance
 
 	removeParticipant(userId)
 	{
-		// TO DO
+		// Remove participant by userId
 		this.participants.delete(userId);
 	}
 

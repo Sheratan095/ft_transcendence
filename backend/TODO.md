@@ -151,4 +151,4 @@ I think it's ok
 [] When updating profile image with a non supported extension
 	[GATEWAY] Users service error: Request failed with status code 400
 
-[] Can creator cancel the tournament
+[x] Can creator cancel the tournament
