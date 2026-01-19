@@ -239,12 +239,12 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
       "radius": 0.02
     },
     "paddles": {
-      "player1": { "x": 0.05, "y": 0.4, "width": 0.02, "height": 0.2 },
-      "player2": { "x": 0.93, "y": 0.4, "width": 0.02, "height": 0.2 }
+      "playerLeft": { "x": 0.05, "y": 0.4, "width": 0.02, "height": 0.2 },
+      "playerRight": { "x": 0.93, "y": 0.4, "width": 0.02, "height": 0.2 }
     },
     "scores": {
-      "player1": 0,
-      "player2": 0
+      "playerLeft": 0,
+      "playerRight": 0
     }
   }
 }
@@ -270,8 +270,8 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
     "gameId": "game123",
     "scorerId": "user123",
     "scores": {
-      "player1": 1,
-      "player2": 0
+      "playerLeft": 1,
+      "playerRight": 0
     }
   }
 }

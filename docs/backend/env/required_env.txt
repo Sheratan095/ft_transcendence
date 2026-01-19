@@ -55,7 +55,7 @@ services/pong:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
     PONG_WIN_SCORE = 10
-    COOLDOWN_MS = 30000
+    READY_COOLDOWN_MS = 30000
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     WINNING_SCORE=11
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
@@ -77,7 +77,7 @@ services/tris:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
     MAX_MARKS_PER_PLAYER=3
-    COOLDOWN_MS = 30000
+    READY_COOLDOWN_MS = 30000
     MOVE_TIMEOUT_MS = 60000
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     EARNED_WIN_POINTS=100 # Points awarded for winning a game

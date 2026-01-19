@@ -444,7 +444,7 @@ class	GameManager
 				console.log(`[TRIS] Cooldown for game ${gameId} ended, starting game automatically`);
 				this._gameStart(gameInstance); // Start the game automatically after cooldown
 			}
-		}, process.env.COOLDOWN_MS || 30000); // Default cooldown is 30 seconds
+		}, process.env.READY_COOLDOWN_MS || 30000); // Default cooldown is 30 seconds
 
 		this._randomGameCooldowns.set(gameId, timerId);
 	}

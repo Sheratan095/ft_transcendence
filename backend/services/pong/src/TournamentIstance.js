@@ -59,7 +59,6 @@ export class	TournamentInstance
 
 		// Create first round
 		this._createRound(shuffledParticipants);
-		this.currentRound = 0;
 	}
 
 	_createRound(players)
@@ -156,13 +155,15 @@ export class	TournamentInstance
 
 	startMatch(gameId)
 	{
-		const	match = this._findMatchByGameId(gameId);
+		const match = this._findMatchByGameId(gameId);
 		if (!match || match.isBye)
 			return null;
 
-		// Start the game (change status to IN_PROGRESS and start game loop)
-		match.gameStatus = GameStatus.IN_PROGRESS;
-		match.startGame();
+		// Small delay before starting
+		setTimeout(() => {
+			match.gameStatus = GameStatus.IN_PROGRESS;
+			match.startGame();
+		}, process.env.READY_COOLDOWN_MS);
 
 		return match;
 	}

@@ -107,7 +107,7 @@ class	TrisConnectionManager
 			yourSymbol: symbol,
 			opponentUsername,
 			yourTurn,
-			coolDownMs: process.env.COOLDOWN_MS
+			coolDownMs: process.env.READY_COOLDOWN_MS
 		}
 
 		if (socket)

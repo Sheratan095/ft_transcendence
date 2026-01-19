@@ -128,7 +128,7 @@ class	PongConnectionManager
 			gameId,
 			opponentUsername,
 			"yourSide": side,
-			coolDownMs: process.env.COOLDOWN_MS
+			coolDownMs: process.env.READY_COOLDOWN_MS
 		}
 
 		if (socket)

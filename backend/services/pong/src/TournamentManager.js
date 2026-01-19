@@ -279,11 +279,11 @@ class	TournamentManager
 			return ;
 
 		const	currentMatches = tournament.getCurrentMatches();
-		
+		// Notify all participants about their match info
 		for (let participant of tournament.participants)
 		{
 			const	playerMatch = currentMatches.find(m => 
-				m.player1.userId === participant.userId || m.player2?.userId === participant.userId
+				m.playerLeftId === participant.userId || m.playerRightId === participant.userId
 			);
 
 			pongConnectionManager.sendTournamentRoundInfo(
