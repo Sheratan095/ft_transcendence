@@ -219,6 +219,19 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundInfo', data);
 	}
 
+	async	notifyTournamentRoundCooldown(participantId, cooldownMs, nextRoundNumber)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			cooldownMs,
+			nextRoundNumber,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundCooldown', data);
+	}
+
 	async	notifyTournamentPlayerReady(userId, readyUserId, matchId)
 	{
 		const	socket = this._connections.get(userId);

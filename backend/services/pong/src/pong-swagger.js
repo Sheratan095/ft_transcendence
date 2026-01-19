@@ -374,6 +374,17 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
+- **pong.tournamentRoundCooldown** - Break before next round starts
+\`\`\`json
+{
+  "event": "pong.tournamentRoundCooldown",
+  "data": {
+    "cooldownMs": 5000,
+    "nextRoundNumber": 2
+  }
+}
+\`\`\`
+
 - **pong.tournamentPlayerReady** - Your opponent is ready for the match
 \`\`\`json
 {

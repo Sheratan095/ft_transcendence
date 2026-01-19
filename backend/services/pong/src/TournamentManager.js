@@ -10,8 +10,10 @@ class	TournamentManager
 	{
 		this._tournaments = new Map(); // tournamentId -> TournamentInstance
 		this._matchTimers = new Map(); // matchId -> timer
+		this._roundTransitionTimers = new Map(); // tournamentId -> timer
 
 		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START);
+		this.ROUND_TRANSITION_COOLDOWN_MS = parseInt(process.env.ROUND_TRANSITION_COOLDOWN_MS) || 5000;
 	}
 	
 	createTournament(name, creatorId, creatorUsername)
@@ -177,8 +179,8 @@ class	TournamentManager
 				}
 				else if (tournament.isRoundComplete())
 				{
-					// Advance to next round
-					this._startNewRound(tournament.id);
+					// Advance to next round after cooldown
+					this._scheduleNextRound(tournament.id);
 				}
 			}
 		}
@@ -377,8 +379,8 @@ class	TournamentManager
 		// Check if round is complete and new round started
 		else if (tournament.currentRound < tournament.rounds.length - 1)
 		{
-			// New round was created, broadcast it
-			this._startNewRound(tournament.id);
+			// New round was created, schedule it after cooldown
+			this._scheduleNextRound(tournament.id);
 		}
 
 		console.log(`[PONG] Tournament match ${match.id} ended, winner: ${winnerId}`);
@@ -444,6 +446,46 @@ class	TournamentManager
 		}
 	}
 
+	_scheduleNextRound(tournamentId)
+	{
+		// Clear any existing round transition timer
+		this._clearRoundTransitionTimer(tournamentId);
+
+		const	tournament = this._tournaments.get(tournamentId);
+		if (!tournament)
+			return ;
+
+		console.log(`[PONG] Round complete in tournament ${tournamentId}, starting next round in ${this.ROUND_TRANSITION_COOLDOWN_MS}ms`);
+
+		// Notify all participants about the cooldown
+		for (let participant of tournament.participants)
+		{
+			pongConnectionManager.notifyTournamentRoundCooldown(
+				participant.userId,
+				this.ROUND_TRANSITION_COOLDOWN_MS,
+				tournament.currentRound + 2 // Next round number (currentRound is 0-indexed)
+			);
+		}
+
+		// Schedule the next round after cooldown
+		const	timer = setTimeout(() => {
+			this._roundTransitionTimers.delete(tournamentId);
+			this._startNewRound(tournamentId);
+		}, this.ROUND_TRANSITION_COOLDOWN_MS);
+
+		this._roundTransitionTimers.set(tournamentId, timer);
+	}
+
+	_clearRoundTransitionTimer(tournamentId)
+	{
+		const timer = this._roundTransitionTimers.get(tournamentId);
+		if (timer)
+		{
+			clearTimeout(timer);
+			this._roundTransitionTimers.delete(tournamentId);
+		}
+	}
+
 	_endTournament(tournament)
 	{
 		// Notify all participants of tournament end
@@ -468,6 +510,9 @@ class	TournamentManager
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
 			return ;
+
+		// Clear round transition timer
+		this._clearRoundTransitionTimer(tournamentId);
 
 		// Clear all match timers
 		const	allMatches = tournament.getAllGames();
