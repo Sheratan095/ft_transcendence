@@ -313,6 +313,28 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
+- **pong.tournamentParticipantLeft** - A participant left the tournament
+\`\`\`json
+{
+  "event": "pong.tournamentParticipantLeft",
+  "data": {
+    "tournamentId": "tourney123",
+    "tournamentName": "Summer Cup",
+    "participantUsername": "leavingPlayer"
+  }
+}
+\`\`\`
+
+- **pong.tournamentStarted** - Tournament has started
+\`\`\`json
+{
+  "event": "pong.tournamentStarted",
+  "data": {
+    "tournamentId": "tourney123"
+  }
+}
+\`\`\`
+
 - **error** - Error message
 \`\`\`json
 {

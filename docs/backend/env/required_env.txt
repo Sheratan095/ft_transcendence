@@ -69,6 +69,7 @@ services/pong:
     BALL_INITIAL_SPEED=0.5 # Initial ball speed per SECOND (0.5 = 50% of the game area per second)
     BALL_SPEED_FACTOR=1.1 # Factor by which the ball speed increases after each paddle hit
     BALL_MAX_SPEED=2.0 # Maximum ball speed per SECOND to prevent infinite acceleration
+    MIN_PLAYERS_FOR_TOURNAMENT_START=4
 
 services/tris:
     INTERNAL_API_KEY=1234

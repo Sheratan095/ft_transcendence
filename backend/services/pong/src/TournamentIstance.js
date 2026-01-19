@@ -44,4 +44,37 @@ export class	TournamentInstance
 		// TO DO
 		this.participants.delete(userId);
 	}
+
+	startTournament()
+	{
+		this.status = TournamentStatus.IN_PROGRESS;
+
+		// Shuffle participants
+		const	shuffledParticipants = Array.from(this.participants).sort(() => Math.random() - 0.5);
+		this.participants = new Set(shuffledParticipants);
+
+		// Create initial matches
+		for (let i = 0; i < shuffledParticipants.length; i += 2)
+		{
+			// Pair participants into matches
+			if (i + 1 < shuffledParticipants.length)
+			{
+				this.matches.push({
+					player1: shuffledParticipants[i],
+					player2: shuffledParticipants[i + 1],
+					winner: null,
+				});
+			}
+			else
+			{
+				// If the number of players in the tournament is odd, one player does not play in that round and
+				// automatically advances to the next round (a bye)
+				this.matches.push({
+					player1: shuffledParticipants[i],
+					player2: null,
+					winner: shuffledParticipants[i],
+				});
+			}
+		}
+	}
 }
