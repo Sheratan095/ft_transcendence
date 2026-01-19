@@ -192,16 +192,85 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentParticipantLeft', data);
 	}
 
-	async	notifyTournamentStarted(participantId, tournamentId)
+	async	notifyTournamentStarted(participantId, tournamentName, tournamentId)
 	{
 		const	socket = this._connections.get(participantId);
 
 		const	data = {
 			tournamentId,
+			tournamentName,
 		};
 
 		if (socket)
 			this.#dispatchEventToSocket(socket, 'pong.tournamentStarted', data);
+	}
+
+	async	sendTournamentRoundInfo(participantId, roundNumber, totalMatches, playerMatch)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			roundNumber,
+			totalMatches,
+			playerMatch, // null if player has a bye or is not in this round
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundInfo', data);
+	}
+
+	async	notifyTournamentPlayerReady(userId, readyUserId, matchId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			matchId,
+			readyUserId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentPlayerReady', data);
+	}
+
+	async	sendTournamentMatchStarted(userId, gameId, matchId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			gameId,
+			matchId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentMatchStarted', data);
+	}
+
+	async	notifyTournamentMatchEnded(userId, matchId, winnerId, winnerUsername)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			matchId,
+			winnerId,
+			winnerUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentMatchEnded', data);
+	}
+
+	async	notifyTournamentEnded(userId, tournamentId, winnerId, winnerUsername)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			tournamentId,
+			winnerId,
+			winnerUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentEnded', data);
 	}
 
 	//------------------------------------------

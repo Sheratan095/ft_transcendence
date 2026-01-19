@@ -14,6 +14,7 @@ export const	GameType =
 {
 	CUSTOM: 'CUSTOM',
 	RANDOM: 'RANDOM',
+	TOURNAMENT: 'TOURNAMENT',
 };
 
 export class	GameInstance
@@ -238,6 +239,13 @@ export class	GameInstance
 
 		const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
+		
+		// Check if this is a tournament game
+		if (this.gameType === GameType.TOURNAMENT)
+		{
+			const { tournamentManager } = require('./TournamentManager.js');
+			tournamentManager.handleGameEnd(this.id, winnerId, loserId);
+		}
 		
 		gameManager._gameEnd(this, winnerId, loserId, winnerUsername, false);
 	}
