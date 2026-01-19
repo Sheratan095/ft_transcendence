@@ -149,7 +149,7 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.gameStarted', data);
 	}
 
-	// TOURNAMENT RELATED MESSAGES
+	// ------------ TOURNAMENT RELATED MESSAGES ------------
 
 	async	replyTournamentCreated(creatorId, torunamentName, tournamentId)
 	{
@@ -164,27 +164,14 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentCreated', data);
 	}
 
-	async	replyTournamentJoined(userId, tournamentName, tournamentId)
-	{
-		const	socket = this._connections.get(userId);
-
-		const	data = {
-			tournamentId,
-			"name": tournamentName,
-		};
-
-		if (socket)
-			this.#dispatchEventToSocket(socket, 'pong.tournamentJoined', data);
-	}
-
 	async	notifyTournamentParticipantJoined(participantId, newUsername, tournamentName, tournamentId)
 	{
 		const	socket = this._connections.get(participantId);
 
 		const	data = {
-			"tournamentName": tournamentName,
-			"participantUsername": newUsername,
 			tournamentId,
+			tournamentName,
+			"participantUsername": newUsername,
 		};
 
 		if (socket)

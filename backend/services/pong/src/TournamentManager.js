@@ -49,15 +49,30 @@ class	TournamentManager
 		if (!tournament)
 			throw new Error('Tournament not found');
 
+		// Only allow joining if the tournament is in WAITING status
+		if (tournament.status !== TournamentStatus.WAITING)
+			throw new Error('Cannot join a tournament that is not in the WAITING status');
+
 		tournament.addParticipant(userId, username);
 
 		// Reply to the user and notify other participants
-		pongConnectionManager.replyTournamentJoined(userId, tournament.name, tournamentId);
 		for (let participant of tournament.participants)
 		{
 			if (participant.userId !== userId)
 				pongConnectionManager.notifyTournamentParticipantJoined(participant.userId, username, tournament.name, tournamentId);
 		}
+	}
+
+	getParticipants(tournamentId)
+	{
+		const	tournament = this._tournaments.get(tournamentId);
+		if (!tournament)
+			throw new Error('Tournament not found');
+
+		return (Array.from(tournament.participants).map(participant => ({
+			userId: participant.userId,
+			username: participant.username
+		})));
 	}
 }
 

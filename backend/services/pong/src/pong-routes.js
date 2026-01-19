@@ -98,6 +98,16 @@ const	TournamentInfo =
 	}
 };
 
+const	TournamentParticipant =
+{
+	type: 'object',
+	properties:
+	{
+		userId: { type: 'string' },
+		username: { type: 'string' }
+	}
+};
+
 //-----------------------------INTERNAL ROUTES-----------------------------
 
 const	createUserStats = 
@@ -350,7 +360,12 @@ const	joinTournament =
 				type: 'object',
 				properties:
 				{
-					message: { type: 'string' }
+					message: { type: 'string' },
+					participants:
+					{
+						type: 'array',
+						items: TournamentParticipant
+					},
 				}
 			},
 			400: ErrorResponse,
