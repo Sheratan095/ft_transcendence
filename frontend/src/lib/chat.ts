@@ -554,6 +554,190 @@ function handleMessageKeyPress(event: KeyboardEvent) {
   }
 }
 
+// Group chat creation functions
+let selectedFriendsForGroup: Set<string> = new Set();
+
+async function fetchFriends(): Promise<any[]> {
+  try {
+    const response = await fetch('/api/user/relationship/friends', {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch friends: ${response.statusText}`);
+    }
+
+    const friends = await response.json();
+    return Array.isArray(friends) ? friends : [];
+  } catch (err) {
+    console.error('Error fetching friends:', err);
+    return [];
+  }
+}
+
+function openFriendSelectionModal() {
+  const modal = document.getElementById('friend-selection-modal');
+  if (!modal) return;
+
+  modal.classList.remove('hidden');
+  selectedFriendsForGroup.clear();
+  
+  // Reset the form
+  const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
+  if (groupNameInput) {
+    groupNameInput.value = '';
+  }
+
+  renderFriendsList();
+}
+
+function closeFriendSelectionModal() {
+  const modal = document.getElementById('friend-selection-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+  selectedFriendsForGroup.clear();
+}
+
+async function renderFriendsList() {
+  const friendsList = document.getElementById('friends-list');
+  if (!friendsList) return;
+
+  friendsList.innerHTML = '<div class="text-neutral-400 text-center">Loading friends...</div>';
+
+  const friends = await fetchFriends();
+
+  if (friends.length === 0) {
+    friendsList.innerHTML = '<div class="text-neutral-400 text-center">No friends available</div>';
+    return;
+  }
+
+  friendsList.innerHTML = '';
+
+  friends.forEach(friend => {
+    const friendId = String(friend.id || friend.userId);
+    const friendName = friend.username || friend.name || 'Unknown';
+
+    const friendItem = document.createElement('div');
+    friendItem.className = 'flex items-center gap-3 p-3 hover:bg-neutral-700 rounded-md cursor-pointer transition';
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'w-4 h-4 cursor-pointer';
+    checkbox.checked = selectedFriendsForGroup.has(friendId);
+    
+    const label = document.createElement('label');
+    label.className = 'flex-1 cursor-pointer text-white';
+    label.textContent = friendName;
+
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        selectedFriendsForGroup.add(friendId);
+      } else {
+        selectedFriendsForGroup.delete(friendId);
+      }
+      updateSelectedFriendsTags();
+    });
+
+    friendItem.appendChild(checkbox);
+    friendItem.appendChild(label);
+    friendItem.addEventListener('click', () => {
+      checkbox.checked = !checkbox.checked;
+      checkbox.dispatchEvent(new Event('change'));
+    });
+
+    friendsList.appendChild(friendItem);
+  });
+}
+
+function updateSelectedFriendsTags() {
+  const selectedCount = document.getElementById('selected-count');
+  const selectedTags = document.getElementById('selected-friends-tags');
+  const submitBtn = document.getElementById('create-group-submit-btn');
+
+  if (selectedCount) {
+    selectedCount.textContent = String(selectedFriendsForGroup.size);
+  }
+
+  if (selectedTags) {
+    selectedTags.innerHTML = '';
+    selectedFriendsForGroup.forEach(friendId => {
+      const tag = document.createElement('div');
+      tag.className = 'bg-[#0dff66] text-black px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2';
+      tag.innerHTML = `
+        <span>${friendId}</span>
+        <button class="hover:text-black/70" type="button">×</button>
+      `;
+
+      tag.querySelector('button')?.addEventListener('click', () => {
+        selectedFriendsForGroup.delete(friendId);
+        updateSelectedFriendsTags();
+        const checkbox = document.querySelector(`input[data-friend-id="${friendId}"]`) as HTMLInputElement;
+        if (checkbox) {
+          checkbox.checked = false;
+        }
+      });
+
+      selectedTags.appendChild(tag);
+    });
+  }
+
+  // Enable submit button only if at least 2 friends are selected
+  if (submitBtn) {
+    submitBtn.disabled = selectedFriendsForGroup.size < 2;
+  }
+}
+
+async function createGroupChat() {
+  const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
+  const groupName = groupNameInput?.value.trim();
+
+  if (!groupName) {
+    alert('Please enter a group name');
+    return;
+  }
+
+  if (selectedFriendsForGroup.size < 2) {
+    alert('Please select at least 2 friends');
+    return;
+  }
+
+  try {
+    const memberIds = Array.from(selectedFriendsForGroup);
+
+    const response = await fetch('/api/chat/create-group-chat', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: groupName,
+        memberIds: memberIds
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `Failed to create group chat: ${response.statusText}`);
+    }
+
+    const { chatId } = await response.json();
+
+    closeFriendSelectionModal();
+
+    // Reload chats and select the new group chat
+    await loadChats();
+    selectChat(chatId);
+
+    console.log('Group chat created:', chatId);
+  } catch (err) {
+    console.error('Error creating group chat:', err);
+    alert(`Failed to create group chat: ${(err as Error).message}`);
+  }
+}
+
 // Event listeners setup
 export function setupChatEventListeners() {
   const closeBtn = document.getElementById('chat-close-btn');
@@ -591,5 +775,36 @@ export function setupChatEventListeners() {
   const loadMoreBtn = document.getElementById('load-more-btn');
   if (loadMoreBtn) {
     loadMoreBtn.addEventListener('click', loadMoreMessages);
+  }
+
+  // Friend selection modal listeners
+  const createGroupBtn = document.getElementById('create-group-btn');
+  if (createGroupBtn) {
+    createGroupBtn.addEventListener('click', openFriendSelectionModal);
+  }
+
+  const friendModalCloseBtn = document.getElementById('friend-modal-close-btn');
+  if (friendModalCloseBtn) {
+    friendModalCloseBtn.addEventListener('click', closeFriendSelectionModal);
+  }
+
+  const friendModalCancelBtn = document.getElementById('friend-modal-cancel-btn');
+  if (friendModalCancelBtn) {
+    friendModalCancelBtn.addEventListener('click', closeFriendSelectionModal);
+  }
+
+  const createGroupSubmitBtn = document.getElementById('create-group-submit-btn');
+  if (createGroupSubmitBtn) {
+    createGroupSubmitBtn.addEventListener('click', createGroupChat);
+  }
+
+  // Close friend selection modal when clicking outside
+  const friendModal = document.getElementById('friend-selection-modal');
+  if (friendModal) {
+    friendModal.addEventListener('click', (e) => {
+      if (e.target === friendModal) {
+        closeFriendSelectionModal();
+      }
+    });
   }
 }

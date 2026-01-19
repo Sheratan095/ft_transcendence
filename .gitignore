@@ -69,3 +69,4 @@ docker-compose.override.yml
 data/
 
 frontend/tailwind.css
+frontend/package-lock.json
