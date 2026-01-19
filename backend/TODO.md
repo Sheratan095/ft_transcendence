@@ -147,3 +147,8 @@ I think it's ok
 [] Pong mnhgUser stats aren't up to date
 
 [] Is busy has to be done in both games and tournaments
+
+[] When updating profile image with a non supported extension
+	[GATEWAY] Users service error: Request failed with status code 400
+
+[] Can creator cancel the tournament

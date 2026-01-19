@@ -83,6 +83,7 @@ export class	TournamentInstance
 				gameInstance.tournamentId = this.id;
 				gameInstance.gameStatus = GameStatus.WAITING;
 
+
 				matches.push(gameInstance);
 			}
 			else
@@ -129,12 +130,12 @@ export class	TournamentInstance
 			if (match.playerLeftId === userId)
 			{
 				match.playerLeftReady = true;
-				return match;
+				return (match);
 			}
 			else if (match.playerRightId === userId)
 			{
 				match.playerRightReady = true;
-				return match;
+				return (match);
 			}
 		}
 
@@ -145,25 +146,23 @@ export class	TournamentInstance
 	{
 		const	match = this._findMatchByGameId(gameId);
 		if (!match || match.isBye)
-			return false;
+			return (false);
 
 		if (match.gameStatus !== GameStatus.WAITING)
-			return false;
+			return (false);
 
-		return match.playerLeftReady && match.playerRightReady;
+		return (match.playerLeftReady && match.playerRightReady);
 	}
 
 	startMatch(gameId)
 	{
-		const match = this._findMatchByGameId(gameId);
+		const	match = this._findMatchByGameId(gameId);
 		if (!match || match.isBye)
 			return (null);
 
-		// Small delay before starting
-		setTimeout(() => {
-			match.gameStatus = GameStatus.IN_PROGRESS;
-			match.startGame();
-		}, process.env.READY_COOLDOWN_MS);
+		// Start the match
+		match.gameStatus = GameStatus.IN_PROGRESS;
+		match.startGame();
 
 		return (match);
 	}
@@ -191,9 +190,9 @@ export class	TournamentInstance
 	{
 		const	currentMatches = this.rounds[this.currentRound];
 		if (!currentMatches)
-			return false;
+			return (false);
 
-		return currentMatches.every(match => match.gameStatus === GameStatus.FINISHED);
+		return (currentMatches.every(match => match.gameStatus === GameStatus.FINISHED));
 	}
 
 	_advanceToNextRound()
@@ -220,7 +219,7 @@ export class	TournamentInstance
 		{
 			const	match = round.find(m => !m.isBye && m.id === gameId);
 			if (match)
-				return match;
+				return (match);
 		}
 
 		return (null);

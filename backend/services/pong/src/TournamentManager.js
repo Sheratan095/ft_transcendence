@@ -1,12 +1,15 @@
 import { TournamentInstance, TournamentStatus } from './TournamentIstance.js';
+import { GameStatus } from './GameInstance.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
 import { gameManager } from './GameManager.js';
+import { v4 as uuidv4 } from 'uuid';
 
 class	TournamentManager
 {
 	constructor()
 	{
 		this._tournaments = new Map(); // tournamentId -> TournamentInstance
+		this._matchTimers = new Map(); // matchId -> timer
 
 		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START);
 	}
@@ -154,7 +157,7 @@ class	TournamentManager
 			pongConnectionManager.notifyTournamentStarted(participant.userId, tournament.name, tournamentId);
 
 		// Send bracket/match info to all participants
-		this._broadcastCurrentRound(tournamentId);
+		this._startNewRound(tournamentId);
 
 		console.log(`[PONG] Tournament ${tournamentId} started with ${tournament.participants.size} players`);
 	}
@@ -189,9 +192,10 @@ class	TournamentManager
 		if (opponentId)
 			pongConnectionManager.notifyTournamentPlayerReady(opponentId, userId, match.id);
 
-		// If both players are ready, start the match
+		// If both players are ready, clear timer and start the match immediately
 		if (tournament.isMatchReady(match.id))
 		{
+			this._clearMatchTimer(match.id);
 			this._startMatch(tournament, match);
 		}
 
@@ -266,19 +270,27 @@ class	TournamentManager
 		else if (tournament.currentRound < tournament.rounds.length - 1)
 		{
 			// New round was created, broadcast it
-			this._broadcastCurrentRound(tournament.id);
+			this._startNewRound(tournament.id);
 		}
 
 		console.log(`[PONG] Tournament match ${match.id} ended, winner: ${winnerId}`);
 	}
 
-	_broadcastCurrentRound(tournamentId)
+	_startNewRound(tournamentId)
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
 			return ;
 
 		const	currentMatches = tournament.getCurrentMatches();
+		
+		// Start ready timers for all matches in this round
+		for (let match of currentMatches)
+		{
+			if (!match.isBye && match.gameStatus === GameStatus.WAITING)
+				this._startMatchTimer(tournament, match);
+		}
+
 		// Notify all participants about their match info
 		for (let participant of tournament.participants)
 		{
@@ -292,6 +304,35 @@ class	TournamentManager
 				currentMatches.length,
 				playerMatch || null
 			);
+		}
+	}
+
+	_startMatchTimer(tournament, match)
+	{
+		// Clear any existing timer
+		this._clearMatchTimer(match.id);
+
+		// Set timer to auto-start the game after cooldown
+		const timer = setTimeout(() => {
+			// Verify match is still in waiting state
+			if (match.gameStatus === GameStatus.WAITING)
+			{
+				console.log(`[PONG] Ready timer expired for match ${match.id}, auto-starting...`);
+				this._matchTimers.delete(match.id);
+				this._startMatch(tournament, match);
+			}
+		}, process.env.READY_COOLDOWN_MS || 5000);
+
+		this._matchTimers.set(match.id, timer);
+	}
+
+	_clearMatchTimer(matchId)
+	{
+		const timer = this._matchTimers.get(matchId);
+		if (timer)
+		{
+			clearTimeout(timer);
+			this._matchTimers.delete(matchId);
 		}
 	}
 
