@@ -121,10 +121,10 @@ export class	TournamentInstance
 		{
 			// Skip bye matches
 			if (match.isBye)
-				continue;
+				continue ;
 
 			if (match.gameStatus !== GameStatus.WAITING)
-				continue;
+				continue ;
 
 			if (match.playerLeftId === userId)
 			{
@@ -138,7 +138,7 @@ export class	TournamentInstance
 			}
 		}
 
-		return null;
+		return (null);
 	}
 
 	isMatchReady(gameId)
@@ -157,7 +157,7 @@ export class	TournamentInstance
 	{
 		const match = this._findMatchByGameId(gameId);
 		if (!match || match.isBye)
-			return null;
+			return (null);
 
 		// Small delay before starting
 		setTimeout(() => {
@@ -165,14 +165,14 @@ export class	TournamentInstance
 			match.startGame();
 		}, process.env.READY_COOLDOWN_MS);
 
-		return match;
+		return (match);
 	}
 
 	setMatchWinner(gameId, winnerId)
 	{
 		const	match = this._findMatchByGameId(gameId);
 		if (!match)
-			return;
+			return ;
 
 		match.gameStatus = GameStatus.FINISHED;
 		
@@ -184,9 +184,7 @@ export class	TournamentInstance
 
 		// Check if this round is complete
 		if (this._isRoundComplete())
-		{
 			this._advanceToNextRound();
-		}
 	}
 
 	_isRoundComplete()
@@ -208,7 +206,7 @@ export class	TournamentInstance
 		{
 			this.status = TournamentStatus.FINISHED;
 			this.winner = winners[0];
-			return;
+			return ;
 		}
 
 		// Create next round with winners
@@ -225,29 +223,31 @@ export class	TournamentInstance
 				return match;
 		}
 
-		return null;
+		return (null);
 	}
 
 	getCurrentMatches()
 	{
-		return this.rounds[this.currentRound] || [];
+		return (this.rounds[this.currentRound]);
 	}
 
 	getMatchForPlayer(userId)
 	{
+		// TO DO check
 		const	currentMatches = this.getCurrentMatches();
 
-		return currentMatches.find(m => {
+		return (currentMatches.find(m => {
 			if (m.isBye)
 				return m.player1?.userId === userId;
 			return m.playerLeftId === userId || m.playerRightId === userId;
-		}) || null;
+		}) || null);
 	}
 
 	getAllGames()
 	{
 		// Return all GameInstance objects from all rounds (excluding bye matches)
 		const	games = [];
+
 		for (const round of this.rounds)
 		{
 			for (const match of round)
@@ -256,6 +256,7 @@ export class	TournamentInstance
 					games.push(match);
 			}
 		}
-		return games;
+
+		return (games);
 	}
 }
