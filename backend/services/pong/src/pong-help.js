@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { gameManager } from './GameManager.js';
+import { tournamentManager } from './TournamentManager.js';
 
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
@@ -147,4 +149,39 @@ export async function	checkBlock(userA, userB)
 		console.error('[CHAT] Error checking block status:', err.message);
 		return (false);
 	}
+}
+
+export async function	isUserBusyInternal(userId, includeTris)
+{
+	const	isInGame = await gameManager.isUserInGameOrMatchmaking(userId);
+	const	isInTournament = await tournamentManager.isUserInTournament(userId);
+
+	let	status = isInGame || isInTournament;
+
+	// If specified, check Tris service for busy status
+	//	it's included when the request comes from this service, when it's from another service we assume they already checked Tris
+	if (includeTris)
+	{
+		try
+		{
+			const	response = await axios.get(`${process.env.TRIS_SERVICE_URL}/is-user-busy`, {
+				params: { userId }
+			});
+
+			status = status || response.data.isBusy;
+
+			console.log(`[PONG] User ${userId} busy status ${status},[TRIS included]`);
+
+			return (status);
+		}
+		catch (err)
+		{
+			console.error(`[PONG] Failed to check user busy status in Tris service for Id ${userId}:`, err.message);
+			return (status);
+		}
+	}
+
+	console.log(`[PONG] User ${userId} busy status ${status}`);
+
+	return (status);
 }

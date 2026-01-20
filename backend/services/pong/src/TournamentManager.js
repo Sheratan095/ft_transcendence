@@ -50,7 +50,7 @@ class	TournamentManager
 		return (tournamentList);
 	}
 
-	addParticipant(tournamentId, userId, username)
+	async addParticipant(tournamentId, userId, username)
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
@@ -535,6 +535,17 @@ class	TournamentManager
 		// Remove tournament
 		this._tournaments.delete(tournamentId);
 		console.log(`[PONG] Tournament ${tournamentId} cleaned up`);
+	}
+
+	isUserInTournament(userId)
+	{
+		for (let tournament of this._tournaments.values())
+		{
+			if (tournament.hasParticipant(userId))
+				return (true);
+		}
+
+		return (false);
 	}
 }
 

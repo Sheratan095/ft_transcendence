@@ -1,6 +1,7 @@
 import { calculateElo, extractUserData } from './pong-help.js';
 import { tournamentManager } from './TournamentManager.js';
-import { getUsernameById, sleep, checkBlock } from './pong-help.js';
+import { gameManager } from './GameManager.js';
+import { getUsernameById, sleep, checkBlock, isUserBusyInternal } from './pong-help.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -51,6 +52,24 @@ export const	deleteUserStats = async (req, reply) =>
 	{
 		console.error('[PONG] Error in deleteUserStats controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	isUserBusy = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.query.userId;
+
+		// Check if user is in an active game, not including TRIS because this call should be done from tris service
+		const	isInGame = await isUserBusyInternal(userId, false);
+
+		return (reply.code(200).send({ isBusy: isInGame }));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in isUserBusy controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
 
@@ -133,13 +152,23 @@ export const	createTournament = async (req, reply) =>
 	{
 		const	name = req.body.name;
 		const	creatorId = extractUserData(req).id;
-		console.log(`[PONG] User ${creatorId} is creating a tournament named "${name}"`);
+
 		const	creatorUsername = await getUsernameById(creatorId);
 		if (!creatorUsername)
 			return (reply.code(404).send({ error: 'Creator user not found' }));
 
+		// Creator must not be busy (in matchmaking or in another game including TRIS)
+		if (await isUserBusyInternal(creatorId, true))
+		{
+			console.error(`[PONG] ${creatorId} tried to create a tournament while busy`);
+			pongConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
+			return ;
+		}
+
 		// Create a new tournament
 		const	tournament = tournamentManager.createTournament(name, creatorId, creatorUsername);
+
+		console.log(`[PONG] User ${creatorId} creted a tournament named "${name}"`);
 
 		return (reply.code(201).send({
 			tournamentId: tournament.id,
@@ -178,6 +207,14 @@ export const	joinTournament = async (req, reply) =>
 		const	username = await getUsernameById(userId);
 		if (!username)
 			return (reply.code(404).send({ error: 'User not found' }));
+
+		// User must not be busy (in matchmaking or in another game including TRIS)
+		if (await isUserBusyInternal(userId, true))
+		{
+			console.error(`[PONG] ${userId} tried to join a tournament while busy`);
+			pongConnectionManager.sendErrorMessage(userId, 'You are already in a game or matchmaking');
+			return ;
+		}
 
 		// Add participant to the tournament
 		tournamentManager.addParticipant(tournamentId, userId, username);

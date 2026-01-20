@@ -12,7 +12,8 @@ import {
 	getUserMatchHistory as getUserMatchHistoryHandler,
 	createTournament as createTournamentHandler,
 	getAllTournaments as getAllTournamentsHandler,
-	joinTournament as joinTournamentHandler
+	joinTournament as joinTournamentHandler,
+	isUserBusy as isUserBusyHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -186,6 +187,38 @@ const	deleteUserStats =
 
 	preHandler: validateInternalApiKey,
 	handler: deleteUserStatsHandler
+}
+
+const	isUserBusy =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Check if user is busy',
+		description: 'Internal only. Checks if a user is currently in a game/tournament. (called by other game services before inviting/joining)',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: { isBusy: { type: 'boolean' } }
+			},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: isUserBusyHandler
 }
 
 //-----------------------------PUBLIC ROUTES-----------------------------
@@ -400,6 +433,7 @@ export function	pongRoutes(fastify)
 	fastify.get('/stats', getUserStats);
 	fastify.get('/match-history', getUserMatchHistory);
 	fastify.get('/get-all-tournaments', getAllTournaments);
+	fastify.get('/is-user-busy', isUserBusy);
 	// fastify.get('/get-tournament', getTournament); // TO DO return single tournament info
 
 	fastify.post('/create-user-stats', createUserStats);
