@@ -27,7 +27,7 @@ export class FriendsManager {
 
   async loadFriends(): Promise<User[]> {
     try {
-      const response = await fetch('/api/relationships/friends', {
+      const response = await fetch('/api/users/relationships/friends', {
         method: 'GET',
         credentials: 'include'
       });
@@ -56,7 +56,7 @@ export class FriendsManager {
 
   async loadFriendRequests(): Promise<User[]> {
     try {
-      const response = await fetch('/api/relationships/requests/incoming', {
+      const response = await fetch('/api/users/relationships/requests/incoming', {
         method: 'GET',
         credentials: 'include'
       });
@@ -85,11 +85,11 @@ export class FriendsManager {
 
   async addFriend(userId: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/relationships/request', {
+      const response = await fetch('/api/users/relationships/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ targetUserId: userId })
+        body: JSON.stringify({ targetId: userId })
       });
 
       if (!response.ok) {
@@ -105,9 +105,10 @@ export class FriendsManager {
 
   async removeFriend(userId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/relationships/${userId}`, {
+      const response = await fetch(`/api/relationships/removeFriend`, {
         method: 'DELETE',
-        credentials: 'include'
+        credentials: 'include',
+        body: JSON.stringify({ targetId: userId })
       });
 
       if (!response.ok) {
@@ -129,8 +130,8 @@ export class FriendsManager {
 
   async acceptFriendRequest(userId: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/relationships/accept', {
-        method: 'POST',
+      const response = await fetch('/api/users/relationships/accept', {
+      method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ requesterId: userId })
@@ -162,18 +163,19 @@ export class FriendsManager {
     }
   }
 
-  async rejectFriendRequest(userId: string): Promise<boolean> {
+  async rejectFriendRequest(requesterUserId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/relationships/${userId}`, {
-        method: 'DELETE',
-        credentials: 'include'
+      const response = await fetch(`/api/users/relationships/reject`, {
+        method: 'PUT',
+        credentials: 'include',
+        body: JSON.stringify({ requesterId: requesterUserId })
       });
 
       if (!response.ok) {
         throw new Error(`Failed to reject friend request: ${response.statusText}`);
       }
 
-      this.friendRequests.delete(userId);
+      this.friendRequests.delete(requesterUserId);
 
       if (this.onRequestsUpdated) {
         this.onRequestsUpdated(Array.from(this.friendRequests.values()));
@@ -188,11 +190,11 @@ export class FriendsManager {
 
   async blockUser(userId: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/relationships/block', {
-        method: 'POST',
+      const response = await fetch('/api/users/relationships/block', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ targetUserId: userId })
+        body: JSON.stringify({ targetId: userId })
       });
 
       if (!response.ok) {
@@ -213,18 +215,19 @@ export class FriendsManager {
     }
   }
 
-  async unblockUser(userId: string): Promise<boolean> {
+  async unblockUser(targetId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/relationships/${userId}/unblock`, {
-        method: 'POST',
-        credentials: 'include'
+      const response = await fetch(`/api/users/relationships/unblock`, {
+        method: 'DELETE',
+        credentials: 'include',
+        body: JSON.stringify({ targetUserId: targetId })
       });
 
       if (!response.ok) {
         throw new Error(`Failed to unblock user: ${response.statusText}`);
       }
 
-      this.blocked.delete(userId);
+      this.blocked.delete(targetId);
       return true;
     } catch (err) {
       console.error('Error unblocking user:', err);

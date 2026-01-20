@@ -188,6 +188,13 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 no-underline bl
 						Delete
 					</button>
 
+					<!-- Language selector -->
+					<select id="profile-language" class="px-4 py-2 bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-neutral-600 hover:bg-neutral-600 transition rounded">
+						<option value="en">English</option>
+						<option value="fr">Français</option>
+						<option value="it">Italiano</option>
+					</select>
+
 					<!-- 2FA toggle -->
 					<div class="flex items-center gap-2 ml-auto">
 						<input id="input-lock" type="checkbox" class="hidden peer">
@@ -295,8 +302,15 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 no-underline bl
       <!-- Main chat area -->
       <div class="flex-1 flex flex-col">
         <!-- Chat header -->
-        <div class="p-4 border-b border-neutral-700 bg-neutral-800">
+        <div class="p-4 border-b border-neutral-700 bg-neutral-800 flex justify-between items-center">
           <h2 id="chat-header" class="text-xl font-semibold text-white">Select a chat</h2>
+          <button
+            id="leave-group-btn"
+            class="hidden px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+            title="Leave this group chat"
+          >
+            Leave Group
+          </button>
         </div>
 
         <!-- Messages container with load more button -->

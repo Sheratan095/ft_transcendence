@@ -97,7 +97,6 @@ export class ChatManager {
       }
 
       const newMessages = await response.json();
-      console.log('Loaded messages from API:', newMessages);
 
       // Reverse to show oldest first (WhatsApp style)
       if (offset === 0) {
@@ -147,7 +146,6 @@ export class ChatManager {
 
       this.chatSocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log('Received message:', data);
 
         if (data.type === 'chat.chatMessage') {
           const message: Message = {

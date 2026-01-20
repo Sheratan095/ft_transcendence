@@ -1,18 +1,33 @@
 import { showSuccessToast, showInfoToast, showWarningToast } from '../shared/Toast';
+import { FriendsManager } from './FriendsManager';
 
 let notifSocket: WebSocket | null = null;
+let friendsManager: FriendsManager | null = null;
 
+export function setFriendsManager(manager: FriendsManager) {
+  friendsManager = manager;
+}
+
+export function sendPing() {
+  if (notifSocket) {
+	const pingMessage = JSON.stringify({ event: 'ping' });
+	notifSocket.send(pingMessage);
+	console.log('Sent ping to notifications server');
+  }
+}
 
 export function connectNotificationsWebSocket() {
   if (!notifSocket || notifSocket.readyState !== WebSocket.OPEN) 
 	{
 		const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-		const wsUrl = `${protocol}://${window.location.host}/ws/notifications`;
+		const wsUrl = `${protocol}://${window.location.host}/ws/notification`;
 		console.log('Connecting to notifications WebSocket at', wsUrl);
 		notifSocket = new WebSocket(wsUrl);
 
 		notifSocket.addEventListener('open', () => {
 			console.log('Notifications WebSocket connected');
+			// Send initial ping to establish connection
+			sendPing();
 		});
 
 		notifSocket.addEventListener('message', (event) => {
@@ -68,7 +83,15 @@ function handleNotificationEvent(data: any) {
 		case 'friend.request':
 			{
 				const username = data.data?.username || 'Someone';
+				const requesterId = data.data?.requesterId;
 				showWarningToast(`Friend request from ${username}`, { duration: 5000 });
+				
+				// Load friend requests if FriendsManager is available
+				if (friendsManager) {
+					friendsManager.loadFriendRequests().catch(err => 
+						console.error('Failed to reload friend requests:', err)
+					);
+				}
 			}
 			break;
 
@@ -76,6 +99,13 @@ function handleNotificationEvent(data: any) {
 			{
 				const username = data.data?.username || 'A user';
 				showSuccessToast(`${username} accepted your friend request!`, { duration: 4000 });
+				
+				// Reload friends list if FriendsManager is available
+				if (friendsManager) {
+					friendsManager.loadFriends().catch(err => 
+						console.error('Failed to reload friends:', err)
+					);
+				}
 			}
 			break;
 
@@ -83,6 +113,16 @@ function handleNotificationEvent(data: any) {
 			{
 				const username = data.data?.username || 'Someone';
 				showSuccessToast(`You are now friends with ${username}!`, { duration: 4000 });
+				
+				// Reload both friends and requests if FriendsManager is available
+				if (friendsManager) {
+					Promise.all([
+						friendsManager.loadFriends(),
+						friendsManager.loadFriendRequests()
+					]).catch(err => 
+						console.error('Failed to reload friends data:', err)
+					);
+				}
 			}
 			break;
 
@@ -101,13 +141,4 @@ function handleNotificationEvent(data: any) {
 		default:
 			console.log('Unknown notification event:', data.event);
 	}
-}
-
-
-export function sendPing() {
-  if (notifSocket && notifSocket.readyState === WebSocket.OPEN) {
-	const pingMessage = JSON.stringify({ event: 'ping' });
-	notifSocket.send(pingMessage);
-	console.log('Sent ping to notifications server');
-  }
 }
