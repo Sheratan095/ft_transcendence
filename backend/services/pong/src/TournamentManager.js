@@ -395,7 +395,7 @@ class	TournamentManager
 			await this._endTournament(tournament);
 		}
 		// Check if round is complete and new round started
-		else if (tournament.currentRound < tournament.rounds.length - 1)
+		else if (tournament.currentRound <= tournament.rounds.length)
 		{
 			// New round was created, schedule it after cooldown
 			this._scheduleNextRound(tournament.id);
@@ -428,7 +428,7 @@ class	TournamentManager
 
 			pongConnectionManager.sendTournamentRoundInfo(
 				participant.userId,
-				tournament.currentRound + 1,
+				tournament.currentRound,
 				currentMatches.length,
 				playerMatch || null
 			);
@@ -481,7 +481,7 @@ class	TournamentManager
 			pongConnectionManager.notifyTournamentRoundCooldown(
 				participant.userId,
 				this.ROUND_TRANSITION_COOLDOWN_MS,
-				tournament.currentRound + 2 // Next round number (currentRound is 0-indexed)
+				tournament.currentRound + 1 // Next round number
 			);
 		}
 

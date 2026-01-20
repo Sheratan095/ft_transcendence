@@ -185,3 +185,13 @@ export async function	isUserBusyInternal(userId, includeTris)
 
 	return (status);
 }
+
+export function	calculateTop(totalPlayers, roundLost)
+{
+	if (roundLost === null)
+		return 1; // winner
+
+	const	totalRounds = Math.ceil(Math.log2(totalPlayers));
+
+	return (2 ** (totalRounds - roundLost + 1));
+}

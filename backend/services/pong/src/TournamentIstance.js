@@ -24,7 +24,7 @@ export class	TournamentInstance
 		this.addParticipant(creatorId, creatorUsername);
 
 		this.status = TournamentStatus.WAITING;
-		this.currentRound = 0;
+		this.currentRound = 1;
 		this.rounds = []; // Array of rounds, each round contains matches
 	}
 
@@ -120,7 +120,7 @@ export class	TournamentInstance
 
 	playerReady(userId)
 	{
-		const	currentMatches = this.rounds[this.currentRound];
+		const	currentMatches = this.rounds[this.currentRound - 1];
 		if (!currentMatches)
 			return null;
 
@@ -195,7 +195,7 @@ export class	TournamentInstance
 
 	_isRoundComplete()
 	{
-		const	currentMatches = this.rounds[this.currentRound];
+		const	currentMatches = this.rounds[this.currentRound - 1];
 		if (!currentMatches)
 			return (false);
 
@@ -204,7 +204,7 @@ export class	TournamentInstance
 
 	_advanceToNextRound()
 	{
-		const	currentMatches = this.rounds[this.currentRound];
+		const	currentMatches = this.rounds[this.currentRound - 1];
 		const	winners = currentMatches.map(match => match.winner).filter(w => w !== null);
 
 		// If only one winner, tournament is over
@@ -234,7 +234,7 @@ export class	TournamentInstance
 
 	getCurrentMatches()
 	{
-		return (this.rounds[this.currentRound]);
+		return (this.rounds[this.currentRound - 1]);
 	}
 
 	getMatchForPlayer(userId)
