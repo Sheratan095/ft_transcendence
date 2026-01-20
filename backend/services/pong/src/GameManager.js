@@ -130,10 +130,10 @@ class	GameManager
 		}
 
 		// Check if game is a custom game and in WAITING status
-		if (gameInstance.gameType !== GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
+		if (gameInstance.gameType !== GameType.CUSTOM || gameInstance.gameStatus !== GameStatus.WAITING)
 		{
-			console.error(`[PONG] ${playerId} tried to join a non-custom game ${gameId}`);
-			pongConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
+			console.error(`[PONG] ${playerId} tried to join a non-custom game ${gameId} or game not waiting`);
+			pongConnectionManager.sendErrorMessage(playerId, 'Not a custom game or game already started');
 			return ;
 		}
 

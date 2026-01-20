@@ -45,8 +45,15 @@ export class	TournamentInstance
 
 	removeParticipant(userId)
 	{
-		// Remove participant by userId
-		this.participants.delete(userId);
+		// Remove participant by userId - find the object and delete it
+		for (let participant of this.participants)
+		{
+			if (participant.userId === userId)
+			{
+				this.participants.delete(participant);
+				break;
+			}
+		}
 	}
 
 	startTournament()

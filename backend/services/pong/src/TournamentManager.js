@@ -135,7 +135,7 @@ class	TournamentManager
 		// If the tournament is in progress, handle forfeiting active match
 		if (tournament.status === TournamentStatus.IN_PROGRESS)
 		{
-			const	match = tournament.getActiveMatchForPlayer(userId);
+			const	match = tournament.getMatchForPlayer(userId);
 			if (match)
 			{
 				// Clear any ready timer for this match
