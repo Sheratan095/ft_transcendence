@@ -182,7 +182,9 @@ export const	joinTournament = async (req, reply) =>
 		// Add participant to the tournament
 		tournamentManager.addParticipant(tournamentId, userId, username);
 
-		return (reply.code(200).send({ message: 'Joined tournament successfully' }));
+		const	participants = tournamentManager.getParticipants(tournamentId);
+
+		return (reply.code(200).send({ message: 'Joined tournament successfully', participants: participants }));
 	}
 	catch (err)
 	{

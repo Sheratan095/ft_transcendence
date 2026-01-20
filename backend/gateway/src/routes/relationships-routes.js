@@ -23,12 +23,14 @@ export const	getUserRelationships = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] GetUserRelationships error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (get-user-relationships) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -44,12 +46,14 @@ export const	getFriends = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] GetFriends error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (get-user-friends) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -65,12 +69,14 @@ export const	getIncomingRequests = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] GetIncomingRequests error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (get-user-incoming-requests) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -86,12 +92,15 @@ export const	getOutgoingRequests = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] GetOutgoingRequests error:', err.message);
+		// Forward the specific error from relationships service, do not log
 
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (get-user-outgoing-requests) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 }
 
@@ -107,12 +116,14 @@ export const	sendFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] SendFriendRequest error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (send-friend-request) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -128,12 +139,14 @@ export const	acceptFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] AcceptFriendRequest error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (accept-friend-request) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -149,12 +162,14 @@ export const	rejectFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] RejectFriendRequest error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (reject-friend-request) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -170,12 +185,14 @@ export const	blockUser = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] BlockUser error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (block-user) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -192,12 +209,14 @@ export const	unblockUser = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] UnblockUser error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (unblock-user) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -214,12 +233,14 @@ export const	cancelFriendRequest = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] CancelFriendRequest error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (cancel-friend-request) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -236,12 +257,14 @@ export const	removeFriend = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] RemoveFriend error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (remove-friend) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 };
 
@@ -258,11 +281,13 @@ export const	getUsersRelationship = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] GetUsersRelationship error:', err.message);
-
+		// Forward the specific error from relationships service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data));
+			return (reply.code(err.response.status).send(err.response.data))
 
-		return (reply.code(500).send({ error: 'Users service unavailable' }));
+		// Only log and send generic error if relationships service did not handle it
+		console.log('[GATEWAY] Relationships service (get-user-relationship) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Relationships service unavailable' }))
 	}
 }

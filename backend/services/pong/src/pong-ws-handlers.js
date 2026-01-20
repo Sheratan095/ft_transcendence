@@ -1,5 +1,6 @@
 // The class is initialized in PongConnectionManager.js
 import { pongConnectionManager } from './PongConnectionManager.js';
+import { tournamentManager } from './TournamentManager.js';
 import { validateInternalApiKey, getUsernameById } from './pong-help.js';
 import { gameManager } from './GameManager.js';
 
@@ -35,6 +36,7 @@ export function	handleClose(socket, userId)
 
 	pongConnectionManager.removeConnection(userId);
 	gameManager.handleUserDisconnect(userId);
+	tournamentManager.handleUserDisconnect(userId);
 }
 
 export function	handleError(socket, err, userId)
@@ -46,6 +48,7 @@ export function	handleError(socket, err, userId)
 	{
 		pongConnectionManager.removeConnection(userId);
 		gameManager.handleUserDisconnect(userId);
+		tournamentManager.handleUserDisconnect(userId);
 	}
 }
 
@@ -95,6 +98,18 @@ export function	handleMessage(socket, msg, userId)
 
 			case 'pong.paddleMove':
 				handlePaddleMove(userId, message.data.gameId, message.data.direction);
+				break;
+
+			case 'tournament.leave':
+				handleTournamentLeave(userId, message.data.tournamentId);
+				break;
+
+			case 'tournament.start':
+				handleTournamentStart(userId, message.data.tournamentId);
+				break;
+
+			case 'tournament.ready':
+				handleTournamentReady(userId, message.data.tournamentId);
 				break;
 
 			default:
@@ -274,5 +289,65 @@ export async function	handlePaddleMove(userId, gameId, direction)
 	{
 		console.error(`[PONG] Error processing paddle move for user ${userId}:`, err.message);
 		pongConnectionManager.sendErrorMessage(userId, 'Failed to process paddle move');
+	}
+}
+
+export async function	handleTournamentLeave(userId, tournamentId)
+{
+	try
+	{
+		if (!tournamentId)
+		{
+			console.error(`[PONG] No tournamentId provided by user ${userId} to leave tournament`);
+			pongConnectionManager.sendErrorMessage(userId, 'No tournament ID provided');
+			return ;
+		}
+
+		tournamentManager.removeParticipant(tournamentId, userId);
+	}
+	catch (err)
+	{
+		console.error(`[PONG] Error leaving tournament for user ${userId}:`, err.message);
+		pongConnectionManager.sendErrorMessage(userId, 'Failed to leave tournament');
+	}
+}
+
+export async function	handleTournamentStart(userId, tournamentId)
+{
+	try
+	{
+		if (!tournamentId)
+		{
+			console.error(`[PONG] No tournamentId provided to start tournament`);
+			pongConnectionManager.sendErrorMessage(userId, 'No tournament ID provided');
+			return ;
+		}
+
+		tournamentManager.startTournament(tournamentId, userId);
+	}
+	catch (err)
+	{
+		console.error(`[PONG] Error starting tournament ${tournamentId}:`, err.message);
+		pongConnectionManager.sendErrorMessage(userId, 'Failed to start tournament');
+	}
+}
+
+export async function	handleTournamentReady(userId, tournamentId)
+{
+	try
+	{
+		if (!tournamentId)
+		{
+			console.error(`[PONG] No tournamentId provided by user ${userId} to ready up`);
+			pongConnectionManager.sendErrorMessage(userId, 'No tournament ID provided');
+			return ;
+		}
+
+		tournamentManager.playerReady(tournamentId, userId);
+	}
+	catch (err)
+	{
+		console.error(`[PONG] Error readying up for tournament ${tournamentId}:`, err.message);
+		pongConnectionManager.sendErrorMessage(userId, 'Failed to ready up');
 	}
 }

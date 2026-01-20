@@ -112,6 +112,36 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
+- **tournament.leave** - Leave a tournament
+\`\`\`json
+{
+  "event": "tournament.leave",
+  "data": {
+    "tournamentId": "tourney123"
+  }
+}
+\`\`\`
+
+- **tournament.start** - Start a tournament (creator only)
+\`\`\`json
+{
+  "event": "tournament.start",
+  "data": {
+    "tournamentId": "tourney123"
+  }
+}
+\`\`\`
+
+- **tournament.ready** - Mark yourself as ready for your tournament match
+\`\`\`json
+{
+  "event": "tournament.ready",
+  "data": {
+    "tournamentId": "tourney123"
+  }
+}
+\`\`\`
+
 ---
 
 **SERVER → CLIENT EVENTS**
@@ -229,12 +259,12 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
       "radius": 0.02
     },
     "paddles": {
-      "player1": { "x": 0.05, "y": 0.4, "width": 0.02, "height": 0.2 },
-      "player2": { "x": 0.93, "y": 0.4, "width": 0.02, "height": 0.2 }
+      "playerLeft": { "x": 0.05, "y": 0.4, "width": 0.02, "height": 0.2 },
+      "playerRight": { "x": 0.93, "y": 0.4, "width": 0.02, "height": 0.2 }
     },
     "scores": {
-      "player1": 0,
-      "player2": 0
+      "playerLeft": 0,
+      "playerRight": 0
     }
   }
 }
@@ -260,8 +290,8 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
     "gameId": "game123",
     "scorerId": "user123",
     "scores": {
-      "player1": 1,
-      "player2": 0
+      "playerLeft": 1,
+      "playerRight": 0
     }
   }
 }
@@ -284,19 +314,8 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 {
   "event": "pong.tournamentCreated",
   "data": {
-    "tournamentId": "tourney123",
     "name": "Summer Cup",
-  }
-}
-\`\`\`
-
-- **pong.tournamentJoined** - Successfully joined a tournament
-\`\`\`json
-{
-  "event": "pong.tournamentJoined",
-  "data": {
-    "tournamentId": "tourney123",
-    "name": "Summer Cup",
+    "tournamentId": "tourney123"
   }
 }
 \`\`\`
@@ -309,6 +328,115 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
     "tournamentId": "tourney123",
     "tournamentName": "Summer Cup",
     "participantUsername": "newPlayer"
+  }
+}
+\`\`\`
+
+- **pong.tournamentParticipantLeft** - A participant left the tournament
+\`\`\`json
+{
+  "event": "pong.tournamentParticipantLeft",
+  "data": {
+    "tournamentId": "tourney123",
+    "tournamentName": "Summer Cup",
+    "participantUsername": "leavingPlayer"
+  }
+}
+\`\`\`
+
+- **pong.tournamentStarted** - Tournament has started
+\`\`\`json
+{
+  "event": "pong.tournamentStarted",
+  "data": {
+    "tournamentId": "tourney123",
+    "tournamentName": "Summer Cup"
+  }
+}
+\`\`\`
+
+- **pong.tournamentRoundInfo** - Information about current tournament round and your match
+\`\`\`json
+{
+  "event": "pong.tournamentRoundInfo",
+  "data": {
+    "roundNumber": 1,
+    "totalMatches": 4,
+    "playerMatch": {
+      "id": "match123",
+      "playerLeftId": "user1",
+      "playerLeftUsername": "player1",
+      "playerRightId": "user2",
+      "playerRightUsername": "player2",
+      "gameStatus": "WAITING"
+    }
+  }
+}
+\`\`\`
+
+- **pong.tournamentRoundCooldown** - Break before next round starts
+\`\`\`json
+{
+  "event": "pong.tournamentRoundCooldown",
+  "data": {
+    "cooldownMs": 5000,
+    "nextRoundNumber": 2
+  }
+}
+\`\`\`
+
+- **pong.tournamentPlayerReady** - Your opponent is ready for the match
+\`\`\`json
+{
+  "event": "pong.tournamentPlayerReady",
+  "data": {
+    "matchId": "match123",
+    "readyUserId": "user2"
+  }
+}
+\`\`\`
+
+- **pong.tournamentMatchStarted** - Your tournament match is starting
+\`\`\`json
+{
+  "event": "pong.tournamentMatchStarted",
+  "data": {
+    "gameId": "game123",
+    "matchId": "match123"
+  }
+}
+\`\`\`
+
+- **pong.tournamentMatchEnded** - A tournament match has ended
+\`\`\`json
+{
+  "event": "pong.tournamentMatchEnded",
+  "data": {
+    "matchId": "match123",
+    "winnerId": "user1",
+    "winnerUsername": "champion"
+  }
+}
+\`\`\`
+
+- **pong.tournamentEnded** - Tournament has finished
+\`\`\`json
+{
+  "event": "pong.tournamentEnded",
+  "data": {
+    "tournamentId": "tourney123",
+    "winnerId": "user1",
+    "winnerUsername": "champion"
+  }
+}
+\`\`\`
+
+- **pong.tournamentCancelled** - Tournament was cancelled (e.g., creator left)
+\`\`\`json
+{
+  "event": "pong.tournamentCancelled",
+  "data": {
+    "tournamentId": "tourney123"
   }
 }
 \`\`\`

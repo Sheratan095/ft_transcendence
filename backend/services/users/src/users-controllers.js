@@ -177,12 +177,18 @@ export const	uploadAvatar = async (req, reply) =>
 		// Get the uploaded file
 		const	data = await req.file();
 		if (!data)
+		{
+			console.log('[USERS] UploadAvatar error: No file uploaded');
 			return (reply.code(400).send({ error: 'No file uploaded' }));
+		}
 
 		// Validate file type (images only)
 		const	allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 		if (!allowedMimeTypes.includes(data.mimetype))
+		{
+			console.log('[USERS] UploadAvatar error: Invalid file type');
 			return (reply.code(400).send({ error: 'Only image files are allowed (jpeg, png, gif, webp)' }));
+		}
 
 		// Generate unique filename with extension with user ID
 		const	fileExtension = data.filename.split('.').pop();

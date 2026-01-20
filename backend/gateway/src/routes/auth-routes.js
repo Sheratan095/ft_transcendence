@@ -38,18 +38,18 @@ export async function	login(request, reply)
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Login error:', err.message)
-		if (err.response) {
-			console.log('[GATEWAY] Auth response status:', err.response.status)
-			console.log('[GATEWAY] Auth response data:', err.response.data)
-		}
-
+		// Forward the specific error from authentication service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
+
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (login) error:', err.message);	
 
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
 }
+
+
 
 export async function	register(request, reply)
 {
@@ -65,10 +65,12 @@ export async function	register(request, reply)
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
-
+		// Forward the specific error from authentication service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
+
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (register) error:', err.message);	
 
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
@@ -95,10 +97,12 @@ export async function	logout(request, reply)
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
-
+		// Forward the specific error from authentication service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
+
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (logout) error:', err.message);	
 
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
@@ -117,10 +121,13 @@ export async function	deleteAccount(request, reply)
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
+		// Forward the specific error from authentication service, do not log
 
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
+
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (delete-account) error:', err.message);	
 
 		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
 	}
@@ -141,16 +148,18 @@ export async function	token(request, reply)
 
 		forwardCookies(reply, response);
 
-		return (reply.send(response.data))
+		return (reply.send(response.data));
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
-
+		// Forward the specific error from authentication service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
 
-		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (token) error:', err.message);
+
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }));
 	}
 }
 
@@ -164,16 +173,18 @@ export async function	verifyTwoFactorAuth(request, reply)
 
 		forwardCookies(reply, response);
 
-		return (reply.send(response.data))
+		return (reply.send(response.data));
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
-
+		// Forward the specific error from authentication service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
 
-		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (verify-2fa) error:', err.message);
+
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }));
 	}
 }
 
@@ -185,16 +196,18 @@ export async function	enable2FA(request, reply)
 			headers: getAuthHeaders(request)
 		});
 
-		return (reply.send(response.data))
+		return (reply.send(response.data));
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
-
+		// Forward the specific error from authentication service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
 
-		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (enable-2fa) error:', err.message);
+
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }));
 	}
 }
 
@@ -206,15 +219,17 @@ export async function	changePassword(request, reply)
 			headers: getAuthHeaders(request)
 		});
 
-		return (reply.send(response.data))
+		return (reply.send(response.data));
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Auth service error:', err.message)
-
+		// Forward the specific error from authentication service, do not log
 		if (err.response)
-			return (reply.code(err.response.status).send(err.response.data))
+			return (reply.code(err.response.status).send(err.response.data));
 
-		return (reply.code(500).send({ error: 'Authentication service unavailable' }))
+		// Only log and send generic error if authentication service did not handle it
+		console.log('[GATEWAY] Auth service (change-password) error:', err.message);
+
+		return (reply.code(500).send({ error: 'Authentication service unavailable' }));
 	}
 }

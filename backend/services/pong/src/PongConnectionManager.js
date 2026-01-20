@@ -128,7 +128,7 @@ class	PongConnectionManager
 			gameId,
 			opponentUsername,
 			"yourSide": side,
-			coolDownMs: process.env.COOLDOWN_MS
+			coolDownMs: process.env.READY_COOLDOWN_MS
 		}
 
 		if (socket)
@@ -149,7 +149,7 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.gameStarted', data);
 	}
 
-	// TOURNAMENT RELATED MESSAGES
+	// ------------ TOURNAMENT RELATED MESSAGES ------------
 
 	async	replyTournamentCreated(creatorId, torunamentName, tournamentId)
 	{
@@ -164,31 +164,138 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentCreated', data);
 	}
 
-	async	replyTournamentJoined(userId, tournamentName, tournamentId)
-	{
-		const	socket = this._connections.get(userId);
-
-		const	data = {
-			tournamentId,
-			"name": tournamentName,
-		};
-
-		if (socket)
-			this.#dispatchEventToSocket(socket, 'pong.tournamentJoined', data);
-	}
-
 	async	notifyTournamentParticipantJoined(participantId, newUsername, tournamentName, tournamentId)
 	{
 		const	socket = this._connections.get(participantId);
 
 		const	data = {
-			"tournamentName": tournamentName,
-			"participantUsername": newUsername,
 			tournamentId,
+			tournamentName,
+			"participantUsername": newUsername,
 		};
 
 		if (socket)
 			this.#dispatchEventToSocket(socket, 'pong.tournamentParticipantJoined', data);
+	}
+
+	async	notifyTournamentParticipantLeft(participantId, leavingUsername, tournamentName, tournamentId)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			tournamentId,
+			tournamentName,
+			"participantUsername": leavingUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentParticipantLeft', data);
+	}
+
+	async	notifyTournamentStarted(participantId, tournamentName, tournamentId)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			tournamentId,
+			tournamentName,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentStarted', data);
+	}
+
+	async	sendTournamentRoundInfo(participantId, roundNumber, totalMatches, playerMatch)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			roundNumber,
+			totalMatches,
+			playerMatch, // null if player has a bye or is not in this round
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundInfo', data);
+	}
+
+	async	notifyTournamentRoundCooldown(participantId, cooldownMs, nextRoundNumber)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			cooldownMs,
+			nextRoundNumber,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundCooldown', data);
+	}
+
+	async	notifyTournamentPlayerReady(userId, readyUserId, matchId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			matchId,
+			readyUserId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentPlayerReady', data);
+	}
+
+	async	sendTournamentMatchStarted(userId, gameId, matchId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			gameId,
+			matchId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentMatchStarted', data);
+	}
+
+	async	notifyTournamentMatchEnded(userId, matchId, winnerId, winnerUsername)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			matchId,
+			winnerId,
+			winnerUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentMatchEnded', data);
+	}
+
+	async	notifyTournamentEnded(userId, tournamentId, winnerId, winnerUsername)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			tournamentId,
+			winnerId,
+			winnerUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentEnded', data);
+	}
+
+	async	notifyTournamentCancelled(userId, tournamentId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			tournamentId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentCancelled', data);
 	}
 
 	//------------------------------------------

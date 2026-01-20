@@ -14,6 +14,7 @@ export const	GameType =
 {
 	CUSTOM: 'CUSTOM',
 	RANDOM: 'RANDOM',
+	TOURNAMENT: 'TOURNAMENT',
 };
 
 export class	GameInstance
@@ -32,8 +33,12 @@ export class	GameInstance
 		this.playerLeftReady = false;
 		this.playerRightReady = false;
 
-		// CUSTOM GAMES start in WAITING, RANDOM GAMES start in LOBBY because both players are known
-		this.gameStatus = type === GameType.CUSTOM ? GameStatus.WAITING : GameStatus.IN_LOBBY;
+		// CUSTOM GAMES start in WAITING, TOURNAMENT starts in WAITING (for ready-up), RANDOM GAMES start in LOBBY
+		if (type === GameType.CUSTOM || type === GameType.TOURNAMENT)
+			this.gameStatus = GameStatus.WAITING;
+		else
+			this.gameStatus = GameStatus.IN_LOBBY;
+		
 		this.gameType = type;
 
 		this.type = type;
@@ -238,6 +243,13 @@ export class	GameInstance
 
 		const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
+		
+		// Check if this is a tournament game
+		if (this.gameType === GameType.TOURNAMENT)
+		{
+			const { tournamentManager } = require('./TournamentManager.js');
+			tournamentManager.handleGameEnd(this.id, winnerId, loserId);
+		}
 		
 		gameManager._gameEnd(this, winnerId, loserId, winnerUsername, false);
 	}
