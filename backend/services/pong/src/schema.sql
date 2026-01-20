@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS tournament_participants
 	tournament_id	TEXT NOT NULL,
 	user_id			TEXT NOT NULL,
 	joined_at		DATETIME DEFAULT CURRENT_TIMESTAMP,
+	final_position	INTEGER, -- NULL if the tournament is ongoing
 	
 	PRIMARY KEY (tournament_id, user_id)
 	
