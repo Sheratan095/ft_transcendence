@@ -88,7 +88,7 @@ export const	getUserStats = async (req, reply) =>
 		if (!userStats)
 			return (reply.code(404).send({ error: 'User stats not found' }));
 
-		const	elo = calculateElo(userStats.wins, userStats.losses);
+		const	elo = calculateElo(userStats.wins, userStats.losses, userStats.tournaments_won);
 
 		const	response =
 		{
@@ -96,7 +96,9 @@ export const	getUserStats = async (req, reply) =>
 			gamesWon: userStats.wins,
 			gamesLost: userStats.losses,
 			elo: elo.elo,
-			rank: elo.rank
+			rank: elo.rank,
+			tournamentsWon: userStats.tournaments_won,
+			tournamentsParticipated: userStats.tournaments_participated
 		}
 
 		console.log(`[PONG] Retrieved stats for user ${userId}`);
@@ -226,6 +228,42 @@ export const	joinTournament = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[PONG] Error in joinTournament controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	getUserTournamentParticipation = async (req, reply) =>
+{
+	try
+	{
+		const	pongDb = req.server.pongDb;
+		const	userId = req.query.id;
+
+		// Retrieve tournament participation for the user
+		const	participation = await pongDb.getTournamentParticipationByUser(userId);
+		if (!participation || participation.length === 0)
+			return (reply.code(404).send({ error: 'No tournament participation found for user' }));
+
+		// Map the participation to a cleaner format if needed
+		for (let entry of participation)
+		{
+			entry.tournamentId = entry.tournament_id;
+			entry.tournamentName = entry.tournament_name;
+			entry.createdAt = entry.created_at;
+			entry.winnerUsername = await getUsernameById(entry.winner_id);
+			delete entry.winner_id;
+			delete entry.tournament_id;
+			delete entry.tournament_name;
+			delete entry.created_at;
+		}
+
+		console.log(`[PONG] Retrieved tournament participation for user ${userId}`);
+
+		return (reply.code(200).send(participation));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in getUserTournamentParticipation controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

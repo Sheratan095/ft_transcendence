@@ -223,6 +223,23 @@ export class	PongDatabase
 			await this.db.run(query, [tournamentId, participant.userId]);
 	}
 
+	// TO DO createda_at => finished_at
+	async	getTournamentParticipationByUser(userId)
+	{
+		const	query = `
+			SELECT tp.tournament_id, t.name,t.created_at
+			FROM tournament_participants tp
+			JOIN tournaments t ON tp.tournament_id = t.id
+			WHERE tp.user_id = ?
+			ORDER BY tp.created_at DESC
+		`;
+
+		const	participation = await this.db.all(query, [userId]);
+		return (participation);
+	}
+
+	//-----------------------------CLOSE DB---------------------------------//
+
 	async	#close()
 	{
 		if (this.db)

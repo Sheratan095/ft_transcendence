@@ -94,9 +94,9 @@ export async function	getUsernameById(userId)
 	}
 }
 
-export function	calculateElo(win, loss)
+export function	calculateElo(win, loss, tournametsWon)
 {
-	let	elo = (process.env.EARNED_WIN_POINTS * win) - (process.env.LOST_LOSS_POINTS * loss);
+	let	elo = (process.env.EARNED_WIN_POINTS * win) - (process.env.LOST_LOSS_POINTS * loss) + (process.env.TOURNAMENT_EARNED_WIN_POINTS * tournametsWon);
 
 	if (elo < 0)
 		elo = 0;

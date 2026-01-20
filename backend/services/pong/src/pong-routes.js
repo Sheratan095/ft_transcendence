@@ -13,7 +13,8 @@ import {
 	createTournament as createTournamentHandler,
 	getAllTournaments as getAllTournamentsHandler,
 	joinTournament as joinTournamentHandler,
-	isUserBusy as isUserBusyHandler
+	isUserBusy as isUserBusyHandler,
+	getUserTournamentParticipation as getUserTournamentParticipationHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -106,6 +107,18 @@ const	TournamentParticipant =
 	{
 		userId: { type: 'string' },
 		username: { type: 'string' }
+	}
+};
+
+const	TournamentParticipation =
+{
+	type: 'object',
+	properties:
+	{
+		tournamentId: { type: 'string' },
+		tournamentName: { type: 'string' },
+		winnerUsername: { type: 'string' },
+		createdAt: { type: 'string', format: 'date-time' }
 	}
 };
 
@@ -252,6 +265,8 @@ const	getUserStats =
 					gamesPlayed: { type: 'integer' },
 					gamesWon: { type: 'integer' },
 					gamesLost: { type: 'integer' },
+					tournamentsWon: { type: 'integer' },
+					tournamentsParticipated: { type: 'integer' },
 					elo: { type: 'integer' },
 					rank: { type: 'string' }
 				}
@@ -411,6 +426,40 @@ const	joinTournament =
 	handler: joinTournamentHandler
 }
 
+const	getUserTournamentParticipation =
+{
+	schema:
+	{
+		summary: 'Get user tournament participation',
+		description: 'Retrieve the list of tournament participation for a given user.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: TournamentParticipation
+			},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUserTournamentParticipationHandler
+}
+
 //-----------------------------EXPORT ROUTES-----------------------------
 
 export function	pongRoutes(fastify)
@@ -434,6 +483,7 @@ export function	pongRoutes(fastify)
 	fastify.get('/match-history', getUserMatchHistory);
 	fastify.get('/get-all-tournaments', getAllTournaments);
 	fastify.get('/is-user-busy', isUserBusy);
+	fastify.get('/user-tournament-participation', getUserTournamentParticipation);
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.post('/create-tournament', createTournament);
