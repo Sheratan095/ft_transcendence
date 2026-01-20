@@ -29,9 +29,12 @@ export async function	getUserStatsRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] GetUserStats error:', err.message)
+		// Forward the specific error from tris service, do not log
 		if (err.response)
-			console.log('[GATEWAY] GetUserStats response data:', err.response.data)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if tris service did not handle it
+		console.log('[GATEWAY] Tris service (get-user-stats) error:', err.message)
 
 		return (reply.code(500).send({ error: 'Tris service unavailable' }))
 	}
@@ -50,9 +53,12 @@ export async function	getUserMatchHistoryRoute(request, reply)
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] GetUserMatchHistory error:', err.message)
+		// Forward the specific error from tris service, do not log
 		if (err.response)
-			console.log('[GATEWAY] GetUserMatchHistory response data:', err.response.data)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if tris service did not handle it
+		console.log('[GATEWAY] Tris service (get-user-match-history) error:', err.message)
 
 		return (reply.code(500).send({ error: 'Tris service unavailable' }))
 	}

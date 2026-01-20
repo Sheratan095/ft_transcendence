@@ -29,7 +29,7 @@ export const	getUsers = async (req, reply) =>
 			return (reply.code(err.response.status).send(err.response.data));
 
 		// Only log and send generic error if users service did not handle it
-		console.log('[GATEWAY] Users service error:', err.message);
+		console.log('[GATEWAY] Users service (get-users) error:', err.message);
 
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
@@ -54,7 +54,7 @@ export const	searchUsers = async (req, reply) =>
 			return (reply.code(err.response.status).send(err.response.data));
 
 		// Only log and send generic error if users service did not handle it
-		console.log('[GATEWAY] Users service error:', err.message);
+		console.log('[GATEWAY] Users service (search-users) error:', err.message);
 
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
@@ -79,7 +79,7 @@ export const	getUser = async (req, reply) =>
 			return (reply.code(err.response.status).send(err.response.data));
 
 		// Only log and send generic error if users service did not handle it
-		console.log('[GATEWAY] Users service error:', err.message);
+		console.log('[GATEWAY] Users service (get-user) error:', err.message);
 
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
@@ -102,7 +102,7 @@ export const	updateUser = async (req, reply) =>
 			return (reply.code(err.response.status).send(err.response.data));
 
 		// Only log and send generic error if users service did not handle it
-		console.log('[GATEWAY] Users service error:', err.message);
+		console.log('[GATEWAY] Users service (update-user) error:', err.message);
 
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
@@ -147,7 +147,7 @@ export const	uploadAvatar = async (req, reply) =>
 			return (reply.code(err.response.status).send(err.response.data));
 
 		// Only log and send generic error if users service did not handle it
-		console.log('[GATEWAY] Users service error:', err.message);
+		console.log('[GATEWAY] Users service (upload-avatar) error:', err.message);
 
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}
@@ -170,7 +170,7 @@ export const	getUsersStats = async (req, reply) =>
 			return (reply.code(err.response.status).send(err.response.data));
 
 		// Only log and send generic error if users service did not handle it
-		console.log('[GATEWAY] Users service error:', err.message);
+		console.log('[GATEWAY] Users service (get-users-stats) error:', err.message);
 
 		return (reply.code(500).send({ error: 'Users service unavailable' }));
 	}

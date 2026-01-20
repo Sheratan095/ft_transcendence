@@ -25,10 +25,12 @@ export const	getUserStats = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Pong service error:', err.message)
-
+		// Forward the specific error from pong service, do not log
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (get-user-stats) error:', err.message)
 
 		return (reply.code(500).send({ error: 'Pong service unavailable' }))
 	}
@@ -48,10 +50,12 @@ export const	getUserMatchHistory = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Pong service error:', err.message)
-
+		// Forward the specific error from pong service, do not log
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (get-user-match-history) error:', err.message)
 
 		return (reply.code(500).send({ error: 'Pong service unavailable' }))
 	}
@@ -70,10 +74,12 @@ export const	getAllTournaments = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Pong service error:', err.message)
-
+		// Forward the specific error from pong service, do not log
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (get-all-tournaments) error:', err.message)
 
 		return (reply.code(500).send({ error: 'Pong service unavailable' }))
 	}
@@ -92,10 +98,12 @@ export const	createTournament = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.log('[GATEWAY] Pong service error:', err.message)
-
+		// Forward the specific error from pong service, do not log
 		if (err.response)
 			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (create-tournament) error:', err.message)
 
 		return (reply.code(500).send({ error: 'Pong service unavailable' }))
 	}
