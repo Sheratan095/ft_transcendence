@@ -237,15 +237,15 @@ export class	PongDatabase
 		return (participation);
 	}
 
-	async	updateTournamentParticipantPosition(tournamentId, userId, position)
+	async	updateTournamentParticipantTop(tournamentId, userId, top)
 	{
 		const	query = `
 			UPDATE tournament_participants
-			SET final_position = ?
+			SET top = ?
 			WHERE tournament_id = ? AND user_id = ?
 		`;
 
-		await this.db.run(query, [position, tournamentId, userId]);
+		await this.db.run(query, [top, tournamentId, userId]);
 	}
 
 	//-----------------------------CLOSE DB---------------------------------//

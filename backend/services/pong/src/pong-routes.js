@@ -118,7 +118,8 @@ const	TournamentParticipation =
 		tournamentId: { type: 'string' },
 		tournamentName: { type: 'string' },
 		winnerUsername: { type: 'string' },
-		endedAt: { type: 'string', format: 'date-time' }
+		endedAt: { type: 'string', format: 'date-time' },
+		top: { type: 'integer' } // User's rank in the tournament
 	}
 };
 

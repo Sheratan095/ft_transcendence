@@ -251,6 +251,7 @@ export const	getUserTournamentParticipation = async (req, reply) =>
 			entry.tournamentName = entry.tournament_name;
 			entry.endedAt = entry.finished_at;
 			entry.winnerUsername = await getUsernameById(entry.winner_id);
+			entry.top = entry.top;
 			delete entry.winner_id;
 			delete entry.tournament_id;
 			delete entry.tournament_name;
