@@ -434,7 +434,6 @@ export function	pongRoutes(fastify)
 	fastify.get('/match-history', getUserMatchHistory);
 	fastify.get('/get-all-tournaments', getAllTournaments);
 	fastify.get('/is-user-busy', isUserBusy);
-	// fastify.get('/get-tournament', getTournament); // TO DO return single tournament info
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.post('/create-tournament', createTournament);

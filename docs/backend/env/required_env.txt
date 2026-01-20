@@ -78,6 +78,7 @@ services/tris:
     PORT=3006
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
+    PONG_SERVICE_URL=http://localhost:3005
     MAX_MARKS_PER_PLAYER=3
     READY_COOLDOWN_MS = 30000
     MOVE_TIMEOUT_MS = 60000

@@ -172,3 +172,38 @@ export async function	checkBlock(userA, userB)
 		return (false);
 	}
 }
+
+export async function	isUserBusyInternal(userId, includePong)
+{
+	const	isInGame = await gameManager.isUserInGameOrMatchmaking(userId);
+	const	isInTournament = await tournamentManager.isUserInTournament(userId);
+
+	let	status = isInGame || isInTournament;
+
+	// If specified, check PONG service for busy status
+	//	it's included when the request comes from this service, when it's from another service we assume they already checked PONG
+	if (includePong)
+	{
+		try
+		{
+			const	response = await axios.get(`${process.env.PONG_SERVICE_URL}/is-user-busy`, {
+				params: { userId }
+			});
+
+			status = status || response.data.isBusy;
+
+			console.log(`[TRIS] User ${userId} busy status ${status},[PONG included]`);
+
+			return (status);
+		}
+		catch (err)
+		{
+			console.error(`[TRIS] Failed to check user busy status in PONG service for Id ${userId}:`, err.message);
+			return (status);
+		}
+	}
+
+	console.log(`[TRIS] User ${userId} busy status ${status}`);
+
+	return (status);
+}
