@@ -56,7 +56,7 @@ services/pong:
     USERS_SERVICE_URL=http://localhost:3002
     PONG_WIN_SCORE = 10
     READY_COOLDOWN_MS = 30000
-    ROUND_TRANSITION_COOLDOWN_MS
+    ROUND_TRANSITION_COOLDOWN_MS = 10000
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     WINNING_SCORE=11
     EARNED_WIN_POINTS=100 # Points awarded for winning a game

@@ -148,7 +148,7 @@ I think it's ok
 
 [] Is busy has to be done in both games and tournaments
 
-[] When updating profile image with a non supported extension
+[x] When updating profile image with a non supported extension
 	[GATEWAY] Users service error: Request failed with status code 400
 
 [x] Can creator cancel the tournament
