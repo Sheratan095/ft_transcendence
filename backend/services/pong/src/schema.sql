@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS tournaments
 	id				TEXT PRIMARY KEY,
 	name			TEXT NOT NULL,
 	creator_id		TEXT NOT NULL,
-	created_at		DATETIME DEFAULT CURRENT_TIMESTAMP,
+	ended_at		DATETIME DEFAULT CURRENT_TIMESTAMP,
 	winner_id		TEXT NOT NULL -- The tournament is saved when it ends
 
 	-- FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE

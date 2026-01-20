@@ -249,12 +249,12 @@ export const	getUserTournamentParticipation = async (req, reply) =>
 		{
 			entry.tournamentId = entry.tournament_id;
 			entry.tournamentName = entry.tournament_name;
-			entry.createdAt = entry.created_at;
+			entry.endedAt = entry.finished_at;
 			entry.winnerUsername = await getUsernameById(entry.winner_id);
 			delete entry.winner_id;
 			delete entry.tournament_id;
 			delete entry.tournament_name;
-			delete entry.created_at;
+			delete entry.finished_at;
 		}
 
 		console.log(`[PONG] Retrieved tournament participation for user ${userId}`);

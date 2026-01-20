@@ -118,7 +118,7 @@ const	TournamentParticipation =
 		tournamentId: { type: 'string' },
 		tournamentName: { type: 'string' },
 		winnerUsername: { type: 'string' },
-		createdAt: { type: 'string', format: 'date-time' }
+		endedAt: { type: 'string', format: 'date-time' }
 	}
 };
 
