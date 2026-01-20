@@ -2,6 +2,7 @@ import { TournamentInstance, TournamentStatus } from './TournamentIstance.js';
 import { GameStatus } from './GameInstance.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
 import { gameManager } from './GameManager.js';
+import { pongDatabase as pongDb } from './pong.js';
 import { v4 as uuidv4 } from 'uuid';
 
 class	TournamentManager
@@ -93,19 +94,19 @@ class	TournamentManager
 		})));
 	}
 
-	handleUserDisconnect(userId)
+	async handleUserDisconnect(userId)
 	{
 		for (let tournament of this._tournaments.values())
 		{
 			if (tournament.hasParticipant(userId))
 			{
 				console.log(`[PONG] User ${userId} disconnected from tournament ${tournament.id}`);
-				this.removeParticipant(tournament.id, userId, true);
+				await this.removeParticipant(tournament.id, userId, true);
 			}
 		}
 	}
 
-	removeParticipant(tournamentId, userId, isDisconnect = false)
+	async removeParticipant(tournamentId, userId, isDisconnect = false)
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
@@ -217,7 +218,7 @@ class	TournamentManager
 			tournament.status = TournamentStatus.FINISHED;
 
 			console.log(`[PONG] Only one player remains in tournament ${tournamentId}, declaring winner: ${remainingPlayer.username}`);
-			this._endTournament(tournament);
+			await this._endTournament(tournament);
 
 			return ;
 		}
@@ -234,7 +235,7 @@ class	TournamentManager
 		}
 	}
 
-	startTournament(tournamentId, userId)
+	async startTournament(tournamentId, userId)
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
@@ -261,6 +262,23 @@ class	TournamentManager
 		}
 
 		tournament.startTournament();
+
+		// Save participants to database and update their stats
+		try
+		{
+			const	participants = Array.from(tournament.participants);
+			await pongDb.saveTournamentParticipants(tournamentId, participants);
+
+			// Update tournaments_participated stat for all participants
+			for (const participant of participants)
+				await pongDb.updateUserStats(participant.userId, 0, 0, 0, 1);
+
+			console.log(`[PONG] Tournament ${tournamentId} participants saved to database`);
+		}
+		catch (err)
+		{
+			console.error(`[PONG] Failed to save tournament participants to database:`, err.message);
+		}
 
 		// Notify all participants about tournament start and their matches
 		for (let participant of tournament.participants)
@@ -336,7 +354,7 @@ class	TournamentManager
 		console.log(`[PONG] Tournament match ${gameInstance.id} started`);
 	}
 
-	handleGameEnd(gameId, winnerId, loserId)
+	async handleGameEnd(gameId, winnerId, loserId)
 	{
 		// Find which tournament this game belongs to
 		let	tournament = null;
@@ -374,7 +392,7 @@ class	TournamentManager
 		// Check if tournament is finished
 		if (tournament.status === TournamentStatus.FINISHED)
 		{
-			this._endTournament(tournament);
+			await this._endTournament(tournament);
 		}
 		// Check if round is complete and new round started
 		else if (tournament.currentRound < tournament.rounds.length - 1)
@@ -486,8 +504,28 @@ class	TournamentManager
 		}
 	}
 
-	_endTournament(tournament)
+	async _endTournament(tournament)
 	{
+		// Save tournament to database
+		try
+		{
+			await pongDb.saveTournament(
+				tournament.id,
+				tournament.name,
+				tournament.creatorId,
+				tournament.winner.userId
+			);
+
+			// Update winner stats (increment tournament wins) - 4th param is tournamentsParticipatedDelta (0 since already counted at start)
+			await pongDb.updateUserStats(tournament.winner.userId, 0, 0, 1, 0);
+
+			console.log(`[PONG] Tournament ${tournament.id} saved to database, winner: ${tournament.winner.username}`);
+		}
+		catch (err)
+		{
+			console.error(`[PONG] Failed to save tournament ${tournament.id} to database:`, err.message);
+		}
+
 		// Notify all participants of tournament end
 		for (let participant of tournament.participants)
 		{

@@ -184,18 +184,43 @@ export class	PongDatabase
 		return (stats);
 	}
 
-	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0, tournamentWinsDelta = 0)
+	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0, tournamentWinsDelta = 0, tournamentsParticipatedDelta = 0)
 	{
 		const	query = `
 			UPDATE user_stats
 			SET
 				wins = wins + ?,
 				losses = losses + ?,
-				tournament_wins = tournament_wins + ?
+				tournament_wins = tournament_wins + ?,
+				tournaments_participated = tournaments_participated + ?
 			WHERE user_id = ?
 		`;
 
-		await this.db.run(query, [winsDelta, lossesDelta, tournamentWinsDelta, userId]);
+		await this.db.run(query, [winsDelta, lossesDelta, tournamentWinsDelta, tournamentsParticipatedDelta, userId]);
+	}
+
+	//-----------------------------TOURNAMENT QUERIES---------------------------------//
+
+	async	saveTournament(tournamentId, name, creatorId, winnerId)
+	{
+		const	query = `
+			INSERT INTO tournaments (id, name, creator_id, winner_id)
+			VALUES (?, ?, ?, ?)
+		`;
+
+		await this.db.run(query, [tournamentId, name, creatorId, winnerId]);
+	}
+
+	async	saveTournamentParticipants(tournamentId, participants)
+	{
+		const	query = `
+			INSERT INTO tournament_participants (tournament_id, user_id)
+			VALUES (?, ?)
+		`;
+
+		// Insert all participants
+		for (const participant of participants)
+			await this.db.run(query, [tournamentId, participant.userId]);
 	}
 
 	async	#close()

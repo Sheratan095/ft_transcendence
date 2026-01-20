@@ -480,8 +480,8 @@ class	GameManager
 			pongDb.saveMatch(gameInstance.playerLeftId, gameInstance.playerRightId, winner);
 
 			// Update player stats
-			pongDb.updateUserStats(winner, 1, 0);
-			pongDb.updateUserStats(loser, 0, 1);
+			pongDb.updateUserStats(winner, 1, 0, 0);
+			pongDb.updateUserStats(loser, 0, 1, 0);
 		}
 
 		if (this._randomGameCooldowns.has(gameInstance.id))

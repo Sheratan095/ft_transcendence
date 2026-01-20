@@ -1,6 +1,7 @@
 import { gameManager } from './GameManager.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
 import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision } from './pong-physics.js';
+import { tournamentManager } from './TournamentManager.js';
 
 export const	GameStatus =
 {
@@ -247,8 +248,10 @@ export class	GameInstance
 		// Check if this is a tournament game
 		if (this.gameType === GameType.TOURNAMENT)
 		{
-			const { tournamentManager } = require('./TournamentManager.js');
-			tournamentManager.handleGameEnd(this.id, winnerId, loserId);
+			// Fire and forget - don't block game loop
+			tournamentManager.handleGameEnd(this.id, winnerId, loserId).catch(err => {
+				console.error('[PONG] Error handling tournament game end:', err);
+			});
 		}
 		
 		gameManager._gameEnd(this, winnerId, loserId, winnerUsername, false);
