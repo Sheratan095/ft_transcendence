@@ -1,0 +1,87 @@
+services:
+  auth:
+    build:
+      context: ./backend/services/auth
+    container_name: auth
+    expose:
+      - 3001
+    networks:
+      - trascendence
+
+  chat:
+    build:
+      context: ./backend/services/chat
+    container_name: chat
+    expose:
+      - 3002
+    networks:
+      - trascendence
+
+  notification:
+    build:
+      context: ./backend/services/notification
+    container_name: notification
+    expose:
+      - 3003
+    networks:
+      - trascendence
+
+  pong:
+    build:
+      context: ./backend/services/pong
+    container_name: pong
+    expose:
+      - 3004
+    networks:
+      - trascendence
+
+  tris:
+    build:
+      context: ./backend/services/tris
+    container_name: tris
+    expose:
+      - 3005
+    networks:
+      - trascendence
+    
+  users:
+    build:
+      context: ./backend/services/users
+    container_name: users
+    expose:
+      - 3006
+    networks:
+      - trascendence
+
+  gateway:
+    build:
+      context: ./backend/gateway
+    container_name: gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth
+      - chat
+      - notification
+      - pong
+      - tris
+      - users
+    networks:
+      - trascendence
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - 8000:3000
+    depends_on:
+      - gateway
+    networks:
+      - trascendence
+
+networks:
+  trascendence:
+    driver: bridge
+    name: trascendence
+    # external: true
