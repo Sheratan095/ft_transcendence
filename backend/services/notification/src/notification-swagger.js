@@ -52,7 +52,8 @@ Reponse:
 {
   "event": "friend.online",
   "data": {
-	"userId": "123"
+	"userId": "123",
+	"username": "john_doe"
   }
 }
 \`\`\`
@@ -62,7 +63,8 @@ Reponse:
 {
   "event": "friend.offline",
   "data": {
-	"userId": "123"
+	"userId": "123",
+	"username": "john_doe"
   }
 }
 \`\`\`
