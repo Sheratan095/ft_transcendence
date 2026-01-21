@@ -7,9 +7,9 @@ x, y, altezza, velocità
 
 
 formula per calcolare i componenti data velocità, angolo in gradi e diretion (destra (-1) / sinitra (+1))
-(uso cos e sin perchè, dato che la velocità non deve variare in questo calcolo, la risultante delle forze deve essere 1)
     theta = (angolo in gradi * π ) / 180 così trasformo l'angolo in radianti
 
+    (uso cos e sin perchè, dato che la velocità non deve variare, quindi il modulo del vettore delle velocià deve rimanere costante)
     nuova vx = direzione * velocità * cos(theta)
     nuova vy = velocità * sin (theta)
 
