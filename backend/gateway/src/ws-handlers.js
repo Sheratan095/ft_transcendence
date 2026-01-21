@@ -86,7 +86,7 @@ export async function	handleSocketUpgrade(req, socket, head)
 			req.url = '/ws';
 			chatProxy.ws(req, socket, head, { target: process.env.CHAT_SERVICE_URL });
 		}
-		else if (url.pathname === '/notifications/ws')
+		else if (url.pathname === '/notification/ws')
 		{
 			console.log(`[GATEWAY] WebSocket Authenicated, routing connection to NOTIFICATION service for user: ${user.id}`);
 			// Rewrite the URL to /ws for the notification service
