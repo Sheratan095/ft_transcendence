@@ -1,14 +1,18 @@
+import { showInfoToast } from '../components/shared/Toast';
+
 let chatSocket: WebSocket | null = null;
 let currentUserId: string | null = null;
 let currentChatId: string | null = null;
 let chats: any[] = [];
 let messages: Map<string, any[]> = new Map();
 let chatMembers: Map<string, any[]> = new Map();
+let unreadCounts: Map<string, number> = new Map(); // Track unread message counts
 let messageOffset = 0;
 const MESSAGE_LIMIT = 50;
 
 export function initChat(userId: string) {
   currentUserId = userId;
+  connectChatWebSocket();
 }
 
 export async function openChatModal() {
@@ -25,12 +29,7 @@ export async function openChatModal() {
       console.error('Failed to open chat modal:', err);
     }
   }
-
-  connectChatWebSocket();
-  // Connect to WebSocket if not already connected
-  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-    connectChatWebSocket();
-  }
+  
   // Render chat list
   renderChatList();
 }
@@ -39,12 +38,6 @@ export function closeChatModal() {
   const modal = document.getElementById('chat-modal');
   if (modal) {
     modal.classList.add('hidden');
-  }
-
-  // Close WebSocket
-  if (chatSocket) {
-    chatSocket.close();
-    chatSocket = null;
   }
 
   // Reset state
@@ -108,6 +101,15 @@ function renderChatList() {
     const chatType = document.createElement('div');
     chatType.className = 'chat-item-type';
     chatType.textContent = chat.chatType === 'dm' ? 'Direct Message' : 'Group Chat';
+
+    // Add unread badge if there are unread messages
+    const unreadCount = unreadCounts.get(chat.id) || 0;
+    if (unreadCount > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'unread-badge';
+      badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+      chatName.appendChild(badge);
+    }
 
     chatItem.appendChild(chatName);
     chatItem.appendChild(chatType);
@@ -306,33 +308,45 @@ function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
-function connectChatWebSocket() {
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = window.location.host;
-  const wsUrl = `${protocol}//${host}/chat/ws`;
+export function connectChatWebSocket(): Promise<WebSocket> {
+  if (chatSocket && chatSocket.readyState <= WebSocket.OPEN) {
+    return Promise.resolve(chatSocket);
+  }
+
+  const wsUrl = `/chat/ws`;
 
   console.log('Connecting to chat WebSocket at', wsUrl);
-  chatSocket = new WebSocket(wsUrl);
-
-  chatSocket.addEventListener('open', () => {
-    console.log('Chat WebSocket connected');
-  });
-
-  chatSocket.addEventListener('message', (event) => {
+  return new Promise((resolve, reject) => {
     try {
-      const data = JSON.parse(event.data);
-      handleWebSocketMessage(data);
-    } catch (err) {
-      console.error('Failed to parse WebSocket message:', err);
+      const socket = new WebSocket(wsUrl);
+      chatSocket = socket;
+
+      socket.onopen = () => {
+        console.log('Chat WebSocket connected');
+        resolve(socket);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          handleWebSocketMessage(JSON.parse(event.data));
+        } catch (err) {
+          console.error('Invalid WebSocket message', err);
+        }
+      };
+
+      socket.onerror = (event) => {
+        console.error('Chat WebSocket error', event);
+        reject(event);
+      };
+
+      socket.onclose = () => {
+        console.warn('Chat WebSocket closed');
+        chatSocket = null;
+      };
+    } catch (error) {
+      console.error('Connection error:', error);
+      reject(error);
     }
-  });
-
-  chatSocket.addEventListener('close', () => {
-    console.log('Chat WebSocket closed');
-  });
-
-  chatSocket.addEventListener('error', (error) => {
-    console.error('Chat WebSocket error:', error);
   });
 }
 
@@ -370,7 +384,18 @@ function handleChatMessage(data: any) {
     isPrivate: false
   });
 
-  if (currentChatId === chatId) {
+  // Show toast notification if not currently viewing this chat
+  if (currentChatId !== chatId) {
+    const sender = data.from || 'Someone';
+    const preview = data.content.substring(0, 30);
+    const displayText = preview.length < data.content.length ? `${preview}...` : preview;
+    showInfoToast(`📨 ${sender}: ${displayText}`, { duration: 4000 });
+    
+    // Track unread message
+    const unreadCount = (unreadCounts.get(chatId) || 0) + 1;
+    unreadCounts.set(chatId, unreadCount);
+    renderChatList();
+  } else {
     renderMessages();
     scrollToBottom();
   }
@@ -400,7 +425,7 @@ function handleSystemMessage(data: any) {
 
 function handleMessageSent(data: any) {
   console.log('Message sent confirmation:', data);
-  const { messageId, chatId, timestamp } = data;
+  const { messageId, chatId } = data;
   
   // Update message status to 'sent' if it exists
   if (messages.has(chatId)) {
@@ -438,9 +463,11 @@ function handlePrivateMessage(data: any) {
   
   // Find or create a DM chat with this user
   let dmChat = chats.find(c => c.chatType === 'dm' && c.otherUserId === String(fromUserId));
+  let isNewChat = false;
   
   if (!dmChat) {
     // Create a new DM chat entry
+    isNewChat = true;
     dmChat = {
       id: `dm_${fromUserId}`,
       chatType: 'dm',
@@ -470,17 +497,31 @@ function handlePrivateMessage(data: any) {
     isPrivate: true
   });
   
-  // Re-render if this chat is currently open
+  // Handle UI updates
   if (currentChatId === dmChat.id) {
+    // We're viewing this chat, so update messages and scroll
     renderMessages();
     scrollToBottom();
+  } else {
+    // Not viewing this chat, show toast and update unread count
+    const preview = content.substring(0, 30);
+    const displayText = preview.length < content.length ? `${preview}...` : preview;
+    showInfoToast(`💬 ${from}: ${displayText}`, { duration: 4000 });
+    
+    // Track unread message
+    const unreadCount = (unreadCounts.get(dmChat.id) || 0) + 1;
+    unreadCounts.set(dmChat.id, unreadCount);
+    
+    // Only update chat list if new chat was created or unread count changed
+    renderChatList();
   }
-  
-  // Update chat list to show the new/updated chat
-  renderChatList();
 }
 
 function markChatAsRead(chatId: string) {
+  // Clear unread count and re-render chat list
+  unreadCounts.delete(chatId);
+  renderChatList();
+  
   if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
     const message = {
       event: 'chat.read',

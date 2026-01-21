@@ -134,6 +134,19 @@ export class ChatManager {
 
   connectWebSocket(): Promise<void> {
     return new Promise((resolve, reject) => {
+      // Don't connect if already connecting or connected
+      if (this.chatSocket && this.chatSocket.readyState === WebSocket.CONNECTING) {
+        console.log('WebSocket connection already in progress');
+        reject(new Error('Connection already in progress'));
+        return;
+      }
+
+      if (this.chatSocket && this.chatSocket.readyState === WebSocket.OPEN) {
+        console.log('WebSocket already connected');
+        resolve();
+        return;
+      }
+
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const url = `${protocol}://${window.location.host}/chat/ws`;
 
@@ -188,11 +201,13 @@ export class ChatManager {
 
       this.chatSocket.onerror = (error) => {
         console.error('WebSocket error:', error);
+        this.chatSocket = null;
         reject(error);
       };
 
       this.chatSocket.onclose = () => {
         console.log('WebSocket disconnected');
+        this.chatSocket = null;
       };
     });
   }

@@ -24,6 +24,30 @@ export default defineConfig({
         secure: false,
         logLevel: 'debug', // Enable debug logging to see what's happening
       },
+      '/chat/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/notification/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/pong/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/tris/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
     }
   },
   resolve: {

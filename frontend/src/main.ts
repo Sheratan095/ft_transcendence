@@ -1,7 +1,7 @@
 import { getUserId } from './lib/auth';
 import { startTokenRefresh } from './lib/token';
 import { renderProfile } from './lib/profile';
-import { setupChatEventListeners, initChat } from './lib/chat';
+import { setupChatEventListeners, initChat, connectChatWebSocket } from './lib/chat';
 import { searchUser, renderSearchResult } from './lib/search';
 import { createLoginForm, createRegisterForm, createTwoFactorForm } from './components/auth';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
@@ -73,11 +73,6 @@ class AuthUI {
     // make container flexible so the card can expand to available space
     this.container.classList.add('w-full', 'flex', 'items-center', 'justify-center');
     this.container.style.minHeight = '240px';
-
-    // Intlayer
-
-
-
     getUserCount();
     const userId = getUserId();
     if (userId) {

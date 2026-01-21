@@ -1,4 +1,4 @@
-import { showSuccessToast, showInfoToast, showWarningToast } from '../shared/Toast';
+import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } from '../shared/Toast';
 import { FriendsManager } from './FriendsManager';
 
 let notifSocket: WebSocket | null = null;
@@ -17,36 +17,48 @@ export function sendPing() {
 }
 
 export function connectNotificationsWebSocket() {
-  if (!notifSocket || notifSocket.readyState !== WebSocket.OPEN) 
-	{
-		const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-		const wsUrl = `${protocol}://${window.location.host}/ws/notification`;
-		console.log('Connecting to notifications WebSocket at', wsUrl);
-		notifSocket = new WebSocket(wsUrl);
+  // Don't connect if already connecting or connected
+  if (notifSocket && notifSocket.readyState === WebSocket.CONNECTING) {
+    console.log('Notifications WebSocket connection already in progress');
+    return;
+  }
 
-		notifSocket.addEventListener('open', () => {
-			console.log('Notifications WebSocket connected');
-			// Send initial ping to establish connection
-			sendPing();
-		});
+  if (notifSocket && notifSocket.readyState === WebSocket.OPEN) {
+    console.log('Notifications WebSocket already connected');
+    return;
+  };
 
-		notifSocket.addEventListener('message', (event) => {
-			try {
-				const data = JSON.parse(event.data);
-				handleNotificationEvent(data);
-			} catch (err) {
-				console.error('Failed to parse notification WebSocket message:', err);
-			}
-		});
+  const wsUrl = `/notification/ws`;
+  console.log('Connecting to notifications WebSocket at', wsUrl);
+  notifSocket = new WebSocket(wsUrl);
 
-		notifSocket.addEventListener('close', () => {
-			console.log('Notifications WebSocket closed');
-		});
+  notifSocket.addEventListener('open', () => {
+    console.log('Notifications WebSocket connected');
+    showInfoToast('Connected to notifications', { duration: 2000 });
+    // Send initial ping to establish connection
+    sendPing();
+  });
 
-		notifSocket.addEventListener('error', (error) => {
-			console.error('Notifications WebSocket error:', error);
-		});
-	}
+  notifSocket.addEventListener('message', (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      handleNotificationEvent(data);
+    } catch (err) {
+      console.error('Failed to parse notification WebSocket message:', err);
+    }
+  });
+
+  notifSocket.addEventListener('close', () => {
+    console.log('Notifications WebSocket closed');
+    showWarningToast('Disconnected from notifications', { duration: 2000 });
+    notifSocket = null;
+  });
+
+  notifSocket.addEventListener('error', (error) => {
+    console.error('Notifications WebSocket error:', error);
+    showErrorToast('Notification connection error', { duration: 3000 });
+    notifSocket = null;
+  });
 }
 
 export function disconnectNotificationsWebSocket() 
@@ -63,7 +75,10 @@ function handleNotificationEvent(data: any) {
 
 	switch (data.event) {
 		case 'friends.onlineList':
-			console.log('Online friends list:', data.data);
+			{
+				const count = data.data?.onlineFriends?.length || 0;
+				console.log(`${count} online friends:`, data.data);
+			}
 			break;
 
 		case 'friend.online':
@@ -83,15 +98,46 @@ function handleNotificationEvent(data: any) {
 		case 'friend.request':
 			{
 				const username = data.data?.username || 'Someone';
-				const requesterId = data.data?.requesterId;
-				showWarningToast(`Friend request from ${username}`, { duration: 5000 });
+				const userId = data.data?.userId;
 				
-				// Load friend requests if FriendsManager is available
-				if (friendsManager) {
-					friendsManager.loadFriendRequests().catch(err => 
-						console.error('Failed to reload friend requests:', err)
-					);
-				}
+				showWarningToast(`Friend request from ${username}`, { 
+					duration: 0, // Keep toast until user acts
+					actions: [
+						{
+							label: '✓ Accept',
+							style: 'primary',
+							onClick: async () => {
+								if (friendsManager && userId) {
+									try {
+										await friendsManager.acceptFriendRequest(userId);
+										showSuccessToast(`You accepted ${username}'s friend request`, { duration: 3000 });
+										await friendsManager.loadFriends();
+										await friendsManager.loadFriendRequests();
+									} catch (err) {
+										console.error('Error accepting friend request:', err);
+										showErrorToast(`Failed to accept friend request`, { duration: 3000 });
+									}
+								}
+							}
+						},
+						{
+							label: '✕ Reject',
+							style: 'secondary',
+							onClick: async () => {
+								if (friendsManager && userId) {
+									try {
+										await friendsManager.rejectFriendRequest(userId);
+										showInfoToast(`You rejected ${username}'s friend request`, { duration: 3000 });
+										await friendsManager.loadFriendRequests();
+									} catch (err) {
+										console.error('Error rejecting friend request:', err);
+										showErrorToast(`Failed to reject friend request`, { duration: 3000 });
+									}
+								}
+							}
+						}
+					]
+				});
 			}
 			break;
 
@@ -126,6 +172,27 @@ function handleNotificationEvent(data: any) {
 			}
 			break;
 
+		case 'friend.rejected':
+			{
+				const username = data.data?.username || 'Someone';
+				showInfoToast(`${username} rejected your friend request`, { duration: 4000 });
+			}
+			break;
+
+		case 'friend.removed':
+			{
+				const username = data.data?.username || 'Someone';
+				showWarningToast(`${username} removed you as a friend`, { duration: 4000 });
+				
+				// Reload friends list if FriendsManager is available
+				if (friendsManager) {
+					friendsManager.loadFriends().catch(err => 
+						console.error('Failed to reload friends:', err)
+					);
+				}
+			}
+			break;
+
 		case 'game.invite':
 			{
 				const username = data.data?.username || 'Someone';
@@ -134,11 +201,43 @@ function handleNotificationEvent(data: any) {
 			}
 			break;
 
+		case 'game.started':
+			{
+				const gameId = data.data?.gameId || 'unknown';
+				showInfoToast(`Game ${gameId} has started`, { duration: 3000 });
+			}
+			break;
+
+		case 'game.ended':
+			{
+				const gameId = data.data?.gameId || 'unknown';
+				const winner = data.data?.winner || 'Unknown';
+				showInfoToast(`Game ${gameId} ended. Winner: ${winner}`, { duration: 4000 });
+			}
+			break;
+
+		case 'chat.message':
+			{
+				const sender = data.data?.sender || 'Someone';
+				const preview = data.data?.message?.substring(0, 30) || 'sent you a message';
+				showInfoToast(`${sender}: ${preview}...`, { duration: 4000 });
+			}
+			break;
+
+		case 'achievement.unlocked':
+			{
+				const achievement = data.data?.achievement || 'Achievement';
+				showSuccessToast(`🏆 ${achievement} unlocked!`, { duration: 4000 });
+			}
+			break;
+
 		case 'pong':
+			// Heartbeat - don't show toast, just log
 			console.log('Pong received');
 			break;
 
 		default:
 			console.log('Unknown notification event:', data.event);
+			showInfoToast(`Notification: ${data.event}`, { duration: 3000 });
 	}
 }
