@@ -14,7 +14,8 @@ import {
 	getAllTournaments as getAllTournamentsHandler,
 	joinTournament as joinTournamentHandler,
 	isUserBusy as isUserBusyHandler,
-	getUserTournamentParticipation as getUserTournamentParticipationHandler
+	getUserTournamentParticipation as getUserTournamentParticipationHandler,
+	getTournamentBracket as getTournamentBracketHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -80,9 +81,16 @@ const	Match =
 	{
 		id: { type: 'string' },
 		playerLeftId: { type: 'string' },
+		playerLeftUsername: { type: 'string' }, // TO DO check the controller
 		playerRightId: { type: 'string' },
+		playerRightUsername: { type: 'string' },
+		status: { type: 'string' },
 		winnerId: { type: 'string'},
-		endedAt: { type: 'string', format: 'date-time' }
+		isBye : { type: 'boolean' }, // for tournament matches
+		endedAt: { type: 'string', format: 'date-time' },
+		tournamentId: { type: 'string' },
+		playerLeftScore: { type: 'integer' },
+		playerRightScore: { type: 'integer' }
 	}
 };
 
@@ -120,6 +128,40 @@ const	TournamentParticipation =
 		winnerUsername: { type: 'string' },
 		endedAt: { type: 'string', format: 'date-time' },
 		top: { type: 'integer' } // User's rank in the tournament
+	}
+};
+
+const	TournamentRound =
+{
+	type: 'object',
+	properties:
+	{
+		roundNumber: { type: 'integer' },
+		matches:
+		{
+			type: 'array',
+			items: Match
+		}
+	}
+};
+
+const	TournamentBracket =
+{
+	type: 'object',
+	properties:
+	{
+		tournamentId: { type: 'string' },
+		name: { type: 'string' },
+		status: { type: 'string' },
+		currentRound: { type: 'integer' },
+		totalRounds: { type: 'integer' },
+		participantCount: { type: 'integer' },
+		winnerId : { type: 'string' },
+		rounds:
+		{
+			type: 'array',
+			items: TournamentRound
+		}
 	}
 };
 
@@ -461,6 +503,37 @@ const	getUserTournamentParticipation =
 	handler: getUserTournamentParticipationHandler
 }
 
+const	getTournamentBracket =
+{
+	schema:
+	{
+		summary: 'Get tournament bracket',
+		description: 'Retrieve the full bracket state for a tournament (all rounds and matches), it works only for ongoing tournaments.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		params:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:{ ...TournamentBracket },
+			404: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getTournamentBracketHandler
+}
+
 //-----------------------------EXPORT ROUTES-----------------------------
 
 export function	pongRoutes(fastify)
@@ -485,6 +558,7 @@ export function	pongRoutes(fastify)
 	fastify.get('/get-all-tournaments', getAllTournaments);
 	fastify.get('/is-user-busy', isUserBusy);
 	fastify.get('/user-tournament-participation', getUserTournamentParticipation);
+	fastify.get('/tournaments/:id/bracket', getTournamentBracket);
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.post('/create-tournament', createTournament);

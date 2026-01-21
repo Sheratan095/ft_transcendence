@@ -298,6 +298,14 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentCancelled', data);
 	}
 
+	async	sendTournamentBracketUpdate(userId, bracket)
+	{
+		const	socket = this._connections.get(userId);
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentBracketUpdate', bracket);
+	}
+
 	//------------------------------------------
 
 	async	sendErrorMessage(userId, message)

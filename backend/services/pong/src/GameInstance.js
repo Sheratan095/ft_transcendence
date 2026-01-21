@@ -65,6 +65,8 @@ export class	GameInstance
 		this.lastUpdateTime = Date.now();
 		this.frameRate = 60; // 60 FPS
 		this.frameInterval = 1000 / this.frameRate;
+
+		this.winnerId = null;
 	}
 
 	startGame()
@@ -245,7 +247,9 @@ export class	GameInstance
 
 		const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
-		
+
+		this.winnerId = winnerId;
+
 		// Check if this is a tournament game
 		if (this.gameType === GameType.TOURNAMENT)
 		{

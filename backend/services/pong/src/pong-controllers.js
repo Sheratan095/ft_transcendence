@@ -1,7 +1,7 @@
 import { calculateElo, extractUserData } from './pong-help.js';
 import { tournamentManager } from './TournamentManager.js';
-import { gameManager } from './GameManager.js';
-import { getUsernameById, sleep, checkBlock, isUserBusyInternal } from './pong-help.js';
+import { getUsernameById, isUserBusyInternal } from './pong-help.js';
+import { GameStatus } from './GameInstance.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -124,17 +124,29 @@ export const	getUserMatchHistory = async (req, reply) =>
 		if (!matchHistory || matchHistory.length === 0)
 			return (reply.code(404).send({ error: 'No match history found for user' }));
 
-		// Map the match history to a cleaner format if needed
+		// Map the match history to a cleaner format
 		for (let match of matchHistory)
 		{
-			match.playerXId = match.player_x_id;
-			match.playerOId = match.player_o_id;
+			match.id = match.id;
+			match.playerLeftId = match.player_left_id;
+			match.playerLeftUsername = await getUsernameById(match.player_left_id);
+			match.playerRightId = match.player_right_id;
+			match.playerRightUsername = await getUsernameById(match.player_right_id);
+			match.status = GameStatus.FINISHED;
 			match.winnerId = match.winner_id;
+			match.isBye = false;
 			match.endedAt = match.ended_at;
-			delete match.player_x_id;
-			delete match.player_o_id;
+			match.tournamentId = match.tournament_id;
+			match.playerLeftScore = match.player_left_score;
+			match.playerRightScore = match.player_right_score;
+
+			delete match.player_left_id;
+			delete match.player_right_id;
+			delete match.player_left_score;
+			delete match.player_right_score;
 			delete match.winner_id;
 			delete match.ended_at;
+			delete match.tournament_id;
 		}
 
 		console.log(`[PONG] Retrieved match history for user ${userId}`);
@@ -265,6 +277,28 @@ export const	getUserTournamentParticipation = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[PONG] Error in getUserTournamentParticipation controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	getTournamentBracket = async (req, reply) =>
+{
+	try
+	{
+		const	tournamentId = req.params.id;
+
+		// Get bracket state from tournament manager
+		const	bracket = tournamentManager.getTournamentBracket(tournamentId);
+		if (!bracket)
+			return (reply.code(404).send({ error: 'Tournament not found or finished' }));
+
+		console.log(`[PONG] Retrieved bracket for tournament ${tournamentId}`);
+
+		return (reply.code(200).send(bracket));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in getTournamentBracket controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
