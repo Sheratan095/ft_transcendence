@@ -441,6 +441,38 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
+- **pong.tournamentBracketUpdate** - Full tournament bracket state update (sent after matches end and rounds start)
+\`\`\`json
+{
+  "event": "pong.tournamentBracketUpdate",
+  "data": {
+    "tournamentId": "tourney123",
+    "name": "Summer Cup",
+    "status": "IN_PROGRESS",
+    "currentRound": 2,
+    "totalRounds": 3,
+    "participantCount": 8,
+    "winner": null,
+    "rounds": [
+      {
+        "roundNumber": 1,
+        "matches": [
+          {
+            "id": "match1",
+            "playerLeft": { "userId": "user1", "username": "alice" },
+            "playerRight": { "userId": "user2", "username": "bob" },
+            "status": "FINISHED",
+            "winner": { "userId": "user1", "username": "alice" },
+            "isBye": false,
+            "scores": { "user1": 5, "user2": 3 }
+          }
+        ]
+      }
+    ]
+  }
+}
+\`\`\`
+
 - **error** - Error message
 \`\`\`json
 {

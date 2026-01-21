@@ -9,7 +9,8 @@ import {
 	createUserStats as createUserStatsHandler,
 	deleteUserStats as deleteUserStatsHandler,
 	getUserStats as getUserStatsHandler,
-	getUserMatchHistory as getUserMatchHistoryHandler
+	getUserMatchHistory as getUserMatchHistoryHandler,
+	isUserBusy as isUserBusyHandler
 } from './tris-controllers.js';
 
 import { validateInternalApiKey } from './tris-help.js';
@@ -163,6 +164,38 @@ const	deleteUserStats =
 	handler: deleteUserStatsHandler
 }
 
+const	isUserBusy =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Check if user is busy',
+		description: 'Internal only. Checks if a user is currently in a game/tournament. (called by other game services before inviting/joining)',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: { isBusy: { type: 'boolean' } }
+			},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: isUserBusyHandler
+}
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 const	getUserStats =
@@ -261,6 +294,7 @@ export function	trisRoutes(fastify)
 
 	fastify.get('/stats', getUserStats);
 	fastify.get('/history', getUserMatchHistory);
+	fastify.get('/is-user-busy', isUserBusy);
 
 	fastify.post('/create-user-stats', createUserStats);
 

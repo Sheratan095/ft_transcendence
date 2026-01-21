@@ -111,15 +111,15 @@ export class	PongDatabase
 	}
 
 	// Ended at datetime is set by default to CURRENT_TIMESTAMP from db
-	async	saveMatch(playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId)
+	async	saveMatch(playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId, tournamentId = null)
 	{
 		const	matchId = await this.#generateUUID();
 		const	query = `
-			INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id)
-			VALUES (?, ?, ?, ?, ?, ?)
+			INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, tournament_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`;
 
-		await this.db.run(query, [matchId, playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId]);
+		await this.db.run(query, [matchId, playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId, tournamentId]);
 		return (matchId);
 	}
 
@@ -184,19 +184,76 @@ export class	PongDatabase
 		return (stats);
 	}
 
-	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0, tournamentWinsDelta = 0)
+	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0, tournamentWinsDelta = 0, tournamentsParticipatedDelta = 0)
 	{
 		const	query = `
 			UPDATE user_stats
 			SET
 				wins = wins + ?,
 				losses = losses + ?,
-				tournament_wins = tournament_wins + ?
+				tournament_wins = tournament_wins + ?,
+				tournaments_participated = tournaments_participated + ?
 			WHERE user_id = ?
 		`;
 
-		await this.db.run(query, [winsDelta, lossesDelta, tournamentWinsDelta, userId]);
+		await this.db.run(query, [winsDelta, lossesDelta, tournamentWinsDelta, tournamentsParticipatedDelta, userId]);
 	}
+
+	//-----------------------------TOURNAMENT QUERIES---------------------------------//
+
+	async	saveTournament(tournamentId, name, creatorId, winnerId)
+	{
+		const	query = `
+			INSERT INTO tournaments (id, name, creator_id, winner_id)
+			VALUES (?, ?, ?, ?)
+		`;
+
+		await this.db.run(query, [tournamentId, name, creatorId, winnerId]);
+	}
+
+	// it updates the user stats for tournament participated
+	async	saveTournamentParticipants(tournamentId, participants)
+	{
+		const	query = `
+			INSERT INTO tournament_participants (tournament_id, user_id)
+			VALUES (?, ?)
+		`;
+
+		// Insert all participants
+		for (const participant of participants)
+		{
+			await this.db.run(query, [tournamentId, participant.userId]);
+			await this.updateUserStats(participant.userId, 0, 0, 0, 1);
+		}
+
+	}
+
+	async	getTournamentParticipationByUser(userId)
+	{
+		const	query = `
+			SELECT tp.tournament_id, t.name,t.finished_at
+			FROM tournament_participants tp
+			JOIN tournaments t ON tp.tournament_id = t.id
+			WHERE tp.user_id = ?
+			ORDER BY tp.finished_at DESC
+		`;
+
+		const	participation = await this.db.all(query, [userId]);
+		return (participation);
+	}
+
+	async	updateTournamentParticipantTop(tournamentId, userId, top)
+	{
+		const	query = `
+			UPDATE tournament_participants
+			SET top = ?
+			WHERE tournament_id = ? AND user_id = ?
+		`;
+
+		await this.db.run(query, [top, tournamentId, userId]);
+	}
+
+	//-----------------------------CLOSE DB---------------------------------//
 
 	async	#close()
 	{

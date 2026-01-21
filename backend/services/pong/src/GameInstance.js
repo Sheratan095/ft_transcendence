@@ -1,6 +1,7 @@
 import { gameManager } from './GameManager.js';
 import { pongConnectionManager } from './PongConnectionManager.js';
 import { initGameState, movePaddle, elaboratePaddleCollision, elaborateWallCollision } from './pong-physics.js';
+import { tournamentManager } from './TournamentManager.js';
 
 export const	GameStatus =
 {
@@ -20,7 +21,7 @@ export const	GameType =
 export class	GameInstance
 {
 	// By defaualt, the left player is the creator
-	constructor(id, playerLeftId, playerRightId, playerLeftUsername, playerRightUsername, type)
+	constructor(id, playerLeftId, playerRightId, playerLeftUsername, playerRightUsername, type, tournamentId = null)
 	{
 		this.id = id;
 
@@ -42,6 +43,7 @@ export class	GameInstance
 		this.gameType = type;
 
 		this.type = type;
+		this.tournamentId = tournamentId;
 
 		this.scores =
 		{
@@ -63,6 +65,8 @@ export class	GameInstance
 		this.lastUpdateTime = Date.now();
 		this.frameRate = 60; // 60 FPS
 		this.frameInterval = 1000 / this.frameRate;
+
+		this.winnerId = null;
 	}
 
 	startGame()
@@ -243,12 +247,16 @@ export class	GameInstance
 
 		const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 		const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
-		
+
+		this.winnerId = winnerId;
+
 		// Check if this is a tournament game
 		if (this.gameType === GameType.TOURNAMENT)
 		{
-			const { tournamentManager } = require('./TournamentManager.js');
-			tournamentManager.handleGameEnd(this.id, winnerId, loserId);
+			// Fire and forget - don't block game loop
+			tournamentManager.handleGameEnd(this.id, winnerId, loserId).catch(err => {
+				console.error('[PONG] Error handling tournament game end:', err);
+			});
 		}
 		
 		gameManager._gameEnd(this, winnerId, loserId, winnerUsername, false);
@@ -293,6 +301,13 @@ export class	GameInstance
 
 		pongConnectionManager.sendScore(this.playerLeftId, scoreData);
 		pongConnectionManager.sendScore(this.playerRightId, scoreData);
+	}
+
+	// Force end the game immediately (used when tournament is cancelled or player forfeits)
+	forceEnd()
+	{
+		this.gameStatus = GameStatus.FINISHED;
+		this.stopGameLoop();
 	}
 
 	// Cleanup method
