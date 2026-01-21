@@ -1,4 +1,4 @@
-### Create a tournament
+### Create private chat
 POST https://localhost:3000/chat/start-private-chat
 Content-Type: application/json
 

@@ -1,0 +1,23 @@
+
+la pallina ha:
+x, y, vx, vy, velocità e diametro
+
+
+formula per calcolare i componenti data velocità, angolo in gradi e diretion (destra (-1) / sinitra (+1))
+(uso cos e sin perchè, dato che la velocità non deve variare in questo calcolo, la risultante delle forze deve essere 1)
+    theta = (angolo in gradi * π ) / 180 così trasformo l'angolo in radianti
+
+    nuova vx = direzione * velocità * cos(theta)
+    nuova vy = velocità * sin (theta)
+
+
+all'inizio la palla parte al centro del campo con angolo e direzione casuale: 
+    angolo casuale in gradi = {[(random tra 0 e 1)] * 120 } - 60 per generarlo tra -60 e +60
+    direzione casuale = (-1 / +1)
+
+    calcoloComponenti(velocità iniziale, angolo in gradi, direzion)
+
+
+quando la palla colpisce un bordo (sotto o sopra):
+    vy = -vy
+    e vx rimane costante
