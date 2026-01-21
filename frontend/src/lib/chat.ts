@@ -26,6 +26,7 @@ export async function openChatModal() {
     }
   }
 
+  connectChatWebSocket();
   // Connect to WebSocket if not already connected
   if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
     connectChatWebSocket();
@@ -77,6 +78,7 @@ async function loadChats() {
       }
     });
 
+    currentChatId = chats.length > 0 ? chats[0].id : null;
     renderChatList();
   } catch (err) {
     console.error('Error loading chats:', err);
@@ -111,6 +113,8 @@ function renderChatList() {
     chatItem.appendChild(chatType);
     chatList.appendChild(chatItem);
   });
+
+  currentChatId = currentChatId || chats[0].id;
 }
 
 function getChatDisplayName(chat: any): string {
@@ -133,12 +137,19 @@ async function selectChat(chatId: string) {
     console.error('Failed to select chat:', err);
   }
 
-  // Update chat header
+  // Update chat header and show/hide leave group button
   const chatHeader = document.getElementById('chat-header');
-  if (chatHeader) {
+  const leaveGroupBtn = document.getElementById('leave-group-btn');
+  if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
       chatHeader.textContent = getChatDisplayName(chat);
+      // Show leave group button only for group chats
+      if (chat.chatType === 'group') {
+        leaveGroupBtn.classList.remove('hidden');
+      } else {
+        leaveGroupBtn.classList.add('hidden');
+      }
     }
   }
 
@@ -159,7 +170,6 @@ async function loadMessages(chatId: string, offset = 0) {
     }
 
     const newMessages = await response.json();
-    console.log('Loaded messages from API:', newMessages);
 
     // Reverse to show oldest first (WhatsApp style)
     if (offset === 0) {
@@ -239,14 +249,14 @@ export async function renderMessages() {
     // Compare as strings since backend returns string IDs
     const isSent = String(senderId) === String(currentUserId);
 
-    console.log('Message:', {
-      senderId,
-      currentUserId,
-      isSent,
-      isPrivate,
-      senderIdType: typeof senderId,
-      userIdType: typeof currentUserId
-    });
+    // console.log('Message:', {
+    //   senderId,
+    //   currentUserId,
+    //   isSent,
+    //   isPrivate,
+    //   senderIdType: typeof senderId,
+    //   userIdType: typeof currentUserId
+    // });
 
     // Determine message class based on type and sender
     let messageClass = 'message ';
@@ -497,9 +507,49 @@ export async function sendChatInvite(otherUserId: string) {
     console.log('Private chat started:', chatId);
 }
 
+export async function leaveGroupChat(chatId: string) {
+  try {
+    const res = await fetch(`/api/chat/leave-group-chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ chatId })
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to leave group chat: ${res.statusText}`);
+    }
+
+    // Remove chat from list
+    chats = chats.filter(c => c.id !== chatId);
+    messages.delete(chatId);
+    chatMembers.delete(chatId);
+
+    // Close the chat and reset to list view
+    if (currentChatId === chatId) {
+      currentChatId = null;
+      const chatHeader = document.getElementById('chat-header');
+      if (chatHeader) {
+        chatHeader.textContent = 'Select a chat';
+      }
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) {
+        chatMessages.innerHTML = '';
+      }
+    }
+
+    // Re-render the chat list
+    renderChatList();
+    console.log('Left group chat:', chatId);
+  } catch (err) {
+    console.error('Error leaving group chat:', err);
+    throw err;
+  }
+}
+
 export async function sendChatMessage(message: string) {
-  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-    console.error('Not connected to chat or no chat selected');
+  if (!chatSocket || currentChatId === null) {
+    console.error('Not connected to chat or no chat selected', chatSocket, currentChatId);
     return;
   }
 
@@ -559,7 +609,7 @@ let selectedFriendsForGroup: Set<string> = new Set();
 
 async function fetchFriends(): Promise<any[]> {
   try {
-    const response = await fetch('/api/user/relationship/friends', {
+    const response = await fetch('/api/users/relationships/friends', {
       method: 'GET',
       credentials: 'include'
     });
@@ -752,6 +802,25 @@ export function setupChatEventListeners() {
       if (input && input.value.trim()) {
         sendChatMessage(input.value.trim());
         input.value = '';
+      }
+    });
+  }
+
+  const leaveGroupBtn = document.getElementById('leave-group-btn');
+  if (leaveGroupBtn) {
+    leaveGroupBtn.addEventListener('click', async () => {
+      if (!currentChatId) return;
+      
+      const chat = chats.find(c => c.id === currentChatId);
+      if (!chat) return;
+
+      const chatName = getChatDisplayName(chat);
+      if (confirm(`Are you sure you want to leave "${chatName}"?`)) {
+        try {
+          await leaveGroupChat(currentChatId);
+        } catch (err) {
+          alert(`Failed to leave group: ${(err as Error).message}`);
+        }
       }
     });
   }

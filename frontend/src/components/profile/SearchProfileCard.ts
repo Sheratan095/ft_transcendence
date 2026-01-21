@@ -1,6 +1,7 @@
 import { openChatModal } from '../../lib/chat';
 import type { User } from '../../lib/auth';
 import { sendChatInvite } from '../../lib/chat';
+import { FriendsManager } from './FriendsManager';
 
 export interface SearchProfileCardOptions {
   onAddFriend?: (userId: string) => void;
@@ -12,7 +13,18 @@ export async function renderSearchProfileCard(
   container: HTMLElement,
   options: SearchProfileCardOptions = {}
 ): Promise<HTMLElement | null> {
-  const { onAddFriend, onBlock } = options;
+
+  //instantiate friends manager to check friendship status
+  const friendsManager = new FriendsManager({ currentUserId: 'current-user-id' });
+  await friendsManager.loadFriends();
+  await friendsManager.loadFriendRequests();
+
+  
+
+  // If the user is the current user, do not render the card
+  if (user.id === 'current-user-id') {
+    return null;
+  }
 
   // Create card container
   const card = document.createElement('div');
@@ -29,7 +41,7 @@ export async function renderSearchProfileCard(
   const avatar = document.createElement('img');
   avatar.src = user.avatarUrl?.startsWith('http')
     ? user.avatarUrl
-    : `https://localhost:3000${user.avatarUrl || '/assets/placeholder-avatar.jpg'}`;
+    : `${user.avatarUrl || '/assets/placeholder-avatar.jpg'}`;
   avatar.alt = user.username || 'User avatar';
   avatar.className = 'w-32 h-32 rounded-lg object-cover border-2 border-neutral-600';
   avatarContainer.appendChild(avatar);
@@ -89,10 +101,14 @@ export async function renderSearchProfileCard(
   const chatBtn = document.createElement('button');
   chatBtn.className = 'flex-1 min-w-[150px] px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors uppercase tracking-tight text-sm';
   chatBtn.textContent = '💬 Send Message';
-  chatBtn.addEventListener('click', () => {
+  chatBtn.addEventListener('click', async () => {
     // Open chat with this user
-    sendChatInvite(user.id);
-    console.log('Chat invite sent to user:', user.id);
+    try {
+      await sendChatInvite(user.id);
+      console.log('Chat invite sent to user:', user.id);
+    } catch (err) {
+      console.error('Failed to send chat invite:', err);
+    }
   });
   buttonsDiv.appendChild(chatBtn);
 
@@ -100,13 +116,17 @@ export async function renderSearchProfileCard(
   const addFriendBtn = document.createElement('button');
   addFriendBtn.className = 'flex-1 min-w-[150px] px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors uppercase tracking-tight text-sm';
   addFriendBtn.textContent = '👥 Add Friend';
-  addFriendBtn.addEventListener('click', () => {
-    if (onAddFriend) {
-      onAddFriend(user.id);
-      addFriendBtn.disabled = true;
-      addFriendBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-      addFriendBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      addFriendBtn.textContent = '⏳ Request Sent';
+  addFriendBtn.addEventListener('click', async () => {
+    try {
+      const success = await friendsManager.addFriend(user.id);
+      if (success) {
+        addFriendBtn.disabled = true;
+        addFriendBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+        addFriendBtn.classList.add('bg-neutral-600', 'text-neutral-400');
+        addFriendBtn.textContent = '✓ Request Sent';
+      }
+    } catch (err) {
+      console.error('Failed to add friend:', err);
     }
   });
   buttonsDiv.appendChild(addFriendBtn);
@@ -115,13 +135,17 @@ export async function renderSearchProfileCard(
   const blockBtn = document.createElement('button');
   blockBtn.className = 'flex-1 min-w-[150px] px-4 py-3 bg-red-600/70 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors uppercase tracking-tight text-sm';
   blockBtn.textContent = '🚫 Block';
-  blockBtn.addEventListener('click', () => {
-    if (onBlock) {
-      onBlock(user.id);
-      blockBtn.disabled = true;
-      blockBtn.classList.remove('bg-red-600/70', 'hover:bg-red-700');
-      blockBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      blockBtn.textContent = '✓ Blocked';
+  blockBtn.addEventListener('click', async () => {
+    try {
+      const success = await friendsManager.blockUser(user.id);
+      if (success) {
+        blockBtn.disabled = true;
+        blockBtn.classList.remove('bg-red-600/70', 'hover:bg-red-700');
+        blockBtn.classList.add('bg-neutral-600', 'text-neutral-400');
+        blockBtn.textContent = '✓ Blocked';
+      }
+    } catch (err) {
+      console.error('Failed to block user:', err);
     }
   });
   buttonsDiv.appendChild(blockBtn);
