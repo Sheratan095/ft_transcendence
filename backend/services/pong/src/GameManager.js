@@ -474,14 +474,16 @@ class	GameManager
 		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, winnerUsername, quit);
 		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, winnerUsername, quit);
 
-		if (gameInstance.gameType === GameType.RANDOM)
+		if (gameInstance.gameType === GameType.RANDOM || gameInstance.gameType === GameType.TOURNAMENT)
 		{
 			// Add game to the history
-			pongDb.saveMatch(gameInstance.playerLeftId, gameInstance.playerRightId, winner);
+			const	playerLeftScore = gameInstance.scores[gameInstance.playerLeftId] || 0;
+			const	playerRightScore = gameInstance.scores[gameInstance.playerRightId] || 0;
+			pongDb.saveMatch(gameInstance.playerLeftId, gameInstance.playerRightId, playerLeftScore, playerRightScore, winner, gameInstance.tournamentId);
 
 			// Update player stats
-			pongDb.updateUserStats(winner, 1, 0, 0);
-			pongDb.updateUserStats(loser, 0, 1, 0);
+			pongDb.updateUserStats(winner, 1, 0, 0, 0);
+			pongDb.updateUserStats(loser, 0, 1, 0, 0);
 		}
 
 		if (this._randomGameCooldowns.has(gameInstance.id))

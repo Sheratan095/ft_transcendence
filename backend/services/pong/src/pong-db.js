@@ -111,15 +111,15 @@ export class	PongDatabase
 	}
 
 	// Ended at datetime is set by default to CURRENT_TIMESTAMP from db
-	async	saveMatch(playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId)
+	async	saveMatch(playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId, tournamentId = null)
 	{
 		const	matchId = await this.#generateUUID();
 		const	query = `
-			INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id)
-			VALUES (?, ?, ?, ?, ?, ?)
+			INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, tournament_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`;
 
-		await this.db.run(query, [matchId, playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId]);
+		await this.db.run(query, [matchId, playerLeftId, playerRightId, playerLeftScore, playerRightScore, winnerId, tournamentId]);
 		return (matchId);
 	}
 
@@ -211,6 +211,7 @@ export class	PongDatabase
 		await this.db.run(query, [tournamentId, name, creatorId, winnerId]);
 	}
 
+	// it updates the user stats for tournament participated
 	async	saveTournamentParticipants(tournamentId, participants)
 	{
 		const	query = `
@@ -220,7 +221,11 @@ export class	PongDatabase
 
 		// Insert all participants
 		for (const participant of participants)
+		{
 			await this.db.run(query, [tournamentId, participant.userId]);
+			await this.updateUserStats(participant.userId, 0, 0, 0, 1);
+		}
+
 	}
 
 	async	getTournamentParticipationByUser(userId)

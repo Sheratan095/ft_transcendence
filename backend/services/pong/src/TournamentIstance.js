@@ -60,6 +60,9 @@ export class	TournamentInstance
 	{
 		this.status = TournamentStatus.IN_PROGRESS;
 
+		// Store initial participant count for top calculation (doesn't change when players leave)
+		this.initialParticipantCount = this.participants.size;
+
 		// Shuffle participants
 		const	shuffledParticipants = Array.from(this.participants).sort(() => Math.random() - 0.5);
 		this.participants = new Set(shuffledParticipants);
@@ -84,7 +87,8 @@ export class	TournamentInstance
 					players[i + 1].userId,
 					players[i].username,
 					players[i + 1].username,
-					GameType.TOURNAMENT
+					GameType.TOURNAMENT,
+					this.id
 				);
 
 				gameInstance.tournamentId = this.id;
@@ -102,7 +106,8 @@ export class	TournamentInstance
 					null,
 					players[i].username,
 					null,
-					GameType.TOURNAMENT
+					GameType.TOURNAMENT,
+					this.id
 				);
 
 				gameInstance.tournamentId = this.id;
@@ -189,11 +194,11 @@ export class	TournamentInstance
 			match.winner = { userId: match.playerRightId, username: match.playerRightUsername };
 
 		// Check if this round is complete
-		if (this._isRoundComplete())
+		if (this.isRoundComplete())
 			this._advanceToNextRound();
 	}
 
-	_isRoundComplete()
+	isRoundComplete()
 	{
 		const	currentMatches = this.rounds[this.currentRound - 1];
 		if (!currentMatches)

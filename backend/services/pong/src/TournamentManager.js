@@ -158,6 +158,9 @@ class	TournamentManager
 
 				tournament.setMatchWinner(match.id, opponentId);
 
+				// Update top placement for forfeiting player
+				this._updateTopForEliminatedPlayer(tournament, userId);
+
 				// Notify all participants about the forfeit
 				for (let participant of tournament.participants)
 				{
@@ -266,12 +269,8 @@ class	TournamentManager
 		// Save participants to database and update their stats
 		try
 		{
-			const	participants = Array.from(tournament.participants);
-			await pongDb.saveTournamentParticipants(tournamentId, participants);
-
-			// Update tournaments_participated stat for all participants
-			for (const participant of participants)
-				await pongDb.updateUserStats(participant.userId, 0, 0, 0, 1);
+			// Save tournament participants and update their participated count
+			await pongDb.saveTournamentParticipants(tournamentId, Array.from(tournament.participants));
 
 			console.log(`[PONG] Tournament ${tournamentId} participants saved to database`);
 		}
@@ -381,6 +380,9 @@ class	TournamentManager
 
 		// Set match winner
 		tournament.setMatchWinner(gameId, winnerId);
+
+		// Update top placement for losing player
+		this._updateTopForEliminatedPlayer(tournament, loserId);
 
 		// Notify all participants about match result
 		const	winnerUsername = match.playerLeftId === winnerId ? match.playerLeftUsername : match.playerRightUsername;
@@ -519,6 +521,10 @@ class	TournamentManager
 			// Update winner stats (increment tournament wins) - 4th param is tournamentsParticipatedDelta (0 since already counted at start)
 			await pongDb.updateUserStats(tournament.winner.userId, 0, 0, 1, 0);
 
+			// Set winner's top placement to 1
+			await pongDb.updateTournamentParticipantTop(tournament.id, tournament.winner.userId, 1);
+
+
 			console.log(`[PONG] Tournament ${tournament.id} saved to database, winner: ${tournament.winner.username}`);
 		}
 		catch (err)
@@ -584,6 +590,22 @@ class	TournamentManager
 		}
 
 		return (false);
+	}
+
+	async _updateTopForEliminatedPlayer(tournament, userId)
+	{
+		const	totalPlayers = tournament.initialParticipantCount;
+		const	top = calculateTop(totalPlayers, tournament.currentRound);
+
+		try
+		{
+			await pongDb.updateTournamentParticipantTop(tournament.id, userId, top);
+			console.log(`[PONG] Updated top placement for user ${userId} in tournament ${tournament.id}: top ${top}`);
+		}
+		catch (err)
+		{
+			console.error(`[PONG] Failed to update top placement for user ${userId}:`, err.message);
+		}
 	}
 }
 

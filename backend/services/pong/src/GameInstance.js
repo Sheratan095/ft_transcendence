@@ -21,7 +21,7 @@ export const	GameType =
 export class	GameInstance
 {
 	// By defaualt, the left player is the creator
-	constructor(id, playerLeftId, playerRightId, playerLeftUsername, playerRightUsername, type)
+	constructor(id, playerLeftId, playerRightId, playerLeftUsername, playerRightUsername, type, tournamentId = null)
 	{
 		this.id = id;
 
@@ -43,6 +43,7 @@ export class	GameInstance
 		this.gameType = type;
 
 		this.type = type;
+		this.tournamentId = tournamentId;
 
 		this.scores =
 		{
@@ -296,6 +297,13 @@ export class	GameInstance
 
 		pongConnectionManager.sendScore(this.playerLeftId, scoreData);
 		pongConnectionManager.sendScore(this.playerRightId, scoreData);
+	}
+
+	// Force end the game immediately (used when tournament is cancelled or player forfeits)
+	forceEnd()
+	{
+		this.gameStatus = GameStatus.FINISHED;
+		this.stopGameLoop();
 	}
 
 	// Cleanup method
