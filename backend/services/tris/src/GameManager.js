@@ -531,6 +531,22 @@ class	GameManager
 		}, process.env.MOVE_TIMEOUT_MS);
 		this._moveTimeouts.set(gameId, timeoutId);
 	}
+
+	isUserInGameOrMatchmaking(userId)
+	{
+		// Check if user is in matchmaking queue
+		if (this._waitingPlayers.includes(userId))
+			return (true);
+
+		// Check if user is in any active games
+		for (const gameInstance of this._games.values())
+		{
+			if (gameInstance.hasPlayer(userId))
+				return (true);
+		}
+
+		return (false);
+	}
 }
 
 export const	gameManager = new GameManager();

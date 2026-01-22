@@ -54,7 +54,7 @@ services/pong:
     PORT=3005
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
-    TRIS_SERVICE_URL=http://localhost:3004
+    TRIS_SERVICE_URL=http://localhost:3006
     PONG_WIN_SCORE = 10
     READY_COOLDOWN_MS = 30000
     ROUND_TRANSITION_COOLDOWN_MS = 10000
