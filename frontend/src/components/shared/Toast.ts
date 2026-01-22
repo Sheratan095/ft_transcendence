@@ -43,7 +43,7 @@ export function showToast(message: string, type: ToastType = 'info', options: To
   const container = getToastContainer(position);
 
   const toast = document.createElement('div');
-  toast.className = 'animate-in fade-in slide-in-from-top-4 duration-200 rounded-lg px-4 py-3 shadow-lg max-w-md';
+  toast.className = 'animate-in fade-in slide-in-from-top-4 duration-200 rounded-lg px-4 py-3 shadow-lg max-w-md pointer-events-auto';
 
   // Type-based styling
   const typeMap: Record<ToastType, { bg: string; text: string; icon: string }> = {

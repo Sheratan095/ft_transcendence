@@ -40,7 +40,8 @@ export class FriendsManager {
       this.friends.clear();
       
       friendsList.forEach((friend: User) => {
-        this.friends.set(friend.id, friend);
+		friend.id = friend.userId;
+        this.friends.set(friend.userId, friend);
       });
 
       if (this.onFriendsUpdated) {

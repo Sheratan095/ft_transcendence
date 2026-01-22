@@ -1,5 +1,6 @@
 import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } from '../shared/Toast';
 import { FriendsManager } from './FriendsManager';
+import { openTrisModalAndJoinGame } from '../../lib/tris-ui';
 
 let notifSocket: WebSocket | null = null;
 let friendsManager: FriendsManager | null = null;
@@ -196,8 +197,46 @@ function handleNotificationEvent(data: any) {
 		case 'game.invite':
 			{
 				const username = data.data?.username || 'Someone';
-				const game = data.data?.game || 'a game';
-				showWarningToast(`${username} invited you to play ${game}`, { duration: 5000 });
+				const gameType = data.data?.gameType || 'tris';
+				const gameId = data.data?.gameId || '';
+
+				showWarningToast(`${username} invited you to play ${gameType}`, { 
+					duration: 0, // Keep toast until user acts
+					actions: [
+						{
+							label: '✓ Accept',
+							style: 'primary',
+							onClick: async () => {
+								try {
+									// If it's a tris game invite, open modal and join via WebSocket
+									if (gameType === 'tris' && gameId) {
+										// Import and call function to open tris modal and join game
+										await openTrisModalAndJoinGame(gameId);
+										// Note: Success feedback will come from handleCustomGameJoinSuccess event
+									}
+								} catch (err) {
+									console.error('Error accepting game invite:', err);
+									showErrorToast(`Failed to join game`, { duration: 3000 });
+								}
+							}
+						},
+						{
+							label: '✕ Reject',
+							style: 'secondary',
+							onClick: async () => {
+								try {
+									// If it's a tris game, cancel via WebSocket
+									if (gameType === 'tris' && gameId) {
+										showInfoToast(`You rejected ${username}'s invitation`, { duration: 3000 });
+									}
+								} catch (err) {
+									console.error('Error rejecting game invite:', err);
+									showErrorToast(`Failed to reject invitation`, { duration: 3000 });
+								}
+							}
+						}
+					]
+				});
 			}
 			break;
 

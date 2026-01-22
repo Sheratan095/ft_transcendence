@@ -8,6 +8,7 @@ import { getIntlayer, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket, sendPing } from './components/profile/Notifications';
 import { setFriendsManager } from './components/profile/Notifications';
 import { FriendsManager } from './components/profile/FriendsManager';
+import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
 
 // Load user's saved language preference
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
@@ -29,16 +30,23 @@ async function initializeUserServices(userId: string) {
     // 2. Connect FriendsManager to Notifications
     setFriendsManager(friendsManager);
 
-    // 3. Initialize Chat
+    // 3. Connect FriendsManager to Tris UI
+    setTrisFriendsManager(friendsManager);
+
+    // 4. Load friends list
+    await friendsManager.loadFriends();
+    console.log('Friends loaded');
+
+    // 5. Initialize Chat
     initChat(userId);
     setupChatEventListeners();
     console.log('Chat services initialized');
 
-    // 4. Connect to Notifications WebSocket
+    // 6. Connect to Notifications WebSocket
     connectNotificationsWebSocket();
     console.log('Notifications WebSocket connected');
 
-    // 5. Set up periodic token refresh
+    // 7. Set up periodic token refresh
     startTokenRefresh();
     console.log('Token refresh started');
 
@@ -215,6 +223,7 @@ function setupSearchUser() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupSearchUser();
+  setupTrisCardListener();
   // AuthUI will handle chat setup after user login
   new AuthUI();
 });

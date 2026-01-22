@@ -2,6 +2,7 @@ import { stopTokenRefresh } from './token';
 
 export interface User {
     id: string;
+	userId: string;
     username: string;
     email: string;
     avatarUrl?: string;
@@ -12,6 +13,17 @@ export interface User {
 
 export function getUserId(): string | null {
   return localStorage.getItem('userId');
+}
+
+export function getUser(): User | null {
+  const userJson = localStorage.getItem('user');
+  if (!userJson) return null;
+  try {
+    return JSON.parse(userJson) as User;
+  } catch (err) {
+    console.error('Error parsing user from localStorage:', err);
+    return null;
+  }
 }
 
 export function isLoggedInClient(): boolean {
@@ -55,6 +67,7 @@ export async function fetchUserProfile(): Promise<User | null> {
 export async function logout(): Promise<void> {
   localStorage.removeItem('userId');
   localStorage.removeItem('tfaEnabled');
+  localStorage.removeItem('user');
   stopTokenRefresh();
   
   try {
@@ -71,6 +84,7 @@ export async function logout(): Promise<void> {
 export async function deleteAccout(): Promise<void> {
   localStorage.removeItem('userId');
   localStorage.removeItem('tfaEnabled');
+  localStorage.removeItem('user');
   stopTokenRefresh();
   
   try {
