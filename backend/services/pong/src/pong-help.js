@@ -164,20 +164,28 @@ export async function	isUserBusyInternal(userId, includeTris)
 	{
 		try
 		{
-			const	response = await axios.get(`${process.env.TRIS_SERVICE_URL}/is-user-busy`, {
-				params: { userId }
+			const	response = await fetch(`${process.env.TRIS_SERVICE_URL}/is-user-busy?userId=${userId}`, {
+				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }
 			});
 
-			status = status || response.data.isBusy;
+			if (!response.ok)
+			{
+				console.error(`[PONG] Failed to check user busy status in Tris service for Id ${userId}: ${response.statusText}`);
+				return (true); // assume busy if we can't reach TRIS, to avoid conflicts
+			}
 
-			console.log(`[PONG] User ${userId} busy status ${status},[TRIS included]`);
+			const	data = await response.json();
+
+			status = status || data.isBusy;
+
+			console.log(`[PONG] User ${userId} busy status ${status}, (TRIS included)`);
 
 			return (status);
 		}
 		catch (err)
 		{
 			console.error(`[PONG] Failed to check user busy status in Tris service for Id ${userId}:`, err.message);
-			return (status);
+			return (true); // assume busy if we can't reach TRIS, to avoid conflicts
 		}
 	}
 

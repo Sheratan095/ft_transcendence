@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { gameManager } from './GameManager.js';
 
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
@@ -176,9 +177,8 @@ export async function	checkBlock(userA, userB)
 export async function	isUserBusyInternal(userId, includePong)
 {
 	const	isInGame = await gameManager.isUserInGameOrMatchmaking(userId);
-	const	isInTournament = await tournamentManager.isUserInTournament(userId);
 
-	let	status = isInGame || isInTournament;
+	let	status = isInGame;
 
 	// If specified, check PONG service for busy status
 	//	it's included when the request comes from this service, when it's from another service we assume they already checked PONG
@@ -199,7 +199,7 @@ export async function	isUserBusyInternal(userId, includePong)
 		catch (err)
 		{
 			console.error(`[TRIS] Failed to check user busy status in PONG service for Id ${userId}:`, err.message);
-			return (status);
+			return (true); // assume busy if we can't reach PONG, to avoid conflicts
 		}
 	}
 

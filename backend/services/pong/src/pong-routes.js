@@ -536,7 +536,7 @@ const	getTournamentBracket =
 
 //-----------------------------EXPORT ROUTES-----------------------------
 
-export function	pongRoutes(fastify)
+export async function	pongRoutes(fastify, options)
 {
 	// Actual WebSocket endpoint
 	fastify.get('/ws', { websocket: true }, (socket, req) =>
