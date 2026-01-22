@@ -1,4 +1,3 @@
-
 export function	initGameState(playerLeftId, playerRightId)
 {
 	const	ballComponents = generateStartingBallComponents(parseFloat(process.env.BALL_INITIAL_SPEED));
@@ -19,13 +18,13 @@ export function	initGameState(playerLeftId, playerRightId)
 		{
 			[playerLeftId]:
 			{
-				y: 0.5 - paddleHeight / 2, // Center paddle on screen
+				y: 0.5 - paddleHeight / 2, // Center paddle on screen, paddle.y is top of paddle
 				height: paddleHeight,
 				x: 0 // Start of canvas
 			},
 			[playerRightId]:
 			{
-				y: 0.5 - paddleHeight / 2, // Center paddle on screen
+				y: 0.5 - paddleHeight / 2, // Center paddle on screen, paddle.y is top of paddle
 				height: paddleHeight,
 				x: 1 // End of canvas
 			}
@@ -67,7 +66,8 @@ export function	elaboratePaddleCollision(ball, paddle, direction)
 		ball.speed = maxSpeed;
 
 	// Map hit position from -1 (top) to +1 (bottom)
-	const	deltaYHitNorm = (ball.y - paddle.y) / (paddle.height / 2);
+	const	paddleCenter = paddle.y + paddle.height / 2;  // Get center position
+	const	deltaYHitNorm = (ball.y - paddleCenter) / (paddle.height / 2);
 	const	clampedDeltaY = clamp(deltaYHitNorm, -1, 1); // Prevent extreme angles
 	const	maxBounceAngle = parseFloat(process.env.MAX_BOUNCE_ANGLE); // Max 60 degrees
 	const	bounceAngle = clampedDeltaY * maxBounceAngle;
