@@ -192,7 +192,7 @@ export async function	isUserBusyInternal(userId, includePong)
 
 			status = status || response.data.isBusy;
 
-			console.log(`[TRIS] User ${userId} busy status ${status},[PONG included]`);
+			console.log(`[TRIS] User ${userId} busy status ${status}`);
 
 			return (status);
 		}

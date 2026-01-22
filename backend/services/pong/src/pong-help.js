@@ -178,7 +178,7 @@ export async function	isUserBusyInternal(userId, includeTris)
 
 			status = status || data.isBusy;
 
-			console.log(`[PONG] User ${userId} busy status ${status}, (TRIS included)`);
+			console.log(`[PONG] User ${userId} busy status ${status}`);
 
 			return (status);
 		}
