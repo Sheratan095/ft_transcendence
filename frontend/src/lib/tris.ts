@@ -205,6 +205,7 @@ export function quitGame(): void {
     data: { gameId: currentGameId },
   };
 
+  onGameStateUpdate?.('gameEnded', { gameId: currentGameId, message: 'You have quit the game.' });
   trisSocket.send(JSON.stringify(message));
   currentGameId = null;
 }

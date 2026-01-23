@@ -87,7 +87,11 @@ export function closeTrisModal() {
 
 export async function openTrisModalAndJoinGame(gameId: string) {
   pendingGameJoin = gameId;
-  await openTrisModal();
+  if (!trisInitialized || !getCurrentGameId() || WebSocket) {
+	await openTrisModal();
+	return;
+  }
+  joinCustomGame(gameId);
 }
 
 function renderTrisBoard() {
@@ -130,9 +134,9 @@ function setupTrisEventListeners() {
       const status = userReady ? 'You are ready!' : 'You are not ready';
       showSuccessToast(status);
     } else {
-      // Not in game
-      showSuccessToast('Waiting for opponent...');
-    }
+      // Not in game - start looking for a match
+	  
+	}
   });
   if (surrenderBtn) surrenderBtn.addEventListener('click', () => {
     const gameId = getCurrentGameId();
@@ -204,6 +208,7 @@ function handleCustomGameCreated(data: any) {
 
 function handleCustomGameJoinSuccess(data: any) {
   const { gameId, otherUsername } = data;
+  console.log('Joined custom game:', data);
   setCurrentGameId(gameId);
   updateGameIdDisplay(gameId);
   updateTrisStatus(`Joined game! Playing against ${otherUsername}`);
@@ -243,13 +248,13 @@ function handleGameStarted(data: any) {
 }
 
 function handleMoveMade(data: any) {
-  const { symbol, position, yourTurn, removedPosition } = data;
+  const { symbol, position, moveMakerId, removedPosition } = data;
   updateBoardPosition(position, symbol);
   if (removedPosition !== null && removedPosition !== undefined) {
 	// Clear removed position
 	updateBoardPosition(removedPosition, '');	
 }	
-  const status = yourTurn ? 'Your turn' : 'Opponent\'s turn';
+  const status = moveMakerId === user?.id ? 'Your turn' : 'Opponent\'s turn';
   updateTrisStatus(status);
 }
 
@@ -444,6 +449,20 @@ function renderFriendsList(friends: User[]) {
 
 async function inviteFriend(friend: User) {
   try {
+	if (gameStatus === 'playing') {
+		showErrorToast('Cannot invite while in a game');
+		return;
+	}
+	if (!friend.id) {
+	  showErrorToast('Invalid friend selected');
+	  return;
+	}
+	if (gameStatus === 'lobby') {
+		const currentGameId = getCurrentGameId();
+		if (currentGameId) {
+			cancelCustomGame(currentGameId);
+		}
+	}
     // Create a custom game with this friend
     createCustomGame(friend.id);
 	console.log('Inviting friend:', friend);
