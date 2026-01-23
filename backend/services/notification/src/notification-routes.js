@@ -143,7 +143,7 @@ const	sendNowFriendsOpts =
 {
 	schema:
 	{
-		summary: '🔒 Internal - Notify user that is now friend with another user',
+		summary: '🔒 Internal - Notify users that are now friends with each other (Called by relationship service)',
 		tags: ['Notifications', 'Internal'],
 	
 		...withInternalAuth,

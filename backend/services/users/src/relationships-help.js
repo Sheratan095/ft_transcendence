@@ -58,3 +58,31 @@ export async function	notifyFriendAccept(requesterId, accepterId, accepterUserna
 		return (false);
 	}
 }
+
+export async function	notifyNowFriends(user1Id, user2Id, user1Username, user2Username)
+{
+	try
+	{
+		await axios.post(`${process.env.NOTIFICATION_SERVICE_URL}/send-now-friends`,
+			{
+				user1Id: user1Id,
+				user2Id: user2Id,
+				user1Username: user1Username,
+				user2Username: user2Username,
+			},
+			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		)
+
+		return (true);
+	}
+	catch (error)
+	{
+		// If error is 404, user does not exist
+		if (error.response && error.response.status === 404)
+			console.log('[RELATIONSHIPS] User not found for userId:', userId);
+		else
+			console.log('[RELATIONSHIPS] Error notifying now friends:', error.message);
+
+		return (false);
+	}
+}
