@@ -510,6 +510,10 @@ class	GameManager
 		// Check if user is in any active games (IN_LOBBY or IN_PROGRESS)
 		for (const gameInstance of this._games.values())
 		{
+			// If the invitee tries to join a CUSTOM game
+			if (gameInstance.hasPlayer(userId) && gameInstance.gameType === GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
+				continue ;
+
 			if (gameInstance.hasPlayer(userId) &&
 				(gameInstance.gameStatus === GameStatus.IN_LOBBY || gameInstance.gameStatus === GameStatus.IN_PROGRESS))
 			{
