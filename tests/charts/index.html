@@ -18,10 +18,15 @@
                         'body': '#4b5563',
                         'fg-success': '#10b981',
                         'fg-brand': '#3b82f6',
+                        'brand': '#3b82f6',
+                        'brand-strong': '#2563eb',
+                        'brand-medium': '#93c5fd',
+                        'neutral-secondary-medium': '#f3f4f6',
                         'neutral-tertiary-medium': '#e5e7eb',
                         'neutral-primary-medium': '#ffffff',
                         'default-medium': '#d1d5db',
                         'default': '#e5e7eb',
+                        'light': '#f3f4f6',
                     },
                     borderRadius: {
                         'base': '0.375rem',
@@ -31,49 +36,83 @@
         }
     </script>
 </head>
+<body class="bg-neutral-primary-soft">
+<div class="flex flex-col gap-6 p-4 w-full">
 
-<div class="w-100 h-full bg-neutral-primary-soft border border-default rounded-base shadow-xs p-0 md:p-6 ">
-  <div class="flex justify-between mb-4 md:mb-6">
-    <div class="grid gap-4 grid-cols-2">
-    </div>
-    <div>
-    <button id="dropdownDefaultButton" data-dropdown-toggle="lastDaysdropdown" data-dropdown-placement="bottom" type="button" class="inline-flex items-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none">
-      All
-      <svg class="w-4 h-4 ms-1.5 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
-    </button>
-    <div id="lastDaysdropdown" class="z-10 hidden bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-100">
-          <ul class="p-2 text-sm text-body font-medium" aria-labelledby="dropdownDefaultButton">
-            <li>
-              <a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">All</a>
-            </li>
-            <li>
-              <a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 7 days</a>
-            </li>
-            <li>
-              <a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 30 days</a>
-            </li>
-            <li>
-              <a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 90 days</a>
-            </li>
+  <!-- Pong Line Chart -->
+  <div class="w-full bg-neutral-primary-soft border border-default rounded-base shadow-xs p-0 md:p-6">
+    <div class="flex justify-between mb-4 md:mb-6 px-4 pt-4 md:px-0 md:pt-0">
+      <h3 class="text-heading font-bold text-lg">Pong Match History</h3>
+      <div class="relative">
+        <button id="pongDropdownButton" type="button" class="inline-flex items-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none">
+          All
+          <svg class="w-4 h-4 ms-1.5 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+        </button>
+        <div id="pongDropdown" class="z-10 hidden absolute right-0 mt-2 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44">
+          <ul class="p-2 text-sm text-body font-medium">
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">All</a></li>
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 7 days</a></li>
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 15 days</a></li>
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 30 days</a></li>
           </ul>
+        </div>
       </div>
     </div>
+    <div id="pong-line-chart" class="w-full h-[350px]"></div>
   </div>
-  <div id="line-chart"></div>
-  <div class="items-center border-light border-t justify-between mt-4 md:mt-6 pt-4 md:pt-6">
-    <button type="button" class="inline-flex items-center  text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none">
-      <svg class="w-4 h-4 me-1.5 -ms-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 3v4a1 1 0 0 1-1 1H5m4 10v-2m3 2v-6m3 6v-3m4-11v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7.914a1 1 0 0 1 .293-.707l3.914-3.914A1 1 0 0 1 9.914 3H18a1 1 0 0 1 1 1Z"/></svg>
-      View full report
-    </button>
+
+  <!-- Tris Line Chart -->
+  <div class="w-full bg-neutral-primary-soft border border-default rounded-base shadow-xs p-0 md:p-6">
+    <div class="flex justify-between mb-4 md:mb-6 px-4 pt-4 md:px-0 md:pt-0">
+      <h3 class="text-heading font-bold text-lg">Tris Match History</h3>
+      <div class="relative">
+        <button id="dropdownDefaultButton" type="button" class="inline-flex items-center text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-3 py-2 focus:outline-none">
+          All
+          <svg class="w-4 h-4 ms-1.5 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>
+        </button>
+        <div id="lastDaysdropdown" class="z-10 hidden absolute right-0 mt-2 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-44">
+          <ul class="p-2 text-sm text-body font-medium">
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">All</a></li>
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 7 days</a></li>
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 15 days</a></li>
+            <li><a href="#" class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded">Last 30 days</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="line-chart" class="w-full h-[350px]"></div>
   </div>
+
+  <!-- Donut Chart Pong -->
+  <div class="w-full bg-neutral-primary-soft border border-default rounded-base shadow-xs p-4 md:p-6">
+    <h5 class="text-xl font-bold leading-none text-heading mb-4">Pong Win/Loss Ratio</h5>
+    <div id="pong-donut-chart" class="w-full h-[350px]"></div>
+  </div>
+
+  <!-- Donut Chart Tris -->
+  <div class="w-full bg-neutral-primary-soft border border-default rounded-base shadow-xs p-4 md:p-6">
+    <h5 class="text-xl font-bold leading-none text-heading mb-4">Tris Win/Loss Ratio</h5>
+    <div id="tris-donut-chart" class="w-full h-[350px]"></div>
+  </div>
+
 </div>
 
+
 <script type="module">
-  import { getChartOptions } from './index.js';
+  import { getChartOptions, getDonutChartOptions } from './index.js';
 
   // Login configuration
   const LOGIN_URL = 'https://localhost:3000/auth/login';
   
+  // Global references for charts and data
+  let trisChart = null;
+  let pongChart = null;
+  let trisDonutChart = null;
+  let pongDonutChart = null;
+  let trisHistoryGlobal = [];
+  let pongHistoryGlobal = [];
+  let currentUser = null;
+
   async function login() {
     try {
       const response = await fetch(LOGIN_URL, {
@@ -88,92 +127,116 @@
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Logged in successfully:', data.user.id);
-        return data.user;
-      } else {
-        console.error('❌ Login failed:', response.statusText);
+        if (data && data.user) {
+          console.log('✅ Logged in successfully:', data.user.id);
+          return data.user;
+        }
       }
+      console.error('❌ Login failed:', response.statusText);
+      return null;
     } catch (error) {
       console.error('❌ Login error:', error);
+      return null;
     }
   }
 
- async function getUserHistory(userId) 
- {
-	try {
-	  // Use the actual user ID from the login
-	  const historyUrl = `https://localhost:3000/tris/history?id=${userId}`;
-	  const response = await fetch(historyUrl, {
-		method: 'GET',
-		credentials: 'include',
-	  });
-
-	  if (response.ok) {
-		const data = await response.json();
-		console.log('✅ User history fetched:', data);
-		return data;
-	  } else {
-		console.error('❌ Fetching user history failed:', response.statusText);
-		return [];
-	  }
-	} catch (error) {
-	  console.error('❌ Error fetching user history:', error);
-	  return [];
-	}
- }
-
-  // Global references for chart and data so filters can update it
-  let chart = null;
-  let trisHistoryGlobal = [];
-  let currentUser = null;
-
-  function toggleDropdown() {
-    const dd = document.getElementById('lastDaysdropdown');
-    dd.classList.toggle('hidden');
+  async function getUserTrisHistory(userId) {
+    try {
+      const historyUrl = `https://localhost:3000/tris/history?id=${userId}`;
+      const response = await fetch(historyUrl, { method: 'GET', credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ User tris history fetched:', data);
+        return Array.isArray(data) ? data : [];
+      }
+      console.error('❌ Fetching user tris history failed:', response.statusText);
+      return [];
+    } catch (error) {
+      console.error('❌ Error fetching user tris history:', error);
+      return [];
+    }
   }
 
-  function createOrUpdateChart(history) {
-    const opts = getChartOptions(history, currentUser.id);
-    if (chart) {
-      chart.destroy();
+  async function getUserPongHistory(userId) {
+    try {
+      const historyUrl = `https://localhost:3000/pong/match-history?id=${userId}`;
+      const response = await fetch(historyUrl, { method: 'GET', credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ User pong history fetched:', data);
+        return Array.isArray(data) ? data : [];
+      }
+      console.error('❌ Fetching user pong history failed:', response.statusText);
+      return [];
+    } catch (error) {
+      console.error('❌ Error fetching user pong history:', error);
+      return [];
     }
-    chart = new ApexCharts(document.getElementById("line-chart"), opts);
-    chart.render();
+  }
+
+  function toggleDropdown(id) {
+    const dd = document.getElementById(id);
+    if (dd) dd.classList.toggle('hidden');
+  }
+
+  function createOrUpdateChart(containerId, chartObj, history, start, end) {
+    const container = document.getElementById(containerId);
+    if (!container) return null;
+    const opts = getChartOptions(history, currentUser.id, start, end);
+    if (chartObj && typeof chartObj.destroy === 'function') {
+      chartObj.destroy();
+    }
+    const newChart = new ApexCharts(container, opts);
+    newChart.render();
+    return newChart;
+  }
+
+  function createOrUpdateDonutChart(containerId, chartObj, history) {
+    const container = document.getElementById(containerId);
+    if (!container) return null;
+    const opts = getDonutChartOptions(history, currentUser.id);
+    if (chartObj && typeof chartObj.destroy === 'function') {
+      chartObj.destroy();
+    }
+    const newChart = new ApexCharts(container, opts);
+    newChart.render();
+    return newChart;
   }
 
   function filterHistoryByMode(history, mode) {
-    if (!history || history.length === 0) return [];
+    if (!Array.isArray(history)) history = [];
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const tomorrowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
+    let start = null;
+    let end = tomorrowStart;
+
     switch (mode) {
       case 'Last 7 days':
-        const last7Start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-        return history.filter(m => {
-          const d = new Date(m.endedAt);
-          return d >= last7Start && d < tomorrowStart;
-        });
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        break;
+      case 'Last 15 days':
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 14);
+        break;	
       case 'Last 30 days':
-        const last30Start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29);
-        return history.filter(m => {
-          const d = new Date(m.endedAt);
-          return d >= last30Start && d < tomorrowStart;
-        });
-      case 'Last 90 days':
-        const last90Start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 89);
-        return history.filter(m => {
-          const d = new Date(m.endedAt);
-          return d >= last90Start && d < tomorrowStart;
-        });
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29);
+        break;
       default:
-        return history; // All
+        return { matches: history, start: null, end: null };
     }
+
+    const matches = history.filter(m => {
+      const d = new Date(m.endedAt);
+      return d >= start && d < end;
+    });
+    
+    return { matches, start, end: todayStart };
   }
 
-  // Wire dropdown actions (delegated) and toggle
+  // Tris Dropdown
   document.getElementById('dropdownDefaultButton').addEventListener('click', () => {
-    document.getElementById('lastDaysdropdown').classList.toggle('hidden');
+    toggleDropdown('lastDaysdropdown');
   });
 
   document.getElementById('lastDaysdropdown').addEventListener('click', (e) => {
@@ -181,22 +244,48 @@
     if (!a) return;
     e.preventDefault();
     const mode = a.textContent.trim();
-    // Update button text including the arrow
     document.getElementById('dropdownDefaultButton').innerHTML = `${mode} <svg class="w-4 h-4 ms-1.5 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>`;
-    // Filter and update chart
-    const filtered = filterHistoryByMode(trisHistoryGlobal, mode);
-    createOrUpdateChart(filtered);
-    // hide dropdown after selection
+    const result = filterHistoryByMode(trisHistoryGlobal, mode);
+    trisChart = createOrUpdateChart("line-chart", trisChart, result.matches, result.start, result.end);
+    trisDonutChart = createOrUpdateDonutChart("tris-donut-chart", trisDonutChart, result.matches);
     document.getElementById('lastDaysdropdown').classList.add('hidden');
   });
 
-  // Execute login and then render chart
+  // Pong Dropdown
+  document.getElementById('pongDropdownButton').addEventListener('click', () => {
+    toggleDropdown('pongDropdown');
+  });
+
+  document.getElementById('pongDropdown').addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    e.preventDefault();
+    const mode = a.textContent.trim();
+    document.getElementById('pongDropdownButton').innerHTML = `${mode} <svg class="w-4 h-4 ms-1.5 -me-0.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/></svg>`;
+    const result = filterHistoryByMode(pongHistoryGlobal, mode);
+    pongChart = createOrUpdateChart("pong-line-chart", pongChart, result.matches, result.start, result.end);
+    pongDonutChart = createOrUpdateDonutChart("pong-donut-chart", pongDonutChart, result.matches);
+    document.getElementById('pongDropdown').classList.add('hidden');
+  });
+
+  // Execute login and then render charts
   login().then(async (user) => {
     if (!user) return;
     currentUser = user;
-    trisHistoryGlobal = await getUserHistory(user.id);
-    createOrUpdateChart(trisHistoryGlobal);
+    
+    // Fetch both histories
+    [trisHistoryGlobal, pongHistoryGlobal] = await Promise.all([
+      getUserTrisHistory(user.id),
+      getUserPongHistory(user.id)
+    ]);
+
+    // Initial render
+    trisChart = createOrUpdateChart("line-chart", trisChart, trisHistoryGlobal);
+    trisDonutChart = createOrUpdateDonutChart("tris-donut-chart", trisDonutChart, trisHistoryGlobal);
+    pongChart = createOrUpdateChart("pong-line-chart", pongChart, pongHistoryGlobal);
+    pongDonutChart = createOrUpdateDonutChart("pong-donut-chart", pongDonutChart, pongHistoryGlobal);
   });
 </script>
+
 </body>
 </html>
