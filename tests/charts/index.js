@@ -72,7 +72,7 @@ export const getChartOptions = (history = [], userId, rangeStart, rangeEnd) => {
   return {
     chart: {
       height: 350,
-      maxWidth: '100%',
+      width: '100%',
       type: 'area',
       fontFamily: 'Inter, sans-serif',
       dropShadow: { enabled: false },
@@ -103,5 +103,96 @@ export const getChartOptions = (history = [], userId, rangeStart, rangeEnd) => {
       axisTicks: { show: false },
     },
     yaxis: { show: false },
+  };
+};
+
+export const getDonutChartOptions = (history = [], userId) => {
+  let wins = 0;
+  let losses = 0;
+
+  history.forEach(match => {
+    if (match.winnerId === userId) wins++;
+    else if (match.winnerId !== null && match.winnerId !== '') losses++;
+  });
+
+  const total = wins + losses;
+
+  return {
+    series: [wins, losses],
+    colors: ['#10b981', '#ef4444'],
+    chart: {
+      height: 350,
+      width: '100%',
+      type: 'donut',
+    },
+    stroke: {
+      colors: ['transparent'],
+      lineCap: '',
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          labels: {
+            show: true,
+            name: {
+              show: true,
+              fontFamily: 'Inter, sans-serif',
+              offsetY: 20,
+            },
+            total: {
+              showAlways: true,
+              show: true,
+              label: 'Total Matches',
+              fontFamily: 'Inter, sans-serif',
+              formatter: function (w) {
+                return total;
+              },
+            },
+            value: {
+              show: true,
+              fontFamily: 'Inter, sans-serif',
+              offsetY: -20,
+              formatter: function (value) {
+                return value;
+              },
+            },
+          },
+          size: '80%',
+        },
+      },
+    },
+    grid: {
+      padding: {
+        top: -2,
+      },
+    },
+    labels: ['Wins', 'Losses'],
+    dataLabels: {
+      enabled: false,
+    },
+    legend: {
+      position: 'bottom',
+      fontFamily: 'Inter, sans-serif',
+    },
+    yaxis: {
+      labels: {
+        formatter: function (value) {
+          return value;
+        },
+      },
+    },
+    xaxis: {
+      labels: {
+        formatter: function (value) {
+          return value;
+        },
+      },
+      axisTicks: {
+        show: false,
+      },
+      axisBorder: {
+        show: false,
+      },
+    },
   };
 };
