@@ -88,6 +88,19 @@ class	UserConnectionManager
 		}
 	}
 
+	sendNowFriendsNotification(toUserId, userId, username)
+	{
+		const	targetSocket = this.getConnection(toUserId);
+
+		const	data = {
+			userId: userId,
+			username: username
+		};
+
+		if (targetSocket)
+			this.#dispatchEventToSocket( targetSocket, 'friend.nowFriends', data );
+	}
+
 	sendGameInviteNotification(targetId, senderId, fromUsername, gameId, gameType)
 	{
 		const	targetSocket = this.getConnection(targetId);

@@ -80,13 +80,24 @@ Reponse:
 }
 \`\`\`
 
-- **friend.accept** - Sent when someone accepts your friend request.
+- **friend.accept** - Sent when someone accepts your friend request. [Deprecated => use friend.nowFriends]
 \`\`\`json
 {
   "event": "friend.accept",
   "data": {
 	"from": "jane_smith",
 	"accepterId": "456"
+  }
+}
+\`\`\`
+
+- **friend.nowFriends** - Notify the user he is now friends with another user.
+\`\`\`json
+{
+  "event": "friend.nowFriends",
+  "data": {
+	"userId": "456",
+	"username": "jane_smith"
   }
 }
 \`\`\`
