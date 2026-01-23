@@ -11,16 +11,19 @@ import {
   closeTris, 
   setCurrentGameId,
   getCurrentGameId,
-  joinCustomGame
+  joinCustomGame,
+  startMatchmaking,
+  stopMatchmaking
 } from './tris';
 import { showSuccessToast, showErrorToast } from '../components/shared/Toast';
 import type { User } from './auth';
 import type { FriendsManager } from '../components/profile/FriendsManager';
+import { start } from '../spa';
 
 let trisInitialized = false;
 let user: User | null = null;
 let friendsManager: FriendsManager | null = null;
-let gameStatus: 'lobby' | 'playing' = 'lobby';
+let gameStatus: 'lobby' | 'playing' | 'looking' = 'lobby';
 let userReady = false;
 let pendingGameJoin: string | null = null;
 
@@ -62,9 +65,11 @@ export async function openTrisModal() {
 
       // If there's a pending game join, join it now that tris is initialized
       if (pendingGameJoin) {
+		gameStatus = 'playing';
         const gameId = pendingGameJoin;
         pendingGameJoin = null;
         joinCustomGame(gameId);
+		renderAndAttachButtons();
       }
     } catch (err) {
       console.error('Failed to initialize tris:', err);
@@ -91,7 +96,9 @@ export async function openTrisModalAndJoinGame(gameId: string) {
 	await openTrisModal();
 	return;
   }
+  gameStatus = 'playing';
   joinCustomGame(gameId);
+  renderAndAttachButtons();
 }
 
 function renderTrisBoard() {
@@ -115,42 +122,127 @@ function handleCellClick(index: number) {
   makeTrisMove(index);
 }
 
+/**
+ * Render and attach button handlers based on current game status
+ */
+function renderAndAttachButtons() {
+  const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+  const surrenderBtn = document.getElementById('tris-surrender-btn') as HTMLButtonElement | null;
+  const resetBtn = document.getElementById('tris-reset-btn') as HTMLButtonElement | null;
+  const inviteBtn = document.getElementById('tris-invite-btn') as HTMLButtonElement | null;
+  const closeBtn = document.getElementById('tris-close-btn') as HTMLButtonElement | null;
+
+  // Remove existing listeners by cloning (prevents duplicates)
+  if (startBtn) {
+    const newStartBtn = startBtn.cloneNode(true) as HTMLButtonElement;
+    startBtn.replaceWith(newStartBtn);
+  }
+  if (surrenderBtn) {
+    const newSurrenderBtn = surrenderBtn.cloneNode(true) as HTMLButtonElement;
+    surrenderBtn.replaceWith(newSurrenderBtn);
+  }
+
+  // Get fresh references after cloning
+  const freshStartBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+  const freshSurrenderBtn = document.getElementById('tris-surrender-btn') as HTMLButtonElement | null;
+
+  // Render button text based on game status
+  if (freshStartBtn) {
+    if (gameStatus === 'playing' && getCurrentGameId()) {
+      freshStartBtn.textContent = userReady ? '✓ Ready' : 'Ready';
+    } else if (gameStatus === 'looking') {
+      freshStartBtn.textContent = 'Looking for match...';
+    } else {
+      freshStartBtn.textContent = 'Start Game';
+    }
+  }
+
+  if (freshSurrenderBtn) {
+    if (gameStatus === 'looking') {
+      freshSurrenderBtn.textContent = 'Quit Matchmaking';
+    } else {
+      freshSurrenderBtn.textContent = 'Surrender';
+    }
+  }
+
+  // Attach click handlers
+  if (freshStartBtn) {
+    freshStartBtn.addEventListener('click', handleStartButtonClick);
+  }
+  if (freshSurrenderBtn) {
+    freshSurrenderBtn.addEventListener('click', handleSurrenderButtonClick);
+  }
+  if (resetBtn) {
+    resetBtn.removeEventListener('click', () => location.reload());
+    resetBtn.addEventListener('click', () => location.reload());
+  }
+  if (inviteBtn) {
+    inviteBtn.removeEventListener('click', () => openInviteModal());
+    inviteBtn.addEventListener('click', () => openInviteModal());
+  }
+  if (closeBtn) {
+    closeBtn.removeEventListener('click', () => closeTrisModal());
+    closeBtn.addEventListener('click', () => closeTrisModal());
+  }
+}
+
+/**
+ * Handle start button click - changes behavior based on game status
+ */
+function handleStartButtonClick() {
+  const gameId = getCurrentGameId();
+  const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+
+  if (gameStatus === 'playing' && gameId) {
+    // In game - toggle ready status
+    userReady = !userReady;
+    setUserReady(userReady);
+    if (startBtn) {
+      startBtn.textContent = userReady ? '✓ Ready' : 'Ready';
+    }
+    const status = userReady ? 'You are ready!' : 'You are not ready';
+    showSuccessToast(status);
+  } else {
+    // Lobby - start looking for a match
+    lookForMatch();
+    renderAndAttachButtons(); // Update button text after status change
+  }
+}
+
+/**
+ * Handle surrender button click - changes behavior based on game status
+ */
+function handleSurrenderButtonClick() {
+  if (gameStatus === 'looking') {
+    stopLookingForMatch();
+    renderAndAttachButtons(); // Update button text after status change
+  } else {
+    quitGame();
+    showErrorToast('You quit the game');
+  }
+}
+
 function setupTrisEventListeners() {
   // Setup button listeners
-  const startBtn = document.getElementById('tris-start-btn');
-  const surrenderBtn = document.getElementById('tris-surrender-btn');
-  const resetBtn = document.getElementById('tris-reset-btn');
-  const inviteBtn = document.getElementById('tris-invite-btn');
-  const closeBtn = document.getElementById('tris-close-btn');
+  renderAndAttachButtons();
+}
 
-  if (startBtn) startBtn.addEventListener('click', () => {
-    const gameId = getCurrentGameId();
-    if (gameStatus === 'lobby' && gameId) {
-      // In lobby - act as ready button
-      userReady = !userReady;
-      setUserReady(userReady);
-      const btnText = userReady ? '✓ Ready' : 'Ready';
-      startBtn.textContent = btnText;
-      const status = userReady ? 'You are ready!' : 'You are not ready';
-      showSuccessToast(status);
-    } else {
-      // Not in game - start looking for a match
-	  
-	}
-  });
-  if (surrenderBtn) surrenderBtn.addEventListener('click', () => {
-    const gameId = getCurrentGameId();
-    if (gameStatus === 'lobby' && gameId) {
-      cancelCustomGame(gameId);
-      showErrorToast('Game canceled');
-    } else {
-      quitGame();
-      showErrorToast('You quit the game');
-    }
-  });
-  if (resetBtn) resetBtn.addEventListener('click', () => location.reload());
-  if (inviteBtn) inviteBtn.addEventListener('click', () => openInviteModal());
-  if (closeBtn) closeBtn.addEventListener('click', () => closeTrisModal());
+/**
+ * Start matchmaking
+ */
+function lookForMatch() {
+	startMatchmaking();
+  showSuccessToast('Looking for a match...', { duration: 3000 });
+  gameStatus = 'looking';
+}
+
+/**
+ * Stop matchmaking
+ */
+function stopLookingForMatch() {
+	stopMatchmaking();
+  showErrorToast('Stopped looking for a match', { duration: 3000 });
+  gameStatus = 'lobby';
 }
 
 /**
@@ -200,20 +292,24 @@ function handleTrisEvent(event: string, data: any) {
 
 function handleCustomGameCreated(data: any) {
   const { gameId, otherUsername } = data;
+  gameStatus = 'playing';
   setCurrentGameId(gameId);
   updateGameIdDisplay(gameId);
   updateTrisStatus(`Game created! Waiting for ${otherUsername}...`);
   showSuccessToast(`Game created! Waiting for ${otherUsername}...`);
+  renderAndAttachButtons();
 }
 
 function handleCustomGameJoinSuccess(data: any) {
   const { gameId, otherUsername } = data;
   console.log('Joined custom game:', data);
+  gameStatus = 'playing';
   setCurrentGameId(gameId);
   updateGameIdDisplay(gameId);
   updateTrisStatus(`Joined game! Playing against ${otherUsername}`);
   showSuccessToast(`Joined game with ${otherUsername}!`);
   closeInviteModal();
+  renderAndAttachButtons();
 }
 
 function handlePlayerJoinedCustomGame(_data: any) {
@@ -228,9 +324,7 @@ function handleCustomGameCanceled(_data: any) {
   userReady = false;
   updateGameIdDisplay(null);
   setCurrentGameId(null);
-  // Update button text back to default
-  const startBtn = document.getElementById('tris-start-btn');
-  if (startBtn) startBtn.textContent = 'Start Game';
+  renderAndAttachButtons();
 }
 
 function handleGameStarted(data: any) {
@@ -242,9 +336,7 @@ function handleGameStarted(data: any) {
   updateTrisStatus(`Game started! You are ${yourSymbol}. ${turnText}`);
   showSuccessToast(`Game started! You are ${yourSymbol}`);
   renderTrisBoard();
-  // Update button text back to default
-  const startBtn = document.getElementById('tris-start-btn');
-  if (startBtn) startBtn.textContent = 'Start Game';
+  renderAndAttachButtons();
 }
 
 function handleMoveMade(data: any) {
@@ -284,9 +376,7 @@ function handleGameEnded(data: any) {
   }
   updateGameIdDisplay(null);
   setCurrentGameId(null);
-  // Update button text back to default
-  const startBtn = document.getElementById('tris-start-btn');
-  if (startBtn) startBtn.textContent = 'Start Game';
+  renderAndAttachButtons();
 }
 
 function handlePlayerQuitCustomGameInLobby(_data: any) {
@@ -296,17 +386,19 @@ function handlePlayerQuitCustomGameInLobby(_data: any) {
   userReady = false;
   updateGameIdDisplay(null);
   setCurrentGameId(null);
-  // Update button text back to default
-  const startBtn = document.getElementById('tris-start-btn');
-  if (startBtn) startBtn.textContent = 'Start Game';
+  renderAndAttachButtons();
 }
 
 function handleMatchedInRandomGame(data: any) {
   const { gameId, yourSymbol, opponentUsername, yourTurn } = data;
+  gameStatus = 'playing';
   setCurrentGameId(gameId);
+  userReady = false;
+  updateGameIdDisplay(gameId);
   const turnText = yourTurn ? 'Your turn' : `${opponentUsername}'s turn`;
   updateTrisStatus(`Matched! Playing ${opponentUsername}. You are ${yourSymbol}. ${turnText}`);
   showSuccessToast(`Matched with ${opponentUsername}!`);
+  renderAndAttachButtons();
 }
 
 function handleInvalidMove(data: any) {
