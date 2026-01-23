@@ -541,6 +541,10 @@ class	GameManager
 		// Check if user is in any active games
 		for (const gameInstance of this._games.values())
 		{
+			// If the invitee tries to join a CUSTOM game
+			if (gameInstance.hasPlayer(userId) && gameInstance.gameType === GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
+				continue ;
+
 			if (gameInstance.hasPlayer(userId))
 				return (true);
 		}
