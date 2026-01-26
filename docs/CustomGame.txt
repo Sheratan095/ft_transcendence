@@ -1,0 +1,15 @@
+User creates cutom game (tris.createCustomGame with target user)
+	Creator i stuck in a waiting screen
+		He can just cancel game 
+	A notify is sent to the invited user
+
+	Invited try to join the match (tris.joinCustomGame with gameId)
+		if the creator hadn't cancel the game
+			=> the game start
+		else the invited recevive an error message
+
+	After the invited user has joined
+		He can quit the game
+		The creator can:
+			Cancel the game
+			Start the game

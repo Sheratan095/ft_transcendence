@@ -1,0 +1,19 @@
+A player must be able to play against another, and a tournament system should
+also be available. This tournament will consist of multiple players who can take
+turns playing against each other. You have flexibility in how you implement the
+tournament, but it must clearly display who is playing against whom and the order
+of the play 
+
+• The tournament system must work with or without user
+registration.
+
+• Without the Standard User Management module:
+manually input an alias.
+users
+
+• With the module: aliases are linked to registered
+	accounts, allowing persistent stats and friend lists.
+	The module extends the tournament logic; it does not replace
+	it.
+
+• The tournament system should be able to notify users about the next game. (CHAT MODULE)

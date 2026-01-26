@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { promisify } from "util";
 import { mkdir, readFile } from "fs/promises";
-import {formatExpirationDate} from "./auth-help.js";
+import {formatDate} from "./auth-help.js";
 import path from "path";
 import { fileURLToPath } from 'url';
 
@@ -163,7 +163,7 @@ export class	AuthDatabase
 	async	insertRefreshToken(userId, refresh_token, expiresAt)
 	{
 		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS' (ISO FORMAT)
-		const	expiresAtStr = formatExpirationDate(expiresAt);
+		const	expiresAtStr = formatDate(expiresAt);
 
 		await this.db.run(
 			"INSERT INTO refresh_tokens (user_id, refresh_token, expires_at) VALUES (?, ?, ?)",
@@ -176,10 +176,10 @@ export class	AuthDatabase
 	// expiresAt: Date object
 	async	updateRefreshToken(userId, new_refresh_token, expiresAt)
 	{
-		const	expiresAtStr = formatExpirationDate(expiresAt);
+		const	expiresAtStr = formatDate(expiresAt);
 
 		await this.db.run(
-			"UPDATE refresh_tokens SET refresh_token = ?, expires_at = ?, created_at = datetime('now') WHERE user_id = ?",
+			"UPDATE refresh_tokens SET refresh_token = ?, expires_at = ?, created_at = CURRENT_TIMESTAMP WHERE user_id = ?",
 			[new_refresh_token, expiresAtStr, userId]
 		);
 	}
@@ -204,7 +204,7 @@ export class	AuthDatabase
 	async	storeTwoFactorToken(userId, otpCode, expiresAt)
 	{
 		// Convert Date object to SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
-		const	expiresAtStr = formatExpirationDate(expiresAt);
+		const	expiresAtStr = formatDate(expiresAt);
 
 		await this.db.run("INSERT INTO twofactor_tokens (user_id, otp_code, expires_at) VALUES (?, ?, ?)", [userId, otpCode, expiresAtStr]);
 

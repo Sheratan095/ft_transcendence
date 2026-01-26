@@ -4,7 +4,9 @@ import {
 	getChats,
 	getMessages,
 	addUserToChat,
-	createGroupChat
+	createGroupChat,
+	leaveGroupChat,
+	startPrivateChat
 } from './chat-controllers.js';
 
 import {
@@ -12,7 +14,7 @@ import {
 	handleMessage,
 	handleClose,
 	handleError
-} from './event-handlers.js';
+} from './chat-ws-handlers.js';
 
 // Reusable error response schemas
 const	ErrorResponse =
@@ -70,7 +72,7 @@ const	withCookieAuth =
 
 const	chatType =
 {
-	chat_type: 'string',
+	type: 'string',
 	enum: ['dm', 'group'],
 }
 
@@ -111,6 +113,7 @@ const	message =
 		chatId: { type: 'string' },
 		senderId: { type: 'string' },
 		content: { type: 'string' },
+		type: { type: 'string', enum: ['text', 'user_join', 'system', 'user_leave', 'chat_created'] },
 		createdAt: { type: 'string', format: 'date-time' },
 		messageStatus: { type: 'string', enum: ['sent', 'delivered', 'read', 'undefined'] } // undefined for messages not sent by the requestor user
 	}
@@ -225,6 +228,43 @@ const	addUserToChatOpts =
 	handler: addUserToChat
 }
 
+const	startPrivateChatOpts = 
+{
+	schema:
+	{
+		summary: 'Start a private one-on-one chat with another user',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['toUserId'],
+			properties:
+			{
+				toUserId: { type: 'string' },
+			}
+		},
+
+		response:
+		{
+			// Return just the chat id
+			200:
+			{
+				type: 'object',
+				properties: { chatId: { type: 'string' } }
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: startPrivateChat
+}
+
 const	createGroupChatOpts = 
 {
 	schema:
@@ -257,6 +297,44 @@ const	createGroupChatOpts =
 	handler: createGroupChat
 }
 
+const	leaveGroupChatOpts = 
+{
+	schema:
+	{
+		summary: 'Leave a group chat',
+		tags: ['Chat'],
+
+		...withCookieAuth,
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['chatId'],
+			properties:
+			{
+				chatId: { type: 'string' },
+			}
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: { success: { type: 'boolean' } }
+			},
+			403: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: leaveGroupChat
+};
+
+//-----------------------------EXPORT ROUTES-----------------------------
+
 export function	chatRoutes(fastify)
 {
 	// WebSocket route for real-time chat
@@ -277,7 +355,8 @@ export function	chatRoutes(fastify)
 	fastify.get('/', getChatsOpts);
 	fastify.get('/messages', getMessagesOpts);
 
-	// HTTP routes for internal service communication
+	fastify.post('/start-private-chat', startPrivateChatOpts);
 	fastify.post('/add-user', addUserToChatOpts);
 	fastify.post('/create-group-chat', createGroupChatOpts);
+	fastify.post('/leave-group-chat', leaveGroupChatOpts);
 }

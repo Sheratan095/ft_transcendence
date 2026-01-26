@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Test - Player 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        h1 {
+            text-align: center;
+            color: #00ff00;
+        }
+        .game-container {
+            display: flex;
+            gap: 20px;
+        }
+        .controls {
+            width: 350px;
+        }
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            border: 3px solid #00ff00;
+            background-color: #000;
+            display: block;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        .section {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #444;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #00ff00;
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px 2px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: calc(50% - 4px);
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        button.full-width {
+            width: 100%;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover:not(:disabled) {
+            background-color: #c82333;
+        }
+        button.success {
+            background-color: #28a745;
+        }
+        button.success:hover:not(:disabled) {
+            background-color: #218838;
+        }
+        .log {
+            background-color: #000;
+            color: #00ff00;
+            padding: 10px;
+            height: 180px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border: 1px solid #00ff00;
+            border-radius: 4px;
+        }
+        .paddle-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .paddle-controls button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+        }
+        .scores {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .scores .player {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .scores .player-name {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .game-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .info-box label {
+            font-size: 12px;
+            color: #aaa;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .info-box .value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        .status {
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .status.connected { background-color: #28a745; color: white; }
+        .status.disconnected { background-color: #dc3545; color: white; }
+        .status.in-lobby { background-color: #ffc107; color: #000; }
+        .status.in-game { background-color: #17a2b8; color: white; }
+        .status.matchmaking { background-color: #fd7e14; color: white; }
+        .game-screen {
+            text-align: center;
+        }
+        .game-title {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #00ff00;
+        }
+        .opponent-info {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏓 Pong Game Test - Player 1</h1>
+    
+    <div class="game-info">
+        <div class="info-box">
+            <label>Connection Status</label>
+            <div class="value"><span id="status" class="status disconnected">Disconnected</span></div>
+        </div>
+        <div class="info-box">
+            <label>User ID</label>
+            <div class="value" id="userId">Not Set</div>
+        </div>
+        <div class="info-box">
+            <label>Game ID</label>
+            <div class="value" id="gameId">None</div>
+        </div>
+        <div class="info-box">
+            <label>Your Side</label>
+            <div class="value" id="playerSide">None</div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="controls">
+            <div class="section">
+                <h3>🔐 Login</h3>
+                <input type="email" id="emailInput" placeholder="Email" value="test1@gmail.com">
+                <input type="password" id="passwordInput" placeholder="Password" value="1234">
+                <button id="loginBtn" onclick="login()" class="full-width success">Login & Connect</button>
+                <button id="logoutBtn" onclick="logout()" class="full-width danger" disabled style="display: none;">Logout</button>
+            </div>
+
+            <div class="section">
+                <h3>🎮 Game Mode</h3>
+                <button id="joinMatchmakingBtn" onclick="joinMatchmaking()" class="full-width" disabled>Join Matchmaking</button>
+                <button id="leaveMatchmakingBtn" onclick="leaveMatchmaking()" class="full-width danger" disabled>Leave Matchmaking</button>
+                <hr style="border-color: #444; margin: 15px 0;">
+                <input type="text" id="opponentIdInput" placeholder="Opponent User ID" disabled>
+                <button id="createCustomBtn" onclick="createCustomGame()" class="full-width" disabled>Create Custom Game</button>
+                <input type="text" id="gameIdInput" placeholder="Game ID to Join" disabled>
+                <button id="joinCustomBtn" onclick="joinCustomGame()" class="full-width" disabled>Join Custom Game</button>
+            </div>
+
+            <div class="section">
+                <h3>⚙️ Lobby</h3>
+                <button id="readyBtn" onclick="setReady(true)" class="success" disabled>Ready</button>
+                <button id="notReadyBtn" onclick="setReady(false)" class="danger" disabled>Not Ready</button>
+                <button id="cancelGameBtn" onclick="cancelGame()" class="full-width danger" disabled>Cancel Game</button>
+                <button id="quitGameBtn" onclick="quitGame()" class="full-width danger" disabled>Quit Game</button>
+            </div>
+
+            <div class="section paddle-controls">
+                <h3>🎯 Paddle Controls</h3>
+                <button id="upBtn" onmousedown="startPaddleMove('up')" onmouseup="stopPaddleMove()" ontouchstart="startPaddleMove('up')" ontouchend="stopPaddleMove()" disabled>▲ UP (W/↑)</button>
+                <button id="downBtn" onmousedown="startPaddleMove('down')" onmouseup="stopPaddleMove()" ontouchstart="startPaddleMove('down')" ontouchend="stopPaddleMove()" disabled>▼ DOWN (S/↓)</button>
+            </div>
+
+            <div class="section">
+                <h3>📊 Log</h3>
+                <div id="log" class="log"></div>
+                <button onclick="clearLog()" class="full-width" style="margin-top: 10px;">Clear Log</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <div class="game-screen">
+                <div class="game-title" id="gameTitle">Waiting for Connection...</div>
+                <div class="opponent-info" id="opponentInfo"></div>
+                <div class="scores">
+                    <div class="player">
+                        <span>
+                            <div class="player-name" id="leftPlayerName">Left Player</div>
+                            <span id="leftScore">0</span>
+                        </span>
+                        <span style="font-size: 20px; opacity: 0.5;">VS</span>
+                        <span>
+                            <div class="player-name" id="rightPlayerName">Right Player</div>
+                            <span id="rightScore">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const GATEWAY_URL = 'https://localhost:3000';
+        const WS_URL = 'wss://localhost:3000/pong/ws';
+        
+        let ws = null;
+        let currentUserId = null;
+        let currentGameId = null;
+        let playerSide = null;
+        let paddleMoveInterval = null;
+        let opponentUsername = null;
+        let gameState = {
+            ball: { x: 0.5, y: 0.5, vx: 0, vy: 0, speed: 0 },
+            paddles: {},
+            scores: {}
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Rendering constants
+        const PADDLE_WIDTH = 15;
+        const PADDLE_HEIGHT = 100;
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff5555' : 
+                         type === 'success' ? '#55ff55' : 
+                         type === 'warn' ? '#ffff55' : '#00ff00';
+            logElement.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function updateUI() {
+            const connected = ws && ws.readyState === WebSocket.OPEN;
+            const inGame = currentGameId !== null;
+
+            // Update status display
+            let statusText = 'Disconnected';
+            let statusClass = 'disconnected';
+            
+            if (connected) {
+                if (inGame) {
+                    statusText = 'In Game';
+                    statusClass = 'in-game';
+                } else {
+                    statusText = 'Connected';
+                    statusClass = 'connected';
+                }
+            }
+
+            document.getElementById('status').textContent = statusText;
+            document.getElementById('status').className = `status ${statusClass}`;
+            document.getElementById('userId').textContent = currentUserId || 'Not Set';
+            document.getElementById('gameId').textContent = currentGameId || 'None';
+            document.getElementById('playerSide').textContent = playerSide || 'None';
+
+            // Update game title
+            if (!connected) {
+                document.getElementById('gameTitle').textContent = 'Waiting for Connection...';
+            } else if (inGame) {
+                document.getElementById('gameTitle').textContent = `Game ${currentGameId}`;
+                if (opponentUsername) {
+                    document.getElementById('opponentInfo').textContent = `Playing against: ${opponentUsername}`;
+                }
+            } else {
+                document.getElementById('gameTitle').textContent = 'Ready to Play';
+                document.getElementById('opponentInfo').textContent = '';
+            }
+
+            // Enable/disable input fields
+            document.getElementById('emailInput').disabled = connected;
+            document.getElementById('passwordInput').disabled = connected;
+            document.getElementById('opponentIdInput').disabled = !connected || inGame;
+            document.getElementById('gameIdInput').disabled = !connected || inGame;
+
+            // Enable/disable buttons
+            document.getElementById('loginBtn').style.display = connected ? 'none' : 'block';
+            document.getElementById('logoutBtn').style.display = connected ? 'block' : 'none';
+            document.getElementById('joinMatchmakingBtn').disabled = !connected || inGame;
+            document.getElementById('leaveMatchmakingBtn').disabled = !connected;
+            document.getElementById('createCustomBtn').disabled = !connected || inGame;
+            document.getElementById('joinCustomBtn').disabled = !connected || inGame;
+            document.getElementById('readyBtn').disabled = !connected || !inGame;
+            document.getElementById('notReadyBtn').disabled = !connected || !inGame;
+            document.getElementById('cancelGameBtn').disabled = !connected || !inGame;
+            document.getElementById('quitGameBtn').disabled = !connected || !inGame;
+            document.getElementById('upBtn').disabled = !connected || !inGame;
+            document.getElementById('downBtn').disabled = !connected || !inGame;
+        }
+
+        async function login() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            
+            if (!email || !password) {
+                log('Please enter email and password', 'error');
+                return;
+            }
+            
+            try {
+                log('Logging in...', 'info');
+                
+                const response = await fetch(`${GATEWAY_URL}/auth/login`, {
+                    method: 'POST',
+                    credentials: 'include', // Important: include cookies in request
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Login failed');
+                }
+
+                const data = await response.json();
+                currentUserId = data.user.id;
+                
+                log(`✓ Logged in as ${currentUserId}`, 'success');
+                
+                // Now connect to WebSocket
+                connectWs();
+            } catch (err) {
+                console.error('Login error:', err);
+                log(`Login failed: ${err.message}`, 'error');
+            }
+        }
+
+        function connectWs() {
+            if (ws) {
+                log('Already connected', 'warn');
+                return;
+            }
+            
+            try {
+                log('Connecting to WebSocket...', 'info');
+                
+                ws = new WebSocket(WS_URL);
+
+                ws.onopen = function(event) {
+                    log(`✓ WebSocket connected`, 'success');
+                    updateUI();
+                    
+                    // Send ping to test connection
+                    sendMessage('ping', {});
+                    
+                    // Auto-join matchmaking
+                    setTimeout(() => {
+                        joinMatchmaking();
+                    }, 500);
+                };
+
+                ws.onmessage = function(event) {
+                    try {
+                        const message = JSON.parse(event.data);
+                        handleMessage(message);
+                    } catch (e) {
+                        log('Error parsing message: ' + e.message, 'error');
+                    }
+                };
+
+                ws.onclose = function(event) {
+                    log(`Connection closed (code: ${event.code})`, 'error');
+                    ws = null;
+                    currentGameId = null;
+                    playerSide = null;
+                    opponentUsername = null;
+                    updateUI();
+                };
+
+                ws.onerror = function(error) {
+                    log('WebSocket error', 'error');
+                };
+            } catch (e) {
+                log('Failed to connect: ' + e.message, 'error');
+            }
+        }
+
+        function logout() {
+            if (ws) {
+                ws.close();
+            }
+            ws = null;
+            currentUserId = null;
+            currentGameId = null;
+            playerSide = null;
+            opponentUsername = null;
+            gameState = {
+                ball: { x: 0.5, y: 0.5, vx: 0, vy: 0, speed: 0 },
+                paddles: {},
+                scores: {}
+            };
+            document.getElementById('emailInput').disabled = false;
+            document.getElementById('passwordInput').disabled = false;
+            log('Logged out', 'info');
+            updateUI();
+        }
+
+        function sendMessage(event, data) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = JSON.stringify({ event, data });
+                ws.send(message);
+                if (event !== 'pong.paddleMove') {
+                log(`→ ${event}`, 'info');
+                }
+            } else {
+                log('Cannot send: not connected', 'error');
+            }
+        }
+
+        function handleMessage(message) {
+            const eventName = message.event.replace('pong.', '');
+
+            switch (message.event) {
+                case 'pong':
+                    // Ping response - silent
+                    break;
+
+                case 'pong.customGameCreated':
+                    currentGameId = message.data.gameId;
+                    opponentUsername = message.data.otherUsername;
+                    log(`Custom game created! Waiting for ${opponentUsername}...`, 'success');
+                    updateUI();
+                    break;
+
+                case 'pong.playerJoinedCustomGame':
+                    log(`${opponentUsername} joined the game!`, 'success');
+                    break;
+
+                case 'pong.customGameJoinSuccess':
+                    currentGameId = message.data.gameId;
+                    opponentUsername = message.data.creatorUsername;
+                    log(`Joined ${opponentUsername}'s game!`, 'success');
+                    updateUI();
+                    break;
+
+                case 'pong.playerReadyStatus':
+                    log(`Opponent ready status: ${message.data.readyStatus}`, 'info');
+                    break;
+
+                case 'pong.customGameCanceled':
+                    log('Game was canceled', 'warn');
+                    currentGameId = null;
+                    playerSide = null;
+                    opponentUsername = null;
+                    updateUI();
+                    break;
+
+                case 'pong.playerQuitCustomGameInLobby':
+                    log('Opponent quit the lobby', 'warn');
+                    currentGameId = null;
+                    playerSide = null;
+                    opponentUsername = null;
+                    updateUI();
+                    break;
+
+                case 'pong.matchedInRandomGame':
+                    currentGameId = message.data.gameId;
+                    playerSide = message.data.yourSide;
+                    opponentUsername = message.data.opponentUsername;
+                    log(`Matched! You're ${playerSide} vs ${opponentUsername}`, 'success');
+                    
+                    // Update player names in score display
+                    if (playerSide === 'left') {
+                        document.getElementById('leftPlayerName').textContent = 'You';
+                        document.getElementById('rightPlayerName').textContent = opponentUsername;
+                    } else {
+                        document.getElementById('leftPlayerName').textContent = opponentUsername;
+                        document.getElementById('rightPlayerName').textContent = 'You';
+                    }
+                    updateUI();
+                    
+                    // Auto-ready for matchmaking
+                    setTimeout(() => {
+                        setReady(true);
+                    }, 200);
+                    break;
+
+                case 'pong.gameStarted':
+                    playerSide = message.data.yourSide;
+                    opponentUsername = message.data.opponentUsername;
+                    log(`Game starting! You're ${playerSide} side`, 'success');
+                    
+                    // Update player names
+                    if (playerSide === 'left') {
+                        document.getElementById('leftPlayerName').textContent = 'You';
+                        document.getElementById('rightPlayerName').textContent = opponentUsername;
+                    } else {
+                        document.getElementById('leftPlayerName').textContent = opponentUsername;
+                        document.getElementById('rightPlayerName').textContent = 'You';
+                    }
+                    updateUI();
+                    break;
+
+                case 'pong.gameState':
+                    updateGameState(message.data);
+                    break;
+
+                case 'pong.paddleMove':
+                    // Paddle updates are included in gameState, but we can handle separately if needed
+                    break;
+
+                case 'pong.score':
+                    updateScores(message.data.scores);
+                    // log(`Point scored!`, 'success');
+                    break;
+
+                case 'pong.gameEnded':
+                    handleGameEnd(message.data);
+                    break;
+
+                case 'error':
+                    log(`Error: ${message.data.message}`, 'error');
+                    break;
+
+                default:
+                    log(`Unknown event: ${message.event}`, 'warn');
+            }
+        }
+
+        function joinMatchmaking() {
+            sendMessage('pong.joinMatchmaking', {});
+            log('Joining matchmaking queue...', 'info');
+        }
+
+        function leaveMatchmaking() {
+            sendMessage('pong.leaveMatchmaking', {});
+            log('Left matchmaking queue', 'info');
+        }
+
+        function createCustomGame() {
+            const opponentId = document.getElementById('opponentIdInput').value.trim();
+            if (!opponentId) {
+                log('Enter opponent ID first', 'error');
+                return;
+            }
+            sendMessage('pong.createCustomGame', { otherId: opponentId });
+            log(`Creating custom game with ${opponentId}...`, 'info');
+        }
+
+        function joinCustomGame() {
+            const gameId = document.getElementById('gameIdInput').value.trim();
+            if (!gameId) {
+                log('Enter game ID first', 'error');
+                return;
+            }
+            sendMessage('pong.joinCustomGame', { gameId: gameId });
+            log(`Joining game ${gameId}...`, 'info');
+        }
+
+        function setReady(ready) {
+            if (currentGameId) {
+                const event = ready ? 'pong.userReady' : 'pong.userNotReady';
+                sendMessage(event, { gameId: currentGameId });
+                log(ready ? 'Marked as ready' : 'Marked as not ready', 'info');
+            }
+        }
+
+        function cancelGame() {
+            if (currentGameId) {
+                sendMessage('pong.cancelCustomGame', { gameId: currentGameId });
+                log('Canceling game...', 'info');
+            }
+        }
+
+        function quitGame() {
+            if (currentGameId) {
+                sendMessage('pong.userQuit', { gameId: currentGameId });
+                log('Quitting game...', 'info');
+                currentGameId = null;
+                playerSide = null;
+                opponentUsername = null;
+                updateUI();
+            }
+        }
+
+        function startPaddleMove(direction) {
+            if (currentGameId && paddleMoveInterval === null) {
+                // Send immediate paddle move
+                sendMessage('pong.paddleMove', {
+                    gameId: currentGameId,
+                    direction: direction
+                });
+
+                // Start continuous paddle movement
+                paddleMoveInterval = setInterval(() => {
+                    sendMessage('pong.paddleMove', {
+                        gameId: currentGameId,
+                        direction: direction
+                    });
+                }, 50); // Send every 50ms for smooth movement
+            }
+        }
+
+        function stopPaddleMove() {
+            if (paddleMoveInterval) {
+                clearInterval(paddleMoveInterval);
+                paddleMoveInterval = null;
+            }
+        }
+
+        function updateGameState(data) {
+            gameState = {
+                ball: data.ball,
+                paddles: data.paddles,
+                scores: data.scores
+            };
+            updateScores(data.scores);
+            renderGame();
+        }
+
+        function updateScores(scores) {
+            // Scores object has player IDs as keys
+            const scoreValues = Object.values(scores);
+            if (scoreValues.length >= 2) {
+                document.getElementById('leftScore').textContent = scoreValues[0];
+                document.getElementById('rightScore').textContent = scoreValues[1];
+            }
+        }
+
+        function handleGameEnd(data) {
+            const isWinner = data.winner === currentUserId;
+            const resultText = isWinner ? '🎉 YOU WON!' : '😢 You Lost';
+            log(`${resultText} ${data.quit ? '(opponent quit)' : ''}`, isWinner ? 'success' : 'warn');
+            
+            // Immediately stop game - clear gameId to disable controls and clear game state
+            currentGameId = null;
+            playerSide = null;
+            gameState = {
+                ball: { x: 0.5, y: 0.5, vx: 0, vy: 0, speed: 0 },
+                paddles: {},
+                scores: {}
+            };
+            renderGame(); // Render cleared state immediately
+            
+            // Set title immediately (before updateUI so it doesn't get overwritten)
+            document.getElementById('gameTitle').textContent = resultText;
+            
+            // Reset UI after a delay
+            setTimeout(() => {
+                opponentUsername = null;
+                document.getElementById('gameTitle').textContent = 'Ready to Play';
+                updateUI();
+            }, 3000);
+        }
+
+        function renderGame() {
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw center line
+            ctx.strokeStyle = '#333';
+            ctx.setLineDash([10, 10]);
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw ball - convert from normalized (0-1) to pixel coordinates
+            if (gameState.ball) {
+                const ballX = gameState.ball.x * canvas.width;
+                const ballY = gameState.ball.y * canvas.height;
+                const ballRadius = (gameState.ball.radius || 0.02) * canvas.width; // Use dynamic radius or fallback
+                
+                // Ball glow effect
+                const gradient = ctx.createRadialGradient(ballX, ballY, 0, ballX, ballY, ballRadius * 2);
+                gradient.addColorStop(0, '#ffffff');
+                gradient.addColorStop(0.5, '#00ff00');
+                gradient.addColorStop(1, 'rgba(0, 255, 0, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, ballRadius * 2, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Ball solid
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            // Draw paddles - convert from normalized to pixel coordinates
+            Object.entries(gameState.paddles).forEach(([playerId, paddle], idx, arr) => {
+                if (paddle) {
+                    let paddleX = paddle.x * canvas.width;
+                    const paddleY = paddle.y * canvas.height;
+                    const paddleWidth = PADDLE_WIDTH; // Use local constant
+                    const paddleHeight = paddle.height * canvas.height;
+
+                    // If there are two paddles, assume the rightmost one is the one with the highest x
+                    // and shift it left by paddleWidth so it is fully visible
+                    if (arr.length === 2) {
+                        // Find the max x value
+                        const xs = arr.map(([_, p]) => p && p.x || 0);
+                        const maxX = Math.max(...xs);
+                        if (paddle.x === maxX) {
+                            paddleX = paddleX - paddleWidth;
+                        }
+                    }
+
+                    // Determine if this is the player's paddle
+                    const isMyPaddle = playerId === currentUserId;
+
+                    // Paddle glow
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = isMyPaddle ? '#00ff00' : '#ff0000';
+                    ctx.fillStyle = isMyPaddle ? '#00ff00' : '#ff0000';
+                    ctx.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
+
+                    // Reset shadow
+                    ctx.shadowBlur = 0;
+                }
+            });
+        }
+
+        // Keyboard controls
+        let keyState = {};
+        
+        document.addEventListener('keydown', function(event) {
+            if (currentGameId && !keyState[event.key]) {
+                keyState[event.key] = true;
+                switch(event.key.toLowerCase()) {
+                    case 'arrowup':
+                    case 'w':
+                        event.preventDefault();
+                        startPaddleMove('up');
+                        break;
+                    case 'arrowdown':
+                    case 's':
+                        event.preventDefault();
+                        startPaddleMove('down');
+                        break;
+                }
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            keyState[event.key] = false;
+            switch(event.key.toLowerCase()) {
+                case 'arrowup':
+                case 'arrowdown':
+                case 'w':
+                case 's':
+                    event.preventDefault();
+                    stopPaddleMove();
+                    break;
+            }
+        });
+
+        // Prevent context menu on canvas
+        canvas.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Initialize
+        updateUI();
+        renderGame();
+
+        // Render loop for smooth animations
+        function animationLoop() {
+            renderGame();
+            requestAnimationFrame(animationLoop);
+        }
+        animationLoop();
+
+        // Auto-login and join matchmaking after page loads
+        setTimeout(() => {
+            log('Auto-login starting...', 'info');
+            login();
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -3,7 +3,277 @@ import {
 	handleMessage,
 	handleClose,
 	handleError
-} from './event-handlers.js';
+} from './tris-ws-handlers.js';
+
+import {
+	createUserStats as createUserStatsHandler,
+	deleteUserStats as deleteUserStatsHandler,
+	getUserStats as getUserStatsHandler,
+	getUserMatchHistory as getUserMatchHistoryHandler,
+	isUserBusy as isUserBusyHandler
+} from './tris-controllers.js';
+
+import { validateInternalApiKey } from './tris-help.js';
+
+// Reusable error response schemas
+const	ErrorResponse =
+{
+	type: 'object',
+	properties:
+	{
+		statusCode: { type: 'integer' },
+		code: { type: 'string' },
+		error: { type: 'string' },
+		message: { type: 'string' }
+	},
+	additionalProperties: true // let Fastify include unexpected fields
+};
+
+const	withInternalAuth =
+{
+	security: [{ internalApiKey: [] }],
+
+	headers:
+	{
+		type: 'object',
+		required: ['x-internal-api-key'],
+		properties:
+		{
+			'x-internal-api-key': 
+			{ 
+				type: 'string',
+				description: 'Internal API key for service-to-service authentication'
+			}
+		}
+	}
+};
+
+const	withCookieAuth =
+{
+	security: [{ cookieAuth: [] }],
+	
+	headers:
+	{
+		type: 'object',
+		properties:
+		{
+			'accessToken':
+			{
+				type: 'string',
+			},
+			'refreshToken':
+			{
+				type: 'string',
+			}
+		}
+	}
+};
+
+const	Match =
+{
+	type: 'object',
+	properties:
+	{
+		id: { type: 'string' },
+		playerXId: { type: 'string' },
+		playerOId: { type: 'string' },
+		playerXUsername: { type: 'string' },
+		playerOUsername: { type: 'string' },
+		winnerId: { type: 'string'},
+		endedAt: { type: 'string', format: 'date-time' }
+	}
+};
+
+//-----------------------------INTERNAL ROUTES-----------------------------
+
+const	createUserStats = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Create user stats',
+		description: 'Internal only (called by auth service when a new user is created). Creates a new stats entry for the user.',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties:
+			{
+				userId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			201:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: createUserStatsHandler
+}
+
+const	deleteUserStats = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Delete user stats',
+		description: 'Internal only (called by auth service when a user is deleted for GDPR compliance). Deletes the stats entry for the user.',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties:
+			{
+				userId: { type: 'string' }
+			}
+		},
+
+		response:
+		{
+			201:
+			{
+				type: 'object',
+				properties:
+				{
+					message: { type: 'string' }
+				}
+			},
+			404: ErrorResponse, // In case of user's stats not found
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: deleteUserStatsHandler
+}
+
+const	isUserBusy =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Check if user is busy',
+		description: 'Internal only. Checks if a user is currently in a game/tournament. (called by other game services before inviting/joining)',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: { isBusy: { type: 'boolean' } }
+			},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: isUserBusyHandler
+}
+
+//-----------------------------PUBLIC ROUTES-----------------------------
+
+const	getUserStats =
+{
+	schema:
+	{
+		summary: 'Get user stats',
+		description: 'Retrieve the stats for a given user.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{
+					gamesPlayed: { type: 'integer' },
+					gamesWon: { type: 'integer' },
+					gamesLost: { type: 'integer' },
+					// gamesDrawn: { type: 'integer' }, THERE IS NO DRAW IN "INFINITE" TRIS
+					elo: { type: 'integer' },
+					rank: { type: 'string' }
+				}
+			},
+			404: ErrorResponse, // In case of user's stats not found
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUserStatsHandler
+}
+
+const	getUserMatchHistory =
+{
+	schema:
+	{
+		summary: 'Get user match history',
+		description: 'Retrieve the match history for a given user.',
+		tags: ['Public'],
+
+		...withInternalAuth,
+		...withCookieAuth,
+		querystring:
+		{
+			type: 'object',
+			required: ['id'],
+			properties:
+			{ id: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'array',
+				items: Match
+			},
+			404: ErrorResponse, // In case of user's stats not found
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUserMatchHistoryHandler
+}
 
 // importing handlers
 import {
@@ -133,5 +403,11 @@ export function	trisRoutes(fastify)
 		socket.on('error', (err) => {handleError(socket, err, userId);});
 	});
 
-	fastify.get('/init', createGameBoard);
+	fastify.get('/stats', getUserStats);
+	fastify.get('/history', getUserMatchHistory);
+	fastify.get('/is-user-busy', isUserBusy);
+
+	fastify.post('/create-user-stats', createUserStats);
+
+	fastify.delete('/delete-user-stats', deleteUserStats);
 }

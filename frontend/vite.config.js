@@ -1,14 +1,53 @@
 import { defineConfig } from 'vite'
 import tailwindcss from "@tailwindcss/vite";
+import { intlayer } from "vite-intlayer";
+import react from '@vitejs/plugin-react'
+
 import path from "path";
+import { toUSVString } from 'util';
 
 export default defineConfig({
   base: '/',
   server: {
-    port: 443,
+    port: 4000,
     strictPort: true,
+	https: {
+		key: './certs/certs/key.pem',
+		cert: './certs/certs/cert.pem',
+	},
     proxy: {
-      '/api': 'http://localhost:3000'
+      '/api': {
+		port:3000,
+        target: 'https://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false,
+        logLevel: 'debug', // Enable debug logging to see what's happening
+      },
+      '/chat/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/notification/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/pong/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/tris/ws': {
+        target: 'wss://localhost:3000',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
     }
   },
   resolve: {
@@ -18,7 +57,9 @@ export default defineConfig({
   },
   publicDir: 'public',
   plugins: [
+		react(),
 		tailwindcss(),
+		intlayer(),
 
 		{
 			name: 'reload-on-frontend-ts',

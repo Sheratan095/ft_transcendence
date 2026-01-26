@@ -18,14 +18,14 @@ Content-Type: application/json
   "password": "Mrco@123_"
 }
 
-### Register new user
-POST https://localhost:3000/auth/register
+###
+
+POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "username": "poppi",
-  "email": "poppi@gmail.com",
-  "password": "Mrco@123_"
+  "email": "test2@gmail.com",
+  "password": "1234"
 }
 
 ###
@@ -111,7 +111,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZjMjIzZTQwL
 ###
 
 DELETE https://localhost:3000/auth/delete-account
-Cookie: accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVlODk1ODczLWNhYzItNGU1Mi05M2MyLWE2ZTE3NzA3NGVkNiIsImVtYWlsIjoiY2VjY2FyZWxsaW03QGdtYWlsLmNvbSIsImlhdCI6MTc2MjE4MTk1MSwiZXhwIjoxNzYyMTgyODUxfQ.gj-rEVj7e9Ro0gRXguwkfeVk9SgOIeWrDBbtGoqUvu4
 
 ###
 

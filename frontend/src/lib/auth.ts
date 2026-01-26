@@ -1,14 +1,29 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://localhost:3000';
+import { stopTokenRefresh } from './token';
 
 export interface User {
     id: string;
+	userId: string;
     username: string;
     email: string;
     avatarUrl?: string;
+    tfaEnabled?: boolean;
+	rank?: string;
+	wins?: number;
 }
 
 export function getUserId(): string | null {
   return localStorage.getItem('userId');
+}
+
+export function getUser(): User | null {
+  const userJson = localStorage.getItem('user');
+  if (!userJson) return null;
+  try {
+    return JSON.parse(userJson) as User;
+  } catch (err) {
+    console.error('Error parsing user from localStorage:', err);
+    return null;
+  }
 }
 
 export function isLoggedInClient(): boolean {
@@ -25,7 +40,7 @@ export async function fetchUserProfile(): Promise<User | null> {
   console.log('Fetching profile for user id:', userId);
 
   try {
-    const url = `${API_BASE}/users/user?id=${userId}`;
+    const url = `/api/users/user?id=${userId}`;
     const response = await fetch(url, {
       method: 'GET',
       credentials: 'include',
@@ -46,87 +61,38 @@ export async function fetchUserProfile(): Promise<User | null> {
     return null;
   }
 }
-
-export async function renderProfile(container?: HTMLElement | string): Promise<HTMLElement | null> {
-  let root: HTMLElement | null = null;
-  if (!container) {
-    root = document.getElementById('app') || document.getElementById('auth-container') || null;
-  } else if (typeof container === 'string') {
-    root = document.getElementById(container) || null;
-  } else {
-    root = container;
-  }
-
-  if (!root) {
-    console.warn('renderProfile: target container not found');
-    return null;
-  }
-
-  // show loading state
-  root.innerHTML = '';
-  const loading = document.createElement('div');
-  loading.className = 'py-8 text-center text-neutral-400';
-  loading.textContent = 'Loading profile...';
-  root.appendChild(loading);
-
-  const user = await fetchUserProfile();
-  console.log('Fetched user profile:', user);
-  root.removeChild(loading);
-
-  if (!user) {
-    localStorage.removeItem('userId');
-    location.reload();
-    return null;
-  }
-
-  // Clone template
-  const template = document.getElementById('profile-card-template') as HTMLTemplateElement;
-  if (!template) {
-    console.error('Profile card template not found');
-    return null;
-  }
-
-  const card = template.content.cloneNode(true) as DocumentFragment;
-  const cardEl = (card.querySelector('div') as HTMLElement) || null;
-
-  // Populate template with user data
-  const avatar = card.querySelector('#profile-avatar') as HTMLImageElement;
-  if (avatar) avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
-
-  const username = card.querySelector('#profile-username') as HTMLElement;
-  if (username) username.textContent = user.username || user.email || 'User';
-
-  const email = card.querySelector('#profile-email') as HTMLElement;
-  if (email) email.textContent = user.email || '';
-
-  const id = card.querySelector('#profile-id') as HTMLElement;
-  if (id) id.textContent = user.id || '';
-
-  const editBtn = card.querySelector('#profile-edit-btn') as HTMLButtonElement;
-  const logoutBtn = card.querySelector('#profile-logout-btn') as HTMLButtonElement;
-
-  // Append card to root
-  root.appendChild(card);
-
-  // Attach event listeners
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      localStorage.removeItem('userId');
-      await fetch(`${API_BASE}/auth/logout`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        credentials: 'include',
-      });
-      window.location.reload();
+/**
+ * Logout user and stop token refresh
+ */
+export async function logout(): Promise<void> {
+  localStorage.removeItem('userId');
+  localStorage.removeItem('tfaEnabled');
+  localStorage.removeItem('user');
+  stopTokenRefresh();
+  
+  try {
+    await fetch(`/api/auth/logout`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      credentials: 'include',
     });
+  } catch (err) {
+    console.error('Logout error:', err);
   }
+}
 
-  if (editBtn) {
-    editBtn.addEventListener('click', () => {
-      const ev = new CustomEvent('profile:edit', { detail: user });
-      window.dispatchEvent(ev);
-    });
+export async function deleteAccout(): Promise<void> {
+  localStorage.removeItem('userId');
+  localStorage.removeItem('tfaEnabled');
+  localStorage.removeItem('user');
+  stopTokenRefresh();
+  
+  try {
+	await fetch(`/api/auth/delete-account`, {
+	  method: 'DELETE',
+    credentials: 'include',
+	});
+  } catch (err) {
+	console.error('Delete account error:', err);
   }
-
-  return cardEl;
 }

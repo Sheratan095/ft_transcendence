@@ -18,6 +18,7 @@ export class	ChatDatabase
 	{
 		this.dbPath = dbPath;
 		this.db = null;
+		this.systemSenderId = 'system';
 	}
 
 	async	initialize()
@@ -150,7 +151,9 @@ export class	ChatDatabase
 		return (chats);
 	}
 
-	// Fecth just the messages for a chat that a user is part of and that he has received
+	// Fetch all messages for a chat that a user is part of
+	//	includes all message types (text, system, user_join)
+	//	only messages created after the user joined the chat are returned
 	async	getMessagesByChatIdForUser(chatId, userId, limit = 50, offset = 0)
 	{
 		const query = `
@@ -159,24 +162,26 @@ export class	ChatDatabase
 				m.chat_id,
 				m.sender_id,
 				m.content,
-				m.created_at,
-				ms.status AS message_status
+				m.type,
+				m.created_at
 			FROM messages m
-			INNER JOIN message_statuses ms 
-				ON m.id = ms.message_id
+			INNER JOIN chat_members cm
+				ON cm.chat_id = m.chat_id AND cm.user_id = ?
 			WHERE m.chat_id = ?
-			AND ms.user_id = ?
+			AND datetime(m.created_at) >= datetime(cm.joined_at)
 			ORDER BY m.created_at DESC
 			LIMIT ? OFFSET ?;
 		`;
-		// Fetch all messages in the chat received by the user (exclude messages before join and after leave)
-		// Included messages sent by the user as well
+		// Fetch all messages in the chat after user joined
+		// The joined_at filter ensures users only see messages after they joined
+		// Using datetime() to normalize timestamp formats for proper comparison
+		// Status should be computed in the controller using getOverallMessageStatus()
 
-		const	messages = await this.db.all(query, [chatId, userId, limit, offset]);
+		const	messages = await this.db.all(query, [userId, chatId, limit, offset]);
 		return (messages);
 	}
 
-	async	getUsersInRoom(chatId)
+	async	getUsersInChat(chatId)
 	{
 		const	query = `
 			SELECT user_id
@@ -188,8 +193,12 @@ export class	ChatDatabase
 		return (users.map(u => u.user_id));
 	}
 
-	async	createPrivateChat(userId1, userId2)
+	async	createPrivateChat(userId1, userId2, timestamp)
 	{
+		// Ensure userIds are strings to match TEXT column type
+		const	strUserId1 = String(userId1);
+		const	strUserId2 = String(userId2);
+
 		// Check if a private chat already exists between these two users
 		const	existingChatQuery = `
 			SELECT chats.id
@@ -199,7 +208,7 @@ export class	ChatDatabase
 			WHERE chats.chat_type = 'dm'
 		`;
 
-		const	existingChat = await this.db.get(existingChatQuery, [userId1, userId2]);
+		const	existingChat = await this.db.get(existingChatQuery, [strUserId1, strUserId2]);
 		if (existingChat)
 			return (existingChat.id);
 
@@ -213,28 +222,30 @@ export class	ChatDatabase
 		await this.db.run(insertChatQuery, [chatId]);
 
 		// Add both users to the chat_members table
+		const	joinedAt = timestamp;
+
 		const insertMemberQuery = `
-			INSERT INTO chat_members (chat_id, user_id)
-			VALUES (?, ?)
+			INSERT INTO chat_members (chat_id, user_id, joined_at)
+			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId1]);
-		await this.db.run(insertMemberQuery, [chatId, userId2]);
+		await this.db.run(insertMemberQuery, [chatId, strUserId1, joinedAt]);
+		await this.db.run(insertMemberQuery, [chatId, strUserId2, joinedAt]);
 
 		return (chatId);
 	}
 
-	async	createGroupChat(name)
+	async	createGroupChat(name, timestamp)
 	{
 		// Create new group chat
 		const	chatId = await this.#generateUUID();
 
 		const	insertChatQuery = `
-			INSERT INTO chats (id, name, chat_type)
-			VALUES (?, ?, 'group')
+			INSERT INTO chats (id, name, chat_type, created_at)
+			VALUES (?, ?, 'group', ?)
 		`;
 
-		await this.db.run(insertChatQuery, [chatId, name]);
+		await this.db.run(insertChatQuery, [chatId, name, timestamp]);
 
 		return (chatId);
 	}
@@ -262,7 +273,8 @@ export class	ChatDatabase
 			WHERE chat_id = ? AND user_id = ?
 		`;
 
-		const	result = await this.db.get(query, [chatId, userId]);
+		// Ensure userId is a string to match TEXT column type
+		const	result = await this.db.get(query, [chatId, String(userId)]);
 		return (result.count > 0);
 	}
 
@@ -278,7 +290,7 @@ export class	ChatDatabase
 		return (result ? result.chat_type : null);
 	}
 
-	async	addUserToChat(chatId, userId)
+	async	addUserToChat(chatId, userId, timestamp)
 	{
 		// Check if user is already in chat
 		if (await this.isUserInChat(userId, chatId))
@@ -304,11 +316,38 @@ export class	ChatDatabase
 		}
 
 		const	insertMemberQuery = `
-			INSERT INTO chat_members (chat_id, user_id)
-			VALUES (?, ?)
+			INSERT INTO chat_members (chat_id, user_id, joined_at)
+			VALUES (?, ?, ?)
 		`;
 
-		await this.db.run(insertMemberQuery, [chatId, userId]);
+		// Ensure userId is a string to match TEXT column type
+		await this.db.run(insertMemberQuery, [chatId, String(userId), timestamp]);
+	}
+
+	async	removeUserFromChat(chatId, userId)
+	{
+		const	deleteMemberQuery = `
+			DELETE FROM chat_members
+			WHERE chat_id = ? AND user_id = ?
+		`;
+
+		// Ensure userId is a string to match TEXT column type
+		await this.db.run(deleteMemberQuery, [chatId, String(userId)]);
+	}
+
+	// Remove all message statuses for a user in a specific chat
+	// Used when a user leaves a group chat to cleanup their status entries
+	async	removeUserMessageStatusesFromChat(chatId, userId)
+	{
+		const	query = `
+			DELETE FROM message_statuses
+			WHERE user_id = ?
+			AND message_id IN (
+				SELECT id FROM messages WHERE chat_id = ?
+			)
+		`;
+
+		await this.db.run(query, [String(userId), chatId]);
 	}
 
 	async	getChatById(chatId)
@@ -327,29 +366,55 @@ export class	ChatDatabase
 		return (chat);
 	}
 
-	//-----------------------------MESSAGE QUERIES----------------------------
-
-	async	addMessageToChat(chatId, senderId, message)
+	async	getPrivateChatByUsers(userId1, userId2)
 	{
-		const	messageId = await this.#generateUUID();
-		const	timestamp = new Date().toISOString();
-
-		const	insertMessageQuery = `
-			INSERT INTO messages (id, chat_id, sender_id, content, created_at)
-			VALUES (?, ?, ?, ?, ?)
+		const	query = `
+			SELECT c.id, c.name, c.chat_type, c.created_at
+			FROM chats c
+			JOIN chat_members cm1 ON c.id = cm1.chat_id AND cm1.user_id = ?
+			JOIN chat_members cm2 ON c.id = cm2.chat_id AND cm2.user_id = ?
+			WHERE c.chat_type = 'dm'
 		`;
 
-		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, timestamp]);
+		const	chat = await this.db.get(query, [String(userId1), String(userId2)]);
+		return (chat);
+	}
 
+	async	getGroupChatName(chatId)
+	{
+		const	query = `
+			SELECT name
+			FROM chats
+			WHERE id = ? AND chat_type = 'group'
+		`;
+
+		const	chat = await this.db.get(query, [chatId]);
+		return (chat ? chat.name : null);
+
+	}
+
+	//-----------------------------MESSAGE QUERIES----------------------------
+
+	async	addMessageToChat(chatId, senderId, message, timestamp, type = "text")
+	{
+		const	messageId = await this.#generateUUID();
+
+		if (type !== 'text')
+			senderId = this.systemSenderId;
+
+		const	insertMessageQuery = `
+			INSERT INTO messages (id, chat_id, sender_id, content, type, created_at)
+			VALUES (?, ?, ?, ?, ?, ?)
+		`;
+
+		await this.db.run(insertMessageQuery, [messageId, chatId, senderId, message, type, timestamp]);
 		return (messageId);
 	}
 
 	//-----------------------------MESSAGE STATUS QUERIES----------------------------
 
-	async	updateMessageStatus(messageId, userId, status)
+	async	updateMessageStatus(messageId, userId, status, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		// Update existing status entry
 		const	updateStatusQuery = `
 			UPDATE message_statuses
@@ -359,10 +424,8 @@ export class	ChatDatabase
 		await this.db.run(updateStatusQuery, [status, timestamp, messageId, userId]);
 	}
 
-	async	createMessageStatus(messageId, userId, status)
+	async	createMessageStatus(messageId, userId, status, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		const	insertStatusQuery = `
 			INSERT INTO message_statuses (message_id, user_id, status, updated_at)
 			VALUES (?, ?, ?, ?)
@@ -387,17 +450,25 @@ export class	ChatDatabase
 	}
 
 	// Returns aggregated status for a message across all recipients (excluding sender)
-	// DELIVERED if it's delivered to all recipients
-	// READ if it's read by all recipients [future implementation]
+	// Logic: return the MINIMUM status across all recipients
+	// sent (0) < delivered (1) < read (2)
 	// Return "sent" if at least one recipient has not received it yet OR in case of error
 	async	getOverallMessageStatus(messageId)
 	{
 		try
 		{
+			// Use CASE to convert status to numeric values for proper MIN comparison
+			// sent=0, delivered=1, read=2 - we want the minimum status
 			const query = `
 				SELECT 
-					MIN(ms.status) AS min_status,
-					MAX(ms.status) AS max_status
+					MIN(
+						CASE ms.status
+							WHEN 'sent' THEN 0
+							WHEN 'delivered' THEN 1
+							WHEN 'read' THEN 2
+							ELSE 0
+						END
+					) AS min_status_num
 				FROM message_statuses ms
 				JOIN messages m ON ms.message_id = m.id
 				WHERE ms.message_id = ?
@@ -406,23 +477,18 @@ export class	ChatDatabase
 
 			const	row = await this.db.get(query, [messageId]);
 
-			if (!row || row.min_status === null)
-				return ("sent");
-
-			const	{ min_status, max_status } = row;
-
-			// ---- AGGREGATION LOGIC ----
-
-			// Future: if you add "read" status
-			if (min_status === "read" && max_status === "read")
+			// If no recipients (only sender), consider it read
+			if (!row || row.min_status_num === null)
 				return ("read");
 
-			// All delivered
-			if (min_status === "delivered" && max_status === "delivered")
-				return ("delivered");
-
-			// Otherwise: at least one recipient still has only "sent"
-			return ("sent");
+			// Convert numeric back to status string
+			switch (row.min_status_num)
+			{
+				case 0: return ("sent");
+				case 1: return ("delivered");
+				case 2: return ("read");
+				default: return ("sent");
+			}
 		}
 		catch (err)
 		{
@@ -431,10 +497,8 @@ export class	ChatDatabase
 		}
 	}
 
-	async	markMessagesAsRead(chatId, userId)
+	async	markMessagesAsRead(chatId, userId, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		const	query = `
 			UPDATE message_statuses
 			SET status = 'read', 
@@ -453,10 +517,8 @@ export class	ChatDatabase
 	}
 
 	// Used when a user fetch messages from a chat
-	async	markMessagesAsDelivered(chatId, userId)
+	async	markMessagesAsDelivered(chatId, userId, timestamp)
 	{
-		const	timestamp = new Date().toISOString();
-
 		const	query = `
 			UPDATE message_statuses
 			SET status = 'delivered', 

@@ -1,4 +1,4 @@
-// Chat connection manager handles WebSocket connections and message routing
+// Pong connection manager handles WebSocket connections and message routing
 class	PongConnectionManager
 {
 	constructor()
@@ -27,6 +27,286 @@ class	PongConnectionManager
 	{
 		return (this._connections.size);
 	}
+
+	async	sendCustomGameCreationReply(creatorId, gameId, otherUsername)
+	{
+		const	socket = this._connections.get(creatorId);
+
+		const	data = {
+			gameId,
+			otherUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.customGameCreated', data);
+	}
+
+	async	sendPlayerJoinedCustomGame(otherPlayerId, gameId)
+	{
+		const	socket = this._connections.get(otherPlayerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.playerJoinedCustomGame', { gameId });
+	}
+
+	async	replyCustomGameJoined(playerId, gameId, creatorUsername)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			creatorUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.customGameJoinSuccess', data);
+	}
+
+	// Other player is the one who DID NOT change their ready status
+	async	sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus)
+	{
+		const	socket = this._connections.get(otherPlayerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.playerReadyStatus', { gameId, readyStatus });
+	}
+
+	async	sendCustomGameCanceled(playerId, gameId)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.customGameCanceled', { gameId });
+	}
+
+	async	sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId)
+	{
+		const	socket = this._connections.get(otherPlayerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.playerQuitCustomGameInLobby', { gameId });
+	}
+
+	async	sendGameEnded(playerId, gameId, winner, winnerUsername, quit)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data =
+		{
+			gameId: gameId,
+			winner: winner,
+			winnerUsername: winnerUsername,
+			quit: quit,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.gameEnded', data);
+	}
+
+	async	sendGameState(playerId, gameStateData)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.gameState', gameStateData);
+	}
+
+	async	sendPaddleMove(playerId, paddleMoveData)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.paddleMove', paddleMoveData);
+	}
+
+	async	sendScore(playerId, scoreData)
+	{
+		const	socket = this._connections.get(playerId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.score', scoreData);
+	}
+
+	async	notifyMatchedInRandomGame(playerId, gameId, opponentUsername, side)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			opponentUsername,
+			"yourSide": side,
+			coolDownMs: process.env.READY_COOLDOWN_MS
+		}
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.matchedInRandomGame', data);
+	}
+
+	async	notifyGameStart(playerId, gameId, side, opponentUsername)
+	{
+		const	socket = this._connections.get(playerId);
+
+		const	data = {
+			gameId,
+			opponentUsername,
+			"yourSide": side,
+		}
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.gameStarted', data);
+	}
+
+	// ------------ TOURNAMENT RELATED MESSAGES ------------
+
+	async	replyTournamentCreated(creatorId, torunamentName, tournamentId)
+	{
+		const	socket = this._connections.get(creatorId);
+
+		const	data = {
+			"name": torunamentName,
+			tournamentId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentCreated', data);
+	}
+
+	async	notifyTournamentParticipantJoined(participantId, newUsername, tournamentName, tournamentId)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			tournamentId,
+			tournamentName,
+			"participantUsername": newUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentParticipantJoined', data);
+	}
+
+	async	notifyTournamentParticipantLeft(participantId, leavingUsername, tournamentName, tournamentId)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			tournamentId,
+			tournamentName,
+			"participantUsername": leavingUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentParticipantLeft', data);
+	}
+
+	async	notifyTournamentStarted(participantId, tournamentName, tournamentId)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			tournamentId,
+			tournamentName,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentStarted', data);
+	}
+
+	async	sendTournamentRoundInfo(participantId, roundNumber, totalMatches, playerMatch)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			roundNumber,
+			totalMatches,
+			playerMatch, // null if player has a bye or is not in this round
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundInfo', data);
+	}
+
+	async	notifyTournamentRoundCooldown(participantId, cooldownMs, nextRoundNumber)
+	{
+		const	socket = this._connections.get(participantId);
+
+		const	data = {
+			cooldownMs,
+			nextRoundNumber,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundCooldown', data);
+	}
+
+	async	notifyTournamentPlayerReady(userId, readyUserId, matchId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			matchId,
+			readyUserId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentPlayerReady', data);
+	}
+
+	async	sendTournamentMatchStarted(userId, gameId, matchId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			gameId,
+			matchId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentMatchStarted', data);
+	}
+
+	async	notifyTournamentMatchEnded(userId, matchId, winnerId, winnerUsername)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			matchId,
+			winnerId,
+			winnerUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentMatchEnded', data);
+	}
+
+	async	notifyTournamentEnded(userId, tournamentId, winnerId, winnerUsername)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			tournamentId,
+			winnerId,
+			winnerUsername,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentEnded', data);
+	}
+
+	async	notifyTournamentCancelled(userId, tournamentId)
+	{
+		const	socket = this._connections.get(userId);
+
+		const	data = {
+			tournamentId,
+		};
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentCancelled', data);
+	}
+
+	async	sendTournamentBracketUpdate(userId, bracket)
+	{
+		const	socket = this._connections.get(userId);
+
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'pong.tournamentBracketUpdate', bracket);
+	}
+
+	//------------------------------------------
 
 	async	sendErrorMessage(userId, message)
 	{

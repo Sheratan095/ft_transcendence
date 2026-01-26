@@ -200,7 +200,7 @@ logs:
 	@echo "=== Gateway Logs ==="  
 	@tail -f gateway/gateway.log 2>/dev/null || echo "No gateway logs found"
 
-# Help
+# HelpGetUser 5be11af4-4ae9-4b33-8b8d-a4df61b806a5 requested by 5be11af4-4ae9-4b33-8b8d-a4df61b806a5
 .PHONY: help
 help:
 	@echo "Available commands:"
@@ -224,6 +224,13 @@ help:
 	@echo "    make status   - Check service status"
 	@echo "    make install  - Install dependencies"
 	@echo "    make help     - Show this help"
+
+.PHONY: remove-databases
+remove-databases:
+	@echo "Removing all database files (*.db)..."
+	@find . -path "*/data/*.db" -type f -delete
+	@echo "Database files removed."
+
 
 # Clean build artifacts and temporary files
 .PHONY: clean

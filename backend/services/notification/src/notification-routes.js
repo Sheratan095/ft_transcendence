@@ -2,10 +2,12 @@ import { validateInternalApiKey } from './notification-help.js';
 
 import {
 	sendFriendRequest,
-	sendFriendAccept,
+	// sendFriendAccept,
 	send2FaCode,
 	getActiveUsersCount,
-	sendChatUserAdded
+	sendChatUserAdded,
+	sendGameInvite,
+	sendNowFriends
 } from './notification-controllers.js';
 
 import {
@@ -13,7 +15,7 @@ import {
 	handleMessage,
 	handleClose,
 	handleError
-} from './event-handlers.js';
+} from './notification-ws-handlers.js';
 
 // Reusable error response schemas
 const	ErrorResponse =
@@ -69,6 +71,7 @@ const	withCookieAuth =
 	}
 };
 
+const	availableGameTypes = ['pong', 'tris'];
 
 //-----------------------------INTERAL ROUTES-----------------------------
 
@@ -104,11 +107,43 @@ const	sendFriendRequestOpts =
 	handler: sendFriendRequest
 }
 
-const	sendFriendAcceptOpts = 
+// const	sendFriendAcceptOpts = 
+// {
+// 	schema:
+// 	{
+// 		summary: '🔒 Internal - Send friend accept',
+// 		tags: ['Notifications', 'Internal'],
+	
+// 		...withInternalAuth,
+
+// 		body:
+// 		{
+// 			type: 'object',
+// 			required: ['requesterId', 'accepterUsername', 'accepterId'],
+// 			properties:
+// 			{
+// 				requesterId: {type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+// 				accepterId: {type: 'string'}, // WHO ACCEPTED THE REQUEST
+// 				accepterUsername: { type: 'string'}, // USERNAME OF THE ACCEPTER
+// 			}
+// 		},
+
+// 		response:
+// 		{
+// 			200 : {},
+// 			500: ErrorResponse
+// 		}
+// 	},
+
+// 	preHandler: validateInternalApiKey,
+// 	handler: sendFriendAccept,
+// }
+
+const	sendNowFriendsOpts = 
 {
 	schema:
 	{
-		summary: '🔒 Internal - Send friend accept',
+		summary: '🔒 Internal - Notify users that are now friends with each other (Called by relationship service)',
 		tags: ['Notifications', 'Internal'],
 	
 		...withInternalAuth,
@@ -116,12 +151,13 @@ const	sendFriendAcceptOpts =
 		body:
 		{
 			type: 'object',
-			required: ['requesterId', 'accepterUsername', 'accepterId'],
+			required: ['user1Id', 'user2Id', 'user1Username', 'user2Username'],
 			properties:
 			{
-				requesterId: {type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
-				accepterId: {type: 'string'}, // WHO ACCEPTED THE REQUEST
-				accepterUsername: { type: 'string'}, // USERNAME OF THE ACCEPTER
+				user1Id: { type: 'string'}, // USER 1 ID
+				user2Id: { type: 'string'}, // USER 2 ID
+				user1Username: { type: 'string'}, // USER 1 USERNAME
+				user2Username: { type: 'string'}, // USER 2 USERNAME
 			}
 		},
 
@@ -133,7 +169,7 @@ const	sendFriendAcceptOpts =
 	},
 
 	preHandler: validateInternalApiKey,
-	handler: sendFriendAccept,
+	handler: sendNowFriends,
 }
 
 const	send2FaOpts = 
@@ -208,11 +244,11 @@ const	sendChatUserAddedOpts =
 		body:
 		{
 			type: 'object',
-			required: ['userId', 'chatId', 'addedByUserId'],
+			required: ['from', 'senderId', 'targetId', 'chatId'],
 			properties:
 			{
-				from: { type: 'string' },
-				senderId: { type: 'string' },
+				from: { type: 'string' }, // Username of who added the user
+				senderId: { type: 'string' }, // User ID of who added the user
 				targetId: { type: 'string' }, // WHO TO SENT THE NOTIFICATION TO
 				chatId: { type: 'string' }, // CHAT ID
 			}
@@ -228,6 +264,43 @@ const	sendChatUserAddedOpts =
 	preHandler: validateInternalApiKey,
 	handler: sendChatUserAdded,
 }
+
+//-----------------------------ROUTES FOR GAME NOTIFICATIONS-----------------------------
+
+const	sendGameInviteOpts = 
+{
+	schema:
+	{
+		summary: '🔒 Internal - Send game invite',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['senderId', 'senderUsername', 'targetId', 'gameId', 'gameType'],
+			properties:
+			{
+				senderId: { type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+				senderUsername: { type: 'string'}, // USERNAME OF WHO SENT THE GAME INVITE
+				targetId: { type: 'string'}, // WHO SENT THE GAME INVITE
+				gameId: { type: 'string'}, // GAME ID
+				gameType: { type: 'string', enum: availableGameTypes }, // TYPE OF THE GAME
+			}
+		},
+
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: sendGameInvite
+}
+
 
 //-----------------------------EXPORT ROUTES-----------------------------
 
@@ -251,7 +324,9 @@ export function	notificationRoutes(fastify)
 	fastify.get('/active-users-count', getActiveUsersCountOpts);
 
 	fastify.post('/send-friend-request', sendFriendRequestOpts);
-	fastify.post('/send-friend-accept', sendFriendAcceptOpts);
+	// fastify.post('/send-friend-accept', sendFriendAcceptOpts);
 	fastify.post('/send-2fa-code', send2FaOpts);
 	fastify.post('/send-chat-user-added', sendChatUserAddedOpts);
+	fastify.post('/send-now-friends', sendNowFriendsOpts);
+	fastify.post('/send-game-invite', sendGameInviteOpts);
 }

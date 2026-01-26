@@ -226,6 +226,18 @@ export class	UsersDatabase
 		return (relationships);
 	}
 
+	async	getUsersRelationship(userA, userB)
+	{
+		const	query =`
+			SELECT * FROM user_relationships
+			WHERE (requester_id = ? AND target_id = ?) OR (requester_id = ? AND target_id = ?)`;
+
+		const	relationship = await this.db.get(query, [userA, userB, userB, userA]);
+
+
+		return (relationship);
+	}
+
 	// Get only accepted friends
 	async	getFriends(userId)
 	{
@@ -299,6 +311,7 @@ export class	UsersDatabase
 	}
 
 	// Create or update a friend request
+	// Returns: 'sent' | 'mutual_accept' to inform controller what happened
 	async	sendFriendRequest(senderId, receiverId)
 	{
 		// Check if relationship already exists (either direction)
@@ -331,18 +344,24 @@ export class	UsersDatabase
 					SET relationship_status = 'accepted', updated_at = CURRENT_TIMESTAMP
 					WHERE requester_id = ? AND target_id = ?
 				`, [receiverId, senderId]);
-				return;
+				return 'mutual_accept';
 			}
 			
 			// If rejected, allow resending by updating to pending
-			// Send another request after rejecting
+			// Delete the old rejected relationship and create a new pending one with correct direction
 			if (existing.relationship_status === 'rejected')
 			{
 				await this.db.run(`
-					UPDATE user_relationships
-					SET relationship_status = 'pending', requester_id = ?, target_id = ?, updated_at = CURRENT_TIMESTAMP
+					DELETE FROM user_relationships
 					WHERE (requester_id = ? AND target_id = ?) OR (requester_id = ? AND target_id = ?)
-				`, [senderId, receiverId, senderId, receiverId, receiverId, senderId]);
+				`, [senderId, receiverId, receiverId, senderId]);
+				
+				await this.db.run(`
+					INSERT INTO user_relationships (requester_id, target_id, relationship_status)
+					VALUES (?, ?, 'pending')
+				`, [senderId, receiverId]);
+				
+				return 'sent';
 			}
 		}
 		else
@@ -353,6 +372,8 @@ export class	UsersDatabase
 				VALUES (?, ?, 'pending')
 			`, [senderId, receiverId]);
 		}
+		
+		return 'sent';
 	}
 
 	// Accept a pending request (only the target can accept)

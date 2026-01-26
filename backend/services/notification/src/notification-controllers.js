@@ -18,22 +18,22 @@ export const	sendFriendRequest = async (req, reply) =>
 	}
 }
 
-export const	sendFriendAccept = async (req, reply) =>
-{
-	try
-	{
-		const	{ requesterId, accepterUsername, accepterId } = req.body;
+// export const	sendFriendAccept = async (req, reply) =>
+// {
+// 	try
+// 	{
+// 		const	{ requesterId, accepterUsername, accepterId } = req.body;
 
-		userConnectionManager.sendFriendRequestAccept(requesterId, accepterUsername, accepterId);
+// 		userConnectionManager.sendFriendRequestAccept(requesterId, accepterUsername, accepterId);
 
-		return (reply.code(200).send());
-	}
-	catch (err)
-	{
-		console.error('[NOTIFICATION] Error in sendFriendAccept handler:', err);
-		return (reply.code(500).send({error: 'Internal server error' }));
-	}
-}
+// 		return (reply.code(200).send());
+// 	}
+// 	catch (err)
+// 	{
+// 		console.error('[NOTIFICATION] Error in sendFriendAccept handler:', err);
+// 		return (reply.code(500).send({error: 'Internal server error' }));
+// 	}
+// }
 
 export const	send2FaCode = async (req, reply) =>
 {
@@ -75,11 +75,55 @@ export const	sendChatUserAdded = async (req, reply) =>
 
 		userConnectionManager.sendChatUserAddedNotification(targetId, senderId, from, chatId);
 
+		console.log(`[NOTIFICATION] Notifying user ${targetId} about being added to chat ${chatId} by ${senderId}`);
+	
 		return (reply.code(200).send());
 	}
 	catch (err)
 	{
 		console.error('[NOTIFICATION] Error in sendChatUserAdded handler:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	sendNowFriends = async (req, reply) =>
+{
+	try
+	{
+		const	{ user1Id, user2Id, user1Username, user2Username } = req.body;
+
+		// Notify both users that they are now friends
+													// TO USER ID, OTHER USER ID, OTHER USERNAME
+		userConnectionManager.sendNowFriendsNotification(user1Id, user2Id, user2Username);
+		userConnectionManager.sendNowFriendsNotification(user2Id, user1Id, user1Username);
+
+		console.log(`[NOTIFICATION] Notifying user ${user1Id} and ${user2Id} that they are now friends`);
+
+		return (reply.code(200).send());
+	}
+	catch (err)
+	{
+		console.error('[NOTIFICATION] Error in sendNowFriends handler:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+//-----------------------------GAME NOTIFICATIONS-----------------------------
+
+export const	sendGameInvite = async (req, reply) =>
+{
+	try
+	{
+		const	{ senderId, senderUsername, targetId, gameId, gameType } = req.body;
+
+		userConnectionManager.sendGameInviteNotification(targetId, senderId, senderUsername, gameId, gameType);
+		console.log(`[NOTIFICATION] Notifying user ${targetId} about ${gameType} game invite from ${senderUsername} (game ID: ${gameId})`);
+	
+		return (reply.code(200).send());
+	}
+	catch (err)
+	{
+		console.error('[NOTIFICATION] Error in sendPongGameInvite handler:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }

@@ -67,10 +67,20 @@ export function	validator(username, password, email)
 		throw (Object.assign(new Error('Password is too similar to username or email.'), { statusCode: 442 }));
 }
 
-export function	formatExpirationDate(date)
+export function	formatDate(date)
 {
-	// Keep the ISO format to preserve timezone information for proper parsing
-	return (date.toISOString());
+	// Convert date to 'YYYY-MM-DD HH:MM:SS' format (sqlite format)
+	//	from js format 'YYYY-MM-DDTHH:MM:SS.sssZ'
+	const	pad = n => String(n).padStart(2, '0');
+
+	return (
+		date.getUTCFullYear() + '-' +
+		pad(date.getUTCMonth() + 1) + '-' +
+		pad(date.getUTCDate()) + ' ' +
+		pad(date.getUTCHours()) + ':' +
+		pad(date.getUTCMinutes()) + ':' +
+		pad(date.getUTCSeconds())
+	);
 }
 
 export function	isTokenExpired(expirationDate)
@@ -166,5 +176,47 @@ export async function	createUserProfileInUsersService(userId, username)
 
 		// Network or other errors
 		throw err;
+	}
+}
+
+export async function	createUserStatsInGames(userId)
+{
+	try
+	{
+		await axios.post(`${process.env.PONG_SERVICE_URL}/create-user-stats`,
+			{ userId: userId },
+			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		);
+
+		await axios.post(`${process.env.TRIS_SERVICE_URL}/create-user-stats`,
+			{ userId: userId },
+			{ headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY } }
+		);
+	}
+	catch (err)
+	{
+		console.error('[AUTH] Error creating user stats in games services: ', err);
+		// throw (err);
+	}
+}
+
+export async function	deleteUserStatsInGames(userId)
+{
+	try
+	{
+		await axios.delete(`${process.env.PONG_SERVICE_URL}/delete-user-stats`, {
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+			data: { userId: userId }
+		});
+
+		await axios.delete(`${process.env.TRIS_SERVICE_URL}/delete-user-stats`, {
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+			data: { userId: userId }
+		});
+	}
+	catch (err)
+	{
+		console.error('[AUTH] Error deleting user stats in games services:', err);
+		throw (err);
 	}
 }

@@ -13,11 +13,11 @@ Your frontend development must use the Tailwind CSS in addition of the Typescrip
 You can create a front-end without using the constraints of this
 module by using the default front-end directives (as specified above
 in the mandatory part). However, this module will only be valid if
-you follow its requirements.	
+you follow its requirements.
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-• Minor module: Use a database for the backend -and more.
+• Minor module: Use a database for the backend and more.
 The designated database for all DB instances in your project is SQLite This choice
 ensure data consistency and compatibility across all project components and may
 be a prerequisite for other modules, such as the backend Framework module.
@@ -216,7 +216,6 @@ by offering content in multiple languages, making it more user-friendly for a di
 international audience.
 
 ---------------------------------------------------------------------------------------------------------------------------------
-
 
 • Major module: Introduce an AI opponent.
 In this major module, the objective is to incorporate an AI player into the game.

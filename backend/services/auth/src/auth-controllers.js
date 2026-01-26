@@ -1,6 +1,15 @@
 import { generateNewTokens, decodeToken, setAuthCookies, clearAuthCookies } from './jwt.js';
 
-import { validator, isTokenExpired, extractUserData, getUserLanguage, createUserProfileInUsersService } from './auth-help.js';
+import {
+	validator,
+	isTokenExpired,
+	extractUserData,
+	getUserLanguage,
+	createUserProfileInUsersService,
+	createUserStatsInGames,
+	deleteUserStatsInGames,
+} from './auth-help.js';
+
 import { sendTwoFactorCode } from './2fa.js';
 
 import bcrypt from 'bcrypt';
@@ -28,9 +37,11 @@ export const	register = async (req, reply) =>
 
 		// Create user in auth database
 		user = await authDb.createUser(email, hashedpassword);
+		// Create user profile in users service
+		await createUserProfileInUsersService(user.id, username)
+		// Create initial stats in games services
+		await createUserStatsInGames(user.id);
 
-		await createUserProfileInUsersService(user.id, username);
- 
 		// generate access and refresh tokens
 		const	newTokens = await generateNewTokens(user, authDb);
 		// Set tokens as HTTP-only cookies
@@ -126,11 +137,11 @@ export const	login = async (req, reply) =>
 
 		return (reply.code(200).send({
 			message: 'Login successful',
-			tfaRequired: false,
 			user:
 			{
 				id: user.id,
-				email: user.email
+				email: user.email,
+				tfaEnabled: user.tfa_enabled,
 			}
 		}));
 	}
@@ -381,6 +392,8 @@ export const	deleteAccount = async (req, reply) =>
 			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
 			data: { userId: userData.id }
 		});
+
+		await deleteUserStatsInGames(userData.id);
 
 		// Delete user from auth database
 		await authDb.deleteUserById(userData.id);

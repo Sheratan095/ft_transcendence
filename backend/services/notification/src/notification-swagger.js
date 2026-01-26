@@ -52,7 +52,8 @@ Reponse:
 {
   "event": "friend.online",
   "data": {
-	"userId": "123"
+	"userId": "123",
+	"username": "john_doe"
   }
 }
 \`\`\`
@@ -62,7 +63,8 @@ Reponse:
 {
   "event": "friend.offline",
   "data": {
-	"userId": "123"
+	"userId": "123",
+	"username": "john_doe"
   }
 }
 \`\`\`
@@ -78,13 +80,24 @@ Reponse:
 }
 \`\`\`
 
-- **friend.accept** - Sent when someone accepts your friend request.
+- **friend.accept** - Sent when someone accepts your friend request. [Deprecated => use friend.nowFriends]
 \`\`\`json
 {
   "event": "friend.accept",
   "data": {
 	"from": "jane_smith",
 	"accepterId": "456"
+  }
+}
+\`\`\`
+
+- **friend.nowFriends** - Notify the user he is now friends with another user.
+\`\`\`json
+{
+  "event": "friend.nowFriends",
+  "data": {
+	"userId": "456",
+	"username": "jane_smith"
   }
 }
 \`\`\`
@@ -96,7 +109,20 @@ Reponse:
   "data": {
 	"from": "jane_smith",
 	"senderId": "456",
-	"chatId": "chat789"
+	"chatId": "chat789",
+  }
+}
+\`\`\`
+
+- **game.invite** - Notify the user he has been invited to a game.
+\`\`\`json
+{
+  "event": "game.invite",
+  "data": {
+	"gameType": "pong/tris",
+	"from": "jane_smith",
+	"senderId": "456",
+	"gameId": "game123"
   }
 }
 \`\`\`

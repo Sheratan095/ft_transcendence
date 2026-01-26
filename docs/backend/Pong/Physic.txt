@@ -1,0 +1,43 @@
+
+la pallina ha:
+x, y, vx, vy, velocità e diametro
+
+la racchetta ha:
+x, y, altezza, velocità
+
+
+formula per calcolare i componenti data velocità, angolo in gradi e diretion (destra (-1) / sinitra (+1))
+    theta = (angolo in gradi * π ) / 180 così trasformo l'angolo in radianti
+
+    (uso cos e sin perchè, dato che la velocità non deve variare, quindi il modulo del vettore delle velocià deve rimanere costante)
+    nuova vx = direzione * velocità * cos(theta)
+    nuova vy = velocità * sin (theta)
+
+
+all'inizio la palla parte al centro del campo con angolo e direzione casuale: 
+    angolo casuale in gradi = {[(random tra 0 e 1)] * 120 } - 60 per generarlo tra -60 e +60
+    direzione casuale = (-1 / +1)
+
+    calcoloComponenti(velocità iniziale (0.5), angolo in gradi, direzion)
+
+
+quando la palla colpisce un bordo (sotto o sopra):
+    vy = -vy
+    e vx rimane costante
+
+quando la palla colpisce una "racchetta" (paddle)
+    direzione sarà -1 per la racchetta di destra (la palla dovrà rimbalzare verso sinitra) e +1 per quella di sinistra
+    velocità della palla *= fattore di velocità (incrementa la velocità più velocemente, per ora è 1.1)
+    controlla che le velocità non superi vMax che è 2.0
+
+    il punto di impatto sulla racchetta è tra -1 e 1 in cui 0 è il centro
+    Δy normalizzata = (y palla - y paddle) / (h paddle / 2)
+    Δy clampata = clamp(Δy normalizzata, -1, 1) (forza a stare tra -1 e 1)
+    angolo di rimbalzo = Δy clampata * angolo massimo di rimbalzo (60° per evitare che la palla impenni vericalmente)
+
+    calcoloComponenti(nuova velocità, angolo di rimbalzo in gradi, direzione)
+
+
+60 volte al secondo ricalcola le nuova posizione della pallina così:
+    xPalla += VxPalla * Δt (tempo passato dall'aggiornamento precedente)
+    yPalla += VyPalla * Δt

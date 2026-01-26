@@ -177,16 +177,22 @@ export const	uploadAvatar = async (req, reply) =>
 		// Get the uploaded file
 		const	data = await req.file();
 		if (!data)
+		{
+			console.log('[USERS] UploadAvatar error: No file uploaded');
 			return (reply.code(400).send({ error: 'No file uploaded' }));
+		}
 
 		// Validate file type (images only)
 		const	allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 		if (!allowedMimeTypes.includes(data.mimetype))
+		{
+			console.log('[USERS] UploadAvatar error: Invalid file type');
 			return (reply.code(400).send({ error: 'Only image files are allowed (jpeg, png, gif, webp)' }));
+		}
 
-		// Generate unique filename with extension
+		// Generate unique filename with extension with user ID
 		const	fileExtension = data.filename.split('.').pop();
-		const	filename = `${user.id}_${Date.now()}.${fileExtension}`;
+		const	filename = `${user.id}.${fileExtension}`;
 
 		// Define paths
 		const	avatarsDir = path.join(__dirname, '../data/avatars');
@@ -271,6 +277,29 @@ export const	deleteUser = async (req, reply) =>
 		const	userId = req.body.userId;
 
 		deleteUserRelationships(req, reply);
+
+		// Remove avatar file if exists
+		const	user = await usersDb.getUserById(userId);
+		if (user && user.avatar_url)
+		{
+			const	avatarsDir = path.join(__dirname, '../data/avatars');
+			const	avatarFilename = path.basename(user.avatar_url);
+			const	avatarFilePath = path.join(avatarsDir, avatarFilename);
+
+			if (existsSync(avatarFilePath))
+			{
+				try
+				{
+					await unlink(avatarFilePath);
+					console.log(`Deleted avatar for user ${userId}: ${avatarFilename}`);
+				}
+				catch (unlinkErr)
+				{
+					console.log(`Failed to delete avatar for user ${userId}: ${unlinkErr.message}`);
+					// Continue even if deletion fails
+				}
+			}
+		}
 
 		// Delete user from database
 		await usersDb.deleteUserById(userId);

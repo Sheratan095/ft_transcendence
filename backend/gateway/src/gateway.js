@@ -2,8 +2,8 @@ import { exit } from 'process';
 
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'FRONTEND_URL', 'CHAT_SERVICE_URL', 
-'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'DOC_USERNAME', 'DOC_PASSWORD', 'HTTPS_CERTS_PATH', 'USE_HTTPS', 'RATE_LIMIT_ACTIVE']);
+checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'CHAT_SERVICE_URL', 
+'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'FRONTEND_URL', 'PORT', 'DOC_USERNAME', 'DOC_PASSWORD', 'USE_HTTPS', 'HTTPS_CERTS_PATH', 'RATE_LIMIT_ACTIVE']);
 
 import Fastify from 'fastify'
 import { readFileSync } from 'fs';
@@ -84,22 +84,50 @@ fastify.register(helmet,
 			scriptSrc: ["'self'"],
 			objectSrc: ["'none'"],
 			baseUri: ["'self'"],
+			imgSrc: ["'self'", "data:", "blob:"], // Allow images from same origin, data URLs, and blob URLs
 		},
 	},
 });
 
-// Register static file serving for avatars (proxy to users service)
+// Register static file serving for avatars (proxy to users service with auth)
 import proxy from '@fastify/http-proxy';
-await fastify.register(proxy, {
-  upstream: process.env.USERS_SERVICE_URL,
-  prefix: '/avatars',
-  rewritePrefix: '/avatars',
+await fastify.register(proxy,
+{
+	upstream: process.env.USERS_SERVICE_URL,
+	prefix: '/avatars',
+	rewritePrefix: '/avatars',
+	http2: false, // Disable HTTP/2 for better compatibility
+
+	// Add internal API key header before proxying
+	preHandler: async (request, reply) =>
+	{
+		request.headers['x-internal-api-key'] = process.env.INTERNAL_API_KEY;
+	},
+
+	onError: (reply, { error }) =>
+	{
+		console.error('[GATEWAY] Avatar proxy error:', error.message);
+		reply.code(503).send({ error: 'Avatar service temporarily unavailable' });
+	}
+});
+
+// Add a hook to set CORS headers for avatar responses
+fastify.addHook('onSend', async (request, reply, payload) =>
+{
+	if (request.url.startsWith('/avatars/'))
+	{
+		const	origin = request.headers.origin;
+		reply.header('Access-Control-Allow-Origin', origin || '*');
+		reply.header('Access-Control-Allow-Credentials', 'true');
+		reply.header('Cross-Origin-Resource-Policy', 'cross-origin');
+		reply.header('Cache-Control', 'public, max-age=3600');
+	}
+
+	return (payload);
 });
 
 // Register rate limiting plugin (global: false means we'll apply it selectively)
-await fastify.register(import('@fastify/rate-limit'), {
-  global: false
-});
+await fastify.register(import('@fastify/rate-limit'), { global: false });
 
 import cookie from "@fastify/cookie";
 fastify.register(cookie, {
@@ -116,8 +144,8 @@ import SwaggerAggregator from './swagger/swagger-aggregator.js';
 const	swaggerAggregator = new SwaggerAggregator();
 await swaggerAggregator.register(fastify);
 
-
-import { handleSocketUpgrade } from './routes/webSocket-routes.js'
+// Import ws handlers
+import { handleSocketUpgrade } from './ws-handlers.js'
 
 import {
 	login,
@@ -154,15 +182,30 @@ import {
 	blockUser,
 	unblockUser,
 	cancelFriendRequest,
-	removeFriend
+	removeFriend,
+	getUsersRelationship
 } from './routes/relationships-routes.js'
 
 import {
 	getAllChats,
 	getMessages,
 	addUserToChat,
-	createGroupChat
+	leaveGroupChat,
+	createGroupChat,
+	createPrivateChat
 } from './routes/chat-routes.js'
+
+import {
+	getUserStatsRoute,
+	getUserMatchHistoryRoute
+} from './routes/tris-routes.js'
+
+import {
+	getUserStats as getUserStatsHandler,
+	getUserMatchHistory as getUserMatchHistoryHandler,
+	getAllTournaments as getAllTournamentsHandler,
+	createTournament as createTournamentHandler,
+} from './routes/pong-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
@@ -245,12 +288,17 @@ await fastify.register(async function (fastify)
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsers })
 	fastify.get('/users/user', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUser })
+
+	// TRIS routes
+	fastify.get('/tris/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsRoute })
+	fastify.get('/tris/history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryRoute })
 	
 	// RELATIONSHIPS routes
 	fastify.get('/users/relationships', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserRelationships })
 	fastify.get('/users/relationships/friends', { schema: { hide: true }, preHandler: authenticateJwt, handler: getFriends })
 	fastify.get('/users/relationships/requests/incoming', { schema: { hide: true }, preHandler: authenticateJwt, handler: getIncomingRequests })
 	fastify.get('/users/relationships/requests/outgoing', { schema: { hide: true }, preHandler: authenticateJwt, handler: getOutgoingRequests })
+	fastify.get('/users/relationships/getUsersRelationship', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsersRelationship })
 	fastify.post('/users/relationships/request', { schema: { hide: true }, preHandler: authenticateJwt, handler: sendFriendRequest })
 	fastify.put('/users/relationships/accept', { schema: { hide: true }, preHandler: authenticateJwt, handler: acceptFriendRequest })
 	fastify.put('/users/relationships/reject', { schema: { hide: true }, preHandler: authenticateJwt, handler: rejectFriendRequest })
@@ -263,10 +311,15 @@ await fastify.register(async function (fastify)
 	fastify.get('/chat/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllChats })
 	fastify.get('/chat/messages', { schema: { hide: true }, preHandler: authenticateJwt, handler: getMessages })
 	fastify.post('/chat/add-user', { schema: { hide: true }, preHandler: authenticateJwt, handler: addUserToChat })
+	fastify.post('/chat/leave-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: leaveGroupChat })
 	fastify.post('/chat/create-group-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createGroupChat })
+	fastify.post('/chat/start-private-chat', { schema: { hide: true }, preHandler: authenticateJwt, handler: createPrivateChat })
 
-	// TRIS routes
-	fastify.get('/tris/init', {schema: {hide:true}, preHandler: authenticateJwt, handler: getTrisTest})
+	// PONG routes
+	fastify.get('/pong/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsHandler })
+	fastify.get('/pong/match-history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryHandler })
+	fastify.get('/pong/get-all-tournaments', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllTournamentsHandler })
+	fastify.post('/pong/create-tournament', { schema: { hide: true }, preHandler: authenticateJwt, handler: createTournamentHandler })
 });
 
 // SEARCH route – tighter rate limit

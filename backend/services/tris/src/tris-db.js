@@ -95,6 +95,107 @@ export class	TrisDatabase
 		return (id);
 	}
 
+	//-----------------------------MATCHES QUERIES---------------------------------//
+
+	// When a user is deleted, his name musn't appear in past matches, it will be "Deleted User" or something like that
+	async	getMatchesForUser(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE player_x_id = ? OR player_o_id = ?
+		`;
+		const	matches = await this.db.all(query, [userId, userId]);
+
+		return (matches);
+	}
+
+	async	saveMatch(playerXId, playerOId, winnerId)
+	{
+		const	matchId = await this.#generateUUID();
+		const	query = `
+			INSERT INTO matches (id, player_x_id, player_o_id, winner_id)
+			VALUES (?, ?, ?, ?)
+		`;
+
+		await this.db.run(query, [matchId, playerXId, playerOId, winnerId]);
+		return (matchId);
+	}
+
+	async	getMatchById(matchId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE id = ?
+		`;
+		const	match = await this.db.get(query, [matchId]);
+
+		return (match);
+	}
+
+	async	getMatchesForUser(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM matches
+			WHERE player_x_id = ? OR player_o_id = ?
+		`;
+		const	matches = await this.db.all(query, [userId, userId]);
+
+		return (matches);
+	}
+
+	//-----------------------------USER STATS QUERIES---------------------------------//
+
+	// Called by auth service when a new user is created
+	async	createUserStats(userId)
+	{
+		const	query = `
+			INSERT INTO user_stats (user_id)
+			VALUES (?)
+		`;
+
+		await this.db.run(query, [userId]);
+	}
+
+	// Called by auth service when a user is deleted (GDPR compliance)
+	async	deleteUserStats(userId)
+	{
+		const	query = `
+			DELETE FROM user_stats
+			WHERE user_id = ?
+		`;
+
+		await this.db.run(query, [userId]);
+	}
+
+	// TEXT ELO is added in controller level beacause it's a business logic not a db logic
+	async	getUserStats(userId)
+	{
+		const	query = `
+			SELECT *
+			FROM user_stats
+			WHERE user_id = ?
+		`;
+		const	stats = await this.db.get(query, [userId]);
+
+		return (stats);
+	}
+
+	async	updateUserStats(userId, winsDelta = 0, lossesDelta = 0)
+	{
+		const	query = `
+			UPDATE user_stats
+			SET
+				wins = wins + ?,
+				losses = losses + ?
+			WHERE user_id = ?
+		`;
+
+		await this.db.run(query, [winsDelta, lossesDelta, userId]);
+	}
+
 	async	#close()
 	{
 		if (this.db)

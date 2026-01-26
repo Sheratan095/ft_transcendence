@@ -31,6 +31,22 @@ export function	checkEnvVariables(requiredEnvVars)
 		process.exit(1);
 }
 
+export function	formatDate(date)
+{
+	// Convert date to 'YYYY-MM-DD HH:MM:SS' format (sqlite format)
+	//	from 
+	const	pad = n => String(n).padStart(2, '0');
+
+	return (
+		date.getUTCFullYear() + '-' +
+		pad(date.getUTCMonth() + 1) + '-' +
+		pad(date.getUTCDate()) + ' ' +
+		pad(date.getUTCHours()) + ':' +
+		pad(date.getUTCMinutes()) + ':' +
+		pad(date.getUTCSeconds())
+	);
+}
+
 // Helper function to extract user data from gateway headers
 // This function parses the user data passed from the gateway after JWT authentication
 export function	extractUserData(request)
@@ -106,19 +122,55 @@ export async function	checkBlock(userA, userB)
 	}
 }
 
+export async function	getRelationshipByIds(userId, otherUserId)
+{
+	try
+	{
+		// Build user data header for the internal request
+		const	userDataHeader = JSON.stringify({ id: userId });
+
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/relationships/getUsersRelationship?userId=${otherUserId}`,
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+				'x-user-data': userDataHeader
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to check friend status between ${userId} and ${otherUserId}: ${response.statusText}`);
+			return (null);
+		}
+
+		const	text = await response.text();
+		
+		const	data = JSON.parse(text);
+
+		return (data);
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error checking friend status:', err.message);
+		return (null);
+	}
+}
+
 // Helper to notify message senders about status updates (delivered/read)
-export async function	notifyMessageStatusUpdates(roomId, updatedTime, chatDb)
+export async function	notifyMessageStatusUpdates(chatId, updatedTime, chatDb)
 {
 	try
 	{
 		// Get all messages just updated at the given time (when they were marked delivered/read)
-		const	justUpdatedMessages = await chatDb.getMessagesUpdatedAt(roomId, updatedTime);
+		const	justUpdatedMessages = await chatDb.getMessagesUpdatedAt(chatId, updatedTime);
 
 		for (const { message_id, sender_id } of justUpdatedMessages)
 		{
 			// Notify sender about the overall status of the message
 			const	overallStatus = await chatDb.getOverallMessageStatus(message_id);
-			chatConnectionManager.notifyMessageStatusUpdate(sender_id, roomId, message_id, overallStatus);
+			chatConnectionManager.notifyMessageStatusUpdate(sender_id, chatId, message_id, overallStatus);
 		}
 	}
 	catch (err)
@@ -131,7 +183,7 @@ export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, 
 {
 	try
 	{
-		const	response = await fetch(`${process.env.NOTIFICATION_SERVICE_URL}/notification/send-chat-user-added`, {
+		const	response = await fetch(`${process.env.NOTIFICATION_SERVICE_URL}/send-chat-user-added`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -144,10 +196,13 @@ export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, 
 				chatId: chatId,
 			}),
 		});
+
+		return (response.ok);
 	}
 	catch (err)
 	{
 		console.error(`[CHAT] Error notifying user ${toUserId} about being added to chat ${chatId}:`, err.message);
+		return (false);
 	}
 }
 

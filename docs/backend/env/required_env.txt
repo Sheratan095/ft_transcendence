@@ -6,7 +6,7 @@ gateway:
     CHAT_SERVICE_URL=http://localhost:3004
     PONG_SERVICE_URL=http://localhost:3005
     TRIS_SERVICE_URL=http://localhost:3006
-    FRONTEND_URL=http://localhost:443
+    FRONTEND_URL=http://localhost:4000
     PORT=3000
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
@@ -19,12 +19,14 @@ services/auth:
     ACCESS_TOKEN_SECRET=your_access_token_secret
     ACCESS_TOKEN_EXPIRATION=15m
     REFRESH_TOKEN_SECRET=your_refresh_token_secret
-    PORT=3001
     REFRESH_TOKEN_EXPIRATION_DAYS=7
+    PORT=3001
     HASH_SALT_ROUNDS=10
     OTP_EXPIRATION_MINUTES=5
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3003
+    PONG_SERVICE_URL=http://localhost:3005
+    TRIS_SERVICE_URL=http://localhost:3006
 
 services/users:
     INTERNAL_API_KEY=1234
@@ -39,18 +41,49 @@ services/notification:
     SMTP_PORT=587
     SMTP_USER=43skhool@gmail.com
     SMTP_PASS=udkh apxb ltsl iikp
-    USERS_SERVICE_URL=http://localhost:3002\
+    USERS_SERVICE_URL=http://localhost:3002
 
 services/chat:
     INTERNAL_API_KEY=1234
     PORT=3004
     USERS_SERVICE_URL=http://localhost:3002
-    NOTIFICATION_SERVICE_URL=http://localhost:3004
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
 
 services/pong:
     INTERNAL_API_KEY=1234
     PORT=3005
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
+    USERS_SERVICE_URL=http://localhost:3002
+    TRIS_SERVICE_URL=http://localhost:3006
+    PONG_WIN_SCORE = 10
+    READY_COOLDOWN_MS = 30000
+    ROUND_TRANSITION_COOLDOWN_MS = 10000
+    MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
+    WINNING_SCORE=11
+    EARNED_WIN_POINTS=100 # Points awarded for winning a game
+    LOST_LOSS_POINTS=50 # Points lost for losing a game
+    TOURNAMENT_EARNED_WIN_POINTS=200 # Points awarded for winning a tournament
+    PLACEHOLDER_DELETED_USERNAMES=Anonymous player
+    COOLDOWN_BETWEEN_POINTS_MS=3000 # Time between points in milliseconds
+    PADDLE_HEIGHT=0.3 # Height of the paddle respective to the game area (0.5 = half the game area)
+    PADDLE_SPEED=1.5 # Speed of the paddle per SECOND (1.5 = 150% of the game area per second)
+    MAX_BOUNCE_ANGLE=60 # Maximum angle (in degrees) for ball deflection upon paddle hit
+    BALL_RADIUS=0.015 # Radius of the ball respective to the game area (0.02 = 2% of the game area)
+    BALL_INITIAL_SPEED=0.5 # Initial ball speed per SECOND (0.5 = 50% of the game area per second)
+    BALL_SPEED_FACTOR=1.1 # Factor by which the ball speed increases after each paddle hit
+    BALL_MAX_SPEED=2.0 # Maximum ball speed per SECOND to prevent infinite acceleration
+    MIN_PLAYERS_FOR_TOURNAMENT_START=4
 
 services/tris:
     INTERNAL_API_KEY=1234
     PORT=3006
+    NOTIFICATION_SERVICE_URL=http://localhost:3003
+    USERS_SERVICE_URL=http://localhost:3002
+    PONG_SERVICE_URL=http://localhost:3005
+    MAX_MARKS_PER_PLAYER=3
+    READY_COOLDOWN_MS = 30000
+    MOVE_TIMEOUT_MS = 60000
+    MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
+    EARNED_WIN_POINTS=100 # Points awarded for winning a game
+    LOST_LOSS_POINTS=50 # Points lost for losing a game
+    PLACEHOLDER_DELETED_USERNAMES=Anonymous player

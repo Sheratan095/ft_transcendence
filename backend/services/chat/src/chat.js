@@ -26,11 +26,11 @@ const	start = async () =>
 	try
 	{
 		// Initialize database
-		chatDatabase = new ChatDatabase()
-		await chatDatabase.initialize()
+		chatDatabase = new ChatDatabase();
+		await chatDatabase.initialize();
 
 		// Make database available to all routes
-		fastify.decorate('chatDb', chatDatabase)
+		fastify.decorate('chatDb', chatDatabase);
 
 		// Setup routes before starting the server
 		fastify.register(chatRoutes);

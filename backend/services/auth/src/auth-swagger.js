@@ -44,7 +44,7 @@ export async function setupSwagger(fastify) {
 	// Manually register the JSON endpoint since we're not using swagger-ui
 	fastify.get('/docs/json', docsRouteOptions, async (request, reply) =>
 	{
-		return fastify.swagger();
+		return (fastify.swagger());
 	});
 
 	console.log(`[AUTH] Service Swagger JSON spec available at http://localhost:${process.env.PORT}/docs/json`);

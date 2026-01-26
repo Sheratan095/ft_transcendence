@@ -1,3 +1,5 @@
+PRAGMA foreign_keys = ON;
+
 -- ------------------------------------------------------------
 -- CHATS
 -- ------------------------------------------------------------
@@ -6,7 +8,8 @@ CREATE TABLE IF NOT EXISTS chats
 	id			TEXT PRIMARY KEY,
 	name		TEXT NOT NULL,
 	chat_type	TEXT NOT NULL CHECK(chat_type IN ('dm', 'group')),
-	created_at	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+	created_at	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	avatar_url	TEXT -- Future implementation
 );
 
 -- ------------------------------------------------------------
@@ -32,8 +35,10 @@ CREATE TABLE IF NOT EXISTS messages
 	chat_id			TEXT NOT NULL,
 	sender_id		TEXT NOT NULL,
 	content			TEXT NOT NULL,
+	type			TEXT NOT NULL CHECK(type IN ('text', 'user_join', 'system', 'user_leave', 'chat_created')),
 	created_at		DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
+	PRIMARY KEY (id),
 	FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
 	-- FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE -> auth/auth_accounts
 );

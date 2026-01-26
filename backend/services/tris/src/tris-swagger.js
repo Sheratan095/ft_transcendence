@@ -33,7 +33,209 @@ Reponse:
 }
 \`\`\`
 
+- **tris.createCustomGame** - Create a custom game with another player
+\`\`\`json
+{
+  "event": "tris.playerJoinedCustomGame",
+  "data": {
+    "otherId": "userId-of-invited-player"
+  }
+}
+
+Response:
+{
+  "event": "tris.customGameCreated",
+  "data": {
+	"gameId": "some-game-id",
+	"otherUsername": "jack"
+  }
+}
+\`\`\`
+
+- **tris.joinCustomGame** - Join a custom game
+\`\`\`json
+{
+  "event": "tris.joinCustomGame",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+
+Response:
+{
+  "event": "tris.customGameJoinSuccess",
+  "data": {
+	"gameId": "some-game-id",
+	"otherUsername": "jack"
+  }
+}
+\`\`\`
+
+- **tris.cancelCustomGame** - Cancel a custom game
+\`\`\`json
+{
+  "event": "tris.cancelCustomGame",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.userQuit** - Quit a game
+\`\`\`json
+{
+  "event": "tris.userQuit",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.userReady** - Set user ready status
+\`\`\`json
+{
+  "event": "tris.userReady",
+  "data": {
+	"gameId": "some-game-id",
+	"readyStatus": true
+  }
+}
+\`\`\`
+
+- **tris.joinMatchmaking** - Join the matchmaking queue
+\`\`\`json
+{
+  "event": "tris.joinMatchmaking",
+  "data": {}
+}
+\`\`\`
+
+- **tris.leaveMatchmaking** - Leave the matchmaking queue
+\`\`\`json
+{
+  "event": "tris.leaveMatchmaking",
+  "data": {}
+}
+\`\`\`
+
+- **tris.makeMove** - Make a move in the game
+\`\`\`json
+{
+  "event": "tris.makeMove",
+  "data": {
+	"gameId": "some-game-id",
+	"position": 0-8 0-8 for a 3x3 grid
+  }
+}
+
+Reponse:
+{
+  "event": "invalidMove",
+  "data": {
+	"gameId": "some-game-id",
+    "message": "Invalid move: Position already taken" / "Not your turn" / "Invalid move position"
+  }
+}
+\`\`\`
+
+---
+
 **SERVER → CLIENT EVENTS**
+
+- **tris.playerJoinedCustomGame** - Notification when a player joins a custom game
+\`\`\`json
+{
+  "event": "tris.playerJoinedCustomGame",
+  "data": {
+    "gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.playerReadyStatus** - Notification of a player's ready status
+\`\`\`json
+{
+  "event": "tris.playerReadyStatus",
+  "data": {
+	"gameId": "some-game-id",
+	"readyStatus": true
+  }
+}
+\`\`\`
+
+- **tris.customGameCanceled** - Notification that the game has been canceled
+\`\`\`json
+{
+  "event": "tris.customGameCanceled",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.gameEnded** - Notification that the game has ended
+\`\`\`json
+{
+  "event": "tris.gameEnded",
+  "data": {
+	"gameId": "some-game-id",
+	"winner": "userId-of-winner", // NOT DRAW because it's infinite tris
+	"quit": true/false,
+	"timedOut": true/false // in case the game ended due to move timeout
+  }
+}
+\`\`\`
+
+- **tris.gameStarted** - Notification that the game has started
+\`\`\`json
+{
+  "event": "tris.gameStarted",
+  "data": {
+	"gameId": "some-game-id",
+	"yourSymbol": "X", // or "O"
+	"opponentUsername": "jack",
+	"yourTurn": true // or false
+  }
+}
+\`\`\`
+
+- **tris.moveMade** - Notification that a move has been made
+\`\`\`json
+{
+  "event": "tris.moveMade",
+  "data": {
+	"gameId": "some-game-id",
+	"moveMakerId": "userId-of-player-who-made-move",
+	"symbol": "X", // or "O"
+	"position": 0-8, // position of the move made
+	"removedPosition": 0-8 // position of the removed move in infinite tris, null if not applicable
+  }
+}
+\`\`\`
+
+- **tris.playerQuitCustomGameInLobby** - Notification that the other player has quit the custom game lobby
+\`\`\`json
+{
+  "event": "tris.playerQuitCustomGameInLobby",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
+- **tris.matchedInRandomGame** - Notification that the player has been matched in a random game
+\`\`\`json
+{
+  "event": "tris.matchedInRandomGame",
+  "data": {
+	"gameId": "some-game-id",
+	"yourSymbol": "X", // or "O"
+	"opponentUsername": "jack",
+	"yourTurn": true // or false,
+	"coolDownMs": 30000 // cooldown time in ms
+  }
+}
+\`\`\`
 
 - **error** - Error message
 \`\`\`json
@@ -108,7 +310,7 @@ export async function	setupSwagger(fastify)
 	// Manually register the JSON endpoint since we're not using swagger-ui
 	fastify.get('/docs/json', docsRouteOptions, async (request, reply) =>
 	{
-		return fastify.swagger();
+		return (fastify.swagger());
 	});
 
 	// WebSocket documentation endpoint (for Swagger only - doesn't actually work as HTTP GET)

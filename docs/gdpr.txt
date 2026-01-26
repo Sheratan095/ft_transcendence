@@ -26,3 +26,152 @@ including its principles, objectives, and user rights. It also offers additional
 If you are unfamiliar with the GDPR, please take the time to visit the provided link
 and familiarize yourself with the regulations before proceeding with this project.
 https://commission.europa.eu/law/law-topic/data-protection/data-protection-eu_en
+
+================================================================================
+TODO LIST - GDPR COMPLIANCE IMPLEMENTATION
+================================================================================
+
+1. USER ANONYMIZATION
+   [X] Create endpoint for user anonymization request (auth/delete-account)
+   [X] Implement anonymization process that: => remove entirerly the account
+       - Replaces username with "Anonymous User [ID]" or similar
+       - Removes email address
+       - Removes avatar/profile picture
+       - Keeps game history but anonymizes user identity
+       - Preserves game statistics for system integrity
+   [ ] Add database migration for anonymized user flag
+   [X] Test anonymization on all user-related tables (users, game_history, etc.)
+   [ ] Removed chats
+   [X] Ensure anonymized users cannot log in anymore
+   [X] Add UI button/option for users to request anonymization
+
+2. LOCAL DATA MANAGEMENT
+   [ ] Create "My Data" page/section in user profile
+   [ ] Implement data export functionality:
+       - User profile information
+       - Game history
+       - Chat messages
+       - Friend relationships
+       - All stored personal data
+   [ ] Provide data in machine-readable format (JSON/CSV)
+   [ ] Add ability to view all collected data
+   [ ] Add ability to edit personal information:
+       - Username
+       - Email
+       - Profile settings
+   [ ] Display what data is collected and why
+
+3. ACCOUNT DELETION
+   [X] Create endpoint for account deletion request
+   [ ] Implement soft delete vs hard delete options
+   [ ] Add confirmation step (email verification or password re-entry)
+   [X] Implement cascading deletion:
+       - Remove user profile
+       - Delete or anonymize game history
+       - Remove chat messages or anonymize
+       - Delete friend relationships
+       - Remove all user sessions/tokens
+   [ ] Add grace period (e.g., 30 days) before permanent deletion
+   [ ] Send confirmation email when account is deleted
+   [X] Add UI for account deletion in settings
+   [X] Test deletion process thoroughly
+
+4. DATA PRIVACY RIGHTS & TRANSPARENCY
+   [ ] Create Privacy Policy page with:
+       - What data we collect
+       - Why we collect it
+       - How long we store it
+       - Who has access to it
+       - User rights under GDPR
+   [ ] Add Terms of Service page
+   [ ] Create "Data Processing Agreement" if applicable
+   [ ] Add cookie consent banner/notice
+   [ ] Implement consent management:
+       - Track user consent for data processing
+       - Allow users to withdraw consent
+       - Record consent timestamps
+   [ ] Add clear opt-in/opt-out options for:
+       - Marketing communications (if any)
+       - Data analytics
+       - Third-party data sharing
+   [ ] Create "Contact Us" or "Data Protection Officer" contact method
+
+5. TECHNICAL IMPLEMENTATION
+   [ ] Add logging for all GDPR-related actions
+   [ ] Implement audit trail for:
+       - Anonymization requests
+       - Data exports
+       - Account deletions
+       - Consent changes
+   [ ] Encrypt sensitive personal data at rest
+   [ ] Ensure HTTPS for all data transmission
+   [ ] Add rate limiting for data export to prevent abuse
+   [ ] Implement secure authentication for GDPR operations
+   [ ] Add admin panel to handle GDPR requests
+   [ ] Create automated cleanup for expired data
+
+6. DOCUMENTATION & COMPLIANCE
+   [ ] Document data retention policies
+   [ ] Create user-facing GDPR rights documentation
+   [ ] Add GDPR section to API documentation
+   [ ] Create internal procedures for handling data breaches
+   [ ] Define data breach notification process
+   [ ] Document third-party data processors (if any)
+   [ ] Review all external services for GDPR compliance
+
+7. TESTING & VALIDATION
+   [ ] Test anonymization process end-to-end
+   [ ] Test data export for completeness
+   [ ] Test account deletion process
+   [ ] Verify data is actually removed from backups
+   [ ] Test grace period functionality
+   [ ] Security audit of GDPR features
+   [ ] Load test GDPR endpoints
+
+8. USER INTERFACE
+   [ ] Add "Privacy Settings" section to user profile
+   [ ] Create clear, accessible UI for:
+       - Requesting data export
+       - Requesting anonymization
+       - Deleting account
+       - Managing consent
+   [ ] Add help text/tooltips explaining each option
+   [ ] Ensure accessibility (screen readers, keyboard navigation)
+   [ ] Test on mobile devices
+
+9. NOTIFICATIONS & COMMUNICATION
+   [ ] Email confirmation for anonymization requests
+   [ ] Email confirmation for account deletion
+   [ ] Email with exported data (or download link)
+   [ ] Notification about data retention periods
+   [ ] Privacy policy update notifications
+
+10. LEGAL & COMPLIANCE REVIEW
+    [ ] Have privacy policy reviewed by legal counsel
+    [ ] Ensure compliance with GDPR Articles 15-22
+    [ ] Verify "Right to be Forgotten" implementation
+    [ ] Verify "Right to Data Portability" implementation
+    [ ] Verify "Right to Rectification" implementation
+    [ ] Document compliance measures
+
+================================================================================
+PRIORITY LEVELS
+================================================================================
+HIGH PRIORITY (Essential for GDPR compliance):
+- Account deletion functionality
+- Data export functionality
+- Privacy policy page
+- Consent management
+
+MEDIUM PRIORITY:
+- Anonymization feature
+- Audit logging
+- Grace period for deletion
+- Data retention policies
+
+LOW PRIORITY (Nice to have):
+- Advanced consent management
+- Automated data cleanup
+- Admin panel for GDPR requests
+
+================================================================================

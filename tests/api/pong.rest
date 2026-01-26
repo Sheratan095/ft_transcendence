@@ -1,0 +1,16 @@
+### Get user stats
+GET https://localhost:3000/pong/stats?id=2
+
+### Get user match history
+GET https://localhost:3000/pong/match-history?id=1
+
+### Create a tournament
+POST https://localhost:3000/pong/create-tournament
+Content-Type: application/json
+
+{
+  "name": "name"
+}
+
+### Get all tournaments
+GET https://localhost:3000/pong/get-all-tournaments
