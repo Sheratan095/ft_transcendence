@@ -3,8 +3,12 @@ services:
     build:
       context: ./backend/services/auth
     container_name: auth
+    env_file:
+      - ./backend/services/auth/.env
     expose:
       - 3001
+    volumes:
+      - ./backend/data/auth:/usr/src/app/data
     networks:
       - trascendence
 
@@ -12,8 +16,12 @@ services:
     build:
       context: ./backend/services/chat
     container_name: chat
+    env_file:
+      - ./backend/services/chat/.env
     expose:
       - 3002
+    volumes:
+      - ./backend/data/chat:/usr/src/app/data
     networks:
       - trascendence
 
@@ -21,8 +29,12 @@ services:
     build:
       context: ./backend/services/notification
     container_name: notification
+    env_file:
+      - ./backend/services/notification/.env
     expose:
       - 3003
+    volumes:
+      - ./backend/data/notification:/usr/src/app/data
     networks:
       - trascendence
 
@@ -30,8 +42,12 @@ services:
     build:
       context: ./backend/services/pong
     container_name: pong
+    env_file:
+      - ./backend/services/pong/.env
     expose:
       - 3004
+    volumes:
+      - ./backend/data/pong:/usr/src/app/data
     networks:
       - trascendence
 
@@ -39,8 +55,12 @@ services:
     build:
       context: ./backend/services/tris
     container_name: tris
+    env_file:
+      - ./backend/services/tris/.env
     expose:
       - 3005
+    volumes:
+      - ./backend/data/tris:/usr/src/app/data
     networks:
       - trascendence
     
@@ -48,8 +68,12 @@ services:
     build:
       context: ./backend/services/users
     container_name: users
+    env_file:
+      - ./backend/services/users/.env
     expose:
       - 3006
+    volumes:
+      - ./backend/data/users:/usr/src/app/data
     networks:
       - trascendence
 
@@ -59,6 +83,10 @@ services:
     container_name: gateway
     ports:
       - "3000:3000"
+    env_file:
+      - ./backend/gateway/.env
+    volumes:
+      - ./certs:/usr/src/certs/certs:ro
     depends_on:
       - auth
       - chat
@@ -72,9 +100,13 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        VITE_API_URL: "http://localhost:3000"
+    environment:
+      - VITE_API_URL=http://localhost:3000
     container_name: frontend
     ports:
-      - 8000:3000
+      - 4000:3000
     depends_on:
       - gateway
     networks:

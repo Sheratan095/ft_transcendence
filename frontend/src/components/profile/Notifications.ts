@@ -6,10 +6,26 @@ let notifSocket: WebSocket | null = null;
 export function connectNotificationsWebSocket() {
   if (!notifSocket || notifSocket.readyState !== WebSocket.OPEN) 
 	{
-		const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-		const wsUrl = `${protocol}://${window.location.host}/ws/notifications`;
-		console.log('Connecting to notifications WebSocket at', wsUrl);
-		notifSocket = new WebSocket(wsUrl);
+			// Determine API base (VITE_API_URL when built or injected at runtime) with safe fallbacks
+			const apiBase = (((import.meta as any)?.env && (import.meta as any).env.VITE_API_URL) || (globalThis as any).__VITE_API_URL || '').replace(/\/+$/, '');
+			let wsUrl: string;
+
+				if (apiBase) {
+					// Convert http(s) to ws(s) and target the gateway path for notifications
+					if (/^https?:\/\//.test(apiBase)) {
+						wsUrl = apiBase.replace(/^http/, 'ws').replace(/\/+$/, '') + '/notifications/ws';
+					} else {
+						// Unexpected format, fallback to origin using gateway-style path
+						const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+						wsUrl = `${proto}://${window.location.host}/notifications/ws`;
+					}
+			} else {
+					const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+					wsUrl = `${proto}://${window.location.host}/notifications/ws`;
+			}
+
+			console.log('Connecting to notifications WebSocket at', wsUrl);
+			notifSocket = new WebSocket(wsUrl);
 
 		notifSocket.addEventListener('open', () => {
 			console.log('Notifications WebSocket connected');

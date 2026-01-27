@@ -2,9 +2,14 @@ import { defineConfig } from 'vite'
 import tailwindcss from "@tailwindcss/vite";
 import { intlayer } from "vite-intlayer";
 import react from '@vitejs/plugin-react'
+import fs from 'fs'; 
 
 import path from "path";
 import { toUSVString } from 'util';
+
+const runningInDocker = fs.existsSync('/.dockerenv');
+const defaultApiTarget = process.env.VITE_API_URL
+  || (runningInDocker ? 'http://gateway:3000' : 'http://localhost:3000');
 
 export default defineConfig({
   base: '/',
@@ -17,8 +22,8 @@ export default defineConfig({
 	},
     proxy: {
       '/api': {
-		port:3000,
-        target: 'https://localhost:3000',
+		// port:3000,
+        target: defaultApiTarget,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         secure: false,

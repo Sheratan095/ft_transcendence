@@ -1,0 +1,10 @@
+run populate_env
+run generate-certs
+run docker compose
+
+modified front-end package.json
+// "build": "tsc && vite build --watch",
+
+modified references to locahost around the code
+
+modified fetchProxy in frontend to call the service

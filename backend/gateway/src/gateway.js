@@ -340,17 +340,31 @@ const	start = async () =>
 {
 	try
 	{
-		fastify.listen({port: process.env.PORT }, () =>
-		{
-			// When the client sends an Upgrade request (tries to establish a WebSocket connection)
-			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
-		})
+		// fastify.listen({port: process.env.PORT }, () =>
+		// {
+		// 	// When the client sends an Upgrade request (tries to establish a WebSocket connection)
+		// 	fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
+		// })
 
-		const	protocol = httpsOptions ? 'https' : 'http';
+		// const	protocol = httpsOptions ? 'https' : 'http';
 
+		// console.log(`[GATEWAY] Server is running:`);
+		// console.log(`[GATEWAY] Protocol: ${protocol} `);
+		// // console.log(`[GATEWAY] URL: ${protocol}://localhost:${process.env.PORT}`);
+		// console.log(`[GATEWAY] URL: ${protocol}://gateway:${process.env.PORT}`);
+		// console.log(`[GATEWAY] Rate limiting: ${process.env.RATE_LIMIT_ACTIVE === 'true' ? 'Enabled' : 'Disabled'}`);
+		const PORT = Number(process.env.PORT) || 3000;
+		const HOST = process.env.HOST || '0.0.0.0';
+
+		await fastify.listen({ port: PORT, host: HOST });
+
+		// When the client sends an Upgrade request (tries to establish a WebSocket connection)
+		fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
+
+		const protocol = httpsOptions ? 'https' : 'http';
 		console.log(`[GATEWAY] Server is running:`);
-		console.log(`[GATEWAY] Protocol: ${protocol} `);
-		console.log(`[GATEWAY] URL: ${protocol}://localhost:${process.env.PORT}`);
+		console.log(`[GATEWAY] Protocol: ${protocol}`);
+		console.log(`[GATEWAY] URL: ${protocol}://${HOST}:${PORT}`);
 		console.log(`[GATEWAY] Rate limiting: ${process.env.RATE_LIMIT_ACTIVE === 'true' ? 'Enabled' : 'Disabled'}`);
 	}
 	catch (err)

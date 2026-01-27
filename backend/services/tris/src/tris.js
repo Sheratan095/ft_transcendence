@@ -35,9 +35,13 @@ const	start = async () =>
 		// Setup routes before starting the server
 		fastify.register(trisRoutes);
 
-		await fastify.listen({ port: process.env.PORT })
-		console.log(`[TRIS] Server is running on localhost:${process.env.PORT}`)
-		console.log(`[TRIS] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
+		// await fastify.listen({ port: process.env.PORT })
+		// console.log(`[TRIS] Server is running on localhost:${process.env.PORT}`)
+		// console.log(`[TRIS] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
+		const HOST = process.env.HOST || '0.0.0.0'
+        await fastify.listen({ port: Number(process.env.PORT), host: HOST })
+        console.log(`[TRIS] Server is running on ${HOST}:${process.env.PORT}`)
+		console.log(`[TRIS] Web socket is listening on ws://${HOST}:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{

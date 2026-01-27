@@ -45,16 +45,29 @@ export class	SwaggerAggregator
 
 	async	getAggregatedSpec()
 	{
+		// helper: fetch with retries to tolerate slow service startup
+		const fetchWithRetry = async (url, options = {}, attempts = 3, delayMs = 1000) => {
+			for (let i = 0; i < attempts; i++) {
+				try {
+					const res = await axios.get(url, options);
+					return res;
+				} catch (err) {
+					if (i === attempts - 1) throw err;
+					await new Promise(r => setTimeout(r, delayMs));
+				}
+			}
+		};
+
 		const	results = await Promise.all(
 			this.services.map(async svc =>
 			{
 				try
 				{
-					const	res = await axios.get(svc.url,
+					const	res = await fetchWithRetry(svc.url,
 					{
 						timeout: 5000,
 						headers: { "x-internal-api-key": process.env.INTERNAL_API_KEY }
-					});
+					}, 3, 1000);
 
 					return { ...svc, spec: res.data };
 				}
