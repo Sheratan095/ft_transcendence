@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { trisConnectionManager } from './TrisConnectionManager.js';
-import { sendGameInviteNotification, getUsernameById, sleep, checkBlock } from './tris-help.js';
+import { sendGameInviteNotification, getUsernameById, sleep, checkBlock, isUserBusyInternal } from './tris-help.js';
 import { trisDatabase as trisDb } from './tris.js';
 
 class	GameManager
@@ -16,10 +16,10 @@ class	GameManager
 
 	async createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
-		// User must not be busy (in matchmaking or in another game)
-		if (this._isUserBusy(creatorId))
+		// User must not be busy (in matchmaking or in another game, including PONG)
+		if (await isUserBusyInternal(creatorId, true))
 		{
-			console.error(`[TRIS] ${creatorId} tried to create a custom game while busy`);
+			console.error(`[TRIS] ${creatorId} tried to create custom game while busy`);
 			trisConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
 			return ;
 		}
@@ -110,10 +110,10 @@ class	GameManager
 		console.log(`[TRIS] Canceled custom game ${gameId} by user ${userId}`);
 	}
 
-	joinCustomGame(playerId, gameId)
+	async joinCustomGame(playerId, gameId)
 	{
-		// User must not be busy (in matchmaking or in another game)
-		if (this._isUserBusy(playerId))
+		// User must not be busy (in matchmaking or in another game, including PONG)
+		if (await isUserBusyInternal(playerId, true))
 		{
 			console.error(`[TRIS] ${playerId} tried to join custom game ${gameId} while busy`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
@@ -221,8 +221,8 @@ class	GameManager
 
 	async joinMatchmaking(playerId)
 	{
-		// User must not be busy (in matchmaking or in another game)
-		if (this._isUserBusy(playerId))
+		// User must not be busy (in matchmaking or in another game, including PONG)
+		if (await isUserBusyInternal(playerId, true))
 		{
 			console.error(`[TRIS] ${playerId} tried to join matchmaking while busy`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
@@ -511,23 +511,6 @@ class	GameManager
 			console.log(`[TRIS] Game ${gameInstance.id} ended. Winner: ${winner}`);
 	}
 
-	// A user is considered busy if they are in matchmaking
-	//	or in a game that is in progress or in lobby (waiting for ready)
-	_isUserBusy(userId)
-	{
-		if (this._waitingPlayers.includes(userId))
-			return (true);
-
-		// Check if user is in any active games
-		for (const gameInstance of this._games.values())
-		{
-			if (gameInstance.hasPlayer(userId) && (gameInstance.gameStatus === GameStatus.IN_PROGRESS || gameInstance.gameStatus === GameStatus.IN_LOBBY))
-				return (true);
-		}
-
-		return (false);
-	}
-
 	_startMoveTimeout(gameId)
 	{
 		// start move timeout for the next player
@@ -547,6 +530,26 @@ class	GameManager
 
 		}, process.env.MOVE_TIMEOUT_MS);
 		this._moveTimeouts.set(gameId, timeoutId);
+	}
+
+	isUserInGameOrMatchmaking(userId)
+	{
+		// Check if user is in matchmaking queue
+		if (this._waitingPlayers.includes(userId))
+			return (true);
+
+		// Check if user is in any active games
+		for (const gameInstance of this._games.values())
+		{
+			// If the invitee tries to join a CUSTOM game
+			if (gameInstance.hasPlayer(userId) && gameInstance.gameType === GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
+				continue ;
+
+			if (gameInstance.hasPlayer(userId))
+				return (true);
+		}
+
+		return (false);
 	}
 }
 

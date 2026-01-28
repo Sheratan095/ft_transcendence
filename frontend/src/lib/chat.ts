@@ -1,14 +1,18 @@
+import { showInfoToast } from '../components/shared/Toast';
+
 let chatSocket: WebSocket | null = null;
 let currentUserId: string | null = null;
 let currentChatId: string | null = null;
 let chats: any[] = [];
 let messages: Map<string, any[]> = new Map();
 let chatMembers: Map<string, any[]> = new Map();
+let unreadCounts: Map<string, number> = new Map(); // Track unread message counts
 let messageOffset = 0;
 const MESSAGE_LIMIT = 50;
 
 export function initChat(userId: string) {
   currentUserId = userId;
+  connectChatWebSocket();
 }
 
 export async function openChatModal() {
@@ -25,11 +29,7 @@ export async function openChatModal() {
       console.error('Failed to open chat modal:', err);
     }
   }
-
-  // Connect to WebSocket if not already connected
-  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-    connectChatWebSocket();
-  }
+  
   // Render chat list
   renderChatList();
 }
@@ -38,12 +38,6 @@ export function closeChatModal() {
   const modal = document.getElementById('chat-modal');
   if (modal) {
     modal.classList.add('hidden');
-  }
-
-  // Close WebSocket
-  if (chatSocket) {
-    chatSocket.close();
-    chatSocket = null;
   }
 
   // Reset state
@@ -77,6 +71,7 @@ async function loadChats() {
       }
     });
 
+    currentChatId = chats.length > 0 ? chats[0].id : null;
     renderChatList();
   } catch (err) {
     console.error('Error loading chats:', err);
@@ -107,10 +102,21 @@ function renderChatList() {
     chatType.className = 'chat-item-type';
     chatType.textContent = chat.chatType === 'dm' ? 'Direct Message' : 'Group Chat';
 
+    // Add unread badge if there are unread messages
+    const unreadCount = unreadCounts.get(chat.id) || 0;
+    if (unreadCount > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'unread-badge';
+      badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+      chatName.appendChild(badge);
+    }
+
     chatItem.appendChild(chatName);
     chatItem.appendChild(chatType);
     chatList.appendChild(chatItem);
   });
+
+  currentChatId = currentChatId || chats[0].id;
 }
 
 function getChatDisplayName(chat: any): string {
@@ -133,12 +139,19 @@ async function selectChat(chatId: string) {
     console.error('Failed to select chat:', err);
   }
 
-  // Update chat header
+  // Update chat header and show/hide leave group button
   const chatHeader = document.getElementById('chat-header');
-  if (chatHeader) {
+  const leaveGroupBtn = document.getElementById('leave-group-btn');
+  if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
       chatHeader.textContent = getChatDisplayName(chat);
+      // Show leave group button only for group chats
+      if (chat.chatType === 'group') {
+        leaveGroupBtn.classList.remove('hidden');
+      } else {
+        leaveGroupBtn.classList.add('hidden');
+      }
     }
   }
 
@@ -159,7 +172,6 @@ async function loadMessages(chatId: string, offset = 0) {
     }
 
     const newMessages = await response.json();
-    console.log('Loaded messages from API:', newMessages);
 
     // Reverse to show oldest first (WhatsApp style)
     if (offset === 0) {
@@ -239,14 +251,14 @@ export async function renderMessages() {
     // Compare as strings since backend returns string IDs
     const isSent = String(senderId) === String(currentUserId);
 
-    console.log('Message:', {
-      senderId,
-      currentUserId,
-      isSent,
-      isPrivate,
-      senderIdType: typeof senderId,
-      userIdType: typeof currentUserId
-    });
+    // console.log('Message:', {
+    //   senderId,
+    //   currentUserId,
+    //   isSent,
+    //   isPrivate,
+    //   senderIdType: typeof senderId,
+    //   userIdType: typeof currentUserId
+    // });
 
     // Determine message class based on type and sender
     let messageClass = 'message ';
@@ -296,33 +308,45 @@ function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
-function connectChatWebSocket() {
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = window.location.host;
-  const wsUrl = `${protocol}//${host}/chat/ws`;
+export function connectChatWebSocket(): Promise<WebSocket> {
+  if (chatSocket && chatSocket.readyState <= WebSocket.OPEN) {
+    return Promise.resolve(chatSocket);
+  }
+
+  const wsUrl = `/chat/ws`;
 
   console.log('Connecting to chat WebSocket at', wsUrl);
-  chatSocket = new WebSocket(wsUrl);
-
-  chatSocket.addEventListener('open', () => {
-    console.log('Chat WebSocket connected');
-  });
-
-  chatSocket.addEventListener('message', (event) => {
+  return new Promise((resolve, reject) => {
     try {
-      const data = JSON.parse(event.data);
-      handleWebSocketMessage(data);
-    } catch (err) {
-      console.error('Failed to parse WebSocket message:', err);
+      const socket = new WebSocket(wsUrl);
+      chatSocket = socket;
+
+      socket.onopen = () => {
+        console.log('Chat WebSocket connected');
+        resolve(socket);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          handleWebSocketMessage(JSON.parse(event.data));
+        } catch (err) {
+          console.error('Invalid WebSocket message', err);
+        }
+      };
+
+      socket.onerror = (event) => {
+        console.error('Chat WebSocket error', event);
+        reject(event);
+      };
+
+      socket.onclose = () => {
+        console.warn('Chat WebSocket closed');
+        chatSocket = null;
+      };
+    } catch (error) {
+      console.error('Connection error:', error);
+      reject(error);
     }
-  });
-
-  chatSocket.addEventListener('close', () => {
-    console.log('Chat WebSocket closed');
-  });
-
-  chatSocket.addEventListener('error', (error) => {
-    console.error('Chat WebSocket error:', error);
   });
 }
 
@@ -360,7 +384,18 @@ function handleChatMessage(data: any) {
     isPrivate: false
   });
 
-  if (currentChatId === chatId) {
+  // Show toast notification if not currently viewing this chat
+  if (currentChatId !== chatId) {
+    const sender = data.from || 'Someone';
+    const preview = data.content.substring(0, 30);
+    const displayText = preview.length < data.content.length ? `${preview}...` : preview;
+    showInfoToast(`📨 ${sender}: ${displayText}`, { duration: 4000 });
+    
+    // Track unread message
+    const unreadCount = (unreadCounts.get(chatId) || 0) + 1;
+    unreadCounts.set(chatId, unreadCount);
+    renderChatList();
+  } else {
     renderMessages();
     scrollToBottom();
   }
@@ -390,7 +425,7 @@ function handleSystemMessage(data: any) {
 
 function handleMessageSent(data: any) {
   console.log('Message sent confirmation:', data);
-  const { messageId, chatId, timestamp } = data;
+  const { messageId, chatId } = data;
   
   // Update message status to 'sent' if it exists
   if (messages.has(chatId)) {
@@ -428,9 +463,11 @@ function handlePrivateMessage(data: any) {
   
   // Find or create a DM chat with this user
   let dmChat = chats.find(c => c.chatType === 'dm' && c.otherUserId === String(fromUserId));
+  let isNewChat = false;
   
   if (!dmChat) {
     // Create a new DM chat entry
+    isNewChat = true;
     dmChat = {
       id: `dm_${fromUserId}`,
       chatType: 'dm',
@@ -460,17 +497,31 @@ function handlePrivateMessage(data: any) {
     isPrivate: true
   });
   
-  // Re-render if this chat is currently open
+  // Handle UI updates
   if (currentChatId === dmChat.id) {
+    // We're viewing this chat, so update messages and scroll
     renderMessages();
     scrollToBottom();
+  } else {
+    // Not viewing this chat, show toast and update unread count
+    const preview = content.substring(0, 30);
+    const displayText = preview.length < content.length ? `${preview}...` : preview;
+    showInfoToast(`💬 ${from}: ${displayText}`, { duration: 4000 });
+    
+    // Track unread message
+    const unreadCount = (unreadCounts.get(dmChat.id) || 0) + 1;
+    unreadCounts.set(dmChat.id, unreadCount);
+    
+    // Only update chat list if new chat was created or unread count changed
+    renderChatList();
   }
-  
-  // Update chat list to show the new/updated chat
-  renderChatList();
 }
 
 function markChatAsRead(chatId: string) {
+  // Clear unread count and re-render chat list
+  unreadCounts.delete(chatId);
+  renderChatList();
+  
   if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
     const message = {
       event: 'chat.read',
@@ -497,9 +548,49 @@ export async function sendChatInvite(otherUserId: string) {
     console.log('Private chat started:', chatId);
 }
 
+export async function leaveGroupChat(chatId: string) {
+  try {
+    const res = await fetch(`/api/chat/leave-group-chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ chatId })
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to leave group chat: ${res.statusText}`);
+    }
+
+    // Remove chat from list
+    chats = chats.filter(c => c.id !== chatId);
+    messages.delete(chatId);
+    chatMembers.delete(chatId);
+
+    // Close the chat and reset to list view
+    if (currentChatId === chatId) {
+      currentChatId = null;
+      const chatHeader = document.getElementById('chat-header');
+      if (chatHeader) {
+        chatHeader.textContent = 'Select a chat';
+      }
+      const chatMessages = document.getElementById('chat-messages');
+      if (chatMessages) {
+        chatMessages.innerHTML = '';
+      }
+    }
+
+    // Re-render the chat list
+    renderChatList();
+    console.log('Left group chat:', chatId);
+  } catch (err) {
+    console.error('Error leaving group chat:', err);
+    throw err;
+  }
+}
+
 export async function sendChatMessage(message: string) {
-  if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
-    console.error('Not connected to chat or no chat selected');
+  if (!chatSocket || currentChatId === null) {
+    console.error('Not connected to chat or no chat selected', chatSocket, currentChatId);
     return;
   }
 
@@ -559,7 +650,7 @@ let selectedFriendsForGroup: Set<string> = new Set();
 
 async function fetchFriends(): Promise<any[]> {
   try {
-    const response = await fetch('/api/user/relationship/friends', {
+    const response = await fetch('/api/users/relationships/friends', {
       method: 'GET',
       credentials: 'include'
     });
@@ -752,6 +843,25 @@ export function setupChatEventListeners() {
       if (input && input.value.trim()) {
         sendChatMessage(input.value.trim());
         input.value = '';
+      }
+    });
+  }
+
+  const leaveGroupBtn = document.getElementById('leave-group-btn');
+  if (leaveGroupBtn) {
+    leaveGroupBtn.addEventListener('click', async () => {
+      if (!currentChatId) return;
+      
+      const chat = chats.find(c => c.id === currentChatId);
+      if (!chat) return;
+
+      const chatName = getChatDisplayName(chat);
+      if (confirm(`Are you sure you want to leave "${chatName}"?`)) {
+        try {
+          await leaveGroupChat(currentChatId);
+        } catch (err) {
+          alert(`Failed to leave group: ${(err as Error).message}`);
+        }
       }
     });
   }

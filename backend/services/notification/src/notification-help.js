@@ -160,3 +160,31 @@ export async function	getFriendsList(userId, onlineUserIds)
 		return ([]);
 	}
 }
+
+export async function	getUsernameById(userId)
+{
+	try
+	{
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/user?id=${userId}`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-internal-api-key': process.env.INTERNAL_API_KEY,
+			},
+		});
+
+		if (!response.ok)
+		{
+			console.error(`[CHAT] Failed to fetch user data for Id ${userId}: ${response.statusText}`);
+			return (null);
+		}
+
+		const	userData = await response.json();
+		return (userData.username);
+	}
+	catch (error)
+	{
+		console.error(`[CHAT] Error fetching user data for Id ${userId}:`, error.message);
+		return (null);
+	}
+}

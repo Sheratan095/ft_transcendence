@@ -117,7 +117,10 @@ export function createRegisterForm(callbacks: RegisterFormCallbacks): { form: HT
 
       const body = await res.json().catch(() => null);
       if (res.ok) {
-        if (body?.user?.id) localStorage.setItem('userId', body.user.id);
+        if (body?.user?.id) {
+          localStorage.setItem('userId', body.user.id);
+          localStorage.setItem('user', JSON.stringify(body.user));
+        }
         if (body?.user?.TfaEnabled)
           localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
         else 

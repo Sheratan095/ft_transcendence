@@ -1,0 +1,1 @@
+- remove innerHTML, (unsafe, see XSS attacks) use textContext

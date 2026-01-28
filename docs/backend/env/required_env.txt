@@ -54,6 +54,7 @@ services/pong:
     PORT=3005
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
+    TRIS_SERVICE_URL=http://localhost:3006
     PONG_WIN_SCORE = 10
     READY_COOLDOWN_MS = 30000
     ROUND_TRANSITION_COOLDOWN_MS = 10000
@@ -61,6 +62,7 @@ services/pong:
     WINNING_SCORE=11
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
+    TOURNAMENT_EARNED_WIN_POINTS=200 # Points awarded for winning a tournament
     PLACEHOLDER_DELETED_USERNAMES=Anonymous player
     COOLDOWN_BETWEEN_POINTS_MS=3000 # Time between points in milliseconds
     PADDLE_HEIGHT=0.3 # Height of the paddle respective to the game area (0.5 = half the game area)
@@ -77,6 +79,7 @@ services/tris:
     PORT=3006
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     USERS_SERVICE_URL=http://localhost:3002
+    PONG_SERVICE_URL=http://localhost:3005
     MAX_MARKS_PER_PLAYER=3
     READY_COOLDOWN_MS = 30000
     MOVE_TIMEOUT_MS = 60000

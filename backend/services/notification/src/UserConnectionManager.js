@@ -1,4 +1,4 @@
-import { getFriendsList } from './notification-help.js';
+import { getFriendsList, getUsernameById } from './notification-help.js';
 
 // Dot-notation (most common & scalable)
 // domain.action
@@ -17,8 +17,9 @@ class	UserConnectionManager
 		// Send the current list of connected users to the newly connected `senderUserId`.
 		this.#dispatchEventToSocket(socket, 'friends.onlineList', { onlineFriends });
 
+		const	username = await getUsernameById(userId);
 		// Then notify other connected users that this user is now online
-		this.#dispatchEventToFriends(userId, 'friend.online', { userId }, onlineFriends);
+		this.#dispatchEventToFriends(userId, 'friend.online', { userId, username }, onlineFriends);
 	}
 
 	async	removeConnection(userId)
@@ -26,8 +27,9 @@ class	UserConnectionManager
 		this._connections.delete(userId);
 		const	onlineFriends = await getFriendsList(userId, [...this._connections.keys()]);
 
+		const	username = await getUsernameById(userId);
 		// Notify other connected users that this user is now offline
-		this.#dispatchEventToFriends(userId, 'friend.offline', { userId }, onlineFriends);
+		this.#dispatchEventToFriends(userId, 'friend.offline', { userId, username }, onlineFriends);
 	}
 
 	getConnection(userId)
@@ -84,6 +86,19 @@ class	UserConnectionManager
 				}
 			);
 		}
+	}
+
+	sendNowFriendsNotification(toUserId, userId, username)
+	{
+		const	targetSocket = this.getConnection(toUserId);
+
+		const	data = {
+			userId: userId,
+			username: username
+		};
+
+		if (targetSocket)
+			this.#dispatchEventToSocket( targetSocket, 'friend.nowFriends', data );
 	}
 
 	sendGameInviteNotification(targetId, senderId, fromUsername, gameId, gameType)

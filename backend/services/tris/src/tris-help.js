@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { gameManager } from './GameManager.js';
 
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
@@ -159,7 +160,7 @@ export async function	checkBlock(userA, userB)
 
 		if (!response.ok)
 		{
-			console.error(`[CHAT] Failed to check block status between ${userA} and ${userB}: ${response.statusText}`);
+			console.error(`[TRIS] Failed to check block status between ${userA} and ${userB}: ${response.statusText}`);
 			return (false);
 		}
 
@@ -168,7 +169,49 @@ export async function	checkBlock(userA, userB)
 	}
 	catch (err)
 	{
-		console.error('[CHAT] Error checking block status:', err.message);
+		console.error('[TRIS] Error checking block status:', err.message);
 		return (false);
 	}
+}
+
+export async function	isUserBusyInternal(userId, includePong)
+{
+	const	isInGame = await gameManager.isUserInGameOrMatchmaking(userId);
+
+	let	status = isInGame;
+
+	// If specified, check Pong service for busy status
+	//	it's included when the request comes from this service, when it's from another service we assume they already checked Pong
+	if (includePong)
+	{
+		try
+		{
+			const	response = await fetch(`${process.env.PONG_SERVICE_URL}/is-user-busy?userId=${userId}`, {
+				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }
+			});
+
+			if (!response.ok)
+			{
+				console.error(`[TRIS] Failed to check user busy status in Pong service for Id ${userId}: ${response.statusText}`);
+				return (true); // assume busy if we can't reach Pong, to avoid conflicts
+			}
+
+			const	data = await response.json();
+
+			status = status || data.isBusy;
+
+			console.log(`[TRIS] User ${userId} busy status ${status}`);
+
+			return (status);
+		}
+		catch (err)
+		{
+			console.error(`[TRIS] Failed to check user busy status in Pong service for Id ${userId}:`, err.message);
+			return (true); // assume busy if we can't reach Pong, to avoid conflicts
+		}
+	}
+
+	console.log(`[TRIS] User ${userId} busy status ${status}`);
+
+	return (status);
 }

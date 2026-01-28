@@ -111,11 +111,17 @@ export function createLoginForm(callbacks: LoginFormCallbacks): { form: HTMLForm
         if (body?.tfaRequired) {
           localStorage.setItem('tfaEnabled', 'true');
           localStorage.setItem('userId', body.userId);
+          if (body?.user) {
+            localStorage.setItem('user', JSON.stringify(body.user));
+          }
           // Trigger render2FA through parent component
           const event = new CustomEvent('login:tfa-required', { detail: body });
           window.dispatchEvent(event);
         } else {
-          if (body?.user?.id) localStorage.setItem('userId', body.user?.id);
+          if (body?.user?.id) {
+            localStorage.setItem('userId', body.user?.id);
+            localStorage.setItem('user', JSON.stringify(body.user));
+          }
           localStorage.setItem('tfaEnabled', 'false');
           showSuccess(authError, 'Login successful.');
           setTimeout(() => { location.href = '/'; }, 600);

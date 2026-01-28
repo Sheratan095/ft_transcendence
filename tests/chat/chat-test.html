@@ -469,7 +469,7 @@
                     <h2 id="chatTitle">Select a chat</h2>
                     <div>
                         <button class="btn btn-secondary" id="loadMoreBtn" onclick="loadMoreMessages()" style="display: none;">Load More</button>
-                        <button class="btn btn-secondary" onclick="showPrivateMessageModal()">+ Private Message</button>
+                        <button class="btn btn-secondary" onclick="showPrivateMessageModal()">+ Start DM</button>
                         <button class="btn btn-secondary" id="addUserBtn" onclick="showAddUserModal()" style="display: none;">+ Add User</button>
                         <button class="btn btn-danger" id="leaveGroupBtn" onclick="leaveGroupChat()" style="display: none;">Leave Group</button>
                     </div>
@@ -509,12 +509,11 @@
     <!-- Private Message Modal -->
     <div class="modal" id="privateMessageModal">
         <div class="modal-content">
-            <h3>Send Private Message</h3>
+            <h3>Start Private Chat</h3>
             <input type="text" id="privateUserIdInput" placeholder="User ID" />
-            <input type="text" id="privateMessageInput" placeholder="Message" />
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="hidePrivateMessageModal()">Cancel</button>
-                <button class="btn" onclick="sendPrivateMessage()">Send</button>
+                <button class="btn" onclick="startPrivateChat()">Create Chat</button>
             </div>
         </div>
     </div>
@@ -535,7 +534,7 @@
         // Configuration
         const GATEWAY_URL = 'https://localhost:3000';
         const WS_URL = 'wss://localhost:3000/chat/ws';
-        const NOTIFICATION_WS_URL = 'wss://localhost:3000/notifications/ws';
+        const NOTIFICATION_WS_URL = 'wss://localhost:3000/notification/ws';
 
         // State
         let ws = null;
@@ -825,12 +824,6 @@
         // Render messages
         function renderMessages() {
             const container = document.getElementById('messagesContainer');
-
-            if (!currentChatId) {
-                container.innerHTML = '<div class="placeholder">Select a chat to start messaging</div>';
-                return;
-            }
-
             const chatMessages = messages.get(currentChatId) || [];
 
             if (chatMessages.length === 0) {
@@ -842,12 +835,11 @@
 
             chatMessages.forEach(msg => {
                 const messageDiv = document.createElement('div');
-                // Handle both snake_case (from API) and camelCase (from WebSocket)
-                const senderId = msg.senderId || msg.sender_id;
-                const createdAt = msg.createdAt || msg.created_at;
-                const messageStatus = msg.messageStatus || msg.message_status;
-                const isPrivate = msg.isPrivate || false;
-                const isSystem = msg.isSystem || senderId === 'system' || senderId === null;
+                const senderId = msg.senderId;
+                const createdAt = msg.createdAt;
+                const messageStatus = msg.messageStatus;
+                const isSystem = msg.isSystem;
+                const isPrivate = msg.isPrivate;
                 
                 // Handle system messages
                 if (isSystem) {
@@ -896,7 +888,7 @@
         }
 
         // Send message
-        function sendMessage() {
+        async function sendMessage() {
             const input = document.getElementById('messageInput');
             const content = input.value.trim();
 
@@ -906,33 +898,35 @@
             if (!chat) return;
 
             if (ws && ws.readyState === WebSocket.OPEN) {
-                let message;
-                
-                // Use different event types based on chat type
+                // For DM chats, send as private message with toUserId
                 if (chat.chatType === 'dm') {
-                    // For DM chats, send as private message to the other user
                     if (!chat.otherUserId) {
-                        alert('Cannot find recipient in DM chat');
+                        alert('Cannot find recipient for DM');
                         return;
                     }
-                    
-                    message = {
+
+                    const message = {
                         event: 'chat.privateMessage',
                         data: {
                             toUserId: chat.otherUserId,
                             content: content
                         }
                     };
-                } else {
-                    // For group chats, send as chat message
-                    message = {
-                        event: 'chat.chatMessage',
-                        data: {
-                            chatId: currentChatId,
-                            content: content
-                        }
-                    };
+
+                    ws.send(JSON.stringify(message));
+                    input.value = '';
+                    return;
                 }
+
+                // For group chats, send as chat message
+                const message = {
+                    event: 'chat.chatMessage',
+                    data: {
+                        chatId: currentChatId,
+                        content: content
+                    }
+                };
+
                 ws.send(JSON.stringify(message));
                 input.value = '';
             } else {
@@ -1606,39 +1600,45 @@
         }
     }
 
-    // Send private message
-    function sendPrivateMessage() {
+    // Start private chat
+    async function startPrivateChat() {
         const toUserId = document.getElementById('privateUserIdInput').value.trim();
-        const content = document.getElementById('privateMessageInput').value.trim();
 
-        if (!toUserId || !content) {
-            alert('Please enter user ID and message');
+        if (!toUserId) {
+            alert('Please enter user ID');
             return;
         }
 
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            const message = {
-                event: 'chat.privateMessage',
-                data: {
-                    toUserId: toUserId,
-                    content: content
-                }
-            };
+        try {
+            const res = await fetch(`${GATEWAY_URL}/chat/start-private-chat`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ toUserId })
+            });
 
-            // Store target for when handleMessageSent creates the new chat
-            pendingDmTarget = toUserId;
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `Failed to start private chat (${res.status})`);
+            }
 
-            ws.send(JSON.stringify(message));
-
+            const data = await res.json();
+            const chatId = data.chatId;
+            
             hidePrivateMessageModal();
             document.getElementById('privateUserIdInput').value = '';
-            document.getElementById('privateMessageInput').value = '';
 
-            // Note: chat list will be updated automatically when chat.messageSent arrives
-            // with the new chat_id, which will trigger loadChats() only if needed
+            // Reload chats to show the new DM
+            await loadChats();
+            
+            // Auto-select the newly created chat
+            if (chatId) {
+                await selectChat(chatId);
+            }
 
-        } else {
-            alert('WebSocket not connected');
+        } catch (err) {
+            console.error('Error starting private chat:', err);
+            alert('Failed to start private chat: ' + err.message);
         }
     }
 

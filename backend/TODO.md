@@ -141,12 +141,11 @@ I think it's ok
 	in FAIR AND BALANCED MATCHES
 	two players "blocked" can find each other?? now they can't
 
-
 [x] Check block before inviting in a custom game 
 
-[] Pong mnhgUser stats aren't up to date, also for tournaments
+[x] Pong User stats aren't up to date, also for tournaments
 
-[] Is busy has to be done in both games and tournaments
+[x] Is busy has to be done in both games and tournaments
 
 [x] When updating profile image with a non supported extension
 	[GATEWAY] Users service error: Request failed with status code 400

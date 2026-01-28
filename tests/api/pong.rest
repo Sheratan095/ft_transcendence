@@ -1,5 +1,5 @@
 ### Get user stats
-GET https://localhost:3000/pong/stats?id=1
+GET https://localhost:3000/pong/stats?id=2
 
 ### Get user match history
 GET https://localhost:3000/pong/match-history?id=1
