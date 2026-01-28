@@ -1,3 +1,4 @@
+import { getUserId } from './token';
 /**
  * Tris Game WebSocket Manager
  */
@@ -215,7 +216,11 @@ export function quitGame(): void {
  */
 export function startMatchmaking(): void {
   if (!trisSocket || trisSocket.readyState !== WebSocket.OPEN) {
-    console.error('Tris WebSocket not connected');
+    console.error('Tris WebSocket not connected')
+    return;
+  }
+  if (getUserId() === null) {
+    console.error('User not authenticated');
     return;
   }
 
