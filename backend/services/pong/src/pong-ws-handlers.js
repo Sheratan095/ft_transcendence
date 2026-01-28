@@ -323,7 +323,7 @@ export async function	handleTournamentStart(userId, tournamentId)
 			return ;
 		}
 
-		await tournamentManager.startTournament(tournamentId, userId);
+		tournamentManager.startTournament(tournamentId, userId);
 	}
 	catch (err)
 	{

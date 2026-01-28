@@ -1,15 +1,8 @@
 import { logout, deleteAccout } from '../../lib/auth';
 import { openChatModal } from '../../lib/chat';
 import type { User } from '../../lib/auth';
-import { FriendsManager } from './FriendsManager';
-import { setFriendsManager } from './Notifications';
-import { setLocaleInStorage } from 'intlayer';
 
 export async function renderProfileCard(user: User, root: HTMLElement): Promise<HTMLElement | null> {
-  // Initialize FriendsManager
-  const friendsManager = new FriendsManager({ currentUserId: user.id });
-  // Connect FriendsManager to Notifications for real-time updates
-  setFriendsManager(friendsManager);
   // Clone template
   const template = document.getElementById('profile-card-template') as HTMLTemplateElement;
   if (!template) {
@@ -135,28 +128,6 @@ export async function renderProfileCard(user: User, root: HTMLElement): Promise<
         console.error('Delete account error:', err);
         alert('Failed to delete account');
       }
-    });
-  }
-
-  const languageSelect = card.querySelector('#profile-language') as HTMLSelectElement;
-  if (languageSelect) {
-    // Load saved language from localStorage or use browser default
-    const savedLanguage = localStorage.getItem('userLanguage') || 'en';
-    languageSelect.value = savedLanguage;
-
-    languageSelect.addEventListener('change', (e) => {
-      const selectedLanguage = (e.target as HTMLSelectElement).value;
-      
-      // Save to localStorage
-      localStorage.setItem('userLanguage', selectedLanguage);
-      
-      // Update intlayer locale
-      setLocaleInStorage(selectedLanguage);
-      
-      console.log('Language changed to:', selectedLanguage);
-      
-      // Optionally reload the page to apply locale changes
-      window.location.reload();
     });
   }
 

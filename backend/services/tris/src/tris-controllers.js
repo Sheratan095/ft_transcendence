@@ -1,4 +1,4 @@
-import { calculateElo, getUsernameById , isUserBusyInternal} from './tris-help.js';
+import { calculateElo, getUsernameById } from './tris-help.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -49,24 +49,6 @@ export const	deleteUserStats = async (req, reply) =>
 	{
 		console.error('[TRIS] Error in deleteUserStats controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
-	}
-}
-
-export const	isUserBusy = async (req, reply) =>
-{
-	try
-	{
-		const	userId = req.query.userId;
-
-		// Check if user is in an active game, not including PONG because this call should be done from pong service
-		const	isInGame = await isUserBusyInternal(userId, false);
-
-		return (reply.code(200).send({ isBusy: isInGame }));
-	}
-	catch (err)
-	{
-		console.error('[TRIS] Error in isUserBusy controller:', err);
-		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
 

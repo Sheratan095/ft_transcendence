@@ -24,7 +24,7 @@ export class	TournamentInstance
 		this.addParticipant(creatorId, creatorUsername);
 
 		this.status = TournamentStatus.WAITING;
-		this.currentRound = 1;
+		this.currentRound = 0;
 		this.rounds = []; // Array of rounds, each round contains matches
 	}
 
@@ -45,23 +45,13 @@ export class	TournamentInstance
 
 	removeParticipant(userId)
 	{
-		// Remove participant by userId - find the object and delete it
-		for (let participant of this.participants)
-		{
-			if (participant.userId === userId)
-			{
-				this.participants.delete(participant);
-				break;
-			}
-		}
+		// Remove participant by userId
+		this.participants.delete(userId);
 	}
 
 	startTournament()
 	{
 		this.status = TournamentStatus.IN_PROGRESS;
-
-		// Store initial participant count for top calculation (doesn't change when players leave)
-		this.initialParticipantCount = this.participants.size;
 
 		// Shuffle participants
 		const	shuffledParticipants = Array.from(this.participants).sort(() => Math.random() - 0.5);
@@ -87,8 +77,7 @@ export class	TournamentInstance
 					players[i + 1].userId,
 					players[i].username,
 					players[i + 1].username,
-					GameType.TOURNAMENT,
-					this.id
+					GameType.TOURNAMENT
 				);
 
 				gameInstance.tournamentId = this.id;
@@ -106,8 +95,7 @@ export class	TournamentInstance
 					null,
 					players[i].username,
 					null,
-					GameType.TOURNAMENT,
-					this.id
+					GameType.TOURNAMENT
 				);
 
 				gameInstance.tournamentId = this.id;
@@ -125,7 +113,7 @@ export class	TournamentInstance
 
 	playerReady(userId)
 	{
-		const	currentMatches = this.rounds[this.currentRound - 1];
+		const	currentMatches = this.rounds[this.currentRound];
 		if (!currentMatches)
 			return null;
 
@@ -194,13 +182,13 @@ export class	TournamentInstance
 			match.winner = { userId: match.playerRightId, username: match.playerRightUsername };
 
 		// Check if this round is complete
-		if (this.isRoundComplete())
+		if (this._isRoundComplete())
 			this._advanceToNextRound();
 	}
 
-	isRoundComplete()
+	_isRoundComplete()
 	{
-		const	currentMatches = this.rounds[this.currentRound - 1];
+		const	currentMatches = this.rounds[this.currentRound];
 		if (!currentMatches)
 			return (false);
 
@@ -209,7 +197,7 @@ export class	TournamentInstance
 
 	_advanceToNextRound()
 	{
-		const	currentMatches = this.rounds[this.currentRound - 1];
+		const	currentMatches = this.rounds[this.currentRound];
 		const	winners = currentMatches.map(match => match.winner).filter(w => w !== null);
 
 		// If only one winner, tournament is over
@@ -239,7 +227,7 @@ export class	TournamentInstance
 
 	getCurrentMatches()
 	{
-		return (this.rounds[this.currentRound - 1]);
+		return (this.rounds[this.currentRound]);
 	}
 
 	getMatchForPlayer(userId)

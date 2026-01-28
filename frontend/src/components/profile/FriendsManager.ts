@@ -27,7 +27,7 @@ export class FriendsManager {
 
   async loadFriends(): Promise<User[]> {
     try {
-      const response = await fetch('/api/users/relationships/friends', {
+      const response = await fetch('/api/relationships/friends', {
         method: 'GET',
         credentials: 'include'
       });
@@ -40,8 +40,7 @@ export class FriendsManager {
       this.friends.clear();
       
       friendsList.forEach((friend: User) => {
-		friend.id = friend.userId;
-        this.friends.set(friend.userId, friend);
+        this.friends.set(friend.id, friend);
       });
 
       if (this.onFriendsUpdated) {
@@ -57,7 +56,7 @@ export class FriendsManager {
 
   async loadFriendRequests(): Promise<User[]> {
     try {
-      const response = await fetch('/api/users/relationships/requests/incoming', {
+      const response = await fetch('/api/relationships/requests/incoming', {
         method: 'GET',
         credentials: 'include'
       });
@@ -86,11 +85,11 @@ export class FriendsManager {
 
   async addFriend(userId: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/users/relationships/request', {
+      const response = await fetch('/api/relationships/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ targetId: userId })
+        body: JSON.stringify({ targetUserId: userId })
       });
 
       if (!response.ok) {
@@ -106,10 +105,9 @@ export class FriendsManager {
 
   async removeFriend(userId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/relationships/removeFriend`, {
+      const response = await fetch(`/api/relationships/${userId}`, {
         method: 'DELETE',
-        credentials: 'include',
-        body: JSON.stringify({ targetId: userId })
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -131,8 +129,8 @@ export class FriendsManager {
 
   async acceptFriendRequest(userId: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/users/relationships/accept', {
-      method: 'PUT',
+      const response = await fetch('/api/relationships/accept', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ requesterId: userId })
@@ -164,19 +162,18 @@ export class FriendsManager {
     }
   }
 
-  async rejectFriendRequest(requesterUserId: string): Promise<boolean> {
+  async rejectFriendRequest(userId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/users/relationships/reject`, {
-        method: 'PUT',
-        credentials: 'include',
-        body: JSON.stringify({ requesterId: requesterUserId })
+      const response = await fetch(`/api/relationships/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include'
       });
 
       if (!response.ok) {
         throw new Error(`Failed to reject friend request: ${response.statusText}`);
       }
 
-      this.friendRequests.delete(requesterUserId);
+      this.friendRequests.delete(userId);
 
       if (this.onRequestsUpdated) {
         this.onRequestsUpdated(Array.from(this.friendRequests.values()));
@@ -191,11 +188,11 @@ export class FriendsManager {
 
   async blockUser(userId: string): Promise<boolean> {
     try {
-      const response = await fetch('/api/users/relationships/block', {
-        method: 'PUT',
+      const response = await fetch('/api/relationships/block', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ targetId: userId })
+        body: JSON.stringify({ targetUserId: userId })
       });
 
       if (!response.ok) {
@@ -216,19 +213,18 @@ export class FriendsManager {
     }
   }
 
-  async unblockUser(targetId: string): Promise<boolean> {
+  async unblockUser(userId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/users/relationships/unblock`, {
-        method: 'DELETE',
-        credentials: 'include',
-        body: JSON.stringify({ targetUserId: targetId })
+      const response = await fetch(`/api/relationships/${userId}/unblock`, {
+        method: 'POST',
+        credentials: 'include'
       });
 
       if (!response.ok) {
         throw new Error(`Failed to unblock user: ${response.statusText}`);
       }
 
-      this.blocked.delete(targetId);
+      this.blocked.delete(userId);
       return true;
     } catch (err) {
       console.error('Error unblocking user:', err);

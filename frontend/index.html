@@ -73,40 +73,6 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 no-underline bl
 </div>
 </a>
 
-<!-- Tic tac toe -->
- <button id="tris-card-btn" class="p-10 w-full max-w-[50vw] max-h-[80vh]
-border-4 border-neutral-700 bg-neutral-900
-shadow-[10px_10px_0_0_#ff009d] overflow-hidden
-hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left">
-
-	<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-[#ff009d] text-center hover:underline scale-105 duration-300">
-		Play tris
-	</h3>
-
-	<div class="relative w-full aspect-square border-4 border-double border-white mx-auto overflow-hidden pointer-events-none">
-
-	<!-- Vertical grid lines -->
-	<div class="absolute left-1/3 top-0 w-[2px] h-full bg-white animate-grid-v"></div>
-	<div class="absolute left-2/3 top-0 w-[2px] h-full bg-white animate-grid-v" style="animation-delay: 0.2s;"></div>
-
-	<!-- Horizontal grid lines -->
-	<div class="absolute top-1/3 left-0 h-[2px] w-full bg-white animate-grid-h"></div>
-	<div class="absolute top-2/3 left-0 h-[2px] w-full bg-white animate-grid-h" style="animation-delay: 0.2s;"></div>
-
-	<!-- X -->
-	<div class="absolute inset-0 animate-x">
-		<div class="absolute top-[16%] left-[16%] w-[68%] h-[2px] bg-white rotate-45 origin-left"></div>
-		<div class="absolute top-[84%] left-[16%] w-[68%] h-[2px] bg-white -rotate-45 origin-left"></div>
-	</div>
-
-	<!-- O -->
-	<div class="absolute inset-0 animate-o">
-		<div class="absolute top-[40%] left-[40%] w-[20%] h-[20%] rounded-full border-2 border-white"></div>
-	</div>
-
-	</div>
-</button>
-
 <div id="stats-container" class="w-full md:w-[50vw] lg:w-[60vw] min-h-[10vh]">
 	<div class=" items-center justify-center text-wrap">
 		
@@ -185,7 +151,7 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer 
 			<!-- Title and info section -->
 			<div class="flex-1 w-full">
 				<!-- Username -->
-				<h1 id="profile-username" class="text-4xl font-extrabold tracking-tight text-[#0dff66] mb-6 capitalize">User</h1>
+				<h1 id="profile-username" class="text-4xl font-extrabold uppercase tracking-tight text-[#0dff66] mb-6 capitalize">User</h1>
 				
 				<!-- Email and ID -->
 				<div class="space-y-3 mb-6 text-lg">
@@ -221,13 +187,6 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer 
 					<button command="show-modal" commandfor="delete-dialog" class="px-6 py-2 bg-[#f73c3c] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition">
 						Delete
 					</button>
-
-					<!-- Language selector -->
-					<select id="profile-language" class="px-4 py-2 bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-neutral-600 hover:bg-neutral-600 transition rounded">
-						<option value="en">English</option>
-						<option value="fr">Français</option>
-						<option value="it">Italiano</option>
-					</select>
 
 					<!-- 2FA toggle -->
 					<div class="flex items-center gap-2 ml-auto">
@@ -336,15 +295,8 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer 
       <!-- Main chat area -->
       <div class="flex-1 flex flex-col">
         <!-- Chat header -->
-        <div class="p-4 border-b border-neutral-700 bg-neutral-800 flex justify-between items-center">
+        <div class="p-4 border-b border-neutral-700 bg-neutral-800">
           <h2 id="chat-header" class="text-xl font-semibold text-white">Select a chat</h2>
-          <button
-            id="leave-group-btn"
-            class="hidden px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
-            title="Leave this group chat"
-          >
-            Leave Group
-          </button>
         </div>
 
         <!-- Messages container with load more button -->
@@ -459,124 +411,5 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer 
 <div id="toast-container-bottom-right" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 <div id="toast-container-bottom-center" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-none"></div>
 <div id="toast-container-bottom-left" class="fixed bottom-4 left-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-
-<!-- Tris Game Modal -->
-<div
-  id="tris-modal"
-  tabindex="-1"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-10 
-         justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
->
-  <div class="relative p-4 w-full max-w-2xl max-h-full">
-    <div class="relative bg-neutral-900 border-4 border-neutral-700 shadow-[10px_10px_0_0_#ff009d] h-auto flex flex-col">
-
-      <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-4 right-4 z-10 text-neutral-400 bg-transparent 
-               hover:bg-neutral-800 hover:text-white transition border-2 border-neutral-700
-               w-8 h-8 inline-flex justify-center items-center"
-        id="tris-close-btn"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-
-      <!-- Header -->
-      <div class="p-6 border-b-2 border-neutral-700 bg-neutral-800">
-        <div class="flex items-center gap-3">
-          <h2 class="text-2xl font-extrabold uppercase tracking-tight text-[#ff009d]">Tris Game</h2>
-          <span id="tris-game-id" class="text-sm text-neutral-400 font-mono"></span>
-        </div>
-      </div>
-
-      <!-- Game area -->
-      <div class="p-6 flex flex-col gap-6">
-        <!-- Game board (3x3 grid) -->
-        <div id="tris-board" class="grid grid-cols-3 gap-2 w-full max-w-xs mx-auto">
-          <!-- Cells will be generated by JS -->
-        </div>
-
-        <!-- Game status -->
-        <div id="tris-status" class="text-center p-4 bg-neutral-800 border-2 border-neutral-700 text-white font-semibold uppercase">
-          Connecting...
-        </div>
-
-        <!-- Control buttons -->
-        <div class="flex gap-3 justify-center flex-wrap">
-          <button 
-            id="tris-start-btn"
-            class="px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700"
-          >
-            Start Game
-          </button>
-          <button 
-            id="tris-invite-btn"
-            class="px-6 py-2 bg-[#00ffff] text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700"
-          >
-            Invite Friend
-          </button>
-          <button 
-            id="tris-surrender-btn"
-            class="px-6 py-2 bg-[#f73c3c] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700"
-          >
-            Surrender
-          </button>
-          <button 
-            id="tris-reset-btn"
-            class="px-6 py-2 bg-neutral-700 text-white font-extrabold uppercase tracking-tight hover:bg-neutral-600 transition border-2 border-neutral-700"
-          >
-            Reset
-          </button>
-        </div>
-
-        <!-- Error message -->
-        <div id="tris-error" class="text-red-500 text-sm text-center hidden"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Tris Invite Modal -->
-<div
-  id="tris-invite-modal"
-  tabindex="-1"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-20 
-         flex justify-center items-center w-full md:inset-0 h-full max-h-full"
->
-  <div class="relative p-4 w-full max-w-md max-h-full">
-    <div class="relative bg-neutral-900 border-4 border-neutral-700 shadow-[10px_10px_0_0_#00ffff] h-auto flex flex-col">
-
-      <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-4 right-4 z-50 text-white bg-transparent 
-               hover:bg-neutral-800 hover:text-white transition border-2 border-neutral-700
-               w-8 h-8 inline-flex justify-center items-center"
-        id="tris-invite-close-btn"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-
-      <!-- Header -->
-      <div class="p-6 border-b-2 border-neutral-700 bg-neutral-800">
-        <h2 class="text-2xl font-extrabold uppercase tracking-tight text-[#00ffff]">Invite Friend</h2>
-        <p class="text-neutral-400 text-sm mt-2">Select a friend to invite to tris</p>
-      </div>
-
-      <!-- Friends list -->
-      <div id="tris-friends-list" class="p-6 flex flex-col gap-2 max-h-96 overflow-y-auto">
-        <div class="text-neutral-400 text-center py-4">Loading friends...</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>

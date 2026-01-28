@@ -52,8 +52,7 @@ Reponse:
 {
   "event": "friend.online",
   "data": {
-	"userId": "123",
-	"username": "john_doe"
+	"userId": "123"
   }
 }
 \`\`\`
@@ -63,8 +62,7 @@ Reponse:
 {
   "event": "friend.offline",
   "data": {
-	"userId": "123",
-	"username": "john_doe"
+	"userId": "123"
   }
 }
 \`\`\`
@@ -80,24 +78,13 @@ Reponse:
 }
 \`\`\`
 
-- **friend.accept** - Sent when someone accepts your friend request. [Deprecated => use friend.nowFriends]
+- **friend.accept** - Sent when someone accepts your friend request.
 \`\`\`json
 {
   "event": "friend.accept",
   "data": {
 	"from": "jane_smith",
 	"accepterId": "456"
-  }
-}
-\`\`\`
-
-- **friend.nowFriends** - Notify the user he is now friends with another user.
-\`\`\`json
-{
-  "event": "friend.nowFriends",
-  "data": {
-	"userId": "456",
-	"username": "jane_smith"
   }
 }
 \`\`\`

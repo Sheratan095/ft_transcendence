@@ -12,10 +12,7 @@ import {
 	getUserMatchHistory as getUserMatchHistoryHandler,
 	createTournament as createTournamentHandler,
 	getAllTournaments as getAllTournamentsHandler,
-	joinTournament as joinTournamentHandler,
-	isUserBusy as isUserBusyHandler,
-	getUserTournamentParticipation as getUserTournamentParticipationHandler,
-	getTournamentBracket as getTournamentBracketHandler
+	joinTournament as joinTournamentHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -81,16 +78,9 @@ const	Match =
 	{
 		id: { type: 'string' },
 		playerLeftId: { type: 'string' },
-		playerLeftUsername: { type: 'string' }, // TO DO check the controller
 		playerRightId: { type: 'string' },
-		playerRightUsername: { type: 'string' },
-		status: { type: 'string' },
 		winnerId: { type: 'string'},
-		isBye : { type: 'boolean' }, // for tournament matches
-		endedAt: { type: 'string', format: 'date-time' },
-		tournamentId: { type: 'string' },
-		playerLeftScore: { type: 'integer' },
-		playerRightScore: { type: 'integer' }
+		endedAt: { type: 'string', format: 'date-time' }
 	}
 };
 
@@ -115,53 +105,6 @@ const	TournamentParticipant =
 	{
 		userId: { type: 'string' },
 		username: { type: 'string' }
-	}
-};
-
-const	TournamentParticipation =
-{
-	type: 'object',
-	properties:
-	{
-		tournamentId: { type: 'string' },
-		tournamentName: { type: 'string' },
-		winnerUsername: { type: 'string' },
-		endedAt: { type: 'string', format: 'date-time' },
-		top: { type: 'integer' } // User's rank in the tournament
-	}
-};
-
-const	TournamentRound =
-{
-	type: 'object',
-	properties:
-	{
-		roundNumber: { type: 'integer' },
-		matches:
-		{
-			type: 'array',
-			items: Match
-		}
-	}
-};
-
-const	TournamentBracket =
-{
-	type: 'object',
-	properties:
-	{
-		tournamentId: { type: 'string' },
-		name: { type: 'string' },
-		status: { type: 'string' },
-		currentRound: { type: 'integer' },
-		totalRounds: { type: 'integer' },
-		participantCount: { type: 'integer' },
-		winnerId : { type: 'string' },
-		rounds:
-		{
-			type: 'array',
-			items: TournamentRound
-		}
 	}
 };
 
@@ -245,38 +188,6 @@ const	deleteUserStats =
 	handler: deleteUserStatsHandler
 }
 
-const	isUserBusy =
-{
-	schema:
-	{
-		summary: '🔒 Internal - Check if user is busy',
-		description: 'Internal only. Checks if a user is currently in a game/tournament. (called by other game services before inviting/joining)',
-		tags: ['Internal'],
-
-		...withInternalAuth,
-
-		querystring:
-		{
-			type: 'object',
-			required: ['userId'],
-			properties: { userId: { type: 'string' } }
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'object',
-				properties: { isBusy: { type: 'boolean' } }
-			},
-			500: ErrorResponse
-		}
-	},
-
-	preHandler: validateInternalApiKey,
-	handler: isUserBusyHandler
-}
-
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 const	getUserStats =
@@ -308,8 +219,6 @@ const	getUserStats =
 					gamesPlayed: { type: 'integer' },
 					gamesWon: { type: 'integer' },
 					gamesLost: { type: 'integer' },
-					tournamentsWon: { type: 'integer' },
-					tournamentsParticipated: { type: 'integer' },
 					elo: { type: 'integer' },
 					rank: { type: 'string' }
 				}
@@ -469,74 +378,9 @@ const	joinTournament =
 	handler: joinTournamentHandler
 }
 
-const	getUserTournamentParticipation =
-{
-	schema:
-	{
-		summary: 'Get user tournament participation',
-		description: 'Retrieve the list of tournament participation for a given user.',
-		tags: ['Public'],
-
-		...withInternalAuth,
-		...withCookieAuth,
-
-		querystring:
-		{
-			type: 'object',
-			required: ['id'],
-			properties:
-			{ id: { type: 'string' } }
-		},
-
-		response:
-		{
-			200:
-			{
-				type: 'array',
-				items: TournamentParticipation
-			},
-			500: ErrorResponse
-		}
-	},
-
-	preHandler: validateInternalApiKey,
-	handler: getUserTournamentParticipationHandler
-}
-
-const	getTournamentBracket =
-{
-	schema:
-	{
-		summary: 'Get tournament bracket',
-		description: 'Retrieve the full bracket state for a tournament (all rounds and matches), it works only for ongoing tournaments.',
-		tags: ['Public'],
-
-		...withInternalAuth,
-		...withCookieAuth,
-
-		params:
-		{
-			type: 'object',
-			required: ['id'],
-			properties:
-			{ id: { type: 'string' } }
-		},
-
-		response:
-		{
-			200:{ ...TournamentBracket },
-			404: ErrorResponse,
-			500: ErrorResponse
-		}
-	},
-
-	preHandler: validateInternalApiKey,
-	handler: getTournamentBracketHandler
-}
-
 //-----------------------------EXPORT ROUTES-----------------------------
 
-export async function	pongRoutes(fastify, options)
+export function	pongRoutes(fastify)
 {
 	// Actual WebSocket endpoint
 	fastify.get('/ws', { websocket: true }, (socket, req) =>
@@ -556,9 +400,7 @@ export async function	pongRoutes(fastify, options)
 	fastify.get('/stats', getUserStats);
 	fastify.get('/match-history', getUserMatchHistory);
 	fastify.get('/get-all-tournaments', getAllTournaments);
-	fastify.get('/is-user-busy', isUserBusy);
-	fastify.get('/user-tournament-participation', getUserTournamentParticipation);
-	fastify.get('/tournaments/:id/bracket', getTournamentBracket);
+	// fastify.get('/get-tournament', getTournament); // TO DO return single tournament info
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.post('/create-tournament', createTournament);

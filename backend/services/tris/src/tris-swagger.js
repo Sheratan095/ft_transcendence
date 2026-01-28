@@ -163,6 +163,16 @@ Reponse:
 }
 \`\`\`
 
+- **tris.gameStarted** - Notification that the game has started
+\`\`\`json
+{
+  "event": "tris.gameStarted",
+  "data": {
+	"gameId": "some-game-id"
+  }
+}
+\`\`\`
+
 - **tris.customGameCanceled** - Notification that the game has been canceled
 \`\`\`json
 {

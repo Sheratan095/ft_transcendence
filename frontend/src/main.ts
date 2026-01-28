@@ -3,73 +3,13 @@ import { getUserId } from './lib/auth';
 import './lib/fetchProxy';
 import { startTokenRefresh } from './lib/token';
 import { renderProfile } from './lib/profile';
-import { setupChatEventListeners, initChat, connectChatWebSocket } from './lib/chat';
+import { setupChatEventListeners } from './lib/chat';
 import { searchUser, renderSearchResult } from './lib/search';
 import { createLoginForm, createRegisterForm, createTwoFactorForm } from './components/auth';
-import { getIntlayer, setLocaleInStorage } from "intlayer";
-import { connectNotificationsWebSocket, sendPing } from './components/profile/Notifications';
-import { setFriendsManager } from './components/profile/Notifications';
-import { FriendsManager } from './components/profile/FriendsManager';
-import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
-
-// Load user's saved language preference
-const savedLanguage = localStorage.getItem('userLanguage') || 'en';
-setLocaleInStorage(savedLanguage);
+import { getIntlayer } from "intlayer";
+import { connectNotificationsWebSocket } from './components/profile/Notifications';
 
 getIntlayer("app"); // Initialize intlayer
-
-/**
- * Initialize application managers and websockets after user login
- */
-async function initializeUserServices(userId: string) {
-  try {
-    console.log('Initializing user services for userId:', userId);
-
-    // 1. Initialize FriendsManager
-    const friendsManager = new FriendsManager({ currentUserId: userId });
-    console.log('FriendsManager initialized');
-
-    // 2. Connect FriendsManager to Notifications
-    setFriendsManager(friendsManager);
-
-    // 3. Connect FriendsManager to Tris UI
-    setTrisFriendsManager(friendsManager);
-
-    // 4. Load friends list
-    await friendsManager.loadFriends();
-    console.log('Friends loaded');
-
-    // 5. Initialize Chat
-    initChat(userId);
-    setupChatEventListeners();
-    console.log('Chat services initialized');
-
-    // 6. Connect to Notifications WebSocket
-    connectNotificationsWebSocket();
-    console.log('Notifications WebSocket connected');
-
-    // 7. Set up periodic token refresh
-    startTokenRefresh();
-    console.log('Token refresh started');
-
-  } catch (err) {
-    console.error('Failed to initialize user services:', err);
-    throw err;
-  }
-}
-
-/**
- * Clean up services when user logs out
- */
-function cleanupUserServices() {
-  try {
-    // Close websockets and clean up any global state
-    console.log('Cleaning up user services');
-    // Additional cleanup can be added here as needed
-  } catch (err) {
-    console.error('Error during cleanup:', err);
-  }
-}
 
 
 class AuthUI {
@@ -83,28 +23,16 @@ class AuthUI {
     // make container flexible so the card can expand to available space
     this.container.classList.add('w-full', 'flex', 'items-center', 'justify-center');
     this.container.style.minHeight = '240px';
+
     getUserCount();
-    const userId = getUserId();
-    if (userId) {
-      this.renderProfileWithInit(el, userId);
+    if (getUserId()) {
+        startTokenRefresh();
+        renderProfile(el);
+        connectNotificationsWebSocket();
       return;
     }
     else
     {
-      this.renderLogin();
-    }
-  }
-
-  private async renderProfileWithInit(el: HTMLElement, userId: string) {
-    try {
-      // Initialize all user services
-      await initializeUserServices(userId);
-      
-      // Render profile card
-      await renderProfile(el);
-    } catch (err) {
-      console.error('Failed to initialize profile:', err);
-      // Fall back to login on init error
       this.renderLogin();
     }
   }
@@ -224,9 +152,8 @@ function setupSearchUser() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  setupChatEventListeners();
   setupSearchUser();
-  setupTrisCardListener();
-  // AuthUI will handle chat setup after user login
   new AuthUI();
 });
 

@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { gameManager } from './GameManager.js';
-import { tournamentManager } from './TournamentManager.js';
 
 // Middleware to validate API key for inter-service communication
 // This function checks for a valid API key in the request headers
@@ -94,9 +92,9 @@ export async function	getUsernameById(userId)
 	}
 }
 
-export function	calculateElo(win, loss, tournametsWon)
+export function	calculateElo(win, loss)
 {
-	let	elo = (process.env.EARNED_WIN_POINTS * win) - (process.env.LOST_LOSS_POINTS * loss) + (process.env.TOURNAMENT_EARNED_WIN_POINTS * tournametsWon);
+	let	elo = (process.env.EARNED_WIN_POINTS * win) - (process.env.LOST_LOSS_POINTS * loss);
 
 	if (elo < 0)
 		elo = 0;
@@ -149,57 +147,4 @@ export async function	checkBlock(userA, userB)
 		console.error('[CHAT] Error checking block status:', err.message);
 		return (false);
 	}
-}
-
-export async function	isUserBusyInternal(userId, includeTris)
-{
-	const	isInGame = await gameManager.isUserInGameOrMatchmaking(userId);
-	const	isInTournament = await tournamentManager.isUserInTournament(userId);
-
-	let	status = isInGame || isInTournament;
-
-	// If specified, check Tris service for busy status
-	//	it's included when the request comes from this service, when it's from another service we assume they already checked Tris
-	if (includeTris)
-	{
-		try
-		{
-			const	response = await fetch(`${process.env.TRIS_SERVICE_URL}/is-user-busy?userId=${userId}`, {
-				headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY }
-			});
-
-			if (!response.ok)
-			{
-				console.error(`[PONG] Failed to check user busy status in Tris service for Id ${userId}: ${response.statusText}`);
-				return (true); // assume busy if we can't reach TRIS, to avoid conflicts
-			}
-
-			const	data = await response.json();
-
-			status = status || data.isBusy;
-
-			console.log(`[PONG] User ${userId} busy status ${status}`);
-
-			return (status);
-		}
-		catch (err)
-		{
-			console.error(`[PONG] Failed to check user busy status in Tris service for Id ${userId}:`, err.message);
-			return (true); // assume busy if we can't reach TRIS, to avoid conflicts
-		}
-	}
-
-	console.log(`[PONG] User ${userId} busy status ${status}`);
-
-	return (status);
-}
-
-export function	calculateTop(totalPlayers, roundLost)
-{
-	if (roundLost === null)
-		return 1; // winner
-
-	const	totalRounds = Math.ceil(Math.log2(totalPlayers));
-
-	return (2 ** (totalRounds - roundLost + 1));
 }

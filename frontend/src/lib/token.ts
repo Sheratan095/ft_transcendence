@@ -86,7 +86,6 @@ export async function logout(): Promise<void> {
 
   localStorage.removeItem('userId');
   localStorage.removeItem('tfaEnabled');
-  localStorage.removeItem('user');
 
   try {
     await fetch(`/api/auth/logout`, {

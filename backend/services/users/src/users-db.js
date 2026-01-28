@@ -311,7 +311,6 @@ export class	UsersDatabase
 	}
 
 	// Create or update a friend request
-	// Returns: 'sent' | 'mutual_accept' to inform controller what happened
 	async	sendFriendRequest(senderId, receiverId)
 	{
 		// Check if relationship already exists (either direction)
@@ -344,24 +343,18 @@ export class	UsersDatabase
 					SET relationship_status = 'accepted', updated_at = CURRENT_TIMESTAMP
 					WHERE requester_id = ? AND target_id = ?
 				`, [receiverId, senderId]);
-				return 'mutual_accept';
+				return;
 			}
 			
 			// If rejected, allow resending by updating to pending
-			// Delete the old rejected relationship and create a new pending one with correct direction
+			// Send another request after rejecting
 			if (existing.relationship_status === 'rejected')
 			{
 				await this.db.run(`
-					DELETE FROM user_relationships
+					UPDATE user_relationships
+					SET relationship_status = 'pending', requester_id = ?, target_id = ?, updated_at = CURRENT_TIMESTAMP
 					WHERE (requester_id = ? AND target_id = ?) OR (requester_id = ? AND target_id = ?)
-				`, [senderId, receiverId, receiverId, senderId]);
-				
-				await this.db.run(`
-					INSERT INTO user_relationships (requester_id, target_id, relationship_status)
-					VALUES (?, ?, 'pending')
-				`, [senderId, receiverId]);
-				
-				return 'sent';
+				`, [senderId, receiverId, senderId, receiverId, receiverId, senderId]);
 			}
 		}
 		else
@@ -372,8 +365,6 @@ export class	UsersDatabase
 				VALUES (?, ?, 'pending')
 			`, [senderId, receiverId]);
 		}
-		
-		return 'sent';
 	}
 
 	// Accept a pending request (only the target can accept)

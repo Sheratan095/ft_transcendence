@@ -2,12 +2,11 @@ import { validateInternalApiKey } from './notification-help.js';
 
 import {
 	sendFriendRequest,
-	// sendFriendAccept,
+	sendFriendAccept,
 	send2FaCode,
 	getActiveUsersCount,
 	sendChatUserAdded,
 	sendGameInvite,
-	sendNowFriends
 } from './notification-controllers.js';
 
 import {
@@ -107,43 +106,11 @@ const	sendFriendRequestOpts =
 	handler: sendFriendRequest
 }
 
-// const	sendFriendAcceptOpts = 
-// {
-// 	schema:
-// 	{
-// 		summary: '🔒 Internal - Send friend accept',
-// 		tags: ['Notifications', 'Internal'],
-	
-// 		...withInternalAuth,
-
-// 		body:
-// 		{
-// 			type: 'object',
-// 			required: ['requesterId', 'accepterUsername', 'accepterId'],
-// 			properties:
-// 			{
-// 				requesterId: {type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
-// 				accepterId: {type: 'string'}, // WHO ACCEPTED THE REQUEST
-// 				accepterUsername: { type: 'string'}, // USERNAME OF THE ACCEPTER
-// 			}
-// 		},
-
-// 		response:
-// 		{
-// 			200 : {},
-// 			500: ErrorResponse
-// 		}
-// 	},
-
-// 	preHandler: validateInternalApiKey,
-// 	handler: sendFriendAccept,
-// }
-
-const	sendNowFriendsOpts = 
+const	sendFriendAcceptOpts = 
 {
 	schema:
 	{
-		summary: '🔒 Internal - Notify users that are now friends with each other (Called by relationship service)',
+		summary: '🔒 Internal - Send friend accept',
 		tags: ['Notifications', 'Internal'],
 	
 		...withInternalAuth,
@@ -151,13 +118,12 @@ const	sendNowFriendsOpts =
 		body:
 		{
 			type: 'object',
-			required: ['user1Id', 'user2Id', 'user1Username', 'user2Username'],
+			required: ['requesterId', 'accepterUsername', 'accepterId'],
 			properties:
 			{
-				user1Id: { type: 'string'}, // USER 1 ID
-				user2Id: { type: 'string'}, // USER 2 ID
-				user1Username: { type: 'string'}, // USER 1 USERNAME
-				user2Username: { type: 'string'}, // USER 2 USERNAME
+				requesterId: {type: 'string'}, // WHO TO SENT THE NOTIFICATION TO
+				accepterId: {type: 'string'}, // WHO ACCEPTED THE REQUEST
+				accepterUsername: { type: 'string'}, // USERNAME OF THE ACCEPTER
 			}
 		},
 
@@ -169,7 +135,7 @@ const	sendNowFriendsOpts =
 	},
 
 	preHandler: validateInternalApiKey,
-	handler: sendNowFriends,
+	handler: sendFriendAccept,
 }
 
 const	send2FaOpts = 
@@ -324,9 +290,8 @@ export function	notificationRoutes(fastify)
 	fastify.get('/active-users-count', getActiveUsersCountOpts);
 
 	fastify.post('/send-friend-request', sendFriendRequestOpts);
-	// fastify.post('/send-friend-accept', sendFriendAcceptOpts);
+	fastify.post('/send-friend-accept', sendFriendAcceptOpts);
 	fastify.post('/send-2fa-code', send2FaOpts);
 	fastify.post('/send-chat-user-added', sendChatUserAddedOpts);
-	fastify.post('/send-now-friends', sendNowFriendsOpts);
 	fastify.post('/send-game-invite', sendGameInviteOpts);
 }

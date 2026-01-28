@@ -1,7 +1,7 @@
 import { GameInstance, GameType, GameStatus } from './GameInstance.js';
 import { v4 as uuidv4 } from 'uuid';
 import { pongConnectionManager } from './PongConnectionManager.js';
-import { sendGameInviteNotification, getUsernameById, sleep, checkBlock, isUserBusyInternal } from './pong-help.js';
+import { sendGameInviteNotification, getUsernameById, sleep, checkBlock } from './pong-help.js';
 import { pongDatabase as pongDb } from './pong.js';
 
 class	GameManager
@@ -15,8 +15,8 @@ class	GameManager
 
 	async createCustomGame(creatorId, creatorUsername, otherId, otherUsername)
 	{
-		// User must not be busy (in matchmaking or in another game, including TRIS)
-		if (await isUserBusyInternal(creatorId, true))
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(creatorId))
 		{
 			console.error(`[PONG] ${creatorId} tried to create a custom game while busy`);
 			pongConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
@@ -111,10 +111,10 @@ class	GameManager
 		console.log(`[PONG] Canceled custom game ${gameId} by user ${userId}`);
 	}
 
-	async joinCustomGame(playerId, gameId)
+	joinCustomGame(playerId, gameId)
 	{
-		// User must not be busy (in matchmaking or in another game including TRIS)
-		if (await isUserBusyInternal(playerId, true))
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(playerId))
 		{
 			console.error(`[PONG] ${playerId} tried to join custom game ${gameId} while busy`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
@@ -130,10 +130,10 @@ class	GameManager
 		}
 
 		// Check if game is a custom game and in WAITING status
-		if (gameInstance.gameType !== GameType.CUSTOM || gameInstance.gameStatus !== GameStatus.WAITING)
+		if (gameInstance.gameType !== GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
 		{
-			console.error(`[PONG] ${playerId} tried to join a non-custom game ${gameId} or game not waiting`);
-			pongConnectionManager.sendErrorMessage(playerId, 'Not a custom game or game already started');
+			console.error(`[PONG] ${playerId} tried to join a non-custom game ${gameId}`);
+			pongConnectionManager.sendErrorMessage(playerId, 'Not a custom game');
 			return ;
 		}
 
@@ -230,8 +230,8 @@ class	GameManager
 
 	async joinMatchmaking(playerId)
 	{
-		// User must not be busy (in matchmaking or in another game including TRIS)
-		if (await isUserBusyInternal(playerId, true))
+		// User must not be busy (in matchmaking or in another game)
+		if (this._isUserBusy(playerId))
 		{
 			console.error(`[PONG] ${playerId} tried to join matchmaking while busy`);
 			pongConnectionManager.sendErrorMessage(playerId, 'You are already in a game or matchmaking');
@@ -474,16 +474,14 @@ class	GameManager
 		pongConnectionManager.sendGameEnded(gameInstance.playerLeftId, gameInstance.id, winner, winnerUsername, quit);
 		pongConnectionManager.sendGameEnded(gameInstance.playerRightId, gameInstance.id, winner, winnerUsername, quit);
 
-		if (gameInstance.gameType === GameType.RANDOM || gameInstance.gameType === GameType.TOURNAMENT)
+		if (gameInstance.gameType === GameType.RANDOM)
 		{
 			// Add game to the history
-			const	playerLeftScore = gameInstance.scores[gameInstance.playerLeftId] || 0;
-			const	playerRightScore = gameInstance.scores[gameInstance.playerRightId] || 0;
-			pongDb.saveMatch(gameInstance.playerLeftId, gameInstance.playerRightId, playerLeftScore, playerRightScore, winner, gameInstance.tournamentId);
+			pongDb.saveMatch(gameInstance.playerLeftId, gameInstance.playerRightId, winner);
 
 			// Update player stats
-			pongDb.updateUserStats(winner, 1, 0, 0, 0);
-			pongDb.updateUserStats(loser, 0, 1, 0, 0);
+			pongDb.updateUserStats(winner, 1, 0);
+			pongDb.updateUserStats(loser, 0, 1);
 		}
 
 		if (this._randomGameCooldowns.has(gameInstance.id))
@@ -502,23 +500,18 @@ class	GameManager
 			console.log(`[PONG] Game ${gameInstance.id} ended. Winner: ${winner}`);
 	}
 
-	isUserInGameOrMatchmaking(userId)
+	// A user is considered busy if they are in matchmaking
+	//	or in a game that is waiting, in lobby, or in progress
+	_isUserBusy(userId)
 	{
 		if (this._waitingPlayers.includes(userId))
 			return (true);
 
-		// Check if user is in any active games (IN_LOBBY or IN_PROGRESS)
+		// Check if user is in any active games (WAITING, IN_LOBBY, or IN_PROGRESS)
 		for (const gameInstance of this._games.values())
 		{
-			// If the invitee tries to join a CUSTOM game
-			if (gameInstance.hasPlayer(userId) && gameInstance.gameType === GameType.CUSTOM && gameInstance.gameStatus === GameStatus.WAITING)
-				continue ;
-
-			if (gameInstance.hasPlayer(userId) &&
-				(gameInstance.gameStatus === GameStatus.IN_LOBBY || gameInstance.gameStatus === GameStatus.IN_PROGRESS))
-			{
+			if (gameInstance.hasPlayer(userId) && gameInstance.gameStatus !== GameStatus.FINISHED)
 				return (true);
-			}
 		}
 
 		return (false);

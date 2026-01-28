@@ -168,10 +168,6 @@ import {
 } from './routes/users-routes.js'
 
 import {
-	getTrisTest
-}	from './routes/tris-routes.js'
-
-import {
 	getUserRelationships,
 	getFriends,
 	getIncomingRequests,

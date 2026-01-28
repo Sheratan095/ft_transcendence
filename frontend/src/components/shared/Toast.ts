@@ -1,15 +1,8 @@
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
-interface ToastAction {
-  label: string;
-  onClick: () => void | Promise<void>;
-  style?: 'primary' | 'secondary';
-}
-
 interface ToastOptions {
   duration?: number;
   position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
-  actions?: ToastAction[];
 }
 
 function getToastContainer(position: string = 'top-right'): HTMLElement {
@@ -39,11 +32,11 @@ function getToastContainer(position: string = 'top-right'): HTMLElement {
 }
 
 export function showToast(message: string, type: ToastType = 'info', options: ToastOptions = {}): void {
-  const { duration = 4000, position = 'top-right', actions = [] } = options;
+  const { duration = 4000, position = 'top-right' } = options;
   const container = getToastContainer(position);
 
   const toast = document.createElement('div');
-  toast.className = 'animate-in fade-in slide-in-from-top-4 duration-200 rounded-lg px-4 py-3 shadow-lg max-w-md pointer-events-auto';
+  toast.className = 'animate-in fade-in slide-in-from-top-4 duration-200 rounded-lg px-4 py-3 shadow-lg max-w-sm';
 
   // Type-based styling
   const typeMap: Record<ToastType, { bg: string; text: string; icon: string }> = {
@@ -71,67 +64,22 @@ export function showToast(message: string, type: ToastType = 'info', options: To
 
   const style = typeMap[type];
   toast.className += ` ${style.bg} ${style.text}`;
-
-  // Build content with message and actions
-  let content = `
-    <div class="flex flex-col gap-2">
-      <div class="flex items-center gap-3">
-        <span class="text-lg font-bold">${style.icon}</span>
-        <span>${escapeHtml(message)}</span>
-      </div>
+  toast.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span class="text-lg font-bold">${style.icon}</span>
+      <span>${escapeHtml(message)}</span>
+    </div>
   `;
-
-  if (actions.length > 0) {
-    content += '<div class="flex gap-2 mt-2">';
-    actions.forEach(action => {
-      const btnStyle = action.style === 'primary' 
-        ? 'bg-white text-gray-900 hover:bg-gray-100' 
-        : 'bg-gray-800 text-white hover:bg-gray-700';
-      
-      content += `
-        <button class="px-3 py-1 rounded text-sm font-medium ${btnStyle} transition cursor-pointer">
-          ${escapeHtml(action.label)}
-        </button>
-      `;
-    });
-    content += '</div>';
-  }
-
-  content += '</div>';
-  toast.innerHTML = content;
-
-  // Attach event listeners to buttons
-  if (actions.length > 0) {
-    const buttons = toast.querySelectorAll('button');
-    buttons.forEach((button, index) => {
-      if (actions[index]) {
-        button.addEventListener('click', async () => {
-          try {
-            await actions[index].onClick();
-          } catch (err) {
-            console.error('Toast action error:', err);
-          }
-          removeToast();
-        });
-      }
-    });
-  }
 
   container.appendChild(toast);
 
-  const removeToast = () => {
-    toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4', 'duration-200');
-    setTimeout(() => {
-      toast.remove();
-    }, 200);
-  };
-
-  // Auto-remove after duration (unless there are actions)
+  // Auto-remove after duration
   if (duration > 0) {
     setTimeout(() => {
-      if (toast.parentElement) {
-        removeToast();
-      }
+      toast.classList.add('animate-out', 'fade-out', 'slide-out-to-top-4', 'duration-200');
+      setTimeout(() => {
+        toast.remove();
+      }, 200);
     }, duration);
   }
 }

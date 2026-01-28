@@ -38,7 +38,6 @@ export function	handleMessage(socket, msg, userId)
 		switch (message.event)
 		{
 			case 'ping': // Handle ping event
-				console.log(`[NOTIFICATION] Received ping from user ${userId}`);
 				socket.send(JSON.stringify({ event: 'pong', data: { timestamp: Date.now() } }));
 				break;
 		

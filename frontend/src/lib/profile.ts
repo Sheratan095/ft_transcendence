@@ -31,7 +31,6 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
   if (!user) {
 	localStorage.removeItem('userId');
 	localStorage.removeItem('tfaEnabled');
-	localStorage.removeItem('user');
 	location.reload();
 	return null;
   }
@@ -40,8 +39,6 @@ export async function renderProfile(container?: HTMLElement | string): Promise<H
 
   // Initialize chat with user ID
   initChat(user.id);
-
-
 
   // Render the profile card component
   return renderProfileCard(user, root);

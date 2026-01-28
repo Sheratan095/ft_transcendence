@@ -2,8 +2,7 @@ import { extractUserData } from './users-help.js';
 
 import {
 	notifyFriendAccept,
-	notifyFriendRequest,
-	notifyNowFriends
+	notifyFriendRequest
 } from './relationships-help.js';
 
 //-----------------------------ROUTES PROTECTED BY JWT, THE USER PROPERTY IS ADDED IN THE GATEWAY MIDDLEWARE-----------------------------
@@ -188,11 +187,11 @@ export async function	blockUser(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body;
+		const	{ blockedId } = req.body.targetId;
 
-		await usersDb.blockUser(userId, targetId);
+		await usersDb.blockUser(userId, blockedId);
 
-		console.log('[RELATIONSHIPS] User blocked by userId:', userId, 'blockedId:', targetId);
+		console.log('[RELATIONSHIPS] User blocked by userId:', userId, 'blockedId:', blockedId);
 
 		return (reply.code(200).send({ message: 'User blocked' }));
 	}
@@ -213,7 +212,7 @@ export async function	unblockUser(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body;
+		const	{ targetId } = req.body.targetId;
 
 		await usersDb.unblockUser(userId, targetId);
 
@@ -238,7 +237,7 @@ export async function	cancelFriendRequest(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body;
+		const	{ targetId } = req.body.targetId;
 
 		await usersDb.cancelFriendRequest(userId, targetId);
 
@@ -266,11 +265,11 @@ export async function	removeFriend(req, reply)
 	{
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
-		const	{ targetId } = req.body;
+		const	{ friendId } = req.body.targetId;
 
-		await usersDb.removeFriend(userId, targetId);
+		await usersDb.removeFriend(userId, friendId);
 
-		console.log('[RELATIONSHIPS] Friend removed by userId:', userId, 'friendId:', targetId);
+		console.log('[RELATIONSHIPS] Friend removed by userId:', userId, 'friendId:', friendId);
 
 		return (reply.code(200).send({ message: 'Friend removed' }));
 	}
@@ -323,44 +322,19 @@ export async function	sendFriendRequest(req, reply)
 		if (!targetUser)
 			return (reply.code(404).send({ error: 'User not found' }));
 
+		// Check if users are blocked before sending request
+		if (await usersDb.isBlocked(userId, targetId))
+		{
+			console.log('[RELATIONSHIPS] Not notifying - users are blocked');
+			return (reply.code(200).send({ message: 'Friend request accepted' }));
+		}
+
 		// Can't send request to yourself
 		if (userId === targetId)
 			return (reply.code(400).send({ error: 'Cannot send friend request to yourself' }));
 
-		const	relationship = await usersDb.getUsersRelationship(userId, targetId);
-		if (relationship)
-		{
-			// Check if blocked - silently return success to avoid revealing block status
-			if (relationship.relationship_status === 'blocked')
-			{
-				console.log(`[RELATIONSHIPS] User ${userId} tried to send request to ${targetId} but the relationship is blocked`);
-				return (reply.code(200).send({ message: 'Friend request sent' }));
-			}
+		await usersDb.sendFriendRequest(userId, targetId);
 
-			// Already friends
-			if (relationship.relationship_status === 'accepted')
-			{
-				console.log(`[RELATIONSHIPS] User ${userId} tried to send request to ${targetId} but they are already friends`);
-				return (reply.code(200).send({ message: 'Already friends' }));
-			}
-		}
-
-		// Send the friend request - DB handles all cases (new, rejected, mutual)
-		const	result = await usersDb.sendFriendRequest(userId, targetId);
-
-		// If the DB auto-accepted a mutual request
-		if (result === 'mutual_accept')
-		{
-			const	targetUsername = targetUser.username;
-			const	requesterUsername = (await usersDb.getUserById(userId)).username;
-
-			await notifyNowFriends(userId, targetId, requesterUsername, targetUsername);
-
-			console.log('[RELATIONSHIPS] Auto-accepted mutual friend request between:', userId, 'and', targetId);
-			return (reply.code(200).send({ message: 'Now friends' }));
-		}
-
-		// Normal friend request sent
 		const	requesterUsername = (await usersDb.getUserById(userId)).username;
 
 		if (await notifyFriendRequest(requesterUsername, targetId, userId) === false)
@@ -402,9 +376,9 @@ export async function	acceptFriendRequest(req, reply)
 		await usersDb.acceptFriendRequest(user.id, requesterId);
 
 		const	accepterUsername = (await usersDb.getUserById(user.id)).username;
-		const	requesterUser = await usersDb.getUserById(requesterId);
 
-		await notifyFriendAccept(requesterId, user.id, requesterUser.username, accepterUsername);
+		if (await notifyFriendAccept(requesterId, user.id, accepterUsername) === false)
+			return (reply.code(500).send({ error: 'Failed to notify user' }));
 
 		console.log('[RELATIONSHIPS] Friend request accepted by userId:', user.id, 'from requesterId:', requesterId);
 
@@ -425,7 +399,6 @@ export async function	acceptFriendRequest(req, reply)
 }
 
 //-----------------------------INTERNAL ROUTES CALLED-----------------------------
-
 export async function	getFriendsInternal(req, reply)
 {
 	try
