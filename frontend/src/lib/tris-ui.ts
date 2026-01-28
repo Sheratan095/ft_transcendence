@@ -19,6 +19,7 @@ import { showSuccessToast, showErrorToast, showToast } from '../components/share
 import type { User } from './auth';
 import type { FriendsManager } from '../components/profile/FriendsManager';
 import { start } from '../spa';
+import { openTrisModeModal, getSelectedTrisMode, initializeModeSpecificBehaviors, resetLocalGame } from './tris-mode';
 
 let trisInitialized = false;
 let user: User | null = null;
@@ -172,8 +173,12 @@ function renderAndAttachButtons() {
     freshSurrenderBtn.addEventListener('click', handleSurrenderButtonClick);
   }
   if (resetBtn) {
-    resetBtn.removeEventListener('click', () => location.reload());
-    resetBtn.addEventListener('click', () => location.reload());
+    const newResetBtn = resetBtn.cloneNode(true) as HTMLButtonElement;
+    resetBtn.replaceWith(newResetBtn);
+    const freshResetBtn = document.getElementById('tris-reset-btn') as HTMLButtonElement | null;
+    if (freshResetBtn) {
+      freshResetBtn.addEventListener('click', handleResetButtonClick);
+    }
   }
   if (inviteBtn) {
     inviteBtn.removeEventListener('click', () => openInviteModal());
@@ -218,6 +223,22 @@ function handleSurrenderButtonClick() {
   } else {
     quitGame();
     showErrorToast('You quit the game');
+  }
+}
+
+/**
+ * Handle reset button click - resets the game or page
+ */
+function handleResetButtonClick() {
+  const selectedMode = getSelectedTrisMode();
+  
+  if (selectedMode === 'offline-1v1' || selectedMode === 'offline-ai') {
+    // Reset local game without reloading page
+    resetLocalGame();
+    showSuccessToast('Game reset!');
+  } else {
+    // Reload page for online mode
+    location.reload();
   }
 }
 
@@ -473,9 +494,28 @@ function attachTrisCardListener() {
   console.log('Attaching tris card listener');
   trisCard.addEventListener('click', (e) => {
     e.preventDefault();
-    console.log('Tris card clicked');
-    openTrisModal();
+    console.log('Tris card clicked - opening mode selection');
+    openTrisModeModal(handleModeSelection);
   });
+}
+
+/**
+ * Handle mode selection from the mode modal
+ */
+async function handleModeSelection(mode: string) {
+  const modeMap: Record<string, string> = {
+    'online': 'Online Matchmaking',
+    'offline-1v1': 'Offline 1v1',
+    'offline-ai': 'Offline vs Bot'
+  };
+
+  showSuccessToast(`Selected: ${modeMap[mode] || mode}`);
+  
+  // Open the tris modal
+  await openTrisModal();
+  
+  // Initialize mode-specific behaviors
+  initializeModeSpecificBehaviors(mode as any);
 }
 
 /**

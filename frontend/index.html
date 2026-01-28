@@ -506,6 +506,80 @@
 <div id="toast-container-bottom-left" class="fixed bottom-4 left-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
 
+<!-- Tris Mode Selection Modal -->
+<div
+  id="tris-mode-modal"
+  tabindex="-1"
+  class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50"
+>
+  <div class="relative p-4 w-full max-w-xl">
+    <div class="relative bg-neutral-900 border-4 border-neutral-700 shadow-[10px_10px_0_0_#ff009d] h-auto flex flex-col">
+      
+      <!-- Close button -->
+      <button
+        type="button"
+        class="absolute top-4 right-4 z-10 text-neutral-400 bg-transparent 
+               hover:bg-neutral-800 hover:text-white transition border-2 border-neutral-700
+               w-8 h-8 inline-flex justify-center items-center"
+        id="tris-mode-close-btn"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- Header -->
+      <div class="p-8 border-b-2 border-neutral-700 bg-neutral-800">
+        <h2 class="text-3xl font-extrabold uppercase tracking-tight text-[#ff009d]">Select Game Mode</h2>
+        <p class="text-neutral-400 text-sm mt-2">Choose how you want to play Tris</p>
+      </div>
+
+      <!-- Mode selection area -->
+      <div class="p-8 flex flex-col gap-4">
+        <!-- Online Mode -->
+        <button
+          id="tris-mode-online"
+          class="group relative p-6 bg-gradient-to-br from-neutral-800 to-neutral-900 border-3 border-neutral-700 
+                 hover:border-[#0dff66] transition-all duration-300 hover:shadow-[0_0_20px_rgba(13,255,102,0.3)]
+                 flex flex-col items-start gap-2 cursor-pointer"
+        >
+          <span class="text-xl font-extrabold uppercase text-[#0dff66]">🌐 Online</span>
+          <span class="text-sm text-neutral-400 group-hover:text-neutral-300 transition">
+            Play against other players online with matchmaking
+          </span>
+        </button>
+
+        <!-- Offline 1v1 Mode -->
+        <button
+          id="tris-mode-offline-1v1"
+          class="group relative p-6 bg-gradient-to-br from-neutral-800 to-neutral-900 border-3 border-neutral-700 
+                 hover:border-[#00ffff] transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]
+                 flex flex-col items-start gap-2 cursor-pointer"
+        >
+          <span class="text-xl font-extrabold uppercase text-[#00ffff]">👥 Offline 1v1</span>
+          <span class="text-sm text-neutral-400 group-hover:text-neutral-300 transition">
+            Play against a friend on the same device
+          </span>
+        </button>
+
+        <!-- Offline AI Mode -->
+        <button
+          id="tris-mode-offline-ai"
+          class="group relative p-6 bg-gradient-to-br from-neutral-800 to-neutral-900 border-3 border-neutral-700 
+                 hover:border-[#ff00ff] transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,0,255,0.3)]
+                 flex flex-col items-start gap-2 cursor-pointer"
+        >
+          <span class="text-xl font-extrabold uppercase text-[#ff00ff]">🤖 Offline Bot</span>
+          <span class="text-sm text-neutral-400 group-hover:text-neutral-300 transition">
+            Play against an AI bot locally
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Tris Game Modal -->
 <div
   id="tris-modal"
