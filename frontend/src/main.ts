@@ -1,4 +1,6 @@
 import { getUserId } from './lib/auth';
+// Ensure the fetch proxy is loaded early so all subsequent fetch() calls are rewritten
+import './lib/fetchProxy';
 import { startTokenRefresh } from './lib/token';
 import { renderProfile } from './lib/profile';
 import { setupChatEventListeners, initChat, connectChatWebSocket } from './lib/chat';

@@ -89,8 +89,11 @@ const	start = async () =>
 		fastify.register(userRoutes)
 		fastify.register(relationshipsRoutes)
 
-		fastify.listen({ port: process.env.PORT })
-		console.log(`[USERS] Server is running on port ${process.env.PORT}`)
+		// fastify.listen({ port: process.env.PORT })
+		// console.log(`[USERS] Server is running on port ${process.env.PORT}`)
+		const HOST = process.env.HOST || '0.0.0.0'
+        await fastify.listen({ port: Number(process.env.PORT), host: HOST })
+        console.log(`[USERS] Server is running on ${HOST}:${process.env.PORT}`)
 	}
 	catch (err)
 	{
