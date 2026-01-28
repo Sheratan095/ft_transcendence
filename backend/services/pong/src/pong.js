@@ -13,7 +13,7 @@ import { checkEnvVariables } from './pong-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'NOTIFICATION_SERVICE_URL', 'USERS_SERVICE_URL', 'READY_COOLDOWN_MS',
 	'MATCHMAKING_IGNORE_BLOCKS', 'WINNING_SCORE', 'EARNED_WIN_POINTS' ,'LOST_LOSS_POINTS', 'PLACEHOLDER_DELETED_USERNAMES',
 	'COOLDOWN_BETWEEN_POINTS_MS', 'PADDLE_HEIGHT', 'PADDLE_SPEED', 'MAX_BOUNCE_ANGLE', 'BALL_RADIUS', 'BALL_INITIAL_SPEED', 'BALL_SPEED_FACTOR',
-	'BALL_MAX_SPEED', 'MIN_PLAYERS_FOR_TOURNAMENT_START', 'ROUND_TRANSITION_COOLDOWN_MS', 'TRIS_SERVICE_URL', 'TOURNAMENT_EARNED_WIN_POINTS'] );
+	'BALL_MAX_SPEED', 'MIN_PLAYERS_FOR_TOURNAMENT_START', 'ROUND_TRANSITION_COOLDOWN_MS', 'TRIS_SERVICE_URL', 'TOURNAMENT_EARNED_WIN_POINTS', 'HOST'] );
 
 import { PongDatabase } from './pong-db.js';
 let		pongDatabase;
@@ -37,9 +37,9 @@ const	start = async () =>
 		// Setup routes before starting the server
 		fastify.register(pongRoutes);
 
-		await fastify.listen({ port: process.env.PORT })
-		console.log(`[PONG] Server is running on localhost:${process.env.PORT}`)
-		console.log(`[PONG] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
+		await fastify.listen({ port: process.env.PORT, host: process.env.HOST })
+		console.log(`[PONG] Server is running on ${process.env.HOST}:${process.env.PORT}`)
+		console.log(`[PONG] Web socket is listening on ws://${process.env.HOST}:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{

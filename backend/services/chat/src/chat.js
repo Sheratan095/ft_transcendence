@@ -10,7 +10,7 @@ import fastifyWebsocket from '@fastify/websocket';
 await fastify.register(fastifyWebsocket);
 
 import { checkEnvVariables } from './chat-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'HOST']);
 
 import { ChatDatabase } from './chat-db.js';
 let		chatDatabase;
@@ -35,9 +35,9 @@ const	start = async () =>
 		// Setup routes before starting the server
 		fastify.register(chatRoutes);
 
-		await fastify.listen({ port: process.env.PORT })
-		console.log(`[CHAT] Server is running on localhost:${process.env.PORT}`)
-		console.log(`[CHAT] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
+		await fastify.listen({ port: process.env.PORT, host: process.env.HOST })
+		console.log(`[CHAT] Server is running on ${process.env.HOST}:${process.env.PORT}`)
+		console.log(`[CHAT] Web socket is listening on ws://${process.env.HOST}:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{
