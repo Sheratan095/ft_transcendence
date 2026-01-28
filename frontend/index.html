@@ -20,22 +20,32 @@
 
 <div class=" shadow-[10px_10px_0_0_#0dff66]"> </div>
 <!-- Search User Bar at Top -->
-	<div class="sticky top-0 z-50 w-full border-b-2 border-neutral-700 hover:border-[#0dff66] transition-colors duration-300">
-		<div class="max-w-full mx-auto flex gap-2">
+	<div class="sticky top-0 z-50 w-full border-b-2 border-neutral-700 hover:border-[#0dff66] transition-colors duration-300 dark:border-neutral-700 dark:hover:border-[#0dff66] light:border-gray-300 light:hover:border-orange-400">
+		<div class="max-w-full mx-auto flex gap-2 items-center">
 			<form id="search-user-form" class="flex gap-2 w-full">
 				<input 
 					id="search-user-input"
 					type="text" 
 					placeholder="Search user by name or ID..." 
-					class="flex-1 px-4 py-2 bg-neutral-800 border-2 border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-[#0dff66] hover:border-neutral-600 uppercase tracking-tight font-semibold text-sm transition-colors duration-300"
+					class="flex-1 px-4 py-2 bg-neutral-800 border-2 border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-[#0dff66] hover:border-neutral-600 uppercase tracking-tight font-semibold text-sm transition-colors duration-300 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:placeholder-neutral-500 dark:focus:border-[#0dff66] dark:hover:border-neutral-600 light:bg-gray-100 light:border-gray-300 light:text-black light:placeholder-gray-500 light:focus:border-orange-400 light:hover:border-gray-400"
 				/>
 				<button 
 					type="submit"
-					class="px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 hover:shadow-[0_0_10px_#0dff66] transition border-2 border-neutral-700 text-sm"
+					class="px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 hover:shadow-[0_0_10px_#0dff66] transition border-2 border-neutral-700 text-sm dark:bg-[#0dff66] dark:text-black dark:border-neutral-700 light:bg-orange-400 light:text-white light:border-gray-400"
 				>
 					Search
 				</button>
 			</form>
+			<!-- Theme Toggle Button -->
+			<button 
+				id="theme-toggle-btn"
+				class="p-2 rounded-lg border-2 border-neutral-700 hover:bg-neutral-800 transition-colors ml-2 dark:border-neutral-700 dark:hover:bg-neutral-800 light:border-gray-300 light:hover:bg-gray-200"
+				title="Toggle dark/light mode"
+			>
+				<svg class="w-5 h-5 text-white dark:text-white light:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m-1.636-6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1m1.636 6.364l.707.707M12 12a3 3 0 110-6 3 3 0 010 6z" />
+				</svg>
+			</button>
 		</div>
 		<div id="search-error" class="mt-2 text-red-500 text-sm hidden max-w-4xl mx-auto"></div>
 	</div>
@@ -51,75 +61,110 @@
 
 <br>
 
-<div class="relative w-full max-w-[90vw] mx-auto
-flex flex-col md:flex-row items-center justify-center
-gap-[10vw]">
+<!-- Main Content Container - Slideshow and Auth Side by Side -->
+<div class="relative w-full max-w-[80vw] mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-8">
+  <!-- Slideshow Container (Left Side) -->
+  <div class="flex-1 flex flex-col items-center justify-center">
+    
+    <!-- Slideshow Wrapper -->
+    <div class="relative w-full flex items-center justify-center">
+      <!-- Previous Button -->
+      <button id="slideshow-prev-btn" 
+        class="absolute left-0 z-10 p-3 bg-[#ff009d] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700 rounded-full w-12 h-12 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
 
-<!-- CARD PONG -->
-<a class="p-10 w-full max-w-[50vw] max-h-[80vh]
-border-4 border-neutral-700 bg-neutral-900
-shadow-[10px_10px_0_0_#ff009d] overflow-hidden
-hover:shadow-lg hover:brightness-110 transition-all duration-300 no-underline block">
+      <!-- Slides Container -->
+      <div class="w-full mx-auto px-16">
+        
+        <!-- CARD PONG -->
+        <div id="pong-card-wrapper" class="hidden">
+          <a class="p-10 w-full
+          border-4 border-neutral-700 bg-neutral-900
+          shadow-[10px_10px_0_0_#ff009d] overflow-hidden
+          hover:shadow-lg hover:brightness-110 transition-all duration-300 no-underline block
+          slideshow-slide" href="/pong">
 
-<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-[#ff009d] text-center hover:underline scale-105 duration-300">
-	Play pong
-</h3>
+            <h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-[#ff009d] text-center hover:underline scale-105 duration-300">
+              Play pong
+            </h3>
 
-<div class="w-full aspect-square relative border-4 border-double border-white mx-auto">
-	<div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-full border-dotted border-r-2 border-white"></div>
-	<div class="absolute left-[6%] w-[0.3vw] h-[1.2vw] bg-white animate-[ping_6s_linear_infinite]"></div>
-	<div class="absolute right-[6%] w-[0.3vw] h-[1.2vw] bg-white animate-[pong_6s_linear_infinite]"></div>
-	<div class="absolute w-[0.4vw] h-[0.4vw] bg-white animate-[ball_6s_linear_infinite]"></div>
-</div>
-</a>
+            <div class="w-full aspect-square relative border-4 border-double border-white mx-auto">
+              <div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-full border-dotted border-r-2 border-white"></div>
+              <div class="absolute left-[6%] w-[0.3vw] h-[1.2vw] bg-white animate-[ping_6s_linear_infinite]"></div>
+              <div class="absolute right-[6%] w-[0.3vw] h-[1.2vw] bg-white animate-[pong_6s_linear_infinite]"></div>
+              <div class="absolute w-[0.4vw] h-[0.4vw] bg-white animate-[ball_6s_linear_infinite]"></div>
+            </div>
+          </a>
+        </div>
 
-<!-- Tic tac toe -->
- <button id="tris-card-btn" class="p-10 w-full max-w-[50vw] max-h-[80vh]
-border-4 border-neutral-700 bg-neutral-900
-shadow-[10px_10px_0_0_#ff009d] overflow-hidden
-hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left">
+        <!-- Tic tac toe -->
+        <div id="tris-card-wrapper">
+          <button id="tris-card-btn" class="p-10 w-full
+          border-4 border-neutral-700 bg-neutral-900
+          shadow-[10px_10px_0_0_#ff009d] overflow-hidden
+          hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left
+          slideshow-slide">
 
-	<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-[#ff009d] text-center hover:underline scale-105 duration-300">
-		Play tris
-	</h3>
+  	<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-[#ff009d] text-center hover:underline scale-105 duration-300">
+  		Play tris
+  	</h3>
 
-	<div class="relative w-full aspect-square border-4 border-double border-white mx-auto overflow-hidden pointer-events-none">
+  	<div class="relative w-full aspect-square border-4 border-double border-white mx-auto overflow-hidden pointer-events-none">
 
-	<!-- Vertical grid lines -->
-	<div class="absolute left-1/3 top-0 w-[2px] h-full bg-white animate-grid-v"></div>
-	<div class="absolute left-2/3 top-0 w-[2px] h-full bg-white animate-grid-v" style="animation-delay: 0.2s;"></div>
+  	<!-- Vertical grid lines -->
+  	<div class="absolute left-1/3 top-0 w-[2px] h-full bg-white animate-grid-v"></div>
+  	<div class="absolute left-2/3 top-0 w-[2px] h-full bg-white animate-grid-v" style="animation-delay: 0.2s;"></div>
 
-	<!-- Horizontal grid lines -->
-	<div class="absolute top-1/3 left-0 h-[2px] w-full bg-white animate-grid-h"></div>
-	<div class="absolute top-2/3 left-0 h-[2px] w-full bg-white animate-grid-h" style="animation-delay: 0.2s;"></div>
+  	<!-- Horizontal grid lines -->
+  	<div class="absolute top-1/3 left-0 h-[2px] w-full bg-white animate-grid-h"></div>
+  	<div class="absolute top-2/3 left-0 h-[2px] w-full bg-white animate-grid-h" style="animation-delay: 0.2s;"></div>
 
-	<!-- X -->
-	<div class="absolute inset-0 animate-x">
-		<div class="absolute top-[16%] left-[16%] w-[68%] h-[2px] bg-white rotate-45 origin-left"></div>
-		<div class="absolute top-[84%] left-[16%] w-[68%] h-[2px] bg-white -rotate-45 origin-left"></div>
-	</div>
+  	<!-- X -->
+  	<div class="absolute inset-0 animate-x">
+  		<div class="absolute top-[40%] left-[40%] w-[30%] h-[2px] bg-white rotate-45 origin-left"></div>
+  		<div class="absolute top-[60%] left-[40%] w-[30%] h-[2px] bg-white -rotate-45 origin-left"></div>
+  	</div>
 
-	<!-- O -->
-	<div class="absolute inset-0 animate-o">
-		<div class="absolute top-[40%] left-[40%] w-[20%] h-[20%] rounded-full border-2 border-white"></div>
-	</div>
+  	<!-- O -->
+  	<div class="absolute inset-0 animate-o">
+  		<div class="absolute top-[40%] left-[40%] w-[20%] h-[20%] rounded-full border-2 border-white"></div>
+  	</div>
 
-	</div>
-</button>
+  	</div>
+          </button>
+        </div>
+      </div>
 
-<div id="stats-container" class="w-full md:w-[50vw] lg:w-[60vw] min-h-[10vh]">
-	<div class=" items-center justify-center text-wrap">
-		
-		<h3 id="online-count" class="text-xl w-full h-4 font-extrabold tracking-tight uppercase">
-			join now ! 42 user online
-		</h3>
-		
-	</div>
-	<br>
-	<div id="auth-container"
-	class="w-full md:w-[50vw] lg:w-[60vw] min-h-[60vh]">
-</div>
-</div>
+      <!-- Next Button -->
+      <button id="slideshow-next-btn" 
+        class="absolute right-0 z-10 p-3 bg-[#ff009d] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700 rounded-full w-12 h-12 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Slideshow Indicators (dots) -->
+    <div class="flex gap-3 justify-center mt-8">
+      <button class="slideshow-indicator w-3 h-3 rounded-full bg-[#ff009d] transition-all duration-300 active" data-slide="tris"></button>
+      <button class="slideshow-indicator w-3 h-3 rounded-full bg-neutral-700 transition-all duration-300 hover:bg-neutral-600" data-slide="pong"></button>
+    </div>
+  </div>
+
+  <!-- Auth Container (Right Side) -->
+  <div class="flex-1 flex flex-col items-center justify-start">
+    <div id="online-count-container" class="w-full text-center mb-6">
+      <h3 id="online-count" class="text-xl font-extrabold tracking-tight uppercase text-neutral-400">
+        join now ! 42 user online
+      </h3>
+    </div>
+    <div id="auth-container"
+    class="w-full flex items-center justify-center">
+    </div>
+  </div>
 </div>
 
 <br>
@@ -162,17 +207,17 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer 
 
 <!-- Profile card template (hidden) -->
 <template id="profile-card-template">
-	<div class="p-10 w-full border-2 border-neutral-700 rounded-xl bg-neutral-900 shadow-[10px_10px_0_0_#00ffff] overflow-hidden hover:shadow-lg hover:brightness-110 transition-all duration-300">
+	<div class="p-10 w-full border-2  border-neutral-700 rounded-xl bg-neutral-900 shadow-[10px_10px_0_0_#00ffff] overflow-hidden hover:shadow-lg hover:brightness-110 transition-all duration-300">
 		<!-- Header with avatar and title -->
-		<div class="flex flex-col md:flex-row items-start gap-8 mb-8">
+		<div class="z-20 flex flex-col md:flex-row items-start gap-8 mb-8">
 			<!-- Avatar -->
-			<div class="flex-shrink-0">
+			<div class="flex-shrink-0 z-20">
 				<label class="cursor-pointer">
 					<input id="input-avatar" type="file" class="hidden" />
 					
 					<div class="relative w-40 h-40 aspect-square rounded-md overflow-hidden border-4 border-neutral-400 flex items-center justify-center bg-neutral-800">
-						<img id="profile-avatar" alt="avatar" class="w-15 h-15 z-10 object-cover" src="/assets/placeholder-avatar.jpg" />
-						<figcaption class="absolute w-full h-full opacity-0 bg-black/0 transition duration-300 ease-in-out hover:opacity-100 hover:bg-black/70 cursor-pointer flex items-center justify-center">
+						<img id="profile-avatar" alt="avatar" class="w-15 h-15 object-cover" src="/assets/placeholder-avatar.jpg" />
+						<figcaption class="absolute w-full h-full opacity-0 bg-black/0 transition duration-300 z-20 ease-in-out hover:opacity-100 hover:bg-black/70 cursor-pointer flex items-center justify-center">
 							<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.217A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.217A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -183,7 +228,7 @@ hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer 
 			</div>
 
 			<!-- Title and info section -->
-			<div class="flex-1 w-full">
+			<div class="flex-1 w-full z-20">
 				<!-- Username -->
 				<h1 id="profile-username" class="text-4xl font-extrabold tracking-tight text-[#0dff66] mb-6 capitalize">User</h1>
 				

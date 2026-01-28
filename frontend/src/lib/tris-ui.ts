@@ -15,7 +15,7 @@ import {
   startMatchmaking,
   stopMatchmaking
 } from './tris';
-import { showSuccessToast, showErrorToast } from '../components/shared/Toast';
+import { showSuccessToast, showErrorToast, showToast } from '../components/shared/Toast';
 import type { User } from './auth';
 import type { FriendsManager } from '../components/profile/FriendsManager';
 import { start } from '../spa';
@@ -35,9 +35,15 @@ export function setTrisFriendsManager(manager: FriendsManager) {
 }
 
 export async function openTrisModal() {
+  const userId = getUserId();
   console.log("tris modal");	
   const modal = document.getElementById('tris-modal');
-  if (!modal) return;
+  if (!modal || !userId)
+  {
+	showErrorToast('User not logged in');
+	console.error('Tris modal or user ID not found');
+	return;
+  }
 
   modal.classList.remove('hidden');
 
@@ -45,13 +51,6 @@ export async function openTrisModal() {
   if (!trisInitialized) {
     try {
 	  setupTrisEventListeners();
-      const userId = getUserId();
-	  user = getUser();
-      if (!userId) {
-        showTrisError('User not authenticated');
-		return;
-      }
-
       await initTris(userId);
       
       // Setup WebSocket event handlers

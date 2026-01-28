@@ -9,6 +9,8 @@ import { connectNotificationsWebSocket, sendPing } from './components/profile/No
 import { setFriendsManager } from './components/profile/Notifications';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
+import { initSlideshow, goToSlide } from './lib/slideshow';
+import { initTheme } from './lib/theme';
 
 // Load user's saved language preference
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
@@ -222,8 +224,22 @@ function setupSearchUser() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  initTheme();
   setupSearchUser();
   setupTrisCardListener();
+  initSlideshow();
+  
+  // Setup indicator dots click handlers
+  const indicators = document.querySelectorAll('.slideshow-indicator');
+  indicators.forEach((indicator) => {
+    indicator.addEventListener('click', () => {
+      const slideId = (indicator as HTMLElement).dataset.slide;
+      if (slideId) {
+        goToSlide(slideId);
+      }
+    });
+  });
+  
   // AuthUI will handle chat setup after user login
   new AuthUI();
 });

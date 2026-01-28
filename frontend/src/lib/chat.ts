@@ -1,4 +1,5 @@
-import { showInfoToast } from '../components/shared/Toast';
+import { showInfoToast, showToast } from '../components/shared/Toast';
+import { getCurrentTheme } from './theme';
 
 let chatSocket: WebSocket | null = null;
 let currentUserId: string | null = null;
@@ -92,6 +93,9 @@ function renderChatList() {
   chats.forEach(chat => {
     const chatItem = document.createElement('div');
     chatItem.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
+    if (getCurrentTheme() === 'light') {
+      chatItem.classList.add('light');
+    }
     chatItem.onclick = () => selectChat(chat.id);
 
     const chatName = document.createElement('div');
@@ -230,6 +234,7 @@ export async function renderMessages() {
   }
 
   messagesContainer.innerHTML = '';
+  const isLightMode = getCurrentTheme() === 'light';
 
   chatMessages.forEach(msg => {
     const messageDiv = document.createElement('div');
@@ -243,6 +248,7 @@ export async function renderMessages() {
     // Handle system messages
     if (isSystem) {
       messageDiv.className = 'message message-system';
+      if (isLightMode) messageDiv.classList.add('light');
       messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
       messagesContainer.appendChild(messageDiv);
       return;
@@ -250,15 +256,6 @@ export async function renderMessages() {
 
     // Compare as strings since backend returns string IDs
     const isSent = String(senderId) === String(currentUserId);
-
-    // console.log('Message:', {
-    //   senderId,
-    //   currentUserId,
-    //   isSent,
-    //   isPrivate,
-    //   senderIdType: typeof senderId,
-    //   userIdType: typeof currentUserId
-    // });
 
     // Determine message class based on type and sender
     let messageClass = 'message ';
@@ -268,6 +265,7 @@ export async function renderMessages() {
       messageClass += isSent ? 'message-sent' : 'message-received';
     }
     messageDiv.className = messageClass;
+    if (isLightMode) messageDiv.classList.add('light');
 
     let statusText = '';
     if (isSent && messageStatus) {
@@ -421,6 +419,8 @@ function handleSystemMessage(data: any) {
     renderMessages();
     scrollToBottom();
   }
+  else
+    showToast(data.message, 'info', );
 }
 
 function handleMessageSent(data: any) {
