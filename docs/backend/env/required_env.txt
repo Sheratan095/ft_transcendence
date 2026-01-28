@@ -6,13 +6,14 @@ gateway:
     CHAT_SERVICE_URL=http://localhost:3004
     PONG_SERVICE_URL=http://localhost:3005
     TRIS_SERVICE_URL=http://localhost:3006
-    FRONTEND_URL=http://localhost:4000
+    FRONTEND_URL=https://localhost:4000
     PORT=3000
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
     USE_HTTPS=true
     HTTPS_CERTS_PATH=../../certs/certs/
     RATE_LIMIT_ACTIVE=true
+    HOST=127.0.0.1
 
 services/auth:
     INTERNAL_API_KEY=1234
@@ -27,12 +28,14 @@ services/auth:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     PONG_SERVICE_URL=http://localhost:3005
     TRIS_SERVICE_URL=http://localhost:3006
+    HOST=127.0.0.1
 
 services/users:
     INTERNAL_API_KEY=1234
     PORT=3002
     AUTH_SERVICE_URL=http://localhost:3001
     NOTIFICATION_SERVICE_URL=http://localhost:3003
+    HOST=127.0.0.1
 
 services/notification:
     INTERNAL_API_KEY=1234
@@ -42,12 +45,14 @@ services/notification:
     SMTP_USER=43skhool@gmail.com
     SMTP_PASS=udkh apxb ltsl iikp
     USERS_SERVICE_URL=http://localhost:3002
+    HOST=127.0.0.1
 
 services/chat:
     INTERNAL_API_KEY=1234
     PORT=3004
     USERS_SERVICE_URL=http://localhost:3002
     NOTIFICATION_SERVICE_URL=http://localhost:3003
+    HOST=127.0.0.1
 
 services/pong:
     INTERNAL_API_KEY=1234
@@ -73,6 +78,7 @@ services/pong:
     BALL_SPEED_FACTOR=1.1 # Factor by which the ball speed increases after each paddle hit
     BALL_MAX_SPEED=2.0 # Maximum ball speed per SECOND to prevent infinite acceleration
     MIN_PLAYERS_FOR_TOURNAMENT_START=4
+    HOST=127.0.0.1
 
 services/tris:
     INTERNAL_API_KEY=1234
@@ -87,3 +93,5 @@ services/tris:
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
     PLACEHOLDER_DELETED_USERNAMES=Anonymous player
+    HOST=127.0.0.1
+

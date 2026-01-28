@@ -12,7 +12,7 @@ await fastify.register(fastifyWebsocket);
 import { checkEnvVariables } from './tris-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'NOTIFICATION_SERVICE_URL', 'USERS_SERVICE_URL', 'MAX_MARKS_PER_PLAYER',
 	'READY_COOLDOWN_MS', 'MOVE_TIMEOUT_MS' , 'MATCHMAKING_IGNORE_BLOCKS', 'EARNED_WIN_POINTS', 'LOST_LOSS_POINTS',
-	'PLACEHOLDER_DELETED_USERNAMES', 'PONG_SERVICE_URL' ]);
+	'PLACEHOLDER_DELETED_USERNAMES', 'PONG_SERVICE_URL', 'HOST']);
 
 import { TrisDatabase } from './tris-db.js';
 let		trisDatabase;
@@ -36,9 +36,9 @@ const	start = async () =>
 		// Setup routes before starting the server
 		fastify.register(trisRoutes);
 
-		await fastify.listen({ port: process.env.PORT })
-		console.log(`[TRIS] Server is running on localhost:${process.env.PORT}`)
-		console.log(`[TRIS] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
+		await fastify.listen({ port: process.env.PORT, host: process.env.HOST })
+		console.log(`[TRIS] Server is running on ${process.env.HOST}:${process.env.PORT}`)
+		console.log(`[TRIS] Web socket is listening on ws://${process.env.HOST}:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{

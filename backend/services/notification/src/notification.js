@@ -11,7 +11,7 @@ await fastify.register(fastifyWebsocket);
 
 import { checkEnvVariables } from './notification-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'USERS_SERVICE_URL',
-	'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS']);
+	'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS', 'HOST']);
 
 // Setup Swagger documentation
 import { setupSwagger } from './notification-swagger.js';
@@ -26,9 +26,9 @@ const	start = async () =>
 		// Setup routes before starting the server
 		fastify.register(notificationRoutes);
 
-		await fastify.listen({ port: process.env.PORT })
-		console.log(`[NOTIFICATION] Server is running on localhost:${process.env.PORT}`)
-		console.log(`[NOTIFICATION] Web socket is listening on ws://localhost:${process.env.PORT}/ws`)
+		await fastify.listen({ port: process.env.PORT, host: process.env.HOST })
+		console.log(`[NOTIFICATION] Server is running on ${process.env.HOST}:${process.env.PORT}`)
+		console.log(`[NOTIFICATION] Web socket is listening on ws://${process.env.HOST}:${process.env.PORT}/ws`)
 	}
 	catch (err)
 	{

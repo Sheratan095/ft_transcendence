@@ -3,7 +3,8 @@ import { exit } from 'process';
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'CHAT_SERVICE_URL', 
-'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'FRONTEND_URL', 'PORT', 'DOC_USERNAME', 'DOC_PASSWORD', 'USE_HTTPS', 'HTTPS_CERTS_PATH', 'RATE_LIMIT_ACTIVE']);
+	'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'FRONTEND_URL', 'PORT', 'DOC_USERNAME', 'DOC_PASSWORD', 'USE_HTTPS', 'HTTPS_CERTS_PATH',
+	'RATE_LIMIT_ACTIVE', 'HOST']);
 
 import Fastify from 'fastify'
 import { readFileSync } from 'fs';
@@ -50,7 +51,7 @@ await fastify.register(cors,
 		// Allow requests from frontend URL and file:// protocol (for testing)
 		const	allowedOrigins = [
 			process.env.FRONTEND_URL,
-			'null', // file:// protocol shows as 'null'
+			'null', // file:// protocol shows as 'null' // TO DO check it
 		];
 		
 		// Allow any localhost origin for development
@@ -341,7 +342,7 @@ const	start = async () =>
 {
 	try
 	{
-		fastify.listen({port: process.env.PORT }, () =>
+		await fastify.listen({port: process.env.PORT, host: process.env.HOST }, () =>
 		{
 			// When the client sends an Upgrade request (tries to establish a WebSocket connection)
 			fastify.server.on('upgrade', (request, socket, head) => handleSocketUpgrade(request, socket, head));
@@ -351,7 +352,7 @@ const	start = async () =>
 
 		console.log(`[GATEWAY] Server is running:`);
 		console.log(`[GATEWAY] Protocol: ${protocol} `);
-		console.log(`[GATEWAY] URL: ${protocol}://localhost:${process.env.PORT}`);
+		console.log(`[GATEWAY] URL: ${protocol}://${process.env.HOST}:${process.env.PORT}`);
 		console.log(`[GATEWAY] Rate limiting: ${process.env.RATE_LIMIT_ACTIVE === 'true' ? 'Enabled' : 'Disabled'}`);
 	}
 	catch (err)

@@ -64,7 +64,7 @@ let		usersDatabase;
 
 // Validate required environment variables
 import { checkEnvVariables } from './users-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'AUTH_SERVICE_URL', 'NOTIFICATION_SERVICE_URL']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'AUTH_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'HOST']);
 
 // Setup Swagger documentation
 import { setupSwagger } from './users-swagger.js';
@@ -89,8 +89,8 @@ const	start = async () =>
 		fastify.register(userRoutes)
 		fastify.register(relationshipsRoutes)
 
-		fastify.listen({ port: process.env.PORT })
-		console.log(`[USERS] Server is running on port ${process.env.PORT}`)
+		await fastify.listen({ port: process.env.PORT, host: process.env.HOST })
+		console.log(`[USERS] Server is running on ${process.env.HOST}:${process.env.PORT}`)
 	}
 	catch (err)
 	{

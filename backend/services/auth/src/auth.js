@@ -26,7 +26,7 @@ let		authDatabase;
 // Validate required environment variables
 import { checkEnvVariables } from './auth-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'ACCESS_TOKEN_SECRET', 'ACCESS_TOKEN_EXPIRATION', 'REFRESH_TOKEN_SECRET', 'REFRESH_TOKEN_EXPIRATION_DAYS', 'PORT', 'HASH_SALT_ROUNDS', 
-	'OTP_EXPIRATION_MINUTES', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'PONG_SERVICE_URL', 'TRIS_SERVICE_URL']);
+	'OTP_EXPIRATION_MINUTES', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'HOST']);
 
 // Setup Swagger documentation
 import { setupSwagger } from './auth-swagger.js';
@@ -49,8 +49,8 @@ const	start = async () =>
 		// Setup routes after database is initialized
 		fastify.register(authRoutes)
 
-		fastify.listen({ port: process.env.PORT })
-		console.log(`[AUTH] Server is running on port ${process.env.PORT}`)
+		await fastify.listen({ port: process.env.PORT, host: process.env.HOST })
+		console.log(`[AUTH] Server is running on ${process.env.HOST}:${process.env.PORT}`)
 	}
 	catch (err)
 	{
