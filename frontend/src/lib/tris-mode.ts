@@ -285,13 +285,13 @@ function handleLocal1v1Move(index: number, statusDiv: HTMLDivElement | null) {
     const oldestMoveIndex = gameState.moveHistory[gameState.currentPlayer].shift();
     const oldestCell = document.getElementById(`tris-cell-${oldestMoveIndex}`) as HTMLButtonElement | null;
     if (oldestCell) {
+	  gameState.board[oldestMoveIndex] = '';
       // Change color to light red before removing
       oldestCell.style.color = '#ff6b6b';
       // Remove after a brief delay for visual effect
       setTimeout(() => {
         oldestCell.textContent = '';
         oldestCell.style.color = 'white';
-        gameState.board[oldestMoveIndex] = '';
       }, 300);
     }
   }
@@ -486,7 +486,7 @@ function getBestAIMove(board: string[]): number {
 }
 
 /**
- * Minimax algorithm for AI
+ * Minimax algorithm for AI to be implemented.
  */
 function minimax(board: string[], depth: number, isMaximizing: boolean): number {
   const winner = checkWinner(board);
@@ -521,7 +521,7 @@ function minimax(board: string[], depth: number, isMaximizing: boolean): number 
 }
 
 /**
- * Check for winner
+ * Check for winner To be rewritten.
  */
 function checkWinner(board: string[]): string | null {
   const winningCombinations = [
