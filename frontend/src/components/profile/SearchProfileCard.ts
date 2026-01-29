@@ -1,4 +1,3 @@
-import { openChatModal } from '../../lib/chat';
 import type { User } from '../../lib/auth';
 import { sendChatInvite } from '../../lib/chat';
 import { FriendsManager } from './FriendsManager';
@@ -11,7 +10,6 @@ export interface SearchProfileCardOptions {
 export async function renderSearchProfileCard(
   user: User,
   container: HTMLElement,
-  options: SearchProfileCardOptions = {}
 ): Promise<HTMLElement | null> {
 
   //instantiate friends manager to check friendship status

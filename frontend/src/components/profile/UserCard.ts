@@ -1,6 +1,5 @@
 import type { User } from '../../lib/auth';
 import type { FriendsManager } from './FriendsManager';
-import { openChatModal } from '../../lib/chat';
 
 export interface UserCardOptions {
   showActions?: boolean;
