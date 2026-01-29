@@ -34,7 +34,6 @@ export const	getUsers = async (req, reply) =>
 		
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
-
 }
 
 export const	searchUser = async (req, reply) =>
@@ -105,7 +104,7 @@ export const	getUser = async (req, reply) =>
 		else
 			return (reply.code(400).send({ error: 'Please provide either username or id query parameter' }));
 
-		if (!user)
+		if (!user || user.deleted)
 			return (reply.code(404).send({ error: 'User not found' }));
 
 		// Get account details from auth service
@@ -149,6 +148,22 @@ export const	updateUser = async (req, reply) =>
 		const	newLanguage = req.body.newLanguage;
 
 		const	user = extractUserData(req);
+		if (!user)
+		{
+			console.log('[USERS] UpdateUser error: User data missing in request');
+			return (reply.code(401).send({ error: 'Unauthorized' }));
+		}
+
+		// Check if new username is already taken
+		if (newUsername)
+		{
+			const	existingUser = await usersDb.getUserByUsername(newUsername);
+			if (existingUser && existingUser.id !== user.id)
+			{
+				console.log('[USERS] UpdateUser error: Username already taken');
+				return (reply.code(409).send({ error: 'Username already taken' }));
+			}
+		}
 
 		const	updatedUser = await usersDb.updateUser(user.id, newUsername, newLanguage);
 
@@ -242,6 +257,29 @@ export const	uploadAvatar = async (req, reply) =>
 }
 
 //-----------------------------INTERAL ROUTES-----------------------------
+
+export const	getUsernameById = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.query.userId;
+		const	usersDb = req.server.usersDb;
+
+		const	user = await usersDb.getUserById(userId);
+		if (!user)
+			return (reply.code(404).send({ error: 'User not found' }));
+
+		console.log(`[USERS] GetUsernameById for userId: ${userId}`);
+
+		return (reply.code(200).send({ username: user.username }));
+	}
+	catch (err)
+	{
+		console.log('[USERS] GetUsernameById error:', err.message);
+
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
 
 export const	createUser = async (req, reply) =>
 {

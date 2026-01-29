@@ -37,6 +37,7 @@ services/users:
     AUTH_SERVICE_URL=http://localhost:3001
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     HOST=127.0.0.1
+    PLACEHOLDER_DELETED_USERNAMES=Anonymous player
 
 services/notification:
     INTERNAL_API_KEY=1234
