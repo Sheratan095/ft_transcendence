@@ -126,8 +126,8 @@ export const	getUserMatchHistory = async (req, reply) =>
 			match.playerOId = match.player_o_id;
 			match.winnerId = match.winner_id;
 			match.endedAt = match.ended_at;
-			match.playerXUsername = (await getUsernameById(match.player_x_id)) || process.env.PLACEHOLDER_DELETED_USERNAMES;
-			match.playerOUsername = (await getUsernameById(match.player_o_id)) || process.env.PLACEHOLDER_DELETED_USERNAMES;
+			match.playerXUsername = (await getUsernameById(match.player_x_id));
+			match.playerOUsername = (await getUsernameById(match.player_o_id));
 			delete match.player_x_id;
 			delete match.player_o_id;
 			delete match.winner_id;

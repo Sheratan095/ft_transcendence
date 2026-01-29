@@ -1,4 +1,4 @@
-GET https://localhost:3000/tris/stats?id=1
+GET https://localhost:3000/tris/stats?id=2
 ###
 
 ### Get user's match history

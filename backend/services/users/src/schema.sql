@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users
 	username	TEXT UNIQUE NOT NULL COLLATE NOCASE,
 	language	TEXT NOT NULL CHECK (language IN ('en', 'fr', 'it')) DEFAULT 'en',
 	created_at	DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	avatar_url	TEXT DEFAULT NULL
+	avatar_url	TEXT DEFAULT NULL,
 	deleted		BOOLEAN NOT NULL DEFAULT 0
 
 	-- FOREIGN KEY (id) REFERENCES auth_accounts (id) ON DELETE CASCADE -> auth/auth_accounts

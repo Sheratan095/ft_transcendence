@@ -269,7 +269,7 @@ export const	getUsernameById = async (req, reply) =>
 		if (!user)
 			return (reply.code(404).send({ error: 'User not found' }));
 
-		console.log(`[USERS] GetUsernameById for userId: ${userId}`);
+		// console.log(`[USERS] GetUsernameById for userId: ${userId}`);
 
 		return (reply.code(200).send({ username: user.username }));
 	}
