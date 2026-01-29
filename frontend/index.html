@@ -21,17 +21,17 @@
 <div class=" shadow-[10px_10px_0_0_#0dff66]"> </div>
 <!-- Search User Bar at Top -->
 	<div class="sticky top-0 z-50 w-full border-b-2 border-neutral-700 hover:border-[#0dff66] transition-colors duration-300 dark:border-neutral-700 dark:hover:border-[#0dff66] light:border-gray-300 light:hover:border-orange-400">
-		<div class="max-w-full mx-auto flex gap-2 items-center">
-			<form id="search-user-form" class="flex gap-2 w-full">
+		<div class="max-w-full mx-auto flex gap-1 sm:gap-2 items-center px-2 sm:px-4">
+			<form id="search-user-form" class="flex gap-1 sm:gap-2 w-full">
 				<input 
 					id="search-user-input"
 					type="text" 
-					placeholder="Search user by name or ID..." 
-					class="flex-1 px-4 py-2 bg-neutral-800 border-2 border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-[#0dff66] hover:border-neutral-600 uppercase tracking-tight font-semibold text-sm transition-colors duration-300 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:placeholder-neutral-500 dark:focus:border-[#0dff66] dark:hover:border-neutral-600 light:bg-gray-100 light:border-gray-300 light:text-black light:placeholder-gray-500 light:focus:border-orange-400 light:hover:border-gray-400"
+					placeholder="Search user..." 
+					class="flex-1 px-2 sm:px-4 py-2 bg-neutral-800 border-2 border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-[#0dff66] hover:border-neutral-600 uppercase tracking-tight font-semibold text-xs sm:text-sm transition-colors duration-300 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:placeholder-neutral-500 dark:focus:border-[#0dff66] dark:hover:border-neutral-600 light:bg-gray-100 light:border-gray-300 light:text-black light:placeholder-gray-500 light:focus:border-orange-400 light:hover:border-gray-400"
 				/>
 				<button 
 					type="submit"
-					class="px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 hover:shadow-[0_0_10px_#0dff66] transition border-2 border-neutral-700 text-sm dark:bg-[#0dff66] dark:text-black dark:border-neutral-700 light:bg-orange-400 light:text-white light:border-gray-400"
+					class="px-2 sm:px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 hover:shadow-[0_0_10px_#0dff66] transition border-2 border-neutral-700 text-xs sm:text-sm whitespace-nowrap dark:bg-[#0dff66] dark:text-black dark:border-neutral-700 light:bg-orange-400 light:text-white light:border-gray-400"
 				>
 					Search
 				</button>
@@ -47,37 +47,31 @@
 				</svg>
 			</button>
 		</div>
-		<div id="search-error" class="mt-2 text-red-500 text-sm hidden max-w-4xl mx-auto"></div>
 	</div>
 
 <br>
 
-<h1 class="text-[10vw] font-extrabold uppercase tracking-tighter leading-[0.8] text-gay-100 float-start mt-5">
+<h1 class="text-[8vw] md:text-[10vw] font-extrabold uppercase tracking-tighter leading-[0.8] text-gay-100 float-start mt-5">
 	FT/<br />TRASCENDENCE
 </h1>
-<p class="max-w-2xl mt-10 text-2xl tracking-wide text-neutral-500 text-center font-bold">
+<p class="max-w-2xl mt-10 text-lg md:text-2xl tracking-wide text-neutral-500 text-center font-bold px-4">
 	Yesterday Dr.Phil was just an ordinary human.
 </p>
 
 <br>
 
-<!-- Main Content Container - Slideshow and Auth Side by Side -->
-<div class="relative w-full max-w-[80vw] mx-auto flex flex-col lg:flex-row items-stretch justify-center gap-8">
-  <!-- Slideshow Container (Left Side) -->
-  <div class="flex-1 flex flex-col items-center justify-center">
-    
-    <!-- Slideshow Wrapper -->
-    <div class="relative w-full flex items-center justify-center">
-      <!-- Previous Button -->
-      <button id="slideshow-prev-btn" 
-        class="absolute left-0 z-10 p-3 bg-[#ff009d] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700 rounded-full w-12 h-12 flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+<!-- Slideshow Wrapper -->
+<div class="relative w-full flex items-center justify-center max-w-[60vh]">
+  <!-- Previous Button -->
+    <button id="slideshow-prev-btn" 
+      class="absolute left-0 z-10 p-2 sm:p-3 bg-[#ff009d] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700 rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
+      <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
 
       <!-- Slides Container -->
-      <div class="w-full mx-auto px-16">
+      <div class="w-full mx-auto px-4 sm:px-8 md:px-16">
         
         <!-- CARD PONG -->
         <div id="pong-card-wrapper" class="hidden">
@@ -139,12 +133,14 @@
       </div>
 
       <!-- Next Button -->
+    <label for="slideshow-next-btn">
       <button id="slideshow-next-btn" 
-        class="absolute right-0 z-10 p-3 bg-[#ff009d] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700 rounded-full w-12 h-12 flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        class="absolute right-0 z-10 p-2 sm:p-3 bg-[#ff009d] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2 border-neutral-700 rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
+        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </button>
+    </label>
     </div>
 
     <!-- Slideshow Indicators (dots) -->
@@ -165,8 +161,6 @@
     class="w-full flex items-center justify-center">
     </div>
   </div>
-</div>
-
 <br>
 </section>
 <section class="py-10 relative overflow-hidden border-y-2 border-yellow-300">
@@ -207,17 +201,17 @@
 
 <!-- Profile card template (hidden) -->
 <template id="profile-card-template">
-	<div class="p-10 w-full border-2  border-neutral-700 rounded-xl bg-neutral-900 shadow-[10px_10px_0_0_#00ffff] overflow-hidden hover:shadow-lg hover:brightness-110 transition-all duration-300">
+	<div class="p-4 sm:p-6 md:p-10 w-full border-2 border-neutral-700 rounded-xl bg-neutral-900 shadow-[10px_10px_0_0_#00ffff] overflow-hidden hover:shadow-lg hover:brightness-110 transition-all duration-300">
 		<!-- Header with avatar and title -->
-		<div class="z-20 flex flex-col md:flex-row items-start gap-8 mb-8">
+		<div class=" flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
 			<!-- Avatar -->
-			<div class="flex-shrink-0 z-20">
+			<div class="relative flex-shrink-0 z-30">
 				<label class="cursor-pointer">
 					<input id="input-avatar" type="file" class="hidden" />
 					
-					<div class="relative w-40 h-40 aspect-square rounded-md overflow-hidden border-4 border-neutral-400 flex items-center justify-center bg-neutral-800">
+					<div class="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 aspect-square rounded-md overflow-hidden border-4 border-neutral-400 flex items-center justify-center bg-neutral-800">
 						<img id="profile-avatar" alt="avatar" class="w-15 h-15 object-cover" src="/assets/placeholder-avatar.jpg" />
-						<figcaption class="absolute w-full h-full opacity-0 bg-black/0 transition duration-300 z-20 ease-in-out hover:opacity-100 hover:bg-black/70 cursor-pointer flex items-center justify-center">
+						<figcaption class="absolute w-full h-full opacity-0 bg-black/0 transition duration-300 ease-in-out hover:opacity-100 hover:bg-black/70 cursor-pointer flex items-center justify-center">
 							<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.217A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.217A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -228,12 +222,12 @@
 			</div>
 
 			<!-- Title and info section -->
-			<div class="flex-1 w-full z-20">
+			<div class="flex-1 w-full z-30">
 				<!-- Username -->
-				<h1 id="profile-username" class="text-4xl font-extrabold tracking-tight text-[#0dff66] mb-6 capitalize">User</h1>
+				<h1 id="profile-username" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#0dff66] mb-4 sm:mb-6 capitalize">User</h1>
 				
 				<!-- Email and ID -->
-				<div class="space-y-3 mb-6 text-lg">
+				<div class="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
 					<div class="flex items-center gap-2">
 						<span class="font-extrabold text-white">Email:</span> 
 						<span class="text-neutral-400" id="profile-email">email@example.com</span>
@@ -253,22 +247,22 @@
 				</div>
 
 				<!-- Action buttons and 2FA toggle -->
-				<div class="flex flex-wrap gap-3 items-center">
+				<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
 					<!-- Chat button -->
-					<button id="profile-chat-btn" class="px-6 py-2 bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition">
+					<button id="profile-chat-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-[#0dff66] text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
 						Chat
 					</button>
 					<!-- Logout button -->
-					<button id="profile-logout-btn" class="px-6 py-2 bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-neutral-600 hover:bg-neutral-600 transition">
+					<button id="profile-logout-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-neutral-600 hover:bg-neutral-600 transition whitespace-nowrap">
 						Logout
 					</button>
 					<!-- Delete account button -->
-					<button command="show-modal" commandfor="delete-dialog" class="px-6 py-2 bg-[#f73c3c] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition">
+					<button command="show-modal" commandfor="delete-dialog" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-[#f73c3c] text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
 						Delete
 					</button>
 
 					<!-- Language selector -->
-					<select id="profile-language" class="px-4 py-2 bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-neutral-600 hover:bg-neutral-600 transition rounded">
+					<select id="profile-language" class="px-2 sm:px-4 py-2 text-xs sm:text-sm md:text-base bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-neutral-600 hover:bg-neutral-600 transition rounded">
 						<option value="en">English</option>
 						<option value="fr">Français</option>
 						<option value="it">Italiano</option>
@@ -297,10 +291,27 @@
 
 		<!-- About section -->
 		<div>
-			<h3 class="text-xl font-extrabold uppercase tracking-tight text-neutral-300 mb-3">Account Info</h3>
-			<p class="text-neutral-400 leading-relaxed">
+			<h3 class="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-neutral-300 mb-3">Account Info</h3>
+			<p class="text-neutral-400 leading-relaxed text-sm sm:text-base">
 				This is your personal profile card. Your email and ID are used for account authentication and security purposes.
 			</p>
+		</div>
+
+		<!-- Game Statistics Section -->
+		<div id="profile-charts-section" class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-neutral-700">
+			<h3 class="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-neutral-300 mb-4 sm:mb-6">Game Statistics</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+				<!-- Stats containers will be added here -->
+			</div>
+
+			<!-- Match History Charts -->
+			<div id="profile-match-history" class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-neutral-700">
+				<h3 class="text-lg sm:text-xl font-extrabold uppercase tracking-tight text-neutral-300 mb-4 sm:mb-6">Match History</h3>
+				<div class="space-y-4 sm:space-y-6">
+					<!-- Pong match history chart will be rendered here -->
+					<!-- Tris match history chart will be rendered here -->
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -513,7 +524,7 @@
   class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50"
 >
   <div class="relative p-4 w-full max-w-xl">
-    <div class="relative bg-neutral-900 border-4 border-neutral-700 shadow-[10px_10px_0_0_#ff009d] h-auto flex flex-col">
+    <div class="relative bg-neutral-900 border-4 border-neutral-700 shadow-[10px_10px_0_0_#ff009d] h-auto flex flex-col hover:shadow-lg transition duration-300">
       
       <!-- Close button -->
       <button
@@ -663,7 +674,7 @@
 <div
   id="tris-invite-modal"
   tabindex="-1"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-20 
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 
          flex justify-center items-center w-full md:inset-0 h-full max-h-full"
 >
   <div class="relative p-4 w-full max-w-md max-h-full">

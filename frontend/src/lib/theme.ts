@@ -71,7 +71,7 @@ function updateToggleIcon(theme: Theme) {
   // For light mode, show moon icon
   if (theme === 'dark') {
     icon.innerHTML = `
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m-1.636-6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1m1.636 6.364l.707.707M12 12a3 3 0 110-6 3 3 0 010 6z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M 20.354 15.354 A 9 9 0 0 0 8.646 3.646 A 9.003 9.003 0 0 0 12 21 a 9 9.003 0 0 0 8.354 -5.646 z" />
     `;
   } else {
     icon.innerHTML = `

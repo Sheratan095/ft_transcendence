@@ -4,6 +4,7 @@ import { renderProfile } from './lib/profile';
 import { setupChatEventListeners, initChat } from './lib/chat';
 import { searchUser, renderSearchResult } from './lib/search';
 import { createLoginForm, createRegisterForm, createTwoFactorForm } from './components/auth';
+import { showErrorToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket } from './components/profile/Notifications';
 import { setFriendsManager } from './components/profile/Notifications';
@@ -11,6 +12,12 @@ import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
 import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
+import ApexCharts from 'apexcharts';
+
+// Make ApexCharts globally available for UserCardCharts
+if (typeof window !== 'undefined') {
+  (window as any).ApexCharts = ApexCharts;
+}
 
 // Load user's saved language preference
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
@@ -169,32 +176,25 @@ async function getUserCount()
 function setupSearchUser() {
   const searchForm = document.getElementById('search-user-form') as HTMLFormElement;
   const searchInput = document.getElementById('search-user-input') as HTMLInputElement;
-  const searchError = document.getElementById('search-error') as HTMLElement;
   const authContainer = document.getElementById('auth-container') as HTMLElement;
 
-  if (!searchForm || !searchInput || !searchError || !authContainer) return;
+  if (!searchForm || !searchInput || !authContainer) return;
 
   searchForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    searchError.classList.add('hidden');
-    searchError.textContent = '';
 
     const query = searchInput.value.trim();
     if (!query) {
-      searchError.textContent = 'Please enter a name or user ID';
-      searchError.classList.remove('hidden');
+      showErrorToast('Please enter a username or ID to search');
       return;
     }
 
     try {
-      searchError.classList.add('hidden');
       authContainer.innerHTML = '<div class="py-8 text-center text-neutral-400">Searching...</div>';
 
       const user = await searchUser(query);
       if (!user) {
-        searchError.textContent = 'User not found';
-        searchError.classList.remove('hidden');
-        authContainer.innerHTML = '';
+        showErrorToast('User not found');
         return;
       }
 
@@ -202,9 +202,7 @@ function setupSearchUser() {
       await renderSearchResult(user, authContainer);
       searchInput.value = '';
     } catch (err) {
-      searchError.textContent = (err as Error).message || 'Search failed';
-      searchError.classList.remove('hidden');
-      authContainer.innerHTML = '';
+      showErrorToast('Error searching for user');
     }
   });
 }
