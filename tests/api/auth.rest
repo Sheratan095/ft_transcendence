@@ -14,7 +14,7 @@ Content-Type: application/json
 
 {
   "username": "marco",
-  "email": "ceccarellim7@gmail.com",
+  "email": "marco.ceccarelli.code@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -56,7 +56,7 @@ POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "ceccarellim7@gmail.com",
+  "email": "marco.ceccarelli.code@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -93,8 +93,8 @@ POST https://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "31be20ac-0991-4795-a0fb-8efe0be24c28",
-  "otpCode": "188327"
+  "userId": "8f2dba45-80e3-468f-b244-83395dc8bb88",
+  "otpCode": "317776"
 }
 
 ###

@@ -152,6 +152,6 @@ I think it's ok
 
 [x] Can creator cancel the tournament
 
-[] 2fa not working
+[x] 2fa not working
 
-[] pong get user stats
+[x] pong get user stats

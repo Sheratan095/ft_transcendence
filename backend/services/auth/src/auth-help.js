@@ -70,16 +70,16 @@ export function	validator(username, password, email)
 export function	formatDate(date)
 {
 	// Convert date to 'YYYY-MM-DD HH:MM:SS' format (sqlite format)
-	//	from js format 'YYYY-MM-DDTHH:MM:SS.sssZ'
+	// Use local time instead of UTC to match how SQLite and JavaScript Date handle comparisons
 	const	pad = n => String(n).padStart(2, '0');
 
 	return (
-		date.getUTCFullYear() + '-' +
-		pad(date.getUTCMonth() + 1) + '-' +
-		pad(date.getUTCDate()) + ' ' +
-		pad(date.getUTCHours()) + ':' +
-		pad(date.getUTCMinutes()) + ':' +
-		pad(date.getUTCSeconds())
+		date.getFullYear() + '-' +
+		pad(date.getMonth() + 1) + '-' +
+		pad(date.getDate()) + ' ' +
+		pad(date.getHours()) + ':' +
+		pad(date.getMinutes()) + ':' +
+		pad(date.getSeconds())
 	);
 }
 
