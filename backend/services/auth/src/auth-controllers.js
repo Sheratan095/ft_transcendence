@@ -7,13 +7,12 @@ import {
 	getUserLanguage,
 	createUserProfileInUsersService,
 	createUserStatsInGames,
-	deleteUserStatsInGames,
+	deleteUserFromOtherServices
 } from './auth-help.js';
 
 import { sendTwoFactorCode } from './2fa.js';
 
 import bcrypt from 'bcrypt';
-import axios from 'axios'
 
 // ------------------------------ROUTES WITHOUT JWT PROTECTION-----------------------------
 
@@ -388,12 +387,8 @@ export const	deleteAccount = async (req, reply) =>
 		const	authDb = req.server.authDb;
 		const	userData = extractUserData(req);
 
-		await axios.delete(`${process.env.USERS_SERVICE_URL}/delete-user`, {
-			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
-			data: { userId: userData.id }
-		});
-
-		await deleteUserStatsInGames(userData.id);
+		// Games are included here
+		await deleteUserFromOtherServices(userData.id);
 
 		// Delete user from auth database
 		await authDb.deleteUserById(userData.id);

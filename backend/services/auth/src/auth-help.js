@@ -220,3 +220,27 @@ export async function	deleteUserStatsInGames(userId)
 		throw (err);
 	}
 }
+
+export async function	deleteUserFromOtherServices(userId)
+{
+	try
+	{
+		// Delete user profile in users service (relationships are included)
+		await axios.delete(`${process.env.USERS_SERVICE_URL}/delete-user`, {
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+			data: { userId: userId }
+		});
+
+		await deleteUserStatsInGames(userId);
+
+		await axios.delete(`${process.env.CHAT_SERVICE_URL}/delete-user`, {
+			headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+			data: { userId: userId }
+		});
+	}
+	catch (err)
+	{
+		console.error('[AUTH] Error deleting user from other services:', err);
+		throw (err);
+	}
+}

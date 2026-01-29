@@ -28,6 +28,7 @@ services/auth:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     PONG_SERVICE_URL=http://localhost:3005
     TRIS_SERVICE_URL=http://localhost:3006
+    CHAT_SERVICE_URL=http://localhost:3004
     HOST=127.0.0.1
 
 services/users:
