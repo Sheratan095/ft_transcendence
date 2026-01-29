@@ -1,5 +1,4 @@
 import { getUserId } from './auth';
-import { getUser } from './auth';
 import { 
   initTris, 
   onTrisEvent, 
@@ -15,10 +14,9 @@ import {
   startMatchmaking,
   stopMatchmaking
 } from './tris';
-import { showSuccessToast, showErrorToast, showToast } from '../components/shared/Toast';
+import { showSuccessToast, showErrorToast} from '../components/shared/Toast';
 import type { User } from './auth';
 import type { FriendsManager } from '../components/profile/FriendsManager';
-import { start } from '../spa';
 import { openTrisModeModal, getSelectedTrisMode, initializeModeSpecificBehaviors, resetLocalGame } from './tris-mode';
 
 let trisInitialized = false;

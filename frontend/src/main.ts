@@ -1,11 +1,11 @@
 import { getUserId } from './lib/auth';
 import { startTokenRefresh } from './lib/token';
 import { renderProfile } from './lib/profile';
-import { setupChatEventListeners, initChat, connectChatWebSocket } from './lib/chat';
+import { setupChatEventListeners, initChat } from './lib/chat';
 import { searchUser, renderSearchResult } from './lib/search';
 import { createLoginForm, createRegisterForm, createTwoFactorForm } from './components/auth';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
-import { connectNotificationsWebSocket, sendPing } from './components/profile/Notifications';
+import { connectNotificationsWebSocket } from './components/profile/Notifications';
 import { setFriendsManager } from './components/profile/Notifications';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
@@ -57,20 +57,6 @@ async function initializeUserServices(userId: string) {
     throw err;
   }
 }
-
-/**
- * Clean up services when user logs out
- */
-function cleanupUserServices() {
-  try {
-    // Close websockets and clean up any global state
-    console.log('Cleaning up user services');
-    // Additional cleanup can be added here as needed
-  } catch (err) {
-    console.error('Error during cleanup:', err);
-  }
-}
-
 
 class AuthUI {
   private container: HTMLElement;

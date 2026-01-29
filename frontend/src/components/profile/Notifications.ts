@@ -9,14 +9,6 @@ export function setFriendsManager(manager: FriendsManager) {
   friendsManager = manager;
 }
 
-export function sendPing() {
-  if (notifSocket) {
-	const pingMessage = JSON.stringify({ event: 'ping' });
-	notifSocket.send(pingMessage);
-	console.log('Sent ping to notifications server');
-  }
-}
-
 export function connectNotificationsWebSocket() {
   // Don't connect if already connecting or connected
   if (notifSocket && notifSocket.readyState === WebSocket.CONNECTING) {
@@ -36,8 +28,6 @@ export function connectNotificationsWebSocket() {
   notifSocket.addEventListener('open', () => {
     console.log('Notifications WebSocket connected');
     showInfoToast('Connected to notifications', { duration: 2000 });
-    // Send initial ping to establish connection
-    sendPing();
   });
 
   notifSocket.addEventListener('message', (event) => {

@@ -1,6 +1,5 @@
-import { showSuccessToast, showErrorToast } from '../components/shared/Toast';
+import { showErrorToast } from '../components/shared/Toast';
 
-let pongInitialized = false;
 
 /**
  * Open the pong modal (or navigate to pong game)

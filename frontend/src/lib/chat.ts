@@ -1,5 +1,6 @@
 import { showInfoToast, showToast } from '../components/shared/Toast';
 import { getCurrentTheme } from './theme';
+import type { User } from './auth';
 
 let chatSocket: WebSocket | null = null;
 let currentUserId: string | null = null;
@@ -64,7 +65,7 @@ async function loadChats() {
         chatMembers.set(chat.id, chat.members);
         // For DM chats, store the other user's ID directly on the chat object
         if (chat.chatType === 'dm') {
-          const otherMember = chat.members.find(m => String(m.userId) !== String(currentUserId));
+          const otherMember = chat.members.find((m: User) => String(m.userId) !== String(currentUserId));
           if (otherMember) {
             chat.otherUserId = String(otherMember.userId);
           }
@@ -461,13 +462,13 @@ function handlePrivateMessage(data: any) {
   console.log('Private message received:', data);
   const { fromUserId, from, content, timestamp } = data;
   
+  // TO BE CHANGED 
+
   // Find or create a DM chat with this user
   let dmChat = chats.find(c => c.chatType === 'dm' && c.otherUserId === String(fromUserId));
-  let isNewChat = false;
   
   if (!dmChat) {
     // Create a new DM chat entry
-    isNewChat = true;
     dmChat = {
       id: `dm_${fromUserId}`,
       chatType: 'dm',
@@ -745,7 +746,7 @@ async function renderFriendsList() {
 function updateSelectedFriendsTags() {
   const selectedCount = document.getElementById('selected-count');
   const selectedTags = document.getElementById('selected-friends-tags');
-  const submitBtn = document.getElementById('create-group-submit-btn');
+  const submitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement;
 
   if (selectedCount) {
     selectedCount.textContent = String(selectedFriendsForGroup.size);
