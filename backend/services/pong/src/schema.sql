@@ -66,14 +66,14 @@ CREATE TABLE user_stats
 	-- FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-INSERT INTO user_stats (user_id, games_played, wins, losses)
-VALUES ('1', 26, 15, 11);
+INSERT INTO user_stats (user_id, games_played, wins, losses, tournament_wins, tournaments_participated)
+VALUES ('1', 30, 20, 10, 2, 5);
 
-INSERT INTO user_stats (user_id, games_played, wins, losses)
-VALUES ('2', 15, 5, 10);
+INSERT INTO user_stats (user_id, games_played, wins, losses, tournament_wins, tournaments_participated)
+VALUES ('2', 27, 10, 17, 0, 2);
 
-INSERT INTO user_stats (user_id, games_played, wins, losses)
-VALUES ('3', 10, 3, 7);
+INSERT INTO user_stats (user_id, games_played, wins, losses, tournament_wins, tournaments_participated)
+VALUES ('3', 21, 9, 12, 1, 3);
 
 -- Sample matches for charting (Pong)
 INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong1', '1', '2', 10, 5, '1', '2026-01-01 10:00:00');
@@ -103,3 +103,15 @@ INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, pla
 INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong23b', '2', '1', 6, 10, '1', '2026-01-23 13:11:00');
 INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong23c', '1', '2', 10, 3, '1', '2026-01-23 15:11:00');
 INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong24', '2', '1', 5, 10, '1', '2026-01-24 16:16:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong25', '1', '3', 7, 10, '3', '2026-01-25 10:00:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong26', '2', '3', 10, 4, '2', '2026-01-25 11:30:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong27', '1', '2', 6, 10, '2', '2026-01-25 13:00:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong28', '3', '1', 8, 10, '1', '2026-01-25 14:30:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong29', '2', '1', 10, 3, '2', '2026-01-25 16:00:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong30', '3', '2', 10, 7, '3', '2026-01-25 17:30:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong31', '1', '2', 10, 8, '1', '2026-01-26 09:00:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong32', '3', '1', 5, 10, '1', '2026-01-26 10:30:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong33', '2', '3', 4, 10, '3', '2026-01-26 12:00:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong34', '1', '3', 10, 6, '1', '2026-01-26 13:30:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong35', '2', '1', 8, 10, '1', '2026-01-26 15:00:00');
+INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong36', '3', '2', 10, 9, '3', '2026-01-26 16:30:00');

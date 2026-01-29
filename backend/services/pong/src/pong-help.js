@@ -96,7 +96,17 @@ export async function	getUsernameById(userId)
 
 export function	calculateElo(win, loss, tournametsWon)
 {
-	let	elo = (process.env.EARNED_WIN_POINTS * win) - (process.env.LOST_LOSS_POINTS * loss) + (process.env.TOURNAMENT_EARNED_WIN_POINTS * tournametsWon);
+	// Use default values if environment variables are not set
+	const	earnedWinPoints = parseInt(process.env.EARNED_WIN_POINTS);
+	const	lostLossPoints = parseInt(process.env.LOST_LOSS_POINTS);
+	const	tournamentEarnedWinPoints = parseInt(process.env.TOURNAMENT_EARNED_WIN_POINTS);
+
+	// Ensure all input values are valid numbers
+	const	wins = isNaN(win) ? 0 : parseInt(win);
+	const	losses = isNaN(loss) ? 0 : parseInt(loss);
+	const	tournamentWins = isNaN(tournametsWon) ? 0 : parseInt(tournametsWon);
+
+	let	elo = (earnedWinPoints * wins) - (lostLossPoints * losses) + (tournamentEarnedWinPoints * tournamentWins);
 
 	if (elo < 0)
 		elo = 0;

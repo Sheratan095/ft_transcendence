@@ -88,7 +88,7 @@ export const	getUserStats = async (req, reply) =>
 		if (!userStats)
 			return (reply.code(404).send({ error: 'User stats not found' }));
 
-		const	elo = calculateElo(userStats.wins, userStats.losses, userStats.tournaments_won);
+		const	elo = calculateElo(userStats.wins, userStats.losses, userStats.tournament_wins);
 
 		const	response =
 		{
@@ -97,7 +97,7 @@ export const	getUserStats = async (req, reply) =>
 			gamesLost: userStats.losses,
 			elo: elo.elo,
 			rank: elo.rank,
-			tournamentsWon: userStats.tournaments_won,
+			tournamentsWon: userStats.tournament_wins,
 			tournamentsParticipated: userStats.tournaments_participated
 		}
 
