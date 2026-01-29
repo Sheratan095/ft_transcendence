@@ -151,3 +151,7 @@ I think it's ok
 	[GATEWAY] Users service error: Request failed with status code 400
 
 [x] Can creator cancel the tournament
+
+[] 2fa not working
+
+[] pong get user stats

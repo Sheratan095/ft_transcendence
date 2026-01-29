@@ -46,6 +46,16 @@ POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
+  "email": "test3@gmail.com",
+  "password": "1234"
+}
+
+### Login (copy the refreshToken from response)
+# @name login
+POST https://localhost:3000/auth/login
+Content-Type: application/json
+
+{
   "email": "ceccarellim7@gmail.com",
   "password": "Mrco@123_"
 }
@@ -83,8 +93,8 @@ POST https://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "0f4b76f9-4d86-4857-80ac-43f5f9dd7379",
-  "otpCode": "846422"
+  "userId": "31be20ac-0991-4795-a0fb-8efe0be24c28",
+  "otpCode": "188327"
 }
 
 ###
