@@ -41,7 +41,7 @@ export const	getUserMatchHistory = async (req, reply) =>
 	// Forward request to users service with user data
 	try
 	{
-		const	response = await axios.get(`${PONG_SERVICE_URL}/match-history`, {
+		const	response = await axios.get(`${PONG_SERVICE_URL}/history`, {
 			params: req.query,
 			headers: getAuthHeaders(req),
 		})

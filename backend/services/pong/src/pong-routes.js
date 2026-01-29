@@ -554,7 +554,7 @@ export async function	pongRoutes(fastify, options)
 	});
 
 	fastify.get('/stats', getUserStats);
-	fastify.get('/match-history', getUserMatchHistory);
+	fastify.get('/history', getUserMatchHistory);
 	fastify.get('/get-all-tournaments', getAllTournaments);
 	fastify.get('/is-user-busy', isUserBusy);
 	fastify.get('/user-tournament-participation', getUserTournamentParticipation);

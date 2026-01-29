@@ -315,7 +315,7 @@ await fastify.register(async function (fastify)
 
 	// PONG routes
 	fastify.get('/pong/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsHandler })
-	fastify.get('/pong/match-history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryHandler })
+	fastify.get('/pong/history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryHandler })
 	fastify.get('/pong/get-all-tournaments', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllTournamentsHandler })
 	fastify.post('/pong/create-tournament', { schema: { hide: true }, preHandler: authenticateJwt, handler: createTournamentHandler })
 });
