@@ -867,3 +867,99 @@ input, textarea, select {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
+/* View Transitions API - Page Navigation Animations */
+::view-transition-old(root) {
+  animation: pageExit 0.5s ease-in-out forwards;
+}
+
+::view-transition-new(root) {
+  animation: pageEnter 0.5s ease-in-out forwards;
+}
+
+/* Forward navigation animations */
+html:not([data-transition-direction="back"]) {
+  ::view-transition-old(root) {
+    animation: pageExitForward 0.5s ease-in-out forwards;
+  }
+
+  ::view-transition-new(root) {
+    animation: pageEnterForward 0.5s ease-in-out forwards;
+  }
+}
+
+/* Backward navigation animations */
+html[data-transition-direction="back"] {
+  ::view-transition-old(root) {
+    animation: pageExitBackward 0.5s ease-in-out forwards;
+  }
+
+  ::view-transition-new(root) {
+    animation: pageEnterBackward 0.5s ease-in-out forwards;
+  }
+}
+
+/* Forward: Slide out left, slide in from right */
+@keyframes pageExitForward {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes pageEnterForward {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Backward: Slide out right, slide in from left */
+@keyframes pageExitBackward {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+}
+
+@keyframes pageEnterBackward {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Default/Neutral animations (for initial page load) */
+@keyframes pageExit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+

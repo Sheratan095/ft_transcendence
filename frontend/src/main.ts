@@ -10,6 +10,7 @@ import { connectNotificationsWebSocket } from './components/profile/Notification
 import { setFriendsManager } from './components/profile/Notifications';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
+import { setupPongCardListener } from './lib/pong-ui';
 import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
 import ApexCharts from 'apexcharts';
@@ -211,6 +212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   setupSearchUser();
   setupTrisCardListener();
+  setupPongCardListener();
   initSlideshow();
   
   // Setup indicator dots click handlers

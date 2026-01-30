@@ -490,10 +490,11 @@ function attachTrisCardListener() {
     return;
   }
   console.log('Attaching tris card listener');
-  trisCard.addEventListener('click', (e) => {
+  trisCard.addEventListener('click', async (e) => {
     e.preventDefault();
-    console.log('Tris card clicked - opening mode selection');
-    openTrisModeModal(handleModeSelection);
+    console.log('Tris card clicked - navigating to /tris');
+    const { navigate } = await import('../spa');
+    navigate('/tris');
   });
 }
 

@@ -7,6 +7,16 @@ import { setLocaleInStorage } from 'intlayer';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';
 
+let navigate: (path: string) => Promise<void>;
+// Lazy load navigate function to avoid circular dependency
+async function getNavigateFunction() {
+  if (!navigate) {
+    const spaModule = await import('../../spa');
+    navigate = spaModule.navigate;
+  }
+  return navigate;
+}
+
 export async function renderProfileCard(user: User, root: HTMLElement, gameStats?: GameStats): Promise<HTMLElement | null> {
   // Initialize FriendsManager
   const friendsManager = new FriendsManager({ currentUserId: user.id });
@@ -114,7 +124,8 @@ export async function renderProfileCard(user: User, root: HTMLElement, gameStats
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
       await logout();
-      window.location.reload();
+      const fn = await getNavigateFunction();
+      fn('/login');
     });
   }
 
@@ -158,7 +169,7 @@ export async function renderProfileCard(user: User, root: HTMLElement, gameStats
       console.log('Language changed to:', selectedLanguage);
       
       // Optionally reload the page to apply locale changes
-      window.location.reload();
+      getNavigateFunction().then(n => n(window.location.pathname));
     });
   }
 

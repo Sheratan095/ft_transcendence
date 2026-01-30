@@ -459,11 +459,7 @@ function handleMessageStatusUpdate(data: any) {
 }
 
 function handlePrivateMessage(data: any) {
-  console.log('Private message received:', data);
-  const { chatId, from, content, timestamp, senderId } = data;
-  
-  // Find or create a DM chat with this user
-  console.log('chats before DM handling:', chats);
+  const { chatId, senderId, from, content, timestamp } = data.data;
   let dmChat = chats.find(c => c.id === String(chatId));
   console.log('DM chat found:', dmChat);
   if (!dmChat) {
