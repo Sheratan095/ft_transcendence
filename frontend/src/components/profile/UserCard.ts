@@ -1,5 +1,6 @@
 import type { User } from '../../lib/auth';
 import type { FriendsManager } from './FriendsManager';
+import type { GameStats } from './UserCardCharts';
 
 export interface UserCardOptions {
   showActions?: boolean;
@@ -9,6 +10,8 @@ export interface UserCardOptions {
   onMessage?: (userId: string) => void;
   relationshipStatus?: 'friend' | 'pending' | 'blocked' | 'none';
   friendsManager?: FriendsManager;
+  showCharts?: boolean;
+  gameStats?: GameStats;
 }
 
 export interface UserCardCallbacks extends Omit<UserCardOptions, 'relationshipStatus'> {
@@ -23,12 +26,18 @@ export function createUserCard(user: User, options: UserCardOptions = {}): HTMLD
     onBlock,
     onMessage,
     relationshipStatus = 'none',
-    friendsManager
+    friendsManager,
+    showCharts = true,
+    gameStats = {}
   } = options;
 
   const card = document.createElement('div');
-  card.className = 'p-4 border border-neutral-700 bg-neutral-800/50 rounded-lg hover:bg-neutral-800 transition-all duration-200 cursor-pointer flex items-start gap-4';
+  card.className = 'p-4 border border-neutral-700 bg-neutral-800/50 rounded-lg hover:bg-neutral-800 transition-all duration-200 cursor-pointer flex flex-col gap-4';
   card.dataset.userId = user.id;
+
+  // Avatar and content wrapper
+  const headerContainer = document.createElement('div');
+  headerContainer.className = 'flex items-start gap-4';
 
   // Avatar
   const avatarContainer = document.createElement('div');
@@ -170,8 +179,96 @@ export function createUserCard(user: User, options: UserCardOptions = {}): HTMLD
     contentDiv.appendChild(actionsDiv);
   }
 
-  card.appendChild(avatarContainer);
-  card.appendChild(contentDiv);
+  headerContainer.appendChild(avatarContainer);
+  headerContainer.appendChild(contentDiv);
+  card.appendChild(headerContainer);
+
+  // Add charts if enabled
+  if (showCharts && Object.keys(gameStats).length > 0) {
+    const chartsContainer = document.createElement('div');
+    chartsContainer.className = 'mt-4 pt-4 border-t border-neutral-600';
+
+    // Chart grid
+    const chartGrid = document.createElement('div');
+    chartGrid.className = 'grid grid-cols-2 gap-3';
+
+    // Pong chart
+    if (gameStats.pongWins !== undefined || gameStats.pongHistory) {
+      const pongChartContainer = document.createElement('div');
+      pongChartContainer.className = 'bg-neutral-900/50 rounded p-2';
+      
+      const pongTitle = document.createElement('h4');
+      pongTitle.className = 'text-xs font-semibold text-neutral-300 mb-2';
+      pongTitle.textContent = 'Pong';
+      pongChartContainer.appendChild(pongTitle);
+
+      const pongStats = document.createElement('div');
+      pongStats.className = 'text-xs text-neutral-400 space-y-1';
+      const pongWins = gameStats.pongWins || 0;
+      const pongLosses = gameStats.pongLosses || 0;
+      pongStats.innerHTML = `
+        <div>Wins: <span class="text-green-400 font-semibold">${pongWins}</span></div>
+        <div>Losses: <span class="text-red-400 font-semibold">${pongLosses}</span></div>
+      `;
+      pongChartContainer.appendChild(pongStats);
+      chartGrid.appendChild(pongChartContainer);
+    }
+
+    // Tris chart
+    if (gameStats.trisWins !== undefined || gameStats.trisHistory) {
+      const trisChartContainer = document.createElement('div');
+      trisChartContainer.className = 'bg-neutral-900/50 rounded p-2';
+      
+      const trisTitle = document.createElement('h4');
+      trisTitle.className = 'text-xs font-semibold text-neutral-300 mb-2';
+      trisTitle.textContent = 'Tris';
+      trisChartContainer.appendChild(trisTitle);
+
+      const trisStats = document.createElement('div');
+      trisStats.className = 'text-xs text-neutral-400 space-y-1';
+      const trisWins = gameStats.trisWins || 0;
+      const trisLosses = gameStats.trisLosses || 0;
+      trisStats.innerHTML = `
+        <div>Wins: <span class="text-green-400 font-semibold">${trisWins}</span></div>
+        <div>Losses: <span class="text-red-400 font-semibold">${trisLosses}</span></div>
+      `;
+      trisChartContainer.appendChild(trisStats);
+      chartGrid.appendChild(trisChartContainer);
+    }
+
+    chartsContainer.appendChild(chartGrid);
+    card.appendChild(chartsContainer);
+
+    // Render detailed charts asynchronously
+    setTimeout(async () => {
+      const { createGameStatsChart } = await import('./UserCardCharts');
+      if (gameStats.pongWins !== undefined) {
+        const pongChartId = `pong-donut-${user.id}`;
+        const pongChart = document.createElement('div');
+        pongChart.id = pongChartId;
+        pongChart.className = 'mt-3 hidden';
+        card.appendChild(pongChart);
+        try {
+          await createGameStatsChart(pongChartId, 'pong', gameStats, user.id);
+        } catch (e) {
+          console.warn('Failed to render pong chart:', e);
+        }
+      }
+      
+      if (gameStats.trisWins !== undefined) {
+        const trisChartId = `tris-donut-${user.id}`;
+        const trisChart = document.createElement('div');
+        trisChart.id = trisChartId;
+        trisChart.className = 'mt-3 hidden';
+        card.appendChild(trisChart);
+        try {
+          await createGameStatsChart(trisChartId, 'tris', gameStats, user.id);
+        } catch (e) {
+          console.warn('Failed to render tris chart:', e);
+        }
+      }
+    }, 100);
+  }
 
   return card;
 }

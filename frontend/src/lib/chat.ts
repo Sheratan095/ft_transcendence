@@ -460,21 +460,20 @@ function handleMessageStatusUpdate(data: any) {
 
 function handlePrivateMessage(data: any) {
   console.log('Private message received:', data);
-  const { fromUserId, from, content, timestamp } = data;
+  const { chatId, from, content, timestamp, senderId } = data;
   
-  // TO BE CHANGED 
-
   // Find or create a DM chat with this user
-  let dmChat = chats.find(c => c.chatType === 'dm' && c.otherUserId === String(fromUserId));
-  
+  console.log('chats before DM handling:', chats);
+  let dmChat = chats.find(c => c.id === String(chatId));
+  console.log('DM chat found:', dmChat);
   if (!dmChat) {
     // Create a new DM chat entry
     dmChat = {
-      id: `dm_${fromUserId}`,
+      id: `dm_${chatId}`,
       chatType: 'dm',
-      otherUserId: String(fromUserId),
+      otherUserId: String(senderId),
       members: [
-        { userId: fromUserId, username: from },
+        { userId: senderId, username: from },
         { userId: currentUserId, username: 'You' }
       ]
     };
@@ -490,7 +489,7 @@ function handlePrivateMessage(data: any) {
   const chatMessages = messages.get(dmChat.id)!;
   chatMessages.push({
     id: data.messageId || `msg_${Date.now()}`,
-    senderId: String(fromUserId),
+    senderId: String(senderId),
     from: from,
     content: content,
     createdAt: timestamp,

@@ -433,7 +433,7 @@ html.light .border-white {
   border-radius: 6px;
   margin-bottom: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition:  0.2s;
   border-left: 3px solid transparent;
 }
 
@@ -569,7 +569,7 @@ html.light .border-white {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: background 0.2s;
+  transition: 0.2s;
 }
 
 .btn:hover {
