@@ -301,6 +301,8 @@
 
 			pongConnectionManager.sendScore(this.playerLeftId, scoreData);
 			pongConnectionManager.sendScore(this.playerRightId, scoreData);
+
+			console.log(`[PONG] Game ${this.id}: Player ${scorerId} scored. Scores:`, this.scores);
 		}
 
 		// Force end the game immediately (used when tournament is cancelled or player forfeits)
