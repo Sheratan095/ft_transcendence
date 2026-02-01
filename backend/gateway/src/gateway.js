@@ -21,7 +21,7 @@ if (process.env.USE_HTTPS === 'true')
 {
 	try
 	{
-		const	certsPath = process.env.CERTS_PATH || path.join(__dirname, process.env.HTTPS_CERTS_PATH);
+		const certsPath = process.env.HTTPS_CERTS_PATH;
 		httpsOptions =
 		{
 			key: readFileSync(path.join(certsPath, 'key.pem')),

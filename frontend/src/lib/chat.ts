@@ -745,7 +745,7 @@ async function renderFriendsList() {
 function updateSelectedFriendsTags() {
   const selectedCount = document.getElementById('selected-count');
   const selectedTags = document.getElementById('selected-friends-tags');
-  const submitBtn = document.getElementById('create-group-submit-btn');
+  const submitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement | null;
 
   if (selectedCount) {
     selectedCount.textContent = String(selectedFriendsForGroup.size);
@@ -775,7 +775,7 @@ function updateSelectedFriendsTags() {
   }
 
   // Enable submit button only if at least 2 friends are selected
-  if (submitBtn) {
+  if (submitBtn instanceof HTMLButtonElement) {
     submitBtn.disabled = selectedFriendsForGroup.size < 2;
   }
 }

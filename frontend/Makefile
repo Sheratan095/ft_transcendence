@@ -41,7 +41,7 @@ dev: tailwind-build gen-certs
 	@echo "=> Starting Vite dev server"
 	@bash -c 'source ~/.nvm/nvm.sh && nvm use 20 && $(DEV)'
 
-build:
+build: gen-certs
 	@echo "=> Building production bundle"
 	@$(BUILD)
 
@@ -62,7 +62,7 @@ tailwind-build:
 	@echo "=> Building Tailwind CSS for production:"
 	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
 	@mkdir -p $(dir $(TAILWIND_OUT))
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT) --minify
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT)
 
 format:
 	@echo "=> Running format"
