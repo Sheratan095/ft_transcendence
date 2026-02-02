@@ -158,4 +158,4 @@ I think it's ok
 
 [] logout bad request in frontend
 
-[] Deleted old avatar: 1.png
+[x] Deleted old avatar: 1.png
