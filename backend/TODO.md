@@ -160,7 +160,7 @@ I think it's ok
 
 [x] Deleted old avatar: 1.png
 
-[] If i sent a friend request to someone I BLOCKED, should the request be sent anyway?
+[x] If i sent a friend request to someone I BLOCKED, should the request be sent anyway?
 
 [x] When blocking yourself, it shouldn't go on, reply with just a general error avoiding to show database info
 {
