@@ -39,7 +39,7 @@ export async function renderProfileCard(user: User, root: HTMLElement, gameStats
   if (avatar) {
     if (user.avatarUrl) {
       console.log('Setting avatar URL:', user.avatarUrl);
-      avatar.src = user.avatarUrl.startsWith('http') ? user.avatarUrl : `https://localhost:3000${user.avatarUrl}`;
+      avatar.src = user.avatarUrl.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl}`;
     } else {
       avatar.src = '/assets/placeholder-avatar.jpg';
     }
@@ -63,7 +63,7 @@ export async function renderProfileCard(user: User, root: HTMLElement, gameStats
         if (!res.ok) throw new Error(`Avatar upload failed: ${res.status}`);
         const body = await res.json();
         if (body && body.avatarUrl) {
-          avatar.src = body.avatarUrl.startsWith('http') ? body.avatarUrl : `https://localhost:3000${body.avatarUrl}`;
+          avatar.src = body.avatarUrl.startsWith('http') ? body.avatarUrl : `/api${body.avatarUrl}`;
           user.avatarUrl = body.avatarUrl;
         }
       } catch (err) {

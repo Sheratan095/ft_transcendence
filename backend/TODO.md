@@ -155,3 +155,7 @@ I think it's ok
 [x] 2fa not working
 
 [x] pong get user stats
+
+[] logout bad request in frontend
+
+[] Deleted old avatar: 1.png

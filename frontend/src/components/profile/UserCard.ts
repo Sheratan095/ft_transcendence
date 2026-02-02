@@ -44,7 +44,9 @@ export function createUserCard(user: User, options: UserCardOptions = {}): HTMLD
   avatarContainer.className = 'flex-shrink-0';
   
   const avatar = document.createElement('img');
-  avatar.src = user.avatarUrl?.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl || '/assets/placeholder-avatar.jpg'}`;
+  avatar.src = user.avatarUrl
+    ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl}`)
+    : '/assets/placeholder-avatar.jpg';
   avatar.alt = user.username || 'User avatar';
   avatar.className = 'w-12 h-12 rounded-full object-cover border border-neutral-600';
   avatarContainer.appendChild(avatar);

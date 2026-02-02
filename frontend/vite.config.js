@@ -6,6 +6,20 @@ import react from '@vitejs/plugin-react'
 import path from "path";
 import { toUSVString } from 'util';
 
+const proxyConfig = {
+  target: 'https://localhost:3000',
+  changeOrigin: true,
+  secure: false,
+  configure: (proxy, _options) => {
+    proxy.on('proxyRes', (proxyRes, req, res) => {
+      delete proxyRes.headers['connection'];
+      delete proxyRes.headers['keep-alive'];
+      delete proxyRes.headers['upgrade'];
+      delete proxyRes.headers['transfer-encoding'];
+    });
+  },
+};
+
 export default defineConfig({
   base: '/',
   server: {
@@ -17,36 +31,29 @@ export default defineConfig({
 	},
     proxy: {
       '/api': {
-		port:3000,
-        target: 'https://localhost:3000',
-        changeOrigin: true,
+        ...proxyConfig,
         rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: false,
-        logLevel: 'debug', // Enable debug logging to see what's happening
+        logLevel: 'debug',
       },
       '/chat/ws': {
+        ...proxyConfig,
         target: 'wss://localhost:3000',
         ws: true,
-        changeOrigin: true,
-        secure: false,
       },
       '/notification/ws': {
+        ...proxyConfig,
         target: 'wss://localhost:3000',
         ws: true,
-        changeOrigin: true,
-        secure: false,
       },
       '/pong/ws': {
+        ...proxyConfig,
         target: 'wss://localhost:3000',
         ws: true,
-        changeOrigin: true,
-        secure: false,
       },
       '/tris/ws': {
+        ...proxyConfig,
         target: 'wss://localhost:3000',
         ws: true,
-        changeOrigin: true,
-        secure: false,
       },
     }
   },
