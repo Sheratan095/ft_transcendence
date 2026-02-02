@@ -1,0 +1,4 @@
+frontend:
+    VITE_PORT=4000
+    VITE_API_TARGET=https://localhost:3000
+    VITE_WS_TARGET=wss://localhost:3000

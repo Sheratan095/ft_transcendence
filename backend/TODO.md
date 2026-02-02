@@ -159,3 +159,5 @@ I think it's ok
 [x] logout bad request in frontend
 
 [x] Deleted old avatar: 1.png
+
+[] If i sent a friend request to someone I BLOCKED, should the request be sent anyway?
