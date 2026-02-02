@@ -46,8 +46,6 @@ ehthumbs.db
 *.Identifier
 
 # Docker
-docker-compose.override.yml
-**/Dockerfile*
 **/*.dockerignore
 **/.dockerignore
 

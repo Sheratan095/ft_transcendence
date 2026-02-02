@@ -41,7 +41,7 @@ dev: tailwind-build gen-certs
 	@echo "=> Starting Vite dev server"
 	@bash -c 'source ~/.nvm/nvm.sh && nvm use 20 && $(DEV)'
 
-build:
+build: gen-certs
 	@echo "=> Building production bundle"
 	@$(BUILD)
 
