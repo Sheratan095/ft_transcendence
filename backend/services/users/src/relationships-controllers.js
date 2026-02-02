@@ -190,6 +190,9 @@ export async function	blockUser(req, reply)
 		const	userId = extractUserData(req).id;
 		const	{ targetId } = req.body;
 
+		if (userId === targetId)
+			return (reply.code(400).send({ error: 'Cannot block yourself' }));
+
 		await usersDb.blockUser(userId, targetId);
 
 		console.log('[RELATIONSHIPS] User blocked by userId:', userId, 'blockedId:', targetId);
