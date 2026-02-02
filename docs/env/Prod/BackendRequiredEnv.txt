@@ -1,19 +1,19 @@
 gateway:
     INTERNAL_API_KEY=1234
-    AUTH_SERVICE_URL=http://localhost:3001
-    USERS_SERVICE_URL=http://localhost:3002
-    NOTIFICATION_SERVICE_URL=http://localhost:3003
-    CHAT_SERVICE_URL=http://localhost:3004
-    PONG_SERVICE_URL=http://localhost:3005
-    TRIS_SERVICE_URL=http://localhost:3006
+    AUTH_SERVICE_URL=http://auth:3001
+    USERS_SERVICE_URL=http://users:3002
+    NOTIFICATION_SERVICE_URL=http://notification:3003
+    CHAT_SERVICE_URL=http://chat:3004
+    PONG_SERVICE_URL=http://pong:3005
+    TRIS_SERVICE_URL=http://tris:3006
     FRONTEND_URL=https://localhost:4000
     PORT=3000
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
     USE_HTTPS=true
-    HTTPS_CERTS_PATH=../../certs/certs/
+    HTTPS_CERTS_PATH=/usr/src/certs/certs/
     RATE_LIMIT_ACTIVE=true
-    HOST=127.0.0.1
+    HOST=0.0.0.0
 
 services/auth:
     INTERNAL_API_KEY=1234
@@ -24,19 +24,19 @@ services/auth:
     PORT=3001
     HASH_SALT_ROUNDS=10
     OTP_EXPIRATION_MINUTES=5
-    USERS_SERVICE_URL=http://localhost:3002
-    NOTIFICATION_SERVICE_URL=http://localhost:3003
-    PONG_SERVICE_URL=http://localhost:3005
-    TRIS_SERVICE_URL=http://localhost:3006
-    CHAT_SERVICE_URL=http://localhost:3004
-    HOST=127.0.0.1
+    USERS_SERVICE_URL=http://users:3002
+    NOTIFICATION_SERVICE_URL=http://notification:3003
+    PONG_SERVICE_URL=http://pong:3005
+    TRIS_SERVICE_URL=http://tris:3006
+    CHAT_SERVICE_URL=http://chat:3004
+    HOST=0.0.0.0
 
 services/users:
     INTERNAL_API_KEY=1234
     PORT=3002
-    AUTH_SERVICE_URL=http://localhost:3001
-    NOTIFICATION_SERVICE_URL=http://localhost:3003
-    HOST=127.0.0.1
+    AUTH_SERVICE_URL=http://auth:3001
+    NOTIFICATION_SERVICE_URL=http://notification:3003
+    HOST=0.0.0.0
     PLACEHOLDER_DELETED_USERNAMES=Anonymous player
 
 services/notification:
@@ -46,22 +46,22 @@ services/notification:
     SMTP_PORT=587
     SMTP_USER=43skhool@gmail.com
     SMTP_PASS=udkh apxb ltsl iikp
-    USERS_SERVICE_URL=http://localhost:3002
-    HOST=127.0.0.1
+    USERS_SERVICE_URL=http://users:3002
+    HOST=0.0.0.0
 
 services/chat:
     INTERNAL_API_KEY=1234
     PORT=3004
-    USERS_SERVICE_URL=http://localhost:3002
-    NOTIFICATION_SERVICE_URL=http://localhost:3003
-    HOST=127.0.0.1
+    USERS_SERVICE_URL=http://users:3002
+    NOTIFICATION_SERVICE_URL=http://notification:3003
+    HOST=0.0.0.0
 
 services/pong:
     INTERNAL_API_KEY=1234
     PORT=3005
-    NOTIFICATION_SERVICE_URL=http://localhost:3003
-    USERS_SERVICE_URL=http://localhost:3002
-    TRIS_SERVICE_URL=http://localhost:3006
+    NOTIFICATION_SERVICE_URL=http://notification:3003
+    USERS_SERVICE_URL=http://users:3002
+    TRIS_SERVICE_URL=http://tris:3006
     PONG_WIN_SCORE = 10
     READY_COOLDOWN_MS = 30000
     ROUND_TRANSITION_COOLDOWN_MS = 10000
@@ -79,19 +79,19 @@ services/pong:
     BALL_SPEED_FACTOR=1.1 # Factor by which the ball speed increases after each paddle hit
     BALL_MAX_SPEED=2.0 # Maximum ball speed per SECOND to prevent infinite acceleration
     MIN_PLAYERS_FOR_TOURNAMENT_START=4
-    HOST=127.0.0.1
+    HOST=0.0.0.0
 
 services/tris:
     INTERNAL_API_KEY=1234
     PORT=3006
-    NOTIFICATION_SERVICE_URL=http://localhost:3003
-    USERS_SERVICE_URL=http://localhost:3002
-    PONG_SERVICE_URL=http://localhost:3005
+    NOTIFICATION_SERVICE_URL=http://notification:3003
+    USERS_SERVICE_URL=http://users:3002
+    PONG_SERVICE_URL=http://pong:3005
     MAX_MARKS_PER_PLAYER=3
     READY_COOLDOWN_MS = 30000
     MOVE_TIMEOUT_MS = 60000
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
-    HOST=127.0.0.1
+    HOST=0.0.0.0
 

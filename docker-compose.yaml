@@ -19,7 +19,7 @@ services:
     env_file:
       - ./backend/services/chat/.env
     expose:
-      - 3002
+      - 3004
     volumes:
       - ./backend/data/chat:/usr/src/app/data
     networks:
@@ -45,7 +45,7 @@ services:
     env_file:
       - ./backend/services/pong/.env
     expose:
-      - 3004
+      - 3005
     volumes:
       - ./backend/data/pong:/usr/src/app/data
     networks:
@@ -58,7 +58,7 @@ services:
     env_file:
       - ./backend/services/tris/.env
     expose:
-      - 3005
+      - 3006
     volumes:
       - ./backend/data/tris:/usr/src/app/data
     networks:
@@ -71,7 +71,7 @@ services:
     env_file:
       - ./backend/services/users/.env
     expose:
-      - 3006
+      - 3002
     volumes:
       - ./backend/data/users:/usr/src/app/data
     networks:
