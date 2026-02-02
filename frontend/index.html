@@ -20,13 +20,14 @@
 
 <div class=" shadow-[10px_10px_0_0_#0dff66]"> </div>
 <!-- Search User Bar at Top -->
-	<div class="sticky top-0 z-50 w-full border-b-2 border-neutral-700 hover:border-[#0dff66] transition-colors duration-300 dark:border-neutral-700 dark:hover:border-[#0dff66] light:border-gray-300 light:hover:border-orange-400">
-		<div class="max-w-full mx-auto flex gap-1 sm:gap-2 items-center px-2 sm:px-4">
+	<div class="sticky top-0 z-50 w-full border-b-2 border-neutral-700 hover:border-[#0dff66] transition-colors duration-300 bg-neutral-900 dark:bg-neutral-900 light:bg-white dark:border-neutral-700 dark:hover:border-[#0dff66] light:border-gray-300 light:hover:border-orange-400 relative h-12 sm:h-14">
+		<div class="max-w-full mx-auto flex gap-1 sm:gap-2 items-center px-2 sm:px-4 h-full">
 			<form id="search-user-form" class="flex gap-1 sm:gap-2 w-full">
 				<input 
 					id="search-user-input"
 					type="text" 
 					placeholder="Search user..." 
+					autocomplete="off"
 					class="flex-1 px-2 sm:px-4 py-2 bg-neutral-800 border-2 border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-[#0dff66] hover:border-neutral-600 uppercase tracking-tight font-semibold text-xs sm:text-sm transition-colors duration-300 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:placeholder-neutral-500 dark:focus:border-[#0dff66] dark:hover:border-neutral-600 light:bg-gray-100 light:border-gray-300 light:text-black light:placeholder-gray-500 light:focus:border-orange-400 light:hover:border-gray-400"
 				/>
 				<button 
@@ -36,6 +37,12 @@
 					Search
 				</button>
 			</form>
+
+			<!-- Search Results Dropdown -->
+			<div id="search-results-dropdown" class="absolute left-0 right-0 top-full translate-y-[2px] bg-neutral-900 border-x-2 border-b-2 border-[#0dff66] hidden z-[60] shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+				<!-- Results will be injected here -->
+			</div>
+
 			<!-- Theme Toggle Button -->
 			<button 
 				id="theme-toggle-btn"
@@ -47,6 +54,11 @@
 				</svg>
 			</button>
 		</div>
+	</div>
+
+	<!-- Search Results Dropdown -->
+	<div id="search-results-dropdown" class="fixed left-0 right-0 z-40 bg-neutral-900 border-x-2 border-b-2 border-[#0dff66] hidden shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+		<!-- Results will be injected here -->
 	</div>
 
 <br>

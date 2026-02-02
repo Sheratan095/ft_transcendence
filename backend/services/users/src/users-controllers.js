@@ -52,7 +52,7 @@ export const	searchUser = async (req, reply) =>
 			avatarUrl: row.avatar_url,
 		}));
 
-		console.log(`[USERS] SearchUser "${query}" requested by user: ${user.id}, found ${results.length} results`);
+		// console.log(`[USERS] SearchUser "${query}" requested by user: ${user.id}, found ${results.length} results`);
 
 		return reply.code(200).send(results);
 	}
