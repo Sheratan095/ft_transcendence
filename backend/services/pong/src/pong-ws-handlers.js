@@ -343,6 +343,7 @@ export async function	handleTournamentReady(userId, tournamentId)
 			return ;
 		}
 
+		// TO DO check it
 		tournamentManager.playerReady(tournamentId, userId);
 	}
 	catch (err)

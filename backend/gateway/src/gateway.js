@@ -201,8 +201,12 @@ import {
 import {
 	getUserStats as getUserStatsHandler,
 	getUserMatchHistory as getUserMatchHistoryHandler,
-	getAllTournaments as getAllTournamentsHandler,
 	createTournament as createTournamentHandler,
+	getAllTournaments as getAllTournamentsHandler,
+	joinTournament as joinTournamentHandler,
+	getUserTournamentsParticipations as getUserTournamentsParticipationsHandler,
+	getTournamentBracket as getTournamentBracketHandler,
+	testGetTournament as testGetTournamentHandler
 } from './routes/pong-routes.js'
 
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
@@ -316,8 +320,12 @@ await fastify.register(async function (fastify)
 	// PONG routes
 	fastify.get('/pong/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsHandler })
 	fastify.get('/pong/history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryHandler })
-	fastify.get('/pong/get-all-tournaments', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllTournamentsHandler })
 	fastify.post('/pong/create-tournament', { schema: { hide: true }, preHandler: authenticateJwt, handler: createTournamentHandler })
+	fastify.get('/pong/get-all-tournaments', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllTournamentsHandler })
+	fastify.post('/pong/join-tournament', { schema: { hide: true }, preHandler: authenticateJwt, handler: joinTournamentHandler })
+	fastify.get('/pong/user-tournaments-participations', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserTournamentsParticipationsHandler })
+	fastify.get('/pong/tournaments/bracket', { schema: { hide: true }, preHandler: authenticateJwt, handler: getTournamentBracketHandler })
+	fastify.get('/pong/tournaments/test', { schema: { hide: true }, handler: testGetTournamentHandler }) // TO DO remove
 });
 
 // SEARCH route – tighter rate limit

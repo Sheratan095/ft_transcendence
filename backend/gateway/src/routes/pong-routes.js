@@ -61,6 +61,30 @@ export const	getUserMatchHistory = async (req, reply) =>
 	}
 }
 
+export const	createTournament = async (req, reply) =>
+{
+	// Forward request to pong service with user data
+	try
+	{
+		const	response = await axios.post(`${PONG_SERVICE_URL}/create-tournament`, req.body, {
+			headers: getAuthHeaders(req),
+		})
+		
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		// Forward the specific error from pong service, do not log
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (create-tournament) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Pong service unavailable' }))
+	}
+}
+
 export const	getAllTournaments = async (req, reply) =>
 {
 	// Forward request to pong service with user data
@@ -85,12 +109,12 @@ export const	getAllTournaments = async (req, reply) =>
 	}
 }
 
-export const	createTournament = async (req, reply) =>
+export const	joinTournament = async (req, reply) =>
 {
 	// Forward request to pong service with user data
 	try
 	{
-		const	response = await axios.post(`${PONG_SERVICE_URL}/create-tournament`, req.body, {
+		const	response = await axios.post(`${PONG_SERVICE_URL}/join-tournament`, req.body, {
 			headers: getAuthHeaders(req),
 		})
 		
@@ -103,7 +127,80 @@ export const	createTournament = async (req, reply) =>
 			return (reply.code(err.response.status).send(err.response.data))
 
 		// Only log and send generic error if pong service did not handle it
-		console.log('[GATEWAY] Pong service (create-tournament) error:', err.message)
+		console.log('[GATEWAY] Pong service (join-tournament) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Pong service unavailable' }))
+	}
+}
+
+export const	getUserTournamentsParticipations = async (req, reply) =>
+{
+	// Forward request to pong service with user data
+	try
+	{
+		const	response = await axios.get(`${PONG_SERVICE_URL}/user-tournaments-participations`, {
+			params: req.query,
+			headers: getAuthHeaders(req),
+		})
+		
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		// Forward the specific error from pong service, do not log
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (get-user-tournaments-participations) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Pong service unavailable' }))
+	}
+}
+
+export const	getTournamentBracket = async (req, reply) =>
+{
+	// Forward request to pong service with user data
+	try
+	{
+		const	response = await axios.get(`${PONG_SERVICE_URL}/tournaments/${req.params.id}/bracket`, {
+			headers: getAuthHeaders(req),
+		})
+		
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		// Forward the specific error from pong service, do not log
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (get-tournament-bracket) error:', err.message)
+
+		return (reply.code(500).send({ error: 'Pong service unavailable' }))
+	}
+}
+
+export const	testGetTournament = async (req, reply) =>
+{
+	// Forward request to pong service with user data
+	try
+	{
+		const	response = await axios.get(`${PONG_SERVICE_URL}/tournaments/test`, {
+			headers: getAuthHeaders(req),
+		})
+		
+		return (reply.send(response.data))
+	}
+	catch (err)
+	{
+		// Forward the specific error from pong service, do not log
+		if (err.response)
+			return (reply.code(err.response.status).send(err.response.data))
+
+		// Only log and send generic error if pong service did not handle it
+		console.log('[GATEWAY] Pong service (test-get-tournament) error:', err.message)
 
 		return (reply.code(500).send({ error: 'Pong service unavailable' }))
 	}

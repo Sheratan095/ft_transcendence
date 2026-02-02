@@ -244,7 +244,7 @@ export const	joinTournament = async (req, reply) =>
 	}
 }
 
-export const	getUserTournamentParticipation = async (req, reply) =>
+export const	getUserTournamentsParticipations = async (req, reply) =>
 {
 	try
 	{
@@ -252,12 +252,12 @@ export const	getUserTournamentParticipation = async (req, reply) =>
 		const	userId = req.query.id;
 
 		// Retrieve tournament participation for the user
-		const	participation = await pongDb.getTournamentParticipationByUser(userId);
-		if (!participation || participation.length === 0)
+		const	participations = await pongDb.getTournamentsParticipationsByUser(userId);
+		if (!participations || participations.length === 0)
 			return (reply.code(404).send({ error: 'No tournament participation found for user' }));
 
 		// Map the participation to a cleaner format if needed
-		for (let entry of participation)
+		for (let entry of participations)
 		{
 			entry.tournamentId = entry.tournament_id;
 			entry.tournamentName = entry.tournament_name;
@@ -270,13 +270,13 @@ export const	getUserTournamentParticipation = async (req, reply) =>
 			delete entry.finished_at;
 		}
 
-		console.log(`[PONG] Retrieved tournament participation for user ${userId}`);
+		console.log(`[PONG] Retrieved tournaments participations for user ${userId}`);
 
-		return (reply.code(200).send(participation));
+		return (reply.code(200).send(participations));
 	}
 	catch (err)
 	{
-		console.error('[PONG] Error in getUserTournamentParticipation controller:', err);
+		console.error('[PONG] Error in getUserTournamentsParticipations controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
@@ -299,6 +299,18 @@ export const	getTournamentBracket = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[PONG] Error in getTournamentBracket controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	testGetTournament = async (req, reply) =>
+{
+	try
+	{
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in testGetTournament controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

@@ -14,8 +14,9 @@ import {
 	getAllTournaments as getAllTournamentsHandler,
 	joinTournament as joinTournamentHandler,
 	isUserBusy as isUserBusyHandler,
-	getUserTournamentParticipation as getUserTournamentParticipationHandler,
-	getTournamentBracket as getTournamentBracketHandler
+	getUserTournamentsParticipations as getUserTournamentsParticipationsHandler,
+	getTournamentBracket as getTournamentBracketHandler,
+	testGetTournament as testGetTournamentHandler
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -469,7 +470,7 @@ const	joinTournament =
 	handler: joinTournamentHandler
 }
 
-const	getUserTournamentParticipation =
+const	getUserTournamentsParticipations =
 {
 	schema:
 	{
@@ -500,7 +501,7 @@ const	getUserTournamentParticipation =
 	},
 
 	preHandler: validateInternalApiKey,
-	handler: getUserTournamentParticipationHandler
+	handler: getUserTournamentsParticipationsHandler
 }
 
 const	getTournamentBracket =
@@ -534,6 +535,26 @@ const	getTournamentBracket =
 	handler: getTournamentBracketHandler
 }
 
+const	testGetTournament = 
+{
+	schema:
+	{
+		summary: 'Get torunament test bracket',
+		tags: ['Test'],
+
+		...withInternalAuth,
+
+		response:
+		{
+			200:{ ...TournamentBracket },
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: testGetTournamentHandler
+}
+
 //-----------------------------EXPORT ROUTES-----------------------------
 
 export async function	pongRoutes(fastify, options)
@@ -557,8 +578,9 @@ export async function	pongRoutes(fastify, options)
 	fastify.get('/history', getUserMatchHistory);
 	fastify.get('/get-all-tournaments', getAllTournaments);
 	fastify.get('/is-user-busy', isUserBusy);
-	fastify.get('/user-tournament-participation', getUserTournamentParticipation);
+	fastify.get('/user-tournaments-participations', getUserTournamentsParticipations);
 	fastify.get('/tournaments/:id/bracket', getTournamentBracket);
+	fastify.get('/tournaments/test', testGetTournament);
 
 	fastify.post('/create-user-stats', createUserStats);
 	fastify.post('/create-tournament', createTournament);

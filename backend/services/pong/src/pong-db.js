@@ -228,18 +228,18 @@ export class	PongDatabase
 
 	}
 
-	async	getTournamentParticipationByUser(userId)
+	async	getTournamentsParticipationsByUser(userId)
 	{
 		const	query = `
 			SELECT tp.tournament_id, t.name,t.finished_at
 			FROM tournament_participants tp
 			JOIN tournaments t ON tp.tournament_id = t.id
 			WHERE tp.user_id = ?
-			ORDER BY tp.finished_at DESC
+			ORDER BY t.finished_at DESC
 		`;
 
-		const	participation = await this.db.all(query, [userId]);
-		return (participation);
+		const	participations = await this.db.all(query, [userId]);
+		return (participations);
 	}
 
 	async	updateTournamentParticipantTop(tournamentId, userId, top)
