@@ -138,8 +138,22 @@ export class	SwaggerAggregator
 
 	async	register(fastify)
 	{
-		// Load initial spec
-		this.currentSpec = await this.getAggregatedSpec();
+		// Load initial spec with retries in case services are not ready yet
+		let attempts = 0;
+		const maxAttempts = 12; // total wait ~12s (with 1s sleep)
+		let spec = null;
+		while (attempts < maxAttempts) {
+			try {
+				spec = await this.getAggregatedSpec();
+				if (spec && Object.keys(spec.paths || {}).length > 0) break; // got useful spec
+			} catch (err) {
+				console.warn(`[GATEWAY] Retry ${attempts + 1}/${maxAttempts} - failed to load specs: ${err.message}`);
+			}
+			attempts += 1;
+			// small delay before next attempt
+			await new Promise(r => setTimeout(r, 1000));
+		}
+		this.currentSpec = spec || this.getFallbackSpec();
 
 		// Protect docs with basic auth
 		await fastify.register(fastifyBasicAuth,

@@ -12,16 +12,16 @@ services:
     networks:
       - trascendence
 
-  chat:
+  users:
     build:
-      context: ./backend/services/chat
-    container_name: chat
+      context: ./backend/services/users
+    container_name: users
     env_file:
-      - ./backend/services/chat/.env
+      - ./backend/services/users/.env
     expose:
-      - 3004
+      - 3002
     volumes:
-      - ./backend/data/chat:/usr/src/app/data
+      - ./backend/data/users:/usr/src/app/data
     networks:
       - trascendence
 
@@ -35,6 +35,19 @@ services:
       - 3003
     volumes:
       - ./backend/data/notification:/usr/src/app/data
+    networks:
+      - trascendence
+
+  chat:
+    build:
+      context: ./backend/services/chat
+    container_name: chat
+    env_file:
+      - ./backend/services/chat/.env
+    expose:
+      - 3004
+    volumes:
+      - ./backend/data/chat:/usr/src/app/data
     networks:
       - trascendence
 
@@ -63,19 +76,6 @@ services:
       - ./backend/data/tris:/usr/src/app/data
     networks:
       - trascendence
-    
-  users:
-    build:
-      context: ./backend/services/users
-    container_name: users
-    env_file:
-      - ./backend/services/users/.env
-    expose:
-      - 3002
-    volumes:
-      - ./backend/data/users:/usr/src/app/data
-    networks:
-      - trascendence
 
   gateway:
     build:
@@ -91,11 +91,11 @@ services:
       - ./backend/certs/certs:/usr/src/certs/certs:ro
     depends_on:
       - auth
-      - chat
+      - users
       - notification
+      - chat
       - pong
       - tris
-      - users
     networks:
       - trascendence
 

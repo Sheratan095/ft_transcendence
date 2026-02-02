@@ -168,6 +168,6 @@ I think it's ok
     "details": "SQLITE_CONSTRAINT: CHECK constraint failed: requester_id != target_id"
 }
 
-[] In docker (just at docker compose up, if docs are refreshed => users docs are loaded correctly, it could be a problem in starting queue of services??)
+[x] In docker (just at docker compose up, if docs are refreshed => users docs are loaded correctly, it could be a problem in starting queue of services??)
 	gateway       | ⚠️ Failed to load users docs: connect ECONNREFUSED 172.18.0.7:3002
 	gateway       | [GATEWAY] 📚 Loaded 5/6 specs
