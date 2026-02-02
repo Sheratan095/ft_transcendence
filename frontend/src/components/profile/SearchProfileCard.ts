@@ -1,4 +1,3 @@
-import { openChatModal } from '../../lib/chat';
 import type { User } from '../../lib/auth';
 import { sendChatInvite } from '../../lib/chat';
 import { FriendsManager } from './FriendsManager';
@@ -11,7 +10,6 @@ export interface SearchProfileCardOptions {
 export async function renderSearchProfileCard(
   user: User,
   container: HTMLElement,
-  options: SearchProfileCardOptions = {}
 ): Promise<HTMLElement | null> {
 
   //instantiate friends manager to check friendship status
@@ -39,9 +37,9 @@ export async function renderSearchProfileCard(
   avatarContainer.className = 'flex-shrink-0';
 
   const avatar = document.createElement('img');
-  avatar.src = user.avatarUrl?.startsWith('http')
-    ? user.avatarUrl
-    : `${user.avatarUrl || '/assets/placeholder-avatar.jpg'}`;
+  avatar.src = user.avatarUrl
+    ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl}`)
+    : '/assets/placeholder-avatar.jpg';
   avatar.alt = user.username || 'User avatar';
   avatar.className = 'w-32 h-32 rounded-lg object-cover border-2 border-neutral-600';
   avatarContainer.appendChild(avatar);

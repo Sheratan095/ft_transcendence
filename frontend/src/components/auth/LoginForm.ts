@@ -124,7 +124,8 @@ export function createLoginForm(callbacks: LoginFormCallbacks): { form: HTMLForm
           }
           localStorage.setItem('tfaEnabled', 'false');
           showSuccess(authError, 'Login successful.');
-          setTimeout(() => { location.href = '/'; }, 600);
+          const { navigate } = await import('../../spa');
+          setTimeout(() => { navigate('/'); }, 600);
         }
       } else {
         showError(authError, (body && (body.message || body.error)) || `Login failed (${res.status})`);

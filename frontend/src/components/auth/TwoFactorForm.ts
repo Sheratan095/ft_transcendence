@@ -104,7 +104,8 @@ export function createTwoFactorForm(callbacks: TwoFactorFormCallbacks): { form: 
       if (res.ok) {
         console.log('2FA verification successful:', body);
         showSuccess(authError, '2FA verified successfully!');
-        setTimeout(() => { location.href = '/'; }, 600);
+        const { navigate } = await import('../../spa');
+        setTimeout(() => { navigate('/'); }, 600);
       } else {
         showError(authError, (body && (body.message || body.error)) || `Verification failed (${res.status})`);
       }

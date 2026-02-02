@@ -342,3 +342,23 @@ export const	startPrivateChat = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
+
+export const	deleteUsernameFromCache = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.body.userId;
+
+		// Force refresh the username in cache, it will be "Unknown" if deleted or updated in case of username change
+		await chatConnectionManager.getUsernameFromCache(userId, true);
+
+		console.log(`[CHAT] Deleted username cache for user ${userId}`);
+
+		return (reply.code(200).send({ success: true }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in deleteUsernameFromCache controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}

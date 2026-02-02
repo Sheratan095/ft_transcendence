@@ -6,7 +6,8 @@ import {
 	addUserToChat,
 	createGroupChat,
 	leaveGroupChat,
-	startPrivateChat
+	startPrivateChat,
+	deleteUsernameFromCache
 } from './chat-controllers.js';
 
 import {
@@ -126,6 +127,40 @@ const	groupNamePolicy =
 	maxLength: 100
 };
 
+//----------------------------INTERNAL ROUTES----------------------------
+
+const	deleteUserOpts = 
+{
+	schema:
+	{
+		summary: 'Delete a username from the cache (Called by auth service when username is changed or account is deleted)',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties: { success: { type: 'boolean' } }
+			},
+			400: ErrorResponse,
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: deleteUsernameFromCache
+};
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 const	getChatsOpts = 
@@ -151,7 +186,7 @@ const	getChatsOpts =
 
 	preHandler: validateInternalApiKey,
 	handler: getChats
-}
+};
 
 const	getMessagesOpts = 
 {
@@ -189,7 +224,7 @@ const	getMessagesOpts =
 
 	preHandler: validateInternalApiKey,
 	handler : getMessages
-}
+};
 
 const	addUserToChatOpts = 
 {
@@ -226,7 +261,7 @@ const	addUserToChatOpts =
 
 	preHandler: validateInternalApiKey,
 	handler: addUserToChat
-}
+};
 
 const	startPrivateChatOpts = 
 {
@@ -263,7 +298,7 @@ const	startPrivateChatOpts =
 
 	preHandler: validateInternalApiKey,
 	handler: startPrivateChat
-}
+};
 
 const	createGroupChatOpts = 
 {
@@ -295,7 +330,7 @@ const	createGroupChatOpts =
 
 	preHandler: validateInternalApiKey,
 	handler: createGroupChat
-}
+};
 
 const	leaveGroupChatOpts = 
 {
@@ -359,4 +394,6 @@ export function	chatRoutes(fastify)
 	fastify.post('/add-user', addUserToChatOpts);
 	fastify.post('/create-group-chat', createGroupChatOpts);
 	fastify.post('/leave-group-chat', leaveGroupChatOpts);
+
+	fastify.delete('/delete-user', deleteUserOpts);
 }

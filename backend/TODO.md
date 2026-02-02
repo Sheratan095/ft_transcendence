@@ -151,3 +151,11 @@ I think it's ok
 	[GATEWAY] Users service error: Request failed with status code 400
 
 [x] Can creator cancel the tournament
+
+[x] 2fa not working
+
+[x] pong get user stats
+
+[x] logout bad request in frontend
+
+[x] Deleted old avatar: 1.png

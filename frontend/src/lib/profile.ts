@@ -1,5 +1,5 @@
-import { fetchUserProfile, logout, deleteAccout } from './auth';
-import { initChat, openChatModal } from './chat';
+import { fetchUserProfile } from './auth';
+import { initChat } from './chat';
 import { renderProfileCard } from '../components/profile';
 
 export async function renderProfile(container?: HTMLElement | string): Promise<HTMLElement | null> {

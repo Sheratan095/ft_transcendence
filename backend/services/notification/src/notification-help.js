@@ -165,7 +165,7 @@ export async function	getUsernameById(userId)
 {
 	try
 	{
-		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/user?id=${userId}`, {
+		const	response = await fetch(`${process.env.USERS_SERVICE_URL}/username-by-id?userId=${userId}`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',

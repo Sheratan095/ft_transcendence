@@ -1,5 +1,6 @@
 import { showInfoToast, showToast } from '../components/shared/Toast';
 import { getCurrentTheme } from './theme';
+import type { User } from './auth';
 
 let chatSocket: WebSocket | null = null;
 let currentUserId: string | null = null;
@@ -64,7 +65,7 @@ async function loadChats() {
         chatMembers.set(chat.id, chat.members);
         // For DM chats, store the other user's ID directly on the chat object
         if (chat.chatType === 'dm') {
-          const otherMember = chat.members.find(m => String(m.userId) !== String(currentUserId));
+          const otherMember = chat.members.find((m: User) => String(m.userId) !== String(currentUserId));
           if (otherMember) {
             chat.otherUserId = String(otherMember.userId);
           }
@@ -458,22 +459,17 @@ function handleMessageStatusUpdate(data: any) {
 }
 
 function handlePrivateMessage(data: any) {
-  console.log('Private message received:', data);
-  const { fromUserId, from, content, timestamp } = data;
-  
-  // Find or create a DM chat with this user
-  let dmChat = chats.find(c => c.chatType === 'dm' && c.otherUserId === String(fromUserId));
-  let isNewChat = false;
-  
+  const { chatId, senderId, from, content, timestamp } = data.data;
+  let dmChat = chats.find(c => c.id === String(chatId));
+  console.log('DM chat found:', dmChat);
   if (!dmChat) {
     // Create a new DM chat entry
-    isNewChat = true;
     dmChat = {
-      id: `dm_${fromUserId}`,
+      id: `dm_${chatId}`,
       chatType: 'dm',
-      otherUserId: String(fromUserId),
+      otherUserId: String(senderId),
       members: [
-        { userId: fromUserId, username: from },
+        { userId: senderId, username: from },
         { userId: currentUserId, username: 'You' }
       ]
     };
@@ -489,7 +485,7 @@ function handlePrivateMessage(data: any) {
   const chatMessages = messages.get(dmChat.id)!;
   chatMessages.push({
     id: data.messageId || `msg_${Date.now()}`,
-    senderId: String(fromUserId),
+    senderId: String(senderId),
     from: from,
     content: content,
     createdAt: timestamp,

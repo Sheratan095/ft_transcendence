@@ -116,8 +116,11 @@ export class	UsersDatabase
 
 	async	deleteUserById(userId)
 	{
-		const	query = `DELETE FROM users WHERE id = ?`;
-		await this.db.run(query, [userId]);
+		const	query = `UPDATE users SET deleted = 1, username = ?, avatar_url = NULL WHERE id = ?`;
+
+		const	anonymousUsername = process.env.PLACEHOLDER_DELETED_USERNAMES;
+
+		await this.db.run(query, [anonymousUsername.toLowerCase(), userId]);
 	}
 
 	// Get user profile by username
@@ -142,6 +145,7 @@ export class	UsersDatabase
 			SELECT id, username, avatar_url
 			FROM users
 			WHERE LOWER(username) LIKE ?
+				AND deleted = 0
 			ORDER BY username ASC
 			LIMIT 20;
 		`;
@@ -157,7 +161,6 @@ export class	UsersDatabase
 
 	async	updateUser(userId, newUsername, newLanguage)
 	{
-
 		// Update username if provided
 		if (newUsername !== undefined && newUsername !== null && newUsername !== '')
 		{

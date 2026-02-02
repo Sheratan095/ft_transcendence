@@ -28,6 +28,7 @@ services/auth:
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     PONG_SERVICE_URL=http://localhost:3005
     TRIS_SERVICE_URL=http://localhost:3006
+    CHAT_SERVICE_URL=http://localhost:3004
     HOST=127.0.0.1
 
 services/users:
@@ -36,6 +37,7 @@ services/users:
     AUTH_SERVICE_URL=http://localhost:3001
     NOTIFICATION_SERVICE_URL=http://localhost:3003
     HOST=127.0.0.1
+    PLACEHOLDER_DELETED_USERNAMES=Anonymous player
 
 services/notification:
     INTERNAL_API_KEY=1234
@@ -68,7 +70,6 @@ services/pong:
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
     TOURNAMENT_EARNED_WIN_POINTS=200 # Points awarded for winning a tournament
-    PLACEHOLDER_DELETED_USERNAMES=Anonymous player
     COOLDOWN_BETWEEN_POINTS_MS=3000 # Time between points in milliseconds
     PADDLE_HEIGHT=0.3 # Height of the paddle respective to the game area (0.5 = half the game area)
     PADDLE_SPEED=1.5 # Speed of the paddle per SECOND (1.5 = 150% of the game area per second)
@@ -92,6 +93,5 @@ services/tris:
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
     LOST_LOSS_POINTS=50 # Points lost for losing a game
-    PLACEHOLDER_DELETED_USERNAMES=Anonymous player
     HOST=127.0.0.1
 

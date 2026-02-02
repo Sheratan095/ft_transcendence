@@ -126,7 +126,8 @@ export function createRegisterForm(callbacks: RegisterFormCallbacks): { form: HT
         else 
           localStorage.setItem('tfaEnabled', 'false');
         showSuccess(authError, 'Registration successful.');
-        setTimeout(() => { location.href = '/'; }, 600);
+        const { navigate } = await import('../../spa');
+        setTimeout(() => { navigate('/'); }, 600);
       } else {
         showError(authError, (body && (body.message || body.error)) || `Register failed (${res.status})`);
       }

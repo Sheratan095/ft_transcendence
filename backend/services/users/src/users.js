@@ -64,7 +64,7 @@ let		usersDatabase;
 
 // Validate required environment variables
 import { checkEnvVariables } from './users-help.js';
-checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'AUTH_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'HOST']);
+checkEnvVariables(['INTERNAL_API_KEY', 'PORT', 'AUTH_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'HOST', 'PLACEHOLDER_DELETED_USERNAMES']);
 
 // Setup Swagger documentation
 import { setupSwagger } from './users-swagger.js';

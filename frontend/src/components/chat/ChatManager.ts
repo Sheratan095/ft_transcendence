@@ -23,7 +23,6 @@ export class ChatManager {
   private chats: Chat[] = [];
   private messages: Map<string, Message[]> = new Map();
   private chatMembers: Map<string, any[]> = new Map();
-  private messageOffset = 0;
   private MESSAGE_LIMIT = 50;
 
   // Callbacks
@@ -115,7 +114,6 @@ export class ChatManager {
 
   selectChat(chatId: string) {
     this.currentChatId = chatId;
-    this.messageOffset = 0;
 
     const chatHeader = document.getElementById('chat-header');
     if (chatHeader) {

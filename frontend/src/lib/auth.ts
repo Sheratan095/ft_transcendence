@@ -73,8 +73,8 @@ export async function logout(): Promise<void> {
   try {
     await fetch(`/api/auth/logout`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      credentials: 'include',
+      // headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      // credentials: 'include',
     });
   } catch (err) {
     console.error('Logout error:', err);

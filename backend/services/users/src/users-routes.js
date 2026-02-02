@@ -7,6 +7,7 @@ import {
 	uploadAvatar,
 	deleteUser,
 	getUsersStats,
+	getUsernameById
 } from './users-controllers.js';
 
 import { validateInternalApiKey } from './users-help.js';
@@ -353,6 +354,40 @@ const	deleteUserOpts =
 	handler: deleteUser,
 }
 
+const	getUsernameByIdOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Get username by user ID',
+		description: 'Internal only. Retrieves the username for a given user ID. Requires internal API key for authentication.',
+		tags: ['Internal'],
+
+		...withInternalAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' } }
+		},
+
+		response:
+		{
+			200:
+			{
+				type: 'object',
+				properties:
+				{ username: { type: 'string' } }
+			},
+			404: ErrorResponse,
+			500: ErrorResponse,
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: getUsernameById,
+}
+
 export function	userRoutes(fastify)
 {
 	fastify.get('/', getUsersOpts);
@@ -361,6 +396,8 @@ export function	userRoutes(fastify)
 	fastify.get('/user', getUserOpts);
 	fastify.get('/search', searchUserOpts);
 	fastify.get('/stats', getUsersStatsOpts);
+
+	fastify.get('/username-by-id', getUsernameByIdOpts);
 
 	fastify.post('/new-user', newUserOpts);
 	fastify.post('/upload-avatar', uploadAvatarOpts);
