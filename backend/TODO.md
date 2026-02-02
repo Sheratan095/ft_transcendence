@@ -156,6 +156,6 @@ I think it's ok
 
 [x] pong get user stats
 
-[] logout bad request in frontend
+[x] logout bad request in frontend
 
 [x] Deleted old avatar: 1.png
