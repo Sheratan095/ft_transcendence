@@ -156,7 +156,8 @@ export async function	getFriendsList(userId, onlineUserIds)
 	}
 	catch (error)
 	{
-		console.log(`[NOTIFICATION] Failed to fetch friends list for user ${userId}:`, error.message);
+		console.error(`[NOTIFICATION] ERROR: Failed to fetch friends list for user ${userId}:`, error.message);
+		console.error(`[NOTIFICATION] This user's friend online notifications will NOT be sent!`);
 		return ([]);
 	}
 }

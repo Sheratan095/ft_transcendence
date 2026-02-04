@@ -19,7 +19,10 @@ class	UserConnectionManager
 
 		const	username = await getUsernameById(userId);
 		// Then notify other connected users that this user is now online
-		this.#dispatchEventToFriends(userId, 'friend.online', { userId, username }, onlineFriends);
+		if (onlineFriends.length > 0)
+			this.#dispatchEventToFriends(userId, 'friend.online', { userId, username }, onlineFriends);
+		else
+			console.log(`[NOTIFICATION] User ${userId} has no online friends to notify (User online)`);
 	}
 
 	async	removeConnection(userId)
@@ -29,7 +32,10 @@ class	UserConnectionManager
 
 		const	username = await getUsernameById(userId);
 		// Notify other connected users that this user is now offline
-		this.#dispatchEventToFriends(userId, 'friend.offline', { userId, username }, onlineFriends);
+		if (onlineFriends.length > 0)
+			this.#dispatchEventToFriends(userId, 'friend.offline', { userId, username }, onlineFriends);
+		else
+			console.log(`[NOTIFICATION] User ${userId} has no online friends to notify (User offline)`);
 	}
 
 	getConnection(userId)
