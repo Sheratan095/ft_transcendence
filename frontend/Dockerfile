@@ -3,8 +3,8 @@ FROM node:latest AS build
 WORKDIR /usr/src/app
 
 # accept build arg used by Vite
-ARG VITE_API_URL
-ENV VITE_API_URL=${VITE_API_URL}
+ARG VITE_API_TARGET
+ENV VITE_API_TARGET=${VITE_API_TARGET}
 
 COPY package*.json ./
 RUN npm install
