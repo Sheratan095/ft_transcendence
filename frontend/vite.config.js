@@ -24,15 +24,25 @@ export default defineConfig(({ mode }) => {
   };
 
   const wsProxyConfig = {
-    ...proxyConfig,
     target: env.VITE_WS_TARGET || 'wss://localhost:3000',
     ws: true,
+    changeOrigin: true,
+    secure: false,
+    rejectUnauthorized: false,
+    configure: (proxy, _options) => {
+      proxy.on('error', (err, req, res) => {
+        console.error('[ws proxy error]', err);
+      });
+      proxy.on('proxyReq', (proxyReq, req, res) => {
+        proxyReq.setHeader('Origin', env.VITE_WS_TARGET || 'wss://localhost:3000');
+      });
+    },
   };
 
   return {
     base: '/',
     server: {
-      host: '0.0.0.0',
+      host: env.HOST,
       port: parseInt(env.VITE_PORT) || 4000,
       strictPort: true,
       https: {
