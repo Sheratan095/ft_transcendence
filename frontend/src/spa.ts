@@ -1,15 +1,15 @@
 import { isLoggedInClient } from './lib/auth';
 import { renderProfile } from './lib/profile';
-import { createLoginForm, createRegisterForm } from './components/auth';
+import { logout } from './lib/token';
 
 type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
   '/': { 
     render: async () => {
-      const el = document.getElementById('auth-container');
+      const el = document.getElementById('main-content');
       if (!el) return;
       if (!isLoggedInClient()) {
-        window.location.pathname = '/login';
+		logout();
         return;
       }
       el.innerHTML = '';
@@ -18,29 +18,15 @@ const routes: Record<string, RouteConfig> = {
   },
   '/login': { 
     render: async () => {
-      const el = document.getElementById('auth-container');
+      const el = document.getElementById('main-content');
       if (!el) return;
       el.innerHTML = '';
-      const { form } = createLoginForm({
-        onRegisterClick: () => navigate('/register')
-      });
-      el.appendChild(form);
-    }
-  },
-  '/register': { 
-    render: async () => {
-      const el = document.getElementById('auth-container');
-      if (!el) return;
-      el.innerHTML = '';
-      const { form } = createRegisterForm({
-        onLoginClick: () => navigate('/login')
-      });
-      el.appendChild(form);
+      //renderLogin(el);
     }
   },
   '/profile': { 
     render: async () => {
-      const el = document.getElementById('auth-container');
+      const el = document.getElementById('main-content');
       if (!el) return;
       el.innerHTML = '';
       await renderProfile(el);
@@ -48,7 +34,7 @@ const routes: Record<string, RouteConfig> = {
   },
   '/pong': { 
     render: async () => {
-      const el = document.getElementById('auth-container');
+      const el = document.getElementById('main-content');
       if (!el) return;
       el.innerHTML = '<div class="py-8">Pong game loading...</div>';
       // Import and render pong component
@@ -62,7 +48,7 @@ const routes: Record<string, RouteConfig> = {
   },
   '/tris': { 
     render: async () => {
-      const el = document.getElementById('auth-container');
+      const el = document.getElementById('main-content');
       if (!el) return;
       el.innerHTML = '<div class="py-8">Tris game loading...</div>';
       // Import and render tris component
@@ -80,7 +66,11 @@ const routes: Record<string, RouteConfig> = {
 let navigationHistory: string[] = [];
 let isBackNavigation = false;
 
-async function navigate(path: string) {
+/**
+ * Main routing function - handles path navigation and rendering
+ * Updates browser history, detects back/forward navigation, and renders the appropriate route
+ */
+async function goToRoute(path: string) {
   // Detect if this is a back/forward navigation
   const currentIndex = navigationHistory.indexOf(location.pathname);
   const targetIndex = navigationHistory.indexOf(path);
@@ -122,7 +112,7 @@ async function renderRoute(path: string) {
       await transitionFn();
     }
   } catch (err) {
-    const el = document.getElementById('auth-container');
+    const el = document.getElementById('main-content');
     if (el) {
       el.innerHTML = `<div class="text-red-600">Error loading page</div>`;
     }
@@ -138,7 +128,7 @@ export function linkify() {
     if (!href) return;
     if (href.startsWith('/')) {
       ev.preventDefault();
-      navigate(href);
+      goToRoute(href);
     }
   });
 }
@@ -158,5 +148,5 @@ export async function start() {
   await renderRoute(initial);
 }
 
-export { navigate };
-export default { start, navigate };
+export { goToRoute };
+export default { start, goToRoute };

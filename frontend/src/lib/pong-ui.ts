@@ -1,4 +1,5 @@
 import { showErrorToast } from '../components/shared/Toast';
+import { goToRoute } from '../spa';
 
 
 /**
@@ -8,9 +9,7 @@ export async function openPongModal() {
   // For now, navigate to pong page or open pong modal
   // This can be extended with full pong game logic similar to tris-ui.ts
   try {
-    // Navigate to pong game page
-    const { navigate } = await import('../spa');
-    navigate('/pong');
+	
   } catch (err) {
     console.error('Failed to open pong:', err);
     showErrorToast((err as Error).message || 'Failed to open pong game');
@@ -47,8 +46,6 @@ function attachPongCardListener() {
   console.log('Attaching pong card listener');
   pongCard.addEventListener('click', async (e) => {
     e.preventDefault();
-    console.log('Pong card clicked - navigating to /pong');
-    const { navigate } = await import('../spa');
-    navigate('/pong');
+    goToRoute('/pong');
   });
 }

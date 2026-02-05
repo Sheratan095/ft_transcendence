@@ -1,313 +1,128 @@
+@import "tailwind.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Theme System */
-html {
-  --color-bg-primary: rgb(0, 0, 0);
-  --color-bg-secondary: rgb(23, 23, 23);
-  --color-text-primary: rgb(229, 229, 229);
-  --color-text-secondary: rgb(115, 115, 115);
-  --color-border: rgb(64, 64, 64);
-  --color-accent-pink: #ff009d;
-  --color-accent-green: #0dff66;
-  --color-accent-cyan: #00ffff;
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Theme transition animation */
+html.theme-transitioning,
+html.theme-transitioning * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-html.light {
-  --color-bg-primary: rgb(255, 255, 255);
-  --color-bg-secondary: rgb(245, 245, 245);
-  --color-text-primary: rgb(0, 0, 0);
-  --color-text-secondary: rgb(100, 100, 100);
-  --color-border: rgb(200, 200, 200);
-  --color-accent-pink: #ff6b35;
-  --color-accent-green: #00a8e8;
-  --color-accent-cyan: #00d9ff;
+/* Interactive Card Hover Effect */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 2rem;
+  position: relative;
 }
 
-html.dark {
-  --color-bg-primary: rgb(0, 0, 0);
-  --color-bg-secondary: rgb(23, 23, 23);
-  --color-text-primary: rgb(229, 229, 229);
-  --color-text-secondary: rgb(115, 115, 115);
-  --color-border: rgb(64, 64, 64);
-  --color-accent-pink: #ff009d;
-  --color-accent-green: #0dff66;
-  --color-accent-cyan: #00ffff;
+.cards:hover .card {
+  background: radial-gradient(
+    100rem circle at var(--xPos) var(--yPos),
+    rgba(255, 102, 0, 0.4),
+    transparent 15%
+  );
+  @apply dark:bg-[radial-gradient(100rem_circle_at_var(--xPos)_var(--yPos),_rgba(13,255,102,0.4),_transparent_15%)];
 }
 
-/* Apply theme variables globally */
-body {
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+.card {
+  background: radial-gradient(
+    150rem circle at 0 0,
+    rgba(0, 255, 241, 0),
+    transparent 0%
+  );
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  transition: all 0.15s;
 }
 
-section {
-  transition: background-color 0.3s ease;
+.card:hover {
+  transform: scale(0.98);
 }
 
-html.dark body {
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-}
-
-html.light body {
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-}
-
-/* Light mode specific styles */
-html.light {
-  color-scheme: light;
-}
-
-html.light body {
-  background-color: white;
-  color: black;
-}
-
-html.light section {
-  background-color: white;
-  color: black;
-}
-
-html.light h1, html.light h2, html.light h3, html.light h4, html.light h5, html.light h6 {
-  color: black;
-}
-
-html.light p {
-  color: #333;
-}
-
-html.light .bg-black {
-  background-color: white;
-}
-
-html.light .bg-neutral-900, html.light .dark\:bg-neutral-900 {
-  background-color: #f5f5f5;
-}
-
-html.light .bg-neutral-800, html.light .dark\:bg-neutral-800 {
-  background-color: #e0e0e0;
-}
-
-html.light .bg-neutral-700, html.light .dark\:bg-neutral-700 {
-  background-color: #d0d0d0;
-}
-
-html.light .border-neutral-700 {
-  border-color: #cccccc;
-}
-
-html.light .text-neutral-200, html.light .text-white {
-  color: black;
-}
-
-html.light .text-neutral-400, html.light .text-neutral-500 {
-  color: #666;
-}
-
-html.light .placeholder-neutral-500::placeholder {
-  color: #999;
-}
-
-html.light .hover\:border-\[\#0dff66\]:hover {
-  border-color: #00a8e8 !important;
-}
-
-html.light .focus\:border-\[\#0dff66\]:focus {
-  border-color: #00a8e8 !important;
-}
-
-html.light .bg-\[\#0dff66\] {
-  background-color: #00a8e8;
-}
-
-html.light .bg-\[\#ff009d\] {
-  background-color: #ff6b35;
-}
-
-html.light .text-\[\#0dff66\] {
-  color: #00a8e8;
-}
-
-html.light .text-\[\#ff009d\] {
-  color: #ff6b35;
-}
-
-html.light .text-\[\#00ffff\] {
-  color: #00d9ff;
-}
-
-html.light .shadow-\[10px_10px_0_0_\#ff009d\] {
-  box-shadow: 10px 10px 0 0 #ff6b35;
-}
-
-html.light .shadow-\[10px_10px_0_0_\#0dff66\] {
-  box-shadow: 10px 10px 0 0 #00a8e8;
-}
-
-html.light .shadow-\[10px_10px_0_0_\#00ffff\] {
-  box-shadow: 10px 10px 0 0 #00d9ff;
-}
-
-html.light .hover\:shadow-\[0_0_10px_\#0dff66\]:hover {
-  box-shadow: 0 0 10px #00a8e8 !important;
-}
-
-html.light .bg-\[\#ff00aa\] {
-  background-color: #ff8c42;
-}
-
-html.light .text-pink-300 {
-  color: #ff6b35;
-}
-
-html.light .text-green-300 {
-  color: #00a8e8;
-}
-
-html.light .text-cyan-300 {
-  color: #00d9ff;
-}
-
-html.light .bg-\[\#bd4747\] {
-  background-color: #ff6b35;
-}
-
-/* Modal background fixes for light mode */
-html.light #chat-modal,
-html.light #tris-modal,
-html.light #tris-invite-modal,
-html.light #friend-selection-modal {
-  background-color: transparent !important;
-}
-
-html.light [id*="modal"],
-html.light [id*="dialog"] {
-  background-color: transparent !important;
-}
-
-html.light .bg-black\/50 {
-  background-color: transparent !important;
-}
-
-html.light .bg-gray-950\/50 {
-  background-color: rgba(0, 0, 0, 0.2) !important;
-}
-
-html.light dialog,
-html.light el-dialog {
-  background-color: transparent !important;
-}
-
-html.light el-dialog-backdrop {
-  background-color: rgba(0, 0, 0, 0.2) !important;
-}
-
-html.light .bg-gray-800\/25 {
-  background-color: transparent !important;
-}
-
-/* Fix inline display for light mode elements - but respect hidden class */
-html.light .inline-flex:not(.hidden) {
-  display: inline-flex !important;
-}
-
-html.light .flex:not(.hidden) {
-  display: flex !important;
-}
-
-html.light .inline-block:not(.hidden) {
-  display: inline-block !important;
-}
-
-html.light .block:not(.hidden) {
-  display: block !important;
-}
-
-html.light .border-yellow-300 {
-  border-color: #ffa500;
-}
-
-html.light .text-yellow-300 {
-  color: #ff8c00;
-}
-
-html.light .text-yellow-400 {
-  color: #ffa500;
-}
-
-html.light .opacity-40 {
-  opacity: 0.15;
-}
-
-html.light .mix-blend-lighten {
-  mix-blend-mode: darken;
-}
-
-html.light .mix-blend-difference {
-  background-color: #ff6b35;
+.card:hover::before {
   opacity: 1;
 }
 
-html.light .bg-\[linear-gradient\(to_right\2c \#262626_1px\2c transparent_1px\)\2c linear-gradient\(to_bottom\2c \#262626_1px\2c transparent_1px\)\] {
-  background-image: linear-gradient(to right, #e0e0e0 1px, transparent 1px), linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    60rem circle at var(--xPos) var(--yPos),
+    rgba(0, 255, 241, 0.1),
+    transparent 35%
+  );
+  opacity: 0;
+  transition: all 0.15s ease-in-out;
+  pointer-events: none;
+  @apply dark:bg-[radial-gradient(60rem_circle_at_var(--xPos)_var(--yPos),_rgba(13,255,102,0.1),_transparent_35%)];
 }
 
-/* Light mode animation elements */
-html.light .bg-white {
-  background-color: black !important;
+.card-content {
+  background-color: #13161c;
+  border-radius: inherit;
+  transition: all 0.25s;
+  @apply dark:bg-neutral-800 bg-neutral-200 border-2 dark:border-neutral-600 border-neutral-400;
 }
 
-html.light .border-white {
-  border-color: black !important;
+@keyframes ball {
+  0% { top: 34%; left: 52%; }
+  8.3% { top: 52%; left: 90%; }
+  24.9% { top: 85%; left: 8%; }
+  30% { top: 98%; left: 27%; }
+  41.5% { top: 70%; left: 90%; }
+  58.1% { top: 55%; left: 8%; }
+  74.7% { top: 13%; left: 90%; }
+  79% { top: 1%; left: 70%; }
+  91.3% { top: 22%; left: 8%; }
+  100% { top: 34%; left: 52%; }
 }
 
-	@keyframes ball {
-      0% { top: 34%; left: 52%; }
-      8.3% { top: 52%; left: 90%; }
-      24.9% { top: 85%; left: 8%; }
-      30% { top: 98%; left: 27%; }
-      41.5% { top: 70%; left: 90%; }
-      58.1% { top: 55%; left: 8%; }
-      74.7% { top: 13%; left: 90%; }
-      79% { top: 1%; left: 70%; }
-      91.3% { top: 22%; left: 8%; }
-      100% { top: 34%; left: 52%; }
-    }
+@keyframes ping {
+  0%, 5% { top: 10%; }
+  9% { top: 24%; }
+  13% { top: 17%; }
+  24.9% { top: 82%; }
+  47% { top: 37%; }
+  52% { top: 41%; }
+  56% { top: 64%; }
+  58.1% { top: 54%; }
+  70% { top: 74%; }
+  84% { top: 12%; }
+  91.3% { top: 18%; }
+  100% { top: 10%; }
+}
 
-    @keyframes ping {
-      0%, 5% { top: 10%; }
-      9% { top: 24%; }
-      13% { top: 17%; }
-      24.9% { top: 82%; }
-      47% { top: 37%; }
-      52% { top: 41%; }
-      56% { top: 64%; }
-      58.1% { top: 54%; }
-      70% { top: 74%; }
-      84% { top: 12%; }
-      91.3% { top: 18%; }
-      100% { top: 10%; }
-    }
-
-    @keyframes pong {
-      0% { top: 90%; }
-      8.3% { top: 51%; }
-      20% { top: 60%; }
-      25% { top: 34%; }
-      41.5% { top: 68%; }
-      46% { top: 36%; }
-      52% { top: 18%; }
-      58.1% { top: 53%; }
-      66% { top: 14%; }
-      70% { top: 20%; }
-      74.7% { top: 10%; }
-      91.3% { top: 10%; }
-      100% { top: 90%; }
-    }
+@keyframes pong {
+  0% { top: 90%; }
+  8.3% { top: 51%; }
+  20% { top: 60%; }
+  25% { top: 34%; }
+  41.5% { top: 68%; }
+  46% { top: 36%; }
+  52% { top: 18%; }
+  58.1% { top: 53%; }
+  66% { top: 14%; }
+  70% { top: 20%; }
+  74.7% { top: 10%; }
+  91.3% { top: 10%; }
+  100% { top: 90%; }
+}
 
 @keyframes gridV {
   0%   { transform: scaleY(0); }
@@ -353,518 +168,17 @@ html.light .border-white {
   animation-delay: 0.2s;
 }
 
-@layer utilities {
-  .btn-lock svg {
-    @apply fill-none transform-gpu;
-  }
-
-  .btn-lock svg .bling {
-    stroke: #fff;
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-dasharray: 3;
-    stroke-dashoffset: 15;
-    transition: all 0.3s ease;
-  }
-
-  .btn-lock svg .lock {
-    stroke: #fff;
-    stroke-width: 4;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-    stroke-dasharray: 36;
-    transition: all 0.4s ease;
-  }
-
-  .btn-lock svg .lockb {
-    fill: #fff;
-    fill-rule: evenodd;
-    clip-rule: evenodd;
-    transform: rotate(8deg);
-    transform-origin: 14px 20px;
-    transition: all 0.2s ease;
-  }
-
-  /* Checked state */
-  input[type="checkbox"].peer:checked + label svg .bling {
-    animation: bling6132 0.3s linear forwards;
-    animation-delay: 0.2s;
-  }
-
-  input[type="checkbox"].peer:checked + label svg .lock {
-    stroke-dasharray: 48;
-    animation: locked 0.3s linear forwards;
-  }
-
-  input[type="checkbox"].peer:checked + label svg .lockb {
-    transform: rotate(0);
-    transform-origin: 14px 22px;
-  }
-
-  @keyframes bling6132 {
-    50% {
-      stroke-dasharray: 3;
-      stroke-dashoffset: 12;
-    }
-    100% {
-      stroke-dasharray: 3;
-      stroke-dashoffset: 9;
-    }
-  }
-
-  @keyframes locked {
-    50% {
-      transform: translateY(1px);
-    }
-  }
-}
-
-/* Chat Modal Styles */
-.placeholder {
-  text-align: center;
-  color: #999;
-  padding: 20px;
-  font-style: italic;
-}
-
-.chat-item {
-  padding: 12px;
-  background: #3d3d3d;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition:  0.2s;
-  border-left: 3px solid transparent;
-}
-
-.chat-item:hover {
-  background: #4d4d4d;
-}
-
-.chat-item.active {
-  background: #4d4d4d;
-  border-left-color: #4CAF50;
-}
-
-.chat-item-name {
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #e0e0e0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.unread-badge {
-  background-color: #ff4444;
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-.chat-item-type {
-  font-size: 12px;
-  color: #aaa;
-}
-
-.message {
-  max-width: 70%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  word-wrap: break-word;
-}
-
-.message-sent {
-  align-self: flex-end;
-  background: #4CAF50;
-  color: white;
-}
-
-.message-received {
-  align-self: flex-start;
-  background: #3d3d3d;
-  color: #e0e0e0;
-}
-
-.message-private-sent {
-  align-self: flex-end;
-  background: #9C27B0;
-  color: white;
-  border-left: 4px solid #E1BEE7;
-}
-
-.message-private-received {
-  align-self: flex-start;
-  background: #4A148C;
-  color: #E1BEE7;
-  border-left: 4px solid #9C27B0;
-}
-
-.message-system {
-  align-self: center;
-  background: #2196F3;
-  color: white;
-  font-style: italic;
-  font-size: 13px;
-}
-
-.message-system.user-join {
-  background: #4CAF50;
-}
-
-.message-system.user-leave {
-  background: #FF9800;
-}
-
-.message-content {
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.message-header {
-  font-size: 12px;
-  margin-bottom: 4px;
-  opacity: 0.8;
-  font-weight: 600;
-}
-
-.message-footer {
-  font-size: 11px;
-  margin-top: 4px;
-  opacity: 0.7;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.message-status {
-  font-size: 11px;
-  color: rgba(7, 7, 7, 0.9);
-  font-weight: 500;
-}
-
-.message-private-badge {
-  font-size: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  padding: 2px 6px;
-  border-radius: 3px;
-  margin-bottom: 4px;
-  display: inline-block;
-}
-
-.btn {
-  padding: 8px 16px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: 0.2s;
-}
-
-.btn:hover {
-  background: #45a049;
-}
-
-.btn:disabled {
-  background: #666;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: #2196F3;
-}
-
-.btn-secondary:hover {
-  background: #0b7dda;
-}
-
 /* Slideshow Styles */
 .slideshow-slide {
-  transition: opacity 0.5s ease-in-out;
+  @apply transition-opacity duration-500 ease-in-out;
 }
 
 .slideshow-indicator {
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.slideshow-indicator.active {
-  background-color: #ff009d !important;
-  transform: scale(1.2);
-}
-
-html.light .slideshow-indicator.active {
-  background-color: #ff6b35 !important;
+  @apply cursor-pointer transition-all duration-300;
 }
 
 .slideshow-indicator:not(.active):hover {
-  background-color: #999;
-}
-
-/* Light mode modal and overlay styles */
-html.light #chat-modal,
-html.light #tris-modal,
-html.light #tris-invite-modal,
-html.light #friend-selection-modal,
-html.light [role="dialog"] {
-  background-color: white;
-}
-
-html.light .relative.bg-neutral-900.border-4.border-neutral-700,
-html.light .relative.bg-neutral-900.border.border-neutral-700 {
-  background-color: #f5f5f5 !important;
-  border-color: #cccccc !important;
-}
-
-html.light .bg-neutral-800.border-b.border-neutral-700,
-html.light .bg-neutral-800.border-r.border-neutral-700,
-html.light .bg-neutral-800.border-t.border-neutral-700 {
-  background-color: #e0e0e0 !important;
-  border-color: #b0b0b0 !important;
-}
-
-html.light .bg-neutral-800 {
-  background-color: #e0e0e0 !important;
-}
-
-html.light .border-b-2.border-neutral-700,
-html.light .border-r-2.border-neutral-700 {
-  border-color: #cccccc !important;
-}
-
-html.light input,
-html.light textarea {
-  background-color: #f0f0f0 !important;
-  color: black !important;
-  border-color: #cccccc !important;
-}
-
-html.light input::placeholder,
-html.light textarea::placeholder {
-  color: #999 !important;
-}
-
-html.light .text-red-500,
-html.light .text-red-400 {
-  color: #d32f2f !important;
-}
-
-html.light .text-neutral-400,
-html.light .text-gray-400 {
-  color: #666 !important;
-}
-
-/* Profile card light mode */
-html.light .p-10.w-full.border-2.border-neutral-700.rounded-xl.bg-neutral-900 {
-  background-color: #f5f5f5 !important;
-  border-color: #cccccc !important;
-}
-
-html.light .text-neutral-300 {
-  color: #555 !important;
-}
-
-html.light .hover\:bg-neutral-800:hover {
-  background-color: #e0e0e0 !important;
-}
-
-html.light .hover\:bg-neutral-600:hover {
-  background-color: #d0d0d0 !important;
-}
-
-html.light .hover\:bg-neutral-700:hover {
-  background-color: #d8d8d8 !important;
-}
-
-/* Modal and overlay light mode support */
-html.light #chat-modal,
-html.light #tris-modal,
-html.light #tris-invite-modal,
-html.light #friend-selection-modal,
-
-html.light .relative.bg-neutral-900.border-4.border-neutral-700,
-html.light .relative.bg-neutral-900.border.border-neutral-700,
-
-html.light .w-80.bg-neutral-800.border-r.border-neutral-700,
-
-html.light .p-4.border-b.border-neutral-700.bg-neutral-800 {
-  background-color: #e0e0e0 !important;
-  border-color: #b0b0b0 !important;
-}
-
-html.light .flex-1.overflow-y-auto.p-4.space-y-3.bg-neutral-900 {
-  background-color: #f5f5f5 !important;
-}
-
-html.light .p-4.border-t.border-neutral-700.bg-neutral-800 {
-  background-color: #e0e0e0 !important;
-  border-color: #b0b0b0 !important;
-}
-
-html.light .text-neutral-400,
-html.light .text-neutral-500 {
-  color: #666 !important;
-}
-
-html.light .text-white {
-  color: black !important;
-}
-
-html.light .text-lg.font-semibold.text-white,
-html.light .text-xl.font-semibold.text-white,
-html.light .text-2xl.font-semibold.text-white {
-  color: black !important;
-}
-
-html.light .text-sm.text-neutral-400 {
-  color: #777 !important;
-}
-
-html.light .text-neutral-400.text-sm.mt-2 {
-  color: #777 !important;
-}
-
-html.light .p-3.bg-neutral-800.border-2.border-neutral-700.rounded {
-  background-color: #e0e0e0 !important;
-  border-color: #b0b0b0 !important;
-  color: black !important;
-}
-
-html.light .bg-neutral-700.text-white.px-3.py-2.rounded-md {
-  background-color: #d0d0d0 !important;
-  color: black !important;
-}
-
-html.light .bg-blue-600.text-white.px-3.py-2.rounded-md {
-  background-color: #00a8e8 !important;
-  color: white !important;
-}
-
-html.light .bg-red-600.hover\:bg-red-700.text-white {
-  background-color: #ff6b35 !important;
-  color: white !important;
-}
-
-html.light .bg-red-600.hover\:bg-red-700.text-white:hover {
-  background-color: #e55a25 !important;
-}
-
-html.light .space-y-3 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(0.75rem * (1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
-}
-
-html.light .flex-col {
-  display: flex;
-  flex-direction: column;
-}
-
-html.light .border-neutral-700 {
-  border-color: #cccccc !important;
-}
-
-html.light .border-2.border-neutral-700 {
-  border-color: #cccccc !important;
-}
-
-/* Dynamically added elements */
-html.light .chat-item {
-  background-color: #e0e0e0 !important;
-  border-color: #b0b0b0 !important;
-  color: black !important;
-}
-
-html.light .chat-item.active,
-html.light .chat-item:hover {
-  background-color: #d0d0d0 !important;
-}
-
-html.light .chat-item-name {
-  color: black !important;
-}
-
-html.light .chat-item-type {
-  color: #666 !important;
-}
-
-html.light .message-sent {
-  background-color: #00a8e8 !important;
-  color: white !important;
-}
-
-html.light .message-received {
-  background-color: #e0e0e0 !important;
-  color: black !important;
-}
-
-html.light .message-system {
-  background-color: #00a8e8 !important;
-  color: white !important;
-}
-
-html.light .message.light .message-header {
-  color: #666 !important;
-}
-
-html.light .message.light .message-footer {
-  color: #777 !important;
-}
-
-html.light .message-private-sent {
-  background-color: #ff6b35 !important;
-  color: white !important;
-}
-
-html.light .message-private-received {
-  background-color: #d0d0d0 !important;
-  color: black !important;
-}
-
-html.light .message-private-badge {
-  color: #ff6b35 !important;
-}
-
-html.light .btn {
-  background-color: #00a8e8 !important;
-  color: white !important;
-}
-
-html.light .btn:hover {
-  background-color: #0096d1 !important;
-}
-
-html.light .btn-secondary {
-  background-color: #00a8e8 !important;
-  color: white !important;
-}
-
-html.light .btn-secondary:hover {
-  background-color: #0096d1 !important;
-}
-
-/* Transitions for theme switching */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-button {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-input, textarea, select {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  @apply bg-gray-600;
 }
 
 /* View Transitions API - Page Navigation Animations */
@@ -961,5 +275,20 @@ html[data-transition-direction="back"] {
   to {
     opacity: 1;
   }
+}
+
+/* Card Border - Theme-aware accent color */
+.card {
+  position: relative;
+  transition: all 0.3s ease;
+  border: 2px solid;
+  border-color: #ff6b35;
+  @apply dark:border-accent-green;
+}
+
+.card.card-active {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(255, 0, 157, 0.2);
+  @apply dark:shadow-[0_20px_40px_rgba(13,255,102,0.3)];
 }
 

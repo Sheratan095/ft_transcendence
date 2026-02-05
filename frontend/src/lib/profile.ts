@@ -5,7 +5,7 @@ import { renderProfileCard } from '../components/profile';
 export async function renderProfile(container?: HTMLElement | string): Promise<HTMLElement | null> {
   let root: HTMLElement | null = null;
   if (!container) {
-	root = document.getElementById('app') || document.getElementById('auth-container') || null;
+	root = document.getElementById('app') || document.getElementById('main-content') || null;
   } else if (typeof container === 'string') {
 	root = document.getElementById(container) || null;
   } else {

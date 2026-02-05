@@ -2,6 +2,7 @@ import { createFormInput } from '../shared/FormInput';
 import { createCard } from '../shared/Card';
 import { createButton } from '../shared/Button';
 import { createErrorContainer, showError, showSuccess, showLoading } from '../shared/ErrorMessage';
+import { goToRoute } from '../../spa';
 
 export interface TwoFactorFormCallbacks {
   onBackClick: () => void;
@@ -104,8 +105,7 @@ export function createTwoFactorForm(callbacks: TwoFactorFormCallbacks): { form: 
       if (res.ok) {
         console.log('2FA verification successful:', body);
         showSuccess(authError, '2FA verified successfully!');
-        const { navigate } = await import('../../spa');
-        setTimeout(() => { navigate('/'); }, 600);
+        setTimeout(() => { goToRoute('/'); }, 600);
       } else {
         showError(authError, (body && (body.message || body.error)) || `Verification failed (${res.status})`);
       }

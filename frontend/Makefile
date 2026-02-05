@@ -62,7 +62,7 @@ tailwind-build:
 	@echo "=> Building Tailwind CSS for production:"
 	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
 	@mkdir -p $(dir $(TAILWIND_OUT))
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT)
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT) --minify
 
 format:
 	@echo "=> Running format"

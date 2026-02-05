@@ -1,5 +1,6 @@
 import { createFormInput } from '../shared/FormInput';
 import { createCard } from '../shared/Card';
+import { goToRoute } from '../../spa';
 import { createButton } from '../shared/Button';
 import { createErrorContainer, showError, showSuccess, showLoading } from '../shared/ErrorMessage';
 
@@ -126,8 +127,7 @@ export function createRegisterForm(callbacks: RegisterFormCallbacks): { form: HT
         else 
           localStorage.setItem('tfaEnabled', 'false');
         showSuccess(authError, 'Registration successful.');
-        const { navigate } = await import('../../spa');
-        setTimeout(() => { navigate('/'); }, 600);
+        setTimeout(() => { goToRoute('/'); }, 600);
       } else {
         showError(authError, (body && (body.message || body.error)) || `Register failed (${res.status})`);
       }

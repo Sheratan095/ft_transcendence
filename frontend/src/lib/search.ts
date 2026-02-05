@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+
 /**
  * Search for a user by name or ID
  */

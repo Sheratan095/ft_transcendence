@@ -1,4 +1,5 @@
 import { getUserId } from './auth';
+import { goToRoute } from '../spa';
 import { 
   initTris, 
   onTrisEvent, 
@@ -493,8 +494,7 @@ function attachTrisCardListener() {
   trisCard.addEventListener('click', async (e) => {
     e.preventDefault();
     console.log('Tris card clicked - navigating to /tris');
-    const { navigate } = await import('../spa');
-    navigate('/tris');
+    goToRoute('/tris');
   });
 }
 

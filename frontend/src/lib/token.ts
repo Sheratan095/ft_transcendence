@@ -1,5 +1,7 @@
 const TOKEN_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
 
+import { goToRoute } from '../spa';
+
 let refreshTokenTimer: ReturnType<typeof setInterval> | null = null;
 let isRefreshing = false;
 
@@ -97,6 +99,7 @@ export async function logout(): Promise<void> {
         'Content-Type': 'application/json',
       }
     });
+	goToRoute('/login');
   } catch (err) {
     console.error('Logout error:', err);
   }
