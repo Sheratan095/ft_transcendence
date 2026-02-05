@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,9 +9,11 @@
 	<link href="./tailwind.css" rel="stylesheet" />
 	<script type="module" src="./src/main.ts"></script>
 </head>
-<html class="dark overflow-hidden">
+<html class="dark overflow-hidden selection:bg-accent-orange dark:selection:bg-accent-pink selection:text-black dark:selection:text-white">
+
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-	<div id="container-grid" class="relative h-max flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-black">
+	<div id="container-grid"
+		class="relative h-max flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-black">
 		<div id="main-grid" class="fixed inset-0 bg-[length:40px_40px] pointer-events-none z-20
 		bg-[linear-gradient(to_right,#d9d9d9_1px,transparent_1px),linear-gradient(to_bottom,#d9d9d9_1px,transparent_1px)]
 		dark:bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]
@@ -22,56 +25,76 @@
 
 	<div class="shadow-[10px_10px_0_0] shadow-accent-orange dark:shadow-accent-green"> </div>
 	<!-- Search bar and theme switch button-->
-	<div id="top-bar" class="flex z-20 items-end justify-end p-2 space-x-4 text-black dark:text-white w-full shadow-md
-							border-b-2 border-gray-800 dark:border-gray-300 hover:border-accent-cyan dark:hover:border-accent-green transition-colors">
-			<form class="w-full px-[12vw] mx-auto z-20 hidden" id="search-user-form">
-				<div class="flex shadow-xs rounded-base -space-x-1">
-				<input type="search" id="search-user-input" class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-gray-300 text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body" placeholder="Search for users..." required>
-				<button type="button" class="inline-flex items-center text-black font-bold bg-accent-orange dark:bg-accent-green rounded-r-xl bg-brand hover:bg-brand-strong border-l-0 box-border border border-gray-700 dark:border-gray-300 focus:ring-4 focus:ring-brand-medium shadow-xs leading-5 rounded-e-base bx-10 text-sm px-4 py-2.5 focus:outline-none">
-					<svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
+	<div id="top-bar"
+		class="flex z-20 items-end justify-end p-2 space-x-4 text-black dark:text-white w-full shadow-md
+							border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-cyan dark:hover:border-accent-green transition-colors">
+		<form class="w-full px-[12vw] mx-auto z-20 hidden" id="search-user-form">
+			<div class="flex shadow-xs rounded-base -space-x-1">
+				<input type="search" id="search-user-input"
+					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-gray-300 text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
+					placeholder="Search for users..." required>
+				<button type="button"
+					class="inline-flex items-center text-black font-bold bg-accent-orange dark:bg-accent-green rounded-r-xl bg-brand hover:bg-brand-strong border-l-0 box-border border border-gray-700 dark:border-gray-300 focus:ring-4 focus:ring-brand-medium shadow-xs leading-5 rounded-e-base bx-10 text-sm px-4 py-2.5 focus:outline-none">
+					<svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+						height="24" fill="none" viewBox="0 0 24 24">
+						<path stroke="currentColor" stroke-linecap="round" stroke-width="2"
+							d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
+					</svg>
 					Search
-					</button>
-				</div>
-			</form>
-			<!-- Theme Toggle Button -->
-			<button 
-				id="theme-toggle-btn"
-				class="p-2 rounded-lg border-2 border-neutral-400 hover:bg-neutral-300 transition-colors ml-2
-					dark:border-neutral-700 dark:hover:bg-neutral-800 light:border-gray-300 light:hover:bg-gray-200"
-				title="Toggle dark/light mode">
-				<svg class="w-5 h-5 text-black dark:text-white light:text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m-1.636-6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1m1.636 6.364l.707.707M12 12a3 3 0 110-6 3 3 0 010 6z" />
-				</svg>
-			</button>
+				</button>
+			</div>
+		</form>
+		<!-- Theme Toggle Button -->
+		<button id="theme-toggle-btn" class="p-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2
+					dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100"
+			title="Toggle dark/light mode">
+			<svg class="w-5 h-5 text-white dark:text-black" fill="none" viewBox="0 0 24 24"
+				stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+					d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m-1.636-6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1m1.636 6.364l.707.707M12 12a3 3 0 110-6 3 3 0 010 6z" />
+			</svg>
+		</button>
 	</div>
 
 	<!-- Search Results Dropdown -->
-	<div id="search-results-dropdown" class="fixed left-0 right-0 z-40 bg-neutral-900 dark:bg-neutral-800 border-x-2 border-b-2 border-accent-orange dark:border-accent-green hidden shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+	<div id="search-results-dropdown"
+		class="fixed left-0 right-0 z-40 bg-neutral-900 dark:bg-neutral-800 border-x-2 border-b-2 border-accent-orange dark:border-accent-green hidden shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
 		<!-- Results will be injected here -->
 	</div>
 	<!-- Main content-->
-	<main id="main-content" class="z-0 cards w-full min-h-screen pt-20 pb-10 px-4 sm:px-8 lg:px-16">
+	<main id="main-content" class="z-0 cards w-full min-h-screen px-4 sm:px-8 lg:px-16">
 		<!-- Content will be dynamically injected here -->
-		<h1 class="text-[7vw] px-[10vw] font-extrabold uppercase tracking-tighter leading-[0.8] text-gray-800 dark:text-gray-100 ">
-			FT/<br />TRASCENDENCE
-		</h1>
-	<br/>
-		<p class="relative text-[2vw] tracking-wide text-gray-800 dark:text-gray-200 text-center font-bold px-4">
-			Yesterday Dr.Phil was just an ordinary human.
-		</p>
-	<br/>
-	<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-10 rounded-xl overflow-hidden ">
-			<div class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden
+		<section class="font-extrabold tracking-tighter h-max leading-[0.8] text-gray-800 dark:text-gray-100" >
+			<h1
+				class="text-[7vw] px-[10vw] uppercase">
+				FT/<br />TRASCENDENCE
+			</h1>
+			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4">
+				Yesterday Dr.Phil was just an ordinary human.
+			</p>
+		</section>
+		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl overflow-hidden ">
+			<div
+				class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden
 				dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 transition-all duration-300">
-				<div class="flex w-full flex-col md:flex-row items-start gap-4 mb-8 p-6">
-					<img src="./42_Logo.svg" alt="42 Logo" class="w-4 h-4 min-w-[20px] min-h-[20px] sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0 dark:invert" />
-					<div>
-						<h2 class="text-2xl sm:text-3xl z-20 font-bold text-black dark:text-white mb-2">Welcome to FT/Transcendence!</h2>
+				<div class="flex w-full max-w-xl flex-col md:flex-row items-start gap-4 mb-8 p-6">
+					<img src="./42_Logo.svg" alt="42 Logo"
+						class="float-start w-full h-full min-w-[50px] min-h-[50px] sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0 dark:invert" />
+					<div class="flex flex-col space-y-4 md:ml-6">
+						<a href="/documentation">
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./DOCUMENTATION</h2>
+						</a>
+						<a href="/subject">
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./SUBJECT</h2>
+						</a>
+						<a href="/login">
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./LOGIN</h2>
+						</a>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 	</main>
 </body>
+
 </html>

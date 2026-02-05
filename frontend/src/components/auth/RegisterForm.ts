@@ -1,5 +1,4 @@
 import { createFormInput } from '../shared/FormInput';
-import { createCard } from '../shared/Card';
 import { goToRoute } from '../../spa';
 import { createButton } from '../shared/Button';
 import { createErrorContainer, showError, showSuccess, showLoading } from '../shared/ErrorMessage';
@@ -8,8 +7,7 @@ export interface RegisterFormCallbacks {
   onLoginClick: () => void;
 }
 
-export function createRegisterForm(callbacks: RegisterFormCallbacks): { form: HTMLFormElement; card: HTMLDivElement } {
-  const card = createCard({ shadowColor: '#00ffff' });
+export function createRegisterForm(callbacks: RegisterFormCallbacks): void {
   const form = document.createElement('form');
   form.id = 'register-form';
   form.noValidate = true;
@@ -85,9 +83,6 @@ export function createRegisterForm(callbacks: RegisterFormCallbacks): { form: HT
   form.appendChild(submit);
   form.appendChild(footer);
 
-  // Assemble card
-  card.appendChild(form);
-  card.appendChild(authError);
 
   // Setup event listeners
   loginLink.addEventListener('click', (e) => {
@@ -136,5 +131,4 @@ export function createRegisterForm(callbacks: RegisterFormCallbacks): { form: HT
     }
   });
 
-  return { form, card };
 }
