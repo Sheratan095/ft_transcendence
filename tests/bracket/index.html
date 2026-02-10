@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Bracket Test</title>
+    <!-- Brackets Viewer Library -->
+    <script src="https://cdn.jsdelivr.net/npm/brackets-viewer@latest/dist/brackets-viewer.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/brackets-viewer@latest/dist/brackets-viewer.min.css">
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .brackets-viewer {
+            background-color: #f9fafb;
+        }
+        .brackets-viewer .bracket-match {
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+        .brackets-viewer .bracket-match__opponent {
+            padding: 8px 12px;
+        }
+        .brackets-viewer .bracket-match__opponent--winner {
+            background-color: #dbeafe;
+            font-weight: 600;
+        }
+        .brackets-viewer .bracket-match__score {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .brackets-viewer .bracket-link {
+            stroke: #6b7280;
+            stroke-width: 2;
+        }
+        .brackets-viewer .bracket-round {
+            margin: 0 12px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-800">Tournament Bracket Visualization</h1>
+            <button id="reload-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+                Reload Data
+            </button>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div id="bracket-container" class="brackets-viewer w-full min-h-[500px]"></div>
+        </div>
+
+        <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">API Status</h2>
+            <div id="status" class="p-4 rounded bg-gray-50 border border-gray-200 font-mono text-sm">
+                Waiting for initialization...
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./index.js"></script>
+</body>
+</html>

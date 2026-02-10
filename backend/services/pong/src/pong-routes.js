@@ -546,7 +546,7 @@ const	testGetTournament =
 
 		response:
 		{
-			200:{ ...TournamentBracket },
+			200: { type: 'object', additionalProperties: true },
 			500: ErrorResponse
 		}
 	},
