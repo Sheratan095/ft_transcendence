@@ -7,6 +7,7 @@ import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket } from './components/profile/Notifications';
 import { setFriendsManager } from './components/profile/Notifications';
+import { attachTorunamentElements } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
 import { setupPongCardListener } from './lib/pong-ui';
@@ -40,6 +41,17 @@ getIntlayer("app"); // Initialize intlayer
 initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
 if (isLoggedInClient()) initUserServices();
+
+const tournamentButton = document.getElementById('tournamentListButton');
+tournamentButton?.addEventListener('click', () =>
+{
+  const modal = document.getElementById('tournament-modal');
+  if (modal)
+    modal.classList.remove('hidden');
+
+    attachTorunamentElements();
+});
+
 }
 /**
  * Setup search user functionality

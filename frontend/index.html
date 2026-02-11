@@ -403,6 +403,29 @@
 					</div>
 				</div>
 			</div>
+		</template>
+
+
+		<!-- TOURNAMENTS -->
+
+		<button command="show-modal" id="tournamentListButton" commandfor="dialog">See tournaments</button>
+
+		<div id="tournament-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+			<!-- Backdrop -->
+			<div id="tournament-backdrop" class="absolute inset-0 bg-gradient-to-br from-black/60 via-transparent to-black/40 backdrop-blur-sm" aria-hidden="true"></div>
+
+			<!-- Modal card -->
+			<div class="relative z-10 w-full max-w-2xl mx-4">
+				<div class="bg-white dark:bg-black rounded-xl shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] border-2 border-gray-200 dark:border-neutral-700 overflow-hidden">
+					<div class="flex items-center justify-between p-6 border-b border-gray-100 dark:border-neutral-800">
+						<h2 id="tournament-title" class="text-2xl font-extrabold text-accent-orange dark:text-accent-green">Available tournaments</h2>
+						<button id="tournament-close-btn" class="ml-4 p-2 rounded-md bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700 text-black dark:text-white">Close</button>
+					</div>
+					<div id="list" class="p-6 grid gap-4 bg-white dark:bg-black"></div>
+				</div>
+			</div>
+		</div>
+
 	</main>
 </body>
 
