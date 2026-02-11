@@ -340,6 +340,22 @@ async function renderBracket() {
         matchGames: transformedData.match_game || [],
     };
 
+    // Ensure matches array has unique match IDs (keep first occurrence)
+    // This protects against duplicate entries from backend or transformation logic.
+    {
+        const seenIds = new Set();
+        const unique = [];
+        for (const m of viewerData.matches) {
+            if (!seenIds.has(m.id)) {
+                seenIds.add(m.id);
+                unique.push(m);
+            } else {
+                console.warn(`Filtering out duplicate match ID while preparing viewerData: ${m.id}`);
+            }
+        }
+        viewerData.matches = unique;
+    }
+
     // expose viewerData for console debugging
     window.viewerDataForDebug = viewerData;
 
@@ -472,6 +488,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     console.log('brackets-viewer found, starting render...');
+    // Install a safe wrapper around bracketsViewer.render to remove duplicate
+    // `.match` elements created by the library during a single render pass.
+    // This prevents duplicate-first-round rows when the library inserts nodes
+    // multiple times (defensive; preserves original behavior otherwise).
+    try {
+        if (window.bracketsViewer && window.bracketsViewer.render && !window.__brackets_render_wrapper_installed) {
+            const _origRender = window.bracketsViewer.render.bind(window.bracketsViewer);
+            window.bracketsViewer.render = async function(payload, options) {
+                const result = await _origRender(payload, options);
+                // Some viewers perform incremental DOM insertion after the render
+                // promise resolves. Delay dedupe a bit so all insertions complete,
+                // then remove duplicate `.match` nodes (keep first occurrence).
+                try {
+                    setTimeout(() => {
+                        try {
+                            const container = document.getElementById('bracket-container');
+                            if (container) {
+                                const seen = new Set();
+                                const matches = Array.from(container.querySelectorAll('.match'));
+                                for (const el of matches) {
+                                    const id = el.getAttribute && el.getAttribute('data-match-id');
+                                    if (!id) continue;
+                                    if (seen.has(id)) el.remove(); else seen.add(id);
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Post-render delayed dedupe failed', e);
+                        }
+                    }, 50);
+                    // After dedupe, ensure first-round matches from the payload
+                    // are present in the DOM. Some viewers insert subsets and
+                    // later fill others; defensively add any missing first-round
+                    // matches using the payload data.
+                    try {
+                        setTimeout(() => {
+                            try {
+                                const container = document.getElementById('bracket-container');
+                                if (!container || !payload || !Array.isArray(payload.matches)) return;
+                                const existing = new Set(Array.from(container.querySelectorAll('.match')).map(el => el.getAttribute('data-match-id')));
+                                const round1Matches = payload.matches.filter(m => Number(m.round_id) === 1);
+                                const round1Article = container.querySelector('article.round[data-round-id="1"]');
+                                if (!round1Article) return;
+                                for (const m of round1Matches) {
+                                    const idStr = String(m.id);
+                                    if (existing.has(idStr)) continue;
+                                    // Build a minimal match element consistent with viewer markup
+                                    const matchEl = document.createElement('div');
+                                    matchEl.className = 'match connect-next';
+                                    matchEl.setAttribute('data-match-id', idStr);
+                                    matchEl.setAttribute('data-match-status', String(m.status || ''));
+                                    const oppHtml = (opp) => opp ? `<div class="participant ${opp.result === 'win' ? 'win' : 'loss'}" data-participant-id="${opp.id}" title="${(opp.name||'')}"><div class="name">${(opp.name||'')}</div><div class="result">${opp.score||0}</div></div>` : '';
+                                    const opponentsHtml = `<div class="opponents">${oppHtml(m.opponent1)}${oppHtml(m.opponent2)}</div>`;
+                                    matchEl.innerHTML = opponentsHtml;
+                                    round1Article.appendChild(matchEl);
+                                    console.log('Inserted missing first-round match DOM for id=', idStr);
+                                }
+                            } catch (e) { console.warn('Failed to insert missing first-round matches', e); }
+                        }, 120);
+                    } catch (e) { console.warn('Failed scheduling missing-match insert', e); }
+                } catch (e) {
+                    console.warn('Failed to schedule post-render dedupe', e);
+                }
+                return result;
+            };
+            window.__brackets_render_wrapper_installed = true;
+            console.log('Installed bracketsViewer.render wrapper (post-render dedupe)');
+        }
+    } catch (e) {
+        console.warn('Failed to install render wrapper', e);
+    }
+
     renderBracket();
 });
 
