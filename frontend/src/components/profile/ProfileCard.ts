@@ -1,5 +1,5 @@
-import { logout, deleteAccout } from '../../lib/auth';
-import { openChatModal } from '../../lib/chat';
+import { logout, deleteAccout, fetchUserProfile, SaveCurrentUserProfile, fetchLocalProfile } from '../../lib/auth';
+import { openChatModal } from '../chat/chat';
 import type { User } from '../../lib/auth';
 import { FriendsManager } from './FriendsManager';
 import { setFriendsManager } from './Notifications';
@@ -7,6 +7,7 @@ import { setLocaleInStorage } from 'intlayer';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';
 import { goToRoute } from '../../spa';
+import { getUserId } from '../../lib/token';
 
 export async function renderProfileCard(root: HTMLElement | null, gameStats?: GameStats) {
   if (!root) {
@@ -14,13 +15,13 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
     return null;
   }
 
-  // Get user from localStorage
-  const user: User = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null;
+  await SaveCurrentUserProfile(getUserId() as string);
+  let user: User | null = await fetchLocalProfile();
   if (!user || !user.id) {
-    console.error('No user data found in localStorage');
-    logout();
+    console.error('No user data found');
     return null;
   }
+
   // Initialize FriendsManager
   const friendsManager = new FriendsManager({ currentUserId: user.id });
   setFriendsManager(friendsManager);
@@ -67,7 +68,9 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
   // ===== 2FA Toggle =====
   const enabled2FA = cardEl.querySelector('#profile-tfa') as HTMLElement;
   const input2FA = cardEl.querySelector('#input-lock') as HTMLInputElement;
-  if (input2FA && enabled2FA) {
+  const lockLabel = cardEl.querySelector('label.btn-lock') as HTMLElement;
+  const lockIcon = lockLabel ? lockLabel.querySelector('svg') : null;
+  if (input2FA && enabled2FA && lockLabel && lockIcon) {
     input2FA.checked = user.tfaEnabled || false;
     enabled2FA.textContent = user.tfaEnabled ? 'DISABLE 2FA' : 'ENABLE 2FA';
     input2FA.addEventListener('change', async () => {
@@ -121,6 +124,7 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
         await deleteAccout();
         localStorage.removeItem('userId');
         localStorage.removeItem('tfaEnabled');
+		window.location.href = '/';
       } catch (err) {
         console.error('Delete account error:', err);
         alert('Failed to delete account');
@@ -385,7 +389,4 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
       }
     }
   }
-
-  // Append to root
-  root.appendChild(cardEl);
 }

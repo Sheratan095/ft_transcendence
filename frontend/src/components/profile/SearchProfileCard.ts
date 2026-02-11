@@ -1,5 +1,5 @@
 import type { User } from '../../lib/auth';
-import { sendChatInvite } from '../../lib/chat';
+import { sendChatInvite } from '../chat/chat';
 import { FriendsManager } from './FriendsManager';
 
 export interface SearchProfileCardOptions {

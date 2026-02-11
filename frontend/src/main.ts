@@ -1,7 +1,7 @@
 import { fetchUserProfile, getUserId } from './lib/auth';
 import { isLoggedInClient, startTokenRefresh } from './lib/token';
-import { attachUserOptions } from './lib/profile';
-import { setupChatEventListeners, initChat } from './lib/chat';
+import { attachUserOptions } from './components/profile/profile';
+import { setupChatEventListeners, initChat } from './components/chat/chat';
 import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
@@ -29,18 +29,14 @@ main(window.location.pathname);
 export async function main(path: string) {
 start();
 
-// Load user's saved language preference
-const savedLanguage = localStorage.getItem('userLanguage') || 'en';
-setLocaleInStorage(savedLanguage);
-
-console.log(savedLanguage);
-
 getIntlayer("app"); // Initialize intlayer
 
 initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
 if (isLoggedInClient()) initUserServices();
+
 }
+
 /**
  * Setup search user functionality
  */

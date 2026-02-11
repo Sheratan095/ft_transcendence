@@ -2,7 +2,7 @@ import { isLoggedInClient } from './lib/auth';
 import { logout } from './lib/token';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
-import { renderProfileCard } from './components/profile';
+import { renderProfileCard } from './components/profile/ProfileCard';
 import { initCardHoverEffect } from './lib/card';
 
 type RouteConfig = { render: () => Promise<void> };
@@ -43,6 +43,7 @@ const routes: Record<string, RouteConfig> = {
     showErrorToast('Please sign in to view your profile');
     return;
     }
+	animatePolygonToBottom();
     el.innerHTML = '';
 
     const clone = template.content.cloneNode(true);
@@ -160,6 +161,17 @@ export async function start() {
   window.addEventListener('popstate', () => renderRoute(location.pathname));
   let initial = location.pathname || '/';
   await renderRoute(initial);
+}
+
+export function animatePolygonToBottom(): void {
+	const polygon = document.querySelector(
+		'.mix-blend-difference'
+	) as HTMLElement | null;
+
+	if (!polygon) return;
+
+	polygon.style.transition = "clip-path 0.6s ease-in-out";
+	polygon.style.clipPath = "polygon(0% 90%, 100% 90%, 100% 100%, 0% 100%)";
 }
 
 export { goToRoute };

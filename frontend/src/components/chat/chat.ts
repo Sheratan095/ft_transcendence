@@ -1,6 +1,6 @@
-import { showInfoToast, showToast } from '../components/shared/Toast';
-import { getCurrentTheme } from './theme';
-import type { User } from './auth';
+import { showInfoToast, showToast } from '../shared/Toast';
+import { getCurrentTheme } from '../../lib/theme';
+import type { User } from '../../lib/auth';
 
 let chatSocket: WebSocket | null = null;
 let currentUserId: string | null = null;
@@ -94,8 +94,8 @@ function renderChatList() {
   chats.forEach(chat => {
     const chatItem = document.createElement('div');
     chatItem.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
-    if (getCurrentTheme() === 'light') {
-      chatItem.classList.add('light');
+    if (getCurrentTheme() === 'dark') {
+      chatItem.classList.add('dark');
     }
     chatItem.onclick = () => selectChat(chat.id);
 
@@ -352,16 +352,33 @@ export function connectChatWebSocket(): Promise<WebSocket> {
 function handleWebSocketMessage(data: any) {
   console.log('Received WebSocket message:', data);
 
-  if (data.event === 'chat.message') {
-    handleChatMessage(data);
-  } else if (data.event === 'chat.systemMessage') {
-    handleSystemMessage(data);
-  } else if (data.event === 'chat.messageSent') {
-    handleMessageSent(data);
-  } else if (data.event === 'chat.messageStatusUpdate') {
-    handleMessageStatusUpdate(data);
-  } else if (data.event === 'chat.privateMessage') {
-    handlePrivateMessage(data);
+  // Normalize incoming message formats from different server implementations.
+  // Some servers use { event: 'name', ... } while others use { type: 'name', ... }
+  const eventName = data?.event || data?.type || data?.typeName || null;
+  if (!eventName) {
+    console.warn('Unknown WebSocket message format, ignoring', data);
+    return;
+  }
+
+  switch (eventName) {
+    case 'chat.message':
+      handleChatMessage(data);
+      break;
+    case 'chat.systemMessage':
+      handleSystemMessage(data);
+      break;
+    case 'chat.messageSent':
+      handleMessageSent(data);
+      break;
+    case 'chat.messageStatusUpdate':
+      handleMessageStatusUpdate(data);
+      break;
+    case 'chat.privateMessage':
+      // Private message payloads sometimes come nested under `data` or at root
+      handlePrivateMessage(data?.data ? data.data : data);
+      break;
+    default:
+      console.warn('Unhandled chat websocket event:', eventName);
   }
 }
 
@@ -419,9 +436,9 @@ function handleSystemMessage(data: any) {
   if (currentChatId === chatId) {
     renderMessages();
     scrollToBottom();
+  } else {
+    showToast(data.message, 'info');
   }
-  else
-    showToast(data.message, 'info', );
 }
 
 function handleMessageSent(data: any) {
@@ -445,7 +462,6 @@ function handleMessageStatusUpdate(data: any) {
   console.log('Message status updated:', data);
   const { messageId, chatId, status } = data;
   
-  // Update message status
   if (messages.has(chatId)) {
     const chatMessages = messages.get(chatId)!;
     const message = chatMessages.find(m => m.id === messageId);
@@ -770,9 +786,9 @@ function updateSelectedFriendsTags() {
     });
   }
 
-  // Enable submit button only if at least 2 friends are selected
+  // Enable submit button only if at least 1 friend is selected
   if (submitBtn instanceof HTMLButtonElement) {
-    submitBtn.disabled = selectedFriendsForGroup.size < 2;
+    submitBtn.disabled = selectedFriendsForGroup.size < 1;
   }
 }
 
@@ -785,8 +801,8 @@ async function createGroupChat() {
     return;
   }
 
-  if (selectedFriendsForGroup.size < 2) {
-    alert('Please select at least 2 friends');
+  if (selectedFriendsForGroup.size < 1) {
+    alert('Please select at least one friend');
     return;
   }
 
@@ -827,6 +843,8 @@ async function createGroupChat() {
 
 // Event listeners setup
 export function setupChatEventListeners() {
+  // idempotent: prevent attaching listeners multiple times
+  if ((window as any).__chat_listeners_attached) return;
   const closeBtn = document.getElementById('chat-close-btn');
   if (closeBtn) {
     closeBtn.addEventListener('click', closeChatModal);
@@ -913,4 +931,7 @@ export function setupChatEventListeners() {
       }
     });
   }
+
+  // mark listeners as attached so repeated initializations are safe
+  (window as any).__chat_listeners_attached = true;
 }
