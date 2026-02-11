@@ -7,11 +7,30 @@ import { setLocaleInStorage } from 'intlayer';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';
 import { goToRoute } from '../../spa';
+import { initCardHoverEffect } from '../../lib/card';
 import { getUserId } from '../../lib/token';
 
-export async function renderProfileCard(root: HTMLElement | null, gameStats?: GameStats) {
-  if (!root) {
-    console.error('renderProfileCard: root element is null');
+export async function renderProfileCard(container: HTMLElement | null) {
+  if (!container) {
+    console.error('renderProfileCard: container element is null');
+    return null;
+  }
+
+  const template = document.getElementById('profile-template') as HTMLTemplateElement | null;
+  if (!template) {
+    console.error('Profile template not found');
+    return null;
+  }
+
+  // Clone template and append to container
+  const clone = template.content.cloneNode(true);
+  container.innerHTML = '';
+  container.appendChild(clone);
+
+  // Find the card element to populate
+  const cardEl = container.querySelector('.card') as HTMLElement | null;
+  if (!cardEl) {
+    console.error('Profile card element not found in template');
     return null;
   }
 
@@ -25,9 +44,6 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
   // Initialize FriendsManager
   const friendsManager = new FriendsManager({ currentUserId: user.id });
   setFriendsManager(friendsManager);
-
-  // Instead of cloning template, use root directly
-  const cardEl = root;
 
   // ===== Avatar =====
   const avatar = cardEl.querySelector('#profile-avatar') as HTMLImageElement;
@@ -145,248 +161,190 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
     });
   }
 
-  // ===== Add Charts if stats provided =====
-  if (gameStats && Object.keys(gameStats).length > 0) {
-    const chartsSection = cardEl.querySelector('#profile-charts-section');
-    if (chartsSection) {
-      // Pong stats
-      if (gameStats.pongWins !== undefined || gameStats.pongHistory) {
-        const pongDiv = document.createElement('div');
-        pongDiv.className = 'bg-neutral-800/50 rounded-lg p-4 border border-neutral-700';
-        
-        const pongTitle = document.createElement('h3');
-        pongTitle.className = 'text-lg font-extrabold text-[#0dff66] mb-3 uppercase tracking-tight';
-        pongTitle.textContent = 'Pong Statistics';
-        pongDiv.appendChild(pongTitle);
+  // Initialize hover effects
+  initCardHoverEffect();
 
-        const pongStats = document.createElement('div');
-        pongStats.className = 'space-y-2 text-neutral-300';
-        const pongWins = gameStats.pongWins || 0;
-        const pongLosses = gameStats.pongLosses || 0;
-        const pongTotal = pongWins + pongLosses;
-        const pongWinRate = pongTotal > 0 ? ((pongWins / pongTotal) * 100).toFixed(1) : 0;
-        
-        pongStats.innerHTML = `
-          <div class="flex justify-between items-center">
-            <span>Matches Played:</span>
-            <span class="font-bold text-white">${pongTotal}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span>Wins:</span>
-            <span class="font-bold text-green-400">${pongWins}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span>Losses:</span>
-            <span class="font-bold text-red-400">${pongLosses}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span>Win Rate:</span>
-            <span class="font-bold text-cyan-400">${pongWinRate}%</span>
-          </div>
-        `;
-        pongDiv.appendChild(pongStats);
-        chartsSection.appendChild(pongDiv);
+  // ===== Fetch Stats and Match History asynchronously (Non-blocking) =====
+  (async () => {
+    console.log('[ProfileCard] Starting stats fetch for user:', user.id);
+    
+    try {
+      const [trisRes, pongRes] = await Promise.all([
+        fetch(`/api/tris/stats?id=${user.id}`, { method: 'GET', credentials: 'include' }),
+        fetch(`/api/pong/stats?id=${user.id}`, { method: 'GET', credentials: 'include' })
+      ]);
+
+      const trisStats = trisRes.ok ? await trisRes.json() : null;
+      const pongStats = pongRes.ok ? await pongRes.json() : null;
+
+      console.log('[ProfileCard] Stats received:', { trisStats, pongStats });
+
+      // Update header stats
+      const profileWinsEl = cardEl.querySelector('#profile-wins');
+      if (profileWinsEl) {
+        const totalWins = (trisStats?.gamesWon || 0) + (pongStats?.gamesWon || 0);
+        profileWinsEl.textContent = totalWins.toString();
+      }
+      const profileRankEl = cardEl.querySelector('#profile-rank');
+      if (profileRankEl) {
+        profileRankEl.textContent = pongStats?.rank || trisStats?.rank || 'Rookie';
       }
 
-      // Tris stats
-      if (gameStats.trisWins !== undefined || gameStats.trisHistory) {
-        const trisDiv = document.createElement('div');
-        trisDiv.className = 'bg-neutral-800/50 rounded-lg p-4 border border-neutral-700';
-        
-        const trisTitle = document.createElement('h3');
-        trisTitle.className = 'text-lg font-extrabold text-[#0dff66] mb-3 uppercase tracking-tight';
-        trisTitle.textContent = 'Tris Statistics';
-        trisDiv.appendChild(trisTitle);
+      const gameStats: GameStats = {
+        trisWins: trisStats?.gamesWon || 0,
+        trisLosses: trisStats?.gamesLost || 0,
+        pongWins: pongStats?.gamesWon || 0,
+        pongLosses: pongStats?.gamesLost || 0,
+      };
 
-        const trisStats = document.createElement('div');
-        trisStats.className = 'space-y-2 text-neutral-300';
-        const trisWins = gameStats.trisWins || 0;
-        const trisLosses = gameStats.trisLosses || 0;
-        const trisTotal = trisWins + trisLosses;
-        const trisWinRate = trisTotal > 0 ? ((trisWins / trisTotal) * 100).toFixed(1) : 0;
-        
-        trisStats.innerHTML = `
-          <div class="flex justify-between items-center">
-            <span>Matches Played:</span>
-            <span class="font-bold text-white">${trisTotal}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span>Wins:</span>
-            <span class="font-bold text-green-400">${trisWins}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span>Losses:</span>
-            <span class="font-bold text-red-400">${trisLosses}</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span>Win Rate:</span>
-            <span class="font-bold text-cyan-400">${trisWinRate}%</span>
-          </div>
+      const chartsSection = cardEl.querySelector('#profile-charts-section');
+      if (chartsSection) {
+        chartsSection.innerHTML = ''; // Clear loading if any
+
+        // GAME SELECTOR
+        const selectorRow = document.createElement('div');
+        selectorRow.className = 'flex flex-row gap-2 mb-4 justify-end';
+        selectorRow.innerHTML = `
+          <button id="btn-show-pong" class="text-sm font-black px-3 py-1 bg-[#00bcd4] text-black uppercase tracking-[0.2em] rounded border border-[#00bcd4] transition-all">PONG</button>
+          <button id="btn-show-tris" class="text-sm font-black px-3 py-1 bg-transparent text-neutral-500 uppercase tracking-[0.2em] rounded border border-neutral-700 hover:border-neutral-500 transition-all">TRIS</button>
         `;
-        trisDiv.appendChild(trisStats);
-        chartsSection.appendChild(trisDiv);
-      }
+        chartsSection.appendChild(selectorRow);
+        
+        // SINGLE horizontal row for stats components
+        const mainRow = document.createElement('div');
+        mainRow.className = 'flex flex-row flex-wrap lg:flex-nowrap gap-4 w-full';
+        chartsSection.appendChild(mainRow);
 
-      // Render detailed charts asynchronously
-      setTimeout(async () => {
-        const { createGameStatsChart } = await import('./UserCardCharts');
+        // History row sits under the stats row (initially same view visibility)
+        const historyRow = document.createElement('div');
+        historyRow.className = 'flex flex-row flex-wrap lg:flex-nowrap gap-4 w-full mt-3';
+        chartsSection.appendChild(historyRow);
+
+        const pongStatsElements: HTMLElement[] = [];
+        const trisStatsElements: HTMLElement[] = [];
+
+        // Pong Summary
         if (gameStats.pongWins !== undefined) {
-          const pongChartId = `profile-pong-donut`;
-          const pongChartContainer = chartsSection.querySelector(`#${pongChartId}`);
-          if (pongChartContainer) {
-            try {
-              await createGameStatsChart(pongChartId, 'pong', gameStats, user.id);
-            } catch (e) {
-              console.warn('Failed to render pong chart:', e);
-            }
-          }
-        }
-        
-        if (gameStats.trisWins !== undefined) {
-          const trisChartId = `profile-tris-donut`;
-          const trisChartContainer = chartsSection.querySelector(`#${trisChartId}`);
-          if (trisChartContainer) {
-            try {
-              await createGameStatsChart(trisChartId, 'tris', gameStats, user.id);
-            } catch (e) {
-              console.warn('Failed to render tris chart:', e);
-            }
-          }
-        }
-      }, 100);
-    }
-  } else {
-    // Load match histories if gameStats not provided
-    const chartsSection = cardEl.querySelector('#profile-charts-section');
-    if (chartsSection) {
-      try {
-        const { trisHistory, pongHistory } = await getAllMatchHistories(user.id);
-
-        // Pong stats
-        if (pongHistory && pongHistory.length > 0) {
-          const pongStats = calculateStats(pongHistory, user.id);
           const pongDiv = document.createElement('div');
-          pongDiv.className = 'bg-neutral-800/50 rounded-lg p-4 border border-neutral-700';
+          pongDiv.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex flex-row items-center gap-4 flex-1 min-w-[200px] h-32';
           
-          const pongTitle = document.createElement('h3');
-          pongTitle.className = 'text-lg font-extrabold text-[#0dff66] mb-3 uppercase tracking-tight';
-          pongTitle.textContent = 'Pong Statistics';
-          pongDiv.appendChild(pongTitle);
+          const pongWins = gameStats.pongWins || 0;
+          const pongLosses = gameStats.pongLosses || 0;
+          const pongTotal = pongWins + pongLosses;
+          const pongWinRate = pongTotal > 0 ? ((pongWins / pongTotal) * 100).toFixed(0) : 0;
 
-          const pongStatsDiv = document.createElement('div');
-          pongStatsDiv.className = 'space-y-2 text-neutral-300';
-          pongStatsDiv.innerHTML = `
-            <div class="flex justify-between items-center">
-              <span>Matches Played:</span>
-              <span class="font-bold text-white">${pongStats.total}</span>
+          pongDiv.innerHTML = `
+            <div class="flex-1">
+              <h3 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em] mb-1">PONG</h3>
+              <div class="flex flex-row gap-3 text-base">
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">P</span><span class="text-white">${pongTotal}</span></div>
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">W</span><span class="text-green-400">${pongWins}</span></div>
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">L</span><span class="text-red-400">${pongLosses}</span></div>
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">%</span><span class="text-cyan-400">${pongWinRate}</span></div>
+              </div>
             </div>
-            <div class="flex justify-between items-center">
-              <span>Wins:</span>
-              <span class="font-bold text-green-400">${pongStats.wins}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span>Losses:</span>
-              <span class="font-bold text-red-400">${pongStats.losses}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span>Win Rate:</span>
-              <span class="font-bold text-cyan-400">${pongStats.winRate}%</span>
-            </div>
+            <div id="profile-pong-donut" class="w-12 h-12 flex-shrink-0"></div>
           `;
-          pongDiv.appendChild(pongStatsDiv);
-          chartsSection.appendChild(pongDiv);
+          mainRow.appendChild(pongDiv);
+          pongStatsElements.push(pongDiv);
         }
 
-        // Tris stats
-        if (trisHistory && trisHistory.length > 0) {
-          const trisStats = calculateStats(trisHistory, user.id);
+        // Tris Summary
+        if (gameStats.trisWins !== undefined) {
           const trisDiv = document.createElement('div');
-          trisDiv.className = 'bg-neutral-800/50 rounded-lg p-4 border border-neutral-700';
+          trisDiv.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex flex-row items-center gap-4 flex-1 min-w-[200px] h-32 hidden';
           
-          const trisTitle = document.createElement('h3');
-          trisTitle.className = 'text-lg font-extrabold text-[#0dff66] mb-3 uppercase tracking-tight';
-          trisTitle.textContent = 'Tris Statistics';
-          trisDiv.appendChild(trisTitle);
+          const trisWins = gameStats.trisWins || 0;
+          const trisLosses = gameStats.trisLosses || 0;
+          const trisTotal = trisWins + trisLosses;
+          const trisWinRate = trisTotal > 0 ? ((trisWins / trisTotal) * 100).toFixed(0) : 0;
 
-          const trisStatsDiv = document.createElement('div');
-          trisStatsDiv.className = 'space-y-2 text-neutral-300';
-          trisStatsDiv.innerHTML = `
-            <div class="flex justify-between items-center">
-              <span>Matches Played:</span>
-              <span class="font-bold text-white">${trisStats.total}</span>
+          trisDiv.innerHTML = `
+            <div class="flex-1">
+              <h3 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em] mb-1">TRIS</h3>
+              <div class="flex flex-row gap-3 text-base">
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">P</span><span class="text-white">${trisTotal}</span></div>
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">W</span><span class="text-green-400">${trisWins}</span></div>
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">L</span><span class="text-red-400">${trisLosses}</span></div>
+                <div class="flex flex-col"><span class="text-neutral-500 font-bold">%</span><span class="text-cyan-400">${trisWinRate}</span></div>
+              </div>
             </div>
-            <div class="flex justify-between items-center">
-              <span>Wins:</span>
-              <span class="font-bold text-green-400">${trisStats.wins}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span>Losses:</span>
-              <span class="font-bold text-red-400">${trisStats.losses}</span>
-            </div>
-            <div class="flex justify-between items-center">
-              <span>Win Rate:</span>
-              <span class="font-bold text-cyan-400">${trisStats.winRate}%</span>
-            </div>
+            <div id="profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
           `;
-          trisDiv.appendChild(trisStatsDiv);
-          chartsSection.appendChild(trisDiv);
+          mainRow.appendChild(trisDiv);
+          trisStatsElements.push(trisDiv);
         }
 
-        // Render match history charts asynchronously
-        setTimeout(async () => {
-          const { createMatchHistoryChart } = await import('./UserCardCharts');
-          
-          if (pongHistory && pongHistory.length > 0) {
-            const pongHistoryChartId = `profile-pong-history-chart`;
-            const pongHistoryWrapper = document.createElement('div');
-            pongHistoryWrapper.className = 'bg-neutral-800/50 rounded-lg p-4 border border-neutral-700';
-            
-            const pongHistoryTitle = document.createElement('h4');
-            pongHistoryTitle.className = 'text-lg font-extrabold text-[#0dff66] mb-3 uppercase tracking-tight';
-            pongHistoryTitle.textContent = 'Pong Match History';
-            pongHistoryWrapper.appendChild(pongHistoryTitle);
-            
-            const pongHistoryContainer = document.createElement('div');
-            pongHistoryContainer.id = pongHistoryChartId;
-            pongHistoryContainer.className = 'w-full h-[350px]';
-            pongHistoryWrapper.appendChild(pongHistoryContainer);
-            
-            chartsSection.appendChild(pongHistoryWrapper);
-            
-            try {
-              await createMatchHistoryChart(pongHistoryChartId, 'pong', { pongHistory }, user.id);
-            } catch (e) {
-              console.warn('Failed to render pong history chart:', e);
-            }
-          }
+        // Fetch histories
+        const { trisHistory, pongHistory } = await getAllMatchHistories(user.id);
+        const { createMatchHistoryChart, createGameStatsChart } = await import('./UserCardCharts');
 
-          if (trisHistory && trisHistory.length > 0) {
-            const trisHistoryChartId = `profile-tris-history-chart`;
-            const trisHistoryWrapper = document.createElement('div');
-            trisHistoryWrapper.className = 'bg-neutral-800/50 rounded-lg p-4 border border-neutral-700';
-            
-            const trisHistoryTitle = document.createElement('h4');
-            trisHistoryTitle.className = 'text-lg font-extrabold text-[#0dff66] mb-3 uppercase tracking-tight';
-            trisHistoryTitle.textContent = 'Tris Match History';
-            trisHistoryWrapper.appendChild(trisHistoryTitle);
-            
-            const trisHistoryContainer = document.createElement('div');
-            trisHistoryContainer.id = trisHistoryChartId;
-            trisHistoryContainer.className = 'w-full h-[350px]';
-            trisHistoryWrapper.appendChild(trisHistoryContainer);
-            
-            chartsSection.appendChild(trisHistoryWrapper);
-            
-            try {
-              await createMatchHistoryChart(trisHistoryChartId, 'tris', { trisHistory }, user.id);
-            } catch (e) {
-              console.warn('Failed to render tris history chart:', e);
-            }
+        // Pong History
+        if (pongHistory && pongHistory.length > 0) {
+          const pongHistoryWrapper = document.createElement('div');
+          pongHistoryWrapper.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex-1 min-w-[250px] h-32 flex flex-col';
+          const pongHistoryChartId = `profile-pong-history-chart`;
+          pongHistoryWrapper.innerHTML = `
+            <h4 class="text-lg text-center font-black text-[#00bcd4] mb-1 uppercase tracking-[0.2em]">PONG HISTORY</h4>
+            <div id="${pongHistoryChartId}" class="w-full flex-1"></div>
+          `;
+          historyRow.appendChild(pongHistoryWrapper);
+          pongStatsElements.push(pongHistoryWrapper);
+          try {
+            await createMatchHistoryChart(pongHistoryChartId, 'pong', { pongHistory }, user.id);
+          } catch (e) { console.warn(e); }
+        }
+
+        // Tris History
+        if (trisHistory && trisHistory.length > 0) {
+          const trisHistoryWrapper = document.createElement('div');
+          trisHistoryWrapper.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex-1 min-w-[250px] h-32 flex flex-col hidden';
+          const trisHistoryChartId = `profile-tris-history-chart`;
+          trisHistoryWrapper.innerHTML = `
+            <h4 class="text-lg text-center font-black text-[#0dff66] mb-1 uppercase tracking-[0.2em]">TRIS HISTORY</h4>
+            <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
+          `;
+          historyRow.appendChild(trisHistoryWrapper);
+          trisStatsElements.push(trisHistoryWrapper);
+          try {
+            await createMatchHistoryChart(trisHistoryChartId, 'tris', { trisHistory }, user.id);
+          } catch (e) { console.warn(e); }
+        }
+
+        // Selector buttons logic
+        const btnPong = selectorRow.querySelector('#btn-show-pong') as HTMLButtonElement;
+        const btnTris = selectorRow.querySelector('#btn-show-tris') as HTMLButtonElement;
+
+        const setView = (view: 'pong' | 'tris') => {
+          if (view === 'pong') {
+            btnPong.className = 'text-sm font-black px-3 py-1 bg-[#00bcd4] text-black uppercase tracking-[0.2em] rounded border border-[#00bcd4] transition-all';
+            btnTris.className = 'text-sm font-black px-3 py-1 bg-transparent text-neutral-500 uppercase tracking-[0.2em] rounded border border-neutral-700 hover:border-neutral-500 transition-all';
+            pongStatsElements.forEach(el => el.classList.remove('hidden'));
+            trisStatsElements.forEach(el => el.classList.add('hidden'));
+          } else {
+            btnTris.className = 'text-sm font-black px-3 py-1 bg-[#0dff66] text-black uppercase tracking-[0.2em] rounded border border-[#0dff66] transition-all';
+            btnPong.className = 'text-sm font-black px-3 py-1 bg-transparent text-neutral-500 uppercase tracking-[0.2em] rounded border border-neutral-700 hover:border-neutral-500 transition-all';
+            trisStatsElements.forEach(el => el.classList.remove('hidden'));
+            pongStatsElements.forEach(el => el.classList.add('hidden'));
           }
-        }, 100);
-      } catch (error) {
-        console.error('Failed to load match histories:', error);
+          // Dispatch resize event to help ApexCharts recalculate visibility
+          window.dispatchEvent(new Event('resize'));
+        };
+
+        btnPong.addEventListener('click', () => setView('pong'));
+        btnTris.addEventListener('click', () => setView('tris'));
+
+        // Render donuts
+        if (gameStats.pongWins !== undefined && chartsSection.querySelector('#profile-pong-donut')) {
+          try { await createGameStatsChart('profile-pong-donut', 'pong', gameStats, user.id); } catch (e) {}
+        }
+        if (gameStats.trisWins !== undefined && chartsSection.querySelector('#profile-tris-donut')) {
+          try { await createGameStatsChart('profile-tris-donut', 'tris', gameStats, user.id); } catch (e) {}
+        }
       }
+    } catch (err) {
+      console.error('[ProfileCard] Combined fetch error:', err);
     }
-  }
+  })();
 }
+

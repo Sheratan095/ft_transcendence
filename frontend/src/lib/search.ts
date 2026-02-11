@@ -1,4 +1,5 @@
 import type { User } from './auth';
+import { goToRoute } from '../spa';
 
 export interface SearchResult extends User {
   matchType: 'name' | 'id';
@@ -50,9 +51,10 @@ export function initSearchAutocomplete(): void {
           btn.textContent = u.username;
           btn.onclick = (e) => {
             e.preventDefault();
-            input.value = u.username;
             dropdown.classList.add('hidden');
-            form.dispatchEvent(new Event('submit'));
+            form.reset();
+            // Navigate to profile with user ID
+            goToRoute(`/profile?id=${u.id}`);
           };
           list.appendChild(btn);
         });
@@ -115,33 +117,9 @@ export async function searchUser(query: string): Promise<SearchResult | null> {
 }
 
 /**
- * Render a user profile from search results
+ * Render a user profile from search results - now navigates to /profile?id=<userId>
  */
 export async function renderSearchResult(user: SearchResult, container: HTMLElement): Promise<void> {
-  // Clear container
-  container.innerHTML = '';
-
-  // Create wrapper with back button
-  const wrapper = document.createElement('div');
-  wrapper.className = 'w-full';
-
-  // Create back button
-  const backBtn = document.createElement('button');
-  backBtn.className = 'mb-6 px-4 py-2 bg-neutral-700 text-white font-semibold uppercase tracking-tight hover:bg-neutral-600 transition border-2 border-neutral-600';
-  backBtn.textContent = '← Back';
-  backBtn.addEventListener('click', () => {
-    location.reload();
-  });
-  wrapper.appendChild(backBtn);
-
-  // Import and render custom search profile card
-  const { renderSearchProfileCard } = await import('../components/profile/SearchProfileCard');
-  const cardEl = await renderSearchProfileCard(user, wrapper);
-
-  if (!cardEl) {
-    container.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load user profile</div>';
-    return;
-  }
-
-  container.appendChild(wrapper);
+  // Navigate to the profile page with user ID
+  goToRoute(`/profile?id=${user.id}`);
 }

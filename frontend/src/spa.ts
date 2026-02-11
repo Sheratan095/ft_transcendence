@@ -1,5 +1,4 @@
 import { isLoggedInClient } from './lib/auth';
-import { logout } from './lib/token';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/ProfileCard';
@@ -9,8 +8,13 @@ type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
   '/': { 
     render: async () => {
-	  const el = document.getElementById('main-content');
-
+      const el = document.getElementById('main-content');
+      const template = document.getElementById('home-template') as HTMLTemplateElement | null;
+      if (!el || !template) return;
+      el.innerHTML = '';
+      const clone = template.content.cloneNode(true);
+      el.appendChild(clone);
+      initCardHoverEffect();
     }
   },
   '/login': {
@@ -35,9 +39,8 @@ const routes: Record<string, RouteConfig> = {
   },
   '/profile': {
     render: async () => {
-    const template = document.getElementById('profile-template') as HTMLTemplateElement | null;
     const el = document.getElementById('main-content');
-    if (!el || !template) return;
+    if (!el) return;
     if (!isLoggedInClient()) {
     goToRoute('/login');
     showErrorToast('Please sign in to view your profile');
@@ -46,21 +49,34 @@ const routes: Record<string, RouteConfig> = {
 	animatePolygonToBottom();
     el.innerHTML = '';
 
-    const clone = template.content.cloneNode(true);
-    el.appendChild(clone);
-    try {
-      // Find the actual profile card root (not just #profile-content)
-      const content = el.querySelector('#profile-content') as HTMLElement | null;
-      // If the template has a single card child, use it
-      let cardRoot = content;
-      if (content && content.children.length === 1 && content.children[0] instanceof HTMLElement) {
-        cardRoot = content.children[0] as HTMLElement;
+    // Check if viewing another user via query param
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('id');
+
+    if (userId && userId !== 'current-user-id')
+    {
+      // Render search profile card for another user
+      try {
+        await renderSearchProfileCard(userId, el);
+      } catch (err) {
+        console.error('Failed to load user profile:', err);
+        el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load user profile</div>';
       }
-      await renderProfileCard(cardRoot ?? content ?? el);
+      return;
+    }
+
+    // Render logged-in user's profile
+    try {
+      console.log('Calling renderProfileCard...');
+      if (typeof renderProfileCard !== 'function') {
+        throw new Error('renderProfileCard is not a function (possible circular dependency)');
+      }
+      await renderProfileCard(el);
+      console.log('Profile card rendered');
     } catch (err) {
       console.error('Failed to render profile:', err);
+      el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load profile</div>';
     }
-	initCardHoverEffect();
     }
   },
   '/pong': { 
@@ -101,12 +117,16 @@ let isBackNavigation = false;
  * Updates browser history, detects back/forward navigation, and renders the appropriate route
  */
 async function goToRoute(path: string) {
-  // Instead of SPA rendering, do a full page reload
-  if (window.location.pathname !== path) {
-    window.location.assign(path);
+  const url = new URL(path, window.location.origin);
+  
+  // Real SPA navigation
+  if (url.pathname + url.search !== window.location.pathname + window.location.search) {
+    history.pushState(null, '', path);
+    await renderRoute(url.pathname);
   } else {
-    // If already on the path, force reload
-    window.location.reload();
+    // If already on the path, we can still re-render or do nothing
+    // To support clicking the same link to refresh:
+    await renderRoute(url.pathname);
   }
 }
 
@@ -117,6 +137,7 @@ async function renderRoute(path: string) {
     // Use View Transitions API for smooth page transitions
     const transitionFn = async () => {
       await route.render();
+      window.dispatchEvent(new CustomEvent('route-rendered', { detail: { path } }));
     };
     
     if (document.startViewTransition) {
@@ -144,6 +165,11 @@ export function linkify() {
     const href = a.getAttribute('href');
     if (!href) return;
     if (href.startsWith('/')) {
+      // Allow explicit new-tab/open/download links to behave normally
+      const target = a.getAttribute('target');
+      if (target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-no-spa')) {
+        return;
+      }
       ev.preventDefault();
       goToRoute(href);
     }

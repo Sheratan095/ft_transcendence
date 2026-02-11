@@ -1,4 +1,4 @@
-import { fetchUserProfile, getUserId } from './lib/auth';
+import { fetchUserProfile, getUserId, logout } from './lib/auth';
 import { isLoggedInClient, startTokenRefresh } from './lib/token';
 import { attachUserOptions } from './components/profile/profile';
 import { setupChatEventListeners, initChat } from './components/chat/chat';
@@ -7,6 +7,7 @@ import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket } from './components/profile/Notifications';
 import { setFriendsManager } from './components/profile/Notifications';
+import { showTournamentListModal } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
 import { setupPongCardListener } from './lib/pong-ui';
@@ -27,7 +28,13 @@ main(window.location.pathname);
 // called on every page load remembering SPA navigation
 // add checks here.
 export async function main(path: string) {
-start();
+await start();
+
+// Load user's saved language preference
+const savedLanguage = localStorage.getItem('userLanguage') || 'en';
+setLocaleInStorage(savedLanguage);
+
+console.log(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 
@@ -40,12 +47,14 @@ if (isLoggedInClient()) initUserServices();
 /**
  * Setup search user functionality
  */
-function setupSearchUser() {
+function setupSearchUser()
+{
   const searchForm = document.getElementById('search-user-form') as HTMLFormElement;
   const searchInput = document.getElementById('search-user-input') as HTMLInputElement;
   const mainContainer = document.getElementById('main-content') as HTMLElement;
 
-  if (!searchForm || !searchInput || !mainContainer) return;
+  if (!searchForm || !searchInput || !mainContainer)
+    return;
 
   searchForm.classList.remove('hidden');
   initSearchAutocomplete();
@@ -77,16 +86,75 @@ function setupSearchUser() {
   });
 }
 
-function initUserServices() {
-	const userId = getUserId();
-	if (!userId) return;
+function modifyIndex()
+{
+  const link = document.getElementById('cta-login-logout') as HTMLAnchorElement | null;
+  if (link)
+  {
+    const h2 = link.getElementsByTagName('h2')[0];
+    if (h2)
+      h2.textContent = './LOGOUT';
+    
+    // Modification: the click listener is now handled via event delegation in main()
+  }
 
-	startTokenRefresh();
-	setupChatEventListeners();
-	connectNotificationsWebSocket();
-	setupSearchUser();
-	attachUserOptions();
-	initChat(userId);
+  const showTournamentsBtn = document.getElementById('tournamentListButton');
+  if (showTournamentsBtn) {
+    showTournamentsBtn.classList.remove('hidden');
+  }
+
+  const showTournamentsBtnStatic = document.getElementById('tournamentListButton-static');
+  if (showTournamentsBtnStatic) {
+    showTournamentsBtnStatic.classList.remove('hidden');
+  }
+}
+
+function initUserServices()
+{
+	const userId = getUserId();
+	if (!userId)
+      return;
+
+  startTokenRefresh();
+  modifyIndex();
+  setupChatEventListeners();
+  connectNotificationsWebSocket();
+  setupSearchUser();
+  attachUserOptions();
+  initChat(userId);
+}
+
+// Global click handler for shared/dynamic elements
+function setupGlobalClickHandlers() {
+  document.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+
+    // Handle Tournament Button
+    const tournamentBtn = target.closest('#tournamentListButton, #tournamentListButton-static');
+    if (tournamentBtn) {
+      e.preventDefault();
+      const modal = document.getElementById('tournament-modal');
+      if (modal) modal.classList.remove('hidden');
+      showTournamentListModal();
+      return;
+    }
+
+    // Handle Logout Link
+    const logoutLink = target.closest('#cta-login-logout');
+    if (logoutLink && logoutLink.textContent?.includes('LOGOUT')) {
+      e.preventDefault();
+      try {
+        await logout();
+        showToast('Logged out successfully');
+        setTimeout(() => (window.location.href = '/'), 800);
+      }
+      catch (err) {
+        console.error('Logout (client) error:', err);
+        showErrorToast('Error logging out');
+      }
+      return;
+    }
+  });
 }
 
 export default {};

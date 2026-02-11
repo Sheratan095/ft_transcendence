@@ -176,14 +176,13 @@ export const	createTournament = async (req, reply) =>
 		if (await isUserBusyInternal(creatorId, true))
 		{
 			console.error(`[PONG] ${creatorId} tried to create a tournament while busy`);
-			pongConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
-			return ;
+			return (reply.code(400).send({ error: 'You are already in a game or matchmaking' }));
 		}
 
 		// Create a new tournament
 		const	tournament = tournamentManager.createTournament(name, creatorId, creatorUsername);
 
-		console.log(`[PONG] User ${creatorId} creted a tournament named "${name}"`);
+		console.log(`[PONG] User ${creatorId} created a tournament named "${name}"`);
 
 		return (reply.code(201).send({
 			tournamentId: tournament.id,
