@@ -52,19 +52,11 @@ const routes: Record<string, RouteConfig> = {
     const params = new URLSearchParams(window.location.search);
     const userId = params.get('id');
 
-    if (userId && userId !== 'current-user-id') {
+    if (userId && userId !== 'current-user-id')
+    {
       // Render search profile card for another user
       try {
-        const response = await fetch(`/api/users/user?id=${userId}`, {
-          credentials: 'include',
-          headers: { 'Accept': 'application/json' },
-        });
-        if (!response.ok) {
-          el.innerHTML = '<div class="text-red-500 text-center mt-8">User not found</div>';
-          return;
-        }
-        const user = await response.json();
-        await renderSearchProfileCard(user, el);
+        await renderSearchProfileCard(userId, el);
       } catch (err) {
         console.error('Failed to load user profile:', err);
         el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load user profile</div>';
@@ -73,27 +65,13 @@ const routes: Record<string, RouteConfig> = {
     }
 
     // Render logged-in user's profile
-    const template = document.getElementById('profile-template') as HTMLTemplateElement | null;
-    if (!template) return;
-    const clone = template.content.cloneNode(true);
-    el.appendChild(clone);
     try {
-      // Find the card container in the cloned template
-      // The template root is a div with id="container", and inside it is the card
-      const container = el.querySelector('#container') as HTMLElement | null;
-      const cardDiv = container?.querySelector('.card') as HTMLElement | null;
-      console.log('Profile route - container found:', !!container, 'cardDiv found:', !!cardDiv);
-      if (!cardDiv) {
-        console.error('Profile card element not found in template');
-        console.log('Container HTML:', container?.innerHTML.substring(0, 200));
-        return;
-      }
-      await renderProfileCard(cardDiv);
+      await renderProfileCard(el);
       console.log('Profile card rendered');
     } catch (err) {
       console.error('Failed to render profile:', err);
+      el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load profile</div>';
     }
-	initCardHoverEffect();
     }
   },
   '/pong': { 

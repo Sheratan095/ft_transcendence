@@ -7,10 +7,29 @@ import { setLocaleInStorage } from 'intlayer';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';
 import { goToRoute } from '../../spa';
+import { initCardHoverEffect } from '../../lib/card';
 
-export async function renderProfileCard(root: HTMLElement | null, gameStats?: GameStats) {
-  if (!root) {
-    console.error('renderProfileCard: root element is null');
+export async function renderProfileCard(container: HTMLElement | null, gameStats?: GameStats) {
+  if (!container) {
+    console.error('renderProfileCard: container element is null');
+    return null;
+  }
+
+  const template = document.getElementById('profile-template') as HTMLTemplateElement | null;
+  if (!template) {
+    console.error('Profile template not found');
+    return null;
+  }
+
+  // Clone template and append to container
+  const clone = template.content.cloneNode(true);
+  container.innerHTML = '';
+  container.appendChild(clone);
+
+  // Find the card element to populate
+  const cardEl = container.querySelector('.card') as HTMLElement | null;
+  if (!cardEl) {
+    console.error('Profile card element not found in template');
     return null;
   }
 
@@ -24,9 +43,6 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
   // Initialize FriendsManager
   const friendsManager = new FriendsManager({ currentUserId: user.id });
   setFriendsManager(friendsManager);
-
-  // Instead of cloning template, use root directly
-  const cardEl = root;
 
   // ===== Avatar =====
   const avatar = cardEl.querySelector('#profile-avatar') as HTMLImageElement;
@@ -386,6 +402,6 @@ export async function renderProfileCard(root: HTMLElement | null, gameStats?: Ga
     }
   }
 
-  // Append to root
-  root.appendChild(cardEl);
+  // Initialize hover effects
+  initCardHoverEffect();
 }

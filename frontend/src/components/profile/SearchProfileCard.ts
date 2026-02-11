@@ -8,9 +8,19 @@ export interface SearchProfileCardOptions {
 }
 
 export async function renderSearchProfileCard(
-  user: User,
+  userId : string,
   container: HTMLElement,
 ): Promise<HTMLElement | null> {
+
+  const response = await fetch(`/api/users/user?id=${userId}`, {
+    credentials: 'include',
+    headers: { 'Accept': 'application/json' },
+  });
+  if (!response.ok) {
+    container.innerHTML = '<div class="text-red-500 text-center mt-8">User not found</div>';
+    return null;
+  }
+  const user = await response.json();
 
   //instantiate friends manager to check friendship status
   const loggedInUserStr = localStorage.getItem('user');
