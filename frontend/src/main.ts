@@ -1,4 +1,4 @@
-import { fetchUserProfile, getUserId } from './lib/auth';
+import { fetchUserProfile, getUserId, logout } from './lib/auth';
 import { isLoggedInClient, startTokenRefresh } from './lib/token';
 import { attachUserOptions } from './lib/profile';
 import { setupChatEventListeners, initChat } from './lib/chat';
@@ -58,7 +58,8 @@ tournamentListButton?.addEventListener('click', () =>
 /**
  * Setup search user functionality
  */
-function setupSearchUser() {
+function setupSearchUser()
+{
   const searchForm = document.getElementById('search-user-form') as HTMLFormElement;
   const searchInput = document.getElementById('search-user-input') as HTMLInputElement;
   const mainContainer = document.getElementById('main-content') as HTMLElement;
@@ -95,12 +96,40 @@ function setupSearchUser() {
   });
 }
 
-function initUserServices() {
+function modifyIndex()
+{
+  const link = document.getElementById('cta-login-logout') as HTMLAnchorElement | null;
+
+  if (link)
+  {
+    const h2 = link.getElementsByTagName('h2')[0];
+    if (h2)
+      h2.textContent = './LOGOUT';
+
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await logout();
+        showToast('Logged out successfully');
+        setTimeout(() => (window.location.href = '/'), 800);
+      }
+      catch (err) {
+        console.error('Logout (client) error:', err);
+        showErrorToast('Error logging out');
+      }
+    });
+  }
+
+}
+
+function initUserServices()
+{
 	const userId = getUserId();
 	if (!userId) return;
 
 	startTokenRefresh();
-	setupChatEventListeners();
+  modifyIndex();
+  setupChatEventListeners();
 	connectNotificationsWebSocket();
 	setupSearchUser();
 	attachUserOptions();
