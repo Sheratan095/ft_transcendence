@@ -3,6 +3,7 @@ import { renderProfile } from './lib/profile';
 import { logout } from './lib/token';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
+import { renderProfileCard } from './components/profile';
 
 type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
@@ -47,8 +48,8 @@ const routes: Record<string, RouteConfig> = {
 
     // Populate profile content using renderProfile
     try {
-    const content = el.querySelector('#profile-content') as HTMLElement | null;
-    await renderProfile(content ?? el);
+    const content = el.querySelector('#profile-content') as HTMLElement;
+    await renderProfileCard(content, undefined);
     } catch (err) {
     console.error('Failed to render profile:', err);
     }
