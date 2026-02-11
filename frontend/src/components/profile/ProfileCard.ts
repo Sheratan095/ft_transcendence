@@ -8,15 +8,21 @@ import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';
 import { goToRoute } from '../../spa';
 
-export async function renderProfileCard(user: User, root: HTMLElement, gameStats?: GameStats): Promise<HTMLElement | null> {
+export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats): Promise<HTMLElement | null> {
+  
+  const user: User = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null;
+  if (!user || !user.id) {
+	console.error('No user data found in localStorage');
+	logout();
+	return null;
+  }
   // Initialize FriendsManager
   const friendsManager = new FriendsManager({ currentUserId: user.id });
   // Connect FriendsManager to Notifications for real-time updates
   setFriendsManager(friendsManager);
-  // Clone template
-  const template = document.getElementById('profile-card-template') as HTMLTemplateElement;
+  const template = document.getElementById('profile-template') as HTMLTemplateElement;
   if (!template) {
-    console.error('Profile card template not found');
+    console.error('Profile template not found');
     return null;
   }
 
