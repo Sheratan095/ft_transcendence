@@ -8,47 +8,36 @@ import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';
 import { goToRoute } from '../../spa';
 
-export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats): Promise<HTMLElement | null> {
-  
-  const user: User = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null;
-  if (!user || !user.id) {
-	console.error('No user data found in localStorage');
-	logout();
-	return null;
-  }
-  // Initialize FriendsManager
-  const friendsManager = new FriendsManager({ currentUserId: user.id });
-  // Connect FriendsManager to Notifications for real-time updates
-  setFriendsManager(friendsManager);
-  const template = document.getElementById('profile-template') as HTMLTemplateElement;
-  if (!template) {
-    console.error('Profile template not found');
+export async function renderProfileCard(root: HTMLElement | null, gameStats?: GameStats) {
+  if (!root) {
+    console.error('renderProfileCard: root element is null');
     return null;
   }
 
-  const card = template.content.cloneNode(true) as DocumentFragment;
-  const cardEl = (card.querySelector('div') as HTMLElement) || null;
+  // Get user from localStorage
+  const user: User = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') as string) : null;
+  if (!user || !user.id) {
+    console.error('No user data found in localStorage');
+    logout();
+    return null;
+  }
+  // Initialize FriendsManager
+  const friendsManager = new FriendsManager({ currentUserId: user.id });
+  setFriendsManager(friendsManager);
 
-  if (!cardEl) return null;
+  // Instead of cloning template, use root directly
+  const cardEl = root;
 
   // ===== Avatar =====
-  const avatar = card.querySelector('#profile-avatar') as HTMLImageElement;
-  if (avatar) {
-    if (user.avatarUrl) {
-      console.log('Setting avatar URL:', user.avatarUrl);
-      avatar.src = user.avatarUrl.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl}`;
-    } else {
-      avatar.src = '/assets/placeholder-avatar.jpg';
-    }
-  }
+  const avatar = cardEl.querySelector('#profile-avatar') as HTMLImageElement;
+  if (avatar) avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
 
   // Avatar upload handler
-  const avatarInput = card.querySelector('#input-avatar') as HTMLInputElement;
-  if (avatarInput) {
+  const avatarInput = cardEl.querySelector('#input-avatar') as HTMLInputElement;
+  if (avatarInput && avatar) {
     avatarInput.addEventListener('change', async () => {
       const file = avatarInput.files ? avatarInput.files[0] : null;
       if (!file) return;
-      
       const formData = new FormData();
       formData.append('file', file);
       try {
@@ -70,21 +59,17 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
   }
 
   // ===== Username =====
-  const username = card.querySelector('#profile-username') as HTMLElement;
+  const username = cardEl.querySelector('#profile-username') as HTMLElement;
   if (username) {
     username.textContent = user.username || user.email || 'User';
   }
 
   // ===== 2FA Toggle =====
-  const enabled2FA = card.querySelector('#profile-tfa') as HTMLElement;
-  const input2FA = card.querySelector('#input-lock') as HTMLInputElement;
-
-  input2FA.checked = user.tfaEnabled || false;
-  if (enabled2FA) {
+  const enabled2FA = cardEl.querySelector('#profile-tfa') as HTMLElement;
+  const input2FA = cardEl.querySelector('#input-lock') as HTMLInputElement;
+  if (input2FA && enabled2FA) {
+    input2FA.checked = user.tfaEnabled || false;
     enabled2FA.textContent = user.tfaEnabled ? 'DISABLE 2FA' : 'ENABLE 2FA';
-  }
-
-  if (input2FA) {
     input2FA.addEventListener('change', async () => {
       const tfaEnabled = input2FA.checked;
       try {
@@ -97,9 +82,7 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
         if (!res.ok) throw new Error(`2FA update failed: ${res.status}`);
         user.tfaEnabled = tfaEnabled;
         localStorage.setItem('tfaEnabled', tfaEnabled ? 'true' : 'false');
-        if (enabled2FA) {
-          enabled2FA.textContent = tfaEnabled ? 'DISABLE 2FA' : 'ENABLE 2FA';
-        }
+        enabled2FA.textContent = tfaEnabled ? 'DISABLE 2FA' : 'ENABLE 2FA';
       } catch (err) {
         console.error('2FA update error:', err);
         input2FA.checked = !tfaEnabled;
@@ -108,16 +91,14 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
   }
 
   // ===== Email & ID =====
-  const email = card.querySelector('#profile-email') as HTMLElement;
+  const email = cardEl.querySelector('#profile-email') as HTMLElement;
   if (email) email.textContent = user.email || '';
 
-  const id = card.querySelector('#profile-id') as HTMLElement;
+  const id = cardEl.querySelector('#profile-id') as HTMLElement;
   if (id) id.textContent = user.id || '';
 
   // ===== Buttons =====
-  const logoutBtn = card.querySelector('#profile-logout-btn') as HTMLButtonElement;
-  const chatBtn = card.querySelector('#profile-chat-btn') as HTMLButtonElement;
-
+  const logoutBtn = cardEl.querySelector('#profile-logout-btn') as HTMLButtonElement;
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
       await logout();
@@ -125,6 +106,7 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
     });
   }
 
+  const chatBtn = cardEl.querySelector('#profile-chat-btn') as HTMLButtonElement;
   if (chatBtn) {
     chatBtn.addEventListener('click', () => {
       openChatModal();
@@ -139,7 +121,6 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
         await deleteAccout();
         localStorage.removeItem('userId');
         localStorage.removeItem('tfaEnabled');
-        //window.location.reload();
       } catch (err) {
         console.error('Delete account error:', err);
         alert('Failed to delete account');
@@ -147,28 +128,22 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
     });
   }
 
-  const languageSelect = card.querySelector('#profile-language') as HTMLSelectElement;
+  // ===== Language selector =====
+  const languageSelect = cardEl.querySelector('#profile-language') as HTMLSelectElement;
   if (languageSelect) {
-    // Load saved language from localStorage or use browser default
     const savedLanguage = localStorage.getItem('userLanguage') || 'en';
     languageSelect.value = savedLanguage;
-
     languageSelect.addEventListener('change', (e) => {
       const selectedLanguage = (e.target as HTMLSelectElement).value;
-      
-      // Save to localStorage
       localStorage.setItem('userLanguage', selectedLanguage);
-      
-      // Update intlayer locale
       setLocaleInStorage(selectedLanguage);
-      
       console.log('Language changed to:', selectedLanguage);
     });
   }
 
   // ===== Add Charts if stats provided =====
   if (gameStats && Object.keys(gameStats).length > 0) {
-    const chartsSection = card.querySelector('#profile-charts-section');
+    const chartsSection = cardEl.querySelector('#profile-charts-section');
     if (chartsSection) {
       // Pong stats
       if (gameStats.pongWins !== undefined || gameStats.pongHistory) {
@@ -278,7 +253,7 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
     }
   } else {
     // Load match histories if gameStats not provided
-    const chartsSection = card.querySelector('#profile-charts-section');
+    const chartsSection = cardEl.querySelector('#profile-charts-section');
     if (chartsSection) {
       try {
         const { trisHistory, pongHistory } = await getAllMatchHistories(user.id);
@@ -412,7 +387,5 @@ export async function renderProfileCard(root: HTMLElement, gameStats?: GameStats
   }
 
   // Append to root
-  root.appendChild(card);
-
-  return cardEl;
+  root.appendChild(cardEl);
 }

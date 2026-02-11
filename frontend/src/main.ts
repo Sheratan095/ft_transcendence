@@ -1,6 +1,6 @@
 import { fetchUserProfile, getUserId } from './lib/auth';
 import { isLoggedInClient, startTokenRefresh } from './lib/token';
-import { attachUserOptions, renderProfile } from './lib/profile';
+import { attachUserOptions } from './lib/profile';
 import { setupChatEventListeners, initChat } from './lib/chat';
 import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
@@ -32,6 +32,8 @@ start();
 // Load user's saved language preference
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
 setLocaleInStorage(savedLanguage);
+
+console.log(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 

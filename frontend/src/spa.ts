@@ -1,14 +1,15 @@
 import { isLoggedInClient } from './lib/auth';
-import { renderProfile } from './lib/profile';
 import { logout } from './lib/token';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile';
+import { initCardHoverEffect } from './lib/card';
 
 type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
   '/': { 
     render: async () => {
+	  const el = document.getElementById('main-content');
 
     }
   },
@@ -29,6 +30,7 @@ const routes: Record<string, RouteConfig> = {
     el.appendChild(clone);
 
     attachLogin();
+	initCardHoverEffect();
   }
   },
   '/profile': {
@@ -45,14 +47,19 @@ const routes: Record<string, RouteConfig> = {
 
     const clone = template.content.cloneNode(true);
     el.appendChild(clone);
-
-    // Populate profile content using renderProfile
     try {
-    const content = el.querySelector('#profile-content') as HTMLElement;
-    await renderProfileCard(content, undefined);
+      // Find the actual profile card root (not just #profile-content)
+      const content = el.querySelector('#profile-content') as HTMLElement | null;
+      // If the template has a single card child, use it
+      let cardRoot = content;
+      if (content && content.children.length === 1 && content.children[0] instanceof HTMLElement) {
+        cardRoot = content.children[0] as HTMLElement;
+      }
+      await renderProfileCard(cardRoot ?? content ?? el);
     } catch (err) {
-    console.error('Failed to render profile:', err);
+      console.error('Failed to render profile:', err);
     }
+	initCardHoverEffect();
     }
   },
   '/pong': { 
@@ -93,22 +100,13 @@ let isBackNavigation = false;
  * Updates browser history, detects back/forward navigation, and renders the appropriate route
  */
 async function goToRoute(path: string) {
-  // Detect if this is a back/forward navigation
-  const currentIndex = navigationHistory.indexOf(location.pathname);
-  const targetIndex = navigationHistory.indexOf(path);
-  
-  if (targetIndex !== -1 && targetIndex < currentIndex) {
-    isBackNavigation = true;
+  // Instead of SPA rendering, do a full page reload
+  if (window.location.pathname !== path) {
+    window.location.assign(path);
   } else {
-    isBackNavigation = false;
-    // Add to history if new path
-    if (!navigationHistory.includes(path)) {
-      navigationHistory.push(path);
-    }
+    // If already on the path, force reload
+    window.location.reload();
   }
-  
-  history.pushState({}, '', path);
-  await renderRoute(path);
 }
 
 async function renderRoute(path: string) {
