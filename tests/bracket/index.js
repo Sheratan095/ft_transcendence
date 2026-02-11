@@ -44,7 +44,9 @@ function transformBackendDataToViewerFormat(tournamentData) {
     // Collect slot order from first round (left then right for each match)
     const firstRound = (tournamentData.rounds && tournamentData.rounds[0]) ? tournamentData.rounds[0].matches : [];
     const slotList = [];
+    console.log('Processing first round matches:', firstRound.length);
     for (const match of firstRound) {
+        console.log('Match:', { left: match.playerLeftUsername, right: match.playerRightUsername, isBye: match.isBye });
         if (match.playerLeftId)
             slotList.push({ userId: match.playerLeftId, name: match.playerLeftUsername });
 
@@ -53,6 +55,8 @@ function transformBackendDataToViewerFormat(tournamentData) {
         else if (match.playerRightId)
             slotList.push({ userId: match.playerRightId, name: match.playerRightUsername });
     }
+
+    console.log('Slot list before dedup:', slotList);
 
     // Deduplicate preserving order
     const seen = new Set();
@@ -63,29 +67,33 @@ function transformBackendDataToViewerFormat(tournamentData) {
             ordered.push(p);
         }
     }
+    
+    console.log('Ordered participants after dedup:', ordered);
 
     // Build participants array strictly from first-round slot order
     const participants = [];
     const userIdToPid = new Map();
+    const pidToUserId = new Map();
 
     for (let i = 0; i < ordered.length; i++) {
         const p = ordered[i];
-        const pid = i + 1; // 1-based
+        const pid = i; // 0-based ids for brackets-viewer compatibility
         participants.push({ id: pid, tournament_id: 0, name: p.name });
         userIdToPid.set(p.userId, pid);
+        pidToUserId.set(pid, p.userId);
     }
 
     // Add remaining participants not in first round
     tournamentData.rounds.forEach(round => {
         round.matches.forEach(match => {
             if (match.playerLeftId && !userIdToPid.has(match.playerLeftId)) {
-                const pid = participants.length + 1;
+                const pid = participants.length;
                 participants.push({ id: pid, tournament_id: 0, name: match.playerLeftUsername });
                 userIdToPid.set(match.playerLeftId, pid);
             }
 
             if (!match.isBye && match.playerRightId && !userIdToPid.has(match.playerRightId)) {
-                const pid = participants.length + 1;
+                const pid = participants.length;
                 participants.push({ id: pid, tournament_id: 0, name: match.playerRightUsername });
                 userIdToPid.set(match.playerRightId, pid);
             }
@@ -94,9 +102,10 @@ function transformBackendDataToViewerFormat(tournamentData) {
 
     // Ensure BYE participant exists at the end
     if (!userIdToPid.has(byeKey)) {
-        const pid = participants.length + 1;
+        const pid = participants.length;
         participants.push({ id: pid, tournament_id: 0, name: 'BYE' });
         userIdToPid.set(byeKey, pid);
+        pidToUserId.set(pid, byeKey);
     }
 
     console.log('Participants (ordered slots):', participants);
@@ -133,70 +142,150 @@ function transformBackendDataToViewerFormat(tournamentData) {
     let matchNumber = 1; // 1-based match ids
     const matches = [];
 
+    const firstRoundMatches = (tournamentData.rounds && tournamentData.rounds[0]) ? tournamentData.rounds[0].matches : [];
+
+    // For first round, use backend matches directly (simpler approach)
+    // No permutation - just create matches in the order they come from the backend
+
+    const firstRoundWinnerToSlot = new Map(); // winner userId -> slot index (0=left, 1=right) in next match
+
     tournamentData.rounds.forEach((round, roundIdx) => {
         console.log(`Processing round ${roundIdx + 1}, matches:`, round.matches.length);
-        round.matches.forEach((match, matchIdx) => {
-            console.log(`Match ${matchIdx}:`, {
-                left: match.playerLeftUsername,
-                right: match.playerRightUsername,
-                isBye: match.isBye
-            });
-            
-            const leftPid = userIdToPid.get(match.playerLeftId);
-            const rightPid = match.playerRightId ? userIdToPid.get(match.playerRightId) : null;
 
-            const opponent1 = leftPid ? {
-                id: leftPid,
-                position: 1,
-                score: match.playerLeftScore || 0,
-                result: (match.winnerId === match.playerLeftId || match.isBye) ? 'win' : 'loss',
-                name: match.playerLeftUsername
-            } : null;
+        // For the first round, use backend matches directly
+        if (roundIdx === 0) {
+            firstRoundMatches.forEach((match, matchIndex) => {
+                const leftPid = userIdToPid.get(match.playerLeftId);
+                const rightPid = match.playerRightId ? userIdToPid.get(match.playerRightId) : null;
+                
+                console.log(`First round match ${matchIndex}: Backend has ${match.playerLeftUsername} vs ${match.playerRightUsername || 'BYE'}`);
+                console.log(`  Participant IDs: ${leftPid} vs ${rightPid}`);
 
-            // Handle BYE matches - use BYE participant instead of null
-            let opponent2;
-            if (match.isBye) {
-                opponent2 = {
-                    id: byePid,
-                    position: 2,
-                    score: 0,
-                    result: 'loss',
-                    name: 'BYE'
+                // Use participant ids (now 0-based) as expected by brackets-viewer
+                const opponent1 = leftPid !== undefined && leftPid !== null ? {
+                    id: leftPid,
+                    position: 1,
+                    score: match.playerLeftScore || 0,
+                    result: (match.winnerId === match.playerLeftId || match.isBye) ? 'win' : 'loss',
+                    name: match.playerLeftUsername
+                } : null;
+
+                let opponent2 = null;
+                if (match.isBye) {
+                    opponent2 = { 
+                        id: byePid, // byePid is 0-based now
+                        position: 2, 
+                        score: 0, 
+                        result: 'loss', 
+                        name: 'BYE' 
+                    };
+                } else if (rightPid !== undefined && rightPid !== null) {
+                    opponent2 = {
+                        id: rightPid,
+                        position: 2,
+                        score: match.playerRightScore || 0,
+                        result: match.winnerId === match.playerRightId ? 'win' : 'loss',
+                        name: match.playerRightUsername
+                    };
+                }
+
+                const matchData = {
+                    id: matchNumber,
+                    stage_id: 1,
+                    group_id: 1,
+                    round_id: 1,
+                    number: matchNumber,
+                    status: match.status === 'FINISHED' ? 4 : 2,
+                    child_count: 0,
+                    opponent1,
+                    opponent2: opponent2 !== undefined ? opponent2 : null
                 };
-            } else if (rightPid) {
-                opponent2 = {
-                    id: rightPid,
-                    position: 2,
-                    score: match.playerRightScore || 0,
-                    result: match.winnerId === match.playerRightId ? 'win' : 'loss',
-                    name: match.playerRightUsername
-                };
-            }
 
-            const matchData = {
-                id: matchNumber,
-                stage_id: 1,
-                group_id: 1,
-                round_id: roundIdx + 1,
-                number: matchNumber, // global unique match number across tournament
-                status: match.status === 'FINISHED' ? 4 : 2, // 4 = completed, 2 = running
-                child_count: 0,
-                opponent1: opponent1,
-                opponent2: opponent2 !== undefined ? opponent2 : null
-            };
-
-            console.log(`Match ${matchData.number} in round ${roundIdx + 1}:`, {
-                matchId: matchData.id,
-                opponent1: matchData.opponent1 ? `ID:${matchData.opponent1.id} ${matchData.opponent1.name}` : 'null',
-                opponent2: matchData.opponent2 ? `ID:${matchData.opponent2.id} ${matchData.opponent2.name}` : 'undefined/BYE'
+                console.log(`First-round Match ${matchData.number}:`, { left: opponent1 && opponent1.name, right: opponent2 && opponent2.name });
+                matches.push(matchData);
+                matchNumber++;
             });
+        } else {
+            // Later rounds: link to parent matches via player lookup
+            round.matches.forEach((match, matchIdx) => {
+                const leftPid = userIdToPid.get(match.playerLeftId);
+                const rightPid = match.playerRightId ? userIdToPid.get(match.playerRightId) : null;
 
-            if (match.isBye) {
-                console.log(`BYE match ${matchData.id} details:`, JSON.stringify(matchData, null, 2));
-            }
-            matches.push(matchData);
-            matchNumber++;
-        });
+                // Find parent match IDs by looking for first-round matches that produced these winners
+                let leftParentId = null;
+                let rightParentId = null;
+
+                if (roundIdx === 1) {
+                    // For round 2, find which first-round matches produced these players
+                    for (let i = 0; i < firstRoundMatches.length; i++) {
+                        const fm = firstRoundMatches[i];
+                        if (fm.winnerId === match.playerLeftId) leftParentId = i + 1;
+                        if (fm.winnerId === match.playerRightId) rightParentId = i + 1;
+                    }
+                }
+
+                // Convert participant IDs to indices for brackets-viewer.
+                // Use explicit null/undefined checks because participant id 0 is valid (falsy).
+                const leftParticipantIndex = (leftPid !== undefined && leftPid !== null) ? leftPid : -1;
+                const rightParticipantIndex = (rightPid !== undefined && rightPid !== null) ? rightPid : -1;
+
+                const opponent1 = (leftPid !== undefined && leftPid !== null) ? {
+                    id: leftParticipantIndex,
+                    position: 1,
+                    score: match.playerLeftScore || 0,
+                    result: (match.winnerId === match.playerLeftId || match.isBye) ? 'win' : 'loss',
+                    name: match.playerLeftUsername
+                } : null;
+
+                let opponent2 = null;
+                if (match.isBye) {
+                    opponent2 = {
+                        id: byePid,
+                        position: 2,
+                        score: 0,
+                        result: 'loss',
+                        name: 'BYE'
+                    };
+                } else if (rightPid !== undefined && rightPid !== null) {
+                    opponent2 = {
+                        id: rightParticipantIndex,
+                        position: 2,
+                        score: match.playerRightScore || 0,
+                        result: match.winnerId === match.playerRightId ? 'win' : 'loss',
+                        name: match.playerRightUsername
+                    };
+                }
+
+                const matchData = {
+                    id: matchNumber,
+                    stage_id: 1,
+                    group_id: 1,
+                    round_id: roundIdx + 1,
+                    number: matchNumber,
+                    status: match.status === 'FINISHED' ? 4 : 2,
+                    child_count: 0,
+                    opponent1,
+                    opponent2: opponent2 !== undefined ? opponent2 : null
+                };
+
+                // Add parent references if available (guard against null opponents)
+                if (leftParentId && matchData.opponent1) {
+                    matchData.opponent1.parent_id = leftParentId;
+                }
+                if (rightParentId && matchData.opponent2) {
+                    matchData.opponent2.parent_id = rightParentId;
+                }
+
+                console.log(`Match ${matchData.number} in round ${roundIdx + 1}:`, {
+                    matchId: matchData.id,
+                    opponent1: matchData.opponent1 ? `ID:${matchData.opponent1.id} ${matchData.opponent1.name}` : 'null',
+                    opponent2: matchData.opponent2 ? `ID:${matchData.opponent2.id} ${matchData.opponent2.name}` : 'undefined/BYE'
+                });
+
+                matches.push(matchData);
+                matchNumber++;
+            });
+        }
     });
 
     return {
@@ -236,6 +325,13 @@ async function renderBracket() {
     // Expose data for debugging in browser console
     window.transformedDataForDebug = transformedData;
 
+    console.log('=== MATCH ARRAY BEFORE RENDER ===');
+    console.log('Total matches in array:', transformedData.match.length);
+    transformedData.match.forEach(m => {
+        console.log(`  - ID:${m.id}, Number:${m.number}, RoundID:${m.round_id}, ${m.opponent1?.name} vs ${m.opponent2?.name}`);
+    });
+    console.log('=== END MATCH ARRAY ===');
+
     // Transform data to flat structure with plural keys expected by brackets-viewer
     const viewerData = {
         stages: transformedData.stage || [],
@@ -251,6 +347,34 @@ async function renderBracket() {
     console.log('Stages length:', viewerData.stages.length);
     console.log('Matches length:', viewerData.matches.length);
     console.log('Participants length:', viewerData.participants.length);
+    
+    // Check for duplicate matches
+    const matchIds = new Set();
+    const duplicates = [];
+    viewerData.matches.forEach(m => {
+        if (matchIds.has(m.id)) {
+            duplicates.push(m.id);
+        }
+        matchIds.add(m.id);
+    });
+    if (duplicates.length > 0) {
+        console.warn('DUPLICATE MATCH IDS FOUND:', duplicates);
+    }
+    
+    // Log all matches in detail
+    console.log('=== ALL MATCHES DETAILS ===');
+    console.log('Total matches in array:', viewerData.matches.length);
+    viewerData.matches.forEach((m, i) => {
+        console.log(`Array index ${i}: ID=${m.id}, Number=${m.number}, RoundID=${m.round_id}, Opponent1=(ID:${m.opponent1?.id} ${m.opponent1?.name}), Opponent2=(ID:${m.opponent2?.id} ${m.opponent2?.name})`);
+    });
+    console.log('=== END MATCHES DETAILS ===');
+    
+    // Log participants
+    console.log('=== PARTICIPANTS ===');
+    viewerData.participants.forEach((p, i) => {
+        console.log(`Index ${i}: ID=${p.id} Name=${p.name}`);
+    });
+    console.log('=== END PARTICIPANTS ===');
 
     // Check if required arrays have data
     if (!viewerData.stages.length) {
@@ -267,14 +391,43 @@ async function renderBracket() {
         return;
     }
 
+    // CRITICAL: Ensure no duplicate match IDs
+    const matchIdCount = {};
+    viewerData.matches.forEach(m => {
+        matchIdCount[m.id] = (matchIdCount[m.id] || 0) + 1;
+    });
+    const duplicateIds = Object.keys(matchIdCount).filter(id => matchIdCount[id] > 1);
+    if (duplicateIds.length > 0) {
+        console.error('CRITICAL ERROR: Duplicate match IDs found:', duplicateIds);
+        console.error('Match ID counts:', matchIdCount);
+        // Remove duplicates - keep only the first occurrence
+        const seenIds = new Set();
+        viewerData.matches = viewerData.matches.filter(m => {
+            if (seenIds.has(m.id)) {
+                console.warn(`Filtering out duplicate match ID ${m.id}`);
+                return false;
+            }
+            seenIds.add(m.id);
+            return true;
+        });
+        console.log(`After filtering, ${viewerData.matches.length} unique matches remain`);
+    }
+
     try {
         console.log('Calling bracketsViewer.render with nested data...');
+        console.log('RENDER PAYLOAD:');
+        console.log('  Stages:', JSON.stringify(viewerData.stages, null, 2));
+        console.log('  Participants:', viewerData.participants.map(p => `${p.id}:${p.name}`));
+        console.log('  Matches count:', viewerData.matches.length);
+        viewerData.matches.forEach(m => {
+            console.log(`    Match ID=${m.id} Num=${m.number} RoundID=${m.round_id}: ${m.opponent1?.name}(${m.opponent1?.id}) vs ${m.opponent2?.name}(${m.opponent2?.id})`);
+        });
         
         // Log first round matches specifically (rounds are 1-based)
         console.log('First round matches being rendered:');
-        viewerData.matches.filter(m => m.round_id === 1).forEach(m => {
-            console.log(`  Match ${m.number}: ${m.opponent1?.name || 'null'} vs ${m.opponent2?.name || 'BYE'} (IDs: ${m.opponent1?.id} vs ${m.opponent2?.id})`);
-        });
+        // viewerData.matches.filter(m => m.round_id === 1).forEach(m => {
+        //     console.log(`  Match ${m.number}: ${m.opponent1?.name || 'null'} vs ${m.opponent2?.name || 'BYE'} (IDs: ${m.opponent1?.id} vs ${m.opponent2?.id})`);
+        // });
         
         // Use render with full data object structure
         await windowBracketsViewer.render(
