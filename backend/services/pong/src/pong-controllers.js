@@ -134,7 +134,7 @@ export const	getUserMatchHistory = async (req, reply) =>
 			match.playerRightUsername = await getUsernameById(match.player_right_id);
 			match.status = GameStatus.FINISHED;
 			match.winnerId = match.winner_id;
-			match.isBye = false;
+			match.isBye = match.is_bye;
 			match.endedAt = match.ended_at;
 			match.tournamentId = match.tournament_id;
 			match.playerLeftScore = match.player_left_score;

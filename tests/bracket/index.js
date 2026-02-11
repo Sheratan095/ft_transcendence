@@ -1,9 +1,9 @@
 const TOURNAMENT_TEST_URL = 'https://localhost:3000/pong/tournaments/test';
-const statusElement = document.getElementById('status');
 
 async function fetchTournamentData() {
+    const statusElement = document.getElementById('status');
     try {
-        statusElement.innerText = 'Fetching data...';
+        statusElement.innerText = 'Fetching tournament data...';
         statusElement.className = 'p-4 rounded bg-blue-50 border border-blue-200 font-mono text-sm text-blue-700';
         
         console.log('Fetching from:', TOURNAMENT_TEST_URL);
@@ -12,9 +12,6 @@ async function fetchTournamentData() {
             credentials: 'include'
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -22,7 +19,7 @@ async function fetchTournamentData() {
         const data = await response.json();
         console.log('Tournament data received:', data);
         
-        statusElement.innerText = 'Data received successfully. Rendering bracket...';
+        statusElement.innerText = 'Data received successfully ✓';
         statusElement.className = 'p-4 rounded bg-green-50 border border-green-200 font-mono text-sm text-green-700';
         
         return data;
@@ -34,538 +31,210 @@ async function fetchTournamentData() {
     }
 }
 
-function transformBackendDataToViewerFormat(tournamentData) {
-    // Build participants ordered by first-round slots so the viewer indices match slot positions
-    const participantMap = new Map();
-    let participantId = 1; // use 1-based ids for viewer compatibility
-
-    const byeKey = 'BYE';
-
-    // Collect slot order from first round (left then right for each match)
-    const firstRound = (tournamentData.rounds && tournamentData.rounds[0]) ? tournamentData.rounds[0].matches : [];
-    const slotList = [];
-    console.log('Processing first round matches:', firstRound.length);
-    for (const match of firstRound) {
-        console.log('Match:', { left: match.playerLeftUsername, right: match.playerRightUsername, isBye: match.isBye });
-        if (match.playerLeftId)
-            slotList.push({ userId: match.playerLeftId, name: match.playerLeftUsername });
-
-        if (match.isBye)
-            slotList.push({ userId: byeKey, name: 'BYE' });
-        else if (match.playerRightId)
-            slotList.push({ userId: match.playerRightId, name: match.playerRightUsername });
-    }
-
-    console.log('Slot list before dedup:', slotList);
-
-    // Deduplicate preserving order
-    const seen = new Set();
-    const ordered = [];
-    for (const p of slotList) {
-        if (!seen.has(p.userId)) {
-            seen.add(p.userId);
-            ordered.push(p);
-        }
-    }
-    
-    console.log('Ordered participants after dedup:', ordered);
-
-    // Build participants array strictly from first-round slot order
-    const participants = [];
-    const userIdToPid = new Map();
-    const pidToUserId = new Map();
-
-    for (let i = 0; i < ordered.length; i++) {
-        const p = ordered[i];
-        const pid = i; // 0-based ids for brackets-viewer compatibility
-        participants.push({ id: pid, tournament_id: 0, name: p.name });
-        userIdToPid.set(p.userId, pid);
-        pidToUserId.set(pid, p.userId);
-    }
-
-    // Add remaining participants not in first round
-    tournamentData.rounds.forEach(round => {
-        round.matches.forEach(match => {
-            if (match.playerLeftId && !userIdToPid.has(match.playerLeftId)) {
-                const pid = participants.length;
-                participants.push({ id: pid, tournament_id: 0, name: match.playerLeftUsername });
-                userIdToPid.set(match.playerLeftId, pid);
-            }
-
-            if (!match.isBye && match.playerRightId && !userIdToPid.has(match.playerRightId)) {
-                const pid = participants.length;
-                participants.push({ id: pid, tournament_id: 0, name: match.playerRightUsername });
-                userIdToPid.set(match.playerRightId, pid);
-            }
-        });
-    });
-
-    // Ensure BYE participant exists at the end
-    if (!userIdToPid.has(byeKey)) {
-        const pid = participants.length;
-        participants.push({ id: pid, tournament_id: 0, name: 'BYE' });
-        userIdToPid.set(byeKey, pid);
-        pidToUserId.set(pid, byeKey);
-    }
-
-    console.log('Participants (ordered slots):', participants);
-    console.log('UserId -> participant id map:', userIdToPid);
-
-    // Reference to BYE participant id for match construction
-    const byePid = userIdToPid.get(byeKey);
-
-    // Create stage (1-based IDs)
-    const stages = [{
-        id: 1,
-        tournament_id: 0,
-        name: tournamentData.name || 'Tournament',
-        type: 'single_elimination',
-        number: 1,
-        settings: {
-            size: 8, // Power of 2 for brackets (7 players + 1 BYE = 8 slots)
-            seedOrdering: ['natural']
-        }
-    }];
-
-    // Create groups (1-based IDs)
-    const groups = [{ id: 1, stage_id: 1, number: 1 }];
-
-    // Create rounds (1-based IDs)
-    const rounds = tournamentData.rounds.map((round, idx) => ({
-        id: idx + 1,
-        group_id: 1,
-        number: round.roundNumber,
-        stage_id: 1
-    }));
-
-    // Create matches
-    let matchNumber = 1; // 1-based match ids
-    const matches = [];
-
-    const firstRoundMatches = (tournamentData.rounds && tournamentData.rounds[0]) ? tournamentData.rounds[0].matches : [];
-
-    // For first round, use backend matches directly (simpler approach)
-    // No permutation - just create matches in the order they come from the backend
-
-    const firstRoundWinnerToSlot = new Map(); // winner userId -> slot index (0=left, 1=right) in next match
-
-    tournamentData.rounds.forEach((round, roundIdx) => {
-        console.log(`Processing round ${roundIdx + 1}, matches:`, round.matches.length);
-
-        // For the first round, use backend matches directly
-        if (roundIdx === 0) {
-            firstRoundMatches.forEach((match, matchIndex) => {
-                const leftPid = userIdToPid.get(match.playerLeftId);
-                const rightPid = match.playerRightId ? userIdToPid.get(match.playerRightId) : null;
-                
-                console.log(`First round match ${matchIndex}: Backend has ${match.playerLeftUsername} vs ${match.playerRightUsername || 'BYE'}`);
-                console.log(`  Participant IDs: ${leftPid} vs ${rightPid}`);
-
-                // Use participant ids (now 0-based) as expected by brackets-viewer
-                const opponent1 = leftPid !== undefined && leftPid !== null ? {
-                    id: leftPid,
-                    position: 1,
-                    score: match.playerLeftScore || 0,
-                    result: (match.winnerId === match.playerLeftId || match.isBye) ? 'win' : 'loss',
-                    name: match.playerLeftUsername
-                } : null;
-
-                let opponent2 = null;
-                if (match.isBye) {
-                    opponent2 = { 
-                        id: byePid, // byePid is 0-based now
-                        position: 2, 
-                        score: 0, 
-                        result: 'loss', 
-                        name: 'BYE' 
-                    };
-                } else if (rightPid !== undefined && rightPid !== null) {
-                    opponent2 = {
-                        id: rightPid,
-                        position: 2,
-                        score: match.playerRightScore || 0,
-                        result: match.winnerId === match.playerRightId ? 'win' : 'loss',
-                        name: match.playerRightUsername
-                    };
-                }
-
-                const matchData = {
-                    id: matchNumber,
-                    stage_id: 1,
-                    group_id: 1,
-                    round_id: 1,
-                    number: matchNumber,
-                    status: match.status === 'FINISHED' ? 4 : 2,
-                    child_count: 0,
-                    opponent1,
-                    opponent2: opponent2 !== undefined ? opponent2 : null
-                };
-
-                console.log(`First-round Match ${matchData.number}:`, { left: opponent1 && opponent1.name, right: opponent2 && opponent2.name });
-                matches.push(matchData);
-                matchNumber++;
-            });
-        } else {
-            // Later rounds: link to parent matches via player lookup
-            round.matches.forEach((match, matchIdx) => {
-                const leftPid = userIdToPid.get(match.playerLeftId);
-                const rightPid = match.playerRightId ? userIdToPid.get(match.playerRightId) : null;
-
-                // Find parent match IDs by looking for first-round matches that produced these winners
-                let leftParentId = null;
-                let rightParentId = null;
-
-                if (roundIdx === 1) {
-                    // For round 2, find which first-round matches produced these players
-                    for (let i = 0; i < firstRoundMatches.length; i++) {
-                        const fm = firstRoundMatches[i];
-                        if (fm.winnerId === match.playerLeftId) leftParentId = i + 1;
-                        if (fm.winnerId === match.playerRightId) rightParentId = i + 1;
-                    }
-                }
-
-                // Convert participant IDs to indices for brackets-viewer.
-                // Use explicit null/undefined checks because participant id 0 is valid (falsy).
-                const leftParticipantIndex = (leftPid !== undefined && leftPid !== null) ? leftPid : -1;
-                const rightParticipantIndex = (rightPid !== undefined && rightPid !== null) ? rightPid : -1;
-
-                const opponent1 = (leftPid !== undefined && leftPid !== null) ? {
-                    id: leftParticipantIndex,
-                    position: 1,
-                    score: match.playerLeftScore || 0,
-                    result: (match.winnerId === match.playerLeftId || match.isBye) ? 'win' : 'loss',
-                    name: match.playerLeftUsername
-                } : null;
-
-                let opponent2 = null;
-                if (match.isBye) {
-                    opponent2 = {
-                        id: byePid,
-                        position: 2,
-                        score: 0,
-                        result: 'loss',
-                        name: 'BYE'
-                    };
-                } else if (rightPid !== undefined && rightPid !== null) {
-                    opponent2 = {
-                        id: rightParticipantIndex,
-                        position: 2,
-                        score: match.playerRightScore || 0,
-                        result: match.winnerId === match.playerRightId ? 'win' : 'loss',
-                        name: match.playerRightUsername
-                    };
-                }
-
-                const matchData = {
-                    id: matchNumber,
-                    stage_id: 1,
-                    group_id: 1,
-                    round_id: roundIdx + 1,
-                    number: matchNumber,
-                    status: match.status === 'FINISHED' ? 4 : 2,
-                    child_count: 0,
-                    opponent1,
-                    opponent2: opponent2 !== undefined ? opponent2 : null
-                };
-
-                // Add parent references if available (guard against null opponents)
-                if (leftParentId && matchData.opponent1) {
-                    matchData.opponent1.parent_id = leftParentId;
-                }
-                if (rightParentId && matchData.opponent2) {
-                    matchData.opponent2.parent_id = rightParentId;
-                }
-
-                console.log(`Match ${matchData.number} in round ${roundIdx + 1}:`, {
-                    matchId: matchData.id,
-                    opponent1: matchData.opponent1 ? `ID:${matchData.opponent1.id} ${matchData.opponent1.name}` : 'null',
-                    opponent2: matchData.opponent2 ? `ID:${matchData.opponent2.id} ${matchData.opponent2.name}` : 'undefined/BYE'
-                });
-
-                matches.push(matchData);
-                matchNumber++;
-            });
-        }
-    });
-
-    return {
-        participant: participants,
-        stage: stages,
-        group: groups,
-        round: rounds,
-        match: matches,
-        match_game: []
-    };
-}
-
-async function renderBracket() {
-    const data = await fetchTournamentData();
-    if (!data) return;
-
-    const windowBracketsViewer = window.bracketsViewer;
-    if (!windowBracketsViewer) {
-        console.error('brackets-viewer library not found');
-        statusElement.innerText = 'Error: brackets-viewer library not found';
-        statusElement.className = 'p-4 rounded bg-red-50 border border-red-200 font-mono text-sm text-red-700';
+function renderBracket(tournament) {
+    if (!tournament || !tournament.rounds) {
+        console.error('Invalid tournament data');
         return;
     }
 
-    // Clear container completely
     const container = document.getElementById('bracket-container');
     container.innerHTML = '';
-    
-    // Remove any existing brackets-viewer classes/data
-    container.className = 'brackets-viewer w-full min-h-[500px]';
 
-    // Transform backend data to viewer format
-    console.log('Original tournament data:', data);
-    const transformedData = transformBackendDataToViewerFormat(data);
-    console.log('Transformed d  ata:', transformedData);
+    // Create header row with round titles
+    const headerRow = document.createElement('div');
+    headerRow.style.display = 'flex';
+    headerRow.style.gap = '4rem';
+    headerRow.style.paddingBottom = '1rem';
+    headerRow.style.position = 'absolute';
+    headerRow.style.top = '0';
+    headerRow.style.left = '0';
+    headerRow.style.width = '100%';
+    headerRow.style.zIndex = '2';
 
-    // Expose data for debugging in browser console
-    window.transformedDataForDebug = transformedData;
-
-    console.log('=== MATCH ARRAY BEFORE RENDER ===');
-    console.log('Total matches in array:', transformedData.match.length);
-    transformedData.match.forEach(m => {
-        console.log(`  - ID:${m.id}, Number:${m.number}, RoundID:${m.round_id}, ${m.opponent1?.name} vs ${m.opponent2?.name}`);
+    tournament.rounds.forEach((round) => {
+        const titleBox = document.createElement('div');
+        titleBox.style.minWidth = '280px';
+        titleBox.style.textAlign = 'center';
+        titleBox.style.fontWeight = 'bold';
+        titleBox.style.color = '#374151';
+        titleBox.style.fontSize = '0.95rem';
+        titleBox.textContent = `Round ${round.roundNumber}`;
+        headerRow.appendChild(titleBox);
     });
-    console.log('=== END MATCH ARRAY ===');
+    container.appendChild(headerRow);
 
-    // Transform data to flat structure with plural keys expected by brackets-viewer
-    const viewerData = {
-        stages: transformedData.stage || [],
-        matches: transformedData.match || [],
-        participants: transformedData.participant || [],
-        matchGames: transformedData.match_game || [],
-    };
+    const matchElements = {}; // Store match box elements for line drawing
 
-    // Ensure matches array has unique match IDs (keep first occurrence)
-    // This protects against duplicate entries from backend or transformation logic.
-    {
-        const seenIds = new Set();
-        const unique = [];
-        for (const m of viewerData.matches) {
-            if (!seenIds.has(m.id)) {
-                seenIds.add(m.id);
-                unique.push(m);
-            } else {
-                console.warn(`Filtering out duplicate match ID while preparing viewerData: ${m.id}`);
-            }
-        }
-        viewerData.matches = unique;
-    }
+    // Render each round as a column
+    tournament.rounds.forEach((round, roundIndex) => {
+        const roundColumn = document.createElement('div');
+        roundColumn.className = 'round-column' + (roundIndex === 0 ? ' first-round' : '');
 
-    // expose viewerData for console debugging
-    window.viewerDataForDebug = viewerData;
+        // Render matches in this round
+        const matchesContainer = document.createElement('div');
+        matchesContainer.className = 'matches-container';
 
-    console.log('Rendering bracket with viewer data:', viewerData);
-    console.log('Stages length:', viewerData.stages.length);
-    console.log('Matches length:', viewerData.matches.length);
-    console.log('Participants length:', viewerData.participants.length);
-    
-    // Check for duplicate matches
-    const matchIds = new Set();
-    const duplicates = [];
-    viewerData.matches.forEach(m => {
-        if (matchIds.has(m.id)) {
-            duplicates.push(m.id);
-        }
-        matchIds.add(m.id);
-    });
-    if (duplicates.length > 0) {
-        console.warn('DUPLICATE MATCH IDS FOUND:', duplicates);
-    }
-    
-    // Log all matches in detail
-    console.log('=== ALL MATCHES DETAILS ===');
-    console.log('Total matches in array:', viewerData.matches.length);
-    viewerData.matches.forEach((m, i) => {
-        console.log(`Array index ${i}: ID=${m.id}, Number=${m.number}, RoundID=${m.round_id}, Opponent1=(ID:${m.opponent1?.id} ${m.opponent1?.name}), Opponent2=(ID:${m.opponent2?.id} ${m.opponent2?.name})`);
-    });
-    console.log('=== END MATCHES DETAILS ===');
-    
-    // Log participants
-    console.log('=== PARTICIPANTS ===');
-    viewerData.participants.forEach((p, i) => {
-        console.log(`Index ${i}: ID=${p.id} Name=${p.name}`);
-    });
-    console.log('=== END PARTICIPANTS ===');
-
-    // Check if required arrays have data
-    if (!viewerData.stages.length) {
-        console.error('No stages data found');
-        statusElement.innerText = 'Error: No stages data found';
-        statusElement.className = 'p-4 rounded bg-red-50 border border-red-200 font-mono text-sm text-red-700';
-        return;
-    }
-
-    if (!viewerData.matches.length) {
-        console.error('No matches data found');
-        statusElement.innerText = 'Error: No matches data found';
-        statusElement.className = 'p-4 rounded bg-red-50 border border-red-200 font-mono text-sm text-red-700';
-        return;
-    }
-
-    // CRITICAL: Ensure no duplicate match IDs
-    const matchIdCount = {};
-    viewerData.matches.forEach(m => {
-        matchIdCount[m.id] = (matchIdCount[m.id] || 0) + 1;
-    });
-    const duplicateIds = Object.keys(matchIdCount).filter(id => matchIdCount[id] > 1);
-    if (duplicateIds.length > 0) {
-        console.error('CRITICAL ERROR: Duplicate match IDs found:', duplicateIds);
-        console.error('Match ID counts:', matchIdCount);
-        // Remove duplicates - keep only the first occurrence
-        const seenIds = new Set();
-        viewerData.matches = viewerData.matches.filter(m => {
-            if (seenIds.has(m.id)) {
-                console.warn(`Filtering out duplicate match ID ${m.id}`);
-                return false;
-            }
-            seenIds.add(m.id);
-            return true;
+        round.matches.forEach((match, index) => {
+            const matchBox = createMatchBox(match);
+            matchBox.dataset.matchId = match.id;
+            matchBox.dataset.roundIndex = roundIndex;
+            matchBox.dataset.matchIndex = index;
+            matchElements[match.id] = matchBox;
+            matchesContainer.appendChild(matchBox);
         });
-        console.log(`After filtering, ${viewerData.matches.length} unique matches remain`);
-    }
 
-    try {
-        console.log('Calling bracketsViewer.render with nested data...');
-        console.log('RENDER PAYLOAD:');
-        console.log('  Stages:', JSON.stringify(viewerData.stages, null, 2));
-        console.log('  Participants:', viewerData.participants.map(p => `${p.id}:${p.name}`));
-        console.log('  Matches count:', viewerData.matches.length);
-        viewerData.matches.forEach(m => {
-            console.log(`    Match ID=${m.id} Num=${m.number} RoundID=${m.round_id}: ${m.opponent1?.name}(${m.opponent1?.id}) vs ${m.opponent2?.name}(${m.opponent2?.id})`);
-        });
-        
-        // Log first round matches specifically (rounds are 1-based)
-        console.log('First round matches being rendered:');
-        // viewerData.matches.filter(m => m.round_id === 1).forEach(m => {
-        //     console.log(`  Match ${m.number}: ${m.opponent1?.name || 'null'} vs ${m.opponent2?.name || 'BYE'} (IDs: ${m.opponent1?.id} vs ${m.opponent2?.id})`);
-        // });
-        
-        // Use render with full data object structure
-        await windowBracketsViewer.render(
-            {
-                stages: viewerData.stages,
-                matches: viewerData.matches,
-                matchGames: viewerData.matchGames,
-                participants: viewerData.participants
-            },
-            {
-            selector: '#bracket-container',
-            participantOriginPlacement: 'none',
-            separatedChildCountWidth: 'draw',
-            showSlotsOrigin: false, // disable origin slots to prevent duplicate initial column
-            showLowerBracket: false,
-            showFinals: true,
-            connectFinal: true,
-            roundMargin: 24,
-            matchMargin: 24,
-        });
-        
-        console.log('Bracket render completed successfully');
-        statusElement.innerText = 'Bracket rendered successfully!';
-        statusElement.className = 'p-4 rounded bg-green-50 border border-green-200 font-mono text-sm text-green-700';
-    } catch (error) {
-        console.error('Error rendering bracket:', error);
-        statusElement.innerText = `Render Error: ${error.message}`;
-        statusElement.className = 'p-4 rounded bg-red-50 border border-red-200 font-mono text-sm text-red-700';
-    }
+        roundColumn.appendChild(matchesContainer);
+        container.appendChild(roundColumn);
+    });
+
+    // Draw connector lines after a short delay to ensure elements are rendered
+    setTimeout(() => {
+        drawConnectorLines(tournament, matchElements);
+    }, 0);
+
+    // Update tournament header info
+    updateTournamentInfo(tournament);
 }
 
-// Initial render
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, checking for brackets-viewer...');
-    console.log('window.bracketsViewer:', window.bracketsViewer);
-    
-    if (typeof window.bracketsViewer === 'undefined') {
-        console.error('brackets-viewer not loaded');
-        statusElement.innerText = 'Error: brackets-viewer library not loaded';
-        statusElement.className = 'p-4 rounded bg-red-50 border border-red-200 font-mono text-sm text-red-700';
-        return;
+function createMatchBox(match) {
+    const box = document.createElement('div');
+    box.className = 'match-box';
+
+    // Player 1 (left)
+    const player1Row = document.createElement('div');
+    player1Row.className = 'player-row';
+    if (match.winnerId === match.playerLeftId) {
+        player1Row.classList.add('winner');
     }
+
+    const player1Name = document.createElement('div');
+    player1Name.className = 'player-name';
+    player1Name.textContent = match.playerLeftUsername || '(Empty)';
+
+    const player1Score = document.createElement('div');
+    player1Score.className = 'player-score';
+    player1Score.textContent = match.playerLeftScore || 0;
+
+    player1Row.appendChild(player1Name);
+    player1Row.appendChild(player1Score);
+    box.appendChild(player1Row);
+
+    // Player 2 (right)
+    const player2Row = document.createElement('div');
     
-    console.log('brackets-viewer found, starting render...');
-    // Install a safe wrapper around bracketsViewer.render to remove duplicate
-    // `.match` elements created by the library during a single render pass.
-    // This prevents duplicate-first-round rows when the library inserts nodes
-    // multiple times (defensive; preserves original behavior otherwise).
-    try {
-        if (window.bracketsViewer && window.bracketsViewer.render && !window.__brackets_render_wrapper_installed) {
-            const _origRender = window.bracketsViewer.render.bind(window.bracketsViewer);
-            window.bracketsViewer.render = async function(payload, options) {
-                const result = await _origRender(payload, options);
-                // Some viewers perform incremental DOM insertion after the render
-                // promise resolves. Delay dedupe a bit so all insertions complete,
-                // then remove duplicate `.match` nodes (keep first occurrence).
-                try {
-                    setTimeout(() => {
-                        try {
-                            const container = document.getElementById('bracket-container');
-                            if (container) {
-                                const seen = new Set();
-                                const matches = Array.from(container.querySelectorAll('.match'));
-                                for (const el of matches) {
-                                    const id = el.getAttribute && el.getAttribute('data-match-id');
-                                    if (!id) continue;
-                                    if (seen.has(id)) el.remove(); else seen.add(id);
-                                }
-                            }
-                        } catch (e) {
-                            console.warn('Post-render delayed dedupe failed', e);
-                        }
-                    }, 50);
-                    // After dedupe, ensure first-round matches from the payload
-                    // are present in the DOM. Some viewers insert subsets and
-                    // later fill others; defensively add any missing first-round
-                    // matches using the payload data.
-                    try {
-                        setTimeout(() => {
-                            try {
-                                const container = document.getElementById('bracket-container');
-                                if (!container || !payload || !Array.isArray(payload.matches)) return;
-                                const existing = new Set(Array.from(container.querySelectorAll('.match')).map(el => el.getAttribute('data-match-id')));
-                                const round1Matches = payload.matches.filter(m => Number(m.round_id) === 1);
-                                const round1Article = container.querySelector('article.round[data-round-id="1"]');
-                                if (!round1Article) return;
-                                for (const m of round1Matches) {
-                                    const idStr = String(m.id);
-                                    if (existing.has(idStr)) continue;
-                                    // Build a minimal match element consistent with viewer markup
-                                    const matchEl = document.createElement('div');
-                                    matchEl.className = 'match connect-next';
-                                    matchEl.setAttribute('data-match-id', idStr);
-                                    matchEl.setAttribute('data-match-status', String(m.status || ''));
-                                    const oppHtml = (opp) => opp ? `<div class="participant ${opp.result === 'win' ? 'win' : 'loss'}" data-participant-id="${opp.id}" title="${(opp.name||'')}"><div class="name">${(opp.name||'')}</div><div class="result">${opp.score||0}</div></div>` : '';
-                                    const opponentsHtml = `<div class="opponents">${oppHtml(m.opponent1)}${oppHtml(m.opponent2)}</div>`;
-                                    matchEl.innerHTML = opponentsHtml;
-                                    round1Article.appendChild(matchEl);
-                                    console.log('Inserted missing first-round match DOM for id=', idStr);
-                                }
-                            } catch (e) { console.warn('Failed to insert missing first-round matches', e); }
-                        }, 120);
-                    } catch (e) { console.warn('Failed scheduling missing-match insert', e); }
-                } catch (e) {
-                    console.warn('Failed to schedule post-render dedupe', e);
+
+    player2Row.className = 'player-row';
+    if (match.winnerId === match.playerRightId) {
+        player2Row.classList.add('winner');
+    }
+
+    const player2Name = document.createElement('div');
+    player2Name.className = 'player-name';
+    player2Name.textContent = match.playerRightUsername || '(Empty)';
+
+    const player2Score = document.createElement('div');
+    player2Score.className = 'player-score';
+    player2Score.textContent = match.playerRightScore || 0;
+
+    player2Row.appendChild(player2Name);
+    player2Row.appendChild(player2Score);
+    
+    box.appendChild(player2Row);
+
+    // Match status
+    if (match.status === 'FINISHED') {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'match-status';
+        statusDiv.textContent = '✓ Finished';
+        box.appendChild(statusDiv);
+    }
+
+    return box;
+}
+
+function drawConnectorLines(tournament, matchElements) {
+    const svgElement = document.getElementById('connector-svg');
+    if (!svgElement) return;
+
+    const container = document.getElementById('bracket-svg-container');
+    const containerRect = container.getBoundingClientRect();
+
+    // Clear existing lines
+    svgElement.innerHTML = '';
+
+    // Draw lines between rounds
+    for (let roundIdx = 0; roundIdx < tournament.rounds.length - 1; roundIdx++) {
+        const currentRound = tournament.rounds[roundIdx];
+        const nextRound = tournament.rounds[roundIdx + 1];
+
+        currentRound.matches.forEach((currentMatch, currentIdx) => {
+            nextRound.matches.forEach((nextMatch, nextIdx) => {
+                // Find if there's a connection: current match's winner plays in next match
+                const currentWinner = currentMatch.winnerId;
+                const nextMatchHasWinner = 
+                    (nextMatch.playerLeftId === currentWinner) || 
+                    (nextMatch.playerRightId === currentWinner);
+
+                if (nextMatchHasWinner) {
+                    const fromBox = matchElements[currentMatch.id];
+                    const toBox = matchElements[nextMatch.id];
+
+                    if (fromBox && toBox) {
+                        const fromRect = fromBox.getBoundingClientRect();
+                        const toRect = toBox.getBoundingClientRect();
+
+                        // Calculate positions relative to SVG container
+                        const fromX = fromRect.right - containerRect.left;
+                        const fromY = fromRect.top - containerRect.top + fromRect.height / 2;
+                        const toX = toRect.left - containerRect.left;
+                        const toY = toRect.top - containerRect.top + toRect.height / 2;
+
+                        // Create path with curves
+                        const midX = fromX + (toX - fromX) / 2;
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('d', `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`);
+                        path.setAttribute('stroke', '#cbd5e1');
+                        path.setAttribute('stroke-width', '2');
+                        path.setAttribute('fill', 'none');
+                        path.setAttribute('stroke-linecap', 'round');
+
+                        svgElement.appendChild(path);
+                    }
                 }
-                return result;
-            };
-            window.__brackets_render_wrapper_installed = true;
-            console.log('Installed bracketsViewer.render wrapper (post-render dedupe)');
-        }
-    } catch (e) {
-        console.warn('Failed to install render wrapper', e);
+            });
+        });
     }
 
-    renderBracket();
-});
-
-// Reload button
-const reloadBtn = document.getElementById('reload-btn');
-if (reloadBtn) {
-    reloadBtn.addEventListener('click', () => {
-        renderBracket();
-    });
+    // Update SVG dimensions to fit all content
+    const containerRect2 = container.getBoundingClientRect();
+    svgElement.setAttribute('width', containerRect2.width);
+    svgElement.setAttribute('height', containerRect2.height);
 }
+
+function updateTournamentInfo(tournament) {
+    document.getElementById('tournament-name').textContent = tournament.name || 'Tournament';
+    document.getElementById('tournament-status').textContent = tournament.status || '-';
+    document.getElementById('tournament-participants').textContent = tournament.participantCount || '-';
+    document.getElementById('tournament-rounds').textContent = tournament.totalRounds || '-';
+    
+    // Find winner name from last round
+    const lastRound = tournament.rounds[tournament.rounds.length - 1];
+    if (lastRound && lastRound.matches.length > 0) {
+        const finalMatch = lastRound.matches[0];
+        if (finalMatch.winnerId === finalMatch.playerLeftId) {
+            document.getElementById('tournament-winner').textContent = finalMatch.playerLeftUsername || '-';
+        } else if (finalMatch.winnerId === finalMatch.playerRightId) {
+            document.getElementById('tournament-winner').textContent = finalMatch.playerRightUsername || '-';
+        }
+    }
+}
+
+async function initialize() {
+    const tournament = await fetchTournamentData();
+    if (tournament) {
+        renderBracket(tournament);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initialize);
