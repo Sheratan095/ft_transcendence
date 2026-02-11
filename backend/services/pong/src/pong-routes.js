@@ -539,14 +539,14 @@ const	testGetTournament =
 {
 	schema:
 	{
-		summary: 'Get torunament test bracket',
+		summary: 'Get tournament test bracket',
 		tags: ['Test'],
 
 		...withInternalAuth,
 
 		response:
 		{
-			200:{ ...TournamentBracket },
+			200: { ...TournamentBracket },
 			500: ErrorResponse
 		}
 	},

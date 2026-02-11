@@ -307,6 +307,79 @@ export const	testGetTournament = async (req, reply) =>
 {
 	try
 	{
+		// Create a test tournament
+		const	testTournament = tournamentManager.createTournament(
+			'Test Tournament',
+			'test-creator-id',
+			'TestCreator'
+		);
+
+		// Add test participants (6 + creator = 7 total, which will create a BYE match)
+		const	participants = [
+			{ userId: 'test-user-1', username: 'Alice' },
+			{ userId: 'test-user-2', username: 'Bob' },
+			{ userId: 'test-user-3', username: 'Charlie' },
+			{ userId: 'test-user-4', username: 'David' },
+			{ userId: 'test-user-5', username: 'Eve' },
+			{ userId: 'test-user-6', username: 'Frank' },
+		];
+		for (const participant of participants)
+			testTournament.addParticipant(participant.userId, participant.username);
+
+		// Start the tournament (this creates the first round with matches)
+		testTournament.startTournament();
+
+		// Simulate completion of first round matches
+		const	firstRoundMatches = testTournament.rounds[0];
+		for (const match of firstRoundMatches)
+		{
+			if (!match.isBye)
+			{
+				// Set match as finished with simulated scores
+				match.gameStatus = GameStatus.FINISHED;
+				match.scores[match.playerLeftId] = 11;
+				match.scores[match.playerRightId] = Math.floor(Math.random() * 10);
+				match.winnerId = match.playerLeftId; // Left player always wins
+				match.winner = { userId: match.playerLeftId, username: match.playerLeftUsername };
+				match.endedAt = new Date().toISOString();
+			}
+		}
+
+		// Advance to next round
+		testTournament._advanceToNextRound();
+
+		// Simulate completion of second round (semi-finals)
+		const	secondRoundMatches = testTournament.rounds[1];
+		for (const match of secondRoundMatches)
+		{
+			match.gameStatus = GameStatus.FINISHED;
+			match.scores[match.playerLeftId] = 11;
+			match.scores[match.playerRightId] = Math.floor(Math.random() * 10);
+			match.winnerId = match.playerLeftId;
+			match.winner = { userId: match.playerLeftId, username: match.playerLeftUsername };
+			match.endedAt = new Date().toISOString();
+		}
+
+		// Advance to final round
+		testTournament._advanceToNextRound();
+
+		// Simulate completion of final match
+		const	finalMatch = testTournament.rounds[2][0];
+		finalMatch.gameStatus = GameStatus.FINISHED;
+		finalMatch.scores[finalMatch.playerLeftId] = 11;
+		finalMatch.scores[finalMatch.playerRightId] = 10;
+		finalMatch.winnerId = finalMatch.playerLeftId;
+		finalMatch.winner = { userId: finalMatch.playerLeftId, username: finalMatch.playerLeftUsername };
+		finalMatch.endedAt = new Date().toISOString();
+
+		// Check if tournament is complete (should set status to FINISHED)
+		if (testTournament.isRoundComplete())
+			testTournament._advanceToNextRound();
+
+		// Get the bracket using the existing method
+		const	bracket = tournamentManager.getTournamentBracket(testTournament.id);
+
+		return (reply.code(200).send(bracket));
 	}
 	catch (err)
 	{
