@@ -1,0 +1,8 @@
+{
+  "content.profileDelete": "Delete",
+  "auth.signIn": "Sign in",
+  "auth.createAccount": "Create account",
+  "profile.chat": "Chat",
+  "profile.logout": "Logout",
+  "profile.2fa": "2FA"
+}

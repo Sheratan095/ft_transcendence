@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark overflow-hidden selection:bg-accent-orange dark:selection:bg-accent-pink selection:text-black dark:selection:text-white">
 
 <head>
 	<meta charset="UTF-8" />
@@ -9,7 +9,6 @@
 	<link href="./tailwind.css" rel="stylesheet" />
 	<script type="module" src="./src/main.ts"></script>
 </head>
-<html class="dark overflow-hidden selection:bg-accent-orange dark:selection:bg-accent-pink selection:text-black dark:selection:text-white">
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 	<div id="container-grid"
@@ -373,7 +372,8 @@
 									</button>
 									<!-- Delete account button -->
 									<button command="show-modal" commandfor="delete-dialog" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-red-500 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
-										Delete
+										<!-- { content.profileDelete } -->
+										<span data-i18n="content.profileDelete"></span>
 									</button>
 
 									<!-- Language selector -->

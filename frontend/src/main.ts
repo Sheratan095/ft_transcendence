@@ -16,10 +16,87 @@ import { initCardHoverEffect } from './lib/card';
 import ApexCharts from 'apexcharts';
 import { start } from './spa';
 
+// internalization dictionaries
+import { registerDictionary, setLocale, getLocale, t } from './lib/intlayer';
+import en from './i18n/en.json';
+import fr from './i18n/fr.json';
+import it from './i18n/it.json';
+
+registerDictionary('en', en);
+registerDictionary('fr', fr);
+registerDictionary('it', it);
+// set runtime locale from saved preference (fallback to 'en') and persist via any storage hook
+const _savedLanguage = localStorage.getItem('userLanguage') || 'en';
+setLocale(_savedLanguage);
+try { setLocaleInStorage && setLocaleInStorage(_savedLanguage); } catch {}
+
+// simple language selector handler: persist and reload to ensure full UI picks up the new locale
+document.addEventListener('DOMContentLoaded', () => {
+  // hydrate existing DOM and template contents once on load
+  function hydrateRoot(root: ParentNode = document) {
+    const nodes = Array.from((root as any).querySelectorAll('[data-i18n]') as HTMLElement[]);
+    nodes.forEach(el => {
+      const key = el.dataset.i18n!;
+      const rawVars = el.dataset.i18nVars || '{}';
+      let vars = {};
+      try { vars = JSON.parse(rawVars); } catch {}
+      try {
+        const val = t(key, vars as Record<string, string|number>);
+        el.textContent = val;
+      } catch (err) {
+        // leave the key if translation fails
+        el.textContent = key;
+      }
+    });
+  }
+
+  function hydrateOnce() {
+    hydrateRoot(document);
+    document.querySelectorAll('template').forEach(tpl => hydrateRoot((tpl as HTMLTemplateElement).content));
+  }
+
+  hydrateOnce();
+  const locales = [
+    { code: 'en', label: 'English' },
+    { code: 'fr', label: 'Français' },
+    { code: 'it', label: 'Italiano' }
+  ];
+  const langSelect = document.getElementById('profile-language') as HTMLSelectElement | null;
+  if (!langSelect) return;
+
+  // populate selector and set current value
+  langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
+  langSelect.value = _savedLanguage;
+
+  langSelect.addEventListener('change', () => {
+    const v = langSelect.value;
+    setLocale(v);
+    try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
+    try { localStorage.setItem('userLanguage', v); } catch {}
+    // reload page so all templates/renderers pick up the new language
+    window.location.reload();
+  });
+});
+
 // Make ApexCharts globally available for UserCardCharts
 if (typeof window !== 'undefined') {
   (window as any).ApexCharts = ApexCharts;
 }
+
+// Delegated fallback: catch change events for dynamically-inserted #profile-language selects
+document.addEventListener('change', (e) => {
+  const target = e.target as Element | null;
+  if (!target) return;
+  if (!(target instanceof HTMLSelectElement)) return;
+  if (target.id !== 'profile-language') return;
+
+  const v = target.value;
+  setLocale(v);
+  try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
+  try { localStorage.setItem('userLanguage', v); } catch {}
+  // reload to ensure all templates/renderers pick up the new locale
+  window.location.reload();
+});
 
 main(window.location.pathname);
 
@@ -33,8 +110,15 @@ start();
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
 setLocaleInStorage(savedLanguage);
 
+  // IMPORTANT: set the runtime translator locale so t(...) uses it
+setLocale(savedLanguage);
+
 console.log(savedLanguage);
 
+try { setLocaleInStorage && setLocaleInStorage(savedLanguage); } catch {}
+
+
+  console.log('[main] startup locale set to', getLocale());
 getIntlayer("app"); // Initialize intlayer
 
 initTheme(); // add theme
