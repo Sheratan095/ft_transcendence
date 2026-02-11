@@ -1,10 +1,7 @@
 const TOURNAMENT_TEST_URL = 'https://localhost:3000/pong/tournaments/test';
 
 async function fetchTournamentData() {
-    const statusElement = document.getElementById('status');
     try {
-        statusElement.innerText = 'Fetching tournament data...';
-        statusElement.className = 'p-4 rounded bg-blue-50 border border-blue-200 font-mono text-sm text-blue-700';
         
         console.log('Fetching from:', TOURNAMENT_TEST_URL);
         const response = await fetch(TOURNAMENT_TEST_URL, {
@@ -19,14 +16,9 @@ async function fetchTournamentData() {
         const data = await response.json();
         console.log('Tournament data received:', data);
         
-        statusElement.innerText = 'Data received successfully ✓';
-        statusElement.className = 'p-4 rounded bg-green-50 border border-green-200 font-mono text-sm text-green-700';
-        
         return data;
     } catch (error) {
         console.error('Error fetching tournament data:', error);
-        statusElement.innerText = `Error: ${error.message}`;
-        statusElement.className = 'p-4 rounded bg-red-50 border border-red-200 font-mono text-sm text-red-700';
         return null;
     }
 }
@@ -46,7 +38,7 @@ function renderBracket(tournament) {
 
     tournament.rounds.forEach((round) => {
         const titleBox = document.createElement('div');
-        titleBox.className = 'min-w-[280px] text-center font-bold text-gray-700 text-sm';
+        titleBox.className = 'min-w-[280px] text-center font-bold text-[var(--text)] text-sm';
         titleBox.textContent = `Round ${round.roundNumber}`;
         headerRow.appendChild(titleBox);
     });
@@ -87,21 +79,22 @@ function renderBracket(tournament) {
 
 function createMatchBox(match) {
     const box = document.createElement('div');
-    box.className = 'border border-slate-300 rounded bg-white shadow-sm overflow-hidden min-w-[250px] relative';
+    box.className = 'rounded shadow-sm overflow-hidden min-w-[250px] relative';
+
 
     // Player 1 (left)
     const player1Row = document.createElement('div');
-    player1Row.className = 'flex justify-between items-center px-4 py-3 border-b border-gray-200 text-sm';
+    player1Row.className = 'flex justify-between items-center px-4 py-3 text-sm';
     if (match.winnerId === match.playerLeftId) {
-        player1Row.className += ' bg-blue-100 font-semibold';
+        player1Row.className += ' bg-[var(--winner-bg)] font-semibold';
     }
 
     const player1Name = document.createElement('div');
-    player1Name.className = 'flex-1 overflow-hidden text-ellipsis whitespace-nowrap';
+    player1Name.className = 'flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[var(--winner-text)]';
     player1Name.textContent = match.playerLeftUsername || '(Empty)';
 
     const player1Score = document.createElement('div');
-    player1Score.className = 'font-semibold min-w-[2rem] text-right ml-4';
+    player1Score.className = 'font-semibold min-w-[2rem] text-right ml-4 text-[var(--winner-text)]';
     player1Score.textContent = match.playerLeftScore || 0;
 
     player1Row.appendChild(player1Name);
@@ -110,9 +103,9 @@ function createMatchBox(match) {
 
     // Player 2 (right)
     const player2Row = document.createElement('div');
-    player2Row.className = 'flex justify-between items-center px-4 py-3 text-sm';
+    player2Row.className = 'flex bg-[var(--match-bg)] justify-between items-center px-4 py-3 text-[var(--loser-text)] text-sm';
     if (match.winnerId === match.playerRightId) {
-        player2Row.className += ' bg-blue-100 font-semibold';
+        player2Row.className += ' font-semibold';
     }
 
     const player2Name = document.createElement('div');
@@ -120,7 +113,7 @@ function createMatchBox(match) {
     player2Name.textContent = match.playerRightUsername || '(Empty)';
 
     const player2Score = document.createElement('div');
-    player2Score.className = 'font-semibold min-w-[2rem] text-right ml-4';
+    player2Score.className = 'font-semibold min-w-[2rem] text-right ml-4 text-[var(--loser-score)]';
     player2Score.textContent = match.playerRightScore || 0;
 
     player2Row.appendChild(player2Name);
@@ -131,7 +124,7 @@ function createMatchBox(match) {
     // Match status
     if (match.status === 'FINISHED') {
         const statusDiv = document.createElement('div');
-        statusDiv.className = 'text-xs text-gray-500 text-center px-4 py-2 bg-gray-50';
+        statusDiv.className = 'text-xs text-[var(--match-status)] text-center px-4 py-2 bg-[var(--match-bg)]';
         statusDiv.textContent = '✓ Finished';
         box.appendChild(statusDiv);
     }
@@ -225,3 +218,26 @@ async function initialize() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', initialize);
+
+// Theme toggle
+function initThemeToggle() {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+
+    // Load saved theme or default to light
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+        toggle.textContent = '☀️ Light Mode';
+    }
+
+    toggle.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        toggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initThemeToggle();
+});

@@ -5,10 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tournament Bracket</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root{
+            --header: #0C89C1;
+            --bg: #f0f0f0;
+            --card: #ffffff;
+            --text: #000000;
+            --muted: #6b7280;
+            --stroke: #cbd5e1;
+            --match-bg: #c9c9c94d;
+            --winner-text: #ffffff;
+            --loser-text: #000000;
+            --match-status: #000000;
+            --winner-bg: #ff6b35;
+            --loser-score: #ff0000;
+        }
+        .dark{
+            --header: #ff009d;
+            --bg: #000000;
+            --card: #ffffff;
+            --text: #ffffff;
+            --muted: #6b7280;
+            --stroke: #cbd5e1;
+            --match-bg: #404040;
+            --winner-text: #000000;
+            --loser-text: #ffffff;
+            --match-status: #ffffff;
+            --winner-bg: #0dff66;
+            --loser-score: #ff0000;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class=" bg-[var(--bg)] min-h-screen">
     <div class="max-w-full p-6">
-        <div class="bg-gradient-to-br from-indigo-500 to-purple-700 text-white p-8 rounded-lg mb-8">
+        <button id="theme-toggle" class="fixed top-6 right-6 z-50 px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+            🌙 Dark Mode
+        </button>
+        <div class="bg-[var(--header)] text-white p-8 rounded-lg mb-8">
             <h1 id="tournament-name" class="text-3xl font-bold">Tournament</h1>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
                 <div>
@@ -30,19 +64,13 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-lg p-6   ">
+        <div class="rounded-lg shadow-lg p-6   ">
             <div id="bracket-svg-container" class="relative">
                 <svg id="connector-svg" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></svg>
                 <div id="bracket-container" class="flex gap-9 overflow-x-auto px-2 relative pt-0 pb-0 items-center min-h-screen"></div>
             </div>
         </div>
 
-        <div class="mt-8 bg-white rounded-lg shadow-lg">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">Status</h2>
-            <div id="status" class="rounded bg-blue-50 border border-blue-200 font-mono text-sm text-blue-700">
-                Loading...
-            </div>
-        </div>
     </div>
 
     <script src="./index.js"></script>
