@@ -44,10 +44,10 @@
 		<form class="w-full px-[12vw] mx-auto z-30 hidden" id="search-user-form" title="search other users to play with">
 			<div class="flex shadow-xs rounded-base -space-x-1">
 				<input type="search" id="search-user-input"
-					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-gray-300 text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
+					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-accent-green text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
 					placeholder="Search for users..." required>
 				<button type="button"
-					class="inline-flex items-center text-black font-bold bg-accent-orange dark:bg-accent-green rounded-r-xl bg-brand hover:bg-brand-strong border-l-0 box-border border border-gray-700 dark:border-gray-300 focus:ring-4 focus:ring-brand-medium shadow-xs leading-5 rounded-e-base bx-10 text-sm px-4 py-2.5 focus:outline-none">
+					class="inline-flex items-center text-black font-bold bg-accent-orange dark:bg-accent-green rounded-r-xl bg-brand hover:bg-brand-strong border-l-0 box-border border border-gray-700 dark:border-accent-green focus:ring-4 focus:ring-brand-medium shadow-xs leading-5 rounded-e-base bx-10 text-sm px-4 py-2.5 focus:outline-none">
 					<svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
 						height="24" fill="none" viewBox="0 0 24 24">
 						<path stroke="currentColor" stroke-linecap="round" stroke-width="2"
@@ -549,8 +549,8 @@
 	class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 rounded-xl
 				 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
 >
-	<div class="relative p-4 w-full max-w-4xl rounded-2xl max-h-full">
-		<div class="relative bg-white dark:bg-gray-900 border-2 border-gray-800 dark:border-gray-300 rounded-2xl 
+	<div class="relative p-4 w-full max-w-4xl max-h-full">
+		<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden
 					shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] 
 					hover:shadow-lg dark:hover:shadow-lg transition-all duration-300 h-[80vh] flex flex-col md:flex-row">
 
@@ -571,13 +571,13 @@
 			</button>
 
 			<!-- Sidebar with chat list -->
-			<div class="w-80 bg-gray-100 dark:bg-gray-800 border-r-2 border-gray-800 dark:border-gray-300 flex flex-col">
+			<div class="w-80 bg-gray-100 dark:bg-gray-800 rounded-l-2xl border-r-2 border-gray-800 dark:border-gray-300 flex flex-col">
 				<div class="p-4 border-b-2 border-gray-800 dark:border-gray-300">
 					<h3 class="text-lg font-bold text-black dark:text-white uppercase tracking-tight">Chats</h3>
 					<button
 						id="create-group-btn"
 						class="mt-3 w-full bg-accent-orange dark:bg-accent-green text-black px-4 py-2 rounded-lg font-extrabold text-sm 
-								hover:brightness-90 dark:hover:brightness-110 transition-all duration-200 uppercase tracking-tight border-2 border-gray-800 dark:border-gray-300"
+								hover:brightness-90 dark:hover:brightness-110 transition-all duration-200 uppercase tracking-tight"
 					>
 						+ Create Group
 					</button>
@@ -588,9 +588,9 @@
 			</div>
 
 			<!-- Main chat area -->
-			<div class="flex-1 flex flex-col bg-white rounded-r-2xl dark:bg-gray-900">
+			<div class="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-tr-2xl">
 				<!-- Chat header -->
-				<div class="p-4 border-b-2 border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+				<div class="p-4 border-b-2 rounded-tr-2xl border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
 					<h2 id="chat-header" class="text-xl font-bold text-black dark:text-white uppercase tracking-tight">Select a chat</h2>
 					<button
 						id="leave-group-btn"
@@ -629,7 +629,7 @@
 						<button
 							id="chat-send-btn"
 							class="bg-accent-orange dark:bg-accent-green text-black font-extrabold px-4 py-2 rounded-lg 
-									hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight border-2 border-gray-800 dark:border-gray-300"
+									hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight"
 						>
 							Send
 						</button>

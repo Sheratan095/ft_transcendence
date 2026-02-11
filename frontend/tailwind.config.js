@@ -11,6 +11,7 @@ module.exports = {
       colors: {
         'accent-pink': '#ff009d',
         'accent-green': '#0dff66',
+        'dark-green': '#16C760',
         'accent-cyan': '#00ffff',
         'accent-orange': '#ff6b35',
         'accent-blue': '#00a8e8',

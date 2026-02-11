@@ -100,12 +100,16 @@ function renderChatList() {
     chatItem.onclick = () => selectChat(chat.id);
 
     const chatName = document.createElement('div');
-    chatName.className = 'chat-item-name';
+    chatName.className = 'chat-item-name text-size-lg font-medium';
     chatName.textContent = getChatDisplayName(chat);
 
     const chatType = document.createElement('div');
-    chatType.className = 'chat-item-type';
-    chatType.textContent = chat.chatType === 'dm' ? 'Direct Message' : 'Group Chat';
+    // Use Tailwind utility classes to color the chat type label differently for DM vs Group
+    chatType.className = 'chat-item-type text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
+    if (chat.chatType === 'dm')
+      chatType.textContent = 'Direct Message';
+    else
+      chatType.textContent = 'Group Chat';
 
     // Add unread badge if there are unread messages
     const unreadCount = unreadCounts.get(chat.id) || 0;
@@ -246,10 +250,9 @@ export async function renderMessages() {
     const isPrivate = msg.isPrivate || false;
     const isSystem = msg.isSystem || senderId === 'system' || senderId === null;
 
-    // Handle system messages
+    // Handle system messages (use Tailwind for color)
     if (isSystem) {
-      messageDiv.className = 'message message-system';
-      if (isLightMode) messageDiv.classList.add('light');
+      messageDiv.className = 'message message-system self-center bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
       messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
       messagesContainer.appendChild(messageDiv);
       return;
@@ -258,15 +261,21 @@ export async function renderMessages() {
     // Compare as strings since backend returns string IDs
     const isSent = String(senderId) === String(currentUserId);
 
-    // Determine message class based on type and sender
-    let messageClass = 'message ';
+    // Determine message class based on type and sender using Tailwind utilities
+    // Base layout classes
+    const baseClasses = 'message px-3 py-2 rounded-lg max-w-[70%] break-words';
+    let variantClasses = '';
     if (isPrivate) {
-      messageClass += isSent ? 'message-private-sent' : 'message-private-received';
+      variantClasses = isSent
+        ? 'self-end bg-purple-700 text-white border-l-4 border-purple-300'
+        : 'self-start bg-purple-900 text-amber-100 border-l-4 border-purple-700';
     } else {
-      messageClass += isSent ? 'message-sent' : 'message-received';
+      variantClasses = isSent
+        ? 'self-end bg-green-600 text-white'
+        : 'self-start bg-gray-700 text-gray-100';
     }
-    messageDiv.className = messageClass;
-    if (isLightMode) messageDiv.classList.add('light');
+
+    messageDiv.className = `${baseClasses} ${variantClasses}`;
 
     let statusText = '';
     if (isSent && messageStatus) {

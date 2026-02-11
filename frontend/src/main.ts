@@ -2,6 +2,7 @@ import { fetchUserProfile, getUserId, logout } from './lib/auth';
 import { isLoggedInClient, startTokenRefresh } from './lib/token';
 import { attachUserOptions } from './components/profile/profile';
 import { setupChatEventListeners, initChat } from './components/chat/chat';
+import { initFloatingButton } from './components/chat/ChatButton';
 import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
@@ -40,7 +41,7 @@ getIntlayer("app"); // Initialize intlayer
 
 initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
-if (isLoggedInClient()) initUserServices();
+if (isLoggedInClient()) initUserServices(path);
 
 }
 
@@ -109,7 +110,7 @@ function modifyIndex()
   }
 }
 
-function initUserServices()
+function initUserServices(path: string)
 {
 	const userId = getUserId();
 	if (!userId)
@@ -118,6 +119,7 @@ function initUserServices()
   startTokenRefresh();
   modifyIndex();
   setupChatEventListeners();
+  initFloatingButton();
   connectNotificationsWebSocket();
   setupSearchUser();
   attachUserOptions();
