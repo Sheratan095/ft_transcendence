@@ -1,6 +1,5 @@
-import type { User } from '../lib/auth';
-import { initChat } from './chat';
-import { renderProfileCard } from '../components/profile';
+import type { User } from '../../lib/auth';
+import { initChat } from '../chat/chat';
 
 export async function attachUserOptions() {
 	const userOptions = document.getElementById('user-options') as HTMLElement | null;

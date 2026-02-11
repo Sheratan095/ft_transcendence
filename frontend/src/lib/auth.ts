@@ -2,7 +2,7 @@ import { stopTokenRefresh } from './token';
 
 export interface User {
 	id: string;
-	UserId: string;
+	userId: string;
     username: string;
     email: string;
 	language?: string;
@@ -68,8 +68,6 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
     
     // Ensure UserId field matches id for compatibility
     (user as any).UserId = user.id;
-    
-    console.log('Fetched user profile:', user);
     return user;
   } catch (error) {
     console.error('Error fetching profile:', error);

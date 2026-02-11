@@ -1,4 +1,3 @@
-import { goToRoute } from '../../spa';
 import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
 import { attachRegister } from './RegisterForm';
 import { SaveCurrentUserProfile } from '../../lib/auth';
@@ -54,21 +53,14 @@ export function attachLogin(): void {
 
 		try {
 			const body = await loginRequest(username, password);
-			console.log('Login response:', body);
-
-			if (body && body.user) {
-				try {
-					if (body.user.id) await SaveCurrentUserProfile(body.user.id);
-					if (body.user.TfaEnabled) {
-						hideLogin();
-						attach2FA();
-						return;
-					}
-				} catch (e) {
-					// ignore storage errors
-				}
+			if (body && body.tfaRequired) {
+				localStorage.setItem('userId', body.userId);
+				hideLogin();
+				attach2FA();
+				return;
 			}
-
+			if (body && body.user.id) localStorage.setItem('userId', body.user.id);
+			if (body && body.user && body.user.id) await SaveCurrentUserProfile(body.user.id);
 			showSuccess(errorEl, 'Signed in successfully.');
 			setTimeout(() => window.location.href = '/profile', 400);
 		} catch (err) {

@@ -1,4 +1,4 @@
-import { goToRoute } from '../../spa';
+import { SaveCurrentUserProfile } from '../../lib/auth';
 import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
 
 export interface TwoFactorFormCallbacks {
@@ -14,10 +14,11 @@ export function attach2FA(callbacks?: TwoFactorFormCallbacks): void {
   const form = document.getElementById('2fa-form') as HTMLFormElement | null;
   if (!form) return;
 
+  const section = document.getElementById('2fa-section');
+  if (section) section.classList.remove('hidden');
   const pinContainer = form.querySelector('[data-pin-input]') as HTMLElement | null;
   const otpInputs = pinContainer ? Array.from(pinContainer.querySelectorAll('input')) as HTMLInputElement[] : [];
   const authErrorEl = document.getElementById('2fa-error') as HTMLElement | null;
-  const backLink = form.querySelector('a[href="#"]') as HTMLAnchorElement | null;
 
   if (otpInputs.length === 0) return;
 
@@ -34,13 +35,6 @@ export function attach2FA(callbacks?: TwoFactorFormCallbacks): void {
       if (e.key === 'Backspace' && !input.value && idx > 0) otpInputs[idx - 1].focus();
     });
   });
-
-  if (backLink) {
-    backLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      goToRoute('/login');
-    });
-  }
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -69,6 +63,7 @@ export function attach2FA(callbacks?: TwoFactorFormCallbacks): void {
       });
 
       const body = await res.json().catch(() => null);
+	  if (body && body.user) await SaveCurrentUserProfile(body.user);
       if (res.ok) {
         showSuccess(errorEl, '2FA verified successfully!');
         setTimeout(() => window.location.href = '/profile', 400);

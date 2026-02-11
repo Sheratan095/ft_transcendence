@@ -1,4 +1,4 @@
-import { goToRoute } from '../../spa';
+import { SaveCurrentUserProfile } from '../../lib/auth';
 import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
 import { attachLogin } from './LoginForm';
 
@@ -66,9 +66,8 @@ export function attachRegister(callbacks?: RegisterFormCallbacks): void {
       if (res.ok) {
         if (body?.user?.id) {
           try {
-            localStorage.setItem('userId', String(body.user.id));
-            localStorage.setItem('user', JSON.stringify(body.user));
-            localStorage.setItem('tfaEnabled', body.user.TfaEnabled ? 'true' : 'false');
+				if (body && body.user.id) localStorage.setItem('userId', body.user.id);
+				if (body && body.user) await SaveCurrentUserProfile(body.user);
           } catch (e) {
             // ignore storage
           }
