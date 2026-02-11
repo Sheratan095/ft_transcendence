@@ -61,11 +61,9 @@ export async function createGameStatsChart(
     }
   }
 
-  const total = wins + losses;
-
   const options = {
     series: [wins, losses],
-    colors: [gameType === 'tris' ? '#0dff66' : '#00bcd4', '#ef4444'],
+    colors: ['#0dff66', '#ef4444'],
     chart: {
       height: '100%',
       width: '100%',
