@@ -1,35 +1,57 @@
 import { isLoggedInClient } from './lib/auth';
 import { renderProfile } from './lib/profile';
 import { logout } from './lib/token';
+import { attachLogin } from './components/auth/LoginForm';
+import { showErrorToast } from './components/shared';
 
 type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
   '/': { 
     render: async () => {
-      const el = document.getElementById('main-content');
-      if (!el) return;
-      if (!isLoggedInClient()) {
-		logout();
-        return;
-      }
-      el.innerHTML = '';
-      await renderProfile(el);
+
     }
   },
-  '/login': { 
-    render: async () => {
-      const el = document.getElementById('main-content');
-      if (!el) return;
-      el.innerHTML = '';
-      //renderLogin(el);
-    }
+  '/login': {
+  render: async () => {
+	if (isLoggedInClient()) {
+		showErrorToast('Already logged in');
+		return;
+	}
+    const el = document.getElementById('main-content');
+    const template = document.getElementById('login-template') as HTMLTemplateElement | null;
+
+    if (!el || !template) return;
+
+    el.innerHTML = '';
+
+    const clone = template.content.cloneNode(true);
+    el.appendChild(clone);
+
+    attachLogin();
+  }
   },
-  '/profile': { 
+  '/profile': {
     render: async () => {
-      const el = document.getElementById('main-content');
-      if (!el) return;
-      el.innerHTML = '';
-      await renderProfile(el);
+    const template = document.getElementById('profile-template') as HTMLTemplateElement | null;
+    const el = document.getElementById('main-content');
+    if (!el || !template) return;
+    if (!isLoggedInClient()) {
+    goToRoute('/login');
+    showErrorToast('Please sign in to view your profile');
+    return;
+    }
+    el.innerHTML = '';
+
+    const clone = template.content.cloneNode(true);
+    el.appendChild(clone);
+
+    // Populate profile content using renderProfile
+    try {
+    const content = el.querySelector('#profile-content') as HTMLElement | null;
+    await renderProfile(content ?? el);
+    } catch (err) {
+    console.error('Failed to render profile:', err);
+    }
     }
   },
   '/pong': { 
@@ -61,7 +83,6 @@ const routes: Record<string, RouteConfig> = {
     }
   }
 };
-
 // Navigation history for detecting back/forward
 let navigationHistory: string[] = [];
 let isBackNavigation = false;
@@ -98,17 +119,13 @@ async function renderRoute(path: string) {
       await route.render();
     };
     
-    // Check if View Transitions API is supported
     if (document.startViewTransition) {
       const transition = document.startViewTransition(transitionFn);
-      // Set animation direction on document for CSS to consume
       document.documentElement.dataset.transitionDirection = isBackNavigation ? 'back' : 'forward';
       
       await transition.finished;
-      // Clean up the attribute after transition completes
       delete document.documentElement.dataset.transitionDirection;
     } else {
-      // Fallback for browsers that don't support View Transitions API
       await transitionFn();
     }
   } catch (err) {
@@ -142,9 +159,7 @@ export async function start() {
   }
   linkify();
   window.addEventListener('popstate', () => renderRoute(location.pathname));
-  // Decide initial route: if user not logged in, show login
   let initial = location.pathname || '/';
-  if (initial === '/' && !isLoggedInClient()) initial = '/login';
   await renderRoute(initial);
 }
 

@@ -1,97 +1,64 @@
-import { createFormInput } from '../shared/FormInput';
-import { createCard } from '../shared/Card';
-import { createButton } from '../shared/Button';
-import { createErrorContainer, showError, showSuccess, showLoading } from '../shared/ErrorMessage';
 import { goToRoute } from '../../spa';
+import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
 
 export interface TwoFactorFormCallbacks {
-  onBackClick: () => void;
+  onBackClick?: () => void;
 }
 
-export function createTwoFactorForm(callbacks: TwoFactorFormCallbacks): { form: HTMLFormElement; card: HTMLDivElement } {
-  const card = createCard({ shadowColor: '#0dff66' });
-  const form = document.createElement('form');
-  form.id = '2fa-form';
-  form.noValidate = true;
-  form.className = 'w-full max-w-2xl space-y-4';
+export function createTwoFactorForm(callbacks?: TwoFactorFormCallbacks): void {
+  // compatibility shim - attach to existing DOM
+  attach2FA(callbacks);
+}
 
-  // Title
-  const title = document.createElement('h1');
-  title.className = 'text-3xl font-bold text-left mb-2 text-white';
-  title.textContent = 'Two-Factor Authentication';
+export function attach2FA(callbacks?: TwoFactorFormCallbacks): void {
+  const form = document.getElementById('2fa-form') as HTMLFormElement | null;
+  if (!form) return;
 
-  // Description
-  const desc = document.createElement('p');
-  desc.className = 'text-xl text-neutral-400 mb-4 text-left';
-  desc.textContent = 'Enter the 6-digit code sent to your email.';
+  const pinContainer = form.querySelector('[data-pin-input]') as HTMLElement | null;
+  const otpInputs = pinContainer ? Array.from(pinContainer.querySelectorAll('input')) as HTMLInputElement[] : [];
+  const authErrorEl = document.getElementById('2fa-error') as HTMLElement | null;
+  const backLink = form.querySelector('a[href="#"]') as HTMLAnchorElement | null;
 
-  // OTP code input
-  const { wrapper: otpWrap, input: otpInput } = createFormInput({
-    id: 'otp-code',
-    name: 'otpCode',
-    label: '2FA Code',
-    type: 'text',
-    placeholder: '000000',
-    inputMode: 'numeric',
-    maxLength: 6,
-    focusRingColor: '#0dff66'
-  });
-  
-  // Add special styling for OTP input
-  otpInput.className = 'w-full bg-neutral-800 border border-neutral-700 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-[#0dff66] text-center text-2xl tracking-widest';
+  if (otpInputs.length === 0) return;
 
-  // Submit button
-  const submit = createButton({
-    text: 'Verify',
-    color: '#0dff66'
+  const errorEl = authErrorEl ?? createErrorContainer();
+
+  // Wire up input navigation
+  otpInputs.forEach((input, idx) => {
+    input.addEventListener('input', (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.value.length > 1) target.value = target.value[0];
+      if (target.value && idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && idx > 0) otpInputs[idx - 1].focus();
+    });
   });
 
-  // Footer with back link
-  const footer = document.createElement('div');
-  footer.className = 'mt-4 text-xl text-neutral-400 text-center';
-  const backLink = document.createElement('a');
-  backLink.id = 'back-to-login';
-  backLink.href = '#';
-  backLink.className = 'text-[#0dff66] hover:underline';
-  backLink.textContent = 'Back to login';
-  footer.appendChild(backLink);
-
-  // Error container
-  const authError = createErrorContainer();
-
-  // Assemble form
-  form.appendChild(title);
-  form.appendChild(desc);
-  form.appendChild(otpWrap);
-  form.appendChild(submit);
-  form.appendChild(footer);
-
-  // Assemble card
-  card.appendChild(form);
-  card.appendChild(authError);
-
-  // Setup event listeners
-  backLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    callbacks.onBackClick();
-  });
+  if (backLink) {
+    backLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      goToRoute('/login');
+    });
+  }
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    showLoading(authError, 'Verifying...');
-    
-    const otpCode = otpInput.value.trim();
+    hideError(errorEl);
 
-    if (!otpCode || otpCode.length !== 6) {
-      showError(authError, 'Enter a 6-digit code.');
+    const otpCode = otpInputs.map(i => i.value.trim()).join('');
+    if (!otpCode || otpCode.length !== otpInputs.length) {
+      showError(errorEl, 'Enter a complete verification code.');
       return;
     }
 
     const userId = localStorage.getItem('userId');
     if (!userId) {
-      showError(authError, 'TFA failed.');
+      showError(errorEl, '2FA failed.');
       return;
     }
+
+    showLoading(errorEl, 'Verifying...');
 
     try {
       const res = await fetch(`/api/auth/2fa`, {
@@ -103,16 +70,23 @@ export function createTwoFactorForm(callbacks: TwoFactorFormCallbacks): { form: 
 
       const body = await res.json().catch(() => null);
       if (res.ok) {
-        console.log('2FA verification successful:', body);
-        showSuccess(authError, '2FA verified successfully!');
-        setTimeout(() => { goToRoute('/'); }, 600);
+        showSuccess(errorEl, '2FA verified successfully!');
+        setTimeout(() => window.location.href = '/profile', 400);
       } else {
-        showError(authError, (body && (body.message || body.error)) || `Verification failed (${res.status})`);
+        showError(errorEl, (body && (body.message || body.error)) || `Verification failed (${res.status})`);
       }
     } catch (err) {
-      showError(authError, (err as Error).message || 'Network error');
+      showError(errorEl, (err as Error).message || 'Network error');
     }
   });
+}
 
-  return { form, card };
+export function hide2FA(): void {
+  const form = document.getElementById('2fa-form') as HTMLFormElement | null;
+  if (form) {
+    form.style.display = 'none';
+    form.reset();
+  }
+  const errorEl = document.getElementById('2fa-error') as HTMLElement | null;
+  if (errorEl) errorEl.style.display = 'none';
 }

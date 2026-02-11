@@ -1,107 +1,58 @@
-import { createFormInput } from '../shared/FormInput';
 import { goToRoute } from '../../spa';
-import { createButton } from '../shared/Button';
-import { createErrorContainer, showError, showSuccess, showLoading } from '../shared/ErrorMessage';
+import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
+import { attachLogin } from './LoginForm';
 
 export interface RegisterFormCallbacks {
-  onLoginClick: () => void;
+  onLoginClick?: () => void;
 }
 
-export function createRegisterForm(callbacks: RegisterFormCallbacks): void {
-  const form = document.createElement('form');
-  form.id = 'register-form';
-  form.noValidate = true;
-  form.className = 'w-full max-w-2xl space-y-4';
+export function createRegisterForm(callbacks?: RegisterFormCallbacks): void {
+  // compatibility shim - attach to existing DOM
+  attachRegister(callbacks);
+}
 
-  // Title
-  const title = document.createElement('h1');
-  title.className = 'text-3xl font-bold text-left mb-2 text-white';
-  title.textContent = 'Register';
+export function attachRegister(callbacks?: RegisterFormCallbacks): void {
+  const form = document.getElementById('register-form') as HTMLFormElement | null;
+  if (!form) return;
 
-  // Description
-  const desc = document.createElement('p');
-  desc.className = 'text-xl text-neutral-400 mb-4 text-left';
-  desc.textContent = 'Create a new account below.';
+  const registerSection = document.getElementById('register-section');
+  if (registerSection) registerSection.classList.remove("hidden");
+  // ensure the form itself is visible (in case it was hidden individually)
+  form.classList.remove('hidden');
+  if (form.dataset.attached === 'true') return;
+  form.dataset.attached = 'true';
+  const usernameInput = document.getElementById('register-username') as HTMLInputElement | null;
+  const emailInput = document.getElementById('register-email') as HTMLInputElement | null;
+  const passwordInput = document.getElementById('register-password') as HTMLInputElement | null;
+  const authErrorEl = document.getElementById('register-error') as HTMLElement | null;
+  const loginLink = document.getElementById('to-login-from-register') as HTMLAnchorElement | null;
 
-  // Username field
-  const { wrapper: userWrap, input: userInput } = createFormInput({
-    id: 'username',
-    name: 'username',
-    label: 'Username',
-    placeholder: 'john_doe',
-    focusRingColor: '#00ffff'
-  });
+  if (!usernameInput || !emailInput || !passwordInput) return;
 
-  // Email field
-  const { wrapper: emailWrap, input: emailInput } = createFormInput({
-    id: 'email_reg',
-    name: 'email',
-    label: 'Email',
-    type: 'email',
-    placeholder: 'you@example.com',
-    focusRingColor: '#00ffff'
-  });
+  const errorEl = authErrorEl ?? createErrorContainer();
 
-  // Password field
-  const { wrapper: passWrap, input: passInput } = createFormInput({
-    id: 'password_reg',
-    name: 'password',
-    label: 'Password',
-    type: 'password',
-    placeholder: '••••••••',
-    focusRingColor: '#00ffff'
-  });
-
-  // Submit button
-  const submit = createButton({
-    text: 'Create account',
-    color: '#00ffff'
-  });
-
-  // Footer with login link
-  const footer = document.createElement('div');
-  footer.className = 'mt-4 text-xl text-neutral-400 text-center';
-  const span = document.createElement('span');
-  span.textContent = 'Already have an account? ';
-  const loginLink = document.createElement('a');
-  loginLink.id = 'to-login';
-  loginLink.href = '#';
-  loginLink.className = 'text-[#00ffff] hover:underline';
-  loginLink.textContent = 'Sign in';
-  footer.appendChild(span);
-  footer.appendChild(loginLink);
-
-  // Error container
-  const authError = createErrorContainer();
-
-  // Assemble form
-  form.appendChild(title);
-  form.appendChild(desc);
-  form.appendChild(userWrap);
-  form.appendChild(emailWrap);
-  form.appendChild(passWrap);
-  form.appendChild(submit);
-  form.appendChild(footer);
-
-
-  // Setup event listeners
-  loginLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    callbacks.onLoginClick();
-  });
+  if (loginLink) {
+    loginLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      hideRegister();
+      attachLogin();
+    });
+  }
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    showLoading(authError, 'Registering...');
+    hideError(errorEl);
 
-    const username = userInput.value.trim();
+    const username = usernameInput.value.trim();
     const email = emailInput.value.trim();
-    const password = passInput.value;
+    const password = passwordInput.value;
 
     if (!username || !email || !password) {
-      showError(authError, 'Enter username, email and password.');
+      showError(errorEl, 'Enter username, email and password.');
       return;
     }
+
+    showLoading(errorEl, 'Creating account...');
 
     try {
       const res = await fetch(`/api/auth/register`, {
@@ -114,21 +65,31 @@ export function createRegisterForm(callbacks: RegisterFormCallbacks): void {
       const body = await res.json().catch(() => null);
       if (res.ok) {
         if (body?.user?.id) {
-          localStorage.setItem('userId', body.user.id);
-          localStorage.setItem('user', JSON.stringify(body.user));
+          try {
+            localStorage.setItem('userId', String(body.user.id));
+            localStorage.setItem('user', JSON.stringify(body.user));
+            localStorage.setItem('tfaEnabled', body.user.TfaEnabled ? 'true' : 'false');
+          } catch (e) {
+            // ignore storage
+          }
         }
-        if (body?.user?.TfaEnabled)
-          localStorage.setItem('tfaEnabled', body.user.tfaEnabled);
-        else 
-          localStorage.setItem('tfaEnabled', 'false');
-        showSuccess(authError, 'Registration successful.');
-        setTimeout(() => { goToRoute('/'); }, 600);
+        showSuccess(errorEl, 'Registration successful.');
+        setTimeout(() => window.location.href = '/profile', 400);
       } else {
-        showError(authError, (body && (body.message || body.error)) || `Register failed (${res.status})`);
+        showError(errorEl, (body && (body.message || body.error)) || `Register failed (${res.status})`);
       }
     } catch (err) {
-      showError(authError, (err as Error).message || 'Network error');
+      showError(errorEl, (err as Error).message || 'Network error');
     }
   });
+}
 
+export function hideRegister(): void {
+  const form = document.getElementById('register-form') as HTMLFormElement | null;
+  if (form) {
+    form.classList.add("hidden");
+    form.reset();
+  }
+  const section = document.getElementById('register-section');
+  if (section) section.classList.add('hidden');
 }

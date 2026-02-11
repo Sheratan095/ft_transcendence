@@ -15,7 +15,7 @@
 	<div id="container-grid"
 		class="relative h-max flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-black">
 		<div id="main-grid" class="fixed inset-0 bg-[length:40px_40px] pointer-events-none z-20
-		bg-[linear-gradient(to_right,#d9d9d9_1px,transparent_1px),linear-gradient(to_bottom,#d9d9d9_1px,transparent_1px)]
+		bg-[linear-gradient(to_right,#f2f2f2_1px,transparent_1px),linear-gradient(to_bottom,#d9d9d9_1px,transparent_1px)]
 		dark:bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]
 		opacity-60 mix-blend-darken dark:mix-blend-lighten [mask-image:linear-gradient(transparent_10%,black)]"></div>
 		<div class="fixed inset-0 h-full w-full z-10 mix-blend-difference
@@ -24,11 +24,25 @@
 	</div>
 
 	<div class="shadow-[10px_10px_0_0] shadow-accent-orange dark:shadow-accent-green"> </div>
-	<!-- Search bar and theme switch button-->
+	<!-- Search bar, small user card and theme switch button-->
 	<div id="top-bar"
 		class="flex z-20 items-end justify-end p-2 space-x-4 text-black dark:text-white w-full shadow-md
-							border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-cyan dark:hover:border-accent-green transition-colors">
-		<form class="w-full px-[12vw] mx-auto z-20 hidden" id="search-user-form">
+			border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-cyan dark:hover:border-accent-green transition-colors">
+		<!-- User options -->
+		<div id="user-options" title="Go to profile"
+			class="flex z-30 items-center justify-center p-2 rounded-lg
+				border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors
+				dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100">
+			<a href="/profile" class="flex items-center justify-center">
+				<img id="topbar-avatar"
+					src="/assets/placeholder-avatar.jpg"
+					alt="avatar"
+					class="content-evenly w-8 h-8">
+			</a>
+		</div>
+
+		<!-- Search form -->
+		<form class="w-full px-[12vw] mx-auto z-30 hidden" id="search-user-form" title="search other users to play with">
 			<div class="flex shadow-xs rounded-base -space-x-1">
 				<input type="search" id="search-user-input"
 					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-gray-300 text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
@@ -73,27 +87,321 @@
 				Yesterday Dr.Phil was just an ordinary human.
 			</p>
 		</section>
-		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl overflow-hidden ">
+		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl">
 			<div
-				class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden
+				class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden rounded-xl
 				dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 transition-all duration-300">
 				<div class="flex w-full max-w-xl flex-col md:flex-row items-start gap-4 mb-8 p-6">
 					<img src="./42_Logo.svg" alt="42 Logo"
 						class="float-start w-full h-full min-w-[50px] min-h-[50px] sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0 dark:invert" />
 					<div class="flex flex-col space-y-4 md:ml-6">
-						<a href="/documentation">
+						<a href="https://localhost:3000/docs">
 							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./DOCUMENTATION</h2>
 						</a>
 						<a href="/subject">
 							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./SUBJECT</h2>
 						</a>
-						<a href="/login">
+						<a href="/login" id="link-to-login">
 							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./LOGIN</h2>
 						</a>
 					</div>
 				</div>
 			</div>
 		</div>
+
+		<!-- LOGIN & REGISTER -->
+
+		<template id="login-template">
+			<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
+				id="container">
+				<div
+					class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
+						overflow-hidden rounded-xl
+						hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300">
+					<form
+					id="login-form"
+					class="flex w-full max-w-2xl flex-col gap-4 p-6">
+
+
+					<!-- Title -->
+					<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
+						Sign in
+					</h1>
+
+					<!-- Description -->
+					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left">
+						Sign in to your account below.
+					</p>
+					<!-- Email -->
+					<div class="flex flex-col gap-1">
+						<label for="email_log" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
+						<input
+							id="email_log"
+							name="email"
+							type="email"
+							placeholder="you@example.com"
+							class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+					</div>
+
+					<!-- Password -->
+					<div class="flex flex-col gap-1">
+						<label for="password_log" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
+						<input
+						id="password_log"
+						name="password"
+						type="password"
+						placeholder="••••••••"
+						class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300
+								px-4 py-2 text-black dark:text-white focus:outline-none
+								focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+					</div>
+
+					<!-- Error container -->
+					<div id="auth-error" class="hidden text-red-400 text-sm"></div>
+
+					<!-- Submit -->
+					<button
+						type="submit"
+						class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 opacity-100
+							font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
+						Sign in
+					</button>
+
+					<!-- Footer -->
+					<div class="mt-4 text-xl text-neutral-400 text-center">
+						Don’t have an account?
+						<a
+						id="to-register"
+						href="#"
+						class="text-accent-cyan-light dark:text-accent-cyan hover:underline">
+						Sign up
+						</a>
+					</div>
+					</form>
+
+					<!--REGISTER-->
+
+					<div class="w-full hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
+					id ="register-section">
+							<form
+								id="register-form"
+								class="flex w-full max-w-2xl flex-col gap-4 p-6">
+
+								<!-- Title -->
+								<h1 id="register-title" class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
+									Create account
+								</h1>
+
+								<!-- Description -->
+								<p id="register-desc" class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left">
+									Pick a username and secure password to get started.
+								</p>
+
+								<!-- Username -->
+								<div class="flex flex-col gap-1">
+									<label for="register-username" class="text-sm text-neutral-700 dark:text-neutral-300">Username</label>
+									<input
+										id="register-username"
+										name="username"
+										type="text"
+										placeholder="john_doe"
+										class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+								</div>
+
+								<!-- Email -->
+								<div class="flex flex-col gap-1">
+									<label for="register-email" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
+									<input
+										id="register-email"
+										name="email"
+										type="email"
+										placeholder="you@example.com"
+										class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+								</div>
+
+								<!-- Password -->
+								<div class="flex flex-col gap-1">
+									<label for="register-password" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
+									<input
+										id="register-password"
+										name="password"
+										type="password"
+										placeholder="••••••••"
+										class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+								</div>
+
+								<!-- Error container -->
+								<div id="register-error" class="hidden text-red-400 text-sm"></div>
+
+								<!-- Submit -->
+								<button
+									id="submit-register"
+									type="submit"
+									class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
+									Create account
+								</button>
+
+								<!-- Footer -->
+								<div class="mt-4 text-xl text-neutral-400 text-center">
+									Already have an account?
+									<a
+										id="to-login-from-register"
+										href="#"
+										class="text-accent-cyan-light dark:text-accent-cyan hover:underline">
+										Sign in
+									</a>
+							</form>
+						</div>
+					</div>
+					
+					<!-- TWO FACTOR AUTH-->
+
+					<div class="w-full hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
+					id="2fa-section">
+						<div
+						class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
+							overflow-hidden rounded-xl bg-white dark:bg-black
+							hover:shadow-lg dark:hover:brightness-95 hover:brightness-105 transition-all duration-300 w-full max-w-md"
+						>
+						<form id="2fa-form" novalidate class="flex w-full flex-col gap-4 p-6">
+							
+							<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
+							Two-Factor Auth
+							</h1>
+
+							<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left">
+							Enter the 6-digit code from your authenticator app.
+							</p>
+
+							<div class="flex flex-col gap-2">
+							<label class="text-sm text-neutral-700 dark:text-neutral-300">Verification Code</label>
+							<div class="flex justify-between gap-2" data-pin-input>
+								<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+								class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
+								<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+								class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
+								<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+								class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
+								<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+								class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
+								<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+								class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
+								<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
+								class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
+							</div>
+
+							<div id="2fa-error" class="hidden text-red-400 text-sm">Invalid code. Please try again.</div>
+
+							<button
+							type="submit"
+							class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2
+								font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
+							Log in
+							</button>
+						</form>
+						</div>
+					</div>
+
+					</form>
+				</div>
+			</div>
+		</template>
+
+		<!-- MAIN PROFILE -->
+		<template id="profile-template">
+			<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
+				id="container">
+				<div
+					class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
+						overflow-hidden rounded-xl
+						hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300">
+					<div class="p-4 sm:p-6 md:p-10 w-full flex flex-col gap-4">
+						<!-- Header with avatar and title -->
+						<div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
+							<!-- Avatar -->
+							<div class="relative flex-shrink-0 z-30">
+								<label class="cursor-pointer">
+									<input id="input-avatar" type="file" class="hidden" />
+									
+									<div class="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 aspect-square rounded-md overflow-hidden border-4 border-gray-400 dark:border-neutral-400 flex items-center justify-center bg-gray-200 dark:bg-neutral-800">
+										<img id="profile-avatar" alt="avatar" class="w-full h-full object-cover" src="/assets/placeholder-avatar.jpg" />
+										<figcaption class="absolute w-full h-full opacity-0 bg-black/0 transition duration-300 ease-in-out hover:opacity-100 hover:bg-black/70 cursor-pointer flex items-center justify-center">
+											<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.217A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.217A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+											</svg>
+										</figcaption>
+									</div>
+								</label>
+							</div>
+
+							<!-- Title and info section -->
+							<div class="flex-1 w-full z-30">
+								<!-- Username -->
+								<h1 id="profile-username" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">User</h1>
+								
+								<!-- Email and ID -->
+								<div class="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
+									<div class="flex items-center gap-2">
+										<span class="font-extrabold text-black dark:text-white">Email:</span> 
+										<span class="text-gray-600 dark:text-neutral-400" id="profile-email">email@example.com</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<span class="font-extrabold text-black dark:text-white">User ID:</span> 
+										<span class="text-gray-600 dark:text-neutral-400" id="profile-id">0</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<span class="font-extrabold text-black dark:text-white">Rank:</span> 
+										<span class="text-gray-600 dark:text-neutral-400" id="profile-rank">Rookie</span>
+									</div>
+									<div class="flex items-center gap-2">
+										<span class="font-extrabold text-black dark:text-white">Wins:</span> 
+										<span class="text-gray-600 dark:text-neutral-400" id="profile-wins">0</span>
+									</div>
+								</div>
+
+								<!-- Action buttons and 2FA toggle -->
+								<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
+									<!-- Chat button -->
+									<button id="profile-chat-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-accent-orange dark:bg-accent-green text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+										Chat
+									</button>
+									<!-- Logout button -->
+									<button id="profile-logout-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-gray-700 dark:border-neutral-600 hover:bg-gray-700 dark:hover:bg-neutral-600 transition whitespace-nowrap">
+										Logout
+									</button>
+									<!-- Delete account button -->
+									<button command="show-modal" commandfor="delete-dialog" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-red-500 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+										Delete
+									</button>
+
+									<!-- Language selector -->
+									<select id="profile-language" class="px-2 sm:px-4 py-2 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-gray-700 dark:border-neutral-600 hover:bg-gray-700 dark:hover:bg-neutral-600 transition rounded">
+										<option value="en">English</option>
+										<option value="fr">Français</option>
+										<option value="it">Italiano</option>
+									</select>
+
+									<!-- 2FA toggle -->
+									<div class="flex items-center gap-2 ml-auto">
+										<input id="input-lock" type="checkbox" class="hidden peer">
+										<label
+											for="input-lock"
+											class="btn-lock group inline-flex items-center h-10 px-4 bg-red-600 dark:bg-red-700 border-2 border-gray-700 dark:border-neutral-600 font-extrabold text-white uppercase tracking-tight text-sm cursor-pointer select-none transition-all duration-300 hover:brightness-110 peer-checked:bg-accent-green dark:peer-checked:bg-accent-green"
+										>
+											<svg viewBox="0 0 30 40" class="w-5 h-5 mr-2">
+												<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
+												<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+											</svg>
+											<span id="profile-tfa" class="whitespace-nowrap">2FA</span>
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 	</main>
 </body>
 

@@ -1,8 +1,8 @@
-import { getUserId } from './lib/auth';
-import { startTokenRefresh } from './lib/token';
-import { renderProfile } from './lib/profile';
+import { fetchUserProfile, getUserId } from './lib/auth';
+import { isLoggedInClient, startTokenRefresh } from './lib/token';
+import { attachUserOptions, renderProfile } from './lib/profile';
 import { setupChatEventListeners, initChat } from './lib/chat';
-import { searchUser, renderSearchResult } from './lib/search';
+import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket } from './components/profile/Notifications';
@@ -10,11 +10,11 @@ import { setFriendsManager } from './components/profile/Notifications';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
 import { setupPongCardListener } from './lib/pong-ui';
-import { initCardOverlay } from './components/shared';
 import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
 import { initCardHoverEffect } from './lib/card';
 import ApexCharts from 'apexcharts';
+import { start } from './spa';
 
 // Make ApexCharts globally available for UserCardCharts
 if (typeof window !== 'undefined') {
@@ -27,21 +27,17 @@ main(window.location.pathname);
 // called on every page load remembering SPA navigation
 // add checks here.
 export async function main(path: string) {
+start();
+
 // Load user's saved language preference
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
 setLocaleInStorage(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 
-initTheme(); // add theme 
+initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
-initCardOverlay(); // Initialize card overlay functionality
-if (getUserId())
-{
-	  initUserServices();
-	  setupSearchUser();
-}
-	setupSearchUser();
+if (isLoggedInClient()) initUserServices();
 }
 /**
  * Setup search user functionality
@@ -54,6 +50,8 @@ function setupSearchUser() {
   if (!searchForm || !searchInput || !mainContainer) return;
 
   searchForm.classList.remove('hidden');
+  initSearchAutocomplete();
+  
   searchForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -82,10 +80,14 @@ function setupSearchUser() {
 }
 
 function initUserServices() {
-	  const userId = getUserId();
-	  if (!userId) return;
-	  
+	const userId = getUserId();
+	if (!userId) return;
+
+	startTokenRefresh();
+	setupChatEventListeners();
 	connectNotificationsWebSocket();
+	setupSearchUser();
+	attachUserOptions();
 	initChat(userId);
 }
 

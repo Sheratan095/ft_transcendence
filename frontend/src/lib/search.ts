@@ -7,11 +7,11 @@ export interface SearchResult extends User {
 /**
  * Initialize search autocomplete behavior
  */
-document.addEventListener('DOMContentLoaded', () => {
+export function initSearchAutocomplete(): void {
   const input = document.getElementById('search-user-input') as HTMLInputElement;
   const dropdown = document.getElementById('search-results-dropdown') as HTMLElement;
   const form = document.getElementById('search-user-form') as HTMLFormElement;
-  const searchBar = document.querySelector('.sticky.top-0') as HTMLElement;
+  const searchBar = document.querySelector('div#top-bar') as HTMLElement;
 
   if (!input || !dropdown || !form || !searchBar) return;
 
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dropdown.classList.add('hidden');
     }
   });
-});
+}
 
 
 /**

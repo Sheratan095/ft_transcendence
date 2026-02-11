@@ -99,7 +99,7 @@ export async function logout(): Promise<void> {
         'Content-Type': 'application/json',
       }
     });
-	goToRoute('/login');
+    goToRoute('/login');
   } catch (err) {
     console.error('Logout error:', err);
   }
