@@ -2,7 +2,7 @@ import { fetchUserProfile, getUserId, logout } from './lib/auth';
 import { isLoggedInClient, startTokenRefresh } from './lib/token';
 import { attachUserOptions } from './components/profile/profile';
 import { setupChatEventListeners, initChat } from './components/chat/chat';
-import { initFloatingButton } from './components/chat/ChatButton';
+import { initChatButton, initHomeButton, removeHomeButton } from './components/shared/FloatingButtons';
 import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
@@ -119,11 +119,22 @@ function initUserServices(path: string)
   startTokenRefresh();
   modifyIndex();
   setupChatEventListeners();
-  initFloatingButton();
+  initChatButton();
+  initHomeButton();
   connectNotificationsWebSocket();
   setupSearchUser();
   attachUserOptions();
   initChat(userId);
+
+  // Handle home button visibility on route changes
+  window.addEventListener('route-rendered', (e: any) => {
+    const currentPath = e.detail?.path || window.location.pathname;
+    if (currentPath === '/') {
+      removeHomeButton();
+    } else {
+      initHomeButton();
+    }
+  });
 }
 
 // Global click handler for shared/dynamic elements
