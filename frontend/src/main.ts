@@ -28,7 +28,7 @@ main(window.location.pathname);
 // called on every page load remembering SPA navigation
 // add checks here.
 export async function main(path: string) {
-start();
+await start();
 
 // Load user's saved language preference
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
@@ -44,16 +44,14 @@ initCardHoverEffect(); // Initialize card hover effect
 if (isLoggedInClient())
   initUserServices();
 
-const tournamentListButton = document.getElementById('tournamentListButton');
-tournamentListButton?.addEventListener('click', () =>
-{
-  const modal = document.getElementById('tournament-modal');
-  if (modal)
-    modal.classList.remove('hidden');
-
-    showTournamentListModal();
+// Re-apply modifications on SPA route changes
+window.addEventListener('route-rendered', (e: any) => {
+  if (isLoggedInClient()) {
+    modifyIndex();
+  }
 });
 
+setupGlobalClickHandlers();
 }
 /**
  * Setup search user functionality
@@ -64,7 +62,8 @@ function setupSearchUser()
   const searchInput = document.getElementById('search-user-input') as HTMLInputElement;
   const mainContainer = document.getElementById('main-content') as HTMLElement;
 
-  if (!searchForm || !searchInput || !mainContainer) return;
+  if (!searchForm || !searchInput || !mainContainer)
+    return;
 
   searchForm.classList.remove('hidden');
   initSearchAutocomplete();
@@ -99,14 +98,59 @@ function setupSearchUser()
 function modifyIndex()
 {
   const link = document.getElementById('cta-login-logout') as HTMLAnchorElement | null;
-
   if (link)
   {
     const h2 = link.getElementsByTagName('h2')[0];
     if (h2)
       h2.textContent = './LOGOUT';
+    
+    // Modification: the click listener is now handled via event delegation in main()
+  }
 
-    link.addEventListener('click', async (e) => {
+  const showTournamentsBtn = document.getElementById('tournamentListButton');
+  if (showTournamentsBtn) {
+    showTournamentsBtn.classList.remove('hidden');
+  }
+
+  const showTournamentsBtnStatic = document.getElementById('tournamentListButton-static');
+  if (showTournamentsBtnStatic) {
+    showTournamentsBtnStatic.classList.remove('hidden');
+  }
+}
+
+function initUserServices()
+{
+	const userId = getUserId();
+	if (!userId)
+      return;
+
+  startTokenRefresh();
+  modifyIndex();
+  setupChatEventListeners();
+  connectNotificationsWebSocket();
+  setupSearchUser();
+  attachUserOptions();
+  initChat(userId);
+}
+
+// Global click handler for shared/dynamic elements
+function setupGlobalClickHandlers() {
+  document.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+
+    // Handle Tournament Button
+    const tournamentBtn = target.closest('#tournamentListButton, #tournamentListButton-static');
+    if (tournamentBtn) {
+      e.preventDefault();
+      const modal = document.getElementById('tournament-modal');
+      if (modal) modal.classList.remove('hidden');
+      showTournamentListModal();
+      return;
+    }
+
+    // Handle Logout Link
+    const logoutLink = target.closest('#cta-login-logout');
+    if (logoutLink && logoutLink.textContent?.includes('LOGOUT')) {
       e.preventDefault();
       try {
         await logout();
@@ -117,23 +161,9 @@ function modifyIndex()
         console.error('Logout (client) error:', err);
         showErrorToast('Error logging out');
       }
-    });
-  }
-
-}
-
-function initUserServices()
-{
-	const userId = getUserId();
-	if (!userId) return;
-
-	startTokenRefresh();
-  modifyIndex();
-  setupChatEventListeners();
-	connectNotificationsWebSocket();
-	setupSearchUser();
-	attachUserOptions();
-	initChat(userId);
+      return;
+    }
+  });
 }
 
 export default {};

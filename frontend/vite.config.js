@@ -19,6 +19,12 @@ export default defineConfig(({ mode }) => {
         delete proxyRes.headers['upgrade'];
         delete proxyRes.headers['transfer-encoding'];
       });
+      proxy.on('error', (err, req, res) => {
+        console.error('[api proxy error]', err && err.code ? err.code : err);
+      });
+      proxy.on('close', (err, socket) => {
+        console.warn('[api proxy close] connection closed', err ? err : 'no error');
+      });
     },
   };
 
@@ -35,6 +41,9 @@ export default defineConfig(({ mode }) => {
       proxy.on('proxyReq', (proxyReq, req, res) => {
         proxyReq.setHeader('Origin', env.VITE_WS_TARGET || 'wss://localhost:3000');
       });
+        proxy.on('close', (err, socket) => {
+          console.warn('[ws proxy close] websocket connection closed', err ? err : 'no error');
+        });
     },
   };
 

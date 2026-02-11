@@ -58,7 +58,7 @@ export function attachLogin(): void {
 
 			if (body && body.user) {
 				try {
-					if (body.user.id) SaveCurrentUserProfile(body.user.id);
+					if (body.user.id) await SaveCurrentUserProfile(body.user.id);
 					if (body.user.TfaEnabled) {
 						hideLogin();
 						attach2FA();
