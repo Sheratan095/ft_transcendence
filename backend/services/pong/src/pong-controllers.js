@@ -2,6 +2,7 @@ import { calculateElo, extractUserData } from './pong-help.js';
 import { tournamentManager } from './TournamentManager.js';
 import { getUsernameById, isUserBusyInternal } from './pong-help.js';
 import { GameStatus } from './GameInstance.js';
+import { TournamentStatus } from './TournamentIstance.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -134,7 +135,7 @@ export const	getUserMatchHistory = async (req, reply) =>
 			match.playerRightUsername = await getUsernameById(match.player_right_id);
 			match.status = GameStatus.FINISHED;
 			match.winnerId = match.winner_id;
-			match.isBye = false;
+			match.isBye = match.is_bye;
 			match.endedAt = match.ended_at;
 			match.tournamentId = match.tournament_id;
 			match.playerLeftScore = match.player_left_score;
@@ -322,6 +323,11 @@ export const	testGetTournament = async (req, reply) =>
 			{ userId: 'test-user-4', username: 'David' },
 			{ userId: 'test-user-5', username: 'Eve' },
 			{ userId: 'test-user-6', username: 'Frank' },
+			{ userId: 'test-user-7', username: 'Grace' },
+			{ userId: 'test-user-8', username: 'Hannah' },
+			{ userId: 'test-user-9', username: 'Ivan' },
+			{ userId: 'test-user-10', username: 'Judy' },
+			{ userId: 'test-user-11', username: 'Karl' }
 		];
 		for (const participant of participants)
 			testTournament.addParticipant(participant.userId, participant.username);
@@ -360,21 +366,49 @@ export const	testGetTournament = async (req, reply) =>
 			match.endedAt = new Date().toISOString();
 		}
 
-		// Advance to final round
+		// Advance to round 3 (semifinals with potential bye)
 		testTournament._advanceToNextRound();
 
-		// Simulate completion of final match
-		const	finalMatch = testTournament.rounds[2][0];
-		finalMatch.gameStatus = GameStatus.FINISHED;
-		finalMatch.scores[finalMatch.playerLeftId] = 11;
-		finalMatch.scores[finalMatch.playerRightId] = 10;
-		finalMatch.winnerId = finalMatch.playerLeftId;
-		finalMatch.winner = { userId: finalMatch.playerLeftId, username: finalMatch.playerLeftUsername };
-		finalMatch.endedAt = new Date().toISOString();
+		// Simulate completion of round 3 (semifinals)
+		const	thirdRoundMatches = testTournament.rounds[2];
+		if (thirdRoundMatches)
+		{
+			for (const match of thirdRoundMatches)
+			{
+				if (!match.isBye)
+				{
+					match.gameStatus = GameStatus.FINISHED;
+					match.scores[match.playerLeftId] = 11;
+					match.scores[match.playerRightId] = Math.floor(Math.random() * 10);
+					match.winnerId = match.playerLeftId;
+					match.winner = { userId: match.playerLeftId, username: match.playerLeftUsername };
+					match.endedAt = new Date().toISOString();
+				}
+			}
+		}
 
-		// Check if tournament is complete (should set status to FINISHED)
-		if (testTournament.isRoundComplete())
+		// Advance to final round if tournament not finished yet
+		if (testTournament.status !== TournamentStatus.FINISHED)
 			testTournament._advanceToNextRound();
+
+		// Simulate completion of final match
+		if (testTournament.rounds.length > 3)
+		{
+			const	finalMatch = testTournament.rounds[testTournament.rounds.length - 1][0];
+			if (finalMatch && !finalMatch.isBye)
+			{
+				finalMatch.gameStatus = GameStatus.FINISHED;
+				finalMatch.scores[finalMatch.playerLeftId] = 11;
+				finalMatch.scores[finalMatch.playerRightId] = 10;
+				finalMatch.winnerId = finalMatch.playerLeftId;
+				finalMatch.winner = { userId: finalMatch.playerLeftId, username: finalMatch.playerLeftUsername };
+				finalMatch.endedAt = new Date().toISOString();
+
+				// Check if tournament is complete (should set status to FINISHED)
+				if (testTournament.isRoundComplete())
+					testTournament._advanceToNextRound();
+			}
+		}
 
 		// Get the bracket using the existing method
 		const	bracket = tournamentManager.getTournamentBracket(testTournament.id);
