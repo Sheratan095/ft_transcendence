@@ -190,6 +190,18 @@ export async function renderProfileCard(container: HTMLElement | null) {
         profileRankEl.textContent = pongStats?.rank || trisStats?.rank || 'Rookie';
       }
 
+      // Remove border classes from parent containers of wins/rank (near userId)
+      const removeBorderFromAncestor = (el: Element | null) => {
+        if (!el) return;
+        const parent = el.parentElement;
+        if (!parent) return;
+        Array.from(parent.classList).forEach((cn) => {
+          if (cn.startsWith('border')) parent.classList.remove(cn);
+        });
+      };
+      removeBorderFromAncestor(profileWinsEl);
+      removeBorderFromAncestor(profileRankEl);
+
       const gameStats: GameStats = {
         trisWins: trisStats?.gamesWon || 0,
         trisLosses: trisStats?.gamesLost || 0,
@@ -226,24 +238,32 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Pong Summary
         if (gameStats.pongWins !== undefined) {
           const pongDiv = document.createElement('div');
-          pongDiv.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex flex-row items-center gap-4 flex-1 min-w-[200px] h-32';
-          
+          pongDiv.className = 'rounded-lg p-3 flex flex-col items-center gap-2 flex-1 min-w-[200px] h-40';
+
           const pongWins = gameStats.pongWins || 0;
           const pongLosses = gameStats.pongLosses || 0;
           const pongTotal = pongWins + pongLosses;
           const pongWinRate = pongTotal > 0 ? ((pongWins / pongTotal) * 100).toFixed(0) : 0;
+          const pongElo = pongStats?.elo ?? pongStats?.rating ?? '—';
+          const pongRankDisplay = pongStats?.rank ?? '—';
 
           pongDiv.innerHTML = `
-            <div class="flex-1">
-              <h3 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em] mb-1">PONG</h3>
-              <div class="flex flex-row gap-3 text-base">
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">P</span><span class="text-white">${pongTotal}</span></div>
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">W</span><span class="text-green-400">${pongWins}</span></div>
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">L</span><span class="text-red-400">${pongLosses}</span></div>
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">%</span><span class="text-cyan-400">${pongWinRate}</span></div>
+            <div class="w-full">
+              <h3 class="text-lg font-black text-[#00bcd4] uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
+              <div class="flex flex-row items-center justify-center gap-4">
+                <div id="profile-pong-donut" class="w-12 h-12 flex-shrink-0"></div>
+                <div>
+                  <div class="flex flex-row gap-6 justify-center items-center text-lg">
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${pongTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${pongWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${pongLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${pongWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${pongElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${pongRankDisplay}</span></div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div id="profile-pong-donut" class="w-12 h-12 flex-shrink-0"></div>
           `;
           mainRow.appendChild(pongDiv);
           pongStatsElements.push(pongDiv);
@@ -252,24 +272,32 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Tris Summary
         if (gameStats.trisWins !== undefined) {
           const trisDiv = document.createElement('div');
-          trisDiv.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex flex-row items-center gap-4 flex-1 min-w-[200px] h-32 hidden';
+          trisDiv.className = 'rounded-lg p-3 flex flex-col items-center gap-2 flex-1 min-w-[200px] h-40 hidden';
           
           const trisWins = gameStats.trisWins || 0;
           const trisLosses = gameStats.trisLosses || 0;
           const trisTotal = trisWins + trisLosses;
           const trisWinRate = trisTotal > 0 ? ((trisWins / trisTotal) * 100).toFixed(0) : 0;
+          const trisElo = trisStats?.elo ?? trisStats?.rating ?? '—';
+          const trisRankDisplay = trisStats?.rank ?? '—';
 
           trisDiv.innerHTML = `
-            <div class="flex-1">
-              <h3 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em] mb-1">TRIS</h3>
-              <div class="flex flex-row gap-3 text-base">
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">P</span><span class="text-white">${trisTotal}</span></div>
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">W</span><span class="text-green-400">${trisWins}</span></div>
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">L</span><span class="text-red-400">${trisLosses}</span></div>
-                <div class="flex flex-col"><span class="text-neutral-500 font-bold">%</span><span class="text-cyan-400">${trisWinRate}</span></div>
+            <div class="w-full">
+              <h3 class="text-lg font-black text-[#0dff66] uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
+              <div class="flex flex-row items-center justify-center gap-4">
+                <div id="profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
+                <div>
+                  <div class="flex flex-row gap-6 justify-center items-center text-lg">
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${trisTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${trisWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${trisLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${trisWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${trisElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${trisRankDisplay}</span></div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div id="profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
           `;
           mainRow.appendChild(trisDiv);
           trisStatsElements.push(trisDiv);
@@ -282,10 +310,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Pong History
         if (pongHistory && pongHistory.length > 0) {
           const pongHistoryWrapper = document.createElement('div');
-          pongHistoryWrapper.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex-1 min-w-[250px] h-32 flex flex-col';
+          pongHistoryWrapper.className = 'rounded-lg p-3 flex-1 min-w-[250px] h-32 flex flex-col';
           const pongHistoryChartId = `profile-pong-history-chart`;
           pongHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#00bcd4] mb-1 uppercase tracking-[0.2em]">PONG HISTORY</h4>
+            <h4 class="text-lg text-center font-black text-[#00bcd4] mb-1 uppercase tracking-[0.2em]">GAME HISTORY</h4>
             <div id="${pongHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(pongHistoryWrapper);
@@ -298,10 +326,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Tris History
         if (trisHistory && trisHistory.length > 0) {
           const trisHistoryWrapper = document.createElement('div');
-          trisHistoryWrapper.className = 'bg-neutral-800/10 rounded-lg p-3 border border-neutral-700/30 flex-1 min-w-[250px] h-32 flex flex-col hidden';
+          trisHistoryWrapper.className = 'rounded-lg p-3 flex-1 min-w-[250px] h-32 flex flex-col hidden';
           const trisHistoryChartId = `profile-tris-history-chart`;
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#0dff66] mb-1 uppercase tracking-[0.2em]">TRIS HISTORY</h4>
+            <h4 class="text-lg text-center font-black text-[#0dff66] mb-1 uppercase tracking-[0.2em]">GAME HISTORY</h4>
             <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
