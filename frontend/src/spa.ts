@@ -66,6 +66,10 @@ const routes: Record<string, RouteConfig> = {
 
     // Render logged-in user's profile
     try {
+      console.log('Calling renderProfileCard...');
+      if (typeof renderProfileCard !== 'function') {
+        throw new Error('renderProfileCard is not a function (possible circular dependency)');
+      }
       await renderProfileCard(el);
       console.log('Profile card rendered');
     } catch (err) {
@@ -160,6 +164,11 @@ export function linkify() {
     const href = a.getAttribute('href');
     if (!href) return;
     if (href.startsWith('/')) {
+      // Allow explicit new-tab/open/download links to behave normally
+      const target = a.getAttribute('target');
+      if (target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-no-spa')) {
+        return;
+      }
       ev.preventDefault();
       goToRoute(href);
     }

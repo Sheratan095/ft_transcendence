@@ -98,7 +98,7 @@
 						<a href="https://localhost:3000/docs">
 							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./DOCUMENTATION</h2>
 						</a>
-						<a href="https://cdn.intra.42.fr/pdf/pdf/190061/en.subject.pdf">
+						<a href="./assets/subject.pdf" target="_blank">
 							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./SUBJECT</h2>
 						</a>
 						<a href="/login" id="cta-login-logout-static">
@@ -390,7 +390,7 @@
 							<h1 id="profile-username" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">User</h1>
 							
 							<!-- Email and ID -->
-							<div class="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
+							<div class="flex flex-wrap gap-x-8 gap-y-2 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
 								<div class="flex items-center gap-2">
 									<span class="font-extrabold text-black dark:text-white">Email:</span> 
 									<span class="text-gray-600 dark:text-neutral-400" id="profile-email">email@example.com</span>
@@ -448,6 +448,11 @@
 							</div>
 						</div>
 					</div>
+
+					<!-- Charts Section -->
+					<div id="profile-charts-section" class="flex flex-col gap-6 mt-4 p-4 border-t border-neutral-200 dark:border-neutral-800">
+						<!-- Dynamically populated stats will go here -->
+					</div>
 				</div>
 			</div>
 		</div>
@@ -493,7 +498,7 @@
 						<a href="https://localhost:3000/docs">
 							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./DOCUMENTATION</h2>
 						</a>
-						<a href="https://cdn.intra.42.fr/pdf/pdf/190061/en.subject.pdf">
+						<a href="/assets/subject.pdf" target="_blank">
 							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./SUBJECT</h2>
 						</a>
 						<a href="/login" id="cta-login-logout">
