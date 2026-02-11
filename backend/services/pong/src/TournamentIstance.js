@@ -220,7 +220,8 @@ export class	TournamentInstance
 	_advanceToNextRound()
 	{
 		const	currentMatches = this.rounds[this.currentRound - 1];
-		const	winners = currentMatches.map(match => match.winner).filter(w => w !== null);
+		// Filter out both null and undefined winners to avoid passing invalid entries
+		const	winners = currentMatches.map(match => match.winner).filter(w => w != null);
 
 		// If only one winner, tournament is over
 		if (winners.length === 1)

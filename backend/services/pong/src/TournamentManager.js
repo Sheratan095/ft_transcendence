@@ -637,7 +637,7 @@ class	TournamentManager
 			currentRound: tournament.currentRound,
 			totalRounds: tournament.rounds.length,
 			participantCount: tournament.initialParticipantCount,
-			winnerId: tournament.winner || null,
+			winnerId: tournament.winner ? tournament.winner.userId : null,
 			rounds: rounds
 		});
 	}
