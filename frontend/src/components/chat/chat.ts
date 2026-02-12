@@ -60,6 +60,9 @@ export function closeChatModal() {
   const leaveGroupBtn = document.getElementById('leave-group-btn');
   if (leaveGroupBtn) leaveGroupBtn.classList.add('hidden');
 
+  const addUserBtn = document.getElementById('add-user-btn');
+  if (addUserBtn) addUserBtn.classList.add('hidden');
+
   const loadMoreBtn = document.getElementById('load-more-btn');
   if (loadMoreBtn) loadMoreBtn.style.display = 'none';
 
@@ -116,7 +119,7 @@ function renderChatList() {
   chats.forEach(chat => {
     const chatItem = document.createElement('div');
     chatItem.id = `chat-item-${chat.id}`;
-    chatItem.className = 'chat-item';
+    chatItem.className = 'chat-item cursor-pointer';
     if (getCurrentTheme() === 'dark') {
       chatItem.classList.add('dark');
     }
@@ -209,6 +212,7 @@ async function selectChat(chatId: string) {
   // Update chat header and show/hide leave group button
   const chatHeader = document.getElementById('chat-header');
   const leaveGroupBtn = document.getElementById('leave-group-btn');
+  let addUserBtn = document.getElementById('add-user-btn');
   if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
@@ -216,8 +220,24 @@ async function selectChat(chatId: string) {
       // Show leave group button only for group chats
       if (chat.chatType === 'group') {
         leaveGroupBtn.classList.remove('hidden');
+        // ensure add-user button exists and is visible
+        if (!addUserBtn) {
+          addUserBtn = document.createElement('button');
+          addUserBtn.id = 'add-user-btn';
+          addUserBtn.className = 'ml-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm';
+          addUserBtn.textContent = 'Add User';
+          addUserBtn.addEventListener('click', () => {
+            addToChatId = chatId;
+            openFriendSelectionModal();
+          });
+          // insert the add button next to leave button
+          leaveGroupBtn.parentElement?.insertBefore(addUserBtn, leaveGroupBtn.nextSibling);
+        } else {
+          addUserBtn.classList.remove('hidden');
+        }
       } else {
         leaveGroupBtn.classList.add('hidden');
+        if (addUserBtn) addUserBtn.classList.add('hidden');
       }
     }
   }
@@ -609,6 +629,27 @@ function handleSystemMessage(data: any) {
       if (chatObj && chatObj.members) chatObj.members = chatObj.members.filter((m: any) => String(m.userId) !== String(messageData.userId));
     }
 
+    // If the current user was removed from this chat, and they are currently viewing it,
+    // reset the chat header and selection back to the default "Select a chat" state.
+    const removedUserId = messageData.userId ? String(messageData.userId) : null;
+    const currentUserRemoved = removedUserId && String(removedUserId) === String(currentUserId);
+    const currentMembers = chatMembers.get(chatId) || [];
+    const isCurrentUserStillMember = currentMembers.find((m: any) => String(m.userId) === String(currentUserId));
+    if ((currentUserRemoved || !isCurrentUserStillMember) && String(currentChatId) === String(chatId)) {
+      currentChatId = null;
+      const chatHeaderEl = document.getElementById('chat-header');
+      if (chatHeaderEl) chatHeaderEl.textContent = 'Select a chat';
+      const chatMessagesEl = document.getElementById('chat-messages');
+      if (chatMessagesEl) chatMessagesEl.innerHTML = '';
+      const leaveBtn = document.getElementById('leave-group-btn');
+      if (leaveBtn) leaveBtn.classList.add('hidden');
+      const addBtn = document.getElementById('add-user-btn');
+      if (addBtn) addBtn.classList.add('hidden');
+      updateChatControls();
+      renderChatList();
+      showToast('You have left this chat', 'info', { duration: 4000, position: 'top-right' });
+      return;
+    }
     // If not viewing this chat, show a toast and mark unread
     if (currentChatId !== chatId) {
       const chat = chats.find(c => c.id === chatId);
@@ -798,10 +839,20 @@ function handleChatAdded(data: any) {
     console.warn('chat.added missing fields', messageData);
     return;
   }
+  // Notify user and allow clicking the toast to view the chat
+  showToast(`➕ You've been added to "${chatName}" by ${addedBy}`, 'info', { duration: 4000, position: 'top-right', onClick: () => { openChatModal(); selectChat(chatId); } });
 
-    // Notify user and allow clicking the toast to view the chat
-    showToast(`➕ You've been added to "${chatName}" by ${addedBy}`, 'info', { duration: 4000, position: 'top-right', onClick: () => { openChatModal(); selectChat(chatId); } });
+  // If the chat modal is currently open, refresh the chat list so the new chat appears
+  const chatModal = document.getElementById('chat-modal');
+  if (chatModal && !chatModal.classList.contains('hidden')) {
+    loadChats().then(() => {
+      // Keep current selection unchanged; just re-render the list
+      renderChatList();
+    }).catch(err => console.error('Failed to refresh chats on chat.added', err));
+  } else {
+    // If modal is closed, still update in-memory list if possible and re-render badges
     renderChatList();
+  }
 }
 
 function markChatAsRead(chatId: string) {
@@ -872,6 +923,12 @@ export async function leaveGroupChat(chatId: string) {
       if (chatMessages) {
         chatMessages.innerHTML = '';
       }
+      // Hide header action buttons and update controls
+      const leaveBtn = document.getElementById('leave-group-btn');
+      if (leaveBtn) leaveBtn.classList.add('hidden');
+      const addBtn = document.getElementById('add-user-btn');
+      if (addBtn) addBtn.classList.add('hidden');
+      updateChatControls();
     }
 
     // Re-render the chat list
@@ -982,6 +1039,8 @@ function handleMessageKeyPress(event: KeyboardEvent) {
 
 // Group chat creation functions
 let selectedFriendsForGroup: Set<string> = new Set();
+// If set, the friend-selection modal is being used to add users to this existing chat
+let addToChatId: string | null = null;
 
 async function fetchFriends(): Promise<any[]> {
   try {
@@ -1002,20 +1061,65 @@ async function fetchFriends(): Promise<any[]> {
   }
 }
 
-function openFriendSelectionModal() {
+async function openFriendSelectionModal() {
   const modal = document.getElementById('friend-selection-modal');
   if (!modal) return;
 
+  // If adding to an existing chat, refresh chats/members to ensure left users are reflected
+  if (addToChatId) {
+    try {
+      await loadChats();
+    } catch (err) {
+      console.error('Failed to refresh chats before opening add-user modal', err);
+    }
+  }
+
   modal.classList.remove('hidden');
   selectedFriendsForGroup.clear();
-  
-  // Reset the form
+
+  // If this modal was opened to add users to an existing chat, update submit button text
+  const createGroupSubmitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement | null;
+  if (createGroupSubmitBtn) {
+    createGroupSubmitBtn.textContent = addToChatId ? 'Add Selected' : 'Create Group';
+  }
+
+  // Reset the form (only the group name when creating a group)
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
-  if (groupNameInput) {
+  if (groupNameInput && !addToChatId) {
     groupNameInput.value = '';
   }
 
   renderFriendsList();
+
+  // If opened in "add to existing chat" mode, hide group-creation fields
+  if (groupNameInput) {
+    if (addToChatId) {
+      if (groupNameInput.parentElement) groupNameInput.parentElement.style.display = 'none';
+    } else {
+      if (groupNameInput.parentElement) groupNameInput.parentElement.style.display = '';
+    }
+  }
+
+  const selectedTags = document.getElementById('selected-friends-tags');
+  const selectedCount = document.getElementById('selected-count');
+  if (addToChatId) {
+    if (selectedTags) selectedTags.style.display = 'none';
+    if (selectedCount) selectedCount.style.display = 'none';
+  } else {
+    if (selectedTags) selectedTags.style.display = '';
+    if (selectedCount) selectedCount.style.display = '';
+  }
+
+  // Update modal header/description based on mode
+  const header = modal.querySelector('h2') as HTMLElement | null;
+  const desc = modal.querySelector('p') as HTMLElement | null;
+  if (addToChatId) {
+    if (header) header.textContent = 'Add Users to Chat';
+    if (desc) desc.textContent = 'Select friends to add to this chat:';
+  } else {
+    if (header) header.textContent = 'Create Group Chat';
+    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+  }
 }
 
 function closeFriendSelectionModal() {
@@ -1024,6 +1128,24 @@ function closeFriendSelectionModal() {
     modal.classList.add('hidden');
   }
   selectedFriendsForGroup.clear();
+  // reset add-to-chat mode
+  addToChatId = null;
+  const createGroupSubmitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement | null;
+  if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = 'Create Group';
+  // restore any hidden UI
+  const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
+  if (groupNameInput && groupNameInput.parentElement) groupNameInput.parentElement.style.display = '';
+  const selectedTags = document.getElementById('selected-friends-tags');
+  const selectedCount = document.getElementById('selected-count');
+  if (selectedTags) selectedTags.style.display = '';
+  if (selectedCount) selectedCount.style.display = '';
+  // restore default header/description using the existing modal variable
+  if (modal) {
+    const header = modal.querySelector('h2') as HTMLElement | null;
+    const desc = modal.querySelector('p') as HTMLElement | null;
+    if (header) header.textContent = 'Create Group Chat';
+    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+  }
 }
 
 async function renderFriendsList() {
@@ -1041,7 +1163,23 @@ async function renderFriendsList() {
 
   friendsList.innerHTML = '';
 
-  friends.forEach(friend => {
+  // If adding to an existing chat, filter out friends who are already members
+  let friendsToShow = friends;
+  if (addToChatId) {
+    const existing = new Set<string>();
+    const members = chatMembers.get(addToChatId) || (chats.find(c => c.id === addToChatId)?.members || []);
+    members.forEach((m: any) => existing.add(String(m.userId)));
+    // also exclude the current user just in case
+    if (currentUserId) existing.add(String(currentUserId));
+    friendsToShow = friends.filter(f => !existing.has(String(f.id || f.userId)));
+  }
+
+  if (friendsToShow.length === 0) {
+    friendsList.innerHTML = '<div class="text-neutral-400 text-center">No friends available to add</div>';
+    return;
+  }
+
+  friendsToShow.forEach(friend => {
     const friendId = String(friend.id || friend.userId);
     const friendName = friend.username || friend.name || 'Unknown';
 
@@ -1052,6 +1190,7 @@ async function renderFriendsList() {
     checkbox.type = 'checkbox';
     checkbox.className = 'w-4 h-4 cursor-pointer';
     checkbox.checked = selectedFriendsForGroup.has(friendId);
+    checkbox.setAttribute('data-friend-id', friendId);
     
     const label = document.createElement('label');
     label.className = 'flex-1 cursor-pointer text-white';
@@ -1096,7 +1235,7 @@ function updateSelectedFriendsTags() {
         <button class="hover:text-black/70" type="button">×</button>
       `;
 
-      tag.querySelector('button')?.addEventListener('click', () => {
+      tag.addEventListener('click', () => {
         selectedFriendsForGroup.delete(friendId);
         updateSelectedFriendsTags();
         const checkbox = document.querySelector(`input[data-friend-id="${friendId}"]`) as HTMLInputElement;
@@ -1119,6 +1258,48 @@ async function createGroupChat() {
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
   const groupName = groupNameInput?.value.trim();
 
+  if (addToChatId) {
+    // We're in "add users to existing chat" mode
+    if (selectedFriendsForGroup.size < 1) {
+      alert('Please select at least one friend to add');
+      return;
+    }
+
+    const memberIds = Array.from(selectedFriendsForGroup);
+    try {
+      for (const memberId of memberIds) {
+        try {
+          const response = await fetch('/api/chat/add-user', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ chatId: addToChatId, toUserId: memberId })
+          });
+          if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || `Failed to add user ${memberId} to chat: ${response.statusText}`);
+          }
+        } catch (err) {
+          console.error(`Error adding user ${memberId} to chat:`, err);
+          alert(`Failed to add user ${memberId} to chat: ${(err as Error).message}`);
+        }
+      }
+
+      // Refresh chats and members, then select the chat
+      closeFriendSelectionModal();
+      await loadChats();
+      selectChat(addToChatId);
+      addToChatId = null;
+    } catch (err) {
+      console.error('Error adding users to chat:', err);
+      alert(`Failed to add users: ${(err as Error).message}`);
+    }
+    return;
+  }
+
+  // Create new group chat flow
   if (!groupName) {
     alert('Please enter a group name');
     return;
@@ -1155,20 +1336,14 @@ async function createGroupChat() {
     }
 
     for (const memberId of memberIds) {
-      try
-      {
+      try {
         const response = await fetch('/api/chat/add-user', {
           method: 'POST',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           },
-          // include both possible property names to satisfy different backend formats
-          body: JSON.stringify({
-            chatId: chatId,
-            // chat_id: chatId,
-            toUserId: memberId
-          })
+          body: JSON.stringify({ chatId: chatId, toUserId: memberId })
         });
         if (!response.ok) {
           const error = await response.json().catch(() => ({}));
@@ -1179,7 +1354,6 @@ async function createGroupChat() {
         alert(`Failed to add user ${memberId} to group chat: ${(err as Error).message}`);
       }
     }
-
 
     closeFriendSelectionModal();
 

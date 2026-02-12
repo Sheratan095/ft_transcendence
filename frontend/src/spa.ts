@@ -23,8 +23,8 @@ const routes: Record<string, RouteConfig> = {
   },
   '/login': {
   render: async () => {
-	if (isLoggedInClient()) {
-		showErrorToast('Already logged in');
+	if (isLoggedInClient())
+  {
 		return;
 	}
     const el = document.getElementById('main-content');
