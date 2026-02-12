@@ -98,15 +98,16 @@ export const	getMessages = async (req, reply) =>
 		}
 
 		// map to match the response schema
-		const	messages = rawMessages.map(msg => ({
+		const	messages = await Promise.all(rawMessages.map(async msg => ({
 			id: msg.id,
 			chatId: msg.chat_id,
 			senderId: msg.sender_id,
+			from: (msg.type == 'text') ? await chatConnectionManager.getUsernameFromCache(msg.sender_id) : null, // Only set 'from' for text messages, null for system messages
 			content: msg.content,
 			type: msg.type,
 			createdAt: msg.created_at,
 			messageStatus: msg.message_status
-		}));
+		})));
 
 		console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
 

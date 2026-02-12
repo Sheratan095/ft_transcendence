@@ -181,6 +181,7 @@ async function loadMessages(chatId: string, offset = 0) {
     }
 
     const newMessages = await response.json();
+    console.log('[CHAT] Loaded messages:', newMessages);
 
     // Reverse to show oldest first (WhatsApp style)
     if (offset === 0) {
@@ -271,8 +272,15 @@ export async function renderMessages() {
 
     messageDiv.className = `${baseClasses} ${variantClasses} ${alignmentClasses}`;
 
+    // Determine a human-friendly display name: prefer `msg.from`, then any cached member username, then senderId
+    const membersForChat = chatMembers.get(currentChatId || '') || [];
+    const matchedMember = membersForChat.find((m: any) => String(m.userId) === String(senderId));
+    const displayName = msg.from || (matchedMember && matchedMember.username) || (msg.senderName) || senderId;
+
+    console.log(msg.from);
+
     messageDiv.innerHTML = `
-      ${!isSent ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(msg.from || senderId)}</div>` : ''}
+      ${!isSent ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(displayName)}</div>` : ''}
       <div class="message-content">${escapeHtml(msg.content)}</div>
       <div class="message-footer text-xs opacity-75">
         <span>${new Date(createdAt).toLocaleTimeString()}</span>
@@ -558,7 +566,7 @@ function handlePrivateMessage(data: any) {
     const preview = content.substring(0, 30);
     const displayText = preview.length < content.length ? `${preview}...` : preview;
     showToast(`💬 ${from}: ${displayText}`, 'info', {
-      duration: 0,
+      duration: 3000,
       position: 'top-right',
       onClick: () => {
         openChatModal();

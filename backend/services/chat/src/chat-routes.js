@@ -113,6 +113,7 @@ const	message =
 		id: { type: 'string' },
 		chatId: { type: 'string' },
 		senderId: { type: 'string' },
+		from : { type: 'string' }, // sender's username, null for system messages
 		content: { type: 'string' },
 		type: { type: 'string', enum: ['text', 'user_join', 'system', 'user_leave', 'chat_created'] },
 		createdAt: { type: 'string', format: 'date-time' },

@@ -385,7 +385,6 @@ export async function renderProfileCard(container: HTMLElement | null) {
               </div>`;
             }
             else {
-              console.log('Match data for Tris:', match);
               // For Tris: W/L on left, centered names, date on right
               const opponent = match.playerOId === user.id ? match.playerXUsername  : match.playerOUsername;
               const matchDate = new Date(match.endedAt);
