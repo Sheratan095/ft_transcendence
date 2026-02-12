@@ -2,6 +2,7 @@ import { isLoggedInClient } from './lib/auth';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/ProfileCard';
+import { renderSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
 
 type RouteConfig = { render: () => Promise<void> };
@@ -46,7 +47,7 @@ const routes: Record<string, RouteConfig> = {
     showErrorToast('Please sign in to view your profile');
     return;
     }
-	animatePolygonToBottom();
+    animatePolygonToBottom();
     el.innerHTML = '';
 
     // Check if viewing another user via query param
@@ -57,7 +58,12 @@ const routes: Record<string, RouteConfig> = {
     {
       // Render search profile card for another user
       try {
-        await renderSearchProfileCard(userId, el);
+        const result = await renderSearchProfileCard(userId, el);
+        // If result is null, it means it's the current user, so render main profile
+        if (result === null) {
+          el.innerHTML = '';
+          await renderProfileCard(el);
+        }
       } catch (err) {
         console.error('Failed to load user profile:', err);
         el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load user profile</div>';
@@ -68,9 +74,6 @@ const routes: Record<string, RouteConfig> = {
     // Render logged-in user's profile
     try {
       console.log('Calling renderProfileCard...');
-      if (typeof renderProfileCard !== 'function') {
-        throw new Error('renderProfileCard is not a function (possible circular dependency)');
-      }
       await renderProfileCard(el);
       console.log('Profile card rendered');
     } catch (err) {

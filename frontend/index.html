@@ -316,50 +316,58 @@
 
 	<!-- Search Profile Card Template -->
 	<template id="search-profile-card-template">
-		<div class="w-full max-w-2xl mx-auto p-8 bg-neutral-800 border-2 border-neutral-700 rounded-lg shadow-lg search-profile-card">
-			<div class="flex gap-6 mb-8">
-				<div class="flex-shrink-0">
-					<img class="w-32 h-32 rounded-lg object-cover border-2 border-neutral-600 spc-avatar" src="/assets/placeholder-avatar.jpg" alt="User avatar" />
-				</div>
-				<div class="flex-1">
-					<h2 class="text-3xl font-bold text-white mb-2 spc-username">Username</h2>
-					<p class="text-neutral-400 text-sm mb-4 spc-email">email@example.com</p>
-					<p class="text-neutral-500 text-xs font-mono spc-userid">ID: 0</p>
-				</div>
-			</div>
+		<div class="w-full cards flex items-center justify-center gap-10 rounded-xl search-profile-card" style="padding-top: 0px; padding-bottom: 64px;">
+			<div class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden rounded-xl hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300">
+				<div class="pt-4 px-4 pb-1 w-full flex flex-col gap-0">
+					<!-- Header with avatar and info -->
+					<div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
+						<!-- Avatar -->
+						<div class="relative flex-shrink-0 z-30">
+							<div class="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 aspect-square rounded-md overflow-hidden border-4 border-gray-400 dark:border-neutral-400 flex items-center justify-center bg-gray-200 dark:bg-neutral-800">
+								<img class="spc-avatar w-full h-full object-cover" src="/assets/placeholder-avatar.jpg" alt="User avatar" />
+							</div>
+						</div>
 
-			<div class="grid grid-cols-3 gap-4 mb-8 pb-8 border-b border-neutral-700">
-				<div class="text-center">
-					<div class="text-2xl font-bold text-cyan-400 spc-friends">0</div>
-					<div class="text-xs text-neutral-400 uppercase tracking-wide mt-1">Friends</div>
-				</div>
-				<div class="text-center">
-					<div class="text-2xl font-bold text-cyan-400 spc-wins">0</div>
-					<div class="text-xs text-neutral-400 uppercase tracking-wide mt-1">Wins</div>
-				</div>
-				<div class="text-center">
-					<div class="text-2xl font-bold text-cyan-400 spc-level">1</div>
-					<div class="text-xs text-neutral-400 uppercase tracking-wide mt-1">Level</div>
-				</div>
-			</div>
+						<!-- User info section -->
+						<div class="flex-1 w-full z-30">
+							<!-- Username -->
+							<h1 class="spc-username text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">Username</h1>
+							
+							<!-- Email -->
+							<div class="flex flex-wrap gap-x-8 gap-y-2 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
+								<div class="flex items-center gap-2">
+									<span class="font-extrabold text-black dark:text-white">Email:</span> 
+									<span class="spc-email text-gray-600 dark:text-neutral-400">email@example.com</span>
+								</div>
+							</div>
 
-			<div class="flex gap-3 flex-wrap spc-actions">
-				<button class="flex-1 min-w-[150px] px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors uppercase tracking-tight text-sm spc-chat">💬 Send Message</button>
-				<button class="flex-1 min-w-[150px] px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors uppercase tracking-tight text-sm spc-add">👥 Add Friend</button>
-				<button class="flex-1 min-w-[150px] px-4 py-3 bg-red-600/70 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors uppercase tracking-tight text-sm spc-block">🚫 Block</button>
-			</div>
+							<!-- Action buttons -->
+							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
+								<button class="spc-chat px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-blue-600 dark:bg-blue-700 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+									💬 Send Message
+								</button>
+								<button class="spc-add px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-accent-orange dark:bg-accent-green text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+									👥 Add Friend
+								</button>
+								<button class="spc-block px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-red-600 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+									🚫 Block
+								</button>
+							</div>
+						</div>
+					</div>
 
-			<div class="mt-8 pt-8 border-t border-neutral-700">
-				<h3 class="text-sm font-semibold text-neutral-300 uppercase tracking-wide mb-4">Socials</h3>
-				<div class="flex gap-2 spc-socials"></div>
+					<!-- Charts Section -->
+					<div id="search-profile-charts-section" class="flex flex-col gap-6 mt-0 p-4 border-t border-accent-cyan dark:border-accent-green">
+						<!-- Dynamically populated stats will go here -->
+					</div>
+				</div>
 			</div>
 		</div>
 	</template>
 
 	<!-- MAIN PROFILE -->
 	<template id="profile-template">
-		<div class="w-full cards flex items-center justify-center sm:p-6 md:p-8 gap-10 rounded-xl" style="padding-top: 0px;"
-			id="container">
+		<div class="w-full cards flex items-center justify-center sm:p-6 md:p-8 gap-10 rounded-xl" style="padding-top: 0px;" id="container">
 			<div
 				class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
 					overflow-hidden rounded-xl
@@ -389,15 +397,11 @@
 							<!-- Username -->
 							<h1 id="profile-username" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">User</h1>
 							
-							<!-- Email and ID -->
+							<!-- Email-->
 							<div class="flex flex-wrap gap-x-8 gap-y-2 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
 								<div class="flex items-center gap-2">
 									<span class="font-extrabold text-black dark:text-white">Email:</span> 
 									<span class="text-gray-600 dark:text-neutral-400" id="profile-email">email@example.com</span>
-								</div>
-								<div class="flex items-center gap-2">
-									<span class="font-extrabold text-black dark:text-white">User ID:</span> 
-									<span class="text-gray-600 dark:text-neutral-400" id="profile-id">0</span>
 								</div>
 							</div>
 
