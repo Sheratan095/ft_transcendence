@@ -93,17 +93,6 @@ export async function renderSearchProfileCard(
 
   // ===== Action Buttons =====
   const chatBtn = cardEl.querySelector('.spc-chat') as HTMLButtonElement | null;
-  if (chatBtn)
-  {
-    // Disable chat button if blocked or rejected
-    if (relationshipStatus !== 'accepted') 
-    {
-      chatBtn.disabled = true;
-      chatBtn.classList.remove('bg-accent-blue', 'hover:brightness-90', 'text-white');
-      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-    }
-  }
-
   if (chatBtn) {
     chatBtn.addEventListener('click', async () => {
       try {
@@ -118,45 +107,74 @@ export async function renderSearchProfileCard(
   console.log('Relationship status with user:', relationshipStatus);
 
   const addBtn = cardEl.querySelector('.spc-add') as HTMLButtonElement | null;
+  // Keep originals so we can restore appearance after unblock
+  const originalAddBtnText = addBtn?.textContent ?? '';
+  const originalAddBtnClass = addBtn?.className ?? '';
+
   if (addBtn) {
-    // Update button based on relationship status
+    addBtn.addEventListener('click', async () => {
+      if (addBtn.disabled) return;
+      try {
+        if (relationshipStatus === 'accepted') {
+          const success = await friendsManager.removeFriend(user.id);
+          if (success) {
+            relationshipStatus = null;
+            updateActionButtons();
+          }
+        } else {
+          const success = await friendsManager.addFriend(user.id);
+          if (success) {
+            relationshipStatus = 'pending';
+            updateActionButtons();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to change friendship:', err);
+      }
+    });
+  }
+
+  // Centralized updater for action buttons so UI matches initial render
+  function updateActionButtons() {
+    if (!chatBtn)
+        return;
+    if (relationshipStatus === 'accepted') {
+      chatBtn.disabled = false;
+      chatBtn.classList.remove('bg-neutral-600', 'text-neutral-400');
+      chatBtn.classList.add('bg-accent-blue', 'hover:brightness-90', 'text-white');
+    } else {
+      chatBtn.disabled = true;
+      chatBtn.classList.remove('bg-accent-blue', 'hover:brightness-90', 'text-white');
+      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400');
+    }
+
+    if (!addBtn)
+      return;
     if (relationshipStatus === 'pending') {
       addBtn.disabled = true;
       addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
       addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
       addBtn.textContent = '⏳ Request Pending';
     } else if (relationshipStatus === 'accepted') {
-      addBtn.disabled = true;
-      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
-      addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      addBtn.textContent = '✓ Already Friends';
-    } else if (relationshipStatus === 'rejected') {
-      // CHANGE NOTHING, THE USER CAN SEND ANOTHER REQUEST
-      // addBtn.disabled = true;
-      // addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
-      // addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      // addBtn.textContent = '✗ Rejected';
+      // When already friends, show a red "Remove Friend" button and allow removal
+      addBtn.disabled = false;
+      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90', 'bg-neutral-600', 'text-neutral-400');
+      addBtn.classList.add('bg-red-600', 'hover:brightness-90', 'text-white');
+      addBtn.textContent = '✖ Remove Friend';
     } else if (relationshipStatus === 'blocked') {
       addBtn.disabled = true;
       addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90', 'text-white');
       addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
     } else {
-      // No relationship - enable add friend button
-      addBtn.addEventListener('click', async () => {
-        try {
-          const success = await friendsManager.addFriend(user.id);
-          if (success) {
-            addBtn.disabled = true;
-            addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
-            addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-            addBtn.textContent = '⏳ Request Pending';
-          }
-        } catch (err) {
-          console.error('Failed to add friend:', err);
-        }
-      });
+      // no relationship or rejected -> restore
+      addBtn.disabled = false;
+      addBtn.className = originalAddBtnClass;
+      addBtn.textContent = originalAddBtnText;
     }
   }
+
+  // Apply initial state from fetched relationshipStatus
+  updateActionButtons();
 
   const blockBtn = cardEl.querySelector('.spc-block') as HTMLButtonElement | null;
   if (blockBtn)
@@ -180,6 +198,7 @@ export async function renderSearchProfileCard(
               blockBtn.classList.remove('bg-green-600');
               blockBtn.classList.add('bg-red-600');
               relationshipStatus = null; // Reset relationship status after unblocking
+              updateActionButtons();
             }
           } catch (err) {
             console.error('Failed to unblock user:', err);
@@ -193,7 +212,8 @@ export async function renderSearchProfileCard(
             blockBtn.textContent = '🔓 Unblock';
             blockBtn.classList.remove('bg-red-600');
             blockBtn.classList.add('bg-green-600');
-            relationshipStatus = 'blocked';
+          relationshipStatus = 'blocked';
+          updateActionButtons();
         }
       } catch (err) {
         console.error('Failed to block user:', err);

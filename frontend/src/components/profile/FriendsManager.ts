@@ -109,7 +109,7 @@ export class FriendsManager {
 
   async removeFriend(userId: string): Promise<boolean> {
     try {
-      const response = await fetch(`/api/relationships/removeFriend`, {
+      const response = await fetch(`/api/users/relationships/removeFriend`, {
         method: 'DELETE',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
