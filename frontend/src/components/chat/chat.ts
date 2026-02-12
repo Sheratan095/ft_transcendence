@@ -121,7 +121,7 @@ function renderChatList() {
       chatItem.classList.add('dark');
     }
     if (String(currentChatId) === String(chat.id)) {
-      chatItem.classList.add('active', 'border-blue-500', 'border-2', 'rounded', 'p-2');
+      chatItem.classList.add('active', 'border-accent-green', 'border-2', 'rounded', 'p-2');
       chatItem.setAttribute('aria-selected', 'true');
     } else {
       chatItem.setAttribute('aria-selected', 'false');
