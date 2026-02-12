@@ -308,10 +308,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
         const { createMatchHistoryChart, createGameStatsChart } = await import('./UserCardCharts');
 
         // Pong History
+        const pongHistoryWrapper = document.createElement('div');
+        pongHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col';
+        const pongHistoryChartId = `profile-pong-history-chart`;
         if (pongHistory && pongHistory.length > 0) {
-          const pongHistoryWrapper = document.createElement('div');
-          pongHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col';
-          const pongHistoryChartId = `profile-pong-history-chart`;
           pongHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${pongHistoryChartId}" class="w-full flex-1"></div>
@@ -321,13 +321,20 @@ export async function renderProfileCard(container: HTMLElement | null) {
           try {
             await createMatchHistoryChart(pongHistoryChartId, 'pong', { pongHistory }, user.id);
           } catch (e) { console.warn(e); }
+        } else {
+          pongHistoryWrapper.innerHTML = `
+            <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">TREND</h4>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+          `;
+          historyRow.appendChild(pongHistoryWrapper);
+          pongStatsElements.push(pongHistoryWrapper);
         }
 
         // Tris History
+        const trisHistoryWrapper = document.createElement('div');
+        trisHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col hidden';
+        const trisHistoryChartId = `profile-tris-history-chart`;
         if (trisHistory && trisHistory.length > 0) {
-          const trisHistoryWrapper = document.createElement('div');
-          trisHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col hidden';
-          const trisHistoryChartId = `profile-tris-history-chart`;
           trisHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
@@ -337,6 +344,13 @@ export async function renderProfileCard(container: HTMLElement | null) {
           try {
             await createMatchHistoryChart(trisHistoryChartId, 'tris', { trisHistory }, user.id);
           } catch (e) { console.warn(e); }
+        } else {
+          trisHistoryWrapper.innerHTML = `
+            <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+          `;
+          historyRow.appendChild(trisHistoryWrapper);
+          trisStatsElements.push(trisHistoryWrapper);
         }
 
         // Match list row - shows last few matches
@@ -392,9 +406,9 @@ export async function renderProfileCard(container: HTMLElement | null) {
         };
 
         // Pong Match List
+        const pongListWrapper = document.createElement('div');
+        pongListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col';
         if (pongHistory && pongHistory.length > 0) {
-          const pongListWrapper = document.createElement('div');
-          pongListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col';
           pongListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
@@ -403,17 +417,31 @@ export async function renderProfileCard(container: HTMLElement | null) {
           `;
           matchListRow.appendChild(pongListWrapper);
           pongStatsElements.push(pongListWrapper);
+        } else {
+          pongListWrapper.innerHTML = `
+            <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+          `;
+          matchListRow.appendChild(pongListWrapper);
+          pongStatsElements.push(pongListWrapper);
         }
 
         // Tris Match List
+        const trisListWrapper = document.createElement('div');
+        trisListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col hidden';
         if (trisHistory && trisHistory.length > 0) {
-          const trisListWrapper = document.createElement('div');
-          trisListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col hidden';
           trisListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
               ${createMatchListHTML(trisHistory, 'tris', 5)}
             </div>
+          `;
+          matchListRow.appendChild(trisListWrapper);
+          trisStatsElements.push(trisListWrapper);
+        } else {
+          trisListWrapper.innerHTML = `
+            <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           matchListRow.appendChild(trisListWrapper);
           trisStatsElements.push(trisListWrapper);
