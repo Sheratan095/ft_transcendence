@@ -81,6 +81,12 @@ export const	getMessages = async (req, reply) =>
 		const	limit = req.query.limit;
 		const	offset = req.query.offset;
 
+		if (!chatId)
+		{
+			console.log(`[CHAT] User ${userId} attempted to fetch messages without providing chatId`);
+			return (reply.code(400).send({ error: 'Bad Request', message: 'chatId query parameter is required' }));
+			}
+
 		if (await chatDb.isUserInChat(userId, chatId) === false)
 		{
 			console.log(`[CHAT] User ${userId} attempted to access messages for chat ${chatId} without membership`);

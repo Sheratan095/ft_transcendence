@@ -6,8 +6,8 @@ import { initChatButton, initHomeButton, removeHomeButton } from './components/s
 import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
-import { connectNotificationsWebSocket } from './components/profile/Notifications';
-import { setFriendsManager } from './components/profile/Notifications';
+import { connectNotificationsWebSocket } from './components/shared/Notifications';
+import { setFriendsManager } from './components/shared/Notifications';
 import { showTournamentListModal } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';

@@ -41,8 +41,8 @@ export default defineConfig(({ mode }) => {
       proxy.on('proxyReq', (proxyReq, req, res) => {
         proxyReq.setHeader('Origin', env.VITE_WS_TARGET || 'wss://localhost:3000');
       });
-        proxy.on('close', (err, socket) => {
-          console.warn('[ws proxy close] websocket connection closed', err ? err : 'no error');
+        proxy.on('close', (_err, _socket) => {
+          // suppressed: socket close logs are noisy during dev (HMR/clients reconnect frequently)
         });
     },
   };

@@ -3,7 +3,7 @@ import { FriendsManager } from './FriendsManager';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories } from '../../lib/matchHistory';
 import { initCardHoverEffect } from '../../lib/card';
-import { onRelationshipEvent } from './Notifications';
+import { onRelationshipEvent } from '../shared/Notifications';
 
 export async function renderSearchProfileCard(
   userId: string,

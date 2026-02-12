@@ -12,9 +12,14 @@ let unreadCounts: Map<string, number> = new Map(); // Track unread message count
 let messageOffset = 0;
 const MESSAGE_LIMIT = 50;
 
+// WebSocket connection state management
+let isConnecting = false;
+let connectionPromise: Promise<WebSocket> | null = null;
+
 export function initChat(userId: string) {
   currentUserId = userId;
-  connectChatWebSocket();
+  // Ensure only one connection is established at startup
+  connectChatWebSocket().catch(err => console.error('Failed to establish chat connection:', err));
 }
 
 export async function openChatModal() {
@@ -181,7 +186,6 @@ async function loadMessages(chatId: string, offset = 0) {
     }
 
     const newMessages = await response.json();
-    console.log('[CHAT] Loaded messages:', newMessages);
 
     // Reverse to show oldest first (WhatsApp style)
     if (offset === 0) {
@@ -277,8 +281,6 @@ export async function renderMessages() {
     const matchedMember = membersForChat.find((m: any) => String(m.userId) === String(senderId));
     const displayName = msg.from || (matchedMember && matchedMember.username) || (msg.senderName) || senderId;
 
-    console.log(msg.from);
-
     messageDiv.innerHTML = `
       ${!isSent ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(displayName)}</div>` : ''}
       <div class="message-content">${escapeHtml(msg.content)}</div>
@@ -310,22 +312,39 @@ let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_DELAY = 3000;
 
+/**
+ * Establishes a single persistent WebSocket connection for chat
+ * Uses a singleton pattern to ensure only one connection exists
+ */
 export function connectChatWebSocket(): Promise<WebSocket> {
+  // Return existing connection if already open
   if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+    console.log('Chat WebSocket already connected');
     return Promise.resolve(chatSocket);
   }
 
-  const wsUrl = `/chat/ws`;
+  // If connecting is in progress, return the existing promise to avoid multiple concurrent attempts
+  if (isConnecting && connectionPromise) {
+    console.log('Connection already in progress, returning cached promise');
+    return connectionPromise;
+  }
 
-  console.log('Connecting to chat WebSocket at', wsUrl);
-  return new Promise((resolve, reject) => {
+  // Set flag to indicate connection is starting
+  isConnecting = true;
+
+  const wsUrl = `/chat/ws`;
+  console.log('Establishing chat WebSocket connection at', wsUrl);
+
+  connectionPromise = new Promise((resolve, reject) => {
     try {
       const socket = new WebSocket(wsUrl);
       chatSocket = socket;
 
       socket.onopen = () => {
-        console.log('Chat WebSocket connected');
+        console.log('✅ Chat WebSocket successfully connected');
+        isConnecting = false;
         reconnectAttempts = 0; // Reset on successful connection
+        connectionPromise = null;
         resolve(socket);
       };
 
@@ -338,34 +357,42 @@ export function connectChatWebSocket(): Promise<WebSocket> {
       };
 
       socket.onerror = (event) => {
-        console.error('Chat WebSocket error', event);
+        console.error('❌ Chat WebSocket error', event);
+        isConnecting = false;
+        connectionPromise = null;
         reject(event);
       };
 
       socket.onclose = () => {
-        console.warn('Chat WebSocket closed');
+        console.warn('⚠️ Chat WebSocket closed');
+        isConnecting = false;
+        connectionPromise = null;
         chatSocket = null;
         
-        // Attempt to reconnect
+        // Attempt to reconnect with exponential backoff
         if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
           reconnectAttempts++;
-          console.log(`Reconnecting... Attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+          const delayMs = RECONNECT_DELAY * Math.pow(1.5, reconnectAttempts - 1);
+          console.log(`🔄 Reconnecting... Attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${Math.round(delayMs)}ms`);
           setTimeout(() => {
             connectChatWebSocket().catch(err => console.error('Reconnection failed:', err));
-          }, RECONNECT_DELAY);
+          }, delayMs);
         } else {
-          console.error('Max reconnection attempts reached');
+          console.error('❌ Max reconnection attempts reached');
         }
       };
     } catch (error) {
-      console.error('Connection error:', error);
+      console.error('Connection initialization error:', error);
+      isConnecting = false;
+      connectionPromise = null;
       reject(error);
     }
   });
+
+  return connectionPromise;
 }
 
 function handleWebSocketMessage(data: any) {
-  console.log('Received WebSocket message:', data);
 
   // Normalize incoming message formats from different server implementations.
   // Some servers use { event: 'name', ... } while others use { type: 'name', ... }
@@ -377,6 +404,7 @@ function handleWebSocketMessage(data: any) {
 
   switch (eventName) {
     case 'chat.message':
+      console.log('Received deprecated chat.message event, handling as chat.chatMessage for compatibility');
       handleChatMessage(data);
       break;
     case 'chat.systemMessage':
@@ -391,13 +419,18 @@ function handleWebSocketMessage(data: any) {
     case 'chat.privateMessage':
       handlePrivateMessage(data);
       break;
+    case 'chat.joined':
+      handleChatJoined(data);
+      break;
     default:
       console.warn('Unhandled chat websocket event:', eventName);
   }
 }
 
 function handleChatMessage(data: any) {
-  const chatId = data.chatId;
+  // Handle both flat and nested data structures
+  const messageData = data.data || data;
+  const chatId = messageData.chatId;
 
   if (!messages.has(chatId)) {
     messages.set(chatId, []);
@@ -405,27 +438,38 @@ function handleChatMessage(data: any) {
 
   const chatMessages = messages.get(chatId)!;
   chatMessages.push({
-    id: data.messageId,
-    senderId: String(data.senderId),
-    from: data.from,
-    content: data.content,
-    createdAt: data.timestamp,
-    messageStatus: data.messageStatus || 'sent',
+    id: messageData.messageId,
+    senderId: String(messageData.senderId),
+    from: messageData.from,
+    content: messageData.content,
+    createdAt: messageData.timestamp,
+    messageStatus: messageData.messageStatus || 'sent',
     isPrivate: false
   });
 
   // Show toast notification if not currently viewing this chat
   if (currentChatId !== chatId) {
-    const sender = data.from || 'Someone';
-    const preview = data.content.substring(0, 30);
-    const displayText = preview.length < data.content.length ? `${preview}...` : preview;
-    showToast(`📨 ${sender}: ${displayText}`, 'info', {
+    const sender = messageData.from || 'Someone';
+    const preview = messageData.content.substring(0, 30);
+    const displayText = preview.length < messageData.content.length ? `${preview}...` : preview;
+    
+    // Get chat name for better context
+    const chat = chats.find(c => c.id === chatId);
+    const chatName = chat ? getChatDisplayName(chat) : 'Group Chat';
+    
+    showToast(`🗣️ ${chatName}: ${sender} - ${displayText}`, 'info', {
       duration: 0,
       position: 'top-right',
-      onClick: () => {
-        openChatModal();
-        selectChat(chatId);
-      }
+      actions: [
+        {
+          label: 'Open',
+          onClick: () => {
+            openChatModal();
+            selectChat(chatId);
+          },
+          style: 'primary'
+        }
+      ]
     });
     
     // Track unread message
@@ -439,7 +483,9 @@ function handleChatMessage(data: any) {
 }
 
 function handleSystemMessage(data: any) {
-  const chatId = data.chatId;
+  // Handle both flat and nested data structures
+  const messageData = data.data || data;
+  const chatId = messageData.chatId;
 
   if (!messages.has(chatId)) {
     messages.set(chatId, []);
@@ -447,10 +493,10 @@ function handleSystemMessage(data: any) {
 
   const chatMessages = messages.get(chatId)!;
   chatMessages.push({
-    id: data.messageId,
+    id: messageData.messageId,
     senderId: 'system',
-    content: data.message,
-    createdAt: data.timestamp,
+    content: messageData.message,
+    createdAt: messageData.timestamp,
     isSystem: true
   });
 
@@ -458,13 +504,37 @@ function handleSystemMessage(data: any) {
     renderMessages();
     scrollToBottom();
   } else {
-    showToast(data.message, 'info');
+    // Show toast for system messages (user join/leave, etc) if not currently in chat
+    const chat = chats.find(c => c.id === chatId);
+    const chatName = chat ? getChatDisplayName(chat) : 'Group Chat';
+    
+    // Add emoji based on message type
+    let emoji = '📌';
+    if (messageData.message.includes('added')) emoji = '➕';
+    if (messageData.message.includes('left')) emoji = '➖';
+    
+    showToast(`${emoji} ${chatName}: ${messageData.message}`, 'info', {
+      duration: 4000,
+      position: 'top-right',
+      actions: [
+        {
+          label: 'View',
+          onClick: () => {
+            openChatModal();
+            selectChat(chatId);
+          },
+          style: 'primary'
+        }
+      ]
+    });
   }
 }
 
 function handleMessageSent(data: any) {
-  console.log('Message sent confirmation:', data);
-  const { messageId, chatId, content, status, name, chatType } = data;
+  // Handle both flat and nested data structures
+  const messageData = data.data || data;
+  console.log('Message sent confirmation:', messageData);
+  const { messageId, chatId, content, status, name, chatType } = messageData;
   
   if (!messages.has(chatId)) {
     messages.set(chatId, []);
@@ -504,8 +574,10 @@ function handleMessageSent(data: any) {
 }
 
 function handleMessageStatusUpdate(data: any) {
-  console.log('Message status updated:', data);
-  const { messageId, chatId, status } = data;
+  // Handle both flat and nested data structures
+  const messageData = data.data || data;
+  console.log('Message status updated:', messageData);
+  const { messageId, chatId, status } = messageData;
   
   if (messages.has(chatId)) {
     const chatMessages = messages.get(chatId)!;
@@ -581,6 +653,38 @@ function handlePrivateMessage(data: any) {
     // Only update chat list if new chat was created or unread count changed
     renderChatList();
   }
+}
+
+function handleChatJoined(data: any) {
+  // Handle both flat and nested data structures
+  const messageData = data.data || data;
+  const { chatId, invitedBy, systemMessage } = messageData;
+
+  console.log('User was added to chat:', chatId);
+
+  // Reload chats to include the new group
+  loadChats().then(() => {
+    renderChatList();
+  }).catch(err => {
+    console.error('Failed to reload chats after joining:', err);
+  });
+
+  // Show notification to user
+  showToast(`✨ You've been added to a new group by ${invitedBy}!`, 'info', {
+    duration: 0,
+    position: 'top-right',
+    actions: [
+      {
+        label: 'View Group',
+        onClick: () => {
+          openChatModal();
+          // Select the newly joined chat
+          selectChat(chatId);
+        },
+        style: 'primary'
+      }
+    ]
+  });
 }
 
 function markChatAsRead(chatId: string) {

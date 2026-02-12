@@ -2,7 +2,7 @@ import { logout, deleteAccout, fetchUserProfile, SaveCurrentUserProfile, fetchLo
 import { openChatModal } from '../chat/chat';
 import type { User } from '../../lib/auth';
 import { FriendsManager } from './FriendsManager';
-import { setFriendsManager } from './Notifications';
+import { setFriendsManager } from '../shared/Notifications';
 import { setLocaleInStorage } from 'intlayer';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';

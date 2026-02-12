@@ -96,7 +96,7 @@ Response (acknowledgment to sender):
 **SERVER → CLIENT EVENTS**
 
 
-- **chat.chatMessage** - Message received in a chat
+- **chat.message** - Message received in a chat
 \`\`\`json
 {
   "event": "chat.message",

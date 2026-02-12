@@ -58,7 +58,7 @@ class	ChatConnectionManager
 			timestamp: timestamp,
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message', timestamp);
+		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message', timestamp, senderId);
 
 		const	status = await chatDb.getOverallMessageStatus(messageId);
 
@@ -197,7 +197,7 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'chat.messageStatusUpdate', data);
 	}
 
-	async	#dispatchEventToChat(chatId, data, chatDb, createMessageStatus=false, eventType, timestamp=null)
+	async	#dispatchEventToChat(chatId, data, chatDb, createMessageStatus=false, eventType, timestamp=null, excludeUserId=null)
 	{
 		// Get users in chat
 		const	userIds = await chatDb.getUsersInChat(chatId);
@@ -205,6 +205,9 @@ class	ChatConnectionManager
 		// Send to each user in the chat
 		for (const userId of userIds)
 		{
+			if (excludeUserId && userId === excludeUserId)
+				continue;
+
 			const	socket = this._connections.get(userId);
 			if (socket)
 			{
@@ -217,6 +220,7 @@ class	ChatConnectionManager
 						"delivered",
 						timestamp
 					);
+					console.log(`[CHAT] Message ${data.messageId} delivered to user ${userId} in chat ${chatId}`);
 				}
 			}
 			else
