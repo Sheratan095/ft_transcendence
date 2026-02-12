@@ -49,6 +49,23 @@ export function closeChatModal() {
 
   // Reset state
   currentChatId = null;
+
+  // Clear chat header and messages to reflect no selection
+  const chatHeader = document.getElementById('chat-header');
+  if (chatHeader) chatHeader.textContent = 'Select a chat';
+
+  const chatMessages = document.getElementById('chat-messages');
+  if (chatMessages) chatMessages.innerHTML = '';
+
+  const leaveGroupBtn = document.getElementById('leave-group-btn');
+  if (leaveGroupBtn) leaveGroupBtn.classList.add('hidden');
+
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+
+  // Re-render chat list to remove any active highlight
+  renderChatList();
+  updateChatControls();
 }
 
 async function loadChats() {
@@ -78,7 +95,7 @@ async function loadChats() {
       }
     });
 
-    currentChatId = chats.length > 0 ? chats[0].id : null;
+    // Do not auto-select a chat when loading the list; keep currentChatId as-is
     renderChatList();
   } catch (err) {
     console.error('Error loading chats:', err);
@@ -98,11 +115,20 @@ function renderChatList() {
 
   chats.forEach(chat => {
     const chatItem = document.createElement('div');
-    chatItem.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
+    chatItem.id = `chat-item-${chat.id}`;
+    chatItem.className = 'chat-item';
     if (getCurrentTheme() === 'dark') {
       chatItem.classList.add('dark');
     }
-    chatItem.onclick = () => selectChat(chat.id);
+    if (String(currentChatId) === String(chat.id)) {
+      chatItem.classList.add('active', 'border-blue-500', 'border-2', 'rounded', 'p-2');
+      chatItem.setAttribute('aria-selected', 'true');
+    } else {
+      chatItem.setAttribute('aria-selected', 'false');
+    }
+    chatItem.onclick = () => {
+      selectChat(chat.id);
+    };
 
     const chatName = document.createElement('div');
     chatName.className = 'chat-item-name text-size-lg font-medium';
@@ -128,9 +154,32 @@ function renderChatList() {
     chatItem.appendChild(chatName);
     chatItem.appendChild(chatType);
     chatList.appendChild(chatItem);
+    // Ensure the active chat is visible in the list
+    if (String(currentChatId) === String(chat.id)) {
+      setTimeout(() => {
+        chatItem.scrollIntoView({ block: 'nearest' });
+      }, 0);
+    }
   });
 
-  currentChatId = currentChatId || chats[0].id;
+  // Do not auto-select the first chat on render; preserve existing selection (or none)
+  updateChatControls();
+}
+
+function updateChatControls() {
+  const input = document.getElementById('chat-input') as HTMLInputElement | null;
+  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement | null;
+
+  const enabled = !!currentChatId;
+
+  if (input) {
+    input.disabled = !enabled;
+    input.placeholder = enabled ? 'Type a message...' : 'Select a chat to start messaging';
+  }
+
+  if (sendBtn) {
+    sendBtn.disabled = !enabled;
+  }
 }
 
 function getChatDisplayName(chat: any): string {
@@ -143,6 +192,10 @@ function getChatDisplayName(chat: any): string {
 }
 
 async function selectChat(chatId: string) {
+  if (!chatId) {
+    console.warn('selectChat called with invalid chatId:', chatId);
+    return;
+  }
   currentChatId = chatId;
   messageOffset = 0;
 
@@ -175,6 +228,10 @@ async function selectChat(chatId: string) {
 }
 
 async function loadMessages(chatId: string, offset = 0) {
+  if (!chatId) {
+    console.warn('loadMessages called with invalid chatId:', chatId);
+    return;
+  }
   try {
     const response = await fetch(`/api/chat/messages?chatId=${chatId}&limit=${MESSAGE_LIMIT}&offset=${offset}`, {
       method: 'GET',
@@ -407,7 +464,12 @@ function handleWebSocketMessage(data: any) {
       console.log('Received deprecated chat.message event, handling as chat.chatMessage for compatibility');
       handleChatMessage(data);
       break;
+    case 'chat.chatMessage':
+      handleChatMessage(data);
+      break;
     case 'chat.systemMessage':
+    case 'chat.sytemMessage':
+      // accept both correct and misspelled event names
       handleSystemMessage(data);
       break;
     case 'chat.messageSent':
@@ -422,6 +484,22 @@ function handleWebSocketMessage(data: any) {
     case 'chat.joined':
       handleChatJoined(data);
       break;
+    case 'chat.created':
+      handleChatCreated(data);
+      break;
+    case 'chat.added':
+      handleChatAdded(data);
+      break;
+    case 'pong':
+      // keep-alive/ping response from server; ignore or use for metrics
+      // console.log('Received pong from server', data);
+      break;
+    case 'error':
+      // Server-side error event (payload in data.data or data)
+      const errPayload = data.data || data;
+      console.error('WebSocket error event from server:', errPayload && errPayload.message ? errPayload.message : errPayload);
+      showToast(`⚠️ Chat error: ${errPayload?.message || 'See console'}`, 'error', { duration: 4000, position: 'top-right' });
+      break;
     default:
       console.warn('Unhandled chat websocket event:', eventName);
   }
@@ -431,6 +509,12 @@ function handleChatMessage(data: any) {
   // Handle both flat and nested data structures
   const messageData = data.data || data;
   const chatId = messageData.chatId;
+
+  if (!chatId) {
+    console.warn('Received chat message without chatId', messageData);
+    showToast('Received message for unknown chat (missing chatId)', 'error', { duration: 4000, position: 'top-right' });
+    return;
+  }
 
   if (!messages.has(chatId)) {
     messages.set(chatId, []);
@@ -499,34 +583,77 @@ function handleSystemMessage(data: any) {
     createdAt: messageData.timestamp,
     isSystem: true
   });
+  // Update chat members for join/leave system events if present
+  const ev = messageData.event || messageData.type || null;
+  if (ev === 'userJoin' || ev === 'userLeave') {
+    const members = chatMembers.get(chatId) || [];
 
+    if (ev === 'userJoin' && messageData.userId) {
+      const exists = members.find((m: any) => String(m.userId) === String(messageData.userId));
+      if (!exists) {
+        const newMember = { userId: String(messageData.userId), username: messageData.username };
+        members.push(newMember);
+        chatMembers.set(chatId, members);
+
+        // update in chats array if present
+        const chatObj = chats.find(c => c.id === chatId);
+        if (chatObj) {
+          chatObj.members = chatObj.members ? [...chatObj.members, newMember] : [newMember];
+        }
+      }
+    }
+
+    if (ev === 'userLeave' && messageData.userId) {
+      const updated = members.filter((m: any) => String(m.userId) !== String(messageData.userId));
+      chatMembers.set(chatId, updated);
+
+      const chatObj = chats.find(c => c.id === chatId);
+      if (chatObj && chatObj.members) chatObj.members = chatObj.members.filter((m: any) => String(m.userId) !== String(messageData.userId));
+    }
+
+    // If not viewing this chat, show a toast and mark unread
+    if (currentChatId !== chatId) {
+      const chat = chats.find(c => c.id === chatId);
+      const chatName = chat ? getChatDisplayName(chat) : 'Group Chat';
+      const emoji = ev === 'userJoin' ? '➕' : '➖';
+      showToast(`${emoji} ${chatName}: ${messageData.message}`, 'info', {
+        duration: 4000,
+        position: 'top-right',
+        actions: [
+          {
+            label: 'View',
+            onClick: () => {
+              openChatModal();
+              selectChat(chatId);
+            },
+            style: 'primary'
+          }
+        ]
+      });
+
+      const unreadCount = (unreadCounts.get(chatId) || 0) + 1;
+      unreadCounts.set(chatId, unreadCount);
+      renderChatList();
+    } else {
+      // currently viewing -> refresh messages and member list
+      renderMessages();
+      scrollToBottom();
+      renderChatList();
+    }
+    return;
+  }
+
+  // Generic system messages: show in current chat or toast otherwise
   if (currentChatId === chatId) {
     renderMessages();
     scrollToBottom();
   } else {
-    // Show toast for system messages (user join/leave, etc) if not currently in chat
     const chat = chats.find(c => c.id === chatId);
     const chatName = chat ? getChatDisplayName(chat) : 'Group Chat';
-    
-    // Add emoji based on message type
-    let emoji = '📌';
-    if (messageData.message.includes('added')) emoji = '➕';
-    if (messageData.message.includes('left')) emoji = '➖';
-    
-    showToast(`${emoji} ${chatName}: ${messageData.message}`, 'info', {
-      duration: 4000,
-      position: 'top-right',
-      actions: [
-        {
-          label: 'View',
-          onClick: () => {
-            openChatModal();
-            selectChat(chatId);
-          },
-          style: 'primary'
-        }
-      ]
-    });
+    showToast(`📌 ${chatName}: ${messageData.message}`, 'info', { duration: 4000, position: 'top-right', actions: [{ label: 'View', onClick: () => { openChatModal(); selectChat(chatId); }, style: 'primary' }] });
+    const unreadCount = (unreadCounts.get(chatId) || 0) + 1;
+    unreadCounts.set(chatId, unreadCount);
+    renderChatList();
   }
 }
 
@@ -595,6 +722,17 @@ function handlePrivateMessage(data: any) {
   // Handle both flat and nested data structures
   const messageData = data.data || data;
   const { chatId, senderId, from, content, timestamp } = messageData;
+  if (!senderId) {
+    console.warn('Received private message without senderId', messageData);
+    showToast('Received private message with missing sender', 'error', { duration: 4000, position: 'top-right' });
+    return;
+  }
+  if (!chatId) {
+    console.warn('Received private message without chatId', messageData);
+    // create a DM entry using senderId as fallback chat id
+    const fallbackId = `dm_${senderId}_${Date.now()}`;
+    messageData.chatId = fallbackId;
+  }
   let dmChat = chats.find(c => c.id === String(chatId));
   console.log('DM chat found:', dmChat);
   if (!dmChat) {
@@ -687,7 +825,76 @@ function handleChatJoined(data: any) {
   });
 }
 
+function handleChatCreated(data: any) {
+  const messageData = data.data || data;
+  const { chatId, name, members, chatType } = messageData;
+  if (!chatId) {
+    console.warn('chat.created missing chatId', messageData);
+    showToast('Server created a chat but no id was provided', 'error', { duration: 4000, position: 'top-right' });
+    return;
+  }
+
+  // Avoid duplicates
+  if (chats.find(c => c.id === chatId)) return;
+
+  const newChat: any = {
+    id: String(chatId),
+    name: name || 'New Chat',
+    chatType: chatType || 'group',
+    members: Array.isArray(members) ? members : []
+  };
+
+  // store members
+  if (newChat.members.length) chatMembers.set(newChat.id, newChat.members);
+
+  // For DM, set otherUserId
+  if (newChat.chatType === 'dm' && newChat.members) {
+    const other = newChat.members.find((m: any) => String(m.userId) !== String(currentUserId));
+    if (other) newChat.otherUserId = String(other.userId);
+  }
+
+  chats.push(newChat);
+  renderChatList();
+
+  showToast(`✨ New chat created: ${newChat.name}`, 'info', {
+    duration: 0,
+    position: 'top-right',
+    actions: [{ label: 'Open', onClick: () => { openChatModal(); selectChat(newChat.id); }, style: 'primary' }]
+  });
+}
+
+function handleChatAdded(data: any) {
+  const messageData = data.data || data;
+  const { chatId, userId, username } = messageData;
+  if (!chatId || !userId) {
+    console.warn('chat.added missing fields', messageData);
+    return;
+  }
+
+  const members = chatMembers.get(chatId) || [];
+  const exists = members.find((m: any) => String(m.userId) === String(userId));
+  if (!exists) {
+    const newMember = { userId: String(userId), username };
+    members.push(newMember);
+    chatMembers.set(chatId, members);
+
+    const chatObj = chats.find(c => c.id === chatId);
+    if (chatObj) {
+      chatObj.members = chatObj.members ? [...chatObj.members, newMember] : [newMember];
+    }
+
+    // Notify user
+    const chatName = chatObj ? getChatDisplayName(chatObj) : 'Group Chat';
+    showToast(`➕ ${chatName}: ${username} added`, 'info', { duration: 4000, position: 'top-right' });
+    renderChatList();
+  }
+}
+
 function markChatAsRead(chatId: string) {
+  if (!chatId) {
+    console.warn('markChatAsRead called with invalid chatId:', chatId);
+    return;
+  }
   // Clear unread count and re-render chat list
   unreadCounts.delete(chatId);
   renderChatList();
