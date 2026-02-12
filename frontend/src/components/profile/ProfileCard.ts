@@ -224,12 +224,12 @@ export async function renderProfileCard(container: HTMLElement | null) {
         
         // SINGLE horizontal row for stats components
         const mainRow = document.createElement('div');
-        mainRow.className = 'flex flex-row flex-wrap lg:flex-nowrap gap-4 w-full';
+        mainRow.className = 'flex flex-row flex-wrap lg:flex-nowrap gap-2 w-full';
         chartsSection.appendChild(mainRow);
 
         // History row sits under the stats row (initially same view visibility)
         const historyRow = document.createElement('div');
-        historyRow.className = 'flex flex-row flex-wrap lg:flex-nowrap gap-4 w-full mt-3';
+        historyRow.className = 'flex flex-row flex-wrap lg:flex-nowrap gap-2 w-full mt-0';
         chartsSection.appendChild(historyRow);
 
         const pongStatsElements: HTMLElement[] = [];
@@ -238,7 +238,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Pong Summary
         if (gameStats.pongWins !== undefined) {
           const pongDiv = document.createElement('div');
-          pongDiv.className = 'rounded-lg p-3 flex flex-col items-center gap-2 flex-1 min-w-[200px] h-40';
+          pongDiv.className = 'rounded-lg flex flex-col items-center gap-2 flex-1 min-w-[200px] h-15';
 
           const pongWins = gameStats.pongWins || 0;
           const pongLosses = gameStats.pongLosses || 0;
@@ -272,7 +272,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Tris Summary
         if (gameStats.trisWins !== undefined) {
           const trisDiv = document.createElement('div');
-          trisDiv.className = 'rounded-lg p-3 flex flex-col items-center gap-2 flex-1 min-w-[200px] h-40 hidden';
+          trisDiv.className = 'rounded-lg flex flex-col items-center gap-2 flex-1 min-w-[200px] h-15 hidden';
           
           const trisWins = gameStats.trisWins || 0;
           const trisLosses = gameStats.trisLosses || 0;
@@ -310,10 +310,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Pong History
         if (pongHistory && pongHistory.length > 0) {
           const pongHistoryWrapper = document.createElement('div');
-          pongHistoryWrapper.className = 'rounded-lg p-3 flex-1 min-w-[250px] h-32 flex flex-col';
+          pongHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col';
           const pongHistoryChartId = `profile-pong-history-chart`;
           pongHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#00bcd4] mb-1 uppercase tracking-[0.2em]">GAME HISTORY</h4>
+            <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${pongHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(pongHistoryWrapper);
@@ -326,10 +326,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
         // Tris History
         if (trisHistory && trisHistory.length > 0) {
           const trisHistoryWrapper = document.createElement('div');
-          trisHistoryWrapper.className = 'rounded-lg p-3 flex-1 min-w-[250px] h-32 flex flex-col hidden';
+          trisHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col hidden';
           const trisHistoryChartId = `profile-tris-history-chart`;
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#0dff66] mb-1 uppercase tracking-[0.2em]">GAME HISTORY</h4>
+            <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
@@ -337,6 +337,86 @@ export async function renderProfileCard(container: HTMLElement | null) {
           try {
             await createMatchHistoryChart(trisHistoryChartId, 'tris', { trisHistory }, user.id);
           } catch (e) { console.warn(e); }
+        }
+
+        // Match list row - shows last few matches
+        const matchListRow = document.createElement('div');
+        matchListRow.className = 'flex flex-row flex-wrap lg:flex-nowrap gap-2 w-full mt-2';
+        chartsSection.appendChild(matchListRow);
+
+        // Helper function to create match list items
+        const createMatchListHTML = (matches: any[], gameType: 'pong' | 'tris', limit: number = 5) => {
+          if (!matches || matches.length === 0) return '';
+          const recent = matches.slice(-limit).reverse();
+          return recent.map((match, idx) => {
+            const isWin = match.winnerId === user.id;
+            
+            if (gameType === 'pong') {
+              // For Pong: W/L on left, centered names/scores, date on right
+              const opponent = match.playerLeftId === user.id ? match.playerRightUsername : match.playerLeftUsername;
+              const yourScore = match.playerLeftId === user.id ? match.playerLeftScore : match.playerRightScore;
+              const opponentScore = match.playerLeftId === user.id ? match.playerRightScore : match.playerLeftScore;
+              const matchDate = new Date(match.endedAt);
+              const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              
+              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
+                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+                <div class="text-center">
+                  <span class="font-semibold">(${yourScore})</span> <span class="text-neutral-300">you vs <span class="font-semibold text-neutral-200">${opponent}</span> <span class="font-semibold">(${opponentScore})</span></span>
+                </div>
+                <div class="text-right text-neutral-400 whitespace-nowrap pr-15">
+                  ${dateStr} ${timeStr}
+                </div>
+              </div>`;
+            }
+            else {
+              console.log('Match data for Tris:', match);
+              // For Tris: W/L on left, centered names, date on right
+              const opponent = match.playerOId === user.id ? match.playerXUsername  : match.playerOUsername;
+              const matchDate = new Date(match.endedAt);
+              const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              
+              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
+                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+                <div class="text-center">
+                  <span class="text-neutral-300">you vs <span class="font-semibold text-neutral-200">${opponent}</span></span>
+                </div>
+                <div class="text-right text-neutral-400 whitespace-nowrap pr-8">
+                  ${dateStr} ${timeStr}
+                </div>
+              </div>`;
+            }
+          }).join('');
+        };
+
+        // Pong Match List
+        if (pongHistory && pongHistory.length > 0) {
+          const pongListWrapper = document.createElement('div');
+          pongListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col';
+          pongListWrapper.innerHTML = `
+            <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <div class="space-y-1 flex-1 overflow-y-auto text-xs">
+              ${createMatchListHTML(pongHistory, 'pong', 5)}
+            </div>
+          `;
+          matchListRow.appendChild(pongListWrapper);
+          pongStatsElements.push(pongListWrapper);
+        }
+
+        // Tris Match List
+        if (trisHistory && trisHistory.length > 0) {
+          const trisListWrapper = document.createElement('div');
+          trisListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col hidden';
+          trisListWrapper.innerHTML = `
+            <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <div class="space-y-1 flex-1 overflow-y-auto text-xs">
+              ${createMatchListHTML(trisHistory, 'tris', 5)}
+            </div>
+          `;
+          matchListRow.appendChild(trisListWrapper);
+          trisStatsElements.push(trisListWrapper);
         }
 
         // Selector buttons logic
