@@ -36,6 +36,10 @@ export default defineConfig(({ mode }) => {
     rejectUnauthorized: false,
     configure: (proxy, _options) => {
       proxy.on('error', (err, req, res) => {
+        // Suppress EPIPE and socket-ended errors; these are normal during dev when connections close/reconnect
+        if (err && (err.code === 'EPIPE' || err.message?.includes('socket has been ended'))) {
+          return;
+        }
         console.error('[ws proxy error]', err);
       });
       proxy.on('proxyReq', (proxyReq, req, res) => {

@@ -1,4 +1,4 @@
-import { showInfoToast, showToast } from '../shared/Toast';
+import { showInfoToast, showToast, showErrorToast } from '../shared/Toast';
 import { getCurrentTheme } from '../../lib/theme';
 import type { User } from '../../lib/auth';
 
@@ -399,6 +399,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
 
       socket.onopen = () => {
         console.log('✅ Chat WebSocket successfully connected');
+        showInfoToast('Connected to chat', { duration: 3000});
         isConnecting = false;
         reconnectAttempts = 0; // Reset on successful connection
         connectionPromise = null;
@@ -415,6 +416,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
 
       socket.onerror = (event) => {
         console.error('❌ Chat WebSocket error', event);
+        showErrorToast('Chat WebSocket error', { duration: 4000, position: 'top-right' });
         isConnecting = false;
         connectionPromise = null;
         reject(event);
@@ -422,6 +424,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
 
       socket.onclose = () => {
         console.warn('⚠️ Chat WebSocket closed');
+        showErrorToast('⚠️ Chat disconnected', { duration: 4000, position: 'top-right' });
         isConnecting = false;
         connectionPromise = null;
         chatSocket = null;
@@ -436,6 +439,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
           }, delayMs);
         } else {
           console.error('❌ Max reconnection attempts reached');
+          showErrorToast('❌ Chat disconnected (could not reconnect)', { duration: 5000, position: 'top-right' });
         }
       };
     } catch (error) {
