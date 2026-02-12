@@ -171,9 +171,19 @@ export const	addUserToChat = async (req, reply) =>
 
 		const chatName = await chatDb.getChatName(chatId);
 
-		// Notify the user newly added to the chat
-		if (chatConnectionManager.notifyNewlyAddedUser(toUserId, chatId, chatName, fromUsername) === false)
-			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
+		// Notify the user newly added to the chat by sending a `chat.joined` event
+		try {
+			await chatConnectionManager.sendChatJoinedToUser(chatId, toUserId, fromUsername, `You were added to "${chatName}" by ${fromUsername}.`, timestamp);
+		} catch (notifyErr) {
+			console.error(`[CHAT] Failed to send chat.joined to user ${toUserId} for chat ${chatId}:`, notifyErr);
+			// Fallback: attempt the older notification method
+			try {
+				const fallback = chatConnectionManager.notifyNewlyAddedUser(toUserId, chatId, chatName, fromUsername);
+				if (fallback === false) console.error(`[CHAT] Fallback notifyNewlyAddedUser also failed for user ${toUserId}`);
+			} catch (fallbackErr) {
+				console.error(`[CHAT] Fallback notify failed for user ${toUserId}:`, fallbackErr);
+			}
+		}
 
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 
