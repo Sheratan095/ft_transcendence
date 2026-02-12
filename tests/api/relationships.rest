@@ -62,14 +62,7 @@ Content-Type: application/json
 }
 
 ### Unblock a user
-DELETE {{baseUrl}}/relationships/unblock
-x-internal-api-key: {{apiKey}}
-Authorization: Bearer {{jwt}}
-Content-Type: application/json
-
-{
-  "blockedId": "{{userId2}}"
-}
+GET https://localhost:3000/users/relationships/getUsersRelationship?userId=1
 
 ### Remove a friend or cancel friend request
 DELETE {{baseUrl}}/relationships/removeFriend
