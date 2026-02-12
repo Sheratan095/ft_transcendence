@@ -67,7 +67,7 @@ class	ChatConnectionManager
 
 	// Send system message to chat members
 	// excludeUserId: optional user to exclude from receiving the message (e.g., newly added user)
-	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedByUsername, chatDb, timestamp)
+	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedById, invitedByUsername, chatDb, timestamp)
 	{
 		const	message = `User ${newUsername} has been added to the chat by ${invitedByUsername}.`;
 
@@ -83,7 +83,7 @@ class	ChatConnectionManager
 			timestamp: timestamp,
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
+		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage', timestamp, invitedById);
 	
 	}
 
@@ -104,6 +104,20 @@ class	ChatConnectionManager
 		};
 
 		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
+	}
+
+	async	notifyNewlyAddedUser(toUserId, chatId, chatName, invitedByUsername)
+	{
+		const	data = {
+			chatId: chatId,
+			chatName: chatName,
+			addedBy: invitedByUsername,
+		};
+
+		const	socket = this._connections.get(toUserId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'chat.added', data);
+
 	}
 
 	// Send chat.joined event to the newly added user

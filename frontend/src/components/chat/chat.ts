@@ -314,7 +314,7 @@ export async function renderMessages() {
 
     // Handle system messages (use Tailwind for color)
     if (isSystem) {
-      messageDiv.className = 'message message-system mx-auto bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
+      messageDiv.className = 'message message-system text-center mx-auto bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
       messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
       messagesContainer.appendChild(messageDiv);
       return;
@@ -484,12 +484,6 @@ function handleWebSocketMessage(data: any) {
       break;
     case 'chat.privateMessage':
       handlePrivateMessage(data);
-      break;
-    case 'chat.joined':
-      handleChatJoined(data);
-      break;
-    case 'chat.created':
-      handleChatCreated(data);
       break;
     case 'chat.added':
       handleChatAdded(data);
@@ -797,101 +791,17 @@ function handlePrivateMessage(data: any) {
   }
 }
 
-function handleChatJoined(data: any) {
-  // Handle both flat and nested data structures
-  const messageData = data.data || data;
-  const { chatId, invitedBy, systemMessage } = messageData;
-
-  console.log('User was added to chat:', chatId);
-
-  // Reload chats to include the new group
-  loadChats().then(() => {
-    renderChatList();
-  }).catch(err => {
-    console.error('Failed to reload chats after joining:', err);
-  });
-
-  // Show notification to user
-  showToast(`✨ You've been added to a new group by ${invitedBy}!`, 'info', {
-    duration: 0,
-    position: 'top-right',
-    actions: [
-      {
-        label: 'View Group',
-        onClick: () => {
-          openChatModal();
-          // Select the newly joined chat
-          selectChat(chatId);
-        },
-        style: 'primary'
-      }
-    ]
-  });
-}
-
-function handleChatCreated(data: any) {
-  const messageData = data.data || data;
-  const { chatId, name, members, chatType } = messageData;
-  if (!chatId) {
-    console.warn('chat.created missing chatId', messageData);
-    showToast('Server created a chat but no id was provided', 'error', { duration: 4000, position: 'top-right' });
-    return;
-  }
-
-  // Avoid duplicates
-  if (chats.find(c => c.id === chatId)) return;
-
-  const newChat: any = {
-    id: String(chatId),
-    name: name || 'New Chat',
-    chatType: chatType || 'group',
-    members: Array.isArray(members) ? members : []
-  };
-
-  // store members
-  if (newChat.members.length) chatMembers.set(newChat.id, newChat.members);
-
-  // For DM, set otherUserId
-  if (newChat.chatType === 'dm' && newChat.members) {
-    const other = newChat.members.find((m: any) => String(m.userId) !== String(currentUserId));
-    if (other) newChat.otherUserId = String(other.userId);
-  }
-
-  chats.push(newChat);
-  renderChatList();
-
-  showToast(`✨ New chat created: ${newChat.name}`, 'info', {
-    duration: 0,
-    position: 'top-right',
-    actions: [{ label: 'Open', onClick: () => { openChatModal(); selectChat(newChat.id); }, style: 'primary' }]
-  });
-}
-
 function handleChatAdded(data: any) {
   const messageData = data.data || data;
-  const { chatId, userId, username } = messageData;
-  if (!chatId || !userId) {
+  const { chatId, chatName, addedBy } = messageData;
+  if (!chatId) {
     console.warn('chat.added missing fields', messageData);
     return;
   }
 
-  const members = chatMembers.get(chatId) || [];
-  const exists = members.find((m: any) => String(m.userId) === String(userId));
-  if (!exists) {
-    const newMember = { userId: String(userId), username };
-    members.push(newMember);
-    chatMembers.set(chatId, members);
-
-    const chatObj = chats.find(c => c.id === chatId);
-    if (chatObj) {
-      chatObj.members = chatObj.members ? [...chatObj.members, newMember] : [newMember];
-    }
-
-    // Notify user
-    const chatName = chatObj ? getChatDisplayName(chatObj) : 'Group Chat';
-    showToast(`➕ ${chatName}: ${username} added`, 'info', { duration: 4000, position: 'top-right' });
+    // Notify user and allow clicking the toast to view the chat
+    showToast(`➕ You've been added to "${chatName}" by ${addedBy}`, 'info', { duration: 4000, position: 'top-right', onClick: () => { openChatModal(); selectChat(chatId); } });
     renderChatList();
-  }
 }
 
 function markChatAsRead(chatId: string) {
@@ -1230,7 +1140,6 @@ async function createGroupChat() {
       },
       body: JSON.stringify({
         name: groupName,
-        memberIds: memberIds
       })
     });
 
@@ -1239,7 +1148,38 @@ async function createGroupChat() {
       throw new Error(error.message || `Failed to create group chat: ${response.statusText}`);
     }
 
-    const { chatId } = await response.json();
+    const createRes = await response.json();
+    const chatId = createRes.chatId || createRes.chat_id || createRes.id;
+    if (!chatId) {
+      throw new Error('Create group chat response did not include chatId');
+    }
+
+    for (const memberId of memberIds) {
+      try
+      {
+        const response = await fetch('/api/chat/add-user', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          // include both possible property names to satisfy different backend formats
+          body: JSON.stringify({
+            chatId: chatId,
+            // chat_id: chatId,
+            toUserId: memberId
+          })
+        });
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          throw new Error(error.message || `Failed to add user ${memberId} to group chat: ${response.statusText}`);
+        }
+      } catch (err) {
+        console.error(`Error adding user ${memberId} to group chat:`, err);
+        alert(`Failed to add user ${memberId} to group chat: ${(err as Error).message}`);
+      }
+    }
+
 
     closeFriendSelectionModal();
 

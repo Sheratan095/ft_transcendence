@@ -126,6 +126,18 @@ Response (acknowledgment to sender):
 }
 \`\`\`
 
+- **chat.added** - You've been added to a chat
+\`\`\`json
+{
+  "event": "chat.added",
+  "data": {
+    "chatId": "chat123",
+    "chatName": "Wonderful Chat",
+    "addedBy": "Alice9023"
+  }
+}
+\`\`\`
+
 - **chat.messageSent** - Acknowledgment that your message was sent
 \`\`\`json
 {

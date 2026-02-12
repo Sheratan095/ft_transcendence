@@ -160,19 +160,21 @@ export const	addUserToChat = async (req, reply) =>
 		}
 
 		const	timestamp = formatDate(new Date());
+		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
+		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
+
+		// Add system message to chat and notify chat
+		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, userId, fromUsername, chatDb, timestamp);
 
 		// Add the user to the chat
 		await chatDb.addUserToChat(chatId, toUserId, timestamp);
 
-		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
-		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
+		const chatName = await chatDb.getChatName(chatId);
 
 		// Notify the user newly added to the chat
-		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)
+		if (chatConnectionManager.notifyNewlyAddedUser(toUserId, chatId, chatName, fromUsername) === false)
 			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
 
-		// Add system message to chat and notify chat
-		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, fromUsername, chatDb, timestamp);
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 
 		return (reply.code(200).send({ success: true }));
