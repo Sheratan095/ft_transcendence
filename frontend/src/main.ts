@@ -122,6 +122,13 @@ function initUserServices(path: string)
   initChatButton();
   initHomeButton();
   connectNotificationsWebSocket();
+  
+  // Initialize global FriendsManager for notifications
+  const globalFriendsManager = new FriendsManager({ currentUserId: userId });
+  setFriendsManager(globalFriendsManager);
+  setTrisFriendsManager(globalFriendsManager);
+  console.log('[Main] FriendsManager initialized for notifications');
+  
   setupSearchUser();
   attachUserOptions();
   initChat(userId);

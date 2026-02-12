@@ -420,7 +420,7 @@ export async function	acceptFriendRequest(req, reply)
 		const	accepterUsername = (await usersDb.getUserById(user.id)).username;
 		const	requesterUser = await usersDb.getUserById(requesterId);
 
-		await notifyFriendAccept(requesterId, user.id, requesterUser.username, accepterUsername);
+		await notifyNowFriends(requesterId, user.id, requesterUser.username, accepterUsername);
 
 		console.log('[RELATIONSHIPS] Friend request accepted by userId:', user.id, 'from requesterId:', requesterId);
 

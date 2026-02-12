@@ -107,6 +107,34 @@ export class FriendsManager {
     }
   }
 
+  async cancelFriendRequest(targetId: string): Promise<boolean> {
+    try {
+      const response = await fetch('/api/users/relationships/cancelFriendRequest', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ targetId })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to cancel friend request: ${response.statusText}`);
+      }
+
+      // If the cancelled request was represented in incoming requests, remove it.
+      if (this.friendRequests.has(targetId)) {
+        this.friendRequests.delete(targetId);
+        if (this.onRequestsUpdated) {
+          this.onRequestsUpdated(Array.from(this.friendRequests.values()));
+        }
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Error cancelling friend request:', err);
+      return false;
+    }
+  }
+
   async removeFriend(userId: string): Promise<boolean> {
     try {
       const response = await fetch(`/api/users/relationships/removeFriend`, {

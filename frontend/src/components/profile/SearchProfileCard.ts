@@ -3,6 +3,7 @@ import { FriendsManager } from './FriendsManager';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories } from '../../lib/matchHistory';
 import { initCardHoverEffect } from '../../lib/card';
+import { onRelationshipEvent } from './Notifications';
 
 export async function renderSearchProfileCard(
   userId: string,
@@ -78,6 +79,7 @@ export async function renderSearchProfileCard(
 
   // ===== Fetch Relationship Status =====
   let relationshipStatus: string | null = null;
+  let targetId : string | null = null;
   try {
     const relationRes = await fetch(`/api/users/relationships/getUsersRelationship?userId=${user.id}`, {
       credentials: 'include',
@@ -86,6 +88,7 @@ export async function renderSearchProfileCard(
     if (relationRes.ok) {
       const relationData = await relationRes.json();
       relationshipStatus = relationData.relationshipStatus; // 'pending', 'accepted', 'rejected', 'blocked'
+      targetId = relationData.targetId; // The user ID of the other party in the relationship
     }
   } catch (err) {
     console.error('Failed to fetch relationship status:', err);
@@ -121,6 +124,23 @@ export async function renderSearchProfileCard(
             relationshipStatus = null;
             updateActionButtons();
           }
+        } else if (relationshipStatus === 'pending') {
+          // If targetId equals user.id, we sent the request (outgoing) - show Cancel
+          // If targetId equals currentUserId, they sent it to us (incoming) - show Accept
+          const isIncomingRequest = targetId === currentUserId;
+          if (isIncomingRequest) {
+            const success = await friendsManager.acceptFriendRequest(user.id);
+            if (success) {
+              relationshipStatus = 'accepted';
+              updateActionButtons();
+            }
+          } else {
+            const success = await friendsManager.cancelFriendRequest(user.id);
+            if (success) {
+              relationshipStatus = null;
+              updateActionButtons();
+            }
+          }
         } else {
           const success = await friendsManager.addFriend(user.id);
           if (success) {
@@ -138,35 +158,47 @@ export async function renderSearchProfileCard(
   function updateActionButtons() {
     if (!chatBtn)
         return;
+    // Chat button: only enabled for accepted friends
     if (relationshipStatus === 'accepted') {
       chatBtn.disabled = false;
-      chatBtn.classList.remove('bg-neutral-600', 'text-neutral-400');
+      chatBtn.classList.remove('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
       chatBtn.classList.add('bg-accent-blue', 'hover:brightness-90', 'text-white');
     } else {
       chatBtn.disabled = true;
       chatBtn.classList.remove('bg-accent-blue', 'hover:brightness-90', 'text-white');
-      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400');
+      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
     }
 
     if (!addBtn)
       return;
+    
     if (relationshipStatus === 'pending') {
-      addBtn.disabled = true;
-      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
-      addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      addBtn.textContent = '⏳ Request Pending';
-    } else if (relationshipStatus === 'accepted') {
-      // When already friends, show a red "Remove Friend" button and allow removal
+      // If targetId equals currentUserId, they sent the request (incoming) - show Accept
+      // If targetId equals user.id, we sent it (outgoing) - show Cancel
+      const isIncomingRequest = targetId === currentUserId;
       addBtn.disabled = false;
-      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90', 'bg-neutral-600', 'text-neutral-400');
+      if (isIncomingRequest) {
+        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-neutral-600', 'text-neutral-400');
+        addBtn.classList.add('bg-green-600', 'hover:brightness-90', 'text-white');
+        addBtn.textContent = '✓ Accept Friend Request';
+      } else {
+        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-neutral-600', 'text-neutral-400');
+        addBtn.classList.add('bg-yellow-600', 'hover:brightness-90', 'text-white');
+        addBtn.textContent = '⏳ Cancel Request';
+      }
+    } else if (relationshipStatus === 'accepted') {
+      // When already friends, show a red "Remove Friend" button
+      addBtn.disabled = false;
+      addBtn.classList.remove('bg-accent-orange', 'bg-green-600', 'bg-yellow-600', 'bg-neutral-600', 'text-neutral-400');
       addBtn.classList.add('bg-red-600', 'hover:brightness-90', 'text-white');
       addBtn.textContent = '✖ Remove Friend';
     } else if (relationshipStatus === 'blocked') {
       addBtn.disabled = true;
-      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90', 'text-white');
-      addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
+      addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-yellow-600', 'hover:brightness-90', 'text-white');
+      addBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
+      addBtn.textContent = '🚫 Blocked';
     } else {
-      // no relationship or rejected -> restore
+      // no relationship or rejected -> restore original
       addBtn.disabled = false;
       addBtn.className = originalAddBtnClass;
       addBtn.textContent = originalAddBtnText;
@@ -224,6 +256,45 @@ export async function renderSearchProfileCard(
 
     // Initialize hover effects
   initCardHoverEffect();
+
+  // Subscribe to relationship events for real-time updates
+  const unsubscribe = onRelationshipEvent((event) => {
+    // Only update if this event is about the currently displayed user
+    if (event.userId === user.id) {
+      console.log(`[SearchProfileCard] Relationship event for ${user.username}:`, event);
+      
+      // Update relationship status based on event type
+      switch (event.type) {
+        case 'friend.request':
+          // They sent us a request (incoming)
+          relationshipStatus = 'pending';
+          targetId = currentUserId;
+          break;
+        case 'friend.accept':
+        case 'friend.userAdded':
+        case 'friend.now':
+        case 'friend.nowFriends':
+          // We are now friends
+          relationshipStatus = 'accepted';
+          break;
+        case 'friend.rejected':
+          // Request was rejected
+          relationshipStatus = null;
+          break;
+        case 'friend.removed':
+          // No longer friends
+          relationshipStatus = null;
+          break;
+      }
+      
+      // Update the UI
+      updateActionButtons();
+    }
+  });
+
+  // Clean up subscription when navigating away
+  // Store the unsubscribe function on the card element
+  (cardEl as any).__unsubscribeRelationship = unsubscribe;
 
   // ===== Fetch Stats and Match History asynchronously =====
   (async () => {
@@ -516,4 +587,16 @@ export async function renderSearchProfileCard(
     }
   })();
   return cardEl;
+}
+
+export function cleanupSearchProfileCard(cardEl: HTMLElement | null) {
+  if (!cardEl) return;
+  
+  // Call unsubscribe function if it exists
+  const unsubscribe = (cardEl as any).__unsubscribeRelationship;
+  if (typeof unsubscribe === 'function') {
+    unsubscribe();
+    delete (cardEl as any).__unsubscribeRelationship;
+    console.log('[SearchProfileCard] Cleaned up relationship event subscription');
+  }
 }
