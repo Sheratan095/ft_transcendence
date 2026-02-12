@@ -1,10 +1,9 @@
-import type { User } from '../../lib/auth';
 import { sendChatInvite } from '../chat/chat';
 import { FriendsManager } from './FriendsManager';
 import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories } from '../../lib/matchHistory';
 import { initCardHoverEffect } from '../../lib/card';
-import { goToRoute } from '../../spa';
+import { onRelationshipEvent } from './Notifications';
 
 export async function renderSearchProfileCard(
   userId: string,
@@ -78,6 +77,23 @@ export async function renderSearchProfileCard(
   const idEl = cardEl.querySelector('.spc-userid') as HTMLElement | null;
   if (idEl) idEl.textContent = `ID: ${user.id}`;
 
+  // ===== Fetch Relationship Status =====
+  let relationshipStatus: string | null = null;
+  let targetId : string | null = null;
+  try {
+    const relationRes = await fetch(`/api/users/relationships/getUsersRelationship?userId=${user.id}`, {
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (relationRes.ok) {
+      const relationData = await relationRes.json();
+      relationshipStatus = relationData.relationshipStatus; // 'pending', 'accepted', 'rejected', 'blocked'
+      targetId = relationData.targetId; // The user ID of the other party in the relationship
+    }
+  } catch (err) {
+    console.error('Failed to fetch relationship status:', err);
+  }
+
   // ===== Action Buttons =====
   const chatBtn = cardEl.querySelector('.spc-chat') as HTMLButtonElement | null;
   if (chatBtn) {
@@ -91,42 +107,194 @@ export async function renderSearchProfileCard(
     });
   }
 
+  console.log('Relationship status with user:', relationshipStatus);
+
   const addBtn = cardEl.querySelector('.spc-add') as HTMLButtonElement | null;
+  // Keep originals so we can restore appearance after unblock
+  const originalAddBtnText = addBtn?.textContent ?? '';
+  const originalAddBtnClass = addBtn?.className ?? '';
+
   if (addBtn) {
     addBtn.addEventListener('click', async () => {
+      if (addBtn.disabled) return;
       try {
-        const success = await friendsManager.addFriend(user.id);
-        if (success) {
-          addBtn.disabled = true;
-          addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
-          addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-          addBtn.textContent = '✓ Request Sent';
+        if (relationshipStatus === 'accepted') {
+          const success = await friendsManager.removeFriend(user.id);
+          if (success) {
+            relationshipStatus = null;
+            updateActionButtons();
+          }
+        } else if (relationshipStatus === 'pending') {
+          // If targetId equals user.id, we sent the request (outgoing) - show Cancel
+          // If targetId equals currentUserId, they sent it to us (incoming) - show Accept
+          const isIncomingRequest = targetId === currentUserId;
+          if (isIncomingRequest) {
+            const success = await friendsManager.acceptFriendRequest(user.id);
+            if (success) {
+              relationshipStatus = 'accepted';
+              updateActionButtons();
+            }
+          } else {
+            const success = await friendsManager.cancelFriendRequest(user.id);
+            if (success) {
+              relationshipStatus = null;
+              updateActionButtons();
+            }
+          }
+        } else {
+          const success = await friendsManager.addFriend(user.id);
+          if (success) {
+            relationshipStatus = 'pending';
+            updateActionButtons();
+          }
         }
       } catch (err) {
-        console.error('Failed to add friend:', err);
+        console.error('Failed to change friendship:', err);
       }
     });
   }
 
+  // Centralized updater for action buttons so UI matches initial render
+  function updateActionButtons() {
+    if (!chatBtn)
+        return;
+    // Chat button: only enabled for accepted friends
+    if (relationshipStatus === 'accepted') {
+      chatBtn.disabled = false;
+      chatBtn.classList.remove('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
+      chatBtn.classList.add('bg-accent-blue', 'hover:brightness-90', 'text-white');
+    } else {
+      chatBtn.disabled = true;
+      chatBtn.classList.remove('bg-accent-blue', 'hover:brightness-90', 'text-white');
+      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
+    }
+
+    if (!addBtn)
+      return;
+    
+    if (relationshipStatus === 'pending') {
+      // If targetId equals currentUserId, they sent the request (incoming) - show Accept
+      // If targetId equals user.id, we sent it (outgoing) - show Cancel
+      const isIncomingRequest = targetId === currentUserId;
+      addBtn.disabled = false;
+      if (isIncomingRequest) {
+        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-neutral-600', 'text-neutral-400');
+        addBtn.classList.add('bg-green-600', 'hover:brightness-90', 'text-white');
+        addBtn.textContent = '✓ Accept Friend Request';
+      } else {
+        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-neutral-600', 'text-neutral-400');
+        addBtn.classList.add('bg-yellow-600', 'hover:brightness-90', 'text-white');
+        addBtn.textContent = '⏳ Cancel Request';
+      }
+    } else if (relationshipStatus === 'accepted') {
+      // When already friends, show a red "Remove Friend" button
+      addBtn.disabled = false;
+      addBtn.classList.remove('bg-accent-orange', 'bg-green-600', 'bg-yellow-600', 'bg-neutral-600', 'text-neutral-400');
+      addBtn.classList.add('bg-red-600', 'hover:brightness-90', 'text-white');
+      addBtn.textContent = '✖ Remove Friend';
+    } else if (relationshipStatus === 'blocked') {
+      addBtn.disabled = true;
+      addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-yellow-600', 'hover:brightness-90', 'text-white');
+      addBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
+      addBtn.textContent = '🚫 Blocked';
+    } else {
+      // no relationship or rejected -> restore original
+      addBtn.disabled = false;
+      addBtn.className = originalAddBtnClass;
+      addBtn.textContent = originalAddBtnText;
+    }
+  }
+
+  // Apply initial state from fetched relationshipStatus
+  updateActionButtons();
+
   const blockBtn = cardEl.querySelector('.spc-block') as HTMLButtonElement | null;
-  if (blockBtn) {
+  if (blockBtn)
+  {
+    // Change button text and style if already blocked
+    if (relationshipStatus === 'blocked')
+    {
+      // UNBLOCK THE USER
+      blockBtn.textContent = '🔓 Unblock';
+      blockBtn.classList.remove('bg-red-600');
+      blockBtn.classList.add('bg-green-600');
+    }
+
     blockBtn.addEventListener('click', async () => {
+        if (relationshipStatus === 'blocked')
+        {
+          try {
+            const success = await friendsManager.unblockUser(user.id);
+            if (success) {
+              blockBtn.textContent = '🔒 Block';
+              blockBtn.classList.remove('bg-green-600');
+              blockBtn.classList.add('bg-red-600');
+              relationshipStatus = null; // Reset relationship status after unblocking
+              updateActionButtons();
+            }
+          } catch (err) {
+            console.error('Failed to unblock user:', err);
+          }
+          return;
+        }
+
       try {
         const success = await friendsManager.blockUser(user.id);
         if (success) {
-          blockBtn.disabled = true;
-          blockBtn.classList.remove('bg-red-600', 'hover:brightness-90');
-          blockBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-          blockBtn.textContent = '✓ Blocked';
+            blockBtn.textContent = '🔓 Unblock';
+            blockBtn.classList.remove('bg-red-600');
+            blockBtn.classList.add('bg-green-600');
+          relationshipStatus = 'blocked';
+          updateActionButtons();
         }
       } catch (err) {
         console.error('Failed to block user:', err);
       }
+
     });
   }
 
-  // Initialize hover effects
+    // Initialize hover effects
   initCardHoverEffect();
+
+  // Subscribe to relationship events for real-time updates
+  const unsubscribe = onRelationshipEvent((event) => {
+    // Only update if this event is about the currently displayed user
+    if (event.userId === user.id) {
+      console.log(`[SearchProfileCard] Relationship event for ${user.username}:`, event);
+      
+      // Update relationship status based on event type
+      switch (event.type) {
+        case 'friend.request':
+          // They sent us a request (incoming)
+          relationshipStatus = 'pending';
+          targetId = currentUserId;
+          break;
+        case 'friend.accept':
+        case 'friend.userAdded':
+        case 'friend.now':
+        case 'friend.nowFriends':
+          // We are now friends
+          relationshipStatus = 'accepted';
+          break;
+        case 'friend.rejected':
+          // Request was rejected
+          relationshipStatus = null;
+          break;
+        case 'friend.removed':
+          // No longer friends
+          relationshipStatus = null;
+          break;
+      }
+      
+      // Update the UI
+      updateActionButtons();
+    }
+  });
+
+  // Clean up subscription when navigating away
+  // Store the unsubscribe function on the card element
+  (cardEl as any).__unsubscribeRelationship = unsubscribe;
 
   // ===== Fetch Stats and Match History asynchronously =====
   (async () => {
@@ -249,10 +417,10 @@ export async function renderSearchProfileCard(
         const { createMatchHistoryChart, createGameStatsChart } = await import('./UserCardCharts');
 
         // Pong History Chart
+        const pongHistoryWrapper = document.createElement('div');
+        pongHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col';
+        const pongHistoryChartId = `search-profile-pong-history-chart`;
         if (pongHistory && pongHistory.length > 0) {
-          const pongHistoryWrapper = document.createElement('div');
-          pongHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col';
-          const pongHistoryChartId = `search-profile-pong-history-chart`;
           pongHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${pongHistoryChartId}" class="w-full flex-1"></div>
@@ -262,13 +430,20 @@ export async function renderSearchProfileCard(
           try {
             await createMatchHistoryChart(pongHistoryChartId, 'pong', { pongHistory }, user.id);
           } catch (e) { console.warn(e); }
+        } else {
+          pongHistoryWrapper.innerHTML = `
+            <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">TREND</h4>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+          `;
+          historyRow.appendChild(pongHistoryWrapper);
+          pongStatsElements.push(pongHistoryWrapper);
         }
 
         // Tris History Chart
+        const trisHistoryWrapper = document.createElement('div');
+        trisHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col hidden';
+        const trisHistoryChartId = `search-profile-tris-history-chart`;
         if (trisHistory && trisHistory.length > 0) {
-          const trisHistoryWrapper = document.createElement('div');
-          trisHistoryWrapper.className = 'rounded-lg mb-7 flex-1 min-w-[250px] h-32 flex flex-col hidden';
-          const trisHistoryChartId = `search-profile-tris-history-chart`;
           trisHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
@@ -278,6 +453,13 @@ export async function renderSearchProfileCard(
           try {
             await createMatchHistoryChart(trisHistoryChartId, 'tris', { trisHistory }, user.id);
           } catch (e) { console.warn(e); }
+        } else {
+          trisHistoryWrapper.innerHTML = `
+            <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+          `;
+          historyRow.appendChild(trisHistoryWrapper);
+          trisStatsElements.push(trisHistoryWrapper);
         }
 
         // Match list row
@@ -329,9 +511,9 @@ export async function renderSearchProfileCard(
         };
 
         // Pong Match List
+        const pongListWrapper = document.createElement('div');
+        pongListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col';
         if (pongHistory && pongHistory.length > 0) {
-          const pongListWrapper = document.createElement('div');
-          pongListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col';
           pongListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
@@ -340,17 +522,31 @@ export async function renderSearchProfileCard(
           `;
           matchListRow.appendChild(pongListWrapper);
           pongStatsElements.push(pongListWrapper);
+        } else {
+          pongListWrapper.innerHTML = `
+            <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+          `;
+          matchListRow.appendChild(pongListWrapper);
+          pongStatsElements.push(pongListWrapper);
         }
 
         // Tris Match List
+        const trisListWrapper = document.createElement('div');
+        trisListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col hidden';
         if (trisHistory && trisHistory.length > 0) {
-          const trisListWrapper = document.createElement('div');
-          trisListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col hidden';
           trisListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
               ${createMatchListHTML(trisHistory, 'tris', 5)}
             </div>
+          `;
+          matchListRow.appendChild(trisListWrapper);
+          trisStatsElements.push(trisListWrapper);
+        } else {
+          trisListWrapper.innerHTML = `
+            <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           matchListRow.appendChild(trisListWrapper);
           trisStatsElements.push(trisListWrapper);
@@ -390,6 +586,17 @@ export async function renderSearchProfileCard(
       console.error('[SearchProfileCard] Combined fetch error:', err);
     }
   })();
-
   return cardEl;
+}
+
+export function cleanupSearchProfileCard(cardEl: HTMLElement | null) {
+  if (!cardEl) return;
+  
+  // Call unsubscribe function if it exists
+  const unsubscribe = (cardEl as any).__unsubscribeRelationship;
+  if (typeof unsubscribe === 'function') {
+    unsubscribe();
+    delete (cardEl as any).__unsubscribeRelationship;
+    console.log('[SearchProfileCard] Cleaned up relationship event subscription');
+  }
 }

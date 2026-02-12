@@ -2,8 +2,11 @@ import { isLoggedInClient } from './lib/auth';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/ProfileCard';
-import { renderSearchProfileCard } from './components/profile/SearchProfileCard';
+import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
+
+// Track current search profile card for cleanup
+let currentSearchProfileCard: HTMLElement | null = null;
 
 type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
@@ -59,6 +62,8 @@ const routes: Record<string, RouteConfig> = {
       // Render search profile card for another user
       try {
         const result = await renderSearchProfileCard(userId, el);
+        // Store reference for cleanup
+        currentSearchProfileCard = result;
         // If result is null, it means it's the current user, so render main profile
         if (result === null) {
           el.innerHTML = '';
@@ -135,6 +140,12 @@ async function goToRoute(path: string) {
 
 async function renderRoute(path: string) {
   const route = routes[path] || routes['/'];
+  
+  // Cleanup any previous search profile card
+  if (currentSearchProfileCard) {
+    cleanupSearchProfileCard(currentSearchProfileCard);
+    currentSearchProfileCard = null;
+  }
   
   try {
     // Use View Transitions API for smooth page transitions
