@@ -1,3 +1,5 @@
+import { showToast } from '../shared/Toast';
+
 export interface Chat {
   id: string;
   name?: string;
@@ -29,6 +31,7 @@ export class ChatManager {
   private onChatsLoaded: ((chats: Chat[]) => void) | null = null;
   private onChatSelected: ((chatId: string) => void) | null = null;
   private onMessageReceived: ((message: Message) => void) | null = null;
+  private onOpenChatRequested: ((chatId: string) => void) | null = null;
 
   constructor(userId: string) {
     this.currentUserId = userId;
@@ -44,6 +47,10 @@ export class ChatManager {
 
   setOnMessageReceived(callback: (message: Message) => void) {
     this.onMessageReceived = callback;
+  }
+
+  setOnOpenChatRequested(callback: (chatId: string) => void) {
+    this.onOpenChatRequested = callback;
   }
 
   async loadChats(): Promise<Chat[]> {
@@ -130,6 +137,30 @@ export class ChatManager {
     }
   }
 
+  private isChatModalOpen(): boolean {
+    const modal = document.getElementById('chat-modal');
+    if (!modal) return false;
+    return !modal.classList.contains('hidden');
+  }
+
+  private showMessageToast(message: Message): void {
+    const chat = this.chats.find(c => c.id === message.chatId);
+    if (!chat) return;
+
+    const chatDisplayName = this.getChatDisplayName(chat);
+    const toastMessage = `${message.senderName || 'User'}: ${message.content}`;
+
+    showToast(toastMessage, 'info', {
+      duration: 3000,
+      position: 'top-right',
+      onClick: () => {
+        if (this.onOpenChatRequested) {
+          this.onOpenChatRequested(message.chatId);
+        }
+      }
+    });
+  }
+
   connectWebSocket(): Promise<void> {
     return new Promise((resolve, reject) => {
       // Don't connect if already connecting or connected
@@ -173,7 +204,10 @@ export class ChatManager {
           msgs.push(message);
           this.messages.set(data.chatId, msgs);
 
-          if (this.onMessageReceived) {
+          // Show toast if modal is not open
+          if (!this.isChatModalOpen()) {
+            this.showMessageToast(message);
+          } else if (this.onMessageReceived) {
             this.onMessageReceived(message);
           }
         } else if (data.type === 'chat.privateMessage') {
@@ -191,7 +225,10 @@ export class ChatManager {
           msgs.push(message);
           this.messages.set(data.chatId, msgs);
 
-          if (this.onMessageReceived) {
+          // Show toast if modal is not open
+          if (!this.isChatModalOpen()) {
+            this.showMessageToast(message);
+          } else if (this.onMessageReceived) {
             this.onMessageReceived(message);
           }
         }

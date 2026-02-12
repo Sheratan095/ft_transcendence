@@ -252,7 +252,7 @@ export async function renderMessages() {
 
     // Handle system messages (use Tailwind for color)
     if (isSystem) {
-      messageDiv.className = 'message message-system self-center bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
+      messageDiv.className = 'message message-system mx-auto bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
       messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
       messagesContainer.appendChild(messageDiv);
       return;
@@ -261,39 +261,21 @@ export async function renderMessages() {
     // Compare as strings since backend returns string IDs
     const isSent = String(senderId) === String(currentUserId);
 
-    // Determine message class based on type and sender using Tailwind utilities
-    // Base layout classes
-    const baseClasses = 'message px-3 py-2 rounded-lg max-w-[70%] break-words';
-    let variantClasses = '';
-    if (isPrivate) {
-      variantClasses = isSent
-        ? 'self-end bg-purple-700 text-white border-l-4 border-purple-300'
-        : 'self-start bg-purple-900 text-amber-100 border-l-4 border-purple-700';
-    } else {
-      variantClasses = isSent
-        ? 'self-end bg-green-600 text-white'
-        : 'self-start bg-gray-700 text-gray-100';
-    }
+    // Determine message class based on sender - same style for all messages
+    // Base layout classes - use ml-auto for sent messages to push right, mr-auto for received to keep left
+    const baseClasses = 'message px-3 py-2 rounded-lg max-w-[70%] break-words w-fit';
+    const variantClasses = isSent
+      ? 'bg-green-600 text-white'
+      : 'bg-gray-700 text-gray-100';
+    const alignmentClasses = isSent ? 'ml-auto' : 'mr-auto';
 
-    messageDiv.className = `${baseClasses} ${variantClasses}`;
-
-    let statusText = '';
-    if (isSent && messageStatus) {
-      statusText = `<span class="message-status">${messageStatus}</span>`;
-    }
-
-    let privateBadge = '';
-    if (isPrivate) {
-      privateBadge = '<div class="message-private-badge">🔒 Private Message</div>';
-    }
+    messageDiv.className = `${baseClasses} ${variantClasses} ${alignmentClasses}`;
 
     messageDiv.innerHTML = `
-      ${privateBadge}
-      ${!isSent ? `<div class="message-header">Sender: ${escapeHtml(msg.from || senderId)}</div>` : ''}
+      ${!isSent ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(msg.from || senderId)}</div>` : ''}
       <div class="message-content">${escapeHtml(msg.content)}</div>
-      <div class="message-footer">
+      <div class="message-footer text-xs opacity-75">
         <span>${new Date(createdAt).toLocaleTimeString()}</span>
-        ${statusText}
       </div>
     `;
 
@@ -302,10 +284,10 @@ export async function renderMessages() {
 }
 
 export function scrollToBottom() {
-  const messagesContainer = document.getElementById('chat-messages');
-  if (messagesContainer) {
+  const scrollContainer = document.getElementById('chat-messages-container') || document.getElementById('chat-messages');
+  if (scrollContainer) {
     setTimeout(() => {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }, 0);
   }
 }
@@ -316,8 +298,12 @@ function escapeHtml(text: string): string {
   return div.innerHTML;
 }
 
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000;
+
 export function connectChatWebSocket(): Promise<WebSocket> {
-  if (chatSocket && chatSocket.readyState <= WebSocket.OPEN) {
+  if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
     return Promise.resolve(chatSocket);
   }
 
@@ -331,6 +317,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
 
       socket.onopen = () => {
         console.log('Chat WebSocket connected');
+        reconnectAttempts = 0; // Reset on successful connection
         resolve(socket);
       };
 
@@ -338,7 +325,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
         try {
           handleWebSocketMessage(JSON.parse(event.data));
         } catch (err) {
-          console.error('Invalid WebSocket message', err);
+          console.error('Invalid WebSocket message', err, event.data);
         }
       };
 
@@ -350,6 +337,17 @@ export function connectChatWebSocket(): Promise<WebSocket> {
       socket.onclose = () => {
         console.warn('Chat WebSocket closed');
         chatSocket = null;
+        
+        // Attempt to reconnect
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts++;
+          console.log(`Reconnecting... Attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+          setTimeout(() => {
+            connectChatWebSocket().catch(err => console.error('Reconnection failed:', err));
+          }, RECONNECT_DELAY);
+        } else {
+          console.error('Max reconnection attempts reached');
+        }
       };
     } catch (error) {
       console.error('Connection error:', error);
@@ -383,8 +381,7 @@ function handleWebSocketMessage(data: any) {
       handleMessageStatusUpdate(data);
       break;
     case 'chat.privateMessage':
-      // Private message payloads sometimes come nested under `data` or at root
-      handlePrivateMessage(data?.data ? data.data : data);
+      handlePrivateMessage(data);
       break;
     default:
       console.warn('Unhandled chat websocket event:', eventName);
@@ -414,7 +411,14 @@ function handleChatMessage(data: any) {
     const sender = data.from || 'Someone';
     const preview = data.content.substring(0, 30);
     const displayText = preview.length < data.content.length ? `${preview}...` : preview;
-    showInfoToast(`📨 ${sender}: ${displayText}`, { duration: 4000 });
+    showToast(`📨 ${sender}: ${displayText}`, 'info', {
+      duration: 0,
+      position: 'top-right',
+      onClick: () => {
+        openChatModal();
+        selectChat(chatId);
+      }
+    });
     
     // Track unread message
     const unreadCount = (unreadCounts.get(chatId) || 0) + 1;
@@ -452,18 +456,42 @@ function handleSystemMessage(data: any) {
 
 function handleMessageSent(data: any) {
   console.log('Message sent confirmation:', data);
-  const { messageId, chatId } = data;
+  const { messageId, chatId, content, status, name, chatType } = data;
   
-  // Update message status to 'sent' if it exists
-  if (messages.has(chatId)) {
-    const chatMessages = messages.get(chatId)!;
-    const message = chatMessages.find(m => m.id === messageId);
-    if (message) {
-      message.messageStatus = 'sent';
-      if (currentChatId === chatId) {
-        renderMessages();
-      }
-    }
+  if (!messages.has(chatId)) {
+    messages.set(chatId, []);
+  }
+  
+  const chatMessages = messages.get(chatId)!;
+  
+  // Find the optimistic message by content (matches temp message sent before server response)
+  let existingMessage = chatMessages.find(m => 
+    m.content === content && 
+    m.senderId === currentUserId && 
+    m.id.toString().startsWith('temp_')
+  );
+  
+  if (existingMessage) {
+    // Update the optimistic message with real messageId and status
+    existingMessage.id = messageId;
+    existingMessage.messageStatus = status;
+  } else {
+    // Fallback: add message if optimistic update wasn't found
+    // (shouldn't happen in normal flow, but handles edge cases)
+    chatMessages.push({
+      id: messageId,
+      senderId: currentUserId,
+      from: 'You',
+      content: content,
+      createdAt: new Date().toISOString(),
+      messageStatus: status,
+      isPrivate: chatType === 'dm'
+    });
+  }
+  
+  if (currentChatId === chatId) {
+    renderMessages();
+    scrollToBottom();
   }
 }
 
@@ -484,13 +512,15 @@ function handleMessageStatusUpdate(data: any) {
 }
 
 function handlePrivateMessage(data: any) {
-  const { chatId, senderId, from, content, timestamp } = data.data;
+  // Handle both flat and nested data structures
+  const messageData = data.data || data;
+  const { chatId, senderId, from, content, timestamp } = messageData;
   let dmChat = chats.find(c => c.id === String(chatId));
   console.log('DM chat found:', dmChat);
   if (!dmChat) {
-    // Create a new DM chat entry
+    // Create a new DM chat entry - use the actual chatId from backend, not a prefixed version
     dmChat = {
-      id: `dm_${chatId}`,
+      id: String(chatId),
       chatType: 'dm',
       otherUserId: String(senderId),
       members: [
@@ -509,7 +539,7 @@ function handlePrivateMessage(data: any) {
   
   const chatMessages = messages.get(dmChat.id)!;
   chatMessages.push({
-    id: data.messageId || `msg_${Date.now()}`,
+    id: messageData.messageId || messageData.id || `msg_${Date.now()}`,
     senderId: String(senderId),
     from: from,
     content: content,
@@ -527,7 +557,14 @@ function handlePrivateMessage(data: any) {
     // Not viewing this chat, show toast and update unread count
     const preview = content.substring(0, 30);
     const displayText = preview.length < content.length ? `${preview}...` : preview;
-    showInfoToast(`💬 ${from}: ${displayText}`, { duration: 4000 });
+    showToast(`💬 ${from}: ${displayText}`, 'info', {
+      duration: 0,
+      position: 'top-right',
+      onClick: () => {
+        openChatModal();
+        selectChat(dmChat.id);
+      }
+    });
     
     // Track unread message
     const unreadCount = (unreadCounts.get(dmChat.id) || 0) + 1;
@@ -564,6 +601,10 @@ export async function sendChatInvite(otherUserId: string) {
       throw new Error(`Failed to send chat invite: ${res.statusText}`);
     }
     const { chatId } = await res.json();
+    
+    // Reload chats to include the newly created chat
+    await loadChats();
+    
     openChatModal();
     selectChat(chatId);
     console.log('Private chat started:', chatId);
@@ -621,6 +662,28 @@ export async function sendChatMessage(message: string) {
     return;
   }
 
+  // Generate temporary message ID for optimistic update
+  const tempMessageId = `temp_${Date.now()}`;
+
+  // Add message to display immediately (optimistic update)
+  if (!messages.has(currentChatId)) {
+    messages.set(currentChatId, []);
+  }
+
+  const chatMessages = messages.get(currentChatId)!;
+  chatMessages.push({
+    id: tempMessageId,
+    senderId: currentUserId,
+    from: 'You',
+    content: message,
+    createdAt: new Date().toISOString(),
+    messageStatus: 'sending',
+    isPrivate: chat.chatType === 'dm'
+  });
+
+  renderMessages();
+  scrollToBottom();
+
   let wsMessage;
 
   if (chat.chatType === 'dm') {
@@ -648,11 +711,29 @@ export async function sendChatMessage(message: string) {
     };
   }
 
-  chatSocket.send(JSON.stringify(wsMessage));
-  if (currentChatId)
-    await loadMessages(currentChatId, 0);
-  renderMessages();
-  scrollToBottom();
+  if (chatSocket.readyState !== WebSocket.OPEN) {
+    console.error('WebSocket not open, cannot send message');
+    // Update status to failed
+    const msg = chatMessages.find(m => m.id === tempMessageId);
+    if (msg) {
+      msg.messageStatus = 'failed';
+      renderMessages();
+    }
+    return;
+  }
+
+  try {
+    chatSocket.send(JSON.stringify(wsMessage));
+    console.log('Message sent:', wsMessage);
+  } catch (err) {
+    console.error('Failed to send message:', err);
+    // Update status to failed
+    const msg = chatMessages.find(m => m.id === tempMessageId);
+    if (msg) {
+      msg.messageStatus = 'failed';
+      renderMessages();
+    }
+  }
 }
 
 function handleMessageKeyPress(event: KeyboardEvent) {

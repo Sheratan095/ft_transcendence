@@ -291,3 +291,17 @@ html[data-transition-direction="back"] {
   @apply dark:shadow-[0_20px_40px_rgba(13,255,102,0.3)];
 }
 
+/* Hide scrollbars inside the chat modal while preserving scrolling behavior */
+#chat-modal .overflow-y-auto,
+#chat-modal #chat-messages {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+#chat-modal .overflow-y-auto::-webkit-scrollbar,
+#chat-modal #chat-messages::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Keep accessibility: ensure focusable elements are still reachable */
+
