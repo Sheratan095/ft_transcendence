@@ -39,15 +39,19 @@ export async function	getUsersRelationship(req, reply)
 	try
 	{
 		const	usersDb = req.server.usersDb;
-		const	userA = extractUserData(req).id;
-		const	userB = req.query.userId;
+		const	requesterId = extractUserData(req).id;
+		const	targetId = req.query.userId;
 
-		const	relationship = await usersDb.getUsersRelationship(userA, userB);
+		const	relationship = await usersDb.getUsersRelationship(requesterId, targetId);
 
-		console.log(`[RELATIONSHIPS] GetUsersRelationship between ${userA} and ${userB} : ${relationship? relationship.relationship_status : 'none'}`);
+		console.log(`[RELATIONSHIPS] GetUsersRelationship between ${requesterId} and ${targetId} : ${relationship? relationship.relationship_status : 'none'}`);
 
 		// Return empty object if no relationship exists
 		if (!relationship)
+			return (reply.code(200).send({}));
+
+		// If the blocked relation is requested by those who got blocked, return empty to avoid revealing block status
+		if (relationship.relationship_status === 'blocked' && requesterId === relationship.target_id)
 			return (reply.code(200).send({}));
 
 		// Map snake_case to camelCase to match the response schema

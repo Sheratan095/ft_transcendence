@@ -38,10 +38,11 @@ export class FriendsManager {
 
       const friendsList = await response.json();
       this.friends.clear();
-      
+
       friendsList.forEach((friend: User) => {
-		friend.id = friend.userId;
-        this.friends.set(friend.userId, friend);
+        const id = (friend as any).userId ?? friend.id;
+        friend.id = id;
+        this.friends.set(id, friend);
       });
 
       if (this.onFriendsUpdated) {
@@ -68,9 +69,11 @@ export class FriendsManager {
 
       const requests = await response.json();
       this.friendRequests.clear();
-      
+
       requests.forEach((request: User) => {
-        this.friendRequests.set(request.id, request);
+        const id = (request as any).userId ?? request.id;
+        request.id = id;
+        this.friendRequests.set(id, request);
       });
 
       if (this.onRequestsUpdated) {
@@ -109,6 +112,7 @@ export class FriendsManager {
       const response = await fetch(`/api/relationships/removeFriend`, {
         method: 'DELETE',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetId: userId })
       });
 
@@ -202,11 +206,21 @@ export class FriendsManager {
         throw new Error(`Failed to block user: ${response.statusText}`);
       }
 
-      // Remove from friends if exists
-      const user = this.friends.get(userId);
-      if (user) {
+      // Try to read returned user info (if server provides it)
+      const blockedUser = await response.json().catch(() => null);
+      const id = blockedUser?.userId ?? blockedUser?.id ?? userId;
+
+      if (this.friends.has(userId)) {
+        const user = this.friends.get(userId)!;
         this.friends.delete(userId);
-        this.blocked.set(userId, user);
+        this.blocked.set(id, user);
+        if (this.onFriendsUpdated) this.onFriendsUpdated(Array.from(this.friends.values()));
+      } else if (blockedUser) {
+        blockedUser.id = id;
+        this.blocked.set(id, blockedUser);
+      } else {
+        // As fallback, create a minimal record in blocked map so callers can query isBlocked()
+        this.blocked.set(userId, { id: userId } as User);
       }
 
       return true;
@@ -221,7 +235,8 @@ export class FriendsManager {
       const response = await fetch(`/api/users/relationships/unblock`, {
         method: 'DELETE',
         credentials: 'include',
-        body: JSON.stringify({ targetUserId: targetId })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetId: targetId })
       });
 
       if (!response.ok) {

@@ -93,6 +93,17 @@ export async function renderSearchProfileCard(
 
   // ===== Action Buttons =====
   const chatBtn = cardEl.querySelector('.spc-chat') as HTMLButtonElement | null;
+  if (chatBtn)
+  {
+    // Disable chat button if blocked or rejected
+    if (relationshipStatus !== 'accepted') 
+    {
+      chatBtn.disabled = true;
+      chatBtn.classList.remove('bg-accent-blue', 'hover:brightness-90', 'text-white');
+      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400');
+    }
+  }
+
   if (chatBtn) {
     chatBtn.addEventListener('click', async () => {
       try {
@@ -120,15 +131,15 @@ export async function renderSearchProfileCard(
       addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
       addBtn.textContent = '✓ Already Friends';
     } else if (relationshipStatus === 'rejected') {
-      addBtn.disabled = true;
-      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
-      addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      addBtn.textContent = '✗ Rejected';
+      // CHANGE NOTHING, THE USER CAN SEND ANOTHER REQUEST
+      // addBtn.disabled = true;
+      // addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
+      // addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
+      // addBtn.textContent = '✗ Rejected';
     } else if (relationshipStatus === 'blocked') {
       addBtn.disabled = true;
-      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90');
+      addBtn.classList.remove('bg-accent-orange', 'dark:bg-accent-green', 'hover:brightness-90', 'text-white');
       addBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      addBtn.textContent = '🚫 Blocked';
     } else {
       // No relationship - enable add friend button
       addBtn.addEventListener('click', async () => {
@@ -148,28 +159,47 @@ export async function renderSearchProfileCard(
   }
 
   const blockBtn = cardEl.querySelector('.spc-block') as HTMLButtonElement | null;
-  if (blockBtn) {
-    // Hide block button if already blocked
-    if (relationshipStatus === 'blocked') {
-      blockBtn.disabled = true;
-      blockBtn.classList.remove('bg-red-600', 'hover:brightness-90');
-      blockBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-      blockBtn.textContent = '🚫 Blocked';
-    } else {
-      blockBtn.addEventListener('click', async () => {
-        try {
-          const success = await friendsManager.blockUser(user.id);
-          if (success) {
-            blockBtn.disabled = true;
-            blockBtn.classList.remove('bg-red-600', 'hover:brightness-90');
-            blockBtn.classList.add('bg-neutral-600', 'text-neutral-400');
-            blockBtn.textContent = '✓ Blocked';
-          }
-        } catch (err) {
-          console.error('Failed to block user:', err);
-        }
-      });
+  if (blockBtn)
+  {
+    // Change button text and style if already blocked
+    if (relationshipStatus === 'blocked')
+    {
+      // UNBLOCK THE USER
+      blockBtn.textContent = '🔓 Unblock';
+      blockBtn.classList.remove('bg-red-600');
+      blockBtn.classList.add('bg-green-600');
     }
+
+    blockBtn.addEventListener('click', async () => {
+        if (relationshipStatus === 'blocked')
+        {
+          try {
+            const success = await friendsManager.unblockUser(user.id);
+            if (success) {
+              blockBtn.textContent = '🔒 Block';
+              blockBtn.classList.remove('bg-green-600');
+              blockBtn.classList.add('bg-red-600');
+              relationshipStatus = null; // Reset relationship status after unblocking
+            }
+          } catch (err) {
+            console.error('Failed to unblock user:', err);
+          }
+          return;
+        }
+
+      try {
+        const success = await friendsManager.blockUser(user.id);
+        if (success) {
+            blockBtn.textContent = '🔓 Unblock';
+            blockBtn.classList.remove('bg-red-600');
+            blockBtn.classList.add('bg-green-600');
+            relationshipStatus = 'blocked';
+        }
+      } catch (err) {
+        console.error('Failed to block user:', err);
+      }
+
+    });
   }
 
     // Initialize hover effects

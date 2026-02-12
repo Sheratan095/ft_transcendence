@@ -61,7 +61,8 @@ Content-Type: application/json
   "blockedId": "{{userId2}}"
 }
 
-### Unblock a user
+### Get relationship status with another user
+
 GET https://localhost:3000/users/relationships/getUsersRelationship?userId=1
 
 ### Remove a friend or cancel friend request
