@@ -1,7 +1,7 @@
 import { isLoggedInClient } from './lib/auth';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
-import { renderProfileCard } from './components/profile/ProfileCard';
+import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
 
