@@ -150,14 +150,42 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
   // ===== Language selector =====
   const languageSelect = cardEl.querySelector('#profile-language') as HTMLSelectElement;
-  if (languageSelect) {
+  if (languageSelect)
+  {
     const savedLanguage = localStorage.getItem('userLanguage') || 'en';
     languageSelect.value = savedLanguage;
-    languageSelect.addEventListener('change', (e) => {
-      const selectedLanguage = (e.target as HTMLSelectElement).value;
-      localStorage.setItem('userLanguage', selectedLanguage);
-      setLocaleInStorage(selectedLanguage);
-      console.log('Language changed to:', selectedLanguage);
+    languageSelect.addEventListener('change', async (e) =>
+    {
+      try
+      {
+        const response = await fetch(`/api/users/update-user`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ newLanguage: (e.target as HTMLSelectElement).value }),
+        });
+
+        if (!response.ok)
+          throw new Error(`Language update failed: ${response.status}`);
+
+        const responseBody = await response.json();
+
+        if (responseBody && responseBody.language)
+        {
+          localStorage.setItem('userLanguage', responseBody.language);
+          setLocaleInStorage(responseBody.language);
+          console.log('Language changed to:', responseBody.language);
+        }
+        else
+        {
+          console.warn('Language update response missing language field');
+        }
+
+      }
+      catch (err)
+      {
+        console.error('Failed to update language:', err);
+      }
     });
   }
 

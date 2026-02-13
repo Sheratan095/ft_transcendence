@@ -173,3 +173,6 @@ I think it's ok
 	gateway       | [GATEWAY] 📚 Loaded 5/6 specs
 
 [] XSS attack ?? tournament name??
+
+[] both for pong and tris when user hasn't history => TRY CATCH to avoid console error
+	GET https://localhost:4000/api/tris/history?id=0da84a23-0ea9-4f0c-8d38-4f01707bd08d 404 (Not Found)
