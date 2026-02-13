@@ -41,6 +41,8 @@ getIntlayer("app"); // Initialize intlayer
 
 initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
+  // Attach global click handlers for shared/dynamic elements
+  setupGlobalClickHandlers();
 if (isLoggedInClient()) initUserServices(path);
 
 }
@@ -89,14 +91,15 @@ function setupSearchUser()
 
 function modifyIndex()
 {
-  const link = document.getElementById('cta-login-logout') as HTMLAnchorElement | null;
+  // Support both the dynamic and static login anchors
+  const link = document.querySelector('#cta-login-logout, #cta-login-logout-static') as HTMLAnchorElement | null;
   if (link)
   {
     const h2 = link.getElementsByTagName('h2')[0];
     if (h2)
       h2.textContent = './LOGOUT';
     
-    // Modification: the click listener is now handled via event delegation in main()
+    // Clicks are handled via event delegation in setupGlobalClickHandlers()
   }
 
   const showTournamentsBtn = document.getElementById('tournamentListButton');
@@ -141,6 +144,8 @@ function initUserServices(path: string)
     } else {
       initHomeButton();
     }
+    // Ensure the CTA in the rendered page reflects the logged-in state
+    modifyIndex();
   });
 }
 
@@ -159,19 +164,40 @@ function setupGlobalClickHandlers() {
       return;
     }
 
-    // Handle Logout Link
-    const logoutLink = target.closest('#cta-login-logout');
-    if (logoutLink && logoutLink.textContent?.includes('LOGOUT')) {
-      e.preventDefault();
+    // Shared logout flow
+    const performLogout = async () => {
+      // mark manual logout to prevent background token refresh from redirecting to /login
+      (window as any).__manualLogout = true;
       try {
         await logout();
         showToast('Logged out successfully');
-        setTimeout(() => (window.location.href = '/'), 800);
+        // Navigate to home and force a full reload to ensure fresh state
+        setTimeout(() => {
+          window.location.href = '/';
+          setTimeout(() => window.location.reload(), 60);
+        }, 300);
       }
       catch (err) {
         console.error('Logout (client) error:', err);
         showErrorToast('Error logging out');
       }
+      // clear the flag after a short delay so future 401s behave normally
+      setTimeout(() => { (window as any).__manualLogout = false; }, 2000);
+    };
+
+    // Handle Logout Link (static or dynamic)
+    const logoutLink = target.closest('#cta-login-logout, #cta-login-logout-static');
+    if (logoutLink && logoutLink.textContent?.includes('LOGOUT')) {
+      e.preventDefault();
+      await performLogout();
+      return;
+    }
+
+    // Handle Logout Button on profile page
+    const profileLogoutBtn = target.closest('#profile-logout-btn');
+    if (profileLogoutBtn) {
+      e.preventDefault();
+      await performLogout();
       return;
     }
   });
