@@ -56,7 +56,7 @@
 					</svg>
 					Search
 				</button>
-			</div>
+			</div> 
 		</form>
 		<!-- Theme Toggle Button -->
 		<button id="theme-toggle-btn" class="p-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2
@@ -83,9 +83,7 @@
 				class="text-[7vw] px-[10vw] uppercase">
 				FT/<br />TRASCENDENCE
 			</h1>
-			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4">
-				Yesterday Dr.Phil was just an ordinary human.
-			</p>
+			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4" data-i18n="site.subtitle"></p>
 		</section>
 		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl">
 			<div
@@ -96,13 +94,13 @@
 						class="float-start w-full h-full min-w-[50px] min-h-[50px] sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0 dark:invert" />
 					<div class="flex flex-col space-y-4 md:ml-6">
 						<a href="https://localhost:3000/docs">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./DOCUMENTATION</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.documentation"></h2>
 						</a>
 						<a href="/subject">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./SUBJECT</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.subject"></h2>
 						</a>
 						<a href="/login" id="link-to-login">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./LOGIN</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.login"></h2>
 						</a>
 					</div>
 				</div>
@@ -129,9 +127,7 @@
 					</h1>
 
 					<!-- Description -->
-					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left">
-						Sign in to your account below.
-					</p>
+					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left" data-i18n="auth.signInDesc"></p>
 					<!-- Email -->
 					<div class="flex flex-col gap-1">
 						<label for="email_log" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
@@ -163,13 +159,11 @@
 					<button
 						type="submit"
 						class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 opacity-100
-							font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
-						Sign in
+							font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition" data-i18n="auth.signIn">
 					</button>
 
 					<!-- Footer -->
-					<div class="mt-4 text-xl text-neutral-400 text-center">
-						Don’t have an account?
+					<div class="mt-4 text-xl text-neutral-400 text-center" data-i18n="auth.noAccount">
 						<a
 						id="to-register"
 						href="#"
@@ -347,15 +341,15 @@
 										<span class="text-gray-600 dark:text-neutral-400" id="profile-email">email@example.com</span>
 									</div>
 									<div class="flex items-center gap-2">
-										<span class="font-extrabold text-black dark:text-white">User ID:</span> 
+										<span class="font-extrabold text-black dark:text-white" data-i18n="profile.idLabel"></span> 
 										<span class="text-gray-600 dark:text-neutral-400" id="profile-id">0</span>
 									</div>
 									<div class="flex items-center gap-2">
-										<span class="font-extrabold text-black dark:text-white">Rank:</span> 
+										<span class="font-extrabold text-black dark:text-white" data-i18n="profile.rankLabel"></span> 
 										<span class="text-gray-600 dark:text-neutral-400" id="profile-rank">Rookie</span>
 									</div>
 									<div class="flex items-center gap-2">
-										<span class="font-extrabold text-black dark:text-white">Wins:</span> 
+										<span class="font-extrabold text-black dark:text-white" data-i18n="profile.winsLabel"></span> 
 										<span class="text-gray-600 dark:text-neutral-400" id="profile-wins">0</span>
 									</div>
 								</div>
