@@ -1,138 +1,99 @@
-import { createFormInput } from '../shared/FormInput';
-import { createCard } from '../shared/Card';
-import { createButton } from '../shared/Button';
-import { createErrorContainer, showError, showSuccess, showLoading } from '../shared/ErrorMessage';
+import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
+import { attachRegister } from './RegisterForm';
+import { SaveCurrentUserProfile } from '../../lib/auth';
+import { attach2FA } from './TwoFactorForm';
 
 export interface LoginFormCallbacks {
-  onRegisterClick: () => void;
+	onRegisterClick?: () => void;
 }
 
-export function createLoginForm(callbacks: LoginFormCallbacks): { form: HTMLFormElement; card: HTMLDivElement } {
-  const card = createCard({ shadowColor: '#0dff66' });
-  const form = document.createElement('form');
-  form.id = 'login-form';
-  form.noValidate = true;
-  form.className = 'w-full max-w-2xl space-y-4';
+export function createLoginForm(callbacks?: LoginFormCallbacks): void {
+	// Kept for API compatibility with other modules that may call createLoginForm
+	attachLogin();
+}
 
-  // Title
-  const title = document.createElement('h1');
-  title.className = 'text-3xl font-bold text-left mb-2 text-white';
-  title.textContent = 'Log in';
+export function attachLogin(): void {
+	const form = document.getElementById('login-form') as HTMLFormElement | null;
+	if (!form) return;
+	if (form.dataset.attached === 'true') {
+		// already attached
+		form.classList.remove('hidden');
+		return;
+	}
+	form.classList.remove('hidden');
+	form.dataset.attached = 'true';
+	const usernameInput = document.getElementById('email_log') as HTMLInputElement | null;
+	const passwordInput = document.getElementById('password_log') as HTMLInputElement | null;
+	const authErrorEl = document.getElementById('auth-error') as HTMLElement | null;
+	const registerLink = document.getElementById('to-register') as HTMLAnchorElement | null;
 
-  // Description
-  const desc = document.createElement('p');
-  desc.className = 'text-xl text-neutral-400 mb-4 text-left';
-  desc.textContent = 'Welcome back — enter your credentials.';
+	if (registerLink) {
+		registerLink.addEventListener('click', (e) => {
+			e.preventDefault();
+			hideLogin();
+			attachRegister();
+		});
+	}
+	if (!usernameInput || !passwordInput) return;
+	const errorEl = authErrorEl ?? createErrorContainer();
 
-  // Email field
-  const { wrapper: emailWrap, input: emailInput } = createFormInput({
-    id: 'email',
-    name: 'email',
-    label: 'Email',
-    type: 'email',
-    placeholder: 'you@example.com',
-    focusRingColor: '#0dff66'
-  });
+	form.addEventListener('submit', async (ev) => {
+		ev.preventDefault();
+		hideError(errorEl);
 
-  // Password field
-  const { wrapper: passWrap, input: passInput } = createFormInput({
-    id: 'password',
-    name: 'password',
-    label: 'Password',
-    type: 'password',
-    placeholder: '••••••••',
-    focusRingColor: '#0dff66'
-  });
+		const username = usernameInput.value.trim();
+		const password = passwordInput.value;
 
-  // Submit button
-  const submit = createButton({
-    text: 'Sign in',
-    color: '#0dff66'
-  });
+		if (!username || !password) {
+			showError(errorEl, 'Please enter username and password.');
+			return;
+		}
 
-  // Footer with register link
-  const footer = document.createElement('div');
-  footer.className = 'mt-4 text-xl text-neutral-400 text-center';
-  const span = document.createElement('span');
-  span.textContent = "Don't have an account? ";
-  const createLink = document.createElement('a');
-  createLink.id = 'to-register';
-  createLink.href = '#';
-  createLink.className = 'text-[#0dff66] hover:underline';
-  createLink.textContent = 'Create one';
-  footer.appendChild(span);
-  footer.appendChild(createLink);
+		showLoading(errorEl, 'Signing in...');
 
-  // Error container
-  const authError = createErrorContainer();
+		try {
+			const body = await loginRequest(username, password);
+			if (body && body.tfaRequired) {
+				localStorage.setItem('userId', body.userId);
+				hideLogin();
+				attach2FA();
+				return;
+			}
+			if (body && body.user.id) localStorage.setItem('userId', body.user.id);
+			if (body && body.user && body.user.id) await SaveCurrentUserProfile(body.user.id);
+			showSuccess(errorEl, 'Signed in successfully.');
+			setTimeout(() => window.location.href = '/profile', 400);
+		} catch (err) {
+			showError(errorEl, (err as Error).message || 'Login failed');
+		}
+	});
+}
 
-  // Assemble form
-  form.appendChild(title);
-  form.appendChild(desc);
-  form.appendChild(emailWrap);
-  form.appendChild(passWrap);
-  form.appendChild(submit);
-  form.appendChild(footer);
+export function hideLogin(): void {
+	const form = document.getElementById('login-form') as HTMLFormElement | null;
+	if (form) {
+		form.classList.add('hidden');
+	}
+}
 
-  // Assemble card
-  card.appendChild(form);
-  card.appendChild(authError);
+export async function loginRequest(email: string, password: string): Promise<any> {
+	try {
+		const res = await fetch(`/api/auth/login`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({ email, password })
+		});
 
-  // Setup event listeners
-  createLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    callbacks.onRegisterClick();
-  });
-
-  form.addEventListener('submit', async (ev) => {
-    ev.preventDefault();
-    showLoading(authError, 'Signing in...');
-
-    const email = emailInput.value.trim();
-    const password = passInput.value;
-
-    if (!email || !password) {
-      showError(authError, 'Enter email and password.');
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password })
-      });
-
-      const body = await res.json().catch(() => null);
-      if (res.ok) {
-        console.log('Login successful:', body);
-        // Check if 2FA is required
-        if (body?.tfaRequired) {
-          localStorage.setItem('tfaEnabled', 'true');
-          localStorage.setItem('userId', body.userId);
-          if (body?.user) {
-            localStorage.setItem('user', JSON.stringify(body.user));
-          }
-          // Trigger render2FA through parent component
-          const event = new CustomEvent('login:tfa-required', { detail: body });
-          window.dispatchEvent(event);
-        } else {
-          if (body?.user?.id) {
-            localStorage.setItem('userId', body.user?.id);
-            localStorage.setItem('user', JSON.stringify(body.user));
-          }
-          localStorage.setItem('tfaEnabled', 'false');
-          showSuccess(authError, 'Login successful.');
-          setTimeout(() => { location.href = '/'; }, 600);
-        }
-      } else {
-        showError(authError, (body && (body.message || body.error)) || `Login failed (${res.status})`);
-      }
-    } catch (err) {
-      showError(authError, (err as Error).message || 'Network error');
-    }
-  });
-
-  return { form, card };
+		const body = await res.json().catch(() => null);
+		if (res.ok) {
+			return body;
+		} else {
+			const errorMsg = body && (body.message || body.error) ? (body.message || body.error) : `Login failed (${res.status})`;
+			throw new Error(errorMsg);
+		}
+	} catch (err) {
+		const message = (err as Error).message || 'Login request failed';
+		throw new Error(message);
+	}
 }

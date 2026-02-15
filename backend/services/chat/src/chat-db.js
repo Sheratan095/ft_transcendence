@@ -151,6 +151,18 @@ export class	ChatDatabase
 		return (chats);
 	}
 
+	async	getChatName(chatId)
+	{
+		const	query = `
+			SELECT name
+			FROM chats
+			WHERE id = ?
+		`;
+
+		const	result = await this.db.get(query, [chatId]);
+		return (result ? result.name : null);
+	}
+
 	// Fetch all messages for a chat that a user is part of
 	//	includes all message types (text, system, user_join)
 	//	only messages created after the user joined the chat are returned

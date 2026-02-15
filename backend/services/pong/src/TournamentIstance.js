@@ -94,7 +94,6 @@ export class	TournamentInstance
 				gameInstance.tournamentId = this.id;
 				gameInstance.gameStatus = GameStatus.WAITING;
 
-
 				matches.push(gameInstance);
 			}
 			else
@@ -105,7 +104,7 @@ export class	TournamentInstance
 					players[i].userId,
 					null,
 					players[i].username,
-					null,
+					"---",
 					GameType.TOURNAMENT,
 					this.id
 				);
@@ -113,7 +112,18 @@ export class	TournamentInstance
 				gameInstance.tournamentId = this.id;
 				gameInstance.isBye = true;
 				gameInstance.gameStatus = GameStatus.FINISHED;
+
+				// Mark the bye match as finished with a decisive 11-0 score
 				gameInstance.winner = players[i];
+				gameInstance.winnerId = players[i].userId;
+				// Ensure scores reflect 11-0 (left player is the one with the bye)
+				if (!gameInstance.scores)
+					gameInstance.scores = {};
+				gameInstance.scores[gameInstance.playerLeftId] = 11;
+				if (gameInstance.playerRightId != null)
+					gameInstance.scores[gameInstance.playerRightId] = 0;
+				else
+					delete gameInstance.scores[String(gameInstance.playerRightId)];
 
 				matches.push(gameInstance);
 			}
@@ -210,7 +220,8 @@ export class	TournamentInstance
 	_advanceToNextRound()
 	{
 		const	currentMatches = this.rounds[this.currentRound - 1];
-		const	winners = currentMatches.map(match => match.winner).filter(w => w !== null);
+		// Filter out both null and undefined winners to avoid passing invalid entries
+		const	winners = currentMatches.map(match => match.winner).filter(w => w != null);
 
 		// If only one winner, tournament is over
 		if (winners.length === 1)

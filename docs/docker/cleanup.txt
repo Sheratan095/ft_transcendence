@@ -1,0 +1,21 @@
+RESTART EVERYTHING (QUICK & SAFE)
+docker compose down
+docker compose up --build
+
+docker compose down --volumes --remove-orphans
+
+DELETE UNUSED IMAGES
+docker image prune -a
+
+DELETES EVERYTHING DOCKER-RELATED
+(containers, images, volumes, networks, cache)
+
+docker stop $(docker ps -aq) 2>/dev/null || true
+docker rm $(docker ps -aq) 2>/dev/null || true
+docker system prune -a --volumes
+
+
+THEN REBUILD CLEAN:
+
+docker compose build --no-cache
+docker compose up

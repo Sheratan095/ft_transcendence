@@ -26,7 +26,7 @@ let		authDatabase;
 // Validate required environment variables
 import { checkEnvVariables } from './auth-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'ACCESS_TOKEN_SECRET', 'ACCESS_TOKEN_EXPIRATION', 'REFRESH_TOKEN_SECRET', 'REFRESH_TOKEN_EXPIRATION_DAYS', 'PORT', 'HASH_SALT_ROUNDS', 
-	'OTP_EXPIRATION_MINUTES', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'HOST']);
+	'OTP_EXPIRATION_MINUTES', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'PONG_SERVICE_URL', 'TRIS_SERVICE_URL', 'CHAT_SERVICE_URL', 'HOST']);
 
 // Setup Swagger documentation
 import { setupSwagger } from './auth-swagger.js';

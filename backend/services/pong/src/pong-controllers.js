@@ -2,6 +2,7 @@ import { calculateElo, extractUserData } from './pong-help.js';
 import { tournamentManager } from './TournamentManager.js';
 import { getUsernameById, isUserBusyInternal } from './pong-help.js';
 import { GameStatus } from './GameInstance.js';
+import { TournamentStatus } from './TournamentIstance.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -88,7 +89,7 @@ export const	getUserStats = async (req, reply) =>
 		if (!userStats)
 			return (reply.code(404).send({ error: 'User stats not found' }));
 
-		const	elo = calculateElo(userStats.wins, userStats.losses, userStats.tournaments_won);
+		const	elo = calculateElo(userStats.wins, userStats.losses, userStats.tournament_wins);
 
 		const	response =
 		{
@@ -97,7 +98,7 @@ export const	getUserStats = async (req, reply) =>
 			gamesLost: userStats.losses,
 			elo: elo.elo,
 			rank: elo.rank,
-			tournamentsWon: userStats.tournaments_won,
+			tournamentsWon: userStats.tournament_wins,
 			tournamentsParticipated: userStats.tournaments_participated
 		}
 
@@ -134,7 +135,7 @@ export const	getUserMatchHistory = async (req, reply) =>
 			match.playerRightUsername = await getUsernameById(match.player_right_id);
 			match.status = GameStatus.FINISHED;
 			match.winnerId = match.winner_id;
-			match.isBye = false;
+			match.isBye = match.is_bye;
 			match.endedAt = match.ended_at;
 			match.tournamentId = match.tournament_id;
 			match.playerLeftScore = match.player_left_score;
@@ -175,14 +176,13 @@ export const	createTournament = async (req, reply) =>
 		if (await isUserBusyInternal(creatorId, true))
 		{
 			console.error(`[PONG] ${creatorId} tried to create a tournament while busy`);
-			pongConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
-			return ;
+			return (reply.code(400).send({ error: 'You are already in a game or matchmaking' }));
 		}
 
 		// Create a new tournament
 		const	tournament = tournamentManager.createTournament(name, creatorId, creatorUsername);
 
-		console.log(`[PONG] User ${creatorId} creted a tournament named "${name}"`);
+		console.log(`[PONG] User ${creatorId} created a tournament named "${name}"`);
 
 		return (reply.code(201).send({
 			tournamentId: tournament.id,
@@ -244,7 +244,7 @@ export const	joinTournament = async (req, reply) =>
 	}
 }
 
-export const	getUserTournamentParticipation = async (req, reply) =>
+export const	getUserTournamentsParticipations = async (req, reply) =>
 {
 	try
 	{
@@ -252,12 +252,12 @@ export const	getUserTournamentParticipation = async (req, reply) =>
 		const	userId = req.query.id;
 
 		// Retrieve tournament participation for the user
-		const	participation = await pongDb.getTournamentParticipationByUser(userId);
-		if (!participation || participation.length === 0)
+		const	participations = await pongDb.getTournamentsParticipationsByUser(userId);
+		if (!participations || participations.length === 0)
 			return (reply.code(404).send({ error: 'No tournament participation found for user' }));
 
 		// Map the participation to a cleaner format if needed
-		for (let entry of participation)
+		for (let entry of participations)
 		{
 			entry.tournamentId = entry.tournament_id;
 			entry.tournamentName = entry.tournament_name;
@@ -270,13 +270,13 @@ export const	getUserTournamentParticipation = async (req, reply) =>
 			delete entry.finished_at;
 		}
 
-		console.log(`[PONG] Retrieved tournament participation for user ${userId}`);
+		console.log(`[PONG] Retrieved tournaments participations for user ${userId}`);
 
-		return (reply.code(200).send(participation));
+		return (reply.code(200).send(participations));
 	}
 	catch (err)
 	{
-		console.error('[PONG] Error in getUserTournamentParticipation controller:', err);
+		console.error('[PONG] Error in getUserTournamentsParticipations controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
@@ -299,6 +299,124 @@ export const	getTournamentBracket = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[PONG] Error in getTournamentBracket controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	testGetTournament = async (req, reply) =>
+{
+	try
+	{
+		// Create a test tournament
+		const	testTournament = tournamentManager.createTournament(
+			'Test Tournament',
+			'test-creator-id',
+			'TestCreator'
+		);
+
+		// Add test participants (6 + creator = 7 total, which will create a BYE match)
+		const	participants = [
+			{ userId: 'test-user-1', username: 'Alice' },
+			{ userId: 'test-user-2', username: 'Bob' },
+			{ userId: 'test-user-3', username: 'Charlie' },
+			{ userId: 'test-user-4', username: 'David' },
+			{ userId: 'test-user-5', username: 'Eve' },
+			{ userId: 'test-user-6', username: 'Frank' },
+			{ userId: 'test-user-7', username: 'Grace' },
+			{ userId: 'test-user-8', username: 'Hannah' },
+			{ userId: 'test-user-9', username: 'Ivan' },
+			{ userId: 'test-user-10', username: 'Judy' },
+			{ userId: 'test-user-11', username: 'Karl' }
+		];
+		for (const participant of participants)
+			testTournament.addParticipant(participant.userId, participant.username);
+
+		// Start the tournament (this creates the first round with matches)
+		testTournament.startTournament();
+
+		// Simulate completion of first round matches
+		const	firstRoundMatches = testTournament.rounds[0];
+		for (const match of firstRoundMatches)
+		{
+			if (!match.isBye)
+			{
+				// Set match as finished with simulated scores
+				match.gameStatus = GameStatus.FINISHED;
+				match.scores[match.playerLeftId] = 11;
+				match.scores[match.playerRightId] = Math.floor(Math.random() * 10);
+				match.winnerId = match.playerLeftId; // Left player always wins
+				match.winner = { userId: match.playerLeftId, username: match.playerLeftUsername };
+				match.endedAt = new Date().toISOString();
+			}
+		}
+
+		// Advance to next round
+		testTournament._advanceToNextRound();
+
+		// Simulate completion of second round (semi-finals)
+		const	secondRoundMatches = testTournament.rounds[1];
+		for (const match of secondRoundMatches)
+		{
+			match.gameStatus = GameStatus.FINISHED;
+			match.scores[match.playerLeftId] = 11;
+			match.scores[match.playerRightId] = Math.floor(Math.random() * 10);
+			match.winnerId = match.playerLeftId;
+			match.winner = { userId: match.playerLeftId, username: match.playerLeftUsername };
+			match.endedAt = new Date().toISOString();
+		}
+
+		// Advance to round 3 (semifinals with potential bye)
+		testTournament._advanceToNextRound();
+
+		// Simulate completion of round 3 (semifinals)
+		const	thirdRoundMatches = testTournament.rounds[2];
+		if (thirdRoundMatches)
+		{
+			for (const match of thirdRoundMatches)
+			{
+				if (!match.isBye)
+				{
+					match.gameStatus = GameStatus.FINISHED;
+					match.scores[match.playerLeftId] = 11;
+					match.scores[match.playerRightId] = Math.floor(Math.random() * 10);
+					match.winnerId = match.playerLeftId;
+					match.winner = { userId: match.playerLeftId, username: match.playerLeftUsername };
+					match.endedAt = new Date().toISOString();
+				}
+			}
+		}
+
+		// Advance to final round if tournament not finished yet
+		if (testTournament.status !== TournamentStatus.FINISHED)
+			testTournament._advanceToNextRound();
+
+		// Simulate completion of final match
+		if (testTournament.rounds.length > 3)
+		{
+			const	finalMatch = testTournament.rounds[testTournament.rounds.length - 1][0];
+			if (finalMatch && !finalMatch.isBye)
+			{
+				finalMatch.gameStatus = GameStatus.FINISHED;
+				finalMatch.scores[finalMatch.playerLeftId] = 11;
+				finalMatch.scores[finalMatch.playerRightId] = 10;
+				finalMatch.winnerId = finalMatch.playerLeftId;
+				finalMatch.winner = { userId: finalMatch.playerLeftId, username: finalMatch.playerLeftUsername };
+				finalMatch.endedAt = new Date().toISOString();
+
+				// Check if tournament is complete (should set status to FINISHED)
+				if (testTournament.isRoundComplete())
+					testTournament._advanceToNextRound();
+			}
+		}
+
+		// Get the bracket using the existing method
+		const	bracket = tournamentManager.getTournamentBracket(testTournament.id);
+
+		return (reply.code(200).send(bracket));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in testGetTournament controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

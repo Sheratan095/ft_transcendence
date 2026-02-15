@@ -1,7 +1,3 @@
 ### Create private chat
-POST https://localhost:3000/chat/start-private-chat
-Content-Type: application/json
+GET https://localhost:3000/chat/
 
-{
-  "toUserId": 1
-}

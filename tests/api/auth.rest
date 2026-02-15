@@ -14,7 +14,7 @@ Content-Type: application/json
 
 {
   "username": "marco",
-  "email": "ceccarellim7@gmail.com",
+  "email": "marco.ceccarelli.code@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -46,7 +46,17 @@ POST https://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "email": "ceccarellim7@gmail.com",
+  "email": "test3@gmail.com",
+  "password": "1234"
+}
+
+### Login (copy the refreshToken from response)
+# @name login
+POST https://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "marco.ceccarelli.code@gmail.com",
   "password": "Mrco@123_"
 }
 
@@ -83,8 +93,8 @@ POST https://localhost:3000/auth/2fa
 Content-Type: application/json
 
 {
-  "userId": "0f4b76f9-4d86-4857-80ac-43f5f9dd7379",
-  "otpCode": "846422"
+  "userId": "8f2dba45-80e3-468f-b244-83395dc8bb88",
+  "otpCode": "317776"
 }
 
 ###

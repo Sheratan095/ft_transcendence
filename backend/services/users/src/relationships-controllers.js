@@ -39,15 +39,19 @@ export async function	getUsersRelationship(req, reply)
 	try
 	{
 		const	usersDb = req.server.usersDb;
-		const	userA = extractUserData(req).id;
-		const	userB = req.query.userId;
+		const	requesterId = extractUserData(req).id;
+		const	targetId = req.query.userId;
 
-		const	relationship = await usersDb.getUsersRelationship(userA, userB);
+		const	relationship = await usersDb.getUsersRelationship(requesterId, targetId);
 
-		console.log(`[RELATIONSHIPS] GetUsersRelationship between ${userA} and ${userB} : ${relationship? relationship.relationship_status : 'none'}`);
+		console.log(`[RELATIONSHIPS] GetUsersRelationship between ${requesterId} and ${targetId} : ${relationship? relationship.relationship_status : 'none'}`);
 
 		// Return empty object if no relationship exists
 		if (!relationship)
+			return (reply.code(200).send({}));
+
+		// If the blocked relation is requested by those who got blocked, return empty to avoid revealing block status
+		if (relationship.relationship_status === 'blocked' && requesterId === relationship.target_id)
 			return (reply.code(200).send({}));
 
 		// Map snake_case to camelCase to match the response schema
@@ -189,6 +193,9 @@ export async function	blockUser(req, reply)
 		const	usersDb = req.server.usersDb;
 		const	userId = extractUserData(req).id;
 		const	{ targetId } = req.body;
+
+		if (userId === targetId)
+			return (reply.code(400).send({ error: 'Cannot block yourself' }));
 
 		await usersDb.blockUser(userId, targetId);
 
@@ -333,8 +340,17 @@ export async function	sendFriendRequest(req, reply)
 			// Check if blocked - silently return success to avoid revealing block status
 			if (relationship.relationship_status === 'blocked')
 			{
-				console.log(`[RELATIONSHIPS] User ${userId} tried to send request to ${targetId} but the relationship is blocked`);
-				return (reply.code(200).send({ message: 'Friend request sent' }));
+				// if the requestor is the one who blocked, tell them to unblock first
+				if (relationship.requester_id === userId)
+				{
+					console.log(`[RELATIONSHIPS] User ${userId} tried to send request to ${targetId} but they have blocked them`);
+					return (reply.code(400).send({ error: 'You have blocked this user. Unblock them to send a friend request.' }));
+				}
+				else
+				{
+					console.log(`[RELATIONSHIPS] User ${userId} tried to send request to ${targetId} but the relationship is blocked`);
+					return (reply.code(200).send({ message: 'Friend request sent' }));
+				}
 			}
 
 			// Already friends
@@ -404,7 +420,7 @@ export async function	acceptFriendRequest(req, reply)
 		const	accepterUsername = (await usersDb.getUserById(user.id)).username;
 		const	requesterUser = await usersDb.getUserById(requesterId);
 
-		await notifyFriendAccept(requesterId, user.id, requesterUser.username, accepterUsername);
+		await notifyNowFriends(requesterId, user.id, requesterUser.username, accepterUsername);
 
 		console.log('[RELATIONSHIPS] Friend request accepted by userId:', user.id, 'from requesterId:', requesterId);
 

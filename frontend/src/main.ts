@@ -1,247 +1,206 @@
-import { getUserId } from './lib/auth';
-import { startTokenRefresh } from './lib/token';
-import { renderProfile } from './lib/profile';
-import { setupChatEventListeners, initChat, connectChatWebSocket } from './lib/chat';
-import { searchUser, renderSearchResult } from './lib/search';
-import { createLoginForm, createRegisterForm, createTwoFactorForm } from './components/auth';
+import { fetchUserProfile, getUserId, logout } from './lib/auth';
+import { isLoggedInClient, startTokenRefresh } from './lib/token';
+import { attachUserOptions } from './components/profile/profile';
+import { setupChatEventListeners, initChat } from './components/chat/chat';
+import { initChatButton, initHomeButton, removeHomeButton } from './components/shared/FloatingButtons';
+import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
+import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, setLocaleInStorage } from "intlayer";
-import { connectNotificationsWebSocket, sendPing } from './components/profile/Notifications';
-import { setFriendsManager } from './components/profile/Notifications';
+import { connectNotificationsWebSocket } from './components/shared/Notifications';
+import { setFriendsManager } from './components/shared/Notifications';
+import { showTournamentListModal } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
+import { setupPongCardListener } from './lib/pong-ui';
 import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
+import { initCardHoverEffect } from './lib/card';
+import ApexCharts from 'apexcharts';
+import { start } from './spa';
+
+// Make ApexCharts globally available for UserCardCharts
+if (typeof window !== 'undefined') {
+  (window as any).ApexCharts = ApexCharts;
+}
+
+main(window.location.pathname);
+
+// Main application entry point,
+// called on every page load remembering SPA navigation
+// add checks here.
+export async function main(path: string) {
+await start();
 
 // Load user's saved language preference
 const savedLanguage = localStorage.getItem('userLanguage') || 'en';
 setLocaleInStorage(savedLanguage);
 
+console.log(savedLanguage);
+
 getIntlayer("app"); // Initialize intlayer
 
-/**
- * Initialize application managers and websockets after user login
- */
-async function initializeUserServices(userId: string) {
-  try {
-    console.log('Initializing user services for userId:', userId);
+initTheme(); // add theme
+initCardHoverEffect(); // Initialize card hover effect
+  // Attach global click handlers for shared/dynamic elements
+  setupGlobalClickHandlers();
+if (isLoggedInClient()) initUserServices(path);
 
-    // 1. Initialize FriendsManager
-    const friendsManager = new FriendsManager({ currentUserId: userId });
-    console.log('FriendsManager initialized');
-
-    // 2. Connect FriendsManager to Notifications
-    setFriendsManager(friendsManager);
-
-    // 3. Connect FriendsManager to Tris UI
-    setTrisFriendsManager(friendsManager);
-
-    // 4. Load friends list
-    await friendsManager.loadFriends();
-    console.log('Friends loaded');
-
-    // 5. Initialize Chat
-    initChat(userId);
-    setupChatEventListeners();
-    console.log('Chat services initialized');
-
-    // 6. Connect to Notifications WebSocket
-    connectNotificationsWebSocket();
-    console.log('Notifications WebSocket connected');
-
-    // 7. Set up periodic token refresh
-    startTokenRefresh();
-    console.log('Token refresh started');
-
-  } catch (err) {
-    console.error('Failed to initialize user services:', err);
-    throw err;
-  }
-}
-
-/**
- * Clean up services when user logs out
- */
-function cleanupUserServices() {
-  try {
-    // Close websockets and clean up any global state
-    console.log('Cleaning up user services');
-    // Additional cleanup can be added here as needed
-  } catch (err) {
-    console.error('Error during cleanup:', err);
-  }
-}
-
-
-class AuthUI {
-  private container: HTMLElement;
-
-  constructor() {
-    const el = document.getElementById('auth-container');
-    if (!el) throw new Error('Auth container not found');
-    this.container = el;
-
-    // make container flexible so the card can expand to available space
-    this.container.classList.add('w-full', 'flex', 'items-center', 'justify-center');
-    this.container.style.minHeight = '240px';
-    getUserCount();
-    const userId = getUserId();
-    if (userId) {
-      this.renderProfileWithInit(el, userId);
-      return;
-    }
-    else
-    {
-      this.renderLogin();
-    }
-  }
-
-  private async renderProfileWithInit(el: HTMLElement, userId: string) {
-    try {
-      // Initialize all user services
-      await initializeUserServices(userId);
-      
-      // Render profile card
-      await renderProfile(el);
-    } catch (err) {
-      console.error('Failed to initialize profile:', err);
-      // Fall back to login on init error
-      this.renderLogin();
-    }
-  }
-
-  private clear() {
-    while (this.container.firstChild) this.container.removeChild(this.container.firstChild);
-  }
-
-  private renderLogin() {
-    this.clear();
-
-    const { form, card } = createLoginForm({
-      onRegisterClick: () => this.renderRegister()
-    });
-
-    // Listen for 2FA required event
-    const handleTfaRequired = () => {
-      this.render2FA();
-    };
-    window.addEventListener('login:tfa-required', handleTfaRequired);
-
-    card.appendChild(form);
-    this.container.appendChild(card);
-  }
-
-  private renderRegister() {
-    this.clear();
-
-    const { form, card } = createRegisterForm({
-      onLoginClick: () => this.renderLogin()
-    });
-
-    card.appendChild(form);
-    this.container.appendChild(card);
-  }
-
-  // 2FA 
-
-  private render2FA() {
-    this.clear();
-
-    const { form, card } = createTwoFactorForm({
-      onBackClick: () => this.renderLogin()
-    });
-
-    card.appendChild(form);
-    this.container.appendChild(card);
-  }
-}
-
-async function getUserCount() 
-{
-  const onlineCount = document.getElementById('online-count');
-  if (!onlineCount) return;
-
-  try {
-    const res = await fetch(`/api/users/stats`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    });
-    if (res.ok) {
-      const body = await res.json();
-      if (body && typeof body.activeUsers === 'number') {
-        onlineCount.textContent = 'Join now! (' + body.activeUsers + '/' + body.totalUsers + ') users online.';
-      }
-    }
-  }
-    catch (err) {
-      console.error('Failed to fetch user stats', err);
-    }
 }
 
 /**
  * Setup search user functionality
  */
-function setupSearchUser() {
+function setupSearchUser()
+{
   const searchForm = document.getElementById('search-user-form') as HTMLFormElement;
   const searchInput = document.getElementById('search-user-input') as HTMLInputElement;
-  const searchError = document.getElementById('search-error') as HTMLElement;
-  const authContainer = document.getElementById('auth-container') as HTMLElement;
+  const mainContainer = document.getElementById('main-content') as HTMLElement;
 
-  if (!searchForm || !searchInput || !searchError || !authContainer) return;
+  if (!searchForm || !searchInput || !mainContainer)
+    return;
 
+  searchForm.classList.remove('hidden');
+  initSearchAutocomplete();
+  
   searchForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    searchError.classList.add('hidden');
-    searchError.textContent = '';
 
     const query = searchInput.value.trim();
     if (!query) {
-      searchError.textContent = 'Please enter a name or user ID';
-      searchError.classList.remove('hidden');
+      showErrorToast('Please enter a username or ID to search');
       return;
     }
 
     try {
-      searchError.classList.add('hidden');
-      authContainer.innerHTML = '<div class="py-8 text-center text-neutral-400">Searching...</div>';
+      showInfoToast('Searching for user...');
 
       const user = await searchUser(query);
       if (!user) {
-        searchError.textContent = 'User not found';
-        searchError.classList.remove('hidden');
-        authContainer.innerHTML = '';
+        showErrorToast('User not found');
         return;
       }
 
-      authContainer.innerHTML = '';
-      await renderSearchResult(user, authContainer);
+      mainContainer.innerHTML = '';
+      await renderSearchResult(user, mainContainer);
       searchInput.value = '';
     } catch (err) {
-      searchError.textContent = (err as Error).message || 'Search failed';
-      searchError.classList.remove('hidden');
-      authContainer.innerHTML = '';
+      showErrorToast('Error searching for user');
     }
   });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  initTheme();
+function modifyIndex()
+{
+  // Support both the dynamic and static login anchors
+  const link = document.querySelector('#cta-login-logout, #cta-login-logout-static') as HTMLAnchorElement | null;
+  if (link)
+  {
+    const h2 = link.getElementsByTagName('h2')[0];
+    if (h2)
+      h2.textContent = './LOGOUT';
+    
+    // Clicks are handled via event delegation in setupGlobalClickHandlers()
+  }
+
+  const showTournamentsBtn = document.getElementById('tournamentListButton');
+  if (showTournamentsBtn) {
+    showTournamentsBtn.classList.remove('hidden');
+  }
+
+  const showTournamentsBtnStatic = document.getElementById('tournamentListButton-static');
+  if (showTournamentsBtnStatic) {
+    showTournamentsBtnStatic.classList.remove('hidden');
+  }
+}
+
+function initUserServices(path: string)
+{
+	const userId = getUserId();
+	if (!userId)
+      return;
+
+  startTokenRefresh();
+  modifyIndex();
+  setupChatEventListeners();
+  initChatButton();
+  initHomeButton();
+  connectNotificationsWebSocket();
+  
+  // Initialize global FriendsManager for notifications
+  const globalFriendsManager = new FriendsManager({ currentUserId: userId });
+  setFriendsManager(globalFriendsManager);
+  setTrisFriendsManager(globalFriendsManager);
+  console.log('[Main] FriendsManager initialized for notifications');
+  
   setupSearchUser();
-  setupTrisCardListener();
-  initSlideshow();
-  
-  // Setup indicator dots click handlers
-  const indicators = document.querySelectorAll('.slideshow-indicator');
-  indicators.forEach((indicator) => {
-    indicator.addEventListener('click', () => {
-      const slideId = (indicator as HTMLElement).dataset.slide;
-      if (slideId) {
-        goToSlide(slideId);
-      }
-    });
+  attachUserOptions();
+  initChat(userId);
+
+  // Handle home button visibility on route changes
+  window.addEventListener('route-rendered', (e: any) => {
+    const currentPath = e.detail?.path || window.location.pathname;
+    if (currentPath === '/') {
+      removeHomeButton();
+    } else {
+      initHomeButton();
+    }
+    // Ensure the CTA in the rendered page reflects the logged-in state
+    modifyIndex();
   });
-  
-  // AuthUI will handle chat setup after user login
-  new AuthUI();
-});
+}
+
+// Global click handler for shared/dynamic elements
+function setupGlobalClickHandlers() {
+  document.addEventListener('click', async (e) => {
+    const target = e.target as HTMLElement;
+
+    // Handle Tournament Button
+    const tournamentBtn = target.closest('#tournamentListButton, #tournamentListButton-static');
+    if (tournamentBtn) {
+      e.preventDefault();
+      const modal = document.getElementById('tournament-modal');
+      if (modal) modal.classList.remove('hidden');
+      showTournamentListModal();
+      return;
+    }
+
+    // Shared logout flow
+    const performLogout = async () => {
+      // mark manual logout to prevent background token refresh from redirecting to /login
+      (window as any).__manualLogout = true;
+      try {
+        await logout();
+        showToast('Logged out successfully');
+        // Navigate to home and force a full reload to ensure fresh state
+        setTimeout(() => {
+          window.location.href = '/';
+          setTimeout(() => window.location.reload(), 60);
+        }, 300);
+      }
+      catch (err) {
+        console.error('Logout (client) error:', err);
+        showErrorToast('Error logging out');
+      }
+      // clear the flag after a short delay so future 401s behave normally
+      setTimeout(() => { (window as any).__manualLogout = false; }, 2000);
+    };
+
+    // Handle Logout Link (static or dynamic)
+    const logoutLink = target.closest('#cta-login-logout, #cta-login-logout-static');
+    if (logoutLink && logoutLink.textContent?.includes('LOGOUT')) {
+      e.preventDefault();
+      await performLogout();
+      return;
+    }
+
+    // Handle Logout Button on profile page
+    const profileLogoutBtn = target.closest('#profile-logout-btn');
+    if (profileLogoutBtn) {
+      e.preventDefault();
+      await performLogout();
+      return;
+    }
+  });
+}
 
 export default {};

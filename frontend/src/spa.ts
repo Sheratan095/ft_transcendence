@@ -1,52 +1,173 @@
 import { isLoggedInClient } from './lib/auth';
+import { attachLogin } from './components/auth/LoginForm';
+import { showErrorToast } from './components/shared';
+import { renderProfileCard } from './components/profile/MainProfileCard';
+import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
+import { initCardHoverEffect } from './lib/card';
 
-type RouteConfig = { html: string; script?: string };
+// Track current search profile card for cleanup
+let currentSearchProfileCard: HTMLElement | null = null;
+
+type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
-  '/': { html: './pages/profile-page/profilepage.html', script: './pages/profile-page/profilepage.ts' },
-  '/login': { html: './pages/login/login.html', script: './pages/login/login.ts' },
-  '/register': { html: './pages/register/register.html', script: './pages/register/register.ts' },
-  '/profile': { html: './pages/profile-info/profile.html', script: './pages/profile-info/profile.ts' },
-  '/pong': { html: './pages/pong/pong.html' }
-};
+  '/': { 
+    render: async () => {
+      const el = document.getElementById('main-content');
+      const template = document.getElementById('home-template') as HTMLTemplateElement | null;
+      if (!el || !template) return;
+      el.innerHTML = '';
+      const clone = template.content.cloneNode(true);
+      el.appendChild(clone);
+      initCardHoverEffect();
+    }
+  },
+  '/login': {
+  render: async () => {
+	if (isLoggedInClient())
+  {
+		return;
+	}
+    const el = document.getElementById('main-content');
+    const template = document.getElementById('login-template') as HTMLTemplateElement | null;
 
-async function navigate(path: string) {
-  history.pushState({}, '', path);
-  await renderRoute(path);
+    if (!el || !template) return;
+
+    el.innerHTML = '';
+
+    const clone = template.content.cloneNode(true);
+    el.appendChild(clone);
+
+    attachLogin();
+	initCardHoverEffect();
+  }
+  },
+  '/profile': {
+    render: async () => {
+    const el = document.getElementById('main-content');
+    if (!el) return;
+    if (!isLoggedInClient()) {
+    goToRoute('/login');
+    showErrorToast('Please sign in to view your profile');
+    return;
+    }
+    animatePolygonToBottom();
+    el.innerHTML = '';
+
+    // Check if viewing another user via query param
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('id');
+
+    if (userId && userId !== 'current-user-id')
+    {
+      // Render search profile card for another user
+      try {
+        const result = await renderSearchProfileCard(userId, el);
+        // Store reference for cleanup
+        currentSearchProfileCard = result;
+        // If result is null, it means it's the current user, so render main profile
+        if (result === null) {
+          el.innerHTML = '';
+          await renderProfileCard(el);
+        }
+      } catch (err) {
+        console.error('Failed to load user profile:', err);
+        el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load user profile</div>';
+      }
+      return;
+    }
+
+    // Render logged-in user's profile
+    try {
+      console.log('Calling renderProfileCard...');
+      await renderProfileCard(el);
+      console.log('Profile card rendered');
+    } catch (err) {
+      console.error('Failed to render profile:', err);
+      el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load profile</div>';
+    }
+    }
+  },
+  '/pong': { 
+    render: async () => {
+      const el = document.getElementById('main-content');
+      if (!el) return;
+      el.innerHTML = '<div class="py-8">Pong game loading...</div>';
+      // Import and render pong component
+      try {
+        const pongModule = await import('./lib/pong-ui');
+        await pongModule.openPongModal();
+      } catch (err) {
+        el.innerHTML = '<div class="text-red-600">Failed to load Pong game</div>';
+      }
+    }
+  },
+  '/tris': { 
+    render: async () => {
+      const el = document.getElementById('main-content');
+      if (!el) return;
+      el.innerHTML = '<div class="py-8">Tris game loading...</div>';
+      // Import and render tris component
+      try {
+        const trisModule = await import('./lib/tris-ui');
+        await trisModule.openTrisModal();
+      } catch (err) {
+        el.innerHTML = '<div class="text-red-600">Failed to load Tris game</div>';
+      }
+    }
+  }
+};
+// Navigation history for detecting back/forward
+let navigationHistory: string[] = [];
+let isBackNavigation = false;
+
+/**
+ * Main routing function - handles path navigation and rendering
+ * Updates browser history, detects back/forward navigation, and renders the appropriate route
+ */
+async function goToRoute(path: string) {
+  const url = new URL(path, window.location.origin);
+  
+  // Real SPA navigation
+  if (url.pathname + url.search !== window.location.pathname + window.location.search) {
+    history.pushState(null, '', path);
+    await renderRoute(url.pathname);
+  } else {
+    // If already on the path, we can still re-render or do nothing
+    // To support clicking the same link to refresh:
+    await renderRoute(url.pathname);
+  }
 }
 
 async function renderRoute(path: string) {
-  const container = document.getElementById('app');
-  if (!container) return;
-  container.innerHTML = '<div class="py-8">Loading...</div>';
   const route = routes[path] || routes['/'];
+  
+  // Cleanup any previous search profile card
+  if (currentSearchProfileCard) {
+    cleanupSearchProfileCard(currentSearchProfileCard);
+    currentSearchProfileCard = null;
+  }
+  
   try {
-    // Load HTML
-    // Resolve HTML path relative to this module so Vite serves the correct URL
-    const htmlUrl = new URL(route.html, import.meta.url).href;
-    const res = await fetch(htmlUrl);
-    if (!res.ok) throw new Error(`Failed to load ${htmlUrl}: ${res.status}`);
-    const html = await res.text();
-    container.innerHTML = html;
-
+    // Use View Transitions API for smooth page transitions
+    const transitionFn = async () => {
+      await route.render();
+      window.dispatchEvent(new CustomEvent('route-rendered', { detail: { path } }));
+    };
     
-    // Load script if provided (dynamic import)
-    if (route.script) {
-      try {
-        // Resolve script URL relative to this module and import as module
-        const scriptUrl = new URL(route.script, import.meta.url).href;
-        await import(/* @vite-ignore */ scriptUrl);
-      } catch (err) {
-        // If dynamic import with .ts fails, attempt .js
-        try {
-          const alt = new URL(route.script.replace(/\.ts$/, '.js'), import.meta.url).href;
-          await import(/* @vite-ignore */ alt);
-        } catch (_) {
-          console.warn('Page script import failed', err);
-        }
-      }
+    if (document.startViewTransition) {
+      const transition = document.startViewTransition(transitionFn);
+      document.documentElement.dataset.transitionDirection = isBackNavigation ? 'back' : 'forward';
+      
+      await transition.finished;
+      delete document.documentElement.dataset.transitionDirection;
+    } else {
+      await transitionFn();
     }
   } catch (err) {
-    container.innerHTML = `<div class="text-red-600">Error loading page</div>`;
+    const el = document.getElementById('main-content');
+    if (el) {
+      el.innerHTML = `<div class="text-red-600">Error loading page</div>`;
+    }
     console.error(err);
   }
 }
@@ -58,8 +179,13 @@ export function linkify() {
     const href = a.getAttribute('href');
     if (!href) return;
     if (href.startsWith('/')) {
+      // Allow explicit new-tab/open/download links to behave normally
+      const target = a.getAttribute('target');
+      if (target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-no-spa')) {
+        return;
+      }
       ev.preventDefault();
-      navigate(href);
+      goToRoute(href);
     }
   });
 }
@@ -73,10 +199,20 @@ export async function start() {
   }
   linkify();
   window.addEventListener('popstate', () => renderRoute(location.pathname));
-  // Decide initial route: if user not logged in, show login
   let initial = location.pathname || '/';
-  if (initial === '/' && !isLoggedInClient()) initial = '/login';
   await renderRoute(initial);
 }
 
-export default { start, navigate };
+export function animatePolygonToBottom(): void {
+	const polygon = document.querySelector(
+		'.mix-blend-difference'
+	) as HTMLElement | null;
+
+	if (!polygon) return;
+
+	polygon.style.transition = "clip-path 0.6s ease-in-out";
+	polygon.style.clipPath = "polygon(0% 90%, 100% 90%, 100% 100%, 0% 100%)";
+}
+
+export { goToRoute };
+export default { start, goToRoute };

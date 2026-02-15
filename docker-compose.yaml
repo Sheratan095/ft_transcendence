@@ -12,16 +12,16 @@ services:
     networks:
       - trascendence
 
-  chat:
+  users:
     build:
-      context: ./backend/services/chat
-    container_name: chat
+      context: ./backend/services/users
+    container_name: users
     env_file:
-      - ./backend/services/chat/.env
+      - ./backend/services/users/.env
     expose:
       - 3002
     volumes:
-      - ./backend/data/chat:/usr/src/app/data
+      - ./backend/data/users:/usr/src/app/data
     networks:
       - trascendence
 
@@ -38,6 +38,19 @@ services:
     networks:
       - trascendence
 
+  chat:
+    build:
+      context: ./backend/services/chat
+    container_name: chat
+    env_file:
+      - ./backend/services/chat/.env
+    expose:
+      - 3004
+    volumes:
+      - ./backend/data/chat:/usr/src/app/data
+    networks:
+      - trascendence
+
   pong:
     build:
       context: ./backend/services/pong
@@ -45,7 +58,7 @@ services:
     env_file:
       - ./backend/services/pong/.env
     expose:
-      - 3004
+      - 3005
     volumes:
       - ./backend/data/pong:/usr/src/app/data
     networks:
@@ -58,22 +71,9 @@ services:
     env_file:
       - ./backend/services/tris/.env
     expose:
-      - 3005
-    volumes:
-      - ./backend/data/tris:/usr/src/app/data
-    networks:
-      - trascendence
-    
-  users:
-    build:
-      context: ./backend/services/users
-    container_name: users
-    env_file:
-      - ./backend/services/users/.env
-    expose:
       - 3006
     volumes:
-      - ./backend/data/users:/usr/src/app/data
+      - ./backend/data/tris:/usr/src/app/data
     networks:
       - trascendence
 
@@ -91,11 +91,11 @@ services:
       - ./backend/certs/certs:/usr/src/certs/certs:ro
     depends_on:
       - auth
-      - chat
+      - users
       - notification
+      - chat
       - pong
       - tris
-      - users
     networks:
       - trascendence
 
@@ -103,12 +103,13 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: "http://gateway:3000"
-    environment:
-      - VITE_API_URL=http://gateway:3000
+        VITE_API_TARGET: "https://gateway:3000"
     container_name: frontend
     ports:
-      - "4000:4000"
+      - "4000:443"
+    volumes:
+      - ./frontend/certs/certs:/etc/nginx/certs:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - gateway
     networks:

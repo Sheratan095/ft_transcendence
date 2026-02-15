@@ -1,0 +1,7 @@
+### Create a new tournament
+POST https://localhost:3000/pong/create-tournament
+Content-Type: application/json
+
+{
+  "name": "Summer Championship"
+}

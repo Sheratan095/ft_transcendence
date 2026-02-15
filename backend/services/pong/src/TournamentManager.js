@@ -620,8 +620,8 @@ class	TournamentManager
 				isBye: match.isBye || false,
 				endedAt: match.endedAt || null,
 				tournamentId: tournamentId,
-				playerLeftScore: match.scores[match.playerLeftId],
-				playerRightScore: match.scores[match.playerRightId]
+				playerLeftScore: match.scores[match.playerLeftId] || 0,
+				playerRightScore: match.playerRightId ? match.scores[match.playerRightId] || 0 : 0
 			}));
 
 			rounds.push({
@@ -637,7 +637,7 @@ class	TournamentManager
 			currentRound: tournament.currentRound,
 			totalRounds: tournament.rounds.length,
 			participantCount: tournament.initialParticipantCount,
-			winnerId: tournament.winner || null,
+			winnerId: tournament.winner ? tournament.winner.userId : null,
 			rounds: rounds
 		});
 	}

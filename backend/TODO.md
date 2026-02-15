@@ -151,3 +151,28 @@ I think it's ok
 	[GATEWAY] Users service error: Request failed with status code 400
 
 [x] Can creator cancel the tournament
+
+[x] 2fa not working
+
+[x] pong get user stats
+
+[x] logout bad request in frontend
+
+[x] Deleted old avatar: 1.png
+
+[x] If i sent a friend request to someone I BLOCKED, should the request be sent anyway?
+
+[x] When blocking yourself, it shouldn't go on, reply with just a general error avoiding to show database info
+{
+    "error": "SQL constraint error",
+    "details": "SQLITE_CONSTRAINT: CHECK constraint failed: requester_id != target_id"
+}
+
+[x] In docker (just at docker compose up, if docs are refreshed => users docs are loaded correctly, it could be a problem in starting queue of services??)
+	gateway       | ⚠️ Failed to load users docs: connect ECONNREFUSED 172.18.0.7:3002
+	gateway       | [GATEWAY] 📚 Loaded 5/6 specs
+
+[] XSS attack ?? tournament name??
+
+[] both for pong and tris when user hasn't history => TRY CATCH to avoid console error
+	GET https://localhost:4000/api/tris/history?id=0da84a23-0ea9-4f0c-8d38-4f01707bd08d 404 (Not Found)

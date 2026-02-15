@@ -1,5 +1,5 @@
 import { getUserId } from './auth';
-import { getUser } from './auth';
+import { goToRoute } from '../spa';
 import { 
   initTris, 
   onTrisEvent, 
@@ -15,10 +15,9 @@ import {
   startMatchmaking,
   stopMatchmaking
 } from './tris';
-import { showSuccessToast, showErrorToast, showToast } from '../components/shared/Toast';
+import { showSuccessToast, showErrorToast} from '../components/shared/Toast';
 import type { User } from './auth';
 import type { FriendsManager } from '../components/profile/FriendsManager';
-import { start } from '../spa';
 import { openTrisModeModal, getSelectedTrisMode, initializeModeSpecificBehaviors, resetLocalGame } from './tris-mode';
 
 let trisInitialized = false;
@@ -492,10 +491,10 @@ function attachTrisCardListener() {
     return;
   }
   console.log('Attaching tris card listener');
-  trisCard.addEventListener('click', (e) => {
+  trisCard.addEventListener('click', async (e) => {
     e.preventDefault();
-    console.log('Tris card clicked - opening mode selection');
-    openTrisModeModal(handleModeSelection);
+    console.log('Tris card clicked - navigating to /tris');
+    goToRoute('/tris');
   });
 }
 

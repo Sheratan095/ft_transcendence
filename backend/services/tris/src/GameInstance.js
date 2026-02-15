@@ -62,7 +62,7 @@ export class	GameInstance
 		// Check if it's the player's turn
 		if (this.turn !== playerId)
 		{
-			console.error(`[TRIS] Not player ${playerId}'s turn in game ${this.id}`);
+			console.error(`[TRIS] ${playerId} tryed to make a move out of turn in game ${this.id}`);
 			trisConnectionManager.sendInvalidMoveMessage(playerId, this.id, 'Not your turn');
 			return ;
 		}
