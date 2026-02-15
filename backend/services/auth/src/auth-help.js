@@ -244,3 +244,5 @@ export async function	deleteUserFromOtherServices(userId)
 		throw (err);
 	}
 }
+
+// export async function	removeWsConnections(userId)

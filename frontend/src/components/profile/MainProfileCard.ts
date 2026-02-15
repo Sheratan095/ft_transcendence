@@ -133,17 +133,35 @@ export async function renderProfileCard(container: HTMLElement | null) {
   }
 
   // ===== Delete Account Button =====
+  const deleteBtn = cardEl.querySelector('button[command="show-modal"][commandfor="delete-dialog"]') as HTMLButtonElement;
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+      const deleteDialog = document.getElementById('delete-dialog') as HTMLElement;
+      if (deleteDialog) {
+        deleteDialog.classList.remove('hidden');
+      }
+    });
+  }
+
+  // Handle the confirm delete in the dialog
   const confirmDeleteBtn = document.getElementById('confirm-delete-btn') as HTMLButtonElement;
   if (confirmDeleteBtn) {
     confirmDeleteBtn.addEventListener('click', async () => {
+      const deleteDialog = document.getElementById('delete-dialog') as HTMLElement;
       try {
         await deleteAccout();
         localStorage.removeItem('userId');
         localStorage.removeItem('tfaEnabled');
-		window.location.href = '/';
+        if (deleteDialog) {
+          deleteDialog.classList.add('hidden');
+        }
+        window.location.href = '/';
       } catch (err) {
         console.error('Delete account error:', err);
         alert('Failed to delete account');
+        if (deleteDialog) {
+          deleteDialog.classList.add('hidden');
+        }
       }
     });
   }

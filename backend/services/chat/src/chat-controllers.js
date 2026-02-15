@@ -115,7 +115,7 @@ export const	getMessages = async (req, reply) =>
 			messageStatus: msg.message_status
 		})));
 
-		console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
+		// console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
 
 		const timestamp = formatDate(new Date());
 
