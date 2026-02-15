@@ -1,8 +1,6 @@
 import { getFriendsList, getUsernameById } from './notification-help.js';
 
-// Dot-notation (most common & scalable)
-// domain.action
-class	UserConnectionManager
+class	NotificationConnectionManager
 {
 	constructor()
 	{
@@ -21,8 +19,6 @@ class	UserConnectionManager
 		// Then notify other connected users that this user is now online
 		if (onlineFriends.length > 0)
 			this.#dispatchEventToFriends(userId, 'friend.online', { userId, username }, onlineFriends);
-		else
-			console.log(`[NOTIFICATION] User ${userId} has no online friends to notify (User online)`);
 	}
 
 	async	removeConnection(userId)
@@ -34,8 +30,6 @@ class	UserConnectionManager
 		// Notify other connected users that this user is now offline
 		if (onlineFriends.length > 0)
 			this.#dispatchEventToFriends(userId, 'friend.offline', { userId, username }, onlineFriends);
-		else
-			console.log(`[NOTIFICATION] User ${userId} has no online friends to notify (User offline)`);
 	}
 
 	getConnection(userId)
@@ -154,4 +148,4 @@ class	UserConnectionManager
 	}
 }
 
-export const	userConnectionManager = new UserConnectionManager();
+export const	notificationConnectionManager = new NotificationConnectionManager();

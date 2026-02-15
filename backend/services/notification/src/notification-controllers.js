@@ -1,5 +1,5 @@
 // The class is initialized in UserConnectionManager.js
-import { userConnectionManager } from './UserConnectionManager.js';
+import { notificationConnectionManager } from './NotificationConnectionManager.js';
 import { sendOTPEmail } from './notification-help.js'
 
 export const	sendFriendRequest = async (req, reply) =>
@@ -7,7 +7,7 @@ export const	sendFriendRequest = async (req, reply) =>
 	try
 	{
 		const	{ requesterUsername, targetUserId, requesterId } = req.body;
-		userConnectionManager.sendFriendRequestNotification(targetUserId, requesterUsername, requesterId);
+		notificationConnectionManager.sendFriendRequestNotification(targetUserId, requesterUsername, requesterId);
 
 		return (reply.code(200).send());
 	}
@@ -24,7 +24,7 @@ export const	sendFriendRequest = async (req, reply) =>
 // 	{
 // 		const	{ requesterId, accepterUsername, accepterId } = req.body;
 
-// 		userConnectionManager.sendFriendRequestAccept(requesterId, accepterUsername, accepterId);
+// 		notificationConnectionManager.sendFriendRequestAccept(requesterId, accepterUsername, accepterId);
 
 // 		return (reply.code(200).send());
 // 	}
@@ -56,7 +56,7 @@ export const	getActiveUsersCount = async (req, reply) =>
 {
 	try
 	{
-		const	activeConnections = userConnectionManager.count();
+		const	activeConnections = notificationConnectionManager.count();
 
 		return reply.code(200).send({ activeConnections });
 	}
@@ -73,7 +73,7 @@ export const	sendChatUserAdded = async (req, reply) =>
 	{
 		const	{ from, senderId, targetId, chatId } = req.body;
 
-		userConnectionManager.sendChatUserAddedNotification(targetId, senderId, from, chatId);
+		notificationConnectionManager.sendChatUserAddedNotification(targetId, senderId, from, chatId);
 
 		console.log(`[NOTIFICATION] Notifying user ${targetId} about being added to chat ${chatId} by ${senderId}`);
 	
@@ -94,8 +94,8 @@ export const	sendNowFriends = async (req, reply) =>
 
 		// Notify both users that they are now friends
 													// TO USER ID, OTHER USER ID, OTHER USERNAME
-		userConnectionManager.sendNowFriendsNotification(user1Id, user2Id, user2Username);
-		userConnectionManager.sendNowFriendsNotification(user2Id, user1Id, user1Username);
+		notificationConnectionManager.sendNowFriendsNotification(user1Id, user2Id, user2Username);
+		notificationConnectionManager.sendNowFriendsNotification(user2Id, user1Id, user1Username);
 
 		console.log(`[NOTIFICATION] Notifying user ${user1Id} and ${user2Id} that they are now friends`);
 
@@ -108,6 +108,25 @@ export const	sendNowFriends = async (req, reply) =>
 	}
 }
 
+export const	removeWsConnection = async (req, reply) =>
+{
+	try
+	{
+		const { userId } = req.body;
+
+		notificationConnectionManager.removeConnection(userId);
+
+		console.log(`[NOTIFICATION] Removed WebSocket connection for user ${userId}`);
+
+		return (reply.code(200).send());
+	}
+	catch (err)
+	{
+		console.error('[NOTIFICATION] Error in removeWsConnection handler:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
 //-----------------------------GAME NOTIFICATIONS-----------------------------
 
 export const	sendGameInvite = async (req, reply) =>
@@ -116,7 +135,7 @@ export const	sendGameInvite = async (req, reply) =>
 	{
 		const	{ senderId, senderUsername, targetId, gameId, gameType } = req.body;
 
-		userConnectionManager.sendGameInviteNotification(targetId, senderId, senderUsername, gameId, gameType);
+		notificationConnectionManager.sendGameInviteNotification(targetId, senderId, senderUsername, gameId, gameType);
 		console.log(`[NOTIFICATION] Notifying user ${targetId} about ${gameType} game invite from ${senderUsername} (game ID: ${gameId})`);
 	
 		return (reply.code(200).send());

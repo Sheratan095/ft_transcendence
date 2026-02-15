@@ -1,5 +1,5 @@
 // The class is initialized in UserConnectionManager.js
-import { userConnectionManager } from './UserConnectionManager.js';
+import { notificationConnectionManager } from './NotificationConnectionManager.js';
 
 export function	handleNewConnection(socket, req)
 {
@@ -23,7 +23,7 @@ export function	handleNewConnection(socket, req)
 		return (null);
 	}
 
-	userConnectionManager.addConnection(userId, socket);
+	notificationConnectionManager.addConnection(userId, socket);
 
 	return (userId);
 }
@@ -60,7 +60,7 @@ export function	handleClose(socket, userId)
 {
 	console.log(`[NOTIFICATION] WebSocket connection closed - User: ${userId}`);
 
-	userConnectionManager.removeConnection(userId);
+	notificationConnectionManager.removeConnection(userId);
 }
 
 export function	handleError(socket, err, userId)
@@ -69,5 +69,5 @@ export function	handleError(socket, err, userId)
 	
 	// Remove the connection as it's likely broken
 	if (userId)
-		userConnectionManager.removeConnection(userId);
+		notificationConnectionManager.removeConnection(userId);
 }
