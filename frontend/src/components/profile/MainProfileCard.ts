@@ -1,4 +1,4 @@
-import { logout, deleteAccout, fetchUserProfile, SaveCurrentUserProfile, fetchLocalProfile } from '../../lib/auth';
+import { logout, deleteAccount, fetchUserProfile, SaveCurrentUserProfile, fetchLocalProfile } from '../../lib/auth';
 import { openChatModal } from '../chat/chat';
 import type { User } from '../../lib/auth';
 import { FriendsManager } from './FriendsManager';
@@ -118,10 +118,16 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
   // ===== Buttons =====
   const logoutBtn = cardEl.querySelector('#profile-logout-btn') as HTMLButtonElement;
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      await logout();
-      goToRoute('/login');
+
+  if (logoutBtn)
+  {
+      logoutBtn.addEventListener('click', async () => {
+       const success = await logout();
+
+      if (success)
+        goToRoute('/login');
+      else
+        throw new Error('Logout failed');
     });
   }
 
@@ -149,14 +155,15 @@ export async function renderProfileCard(container: HTMLElement | null) {
     confirmDeleteBtn.addEventListener('click', async () => {
       const deleteDialog = document.getElementById('delete-dialog') as HTMLElement;
       try {
-        await deleteAccout();
-        localStorage.removeItem('userId');
-        localStorage.removeItem('tfaEnabled');
-        if (deleteDialog) {
-          deleteDialog.classList.add('hidden');
-        }
-        window.location.href = '/';
-      } catch (err) {
+        const success = await deleteAccount();
+
+        if (success)
+          goToRoute('/login');
+        else
+          throw new Error('Delete account failed');
+
+      }
+      catch (err) {
         console.error('Delete account error:', err);
         alert('Failed to delete account');
         if (deleteDialog) {

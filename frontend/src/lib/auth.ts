@@ -115,6 +115,7 @@ export async function logout(): Promise<boolean> {
     }
     localStorage.removeItem('userId');
     localStorage.removeItem('user');
+    localStorage.removeItem('tfaEnabled');
     stopTokenRefresh();
 
     return true;
@@ -126,17 +127,29 @@ export async function logout(): Promise<boolean> {
   }
 }
 
-export async function deleteAccout(): Promise<void> {
-  localStorage.removeItem('userId');
-  localStorage.removeItem('user');
-  stopTokenRefresh();
-  
-  try {
-	await fetch(`/api/auth/delete-account`, {
-	  method: 'DELETE',
-    credentials: 'include',
-	});
-  } catch (err) {
-	console.error('Delete account error:', err);
+export async function deleteAccount(): Promise<boolean> {
+  try
+  {
+    const response = await fetch(`/api/auth/delete-account`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok)
+    {
+      console.error('Delete account response not ok:', response.status);
+      return false;
+    }
+    localStorage.removeItem('userId');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tfaEnabled');
+    stopTokenRefresh();
+
+    return true;
+  }
+  catch (err)
+  {
+    console.error('Delete account error:', err);
+    return false;
   }
 }
