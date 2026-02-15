@@ -1,3 +1,6 @@
+import { tournamentManager } from './TournamentManager.js';
+import { gameManager } from './GameManager.js';
+
 // Pong connection manager handles WebSocket connections and message routing
 class	PongConnectionManager
 {
@@ -15,6 +18,8 @@ class	PongConnectionManager
 	removeConnection(userId)
 	{
 		this._connections.delete(userId);
+		tournamentManager.handleUserDisconnect(userId);
+		gameManager.handleUserDisconnect(userId);
 		console.log(`[PONG] User ${userId} disconnected`);
 	}
 

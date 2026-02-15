@@ -74,6 +74,25 @@ export const	isUserBusy = async (req, reply) =>
 	}
 }
 
+export const	removeWsConnection = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.body.userId;
+
+		// Remove WS connection options for the user
+		req.server.pongConnectionManager.removeConnection(userId);
+		console.log(`[PONG] Removed WS connection for user ${userId}`);
+
+		return (reply.code(200).send({ message: 'WS connection removed successfully' }));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in removeWsConnection controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 export const	getUserStats = async (req, reply) =>
