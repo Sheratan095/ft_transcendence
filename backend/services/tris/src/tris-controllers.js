@@ -79,7 +79,6 @@ export const	removeWsConnection = async (req, reply) =>
 
 		// Remove all WebSocket connections for the user
 		trisConnectionManager.removeConnection(userId);
-		console.log(`[TRIS] Removed WebSocket connection for user ${userId}`);
 
 		return (reply.code(200).send({ message: 'WebSocket connection removed successfully' }));
 	}

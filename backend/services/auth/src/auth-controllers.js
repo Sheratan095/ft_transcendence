@@ -7,7 +7,8 @@ import {
 	getUserLanguage,
 	createUserProfileInUsersService,
 	createUserStatsInGames,
-	deleteUserFromOtherServices
+	deleteUserFromOtherServices,
+	removeWsConnections
 } from './auth-help.js';
 
 import { sendTwoFactorCode } from './2fa.js';
@@ -174,9 +175,11 @@ export const	logout = async (req, reply) =>
 		// remove token from DB
 		await authDb.deleteRefreshTokenByUserId(userId);
 
-		clearAuthCookies(reply);
+		await clearAuthCookies(reply);
 
-		console.log('[AUTH] User logged out: ', decodedToken.id);
+		await removeWsConnections(userId);
+
+		console.log(`[AUTH] User ${userId} logged out`);
 
 		return (reply.code(200).send({ message: 'Logged out successfully' }));
 	}
@@ -396,10 +399,9 @@ export const	deleteAccount = async (req, reply) =>
 		// remove refresh token from DB
 		await authDb.deleteRefreshTokenByUserId(userData.id);
 
-		// Notify users service to delete user profile
-		// System cascade events will handle deletion of related data in other services
-
 		clearAuthCookies(reply);
+
+		removeWsConnections(userData.id);
 
 		console.log(`[AUTH] User account deleted: ${userData.id}`);
 

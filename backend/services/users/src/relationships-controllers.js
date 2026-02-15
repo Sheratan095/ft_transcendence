@@ -459,7 +459,7 @@ export async function	getFriendsInternal(req, reply)
 			friendsSince: friend.friends_since
 		}));
 
-		console.log('[RELATIONSHIPS] GetFriendsInternal success for userId:', userId);
+		// console.log('[RELATIONSHIPS] GetFriendsInternal success for userId:', userId);
 
 		return (reply.code(200).send(mappedFriends));
 	}

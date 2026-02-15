@@ -32,6 +32,10 @@ export function	handleNewConnection(socket, req)
 
 export function	handleClose(socket, userId)
 {
+	// Connection already removed via API, skip logging and removal
+	if (!pongConnectionManager.getConnection(userId))
+		return;
+
 	console.log(`[PONG] WebSocket connection closed - User: ${userId}`);
 
 	pongConnectionManager.removeConnection(userId);

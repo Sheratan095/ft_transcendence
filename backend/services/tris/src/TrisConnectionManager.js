@@ -1,3 +1,5 @@
+import { gameManager } from './GameManager.js';
+
 // TRIS connection manager handles WebSocket connections and message routing
 class	TrisConnectionManager
 {

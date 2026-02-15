@@ -614,5 +614,5 @@ export async function	pongRoutes(fastify, options)
 	fastify.post('/join-tournament', joinTournament);
 
 	fastify.delete('/delete-user-stats', deleteUserStats);
-	fastify.post('/remove-ws-connection', removeWsConnectionOpts);
+	fastify.delete('/remove-ws-connection', removeWsConnectionOpts);
 }

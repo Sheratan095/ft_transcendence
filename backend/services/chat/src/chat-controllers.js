@@ -390,8 +390,6 @@ export const	removeWsConnection = async (req, reply) =>
 
 		chatConnectionManager.removeConnection(userId);
 
-		console.log(`[CHAT] Removed WebSocket connection for user ${userId}`);
-
 		return (reply.code(200).send({ success: true }));
 	}
 	catch (err)

@@ -347,5 +347,5 @@ export function	trisRoutes(fastify)
 	fastify.post('/create-user-stats', createUserStats);
 
 	fastify.delete('/delete-user-stats', deleteUserStats);
-	fastify.delete('/remove-ws-connections', removeWsConnectionOpts);
+	fastify.delete('/remove-ws-connection', removeWsConnectionOpts);
 }

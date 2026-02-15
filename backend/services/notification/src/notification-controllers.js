@@ -116,8 +116,6 @@ export const	removeWsConnection = async (req, reply) =>
 
 		notificationConnectionManager.removeConnection(userId);
 
-		console.log(`[NOTIFICATION] Removed WebSocket connection for user ${userId}`);
-
 		return (reply.code(200).send());
 	}
 	catch (err)

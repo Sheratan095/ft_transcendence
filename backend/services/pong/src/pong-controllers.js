@@ -3,6 +3,7 @@ import { tournamentManager } from './TournamentManager.js';
 import { getUsernameById, isUserBusyInternal } from './pong-help.js';
 import { GameStatus } from './GameInstance.js';
 import { TournamentStatus } from './TournamentIstance.js';
+import { pongConnectionManager } from './PongConnectionManager.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -81,8 +82,7 @@ export const	removeWsConnection = async (req, reply) =>
 		const	userId = req.body.userId;
 
 		// Remove WS connection options for the user
-		req.server.pongConnectionManager.removeConnection(userId);
-		console.log(`[PONG] Removed WS connection for user ${userId}`);
+		pongConnectionManager.removeConnection(userId);
 
 		return (reply.code(200).send({ message: 'WS connection removed successfully' }));
 	}

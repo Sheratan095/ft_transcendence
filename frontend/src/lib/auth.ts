@@ -100,17 +100,29 @@ export async function SaveCurrentUserProfile(userId: string): Promise<User | nul
 /**
  * Logout user and stop token refresh
  */
-export async function logout(): Promise<void> {
-  localStorage.removeItem('userId');
-  localStorage.removeItem('user');
-  stopTokenRefresh();
-  
-  try {
-    await fetch(`/api/auth/logout`, {
+export async function logout(): Promise<boolean> {  
+  try
+  {
+    const response = await fetch(`/api/auth/logout`, {
       method: 'DELETE',
+      credentials: 'include',
     });
-  } catch (err) {
+
+    if (!response.ok)
+    {
+      console.error('Logout response not ok:', response.status);
+      return false;
+    }
+    localStorage.removeItem('userId');
+    localStorage.removeItem('user');
+    stopTokenRefresh();
+
+    return true;
+  }
+  catch (err)
+  {
     console.error('Logout error:', err);
+    return false;
   }
 }
 

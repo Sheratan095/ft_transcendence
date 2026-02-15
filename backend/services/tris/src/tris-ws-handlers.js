@@ -31,6 +31,10 @@ export function	handleNewConnection(socket, req)
 
 export function	handleClose(socket, userId)
 {
+	// Connection already removed via API, skip logging and removal
+	if (!trisConnectionManager.getConnection(userId))
+		return;
+
 	console.log(`[TRIS] WebSocket connection closed - User: ${userId}`);
 
 	trisConnectionManager.removeConnection(userId);

@@ -58,6 +58,10 @@ export function	handleMessage(socket, msg, userId)
 
 export function	handleClose(socket, userId)
 {
+	// Connection already removed via API, skip logging and removal
+	if (!notificationConnectionManager.getConnection(userId))
+		return;
+
 	console.log(`[NOTIFICATION] WebSocket connection closed - User: ${userId}`);
 
 	notificationConnectionManager.removeConnection(userId);
