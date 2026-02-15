@@ -1,4 +1,5 @@
 import { calculateElo, getUsernameById , isUserBusyInternal} from './tris-help.js';
+import { trisConnectionManager } from './TrisConnectionManager.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -66,6 +67,25 @@ export const	isUserBusy = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[TRIS] Error in isUserBusy controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	removeWsConnection = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.body.userId;
+
+		// Remove all WebSocket connections for the user
+		trisConnectionManager.removeConnection(userId);
+		console.log(`[TRIS] Removed WebSocket connection for user ${userId}`);
+
+		return (reply.code(200).send({ message: 'WebSocket connection removed successfully' }));
+	}
+	catch (err)
+	{
+		console.error('[TRIS] Error in removeWsConnection controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }

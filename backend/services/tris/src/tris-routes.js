@@ -10,7 +10,8 @@ import {
 	deleteUserStats as deleteUserStatsHandler,
 	getUserStats as getUserStatsHandler,
 	getUserMatchHistory as getUserMatchHistoryHandler,
-	isUserBusy as isUserBusyHandler
+	isUserBusy as isUserBusyHandler,
+	removeWsConnection
 } from './tris-controllers.js';
 
 import { validateInternalApiKey } from './tris-help.js';
@@ -196,6 +197,32 @@ const	isUserBusy =
 	handler: isUserBusyHandler
 }
 
+const	removeWsConnectionOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Remove all WebSocket connections for a user (Called by auth service during logout/delete)',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' }, }
+		},
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		},
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: removeWsConnection,
+}
+
 //-----------------------------PUBLIC ROUTES-----------------------------
 
 const	getUserStats =
@@ -320,4 +347,5 @@ export function	trisRoutes(fastify)
 	fastify.post('/create-user-stats', createUserStats);
 
 	fastify.delete('/delete-user-stats', deleteUserStats);
+	fastify.delete('/remove-ws-connections', removeWsConnectionOpts);
 }

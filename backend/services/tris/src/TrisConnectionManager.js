@@ -15,6 +15,7 @@ class	TrisConnectionManager
 	removeConnection(userId)
 	{
 		this._connections.delete(userId);
+		gameManager.handleUserDisconnect(userId);
 		console.log(`[TRIS] User ${userId} disconnected`);
 	}
 
