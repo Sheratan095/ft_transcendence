@@ -371,7 +371,7 @@ export const	deleteUsernameFromCache = async (req, reply) =>
 		// Force refresh the username in cache, it will be "Unknown" if deleted or updated in case of username change
 		await chatConnectionManager.getUsernameFromCache(userId, true);
 
-		console.log(`[CHAT] Deleted username cache for user ${userId}`);
+		// console.log(`[CHAT] Deleted username cache for user ${userId}`);
 
 		return (reply.code(200).send({ success: true }));
 	}

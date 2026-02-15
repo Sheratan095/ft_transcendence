@@ -399,9 +399,9 @@ export const	deleteAccount = async (req, reply) =>
 		// remove refresh token from DB
 		await authDb.deleteRefreshTokenByUserId(userData.id);
 
-		clearAuthCookies(reply);
+		await clearAuthCookies(reply);
 
-		removeWsConnections(userData.id);
+		await removeWsConnections(userData.id);
 
 		console.log(`[AUTH] User account deleted: ${userData.id}`);
 
