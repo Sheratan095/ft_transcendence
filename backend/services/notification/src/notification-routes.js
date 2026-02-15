@@ -291,6 +291,7 @@ const	removeWsConnectionOpts =
 	preHandler: validateInternalApiKey,
 	handler: removeWsConnection,
 }
+
 //-----------------------------ROUTES FOR GAME NOTIFICATIONS-----------------------------
 
 const	sendGameInviteOpts = 

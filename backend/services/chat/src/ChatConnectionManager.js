@@ -30,6 +30,7 @@ class	ChatConnectionManager
 	removeConnection(userId)
 	{
 		this._connections.delete(userId);
+		this._cachedUsersInChats.delete(userId);
 		console.log(`[CHAT] User ${userId} disconnected`);
 	}
 

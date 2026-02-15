@@ -381,3 +381,22 @@ export const	deleteUsernameFromCache = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
+
+export const	removeWsConnection = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.body.userId;
+
+		chatConnectionManager.removeConnection(userId);
+
+		console.log(`[CHAT] Removed WebSocket connection for user ${userId}`);
+
+		return (reply.code(200).send({ success: true }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in removeWsConnection controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
