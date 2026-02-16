@@ -43,6 +43,10 @@ initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
   // Attach global click handlers for shared/dynamic elements
   setupGlobalClickHandlers();
+  // Setup game card listeners
+  setupTrisCardListener();
+  setupPongCardListener();
+  initSlideshow();
 if (isLoggedInClient()) initUserServices(path);
 
 }
