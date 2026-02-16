@@ -161,12 +161,12 @@ export async function renderSearchProfileCard(
     // Chat button: only enabled for accepted friends
     if (relationshipStatus === 'accepted') {
       chatBtn.disabled = false;
-      chatBtn.classList.remove('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
-      chatBtn.classList.add('bg-accent-blue', 'hover:brightness-90', 'text-white');
+      chatBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+      chatBtn.classList.add('hover:brightness-90', 'dark:hover:brightness-110', 'active:brightness-75');
     } else {
       chatBtn.disabled = true;
-      chatBtn.classList.remove('bg-accent-blue', 'hover:brightness-90', 'text-white');
-      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
+      chatBtn.classList.remove('hover:brightness-90', 'dark:hover:brightness-110', 'active:brightness-75');
+      chatBtn.classList.add('opacity-60', 'cursor-not-allowed');
     }
 
     if (!addBtn)
@@ -177,30 +177,29 @@ export async function renderSearchProfileCard(
       // If targetId equals user.id, we sent it (outgoing) - show Cancel
       const isIncomingRequest = targetId === currentUserId;
       addBtn.disabled = false;
+      addBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+      addBtn.classList.add('hover:brightness-90', 'dark:hover:brightness-110', 'active:brightness-75');
+      
       if (isIncomingRequest) {
-        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-neutral-600', 'text-neutral-400');
-        addBtn.classList.add('bg-green-600', 'hover:brightness-90', 'text-white');
+        addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
         addBtn.textContent = '✓ Accept Friend Request';
       } else {
-        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-neutral-600', 'text-neutral-400');
-        addBtn.classList.add('bg-yellow-600', 'hover:brightness-90', 'text-white');
+        addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-yellow-600 dark:bg-yellow-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
         addBtn.textContent = '⏳ Cancel Request';
       }
     } else if (relationshipStatus === 'accepted') {
       // When already friends, show a red "Remove Friend" button
       addBtn.disabled = false;
-      addBtn.classList.remove('bg-accent-orange', 'bg-green-600', 'bg-yellow-600', 'bg-neutral-600', 'text-neutral-400');
-      addBtn.classList.add('bg-red-600', 'hover:brightness-90', 'text-white');
+      addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
       addBtn.textContent = '✖ Remove Friend';
     } else if (relationshipStatus === 'blocked') {
       addBtn.disabled = true;
-      addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-yellow-600', 'hover:brightness-90', 'text-white');
-      addBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
-      addBtn.textContent = '🚫 Blocked';
+      addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-neutral-700 dark:bg-neutral-700 text-white opacity-60 cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
+      // addBtn.textContent = '🚫 Blocked';
     } else {
-      // no relationship or rejected -> restore original
+      // no relationship or rejected -> restore original neutral/primary state
       addBtn.disabled = false;
-      addBtn.className = originalAddBtnClass;
+      addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-accent-orange dark:bg-accent-green text-black dark:text-black-400 hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
       addBtn.textContent = originalAddBtnText;
     }
   }
@@ -216,8 +215,7 @@ export async function renderSearchProfileCard(
     {
       // UNBLOCK THE USER
       blockBtn.textContent = '🔓 Unblock';
-      blockBtn.classList.remove('bg-red-600');
-      blockBtn.classList.add('bg-green-600');
+      blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
     }
 
     blockBtn.addEventListener('click', async () => {
@@ -227,8 +225,7 @@ export async function renderSearchProfileCard(
             const success = await friendsManager.unblockUser(user.id);
             if (success) {
               blockBtn.textContent = '🔒 Block';
-              blockBtn.classList.remove('bg-green-600');
-              blockBtn.classList.add('bg-red-600');
+              blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-accent-red dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
               relationshipStatus = null; // Reset relationship status after unblocking
               updateActionButtons();
             }
@@ -242,8 +239,7 @@ export async function renderSearchProfileCard(
         const success = await friendsManager.blockUser(user.id);
         if (success) {
             blockBtn.textContent = '🔓 Unblock';
-            blockBtn.classList.remove('bg-red-600');
-            blockBtn.classList.add('bg-green-600');
+            blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
           relationshipStatus = 'blocked';
           updateActionButtons();
         }
