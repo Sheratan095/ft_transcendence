@@ -1,6 +1,7 @@
 import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } from './Toast';
 import { FriendsManager } from '../profile/FriendsManager';
 import { openTrisModalAndJoinGame } from '../../lib/tris-ui';
+import { goToRoute } from '../../spa';
 
 let notifSocket: WebSocket | null = null;
 let friendsManager: FriendsManager | null = null;
@@ -145,9 +146,24 @@ function handleNotificationEvent(data: any) {
 									console.log('[Notifications] Accepting friend request from:', userId);
 									const result = await friendsManager.acceptFriendRequest(userId);
 									console.log('[Notifications] Accept result:', result);
-									if (result) {
+									if (result.success) {
 										await friendsManager.loadFriends();
 										await friendsManager.loadFriendRequests();
+
+										// If server indicated the request was already gone (404), refresh profile if open
+										if (result.status === 404) {
+											try {
+												if (window.location.pathname === '/profile') {
+													const params = new URLSearchParams(window.location.search);
+													const id = params.get('id');
+													if (id === userId) {
+														window.location.href = '/profile?id=' + userId; // force full reload to sync
+													}
+												}
+											} catch (err) {
+												console.error('Failed to refresh profile after accept returned 404:', err);
+											}
+										}
 									} else {
 										showErrorToast(`Failed to accept friend request`, { duration: 3000 });
 									}
@@ -177,6 +193,18 @@ function handleNotificationEvent(data: any) {
 									if (result) {
 										showInfoToast(`You rejected ${username}'s friend request`, { duration: 3000 });
 										await friendsManager.loadFriendRequests();
+										try {
+											if (window.location.pathname === '/profile') {
+												const params = new URLSearchParams(window.location.search);
+												const id = params.get('id');
+												if (id === userId) {
+													// Re-render the profile route to reflect the rejection
+													window.location.href = '/profile?id=' + userId; // Force reload to update profile state
+												}
+											}
+										} catch (err) {
+											console.error('Failed to refresh profile after rejecting friend request:', err);
+										}
 									} else {
 										showErrorToast(`Failed to reject friend request`, { duration: 3000 });
 									}

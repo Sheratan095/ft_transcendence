@@ -117,6 +117,19 @@ export class FriendsManager {
       });
 
       if (!response.ok) {
+        // If the server responds with 404 it means there was no outgoing friend request
+        // (e.g., it was already rejected). Treat this as a successful end state and
+        // remove any local representation of the outgoing request.
+        if (response.status === 404) {
+          if (this.friendRequests.has(targetId)) {
+            this.friendRequests.delete(targetId);
+            if (this.onRequestsUpdated) {
+              this.onRequestsUpdated(Array.from(this.friendRequests.values()));
+            }
+          }
+          return true;
+        }
+
         throw new Error(`Failed to cancel friend request: ${response.statusText}`);
       }
 
@@ -161,14 +174,27 @@ export class FriendsManager {
     }
   }
 
-  async acceptFriendRequest(userId: string): Promise<boolean> {
+  // Returns success flag and HTTP status so callers can react to 404 specially
+  async acceptFriendRequest(userId: string): Promise<{ success: boolean; status: number }> {
     try {
       const response = await fetch('/api/users/relationships/accept', {
-      method: 'PUT',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ requesterId: userId })
       });
+
+      // If no pending request exists, the service returns 404. Treat this as
+      // a terminal state (no pending request) and let callers refresh UI.
+      if (!response.ok && response.status === 404) {
+        if (this.friendRequests.has(userId)) {
+          this.friendRequests.delete(userId);
+          if (this.onRequestsUpdated) {
+            this.onRequestsUpdated(Array.from(this.friendRequests.values()));
+          }
+        }
+        return { success: true, status: 404 };
+      }
 
       if (!response.ok) {
         throw new Error(`Failed to accept friend request: ${response.statusText}`);
@@ -189,10 +215,10 @@ export class FriendsManager {
         this.onFriendsUpdated(Array.from(this.friends.values()));
       }
 
-      return true;
+      return { success: true, status: response.status };
     } catch (err) {
       console.error('Error accepting friend request:', err);
-      return false;
+      return { success: false, status: 0 };
     }
   }
 
@@ -201,6 +227,7 @@ export class FriendsManager {
       const response = await fetch(`/api/users/relationships/reject`, {
         method: 'PUT',
         credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requesterId: requesterUserId })
       });
 

@@ -122,34 +122,49 @@ export async function renderSearchProfileCard(
           const success = await friendsManager.removeFriend(user.id);
           if (success) {
             relationshipStatus = null;
-            updateActionButtons();
           }
         } else if (relationshipStatus === 'pending') {
           // If targetId equals user.id, we sent the request (outgoing) - show Cancel
           // If targetId equals currentUserId, they sent it to us (incoming) - show Accept
           const isIncomingRequest = targetId === currentUserId;
           if (isIncomingRequest) {
-            const success = await friendsManager.acceptFriendRequest(user.id);
-            if (success) {
+            const acceptResult = await friendsManager.acceptFriendRequest(user.id);
+            if (acceptResult.success) {
               relationshipStatus = 'accepted';
-              updateActionButtons();
+            }
+            // If server returned 404 (no pending request), refresh profile to sync state
+            if (acceptResult.status === 404) {
+              try {
+                if (window.location.pathname === '/profile') {
+                  const params = new URLSearchParams(window.location.search);
+                  const id = params.get('id');
+                  if (id === user.id) {
+                    const { goToRoute } = await import('../../spa');
+                    goToRoute(window.location.pathname + window.location.search);
+                  }
+                }
+              } catch (err) {
+                console.error('Failed to refresh profile after accepting friend request:', err);
+              }
             }
           } else {
-            const success = await friendsManager.cancelFriendRequest(user.id);
-            if (success) {
+            const cancelResult = await friendsManager.cancelFriendRequest(user.id);
+            if (cancelResult) {
+              // Cancelled outgoing request -> no relationship anymore
               relationshipStatus = null;
-              updateActionButtons();
+              targetId = null;
             }
           }
         } else {
           const success = await friendsManager.addFriend(user.id);
           if (success) {
             relationshipStatus = 'pending';
-            updateActionButtons();
           }
         }
       } catch (err) {
         console.error('Failed to change friendship:', err);
+      } finally {
+        updateActionButtons();
       }
     });
   }
@@ -219,34 +234,28 @@ export async function renderSearchProfileCard(
     }
 
     blockBtn.addEventListener('click', async () => {
-        if (relationshipStatus === 'blocked')
-        {
-          try {
-            const success = await friendsManager.unblockUser(user.id);
-            if (success) {
-              blockBtn.textContent = '🔒 Block';
-              blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-accent-red dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
-              relationshipStatus = null; // Reset relationship status after unblocking
-              updateActionButtons();
-            }
-          } catch (err) {
-            console.error('Failed to unblock user:', err);
-          }
-          return;
-        }
-
       try {
-        const success = await friendsManager.blockUser(user.id);
-        if (success) {
+        if (relationshipStatus === 'blocked') {
+          const success = await friendsManager.unblockUser(user.id);
+          if (success) {
+            blockBtn.textContent = '🔒 Block';
+            blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-accent-red dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
+            relationshipStatus = null; // Reset relationship status after unblocking
+          }
+        } else {
+          const success = await friendsManager.blockUser(user.id);
+          if (success) {
             blockBtn.textContent = '🔓 Unblock';
             blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
-          relationshipStatus = 'blocked';
-          updateActionButtons();
+            relationshipStatus = 'blocked';
+          }
         }
       } catch (err) {
-        console.error('Failed to block user:', err);
+        console.error('Failed to block/unblock user:', err);
+      } finally {
+        // Always ensure buttons reflect the final state even on failure
+        updateActionButtons();
       }
-
     });
   }
 
