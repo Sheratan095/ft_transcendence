@@ -39,7 +39,7 @@ console.log(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 
-initTheme(); // add theme
+// initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
   // Attach global click handlers for shared/dynamic elements
   setupGlobalClickHandlers();
@@ -158,6 +158,16 @@ function setupGlobalClickHandlers() {
   document.addEventListener('click', async (e) => {
     const target = e.target as HTMLElement;
 
+    // Handle cancel delete button
+    const cancelDeleteBtn = target.closest('#cancel-delete-btn');
+    if (cancelDeleteBtn) {
+      const deleteDialog = document.getElementById('delete-dialog') as HTMLElement;
+      if (deleteDialog) {
+        deleteDialog.classList.add('hidden');
+      }
+      return;
+    }
+
     // Handle Tournament Button
     const tournamentBtn = target.closest('#tournamentListButton, #tournamentListButton-static');
     if (tournamentBtn) {
@@ -206,5 +216,9 @@ function setupGlobalClickHandlers() {
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme(); // Initialize theme on DOMContentLoaded
+});
 
 export default {};

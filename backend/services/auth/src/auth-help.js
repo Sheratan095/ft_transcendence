@@ -244,3 +244,34 @@ export async function	deleteUserFromOtherServices(userId)
 		throw (err);
 	}
 }
+
+export async function	removeWsConnections(userId)
+{
+	try
+	{
+		const	microservicesWithWs = [process.env.CHAT_SERVICE_URL, process.env.PONG_SERVICE_URL, process.env.TRIS_SERVICE_URL, process.env.NOTIFICATION_SERVICE_URL];
+	
+		for (const serviceUrl of microservicesWithWs)
+		{
+			try
+			{
+				await axios.delete(`${serviceUrl}/remove-ws-connection`, 
+					{ 
+						headers: { 'x-internal-api-key': process.env.INTERNAL_API_KEY },
+						data: { userId: userId }
+					}
+				);
+			}
+			catch (err)
+			{
+				console.error(`[AUTH] Error removing WebSocket connections for user ${userId} in service ${serviceUrl}:`, err);
+				// Continue to next service even if one fails
+			}
+		}
+	}
+	catch (err)
+	{
+		console.error('[AUTH] Error removing WebSocket connections for user:', err);
+		// throw (err);
+	}
+}

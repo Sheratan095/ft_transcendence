@@ -16,7 +16,8 @@ import {
 	isUserBusy as isUserBusyHandler,
 	getUserTournamentsParticipations as getUserTournamentsParticipationsHandler,
 	getTournamentBracket as getTournamentBracketHandler,
-	testGetTournament as testGetTournamentHandler
+	testGetTournament as testGetTournamentHandler,
+	removeWsConnection as removeWsConnection
 } from './pong-controllers.js';
 
 import { validateInternalApiKey } from './pong-help.js';
@@ -276,6 +277,32 @@ const	isUserBusy =
 
 	preHandler: validateInternalApiKey,
 	handler: isUserBusyHandler
+}
+
+const	removeWsConnectionOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Remove all WebSocket connections for a user (Called by auth service during logout/delete)',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' }, }
+		},
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		},
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: removeWsConnection,
 }
 
 //-----------------------------PUBLIC ROUTES-----------------------------
@@ -587,5 +614,5 @@ export async function	pongRoutes(fastify, options)
 	fastify.post('/join-tournament', joinTournament);
 
 	fastify.delete('/delete-user-stats', deleteUserStats);
-
+	fastify.delete('/remove-ws-connection', removeWsConnectionOpts);
 }

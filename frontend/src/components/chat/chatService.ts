@@ -123,6 +123,27 @@ export function connectChatWebSocket(): Promise<WebSocket> {
   return connectionPromise;
 }
 
+/**
+ * Gracefully disconnect the chat WebSocket connection
+ */
+export function disconnectChatWebSocket(): void {
+  if (!chatSocket) {
+    return;
+  }
+  
+  console.log('Disconnecting from chat WebSocket');
+  // Prevent reconnection attempts when manually disconnecting
+  reconnectAttempts = MAX_RECONNECT_ATTEMPTS;
+  
+  if (chatSocket.readyState === WebSocket.OPEN) {
+    chatSocket.close();
+  }
+  
+  chatSocket = null;
+  isConnecting = false;
+  connectionPromise = null;
+}
+
 // ============================================================================
 // WEBSOCKET MESSAGE ROUTING
 // ============================================================================
@@ -700,6 +721,10 @@ export async function leaveGroupChat(chatId: string) {
       currentChatId = null;
       const resetUI = (window as any).__resetChatUI;
       if (resetUI) resetUI(chatId);
+      
+      // Close the chat modal after leaving
+      const closeChatModal = (window as any).__closeChatModal;
+      if (closeChatModal) closeChatModal();
     }
 
     // Signal UI to re-render chat list

@@ -44,6 +44,7 @@ export function initChat(userId: string) {
   (window as any).__openChat = openChatAction;
   (window as any).__resetChatUI = resetChatUI;
   (window as any).__refreshChatsIfOpen = refreshChatsIfOpen;
+  (window as any).__closeChatModal = closeChatModal;
 }
 
 // ============================================================================

@@ -1,6 +1,6 @@
 const TOKEN_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
 
-import { goToRoute } from '../spa';
+import { logout } from './auth';
 
 let refreshTokenTimer: ReturnType<typeof setInterval> | null = null;
 let isRefreshing = false;
@@ -83,24 +83,3 @@ export function stopTokenRefresh(): void {
   }
 }
 
-export async function logout(): Promise<void> {
-  stopTokenRefresh();
-
-  localStorage.removeItem('userId');
-  localStorage.removeItem('tfaEnabled');
-  localStorage.removeItem('user');
-
-  try {
-    await fetch(`/api/auth/logout`, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      }
-    });
-    goToRoute('/login');
-  } catch (err) {
-    console.error('Logout error:', err);
-  }
-}

@@ -1,3 +1,5 @@
+import { gameManager } from './GameManager.js';
+
 // TRIS connection manager handles WebSocket connections and message routing
 class	TrisConnectionManager
 {
@@ -15,6 +17,7 @@ class	TrisConnectionManager
 	removeConnection(userId)
 	{
 		this._connections.delete(userId);
+		gameManager.handleUserDisconnect(userId);
 		console.log(`[TRIS] User ${userId} disconnected`);
 	}
 
