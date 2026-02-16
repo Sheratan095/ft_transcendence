@@ -559,7 +559,96 @@
 				Yesterday Dr.Phil was just an ordinary human.
 			</p>
 		</section>
-		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl">
+		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"></div>
+		<!-- Slideshow Wrapper -->
+		<div class="relative w-full flex items-center justify-center max-w-[60vh]">
+		<!-- Previous Button -->
+			<button id="slideshow-prev-btn" 
+			class="absolute left-0 z-10 p-2 sm:p-3 dark:bg-accent-pink bg-accent-orange text-black dark:text-white 
+				font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2
+				dark:border-neutral-700 border-neutral-300 rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
+			<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+			</svg>
+			</button>
+
+			<!-- Slides Container -->
+			<div class="w-full mx-auto px-4 sm:px-8 md:px-16">
+				<!-- CARD PONG -->
+				<div id="pong-card-wrapper" class="hidden">
+				<button id="pong-card-btn" class="p-10 w-full
+				border-4 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-900 bg-neutral-100
+				shadow-[10px_10px_0_0_#00a8e8] accent-accent-blue dark:shadow-[10px_10px_0_0_#0dff66]  overflow-hidden
+				hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left
+				slideshow-slide">
+
+					<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
+					Play pong
+					</h3>
+
+					<div class="w-full aspect-square relative border-4 border-double dark:border-white border-black mx-auto">
+					<div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-full border-dotted border-r-2 dark:border-white border-black"></div>
+					<div class="absolute left-[6%] w-[0.3vw] h-[1.2vw] dark:bg-white bg-black animate-[ping_6s_linear_infinite]"></div>
+					<div class="absolute right-[6%] w-[0.3vw] h-[1.2vw] dark:bg-white bg-black animate-[pong_6s_linear_infinite]"></div>
+					<div class="absolute w-[0.4vw] h-[0.4vw] dark:bg-white bg-black animate-[ball_6s_linear_infinite]"></div>
+					</div>
+				</button>
+				</div>
+
+				<!-- Tic tac toe -->
+				<div id="tris-card-wrapper">
+				<button id="tris-card-btn" class="p-10 w-full
+				border-4 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-900 bg-neutral-100
+				shadow-[10px_10px_0_0_#00a8e8] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden
+				hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left
+				slideshow-slide">
+			<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
+				Play tris
+			</h3>
+
+			<div class="relative w-full aspect-square border-4 border-double dark:border-white border-black mx-auto overflow-hidden pointer-events-none">
+
+			<!-- Vertical grid lines -->
+			<div class="absolute left-1/3 top-0 w-[2px] h-full dark:bg-white bg-black animate-grid-v"></div>
+			<div class="absolute left-2/3 top-0 w-[2px] h-full dark:bg-white bg-black animate-grid-v" style="animation-delay: 0.2s;"></div>
+
+			<!-- Horizontal grid lines -->
+			<div class="absolute top-1/3 left-0 h-[2px] w-full dark:bg-white bg-black animate-grid-h"></div>
+			<div class="absolute top-2/3 left-0 h-[2px] w-full dark:bg-white bg-black animate-grid-h" style="animation-delay: 0.2s;"></div>
+
+			<!-- X -->
+			<div class="absolute inset-0 animate-x">
+				<div class="absolute top-[40%] left-[40%] w-[30%] h-[2px] dark:bg-white bg-black rotate-45 origin-left"></div>
+				<div class="absolute top-[60%] left-[40%] w-[30%] h-[2px] dark:bg-white bg-black -rotate-45 origin-left"></div>
+			</div>
+
+			<!-- O -->
+			<div class="absolute inset-0 animate-o">
+				<div class="absolute top-[40%] left-[40%] w-[20%] h-[20%] rounded-full border-2 border-black dark:border-white"></div>
+			</div>
+
+			</div>
+				</button>
+				</div>
+			</div>
+
+			<!-- Next Button -->
+			<label for="slideshow-next-btn">
+			<button id="slideshow-next-btn" 
+				class="absolute right-0 z-10 p-2 sm:p-3 dark:bg-accent-pink bg-accent-blue text-black dark:text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2
+				 border-neutral-300 dark:border-neutral-700 rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
+				<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+			</label>
+						<!-- Slideshow Indicators (dots) -->
+			<div class="flex gap-3 justify-center mt-8">
+			<button class="slideshow-indicator w-3 h-3 rounded-full dark:bg-accent-pink bg-accent-blue transition-all duration-300 active" data-slide="tris"></button>
+			<button class="slideshow-indicator w-3 h-3 rounded-full bg-neutral-300 dark:bg-neutral-700 transition-all duration-300 dark:hover:bg-neutral-600 hover:bg-neutral-200" data-slide="pong"></button>
+				</div>
+			</div>
+		</div>
 			<div
 				class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden rounded-xl
 				dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 transition-all duration-300">
@@ -588,6 +677,206 @@
 		</div>
 	</template>
 
+
+<!-- Tris Game Modals-->
+
+<!-- Tris Mode Selection Modal -->
+<div
+  id="tris-mode-modal"
+  tabindex="-1"
+  class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50"
+>
+  <div class="relative p-20 w-full max-w-xl">
+    <div class="relative bg-neutral-900 border-4 border-neutral-700 shadow-[10px_10px_0_0_#ff009d] h-auto flex flex-col hover:shadow-lg transition duration-300">
+      
+      <!-- Close button -->
+      <button
+        type="button"
+        class="absolute top-4 right-4 z-10 text-neutral-400 bg-transparent 
+               hover:bg-neutral-800 hover:text-white transition border-2 border-neutral-700
+               w-8 h-8 inline-flex justify-center items-center"
+        id="tris-mode-close-btn"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- Header -->
+      <div class="p-8 border-b-2 border-neutral-700 bg-neutral-800">
+        <h2 class="text-3xl font-extrabold uppercase tracking-tight text-[#ff009d]">Select Game Mode</h2>
+        <p class="text-neutral-400 text-sm mt-2">Choose how you want to play Tris</p>
+      </div>
+
+      <!-- Mode selection area -->
+      <div class="p-8 flex flex-col gap-4">
+        <!-- Online Mode -->
+        <button
+          id="tris-mode-online"
+          class="group relative p-6 bg-gradient-to-br from-neutral-800 to-neutral-900 border-3 border-neutral-700 
+                 hover:border-[#0dff66] transition-all duration-300 hover:shadow-[0_0_20px_rgba(13,255,102,0.3)]
+                 flex flex-col items-start gap-2 cursor-pointer"
+        >
+          <span class="text-xl font-extrabold uppercase text-[#0dff66]">🌐 Online</span>
+          <span class="text-sm text-neutral-400 group-hover:text-neutral-300 transition">
+            Play against other players online with matchmaking
+          </span>
+        </button>
+
+        <!-- Offline 1v1 Mode -->
+        <button
+          id="tris-mode-offline-1v1"
+          class="group relative p-6 bg-gradient-to-br from-neutral-800 to-neutral-900 border-3 border-neutral-700 
+                 hover:border-[#00ffff] transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,255,255,0.3)]
+                 flex flex-col items-start gap-2 cursor-pointer"
+        >
+          <span class="text-xl font-extrabold uppercase text-[#00ffff]">👥 Offline 1v1</span>
+          <span class="text-sm text-neutral-400 group-hover:text-neutral-300 transition">
+            Play against a friend on the same device
+          </span>
+        </button>
+
+        <!-- Offline AI Mode -->
+        <button
+          id="tris-mode-offline-ai"
+          class="group relative p-6 bg-gradient-to-br from-neutral-800 to-neutral-900 border-3 border-neutral-700 
+                 hover:border-[#ff00ff] transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,0,255,0.3)]
+                 flex flex-col items-start gap-2 cursor-pointer"
+        >
+          <span class="text-xl font-extrabold uppercase text-[#ff00ff]">🤖 Offline Bot</span>
+          <span class="text-sm text-neutral-400 group-hover:text-neutral-300 transition">
+            Play against an AI bot locally
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tris Game Modal -->
+<div
+  id="tris-modal"
+  tabindex="-1"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-10 
+         justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+  <div class="relative p-4 z-50 w-full max-w-2xl max-h-full">
+    <div class="relative dark:bg-neutral-900 bg-neutral-100 border-4 dark:border-neutral-700 border-neutral-300 
+	dark:shadow-[10px_10px_0_0_#ff009d] shadow-[10px_10px_0_0_#00a8e8] h-auto flex flex-col">
+
+      <!-- Close button -->
+      <button
+        type="button"
+        class="absolute top-4 right-4 dark:text-neutral-400 text-neutral-600 bg-transparent hover:bg-neutral-200
+               dark:hover:bg-neutral-800 dark:hover:text-white hover:text-black transition border-2 dark:border-neutral-700 border-neutral-300
+               w-8 h-8 inline-flex justify-center items-center"
+        id="tris-close-btn"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- Header -->
+      <div class="p-6 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-800 bg-neutral-200">
+        <div class="flex items-center gap-3">
+          <h2 class="text-2xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Tris Game</h2>
+          <span id="tris-game-id" class="text-sm dark:text-neutral-400 text-neutral-600 font-mono"></span>
+        </div>
+      </div>
+
+      <!-- Game area -->
+      <div class="p-6 flex flex-col gap-6">
+        <!-- Game board (3x3 grid) -->
+        <div id="tris-board" class="grid grid-cols-3 gap-2 w-full max-w-xs mx-auto">
+          <!-- Cells will be generated by JS -->
+        </div>
+
+        <!-- Game status -->
+        <div id="tris-status" class="text-center p-4 bg-neutral-800 border-2 dark:border-neutral-700 border-neutral-300
+		 text-black dark:text-white font-semibold uppercase">
+          Connecting...
+        </div>
+
+        <!-- Control buttons -->
+        <div class="flex gap-3 justify-center flex-wrap">
+          <button 
+            id="tris-start-btn"
+            class="px-6 py-2 dark:bg-accent-green bg-accent-cyan dark:text-black text-white font-extrabold uppercase tracking-tight
+			 hover:brightness-90 transition border-2 dark:border-neutral-700 border-neutral-300"
+          >
+            Start Game
+          </button>
+          <button 
+            id="tris-invite-btn"
+            class="px-6 py-2 dark:bg-accent-green bg-accent-cyan dark:text-black text-white font-extrabold uppercase 
+			tracking-tight hover:brightness-90 transition border-2 dark:border-neutral-700 border-neutral-300"
+          >
+            Invite Friend
+          </button>
+          <button 
+            id="tris-surrender-btn"
+            class="px-6 py-2 dark:bg-accent-red bg-accent-red dark:text-white text-white font-extrabold uppercase tracking-tight 
+			hover:brightness-90 transition border-2 dark:border-neutral-700 border-neutral-300"
+          >
+            Surrender
+          </button>
+          <button 
+            id="tris-reset-btn"
+            class="px-6 py-2 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight
+			 hover:bg-neutral-600 transition border-2 dark:border-neutral-700 border-neutral-300"
+          >
+            Reset
+          </button>
+        </div>
+
+        <!-- Error message -->
+        <div id="tris-error" class="text-red-500 text-sm text-center hidden"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tris Invite Modal -->
+<div
+  id="tris-invite-modal"
+  tabindex="-1"
+  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 
+         flex justify-center items-center w-full md:inset-0 h-full max-h-full"
+>
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <div class="relative dark:bg-neutral-900 bg-neutral-100 border-4 dark:border-neutral-700 border-neutral-300 
+	dark:shadow-[10px_10px_0_0_#00ffff] shadow-[10px_10px_0_0_#ff6b35] h-auto flex flex-col">
+
+      <!-- Close button -->
+      <button
+        type="button"
+        class="absolute top-4 right-4 z-50 dark:text-white text-black bg-transparent 
+               dark:hover:bg-neutral-800 hover:bg-neutral-200 hover:text-white transition border-2 dark:border-neutral-700 border-neutral-300
+               w-8 h-8 inline-flex justify-center items-center"
+        id="tris-invite-close-btn"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- Header -->
+      <div class="p-6 border-b-2 dark:border-neutral-700 dark:bg-neutral-800 border-nwutral-300 bg-neutral-200">
+        <h2 class="text-2xl font-extrabold uppercase tracking-tight dark:text-[#00ffff] text-accent-orange">Invite Friend</h2>
+        <p class="dark:text-neutral-400 text-neutral-600 text-sm mt-2">Select a friend to invite to tris</p>
+      </div>
+
+      <!-- Friends list -->
+      <div id="tris-friends-list" class="p-6 flex flex-col gap-2 max-h-96 overflow-y-auto">
+        <div class="dark:text-neutral-400 text-neutral-600 text-center py-4">Loading friends...
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Chat Modal -->
 <div
