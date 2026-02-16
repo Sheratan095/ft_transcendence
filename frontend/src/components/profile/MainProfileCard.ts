@@ -157,6 +157,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
       try {
         const success = await deleteAccount();
 
+        // Close the dialog if it was successful
+        if (success && deleteDialog)
+          deleteDialog.classList.add('hidden');
+
         if (success)
           goToRoute('/login');
         else

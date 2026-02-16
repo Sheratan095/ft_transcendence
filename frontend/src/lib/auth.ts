@@ -1,4 +1,6 @@
 import { stopTokenRefresh } from './token';
+import { disconnectChatWebSocket } from '../components/chat/chatService';
+import { disconnectNotificationsWebSocket } from '../components/shared/Notifications';
 
 export interface User {
 	id: string;
@@ -10,8 +12,6 @@ export interface User {
 	createdAt?: string;
     tfaEnabled?: boolean;
 }
-
-
 
 export function getUserId(): string | null {
   return localStorage.getItem('userId');
@@ -103,6 +103,11 @@ export async function SaveCurrentUserProfile(userId: string): Promise<User | nul
 export async function logout(): Promise<boolean> {  
   try
   {
+    // Close all WebSocket connections BEFORE calling logout API
+    // This prevents the server from trying to close already-closed connections
+    disconnectChatWebSocket();
+    disconnectNotificationsWebSocket();
+
     const response = await fetch(`/api/auth/logout`, {
       method: 'DELETE',
       credentials: 'include',
