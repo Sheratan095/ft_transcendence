@@ -9,43 +9,61 @@
 	<script type="module" src="./src/main.ts"></script>
 	<style>
 		/* 2FA Lock SVG Animations */
-		@keyframes lockOpen {
-			0% {
-				transform: translateY(0) rotate(0deg);
-				opacity: 1;
-			}
-			50% {
-				transform: translateY(-6px) rotate(-15deg);
-			}
-			100% {
-				transform: translateY(-12px) rotate(-30deg);
-				opacity: 0.7;
-			}
+		@keyframes lockShackleOpen {
+			0% { transform: translateY(0px); }
+			100% { transform: translateY(0px); }
 		}
 
-		@keyframes keyholePulse {
-			0%, 100% {
-				opacity: 1;
-			}
-			50% {
-				opacity: 0.5;
-			}
+		/* @keyframes keyholePulse {
+			0%, 100% { opacity: 1; }
+			50% { opacity: 0.5; }
+		} */
+
+		/* Default: shackle sits a bit lower when closed. Use SVG-specific transform-box/origin so
+		   the shackle moves cleanly without detaching from the body. */
+		.btn-lock svg path.lock {
+			transform-box: fill-box;
+			transform-origin: 50% 10%;
+			will-change: transform;
+			transform: translateY(0px);
+			transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
 		}
 
-		.btn-lock path.lock {
-			transition: all 0.3s ease;
+		.btn-lock svg path.lockb {
+			will-change: opacity;
+			transition: opacity 200ms ease;
 		}
 
-		.btn-lock path.lockb {
-			transition: all 0.3s ease;
+		/* Open animation (checked) */
+		#input-lock:checked ~ label svg path.lock {
+			animation: lockShackleOpen 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 		}
 
-		#input-lock:checked ~ label.btn-lock path.lock {
-			animation: lockOpen 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		#input-lock:checked ~ label svg path.lockb {
+			animation: keyholePulse 0.6s ease-in-out forwards;
 		}
 
-		#input-lock:checked ~ label.btn-lock path.lockb {
-			animation: keyholePulse 0.7s ease forwards;
+		/* Ensure closed state snaps back to the slightly-lowered position */
+		#input-lock:not(:checked) ~ label svg path.lock {
+			animation: none !important;
+			transform: translateY(0px) !important;
+			opacity: 1;
+		}
+
+		#input-lock:not(:checked) ~ label svg path.lockb {
+			animation: none !important;
+			opacity: 1;
+		}
+
+		/* In dark mode, make the closed lock visually black (only SVG paths) */
+		#input-lock:checked ~ label svg path.lock {
+			stroke: #000000 !important;
+			fill: none !important;
+		}
+
+		#input-lock:checked ~ label svg path.lockb {
+			fill: #000000 !important;
+			stroke: none !important;
 		}
 	</style>
 </head>
@@ -477,9 +495,9 @@
 									<label
 										for="input-lock"
 										class="btn-lock group inline-flex items-center h-10 px-4 bg-red-600 dark:bg-red-700 font-extrabold text-white uppercase tracking-tight text-sm cursor-pointer select-none transition-all duration-300 hover:brightness-110 peer-checked:bg-accent-orange dark:peer-checked:bg-accent-green peer-checked:text-black dark:peer-checked:text-black rounded">
-										<svg viewBox="0 0 30 40" class="h-5 mr-2" style="transform-origin: center;">
-											<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z" style="transition: all 0.3s ease;"></path>
-											<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21" style="transition: all 0.3s ease; transform-origin: 14px 15px;"></path>
+										<svg viewBox="0 0 30 40" class="h-5 mr-2" style="transform-origin: center;" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+											<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z" fill="currentColor" stroke="none" />
+											<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21" fill="none" stroke="currentColor" />
 										</svg>
 										<span id="profile-tfa" class="whitespace-nowrap">2FA</span>
 									</label>
@@ -511,7 +529,7 @@
 				<div class="bg-neutral-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
 					<div class="sm:flex sm:items-start">
 						<div class="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-500/10 sm:mx-0 sm:size-10">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-red-400">
+							<svg viewBox="0 0 24 24" fill="none" data-slot="icon" aria-hidden="true" class="size-6 text-red-400">
 								<path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" stroke-linecap="round" stroke-linejoin="round" />
 							</svg>
 						</div>
