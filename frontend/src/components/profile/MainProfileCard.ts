@@ -314,12 +314,12 @@ export async function renderProfileCard(container: HTMLElement | null) {
                 <div id="profile-pong-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
                   <div class="flex flex-row gap-6 justify-center items-center text-lg">
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${pongTotal}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${pongWins}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${pongLosses}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${pongWinRate}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${pongElo}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${pongRankDisplay}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-black dark:text-white font-bold text-lg">${pongTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-600 dark:text-green-400 font-bold text-lg">${pongWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-600 dark:text-red-400 font-bold text-lg">${pongLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-600 dark:text-cyan-400 font-bold text-lg">${pongWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-black dark:text-white font-bold text-lg">${pongElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-black dark:text-white font-bold text-lg">${pongRankDisplay}</span></div>
                   </div>
                 </div>
               </div>
@@ -343,17 +343,17 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
           trisDiv.innerHTML = `
             <div class="w-full">
-              <h3 class="text-lg font-black text-[#0dff66] uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
+              <h3 class="text-lg font-black text-green-600 dark:text-[#0dff66] uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
               <div class="flex flex-row items-center justify-center gap-4">
                 <div id="profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
                   <div class="flex flex-row gap-6 justify-center items-center text-lg">
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${trisTotal}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${trisWins}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${trisLosses}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${trisWinRate}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${trisElo}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${trisRankDisplay}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-black dark:text-white font-bold text-lg">${trisTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-600 dark:text-green-400 font-bold text-lg">${trisWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-600 dark:text-red-400 font-bold text-lg">${trisLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-600 dark:text-cyan-400 font-bold text-lg">${trisWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-black dark:text-white font-bold text-lg">${trisElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-black dark:text-white font-bold text-lg">${trisRankDisplay}</span></div>
                   </div>
                 </div>
               </div>
@@ -396,7 +396,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         const trisHistoryChartId = `profile-tris-history-chart`;
         if (trisHistory && trisHistory.length > 0) {
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black text-green-600 dark:text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
@@ -406,7 +406,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
           } catch (e) { console.warn(e); }
         } else {
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black text-green-600 dark:text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
             <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
@@ -434,12 +434,14 @@ export async function renderProfileCard(container: HTMLElement | null) {
               const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
-              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
-                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+              return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
                 <div class="text-center">
-                  <span class="font-semibold">(${yourScore})</span> <span class="text-neutral-300">you vs <span class="font-semibold text-neutral-200">${opponent}</span> <span class="font-semibold">(${opponentScore})</span></span>
+                  <span class="font-semibold">(${yourScore})</span>
+                  <span class="text-neutral-700 dark:text-white">you vs <span class="font-semibold text-neutral-700 dark:text-white">${opponent}</span>
+                  <span class="font-semibold">(${opponentScore})</span></span>
                 </div>
-                <div class="text-right text-neutral-400 whitespace-nowrap pr-15">
+                <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
                   ${dateStr} ${timeStr}
                 </div>
               </div>`;
@@ -451,12 +453,12 @@ export async function renderProfileCard(container: HTMLElement | null) {
               const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
-              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
-                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+              return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
                 <div class="text-center">
-                  <span class="text-neutral-300">you vs <span class="font-semibold text-neutral-200">${opponent}</span></span>
+                  <span class="text-black dark:text-white">you vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
                 </div>
-                <div class="text-right text-neutral-400 whitespace-nowrap pr-8">
+                <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
                   ${dateStr} ${timeStr}
                 </div>
               </div>`;
@@ -466,7 +468,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
         // Pong Match List
         const pongListWrapper = document.createElement('div');
-        pongListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col';
+        pongListWrapper.className = 'rounded-lg pt-4 flex-1 min-w-[250px] flex flex-col';
         if (pongHistory && pongHistory.length > 0) {
           pongListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
@@ -487,10 +489,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
         // Tris Match List
         const trisListWrapper = document.createElement('div');
-        trisListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col hidden';
+        trisListWrapper.className = 'rounded-lg pt-4 flex-1 min-w-[250px] flex flex-col hidden';
         if (trisHistory && trisHistory.length > 0) {
           trisListWrapper.innerHTML = `
-            <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black text-green-600 dark:text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
               ${createMatchListHTML(trisHistory, 'tris', 5)}
             </div>
@@ -499,7 +501,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
           trisStatsElements.push(trisListWrapper);
         } else {
           trisListWrapper.innerHTML = `
-            <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black text-green-600 dark:text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           matchListRow.appendChild(trisListWrapper);

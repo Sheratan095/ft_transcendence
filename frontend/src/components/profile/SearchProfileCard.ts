@@ -392,7 +392,7 @@ export async function renderSearchProfileCard(
 
           trisDiv.innerHTML = `
             <div class="w-full">
-              <h3 class="text-lg font-black text-[#0dff66] uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
+              <h3 class="text-lg font-black text-green-600 dark:text-[#0dff66] uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
               <div class="flex flex-row items-center justify-center gap-4">
                 <div id="search-profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
@@ -445,7 +445,7 @@ export async function renderSearchProfileCard(
         const trisHistoryChartId = `search-profile-tris-history-chart`;
         if (trisHistory && trisHistory.length > 0) {
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black text-green-600 dark:text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
             <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
@@ -455,7 +455,7 @@ export async function renderSearchProfileCard(
           } catch (e) { console.warn(e); }
         } else {
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black text-green-600 dark:text-[#0dff66] uppercase tracking-[0.2em]">TREND</h4>
             <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
@@ -512,7 +512,7 @@ export async function renderSearchProfileCard(
 
         // Pong Match List
         const pongListWrapper = document.createElement('div');
-        pongListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col';
+        pongListWrapper.className = 'rounded-lg pt-4 flex-1 min-w-[250px] flex flex-col';
         if (pongHistory && pongHistory.length > 0) {
           pongListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
@@ -533,10 +533,10 @@ export async function renderSearchProfileCard(
 
         // Tris Match List
         const trisListWrapper = document.createElement('div');
-        trisListWrapper.className = 'rounded-lg py-4 flex-1 min-w-[250px] flex flex-col hidden';
+        trisListWrapper.className = 'rounded-lg pt-4 flex-1 min-w-[250px] flex flex-col hidden';
         if (trisHistory && trisHistory.length > 0) {
           trisListWrapper.innerHTML = `
-            <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black text-green-600 dark:text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
               ${createMatchListHTML(trisHistory, 'tris', 5)}
             </div>
@@ -545,7 +545,7 @@ export async function renderSearchProfileCard(
           trisStatsElements.push(trisListWrapper);
         } else {
           trisListWrapper.innerHTML = `
-            <h4 class="text-lg font-black text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black text-green-600 dark:text-[#0dff66] mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
             <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           matchListRow.appendChild(trisListWrapper);

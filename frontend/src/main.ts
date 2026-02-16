@@ -39,7 +39,7 @@ console.log(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 
-initTheme(); // add theme
+// initTheme(); // add theme
 initCardHoverEffect(); // Initialize card hover effect
   // Attach global click handlers for shared/dynamic elements
   setupGlobalClickHandlers();
@@ -212,5 +212,9 @@ function setupGlobalClickHandlers() {
     }
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme(); // Initialize theme on DOMContentLoaded
+});
 
 export default {};
