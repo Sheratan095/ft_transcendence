@@ -9,6 +9,7 @@ import { getAllMatchHistories, calculateStats } from '../../lib/matchHistory';
 import { goToRoute } from '../../spa';
 import { initCardHoverEffect } from '../../lib/card';
 import { getUserId } from '../../lib/token';
+import { attachUserOptions } from './profile';
 
 export async function renderProfileCard(container: HTMLElement | null) {
   if (!container) {
@@ -124,8 +125,10 @@ export async function renderProfileCard(container: HTMLElement | null) {
       logoutBtn.addEventListener('click', async () => {
        const success = await logout();
 
-      if (success)
+      if (success) {
+        await attachUserOptions();
         goToRoute('/login');
+      }
       else
         throw new Error('Logout failed');
     });
@@ -157,14 +160,14 @@ export async function renderProfileCard(container: HTMLElement | null) {
       try {
         const success = await deleteAccount();
 
-        // Close the dialog if it was successful
-        if (success && deleteDialog)
-          deleteDialog.classList.add('hidden');
-
         if (success)
+        {
+          deleteDialog.classList.add('hidden');
+          await attachUserOptions();
           goToRoute('/login');
+        }
         else
-          throw new Error('Delete account failed');
+          throw new Error('Delete failed');
 
       }
       catch (err) {
