@@ -363,12 +363,12 @@ export async function renderSearchProfileCard(
                 <div id="search-profile-pong-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
                   <div class="flex flex-row gap-6 justify-center items-center text-lg">
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${pongTotal}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${pongWins}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${pongLosses}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${pongWinRate}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${pongElo}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${pongRankDisplay}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-black dark:text-white font-bold text-lg">${pongTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-600 dark:text-green-400 font-bold text-lg">${pongWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-600 dark:text-red-400 font-bold text-lg">${pongLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-600 dark:text-cyan-400 font-bold text-lg">${pongWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-black dark:text-white font-bold text-lg">${pongElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-black dark:text-white font-bold text-lg">${pongRankDisplay}</span></div>
                   </div>
                 </div>
               </div>
@@ -397,12 +397,12 @@ export async function renderSearchProfileCard(
                 <div id="search-profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
                   <div class="flex flex-row gap-6 justify-center items-center text-lg">
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${trisTotal}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${trisWins}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${trisLosses}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${trisWinRate}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${trisElo}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${trisRankDisplay}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-black dark:text-white font-bold text-lg">${trisTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-600 dark:text-green-400 font-bold text-lg">${trisWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-600 dark:text-red-400 font-bold text-lg">${trisLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-600 dark:text-cyan-400 font-bold text-lg">${trisWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-black dark:text-white font-bold text-lg">${trisElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-black dark:text-white font-bold text-lg">${trisRankDisplay}</span></div>
                   </div>
                 </div>
               </div>
@@ -482,12 +482,14 @@ export async function renderSearchProfileCard(
               const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
-              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
-                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+              return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
                 <div class="text-center">
-                  <span class="font-semibold">(${yourScore})</span> <span class="text-neutral-300">${user.username} vs <span class="font-semibold text-neutral-200">${opponent}</span> <span class="font-semibold">(${opponentScore})</span></span>
+                  <span class="font-semibold">(${yourScore})</span>
+                  <span class="text-neutral-700 dark:text-white">you vs <span class="font-semibold text-neutral-700 dark:text-white">${opponent}</span>
+                  <span class="font-semibold">(${opponentScore})</span></span>
                 </div>
-                <div class="text-right text-neutral-400 whitespace-nowrap pr-15">
+                <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
                   ${dateStr} ${timeStr}
                 </div>
               </div>`;
@@ -497,12 +499,12 @@ export async function renderSearchProfileCard(
               const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
-              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
-                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+             return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
                 <div class="text-center">
-                  <span class="text-neutral-300">${user.username} vs <span class="font-semibold text-neutral-200">${opponent}</span></span>
+                  <span class="text-black dark:text-white">you vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
                 </div>
-                <div class="text-right text-neutral-400 whitespace-nowrap pr-8">
+                <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
                   ${dateStr} ${timeStr}
                 </div>
               </div>`;
