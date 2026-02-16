@@ -23,6 +23,51 @@ if (typeof window !== 'undefined') {
   (window as any).ApexCharts = ApexCharts;
 }
 
+// Debug function for chat modal testing
+(window as any).__debugChatModal = () => {
+  const modal = document.getElementById('chat-modal');
+  if (!modal) {
+    console.error('❌ chat-modal element NOT FOUND in DOM');
+    return;
+  }
+  
+  console.log('📋 MODAL DEBUG INFO:');
+  console.log('✅ Modal element found:', modal);
+  console.log('Classes:', modal.className);
+  console.log('Has "hidden" class:', modal.classList.contains('hidden'));
+  console.log('Computed display:', window.getComputedStyle(modal).display);
+  console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
+  console.log('offsetHeight:', modal.offsetHeight);
+  console.log('offsetWidth:', modal.offsetWidth);
+  console.log('Position:', window.getComputedStyle(modal).position);
+  console.log('z-index:', window.getComputedStyle(modal).zIndex);
+  console.log('background:', window.getComputedStyle(modal).background);
+  
+  console.log('\n🔧 Attempting to show modal with force...');
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  modal.style.visibility = 'visible';
+  modal.style.opacity = '1';
+  console.log('After forcing display via inline styles:');
+  console.log('Computed display:', window.getComputedStyle(modal).display);
+  console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
+  console.log('Computed opacity:', window.getComputedStyle(modal).opacity);
+  
+  void modal.offsetHeight; // Force reflow
+};
+
+// Also test if modal appears by directly showing it
+(window as any).__forceShowChat = () => {
+  const modal = document.getElementById('chat-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex !important';
+    modal.style.visibility = 'visible !important';
+    modal.style.opacity = '1 !important';
+    console.log('✅ Modal forced visible with inline styles');
+  }
+};
+
 main(window.location.pathname);
 
 // Main application entry point,

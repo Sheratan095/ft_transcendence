@@ -529,11 +529,21 @@ export async function loadChats() {
       credentials: 'include'
     });
     console.log('Load chats response:', response);
+    
     if (!response.ok) {
       throw new Error(`Failed to load chats: ${response.statusText}`);
     }
 
-    chats = await response.json();
+    const responseText = await response.text();
+    console.log('Raw response text:', responseText);
+
+    try {
+      chats = JSON.parse(responseText);
+      console.log('✅ Chats loaded successfully:', chats);
+    } catch (parseErr) {
+      console.error('❌ Failed to parse chats JSON:', parseErr, 'Raw:', responseText);
+      chats = [];
+    }
 
     // Store members for each chat and extract otherUserId for DM chats
     chats.forEach(chat => {
@@ -549,6 +559,7 @@ export async function loadChats() {
     });
   } catch (err) {
     console.error('Error loading chats:', err);
+    throw err;
   }
 }
 

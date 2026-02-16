@@ -33,6 +33,7 @@ export { sendChatInvite } from './chatService';
 // ============================================================================
 
 export function initChat(userId: string) {
+  console.log('🔧 Initializing chat for user:', userId);
   setCurrentUserId(userId);
   connectChatWebSocket().catch(err => console.error('Failed to establish chat connection:', err));
   
@@ -45,6 +46,7 @@ export function initChat(userId: string) {
   (window as any).__resetChatUI = resetChatUI;
   (window as any).__refreshChatsIfOpen = refreshChatsIfOpen;
   (window as any).__closeChatModal = closeChatModal;
+  console.log('✅ Chat UI functions exposed to global scope');
 }
 
 // ============================================================================
@@ -53,9 +55,21 @@ export function initChat(userId: string) {
 
 export async function openChatModal() {
   const modal = document.getElementById('chat-modal');
-  if (!modal) return;
+  if (!modal) {
+    console.error('❌ chat-modal element not found in DOM');
+    return;
+  }
 
+  console.log('📂 Opening chat modal...');
+  
+  // FIX: Ensure modal is direct child of body (not inside a hidden parent)
+  if (modal.parentElement !== document.body) {
+    console.warn('⚠️ Modal parent is not body, moving modal to body');
+    document.body.appendChild(modal);
+  }
+  
   modal.classList.remove('hidden');
+  console.log('✅ Modal is now visible!');
 
   if (chats.length === 0) {
     try {
@@ -101,10 +115,16 @@ export function closeChatModal() {
 
 export function renderChatList() {
   const chatList = document.getElementById('chat-list');
-  if (!chatList) return;
+  if (!chatList) {
+    console.error('chat-list element not found in DOM');
+    return;
+  }
+
+  console.log(`Rendering chat list with ${chats.length} chats`);
 
   if (chats.length === 0) {
     chatList.innerHTML = '<div class="placeholder">No chats yet</div>';
+    console.warn('No chats to display');
     return;
   }
 
@@ -414,6 +434,12 @@ async function openFriendSelectionModal() {
   const modal = document.getElementById('friend-selection-modal');
   if (!modal) return;
 
+  // FIX: Ensure modal is direct child of body (not inside a hidden parent)
+  if (modal.parentElement !== document.body) {
+    console.warn('⚠️ Friend modal parent is not body, moving to body');
+    document.body.appendChild(modal);
+  }
+
   if (addToChatId) {
     try {
       await loadChats();
@@ -688,7 +714,12 @@ function handleMessageKeyPress(event: KeyboardEvent) {
 // ============================================================================
 
 export function setupChatEventListeners() {
-  if ((window as any).__chat_listeners_attached) return;
+  if ((window as any).__chat_listeners_attached) {
+    console.log('⚠️ Chat event listeners already attached, skipping');
+    return;
+  }
+
+  console.log('🎯 Setting up chat event listeners...');
 
   const closeBtn = document.getElementById('chat-close-btn');
   if (closeBtn) {
@@ -774,4 +805,5 @@ export function setupChatEventListeners() {
   }
 
   (window as any).__chat_listeners_attached = true;
+  console.log('✅ Chat event listeners successfully attached');
 }
