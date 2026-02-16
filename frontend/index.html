@@ -7,6 +7,47 @@
 	<link rel="icon" type="image/png" href="/42_Logo.svg" />
 	<link href="./tailwind.css" rel="stylesheet" />
 	<script type="module" src="./src/main.ts"></script>
+	<style>
+		/* 2FA Lock SVG Animations */
+		@keyframes lockOpen {
+			0% {
+				transform: translateY(0) rotate(0deg);
+				opacity: 1;
+			}
+			50% {
+				transform: translateY(-6px) rotate(-15deg);
+			}
+			100% {
+				transform: translateY(-12px) rotate(-30deg);
+				opacity: 0.7;
+			}
+		}
+
+		@keyframes keyholePulse {
+			0%, 100% {
+				opacity: 1;
+			}
+			50% {
+				opacity: 0.5;
+			}
+		}
+
+		.btn-lock path.lock {
+			transition: all 0.3s ease;
+		}
+
+		.btn-lock path.lockb {
+			transition: all 0.3s ease;
+		}
+
+		#input-lock:checked ~ label.btn-lock path.lock {
+			animation: lockOpen 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		}
+
+		#input-lock:checked ~ label.btn-lock path.lockb {
+			animation: keyholePulse 0.7s ease forwards;
+		}
+	</style>
 </head>
 <html lang="en"
  class="dark overflow-hidden selection:bg-accent-orange
@@ -411,20 +452,20 @@
 							<!-- Action buttons and 2FA toggle -->
 							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
 								<!-- Chat button -->
-								<button id="profile-chat-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-accent-orange dark:bg-accent-green text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+								<button id="profile-chat-btn" class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base bg-accent-orange dark:bg-accent-green text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap rounded">
 									Chat
 								</button>
 								<!-- Logout button -->
-								<button id="profile-logout-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-gray-700 dark:border-neutral-600 hover:bg-gray-700 dark:hover:bg-neutral-600 transition whitespace-nowrap">
+								<button id="profile-logout-btn" class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight hover:bg-gray-700 dark:hover:bg-neutral-600 transition whitespace-nowrap rounded">
 									Logout
 								</button>
 								<!-- Delete account button -->
-								<button command="show-modal" commandfor="delete-dialog" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-red-500 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+								<button command="show-modal" commandfor="delete-dialog" class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base bg-red-500 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap rounded">
 									Delete
 								</button>
 
 								<!-- Language selector -->
-								<select id="profile-language" class="px-2 sm:px-4 py-2 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-gray-700 dark:border-neutral-600 hover:bg-gray-700 dark:hover:bg-neutral-600 transition rounded">
+								<select id="profile-language" class="h-10 flex items-center px-2 sm:px-4 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight appearance-none transition rounded">
 									<option value="en">English</option>
 									<option value="fr">Français</option>
 									<option value="it">Italiano</option>
@@ -435,11 +476,10 @@
 									<input id="input-lock" type="checkbox" class="hidden peer">
 									<label
 										for="input-lock"
-										class="btn-lock group inline-flex items-center h-10 px-4 bg-red-600 dark:bg-red-700 border-2 border-gray-700 dark:border-neutral-600 font-extrabold text-white uppercase tracking-tight text-sm cursor-pointer select-none transition-all duration-300 hover:brightness-110 peer-checked:bg-accent-green dark:peer-checked:bg-accent-green"
-									>
-										<svg viewBox="0 0 30 40" class="w-5 h-5 mr-2">
-											<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
-											<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+										class="btn-lock group inline-flex items-center h-10 px-4 bg-red-600 dark:bg-red-700 font-extrabold text-white uppercase tracking-tight text-sm cursor-pointer select-none transition-all duration-300 hover:brightness-110 peer-checked:bg-accent-orange dark:peer-checked:bg-accent-green peer-checked:text-black dark:peer-checked:text-black rounded">
+										<svg viewBox="0 0 30 40" class="h-5 mr-2" style="transform-origin: center;">
+											<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z" style="transition: all 0.3s ease;"></path>
+											<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21" style="transition: all 0.3s ease; transform-origin: 14px 15px;"></path>
 										</svg>
 										<span id="profile-tfa" class="whitespace-nowrap">2FA</span>
 									</label>
