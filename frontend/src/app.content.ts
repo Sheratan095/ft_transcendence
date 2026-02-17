@@ -16,6 +16,12 @@ const appContent = {
 
     title: "Vite + TypeScript",
 
+    profileDelete: t({
+      en: "Delete",
+      fr: "Supprimer",
+      it: "Elimina",
+    }),
+
     count: t({
       en: "count is ",
       fr: "le compte est ",
