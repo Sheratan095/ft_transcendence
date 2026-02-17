@@ -476,7 +476,7 @@ async function openFriendSelectionModal() {
 
   const createGroupSubmitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement | null;
   if (createGroupSubmitBtn) {
-    createGroupSubmitBtn.textContent = addToChatId ? 'Add Selected' : 'Create Group';
+    createGroupSubmitBtn.textContent = addToChatId ? t('chat.add-selected') : t('chat.create-group');
   }
 
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
@@ -515,11 +515,11 @@ async function openFriendSelectionModal() {
   const header = modal.querySelector('h2') as HTMLElement | null;
   const desc = modal.querySelector('p') as HTMLElement | null;
   if (addToChatId) {
-    if (header) header.textContent = 'Add Users to Chat';
-    if (desc) desc.textContent = 'Select friends to add to this chat:';
+    if (header) header.textContent = t('chat.add');
+    if (desc) desc.textContent = t('chat.select-group');
   } else {
-    if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group:';
+    if (header) header.textContent = t('chat.create-group');
+    if (desc) desc.textContent = t('chat.select-group');
   }
 }
 
@@ -531,7 +531,7 @@ function closeFriendSelectionModal() {
   selectedFriendsForGroup.clear();
   addToChatId = null;
   const createGroupSubmitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement | null;
-  if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = 'Create Group';
+  if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = t('chat.create-group');
 
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
   if (groupNameInput) {
@@ -547,8 +547,8 @@ function closeFriendSelectionModal() {
   if (modal) {
     const header = modal.querySelector('h2') as HTMLElement | null;
     const desc = modal.querySelector('p') as HTMLElement | null;
-    if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group:';
+    if (header) header.textContent = t('chat.create-group');
+    if (desc) desc.textContent = t('chat.select-group');
   }
 }
 
@@ -577,7 +577,7 @@ async function renderFriendsList() {
   }
 
   if (friendsToShow.length === 0) {
-    friendsList.innerHTML = '<div class="text-neutral-400 text-center">No friends available to add</div>';
+    friendsList.innerHTML = `<div class="text-neutral-400 text-center">${t('chat.no-friends')}</div>`;
     return;
   }
 

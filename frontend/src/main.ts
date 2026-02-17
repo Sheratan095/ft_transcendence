@@ -182,10 +182,6 @@ setLocale(savedLanguage);
 
 console.log(savedLanguage);
 
-try { setLocaleInStorage && setLocaleInStorage(savedLanguage); } catch {}
-
-
-  console.log('[main] startup locale set to', getLocale());
 getIntlayer("app"); // Initialize intlayer
 
 // initTheme(); // add theme
@@ -193,11 +189,8 @@ initCardHoverEffect(); // Initialize card hover effect
   // Attach global click handlers for shared/dynamic elements
   setupGlobalClickHandlers();
   // Setup game card listeners
-  setupTrisCardListener();
-  setupPongCardListener();
   initSlideshow();
 if (isLoggedInClient()) initUserServices(path);
-
 }
 
 /**
@@ -369,5 +362,25 @@ function setupGlobalClickHandlers() {
 document.addEventListener('DOMContentLoaded', () => {
   initTheme(); // Initialize theme on DOMContentLoaded
 });
+
+function fetchLanguage(): string {
+let language = localStorage.getItem('userLanguage');
+if (!language) {
+	  language = navigator.language || 'en';
+
+	switch (language) {
+	case 'fr':
+		setLocaleInStorage('fr');
+		break;
+	case 'it':
+		setLocaleInStorage('it');
+		break;
+	default:
+		setLocaleInStorage('en');
+		break;
+	}
+}
+return language;
+}
 
 export default {};
