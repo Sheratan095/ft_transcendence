@@ -91,7 +91,7 @@ export async function SaveCurrentUserProfile(userId: string): Promise<User | nul
   (user as any).avatarUrl = user.avatarUrl ? `/api${user.avatarUrl}` : '/assets/placeholder-avatar.jpg';
   (user as any).createdAt = user.createdAt || new Date().toISOString();
   (user as any).language = user.language || 'en';
-  localStorage.setItem("userLanguage", user.language as string);
+  localStorage.setItem("locale", user.language as string);
 
   // Save to localStorage
   saveUser(user);
@@ -108,6 +108,10 @@ export async function logout(): Promise<boolean> {
   {
     // Close all WebSocket connections BEFORE calling logout API
     // This prevents the server from trying to close already-closed connections
+	localStorage.removeItem('userId');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tfaEnabled');
+    stopTokenRefresh();
     disconnectChatWebSocket();
     disconnectNotificationsWebSocket();
 
@@ -121,10 +125,6 @@ export async function logout(): Promise<boolean> {
       console.error('Logout response not ok:', response.status);
       return false;
     }
-    localStorage.removeItem('userId');
-    localStorage.removeItem('user');
-    localStorage.removeItem('tfaEnabled');
-    stopTokenRefresh();
 
     return true;
   }

@@ -1,7 +1,6 @@
 import { showErrorToast, showSuccessToast } from '../components/shared/Toast';
 import { getUser, getUserId } from './auth';
 
-// Full-featured Pong client ported from tests/pong/pong-game-test.html
 let ws: WebSocket | null = null;
 let currentUserId: string | null = null;
 let currentGameId: string | null = null;
@@ -144,7 +143,16 @@ function handleMessage(message: any) {
 
 export function startMatchmaking() { sendMessage('pong.joinMatchmaking', {}); }
 export function leaveMatchmaking() { sendMessage('pong.leaveMatchmaking', {}); }
-export function createCustomGame(otherId: string) { sendMessage('pong.createCustomGame', { otherId }); }
+export async function createCustomGame(otherId: string) {
+  if (!isPongConnected()) {
+    const userId = getUserId();
+    if (!userId) {
+      throw new Error('Not logged in');
+    }
+    await initPong(userId);
+  }
+  sendMessage('pong.createCustomGame', { otherId });
+}
 export function joinCustomGame(gameId: string) { sendMessage('pong.joinCustomGame', { gameId }); }
 export function cancelCustomGame(gameId: string) { sendMessage('pong.cancelCustomGame', { gameId }); }
 export function quitGame(gameId: string) { sendMessage('pong.userQuit', { gameId }); }
@@ -183,26 +191,38 @@ export function closePong() {
   playerSide = null;
 }
 
+export function isPongConnected(): boolean {
+  return ws !== null && ws.readyState === WebSocket.OPEN;
+}
+
 export async function sendGameInvite(targetId: string, gameId: string | null = null) {
   try {
-    const user = getUser();
-    const senderId = user?.id || getUserId();
-    const senderUsername = user?.username || 'Unknown';
-
-    const body = { senderId, senderUsername, targetId, gameId, gameType: 'pong' };
-
-    const res = await fetch('/notification/send-game-invite', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || 'Failed to send invite');
+    const userId = getUserId();
+    
+    // Ensure Pong socket is connected before sending invite
+    if (!isPongConnected()) {
+      if (!userId) {
+        throw new Error('Not logged in');
+      }
+      await initPong(userId);
+      
+      // Wait for connection to open
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('Connection timeout')), 5000);
+        const checkConnection = () => {
+          if (isPongConnected()) {
+            clearTimeout(timeout);
+            resolve();
+          } else {
+            setTimeout(checkConnection, 100);
+          }
+        };
+        checkConnection();
+      });
     }
 
+    // Send invite via WebSocket
+    sendMessage('pong.sendGameInvite', { targetId, gameId });
     return true;
   } catch (err) {
     console.error('Failed to send game invite:', err);

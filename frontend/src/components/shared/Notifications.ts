@@ -1,6 +1,8 @@
 import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } from './Toast';
 import { FriendsManager } from '../profile/FriendsManager';
 import { openTrisModalAndJoinGame } from '../../lib/tris-ui';
+import { openPongModal } from '../../lib/pong-ui';
+import { joinCustomGame } from '../../lib/pong';
 import { goToRoute } from '../../spa';
 
 let notifSocket: WebSocket | null = null;
@@ -318,6 +320,11 @@ function handleNotificationEvent(data: any) {
 										// Import and call function to open tris modal and join game
 										await openTrisModalAndJoinGame(gameId);
 										// Note: Success feedback will come from handleCustomGameJoinSuccess event
+									} else if (gameType === 'pong' && gameId) {
+										// For pong, open the pong modal and join the custom game
+										await openPongModal();
+										joinCustomGame(gameId);
+										showSuccessToast('Joined pong game!', { duration: 2000 });
 									}
 								} catch (err) {
 									console.error('Error accepting game invite:', err);
@@ -333,6 +340,8 @@ function handleNotificationEvent(data: any) {
 									// If it's a tris game, cancel via WebSocket
 									if (gameType === 'tris' && gameId) {
 										showInfoToast(`You rejected ${username}'s invitation`, { duration: 3000 });
+									} else if (gameType === 'pong' && gameId) {
+										showInfoToast(`You rejected ${username}'s pong invitation`, { duration: 3000 });
 									}
 								} catch (err) {
 									console.error('Error rejecting game invite:', err);

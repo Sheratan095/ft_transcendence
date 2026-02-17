@@ -23,6 +23,24 @@ export interface GameState {
   yourTurn?: boolean;
   message?: string;
 }
+ 
+export function connectToTris() {
+	if (trisSocket && trisSocket.readyState === WebSocket.OPEN) {
+		return;
+	}
+	
+	  const userId = getUserId();
+	  if (!userId) {
+		console.error('User not authenticated');
+		return;
+	  }
+	
+	  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+	  const host = window.location.host;
+	  const wsUrl = `${protocol}//${host}/tris/ws?userId=${userId}`;
+
+		
+}
 
 /**
  * Initialize tris game connection
@@ -88,10 +106,13 @@ export function onTrisEvent(callback: (event: string, data: any) => void) {
 /**
  * Create a custom game with another player
  */
-export function createCustomGame(otherId: string): void {
+export async function createCustomGame(otherId: string): Promise<void> {
   if (!trisSocket || trisSocket.readyState !== WebSocket.OPEN) {
-    console.error('Tris WebSocket not connected');
-    return;
+    const userId = getUserId();
+    if (!userId) {
+      throw new Error('Not logged in');
+    }
+    await initTris(userId);
   }
 
   const message = {
@@ -99,7 +120,7 @@ export function createCustomGame(otherId: string): void {
     data: { otherId },
   };
   console.log('Creating custom game with:', message);
-  trisSocket.send(JSON.stringify(message));
+  trisSocket!.send(JSON.stringify(message));
 }
 
 /**

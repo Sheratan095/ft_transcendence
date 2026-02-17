@@ -1,7 +1,10 @@
 import { getUserId } from '../../lib/auth';
 import { openTrisModeModal, initializeModeSpecificBehaviors, resetLocalGame } from '../../lib/tris-mode';
 import { openTrisModal } from '../../lib/tris-ui';
-import { showErrorToast } from '../shared/Toast';
+import { showErrorToast, showSuccessToast } from '../shared/Toast';
+import { openGameInviteModal } from '../../lib/game-invite';
+import { FriendsManager } from '../profile/FriendsManager';
+import { createCustomGame } from '../../lib/tris';
 
 export async function renderTrisPage(container: HTMLElement) {
   const template = document.getElementById('tris-template') as HTMLTemplateElement | null;
@@ -26,6 +29,7 @@ export async function renderTrisPage(container: HTMLElement) {
   const btnOnline = container.querySelector('#tris-play-online') as HTMLButtonElement | null;
   const btnOffline1v1 = container.querySelector('#tris-play-offline-1v1') as HTMLButtonElement | null;
   const btnOfflineAI = container.querySelector('#tris-play-offline-ai') as HTMLButtonElement | null;
+  const btnInviteFriend = container.querySelector('#tris-invite-friend') as HTMLButtonElement | null;
   const btnResetLocal = container.querySelector('#tris-reset-local') as HTMLButtonElement | null;
 
   if (btnMode) btnMode.addEventListener('click', () => openTrisModeModal());
@@ -56,6 +60,23 @@ export async function renderTrisPage(container: HTMLElement) {
       console.error(err);
       showErrorToast('Failed to start AI mode');
     }
+  });
+  if (btnInviteFriend) btnInviteFriend.addEventListener('click', async () => {
+    if (!userId) {
+      showErrorToast('You must be logged in to invite friends');
+      return;
+    }
+    const friendsManager = new FriendsManager({ currentUserId: userId });
+    await openGameInviteModal('tris', async (friendId: string) => {
+      try {
+        await createCustomGame(friendId);
+		openTrisModal();
+        showSuccessToast('Game invite sent!');
+      } catch (err) {
+        console.error('Failed to send game invite:', err);
+        showErrorToast('Failed to send game invite');
+      }
+    });
   });
   if (btnResetLocal) btnResetLocal.addEventListener('click', () => resetLocalGame());
 }

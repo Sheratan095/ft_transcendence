@@ -44,9 +44,11 @@ export async function refreshAccessToken(): Promise<boolean> {
     }
 
     console.error('Token refresh failed:', res.status);
+	await logout();
     return false;
   } catch (error) {
     console.error('Token refresh error:', error);
+    await logout();
     return false;
   } finally {
     isRefreshing = false;

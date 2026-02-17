@@ -1,8 +1,7 @@
 import { showErrorToast, showSuccessToast } from '../components/shared/Toast';
 import { goToRoute } from '../spa';
-import { initPong, onPongEvent, startMatchmaking, startPaddleMove, stopPaddleMove, sendGameInvite, closePong, getCurrentGameId } from './pong';
+import { initPong, onPongEvent, startMatchmaking, startPaddleMove, stopPaddleMove, closePong, getCurrentGameId } from './pong';
 import { getUserId } from './auth';
-import { openGameInviteModal } from './game-invite';
 
 // Render constants
 const PADDLE_WIDTH = 15;
@@ -38,7 +37,6 @@ export async function openPongModal() {
     const canvas = document.getElementById('pong-canvas') as HTMLCanvasElement | null;
     const status = document.getElementById('pong-status') as HTMLElement | null;
     const startBtn = document.getElementById('pong-start-btn') as HTMLButtonElement | null;
-    const inviteBtn = document.getElementById('pong-invite-btn') as HTMLButtonElement | null;
     const resetBtn = document.getElementById('pong-reset-btn') as HTMLButtonElement | null;
     const closeBtn = document.getElementById('pong-close-btn') as HTMLButtonElement | null;
 
@@ -179,20 +177,6 @@ export async function openPongModal() {
       startBtn.onclick = () => {
         startMatchmaking();
         if (status) status.textContent = 'Joining matchmaking queue...';
-      };
-    }
-
-    // Invite button
-    if (inviteBtn) {
-      inviteBtn.onclick = async () => {
-        await openGameInviteModal('pong', async (friendId) => {
-          const success = await sendGameInvite(friendId, null);
-          if (success) {
-            showSuccessToast(`Pong invite sent to ${friendId}`);
-          } else {
-            showErrorToast('Failed to send Pong invite');
-          }
-        });
       };
     }
 

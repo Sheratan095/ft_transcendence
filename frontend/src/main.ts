@@ -28,35 +28,13 @@ registerDictionary('en', en);
 registerDictionary('fr', fr);
 registerDictionary('it', it);
 // set runtime locale from saved preference (fallback to 'en') and persist via any storage hook
-const _savedLanguage = localStorage.getItem('userLanguage') || 'en';
+let _savedLanguage = localStorage.getItem('locale');
+if (!_savedLanguage) _savedLanguage = fetchLanguage(); // will set to navigator language or default and persist
 setLocale(_savedLanguage);
-try { setLocaleInStorage && setLocaleInStorage(_savedLanguage); } catch {}
 
 // simple language selector handler: persist and reload to ensure full UI picks up the new locale
 document.addEventListener('DOMContentLoaded', () => {
   // hydrate existing DOM and template contents once on load
-  function hydrateRoot(root: ParentNode = document) {
-    const nodes = Array.from((root as any).querySelectorAll('[data-i18n]') as HTMLElement[]);
-    nodes.forEach(el => {
-      const key = el.dataset.i18n!;
-      const rawVars = el.dataset.i18nVars || '{}';
-      let vars = {};
-      try { vars = JSON.parse(rawVars); } catch {}
-      try {
-        const val = t(key, vars as Record<string, string|number>);
-        el.textContent = val;
-      } catch (err) {
-        // leave the key if translation fails
-        el.textContent = key;
-      }
-    });
-  }
-
-  function hydrateOnce() {
-    hydrateRoot(document);
-    document.querySelectorAll('template').forEach(tpl => hydrateRoot((tpl as HTMLTemplateElement).content));
-  }
-
   hydrateOnce();
   const locales = [
     { code: 'en', label: 'EN' },
@@ -72,13 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   langSelect.addEventListener('change', async () => {
     const v = langSelect.value;
-    setLocale(v);
-    try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
     try
     {
       if (isLoggedInClient())
       {
-        localStorage.setItem('userLanguage', v); 
+        localStorage.setItem('locale', v); 
         const response = await fetch('/api/users/update-user', {
           method: 'PUT',
           headers: {
@@ -115,7 +91,7 @@ document.addEventListener('change', (e) => {
   const v = target.value;
   setLocale(v);
   try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
-  try { localStorage.setItem('userLanguage', v); } catch {}
+  try { localStorage.setItem('locale', v); } catch {}
   // reload to ensure all templates/renderers pick up the new locale
   window.location.reload();
 });
@@ -174,7 +150,7 @@ export async function main(path: string) {
 await start();
 
 // Load user's saved language preference
-const savedLanguage = localStorage.getItem('userLanguage') || 'en';
+const savedLanguage = localStorage.getItem('locale') || 'en';
 setLocaleInStorage(savedLanguage);
 
   // IMPORTANT: set the runtime translator locale so t(...) uses it
@@ -364,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function fetchLanguage(): string {
-let language = localStorage.getItem('userLanguage');
+let language = localStorage.getItem('locale');
 if (!language) {
 	  language = navigator.language || 'en';
 
@@ -382,5 +358,27 @@ if (!language) {
 }
 return language;
 }
+
+  function hydrateOnce() {
+    hydrateRoot(document);
+    document.querySelectorAll('template').forEach(tpl => hydrateRoot((tpl as HTMLTemplateElement).content));
+  }
+
+  function hydrateRoot(root: ParentNode = document) {
+    const nodes = Array.from((root as any).querySelectorAll('[data-i18n]') as HTMLElement[]);
+    nodes.forEach(el => {
+      const key = el.dataset.i18n!;
+      const rawVars = el.dataset.i18nVars || '{}';
+      let vars = {};
+      try { vars = JSON.parse(rawVars); } catch {}
+      try {
+        const val = t(key, vars as Record<string, string|number>);
+        el.textContent = val;
+      } catch (err) {
+        // leave the key if translation fails
+        el.textContent = key;
+      }
+    });
+  }
 
 export default {};

@@ -189,7 +189,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
   const languageSelect = cardEl.querySelector('#profile-language') as HTMLSelectElement;
   if (languageSelect)
   {
-    const savedLanguage = localStorage.getItem('userLanguage') || 'en';
+    const savedLanguage = localStorage.getItem('locale') || 'en';
     languageSelect.value = savedLanguage;
     languageSelect.addEventListener('change', async (e) =>
     {
@@ -209,7 +209,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
         if (responseBody && responseBody.language)
         {
-          localStorage.setItem('userLanguage', responseBody.language);
+          localStorage.setItem('locale', responseBody.language);
           setLocaleInStorage(responseBody.language);
           console.log('Language changed to:', responseBody.language);
         }

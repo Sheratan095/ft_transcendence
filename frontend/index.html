@@ -246,6 +246,7 @@
 							<div class="p-6 space-y-3">
 								<button id="pong-invite-friend" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">👋 Invite Friend</button>
 								<button id="pong-view-lobby" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">👀 View Lobby</button>
+								<button id="pong-tournaments-btn" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">🏆 Tournaments</button>
 								<button id="pong-reset-local" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">🔄 Reset Game</button>
 							</div>
 						</div>
@@ -825,7 +826,6 @@
 		</div>
 	</template>
 
-
 <!-- Tris Game Modals-->
 
 <!-- Tris Mode Selection Modal -->
@@ -965,7 +965,6 @@
 				<!-- Controls Card -->
 				<div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
 					<button id="pong-start-btn" class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan">Start</button>
-					<button id="pong-invite-btn" class="px-6 py-3 dark:bg-accent-pink bg-accent-orange dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-pink border-accent-orange">Invite</button>
 					<button id="pong-reset-btn" class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300">Reset</button>
 				</div>
 			</div>
@@ -1029,13 +1028,6 @@
             class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight
 	 hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan rounded-lg">
             Start
-          </button>
-          <button 
-            id="tris-invite-btn"
-            class="px-6 py-3 dark:bg-accent-pink bg-accent-orange dark:text-white text-black font-extrabold uppercase 
-	tracking-tight hover:brightness-110 transition border-2 dark:border-accent-pink border-accent-orange rounded-lg"
-          >
-            Invite
           </button>
           <button 
             id="tris-surrender-btn"

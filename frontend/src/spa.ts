@@ -97,7 +97,7 @@ const routes: Record<string, RouteConfig> = {
       const el = document.getElementById('main-content');
       if (!el) return;
       try {
-        const mod = await import('./components/pong/PongPage');
+        const mod = await import('./components/pong/PongPage.ts');
         await mod.renderPongPage(el);
       } catch (err) {
         console.error('Failed to render Pong page:', err);

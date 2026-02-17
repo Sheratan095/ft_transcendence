@@ -197,7 +197,7 @@ function renderAndAttachButtons() {
                 cancelCustomGame(currentGameId);
               }
             }
-            createCustomGame(friendId);
+            await createCustomGame(friendId);
             showSuccessToast('Inviting friend...');
           } catch (err) {
             showErrorToast((err as Error).message || 'Failed to send invitation');
