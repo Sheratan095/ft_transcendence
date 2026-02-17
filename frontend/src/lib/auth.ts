@@ -88,7 +88,7 @@ export async function SaveCurrentUserProfile(userId: string): Promise<User | nul
   
   // Enrich with additional data from localStorage
   (user as any).tfaEnabled = localStorage.getItem('tfaEnabled') === 'true' || false;
-  (user as any).avatarUrl = user.avatarUrl || '/assets/placeholder-avatar.jpg';
+  (user as any).avatarUrl = user.avatarUrl ? `/api${user.avatarUrl}` : '/assets/placeholder-avatar.jpg';
   (user as any).createdAt = user.createdAt || new Date().toISOString();
   (user as any).language = user.language || 'en';
   localStorage.setItem("userLanguage", user.language as string);
