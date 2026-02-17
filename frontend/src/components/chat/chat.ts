@@ -26,6 +26,9 @@ import {
 } from './chatService';
 
 import { t } from '../../lib/intlayer';
+import { showSuccessToast, showErrorToast } from '../shared/Toast';
+import { sendGameInvite as sendPongInvite } from '../../lib/pong';
+import { createCustomGame as createTrisCustomGame } from '../../lib/tris';
 
 // Re-export for backward compatibility
 export { sendChatInvite } from './chatService';
@@ -199,6 +202,8 @@ async function selectChat(chatId: string) {
   const chatHeader = document.getElementById('chat-header');
   const leaveGroupBtn = document.getElementById('leave-group-btn');
   let addUserBtn = document.getElementById('add-user-btn');
+  let pongBtn = document.getElementById('chat-pong-btn');
+  let trisBtn = document.getElementById('chat-tris-btn');
 
   if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
@@ -242,9 +247,72 @@ async function selectChat(chatId: string) {
         } else {
           addUserBtn.classList.remove('hidden');
         }
+        // hide game buttons for groups
+        if (pongBtn) pongBtn.classList.add('hidden');
+        if (trisBtn) trisBtn.classList.add('hidden');
       } else {
         leaveGroupBtn.classList.add('hidden');
         if (addUserBtn) addUserBtn.classList.add('hidden');
+        // For direct messages show game invite buttons
+        // Create Pong button if not present
+        if (!pongBtn) {
+          pongBtn = document.createElement('button');
+          pongBtn.id = 'chat-pong-btn';
+          pongBtn.className = 'w-8 h-8 flex items-center justify-center bg-accent-cyan hover:bg-accent-cyan/90 text-black rounded-md';
+          pongBtn.title = 'Invite to Pong';
+          pongBtn.setAttribute('aria-label', 'Pong invite');
+          pongBtn.innerHTML = `
+            <img src="/assets/pong.svg" alt="Pong" class="w-6 h-6 object-contain" />
+            <span class="sr-only">Pong</span>
+          `;
+          pongBtn.addEventListener('click', async () => {
+            if (!chat.otherUserId) return;
+            try {
+              const ok = await sendPongInvite(chat.otherUserId);
+              if (ok) showSuccessToast(`Pong invite sent to ${chat.otherUserId}`);
+              else showErrorToast('Failed to send Pong invite');
+            } catch (err) {
+              console.error('Pong invite error', err);
+              showErrorToast('Failed to send Pong invite');
+            }
+          });
+        } else {
+          pongBtn.classList.remove('hidden');
+        }
+
+        // Create Tris button if not present
+        if (!trisBtn) {
+          trisBtn = document.createElement('button');
+          trisBtn.id = 'chat-tris-btn';
+          trisBtn.className = 'w-8 h-8 flex items-center justify-center bg-accent-orange hover:bg-accent-orange/90 text-black rounded-md';
+          trisBtn.title = 'Invite to Tris';
+          trisBtn.setAttribute('aria-label', 'Tris invite');
+          trisBtn.innerHTML = `
+            <img src="/assets/tris.svg" alt="Tris" class="w-5 h-5 object-contain" />
+            <span class="sr-only">Tris</span>
+          `;
+          trisBtn.addEventListener('click', () => {
+            if (!chat.otherUserId) return;
+            try {
+              createTrisCustomGame(chat.otherUserId);
+              showSuccessToast(`Tris invite sent to ${chat.otherUserId}`);
+            } catch (err) {
+              console.error('Tris invite error', err);
+              showErrorToast('Failed to send Tris invite');
+            }
+          });
+        } else {
+          trisBtn.classList.remove('hidden');
+        }
+
+        // Insert buttons into header actions next to leave/add controls
+        const actions = document.getElementById('chat-header-actions');
+        if (actions) {
+          // Ensure pong first, then tris, before leave button
+          const leaveBtnInDom = document.getElementById('leave-group-btn');
+          if (pongBtn && !actions.contains(pongBtn)) actions.insertBefore(pongBtn, leaveBtnInDom || null);
+          if (trisBtn && !actions.contains(trisBtn)) actions.insertBefore(trisBtn, leaveBtnInDom || null);
+        }
       }
     }
   }
@@ -265,6 +333,14 @@ export function renderMemberList() {
   if (!currentChatId) {
     container.textContent = 'No chat selected';
     return;
+  }
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (currentChat && currentChat.chatType === 'dm') {
+    // Hide participants list for direct messages
+    container.style.display = 'none';
+    return;
+  } else {
+    container.style.display = '';
   }
 
   const members = chatMembers.get(currentChatId) || (chats.find(c => c.id === currentChatId)?.members || []);
@@ -322,6 +398,9 @@ export async function renderMessages() {
 
   const chatMessages = messages.get(currentChatId) || [];
 
+  const currentChat = chats.find(c => c.id === currentChatId);
+  const isDmChat = currentChat && currentChat.chatType === 'dm';
+
   if (chatMessages.length === 0) {
     messagesContainer.innerHTML = '<div class="placeholder">No messages yet</div>';
     return;
@@ -358,7 +437,7 @@ export async function renderMessages() {
     const displayName = msg.from || (matchedMember && matchedMember.username) || (msg.senderName) || senderId;
 
     messageDiv.innerHTML = `
-      ${!isSent ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(displayName)}</div>` : ''}
+      ${!isSent && !isDmChat ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(displayName)}</div>` : ''}
       <div class="message-content">${escapeHtml(msg.content)}</div>
       <div class="message-footer text-xs opacity-75">
         <span>${new Date(createdAt).toLocaleTimeString()}</span>
