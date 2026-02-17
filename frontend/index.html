@@ -123,7 +123,7 @@
 			<div class="flex shadow-xs rounded-base -space-x-1">
 				<input type="search" id="search-user-input"
 					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-accent-green text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
-					placeholder="Search for users..." required>
+					data-i18n-placeholder="search.placeholder" required>
 				<button type="button"
 					class="inline-flex items-center text-black font-bold bg-accent-orange dark:bg-accent-green rounded-r-xl bg-brand hover:bg-brand-strong border-l-0 box-border border border-gray-700 dark:border-accent-green focus:ring-4 focus:ring-brand-medium shadow-xs leading-5 rounded-e-base bx-10 text-sm px-4 py-2.5 focus:outline-none"
 					>
@@ -348,25 +348,18 @@
 							id="email_log"
 							name="email"
 							type="email"
-							placeholder="you@example.com"
-							class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
-					</div>
-
-				<!-- Password -->
-				<div class="flex flex-col gap-1">
-					<label for="password_log" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
-					<input
-					id="password_log"
-					name="password"
-					type="password"
-					placeholder="••••••••"
-					class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300
-							px-4 py-2 text-black dark:text-white focus:outline-none
-							focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+						data-i18n-placeholder="login.emailPlaceholder"
+						class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
 				</div>
 
-				<!-- Error container -->
-				<div id="auth-error" class="hidden text-red-400 text-sm"></div>
+			<!-- Password -->
+			<div class="flex flex-col gap-1">
+				<label for="password_log" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
+				<input
+				id="password_log"
+				name="password"
+				type="password"
+				data-i18n-placeholder="login.passwordPlaceholder">
 
 					<!-- Submit -->
 					<button
@@ -1241,7 +1234,7 @@
 					id="group-name-input"
 					type="text"
 					class="w-full bg-white dark:bg-neutral-700 text-black dark:text-white px-3 py-2 rounded-md border border-gray-300 dark:border-neutral-600 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green"
-					placeholder="Enter group name..."
+					data-i18n-placeholder="chat.groupNamePlaceholder"
 				/>
       </div>
 
