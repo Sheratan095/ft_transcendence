@@ -33,7 +33,7 @@ export { sendChatInvite } from './chatService';
 // ============================================================================
 
 export function initChat(userId: string) {
-  console.log('🔧 Initializing chat for user:', userId);
+  // initialization
   setCurrentUserId(userId);
   connectChatWebSocket().catch(err => console.error('Failed to establish chat connection:', err));
   
@@ -46,7 +46,6 @@ export function initChat(userId: string) {
   (window as any).__resetChatUI = resetChatUI;
   (window as any).__refreshChatsIfOpen = refreshChatsIfOpen;
   (window as any).__closeChatModal = closeChatModal;
-  console.log('✅ Chat UI functions exposed to global scope');
 }
 
 // ============================================================================
@@ -60,16 +59,12 @@ export async function openChatModal() {
     return;
   }
 
-  console.log('📂 Opening chat modal...');
   
   // FIX: Ensure modal is direct child of body (not inside a hidden parent)
   if (modal.parentElement !== document.body) {
-    console.warn('⚠️ Modal parent is not body, moving modal to body');
     document.body.appendChild(modal);
   }
-  
   modal.classList.remove('hidden');
-  console.log('✅ Modal is now visible!');
 
   if (chats.length === 0) {
     try {
@@ -120,11 +115,8 @@ export function renderChatList() {
     return;
   }
 
-  console.log(`Rendering chat list with ${chats.length} chats`);
-
   if (chats.length === 0) {
     chatList.innerHTML = '<div class="placeholder">No chats yet</div>';
-    console.warn('No chats to display');
     return;
   }
 
@@ -181,10 +173,7 @@ export function renderChatList() {
 }
 
 async function selectChat(chatId: string) {
-  if (!chatId) {
-    console.warn('selectChat called with invalid chatId:', chatId);
-    return;
-  }
+  if (!chatId) return;
   setCurrentChatId(chatId);
   setMessageOffset(0);
 
@@ -708,7 +697,7 @@ async function handleGroupChatSubmit() {
     await loadChats();
     selectChat(chatId);
 
-    console.log('Group chat created:', chatId);
+    // group created
   } catch (err) {
     console.error('Error creating group chat:', err);
     alert(`Failed to create group chat: ${(err as Error).message}`);

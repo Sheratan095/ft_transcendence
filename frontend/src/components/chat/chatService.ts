@@ -46,13 +46,11 @@ export function setMessageOffset(offset: number) {
 export function connectChatWebSocket(): Promise<WebSocket> {
   // Return existing connection if already open
   if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-    console.log('Chat WebSocket already connected');
     return Promise.resolve(chatSocket);
   }
 
   // If connecting is in progress, return the existing promise to avoid multiple concurrent attempts
   if (isConnecting && connectionPromise) {
-    console.log('Connection already in progress, returning cached promise');
     return connectionPromise;
   }
 
@@ -60,7 +58,6 @@ export function connectChatWebSocket(): Promise<WebSocket> {
   isConnecting = true;
 
   const wsUrl = `/chat/ws`;
-  console.log('Establishing chat WebSocket connection at', wsUrl);
 
   connectionPromise = new Promise((resolve, reject) => {
     try {
@@ -68,7 +65,6 @@ export function connectChatWebSocket(): Promise<WebSocket> {
       chatSocket = socket;
 
       socket.onopen = () => {
-        console.log('✅ Chat WebSocket successfully connected');
         showInfoToast('Connected to chat', { duration: 3000 });
         isConnecting = false;
         reconnectAttempts = 0; // Reset on successful connection
@@ -85,7 +81,6 @@ export function connectChatWebSocket(): Promise<WebSocket> {
       };
 
       socket.onerror = (event) => {
-        console.error('❌ Chat WebSocket error', event);
         showErrorToast('Chat WebSocket error', { duration: 4000, position: 'top-right' });
         isConnecting = false;
         connectionPromise = null;
@@ -93,7 +88,6 @@ export function connectChatWebSocket(): Promise<WebSocket> {
       };
 
       socket.onclose = () => {
-        console.warn('⚠️ Chat WebSocket closed');
         showErrorToast('⚠️ Chat disconnected', { duration: 4000, position: 'top-right' });
         isConnecting = false;
         connectionPromise = null;
@@ -103,7 +97,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
         if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
           reconnectAttempts++;
           const delayMs = RECONNECT_DELAY * Math.pow(1.5, reconnectAttempts - 1);
-          console.log(`🔄 Reconnecting... Attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS} in ${Math.round(delayMs)}ms`);
+          // reconnecting
           setTimeout(() => {
             connectChatWebSocket().catch(err => console.error('Reconnection failed:', err));
           }, delayMs);
@@ -127,11 +121,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
  * Gracefully disconnect the chat WebSocket connection
  */
 export function disconnectChatWebSocket(): void {
-  if (!chatSocket) {
-    return;
-  }
-  
-  console.log('Disconnecting from chat WebSocket');
+  if (!chatSocket) return;
   // Prevent reconnection attempts when manually disconnecting
   reconnectAttempts = MAX_RECONNECT_ATTEMPTS;
   
@@ -151,13 +141,13 @@ export function disconnectChatWebSocket(): void {
 function handleWebSocketMessage(data: any) {
   const eventName = data?.event || data?.type || data?.typeName || null;
   if (!eventName) {
-    console.warn('Unknown WebSocket message format, ignoring', data);
+    return;
     return;
   }
 
   switch (eventName) {
     case 'chat.message':
-      console.log('Received deprecated chat.message event, handling as chat.chatMessage for compatibility');
+      // legacy event mapping
       handleChatMessage(data);
       break;
     case 'chat.chatMessage':
@@ -190,7 +180,7 @@ function handleWebSocketMessage(data: any) {
       showToast(`⚠️ Chat error: ${errPayload?.message || 'See console'}`, 'error', { duration: 4000, position: 'top-right' });
       break;
     default:
-      console.warn('Unhandled chat websocket event:', eventName);
+      // ignore unknown events
   }
 }
 
@@ -354,7 +344,6 @@ function handleSystemMessage(data: any) {
 
 function handleMessageSent(data: any) {
   const messageData = data.data || data;
-  console.log('Message sent confirmation:', messageData);
   const { messageId, chatId, content, status } = messageData;
 
   if (!messages.has(chatId)) {
@@ -386,7 +375,6 @@ function handleMessageSent(data: any) {
 
 function handleMessageStatusUpdate(data: any) {
   const messageData = data.data || data;
-  console.log('Message status updated:', messageData);
   const { messageId, chatId, status } = messageData;
 
   if (messages.has(chatId)) {
@@ -403,7 +391,6 @@ function handlePrivateMessage(data: any) {
   const { chatId, senderId, from, content, timestamp } = messageData;
 
   if (!senderId) {
-    console.warn('Received private message without senderId', messageData);
     showToast('Received private message with missing sender', 'error', { duration: 4000, position: 'top-right' });
     return;
   }
@@ -413,7 +400,7 @@ function handlePrivateMessage(data: any) {
   }
 
   let dmChat = chats.find(c => c.id === String(chatId));
-  console.log('DM chat found:', dmChat);
+  // dm handling
 
   if (!dmChat) {
     dmChat = {
@@ -538,20 +525,16 @@ export async function loadChats() {
       method: 'GET',
       credentials: 'include'
     });
-    console.log('Load chats response:', response);
     
     if (!response.ok) {
       throw new Error(`Failed to load chats: ${response.statusText}`);
     }
 
     const responseText = await response.text();
-    console.log('Raw response text:', responseText);
-
     try {
       chats = JSON.parse(responseText);
-      console.log('✅ Chats loaded successfully:', chats);
     } catch (parseErr) {
-      console.error('❌ Failed to parse chats JSON:', parseErr, 'Raw:', responseText);
+      console.error('Failed to parse chats JSON:', parseErr);
       chats = [];
     }
 
@@ -575,7 +558,7 @@ export async function loadChats() {
 
 export async function loadMessages(chatId: string, offset = 0) {
   if (!chatId) {
-    console.warn('loadMessages called with invalid chatId:', chatId);
+    return;
     return;
   }
   try {
@@ -688,7 +671,6 @@ export async function sendChatMessage(message: string) {
 
   try {
     chatSocket.send(JSON.stringify(wsMessage));
-    console.log('Message sent:', wsMessage);
   } catch (err) {
     console.error('Failed to send message:', err);
     const msg = chatMessages.find(m => m.id === tempMessageId);
