@@ -26,6 +26,9 @@ import {
 } from './chatService';
 
 import { t } from '../../lib/intlayer';
+import { showSuccessToast, showErrorToast } from '../shared/Toast';
+import { sendGameInvite as sendPongInvite } from '../../lib/pong';
+import { createCustomGame as createTrisCustomGame } from '../../lib/tris';
 
 // Re-export for backward compatibility
 export { sendChatInvite } from './chatService';
@@ -88,7 +91,10 @@ export function closeChatModal() {
   setCurrentChatId(null);
 
   const chatHeader = document.getElementById('chat-header');
-  if (chatHeader) chatHeader.textContent = 'Select a chat';
+  if (chatHeader) {
+    chatHeader.textContent = t('chat.select');
+    chatHeader.title = '';
+  }
 
   const chatMessages = document.getElementById('chat-messages');
   if (chatMessages) chatMessages.innerHTML = '';
@@ -101,6 +107,9 @@ export function closeChatModal() {
 
   const loadMoreBtn = document.getElementById('load-more-btn');
   if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+
+  const membersEl = document.getElementById('chat-members');
+  if (membersEl) membersEl.innerHTML = '';
 
   renderChatList();
   updateChatControls();
@@ -193,11 +202,15 @@ async function selectChat(chatId: string) {
   const chatHeader = document.getElementById('chat-header');
   const leaveGroupBtn = document.getElementById('leave-group-btn');
   let addUserBtn = document.getElementById('add-user-btn');
+  let pongBtn = document.getElementById('chat-pong-btn');
+  let trisBtn = document.getElementById('chat-tris-btn');
 
   if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
-      chatHeader.textContent = truncateText(getChatDisplayName(chat), 28);
+      const fullName = getChatDisplayName(chat);
+      chatHeader.textContent = truncateText(fullName, 29);
+      chatHeader.title = fullName;
       if (chat.chatType === 'group') {
         leaveGroupBtn.classList.remove('hidden');
         if (!addUserBtn) {
@@ -234,9 +247,72 @@ async function selectChat(chatId: string) {
         } else {
           addUserBtn.classList.remove('hidden');
         }
+        // hide game buttons for groups
+        if (pongBtn) pongBtn.classList.add('hidden');
+        if (trisBtn) trisBtn.classList.add('hidden');
       } else {
         leaveGroupBtn.classList.add('hidden');
         if (addUserBtn) addUserBtn.classList.add('hidden');
+        // For direct messages show game invite buttons
+        // Create Pong button if not present
+        if (!pongBtn) {
+          pongBtn = document.createElement('button');
+          pongBtn.id = 'chat-pong-btn';
+          pongBtn.className = 'w-8 h-8 flex items-center justify-center bg-accent-cyan hover:bg-accent-cyan/90 text-black rounded-md';
+          pongBtn.title = 'Invite to Pong';
+          pongBtn.setAttribute('aria-label', 'Pong invite');
+          pongBtn.innerHTML = `
+            <img src="/assets/pong.svg" alt="Pong" class="w-6 h-6 object-contain" />
+            <span class="sr-only">Pong</span>
+          `;
+          pongBtn.addEventListener('click', async () => {
+            if (!chat.otherUserId) return;
+            try {
+              const ok = await sendPongInvite(chat.otherUserId);
+              if (ok) showSuccessToast(`Pong invite sent to ${chat.otherUserId}`);
+              else showErrorToast('Failed to send Pong invite');
+            } catch (err) {
+              console.error('Pong invite error', err);
+              showErrorToast('Failed to send Pong invite');
+            }
+          });
+        } else {
+          pongBtn.classList.remove('hidden');
+        }
+
+        // Create Tris button if not present
+        if (!trisBtn) {
+          trisBtn = document.createElement('button');
+          trisBtn.id = 'chat-tris-btn';
+          trisBtn.className = 'w-8 h-8 flex items-center justify-center bg-accent-orange hover:bg-accent-orange/90 text-black rounded-md';
+          trisBtn.title = 'Invite to Tris';
+          trisBtn.setAttribute('aria-label', 'Tris invite');
+          trisBtn.innerHTML = `
+            <img src="/assets/tris.svg" alt="Tris" class="w-5 h-5 object-contain" />
+            <span class="sr-only">Tris</span>
+          `;
+          trisBtn.addEventListener('click', () => {
+            if (!chat.otherUserId) return;
+            try {
+              createTrisCustomGame(chat.otherUserId);
+              showSuccessToast(`Tris invite sent to ${chat.otherUserId}`);
+            } catch (err) {
+              console.error('Tris invite error', err);
+              showErrorToast('Failed to send Tris invite');
+            }
+          });
+        } else {
+          trisBtn.classList.remove('hidden');
+        }
+
+        // Insert buttons into header actions next to leave/add controls
+        const actions = document.getElementById('chat-header-actions');
+        if (actions) {
+          // Ensure pong first, then tris, before leave button
+          const leaveBtnInDom = document.getElementById('leave-group-btn');
+          if (pongBtn && !actions.contains(pongBtn)) actions.insertBefore(pongBtn, leaveBtnInDom || null);
+          if (trisBtn && !actions.contains(trisBtn)) actions.insertBefore(trisBtn, leaveBtnInDom || null);
+        }
       }
     }
   }
@@ -258,8 +334,45 @@ export function renderMemberList() {
     container.textContent = 'No chat selected';
     return;
   }
+  const currentChat = chats.find(c => c.id === currentChatId);
+  // If DM, show when you became friends with the other user (friendsSince)
+  if (currentChat && currentChat.chatType === 'dm') {
+    container.style.display = '';
+    container.textContent = 'Loading...';
+    const otherUserId = currentChat.otherUserId || (currentChat.members && currentChat.members.find((m: any) => String(m.userId) !== String(currentUserId))?.userId);
+    if (!otherUserId) {
+      container.textContent = '';
+      return;
+    }
 
-  const members = chatMembers.get(currentChatId) || (chats.find(c => c.id === currentChatId)?.members || []);
+    (async () => {
+      try {
+        const res = await fetch('/api/users/relationships/friends', { method: 'GET', credentials: 'include' });
+        if (!res.ok) {
+          container.textContent = '';
+          return;
+        }
+        const friends = await res.json();
+        const friend = friends.find((f: any) => String(f.userId || f.id) === String(otherUserId));
+        if (friend && friend.friendsSince) {
+          const since = new Date(friend.friendsSince);
+          const day = String(since.getDate()).padStart(2, '0');
+          const month = String(since.getMonth() + 1).padStart(2, '0');
+          const year = since.getFullYear();
+          container.textContent = `Friends since: ${day}/${month}/${year}`;
+        } else {
+          container.textContent = '';
+        }
+      } catch (err) {
+        console.error('Failed to load friends for friendsSince:', err);
+        container.textContent = '';
+      }
+    })();
+
+    return;
+  }
+
+  const members = chatMembers.get(currentChatId) || (currentChat?.members || []);
   if (!members || members.length === 0) {
     container.textContent = 'No members';
     return;
@@ -291,7 +404,7 @@ function updateChatControls() {
 
   if (input) {
     input.disabled = !enabled;
-    input.placeholder = enabled ? 'Type a message...' : 'Select a chat to start messaging';
+    input.placeholder = enabled ? t('chat.typing-placeholder') : t('chat.selector-placeholder');
   }
 
   if (sendBtn) {
@@ -313,6 +426,9 @@ export async function renderMessages() {
   }
 
   const chatMessages = messages.get(currentChatId) || [];
+
+  const currentChat = chats.find(c => c.id === currentChatId);
+  const isDmChat = currentChat && currentChat.chatType === 'dm';
 
   if (chatMessages.length === 0) {
     messagesContainer.innerHTML = '<div class="placeholder">No messages yet</div>';
@@ -350,7 +466,7 @@ export async function renderMessages() {
     const displayName = msg.from || (matchedMember && matchedMember.username) || (msg.senderName) || senderId;
 
     messageDiv.innerHTML = `
-      ${!isSent ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(displayName)}</div>` : ''}
+      ${!isSent && !isDmChat ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(displayName)}</div>` : ''}
       <div class="message-content">${escapeHtml(msg.content)}</div>
       <div class="message-footer text-xs opacity-75">
         <span>${new Date(createdAt).toLocaleTimeString()}</span>
@@ -474,7 +590,7 @@ async function openFriendSelectionModal() {
 
   const createGroupSubmitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement | null;
   if (createGroupSubmitBtn) {
-    createGroupSubmitBtn.textContent = addToChatId ? 'Add Selected' : 'Create Group';
+    createGroupSubmitBtn.textContent = addToChatId ? t('chat.add-selected') : t('chat.create-group');
   }
 
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
@@ -513,11 +629,11 @@ async function openFriendSelectionModal() {
   const header = modal.querySelector('h2') as HTMLElement | null;
   const desc = modal.querySelector('p') as HTMLElement | null;
   if (addToChatId) {
-    if (header) header.textContent = 'Add Users to Chat';
-    if (desc) desc.textContent = 'Select friends to add to this chat:';
+    if (header) header.textContent = t('chat.add');
+    if (desc) desc.textContent = t('chat.select-group');
   } else {
-    if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group:';
+    if (header) header.textContent = t('chat.create-group');
+    if (desc) desc.textContent = t('chat.select-group');
   }
 }
 
@@ -529,7 +645,7 @@ function closeFriendSelectionModal() {
   selectedFriendsForGroup.clear();
   addToChatId = null;
   const createGroupSubmitBtn = document.getElementById('create-group-submit-btn') as HTMLButtonElement | null;
-  if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = 'Create Group';
+  if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = t('chat.create-group');
 
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
   if (groupNameInput) {
@@ -545,8 +661,8 @@ function closeFriendSelectionModal() {
   if (modal) {
     const header = modal.querySelector('h2') as HTMLElement | null;
     const desc = modal.querySelector('p') as HTMLElement | null;
-    if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group:';
+    if (header) header.textContent = t('chat.create-group');
+    if (desc) desc.textContent = t('chat.select-group');
   }
 }
 
@@ -575,7 +691,7 @@ async function renderFriendsList() {
   }
 
   if (friendsToShow.length === 0) {
-    friendsList.innerHTML = '<div class="text-neutral-400 text-center">No friends available to add</div>';
+    friendsList.innerHTML = `<div class="text-neutral-400 text-center">${t('chat.no-friends')}</div>`;
     return;
   }
 

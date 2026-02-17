@@ -36,6 +36,11 @@ setLocale(_savedLanguage);
 document.addEventListener('DOMContentLoaded', () => {
   // hydrate existing DOM and template contents once on load
   hydrateOnce();
+
+  // Expose hydration functions globally for debugging
+  (window as any).__hydrateRoot = hydrateRoot;
+  (window as any).__hydrateAll = hydrateOnce;
+  
   const locales = [
     { code: 'en', label: 'EN' },
     { code: 'fr', label: 'FR' },
@@ -91,7 +96,10 @@ document.addEventListener('change', (e) => {
   const v = target.value;
   setLocale(v);
   try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
-  try { localStorage.setItem('locale', v); } catch {}
+  // Expose hydrate function before reload
+  const hydrateRoot = (window as any).__hydrateRoot;
+  const hydrateAll = (window as any).__hydrateAll;
+  if (hydrateAll) hydrateAll();
   // reload to ensure all templates/renderers pick up the new locale
   window.location.reload();
 });
