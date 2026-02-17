@@ -104,7 +104,7 @@ export function renderChatList() {
   if (!chatList) return;
 
   if (chats.length === 0) {
-    chatList.innerHTML = '<div class="placeholder">No chats yet</div>';
+    chatList.innerHTML = '<div class="placeholder">${no chats.}</div>';
     return;
   }
 

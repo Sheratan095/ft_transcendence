@@ -4,6 +4,9 @@ import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
+import { openTrisModeModal } from './lib/tris-mode';
+import { setupTrisCardListener } from './lib/tris-ui';
+import { setupPongCardListener } from './lib/pong-ui';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -19,6 +22,8 @@ const routes: Record<string, RouteConfig> = {
       const clone = template.content.cloneNode(true);
       el.appendChild(clone);
       initCardHoverEffect();
+	  setupTrisCardListener();
+	  setupPongCardListener();
     }
   },
   '/login': {
@@ -91,13 +96,12 @@ const routes: Record<string, RouteConfig> = {
     render: async () => {
       const el = document.getElementById('main-content');
       if (!el) return;
-      el.innerHTML = '<div class="py-8">Pong game loading...</div>';
-      // Import and render pong component
       try {
-        const pongModule = await import('./lib/pong-ui');
-        await pongModule.openPongModal();
+        const mod = await import('./components/pong/PongPage');
+        await mod.renderPongPage(el);
       } catch (err) {
-        el.innerHTML = '<div class="text-red-600">Failed to load Pong game</div>';
+        console.error('Failed to render Pong page:', err);
+        if (el) el.innerHTML = '<div class="text-red-600">Failed to load Pong page</div>';
       }
     }
   },
@@ -105,13 +109,13 @@ const routes: Record<string, RouteConfig> = {
     render: async () => {
       const el = document.getElementById('main-content');
       if (!el) return;
-      el.innerHTML = '<div class="py-8">Tris game loading...</div>';
-      // Import and render tris component
+      // Dynamically import the tris page renderer
       try {
-        const trisModule = await import('./lib/tris-ui');
-        await trisModule.openTrisModal();
+        const mod = await import('./components/tris/TrisPage');
+        await mod.renderTrisPage(el);
       } catch (err) {
-        el.innerHTML = '<div class="text-red-600">Failed to load Tris game</div>';
+        console.error('Failed to render Tris page:', err);
+        if (el) el.innerHTML = '<div class="text-red-600">Failed to load Tris page</div>';
       }
     }
   }

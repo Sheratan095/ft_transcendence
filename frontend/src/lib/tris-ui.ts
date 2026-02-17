@@ -19,6 +19,8 @@ import { showSuccessToast, showErrorToast} from '../components/shared/Toast';
 import type { User } from './auth';
 import type { FriendsManager } from '../components/profile/FriendsManager';
 import { openTrisModeModal, getSelectedTrisMode, initializeModeSpecificBehaviors, resetLocalGame } from './tris-mode';
+import { isLoggedInClient } from './token';
+import { openGameInviteModal, closeGameInviteModal } from './game-invite';
 
 let trisInitialized = false;
 let user: User | null = null;
@@ -36,9 +38,9 @@ export function setTrisFriendsManager(manager: FriendsManager) {
 
 export async function openTrisModal() {
   const userId = getUserId();
-  console.log("tris modal");	
+  console.log("tris modal", { userId, trisInitialized });	
   const modal = document.getElementById('tris-modal');
-  if (!modal)
+  if (!modal || !userId)
   {
 	showErrorToast('User not logged in');
 	console.error('Tris modal or user ID not found');
@@ -59,8 +61,6 @@ export async function openTrisModal() {
       trisInitialized = true;
       renderTrisBoard();
       updateTrisStatus('Ready to play');
-      
-      setupInviteModalListeners();
 
       // If there's a pending game join, join it now that tris is initialized
       if (pendingGameJoin) {
@@ -109,7 +109,7 @@ function renderTrisBoard() {
   // Create 3x3 grid of cells
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement('button');
-    cell.className = 'w-full aspect-square bg-neutral-800 border-2 border-neutral-700 hover:border-[#0dff66] transition text-2xl font-extrabold text-white hover:bg-neutral-700 cursor-pointer';
+    cell.className = 'w-full aspect-square bg-neutral-800 dark:bg-neutral-700/50 border-2 border-neutral-700 dark:border-neutral-600 hover:border-accent-green hover:bg-neutral-700 dark:hover:bg-neutral-600 transition text-2xl font-extrabold text-white rounded-lg cursor-pointer shadow-md hover:shadow-lg hover:shadow-accent-green/20';
     cell.dataset.index = i.toString();
     cell.id = `tris-cell-${i}`;
     cell.addEventListener('click', () => handleCellClick(i));
@@ -180,8 +180,31 @@ function renderAndAttachButtons() {
     }
   }
   if (inviteBtn) {
-    inviteBtn.removeEventListener('click', () => openInviteModal());
-    inviteBtn.addEventListener('click', () => openInviteModal());
+    const newInviteBtn = inviteBtn.cloneNode(true) as HTMLButtonElement;
+    inviteBtn.replaceWith(newInviteBtn);
+    const freshInviteBtn = document.getElementById('tris-invite-btn') as HTMLButtonElement | null;
+    if (freshInviteBtn) {
+      freshInviteBtn.addEventListener('click', () => {
+        openGameInviteModal('tris', async (friendId: string) => {
+          try {
+            if (gameStatus === 'playing') {
+              showErrorToast('Cannot invite while in a game');
+              return;
+            }
+            if (gameStatus === 'lobby') {
+              const currentGameId = getCurrentGameId();
+              if (currentGameId) {
+                cancelCustomGame(currentGameId);
+              }
+            }
+            createCustomGame(friendId);
+            showSuccessToast('Inviting friend...');
+          } catch (err) {
+            showErrorToast((err as Error).message || 'Failed to send invitation');
+          }
+        });
+      });
+    }
   }
   if (closeBtn) {
     closeBtn.removeEventListener('click', () => closeTrisModal());
@@ -327,7 +350,7 @@ function handleCustomGameJoinSuccess(data: any) {
   updateGameIdDisplay(gameId);
   updateTrisStatus(`Joined game! Playing against ${otherUsername}`);
   showSuccessToast(`Joined game with ${otherUsername}!`);
-  closeInviteModal();
+  closeGameInviteModal();
   renderAndAttachButtons();
 }
 
@@ -515,90 +538,4 @@ async function handleModeSelection(mode: string) {
   
   // Initialize mode-specific behaviors
   initializeModeSpecificBehaviors(mode as any);
-}
-
-/**
- * Open invite modal to select a friend to invite
- */
-async function openInviteModal() {
-  const inviteModal = document.getElementById('tris-invite-modal');
-  if (!inviteModal) return;
-
-  inviteModal.classList.remove('hidden');
-
-  try {
-    if (!friendsManager) {
-      showErrorToast('Friends manager not initialized');
-      return;
-    }
-
-    // Load friends from manager
-    const friends = friendsManager.getFriends();
-    renderFriendsList(friends);
-  } catch (err) {
-    showErrorToast((err as Error).message || 'Failed to load friends');
-  }
-}
-
-function closeInviteModal() {
-  const inviteModal = document.getElementById('tris-invite-modal');
-  if (inviteModal) {
-    inviteModal.classList.add('hidden');
-  }
-}
-
-/**
- * Setup invite modal button listeners
- */
-function setupInviteModalListeners() {
-  const inviteCloseBtn = document.getElementById('tris-invite-close-btn');
-  if (inviteCloseBtn) {
-    inviteCloseBtn.addEventListener('click', () => closeInviteModal());
-  }
-}
-
-function renderFriendsList(friends: User[]) {
-  const friendsList = document.getElementById('tris-friends-list');
-  if (!friendsList) return;
-
-  friendsList.innerHTML = '';
-
-  if (friends.length === 0) {
-    friendsList.innerHTML = '<div class="text-neutral-400 text-center py-4">No friends to invite</div>';
-    return;
-  }
-
-  friends.forEach((friend) => {
-    const button = document.createElement('button');
-    button.className = 'w-full p-3 text-left bg-neutral-800 hover:bg-neutral-700 border-2 border-neutral-700 hover:border-[#0dff66] transition text-white font-semibold rounded';
-    button.textContent = friend.username || `User #${friend.id}`;
-    button.addEventListener('click', () => inviteFriend(friend));
-    friendsList.appendChild(button);
-  });
-}
-
-async function inviteFriend(friend: User) {
-  try {
-	if (gameStatus === 'playing') {
-		showErrorToast('Cannot invite while in a game');
-		return;
-	}
-	if (!friend.id) {
-	  showErrorToast('Invalid friend selected');
-	  return;
-	}
-	if (gameStatus === 'lobby') {
-		const currentGameId = getCurrentGameId();
-		if (currentGameId) {
-			cancelCustomGame(currentGameId);
-		}
-	}
-    // Create a custom game with this friend
-    createCustomGame(friend.id);
-	console.log('Inviting friend:', friend);
-    showSuccessToast(`Inviting ${friend.username}...`);
-    closeInviteModal();
-  } catch (err) {
-    showErrorToast((err as Error).message || 'Failed to send invitation');
-  }
 }

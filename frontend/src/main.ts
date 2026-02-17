@@ -31,11 +31,9 @@ main(window.location.pathname);
 export async function main(path: string) {
 await start();
 
-// Load user's saved language preference
-const savedLanguage = localStorage.getItem('userLanguage') || 'en';
-setLocaleInStorage(savedLanguage);
+const language = fetchLanguage();
+setLocaleInStorage(language);
 
-console.log(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 
@@ -44,11 +42,8 @@ initCardHoverEffect(); // Initialize card hover effect
   // Attach global click handlers for shared/dynamic elements
   setupGlobalClickHandlers();
   // Setup game card listeners
-  setupTrisCardListener();
-  setupPongCardListener();
   initSlideshow();
 if (isLoggedInClient()) initUserServices(path);
-
 }
 
 /**
@@ -220,5 +215,25 @@ function setupGlobalClickHandlers() {
 document.addEventListener('DOMContentLoaded', () => {
   initTheme(); // Initialize theme on DOMContentLoaded
 });
+
+function fetchLanguage(): string {
+let language = localStorage.getItem('userLanguage');
+if (!language) {
+	  language = navigator.language || 'en';
+
+	switch (language) {
+	case 'fr':
+		setLocaleInStorage('fr');
+		break;
+	case 'it':
+		setLocaleInStorage('it');
+		break;
+	default:
+		setLocaleInStorage('en');
+		break;
+	}
+}
+return language;
+}
 
 export default {};
