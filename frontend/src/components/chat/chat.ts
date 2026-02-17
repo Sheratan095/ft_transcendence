@@ -197,7 +197,9 @@ async function selectChat(chatId: string) {
   if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
-      chatHeader.textContent = truncateText(getChatDisplayName(chat), 28);
+      const fullName = getChatDisplayName(chat);
+      chatHeader.textContent = truncateText(fullName, 26);
+      chatHeader.title = fullName;
       if (chat.chatType === 'group') {
         leaveGroupBtn.classList.remove('hidden');
         if (!addUserBtn) {
