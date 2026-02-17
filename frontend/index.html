@@ -145,6 +145,14 @@
 					d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m-1.636-6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1m1.636 6.364l.707.707M12 12a3 3 0 110-6 3 3 0 010 6z" />
 			</svg>
 		</button>
+
+		<!-- Language selector (moved to header) -->
+		<select id="profile-language" class="h-10 flex items-center px-2 sm:px-4 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight appearance-none transition rounded ml-2"
+			title="Select language">
+			<option value="en">English</option>
+			<option value="fr">Français</option>
+			<option value="it">Italiano</option>
+		</select>
 	</div>
 
 	<!-- Search Results Dropdown -->
@@ -500,11 +508,7 @@
 								</button>
 
 								<!-- Language selector -->
-								<select id="profile-language" class="h-10 flex items-center px-2 sm:px-4 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight appearance-none transition rounded">
-									<option value="en">English</option>
-									<option value="fr">Français</option>
-									<option value="it">Italiano</option>
-								</select>
+								<!-- language selector removed from profile-template (moved to header) -->
 
 								<!-- 2FA toggle -->
 								<div class="flex items-center gap-2 ml-auto">
