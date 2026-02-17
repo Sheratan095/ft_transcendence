@@ -960,6 +960,18 @@
 
 				<!-- Controls Card -->
 				<div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
+					<!-- Player names and score inputs -->
+					<div class="flex gap-3 items-center flex-wrap">
+						<label for="pong-player-names" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Players</label>
+						<input id="pong-player-names" type="text" placeholder="Player1, Player2"
+						class="px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
+					</div>
+					<div class="flex gap-3 items-center flex-wrap">
+						<label for="pong-target-score" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Score</label>
+						<input id="pong-target-score" type="number" min="1" placeholder="5"
+						class="w-20 px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
+					</div>
+
 					<button id="pong-start-btn" class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan">Start</button>
 					<button id="pong-reset-btn" class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300">Reset</button>
 				</div>
