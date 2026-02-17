@@ -559,7 +559,6 @@ export async function loadChats() {
 export async function loadMessages(chatId: string, offset = 0) {
   if (!chatId) {
     return;
-    return;
   }
   try {
     const response = await fetch(`/api/chat/messages?chatId=${chatId}&limit=${MESSAGE_LIMIT}&offset=${offset}`, {
@@ -572,6 +571,17 @@ export async function loadMessages(chatId: string, offset = 0) {
     }
 
     const newMessages = await response.json();
+    // Filter the messages to remove the cration system message of private chats
+    newMessages.forEach((msg: any) =>
+    {
+      if (msg.type === 'chat_created')
+      {
+          // This is the system message for DM creation, skip it
+          const index = newMessages.indexOf(msg);
+          if (index !== -1)
+            newMessages.splice(index, 1);
+      }
+    }); 
 
     if (offset === 0) {
       messages.set(chatId, newMessages.reverse());
@@ -582,7 +592,8 @@ export async function loadMessages(chatId: string, offset = 0) {
 
     // Signal UI to render
     const renderUI = (window as any).__renderMessages;
-    if (renderUI) renderUI();
+    if (renderUI)
+      renderUI();
 
     // Show/hide load more button
     const showLoadMore = newMessages.length === MESSAGE_LIMIT;
