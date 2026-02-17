@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   hydrateOnce();
   const locales = [
-    { code: 'en', label: 'English' },
-    { code: 'fr', label: 'Français' },
-    { code: 'it', label: 'Italiano' }
+    { code: 'en', label: 'EN' },
+    { code: 'fr', label: 'FR' },
+    { code: 'it', label: 'IT' }
   ];
   const langSelect = document.getElementById('profile-language') as HTMLSelectElement | null;
   if (!langSelect) return;

@@ -137,6 +137,15 @@
 				</button>
 			</div> 
 		</form>
+
+		<!-- Language selector styled like theme button -->
+		<select id="profile-language" aria-label="Select language" title="Select language"
+			class="relative z-30 pointer-events-auto cursor-pointer py-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2 text-white text-sm appearance-auto dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100 dark:text-black">
+			<option value="en">EN</option>
+			<option value="fr">FR</option>
+			<option value="it">IT</option>
+		</select>
+		
 		<!-- Theme Toggle Button -->
 		<button id="theme-toggle-btn" class="p-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2
 					dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100"
@@ -147,14 +156,6 @@
 					d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m-1.636-6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1m1.636 6.364l.707.707M12 12a3 3 0 110-6 3 3 0 010 6z" />
 			</svg>
 		</button>
-
-		<!-- Language selector (moved to header) -->
-		<select id="profile-language" class="h-10 flex items-center px-2 sm:px-4 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight appearance-none transition rounded ml-2"
-			title="Select language">
-			<option value="en">English</option>
-			<option value="fr">Français</option>
-			<option value="it">Italiano</option>
-		</select>
 	</div>
 
 	<!-- Search Results Dropdown -->
