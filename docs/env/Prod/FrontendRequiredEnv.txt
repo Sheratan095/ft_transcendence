@@ -3,3 +3,4 @@ frontend:
     VITE_API_TARGET=https://gateway:3000
     VITE_WS_TARGET=wss://gateway:3000
     HOST=0.0.0.0
+    VITE_ACCESS_TOKEN_EXPIRATION_MINUTES=15
