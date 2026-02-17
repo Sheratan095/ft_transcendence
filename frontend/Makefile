@@ -30,17 +30,14 @@ help:
 	@printf "  make format         Run format script (if configured)\n"
 	@printf "  make clean          Remove node_modules, dist and generated css\n"
 
-install: gen-certs
+install:
 	@echo "=> Installing dependencies using $(PM)"
 	@$(INSTALL)
 
-dev:
+dev: tailwind-build gen-certs
 	@echo "=> Starting Tailwind in watch mode and Vite dev server"
 	@echo "   tailwind: input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
 	@mkdir -p $(dir $(TAILWIND_OUT))
-	@echo "=> Starting Tailwind watcher in background"
-	@$(MAKE) tailwind-watch &
-	@sleep 0.1
 	@echo "=> Starting Vite dev server"
 	@bash -c 'source ~/.nvm/nvm.sh && nvm use 20 && $(DEV)'
 
@@ -59,8 +56,7 @@ typecheck:
 tailwind-watch:
 	@echo "=> Running Tailwind in watch mode:"
 	@echo "   input: $(TAILWIND_IN) -> output: $(TAILWIND_OUT)"
-	@mkdir -p $(dir $(TAILWIND_OUT))
-	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT) --watch
+	@$(TAILWIND) -i $(TAILWIND_IN) -o $(TAILWIND_OUT)
 
 tailwind-build:
 	@echo "=> Building Tailwind CSS for production:"

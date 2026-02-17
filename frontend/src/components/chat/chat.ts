@@ -126,11 +126,8 @@ export function renderChatList() {
     const chatItem = document.createElement('div');
     chatItem.id = `chat-item-${chat.id}`;
     chatItem.className = 'chat-item cursor-pointer';
-    if (getCurrentTheme() === 'dark') {
-      chatItem.classList.add('dark');
-    }
     if (String(currentChatId) === String(chat.id)) {
-      chatItem.classList.add('active', 'border-accent-green', 'border-2', 'rounded', 'p-2');
+      chatItem.classList.add('active', 'border-accent-blue', 'dark:border-accent-green', 'border-2', 'rounded', 'p-2');
       chatItem.setAttribute('aria-selected', 'true');
     } else {
       chatItem.setAttribute('aria-selected', 'false');
@@ -144,7 +141,7 @@ export function renderChatList() {
     chatName.textContent = getChatDisplayName(chat);
 
     const chatType = document.createElement('div');
-    chatType.className = 'chat-item-type text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
+    chatType.className = 'chat-item-type text-accent-blue dark:text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
     if (chat.chatType === 'dm')
       chatType.textContent = 'Direct Message';
     else
@@ -473,6 +470,14 @@ async function openFriendSelectionModal() {
 
   renderFriendsList();
 
+  // Re-evaluate submit button state when group name changes
+  if (groupNameInput) {
+    // Use oninput to avoid adding multiple listeners
+    groupNameInput.oninput = () => {
+      updateSelectedFriendsTags();
+    };
+  }
+
   if (groupNameInput) {
     if (addToChatId) {
       if (groupNameInput.parentElement) groupNameInput.parentElement.style.display = 'none';
@@ -498,7 +503,7 @@ async function openFriendSelectionModal() {
     if (desc) desc.textContent = 'Select friends to add to this chat:';
   } else {
     if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+    if (desc) desc.textContent = 'Select friends to add to the group:';
   }
 }
 
@@ -513,6 +518,9 @@ function closeFriendSelectionModal() {
   if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = 'Create Group';
 
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
+  if (groupNameInput) {
+    groupNameInput.oninput = null;
+  }
   if (groupNameInput && groupNameInput.parentElement) groupNameInput.parentElement.style.display = '';
 
   const selectedTags = document.getElementById('selected-friends-tags');
@@ -524,7 +532,7 @@ function closeFriendSelectionModal() {
     const header = modal.querySelector('h2') as HTMLElement | null;
     const desc = modal.querySelector('p') as HTMLElement | null;
     if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+    if (desc) desc.textContent = 'Select friends to add to the group:';
   }
 }
 
@@ -562,7 +570,7 @@ async function renderFriendsList() {
     const friendName = friend.username || friend.name || 'Unknown';
 
     const friendItem = document.createElement('div');
-    friendItem.className = 'flex items-center gap-3 p-3 hover:bg-neutral-700 rounded-md cursor-pointer transition';
+    friendItem.className = 'flex items-center gap-3 p-3 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-md cursor-pointer transition';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -571,7 +579,7 @@ async function renderFriendsList() {
     checkbox.setAttribute('data-friend-id', friendId);
 
     const label = document.createElement('label');
-    label.className = 'flex-1 cursor-pointer text-white';
+    label.className = 'flex-1 cursor-pointer text-black dark:text-white';
     label.textContent = friendName;
 
     checkbox.addEventListener('change', () => {
@@ -641,7 +649,17 @@ function updateSelectedFriendsTags() {
   }
 
   if (submitBtn instanceof HTMLButtonElement) {
-    submitBtn.disabled = selectedFriendsForGroup.size < 1;
+    // Disable when no friends selected
+    let disable = selectedFriendsForGroup.size < 1;
+
+    // If creating a new group (not adding to existing chat), also require a non-empty group name
+    if (!addToChatId) {
+      const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement | null;
+      const groupName = groupNameInput?.value?.trim() || '';
+      if (groupName.length === 0) disable = true;
+    }
+
+    submitBtn.disabled = disable;
   }
 }
 

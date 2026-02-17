@@ -16,7 +16,7 @@ module.exports = {
         'accent-orange': '#ff6b35',
         'accent-blue': '#00a8e8',
         'accent-cyan-light': '#00d9ff',
-		'accent-red': '#f73c3c',
+	    	'accent-red': '#f73c3c',
       },
       animation: {
         'grid-v': 'gridV 2s ease-in-out infinite',
