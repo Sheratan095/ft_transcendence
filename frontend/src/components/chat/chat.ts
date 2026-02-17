@@ -208,13 +208,34 @@ async function selectChat(chatId: string) {
         if (!addUserBtn) {
           addUserBtn = document.createElement('button');
           addUserBtn.id = 'add-user-btn';
-          addUserBtn.className = 'ml-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm';
-          addUserBtn.textContent = 'Add User';
+          addUserBtn.className = 'w-8 h-8 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-md';
+          addUserBtn.title = 'Add user to group';
+          addUserBtn.setAttribute('aria-label', 'Add user');
+          addUserBtn.innerHTML = `
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <path d="M20 8v6" />
+              <path d="M23 11h-6" />
+            </svg>
+            <span class="sr-only">Add User</span>
+          `;
           addUserBtn.addEventListener('click', () => {
             setAddToChatId(chatId);
             openFriendSelectionModal();
           });
-          leaveGroupBtn.parentElement?.insertBefore(addUserBtn, leaveGroupBtn.nextSibling);
+          const actions = document.getElementById('chat-header-actions');
+            if (actions) {
+              const leaveBtnInDom = document.getElementById('leave-group-btn');
+              if (leaveBtnInDom) {
+                actions.insertBefore(addUserBtn, leaveBtnInDom);
+              } else {
+                actions.appendChild(addUserBtn);
+              }
+            } else {
+              // fallback: insert before leave button if we can't find the actions container
+              leaveGroupBtn.parentElement?.insertBefore(addUserBtn, leaveGroupBtn);
+            }
         } else {
           addUserBtn.classList.remove('hidden');
         }

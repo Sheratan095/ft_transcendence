@@ -481,7 +481,12 @@ function handleChatAdded(data: any) {
   showToast(`➕ You've been added to "${chatName}" by ${addedBy}`, 'info', {
     duration: 4000,
     position: 'top-right',
-    onClick: () => {
+    onClick: async () => {
+      try {
+        await loadChats();
+      } catch (err) {
+        console.error('Failed to reload chats on toast click', err);
+      }
       const openChat = (window as any).__openChat;
       if (openChat) openChat(chatId);
     }
@@ -505,7 +510,12 @@ function handleChatJoined(data: any) {
   showToast(`➕ You've been added to "${chatName || 'a chat'}" by ${invitedBy || 'someone'}`, 'info', {
     duration: 5000,
     position: 'top-right',
-    onClick: () => {
+    onClick: async () => {
+      try {
+        await loadChats();
+      } catch (err) {
+        console.error('Failed to reload chats on toast click', err);
+      }
       const openChat = (window as any).__openChat;
       if (openChat) openChat(chatId);
     }
