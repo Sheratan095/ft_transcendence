@@ -11,7 +11,7 @@
   "site.login": "./Login",
   "search.button": "Rechercher",
   "search.placeholder": "Rechercher des utilisateurs...",
-  "site.sign-in": "se connecter",
+  "site.sign-in": "Avez-vous déjà un compte ?",
   "site.pick-name": "Choisissez un nom d'utilisateur et un mot de passe sécurisé pour commencer.",
   "site.create-account": "Créer un compte",
   "site.already-account": "Vous avez déjà un compte ?",

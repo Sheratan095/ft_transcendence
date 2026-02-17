@@ -324,7 +324,7 @@
 	
 	<!-- LOGIN & REGISTER -->
 	<template id="login-template">
-		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
+		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl relative z-30"
 			id="container">
 			<div
 				class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
@@ -334,36 +334,36 @@
 				id="login-form"
 				class="flex w-full max-w-2xl flex-col gap-4 p-6">
 
+					<!-- Title -->
+					<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
+						Sign in
+					</h1>
 
-				<!-- Title -->
-				<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
-					Sign in
-				</h1>
+						<!-- Description -->
+						<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left" data-i18n="auth.signInDesc"></p>
+						<!-- Email -->
+						<div class="flex flex-col gap-1">
+							<label for="email_log" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
+							<input
+								id="email_log"
+								name="email"
+								type="email"
+								placeholder="you@example.com"
+							class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+					</div>
 
-					<!-- Description -->
-					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left" data-i18n="auth.signInDesc"></p>
-					<!-- Email -->
+					<!-- Password -->
 					<div class="flex flex-col gap-1">
-						<label for="email_log" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
+						<label for="password_log" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
 						<input
-							id="email_log"
-							name="email"
-							type="email"
-						data-i18n-placeholder="login.emailPlaceholder"
-						class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
-				</div>
-
-			<!-- Password -->
-			<div class="flex flex-col gap-1">
-				<label for="password_log" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
-				<input
-					id="password_log"
-					name="password"
-					type="password"
-					placeholder="••••••••"
-					class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300
-							px-4 py-2 text-black dark:text-white focus:outline-none
-							focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+							id="password_log"
+							name="password"
+							type="password"
+							placeholder="••••••••"
+							class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300
+									px-4 py-2 text-black dark:text-white focus:outline-none
+									focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+					</div>
 
 					<!-- Submit -->
 					<button
@@ -373,17 +373,18 @@
 					</button>
 
 					<!-- Footer -->
-					<div class="mt-4 text-xl text-neutral-400 text-center" data-i18n="auth.noAccount"></div>
-					<a
+					<div class="mt-4 text-xl text-neutral-400 text-center">
+						<a
 						id="to-register"
 						href="#"
-						class="mt-4 text-xl text-center text-accent-cyan-light dark:text-accent-cyan hover:underline">
-						To register	
-					</a>
+						class="text-accent-blue dark:text-accent-cyan hover:underline" data-i18n="auth.noAccount">
+						</a>
+					</div>
 				</form>
+
 				<!--REGISTER-->
 
-				<div class="w-full hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
+				<div class="w-full flex hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
 				id ="register-section">
 						<form
 							id="register-form"
@@ -442,20 +443,21 @@
 							</button>
 
 							<!-- Footer -->
-							<div class="mt-4 text-xl text-neutral-400 text-center" data-i18n="site.already-account"></div>
+							<div class="mt-4 text-xl text-neutral-400 text-center">
 								<a
 									id="to-login-from-register"
 									href="#"
-									class="mt-4 text-xl text-center text-accent-cyan-light dark:text-accent-cyan hover:underline">
-								To login
+									class="text-accent-blue dark:text-accent-cyan hover:underline"
+									data-i18n="site.sign-in">
 								</a>
+							</div>
 						</form>
 					</div>
 				</div>
 				
 				<!-- TWO FACTOR AUTH-->
 
-				<div class="w-full hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
+				<div class="w-full flex hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
 				id="2fa-section">
 					<div
 					class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
@@ -490,6 +492,7 @@
 						</div>
 
 						<div id="2fa-error" class="hidden text-red-400 text-sm">Invalid code. Please try again.</div>
+						</div>
 
 						<button
 						type="submit"
@@ -500,8 +503,6 @@
 					</form>
 					</div>
 				</div>
-
-				</form>
 			</div>
 		</div>
 	</template>
@@ -959,6 +960,18 @@
 
 				<!-- Controls Card -->
 				<div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
+					<!-- Player names and score inputs -->
+					<div class="flex gap-3 items-center flex-wrap">
+						<label for="pong-player-names" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Players</label>
+						<input id="pong-player-names" type="text" placeholder="Player1, Player2"
+						class="px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
+					</div>
+					<div class="flex gap-3 items-center flex-wrap">
+						<label for="pong-target-score" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Score</label>
+						<input id="pong-target-score" type="number" min="1" placeholder="5"
+						class="w-20 px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
+					</div>
+
 					<button id="pong-start-btn" class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan">Start</button>
 					<button id="pong-reset-btn" class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300">Reset</button>
 				</div>

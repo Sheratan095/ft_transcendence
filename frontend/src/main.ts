@@ -97,64 +97,20 @@ document.addEventListener('change', (e) => {
   setLocale(v);
   try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
   // Expose hydrate function before reload
-  const hydrateRoot = (window as any).__hydrateRoot;
+  // const hydrateRoot = (window as any).__hydrateRoot;
   const hydrateAll = (window as any).__hydrateAll;
   if (hydrateAll) hydrateAll();
   // reload to ensure all templates/renderers pick up the new locale
   window.location.reload();
 });
 
-// Debug function for chat modal testing
-(window as any).__debugChatModal = () => {
-  const modal = document.getElementById('chat-modal');
-  if (!modal) {
-    console.error('❌ chat-modal element NOT FOUND in DOM');
-    return;
-  }
-  
-  console.log('📋 MODAL DEBUG INFO:');
-  console.log('✅ Modal element found:', modal);
-  console.log('Classes:', modal.className);
-  console.log('Has "hidden" class:', modal.classList.contains('hidden'));
-  console.log('Computed display:', window.getComputedStyle(modal).display);
-  console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
-  console.log('offsetHeight:', modal.offsetHeight);
-  console.log('offsetWidth:', modal.offsetWidth);
-  console.log('Position:', window.getComputedStyle(modal).position);
-  console.log('z-index:', window.getComputedStyle(modal).zIndex);
-  console.log('background:', window.getComputedStyle(modal).background);
-  
-  console.log('\n🔧 Attempting to show modal with force...');
-  modal.classList.remove('hidden');
-  modal.style.display = 'flex';
-  modal.style.visibility = 'visible';
-  modal.style.opacity = '1';
-  console.log('After forcing display via inline styles:');
-  console.log('Computed display:', window.getComputedStyle(modal).display);
-  console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
-  console.log('Computed opacity:', window.getComputedStyle(modal).opacity);
-  
-  void modal.offsetHeight; // Force reflow
-};
-
-// Also test if modal appears by directly showing it
-(window as any).__forceShowChat = () => {
-  const modal = document.getElementById('chat-modal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex !important';
-    modal.style.visibility = 'visible !important';
-    modal.style.opacity = '1 !important';
-    console.log('✅ Modal forced visible with inline styles');
-  }
-};
-
 main(window.location.pathname);
 
 // Main application entry point,
 // called on every page load remembering SPA navigation
 // add checks here.
-export async function main(path: string) {
+export async function main(path: string)
+{
 await start();
 
 // Load user's saved language preference
@@ -174,7 +130,25 @@ initCardHoverEffect(); // Initialize card hover effect
   setupGlobalClickHandlers();
   // Setup game card listeners
   initSlideshow();
-if (isLoggedInClient()) initUserServices(path);
+
+  // Handle home button visibility on route changes
+  window.addEventListener('route-rendered', (e: any) => {
+    const currentPath = e.detail?.path || window.location.pathname;
+    if (currentPath === '/') {
+      removeHomeButton();
+    } else {
+      initHomeButton();
+    }
+    // Ensure the CTA in the rendered page reflects the logged-in state
+    if (isLoggedInClient()) modifyIndex();
+  });
+
+  // Show home button if not on home page
+  if (path !== '/')
+    initHomeButton();
+
+  if (isLoggedInClient())
+    initUserServices(path);
 }
 
 /**
@@ -265,18 +239,6 @@ function initUserServices(path: string)
   setupSearchUser();
   attachUserOptions();
   initChat(userId);
-
-  // Handle home button visibility on route changes
-  window.addEventListener('route-rendered', (e: any) => {
-    const currentPath = e.detail?.path || window.location.pathname;
-    if (currentPath === '/') {
-      removeHomeButton();
-    } else {
-      initHomeButton();
-    }
-    // Ensure the CTA in the rendered page reflects the logged-in state
-    modifyIndex();
-  });
 }
 
 // Global click handler for shared/dynamic elements
@@ -371,8 +333,8 @@ return language;
     hydrateRoot(document);
     document.querySelectorAll('template').forEach(tpl => hydrateRoot((tpl as HTMLTemplateElement).content));
   }
-
   function hydrateRoot(root: ParentNode = document) {
+    // translate element text content
     const nodes = Array.from((root as any).querySelectorAll('[data-i18n]') as HTMLElement[]);
     nodes.forEach(el => {
       const key = el.dataset.i18n!;
@@ -383,8 +345,18 @@ return language;
         const val = t(key, vars as Record<string, string|number>);
         el.textContent = val;
       } catch (err) {
-        // leave the key if translation fails
         el.textContent = key;
+      }
+    });
+
+    // translate input placeholders (data-i18n-placeholder)
+    const phNodes = Array.from((root as any).querySelectorAll('[data-i18n-placeholder]') as HTMLInputElement[]);
+    phNodes.forEach(el => {
+      const key = el.dataset.i18nPlaceholder!;
+      try {
+        el.placeholder = t(key);
+      } catch (err) {
+        el.placeholder = key;
       }
     });
   }

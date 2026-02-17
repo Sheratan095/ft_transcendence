@@ -388,7 +388,7 @@ function handleMoveMade(data: any) {
 	// Clear removed position
 	updateBoardPosition(removedPosition, '');	
 }	
-  const status = moveMakerId === user?.id ? 'Your turn' : 'Opponent\'s turn';
+  const status = (moveMakerId === getUserId()) ? 'Opponent\'s turn' : 'Your turn';
   updateTrisStatus(status);
 }
 

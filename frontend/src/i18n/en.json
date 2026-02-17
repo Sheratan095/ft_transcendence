@@ -9,7 +9,7 @@
   "site.documentation": "./Documentation",
   "site.subject": "./Subject",
   "site.login": "./Login",
-  "site.sign-in": "Sign in",
+  "site.sign-in": "Do you already have an account?",
   "site.pick-name": "Pick a username and secure password to get started.",
   "site.create-account": "Create account",
   "site.already-account": "Already have an account?",
