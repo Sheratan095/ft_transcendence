@@ -335,15 +335,44 @@ export function renderMemberList() {
     return;
   }
   const currentChat = chats.find(c => c.id === currentChatId);
+  // If DM, show when you became friends with the other user (friendsSince)
   if (currentChat && currentChat.chatType === 'dm') {
-    // Hide participants list for direct messages
-    container.style.display = 'none';
-    return;
-  } else {
     container.style.display = '';
+    container.textContent = 'Loading...';
+    const otherUserId = currentChat.otherUserId || (currentChat.members && currentChat.members.find((m: any) => String(m.userId) !== String(currentUserId))?.userId);
+    if (!otherUserId) {
+      container.textContent = '';
+      return;
+    }
+
+    (async () => {
+      try {
+        const res = await fetch('/api/users/relationships/friends', { method: 'GET', credentials: 'include' });
+        if (!res.ok) {
+          container.textContent = '';
+          return;
+        }
+        const friends = await res.json();
+        const friend = friends.find((f: any) => String(f.userId || f.id) === String(otherUserId));
+        if (friend && friend.friendsSince) {
+          const since = new Date(friend.friendsSince);
+          const day = String(since.getDate()).padStart(2, '0');
+          const month = String(since.getMonth() + 1).padStart(2, '0');
+          const year = since.getFullYear();
+          container.textContent = `Friends since: ${day}/${month}/${year}`;
+        } else {
+          container.textContent = '';
+        }
+      } catch (err) {
+        console.error('Failed to load friends for friendsSince:', err);
+        container.textContent = '';
+      }
+    })();
+
+    return;
   }
 
-  const members = chatMembers.get(currentChatId) || (chats.find(c => c.id === currentChatId)?.members || []);
+  const members = chatMembers.get(currentChatId) || (currentChat?.members || []);
   if (!members || members.length === 0) {
     container.textContent = 'No members';
     return;
