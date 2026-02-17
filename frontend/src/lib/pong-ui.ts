@@ -3,7 +3,6 @@ import { goToRoute } from '../spa';
 import { initPong, onPongEvent, startMatchmaking, startPaddleMove, stopPaddleMove, closePong, getCurrentGameId } from './pong';
 import { getUserId } from './auth';
 import { openGameInviteModal } from './game-invite';
-import { PongGame, GAME_MODES } from '../components/pong/pong.js';
 
 // Render constants
 const PADDLE_WIDTH = 15;

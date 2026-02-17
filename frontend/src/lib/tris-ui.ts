@@ -332,7 +332,7 @@ function handleTrisEvent(event: string, data: any) {
   }
 }
 
-function handleCustomGameCreated(data: any) {
+async function handleCustomGameCreated(data: any) {
   const { gameId, otherUsername } = data;
   gameStatus = 'playing';
   setCurrentGameId(gameId);
