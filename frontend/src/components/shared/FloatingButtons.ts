@@ -42,12 +42,18 @@ export function initChatButton() {
 
     btn.addEventListener('click', (e) => {
       e.preventDefault();
+      console.log('🔘 Chat button clicked');
       try {
         openChatModal();
+        console.log('✅ openChatModal() called successfully');
       } catch (err) {
         // Fallback: toggle chat-modal visibility if openChatModal unavailable
+        console.error('❌ openChatModal error:', err);
         const modal = document.getElementById('chat-modal');
-        if (modal) modal.classList.remove('hidden');
+        if (modal) {
+          console.log('Using fallback to show modal');
+          modal.classList.remove('hidden');
+        }
         console.error('openChatModal error or fallback used:', err);
       }
     });

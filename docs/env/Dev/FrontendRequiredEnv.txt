@@ -3,3 +3,4 @@ frontend:
     VITE_API_TARGET=https://localhost:3000
     VITE_WS_TARGET=wss://localhost:3000
     HOST=localhost
+    VITE_ACCESS_TOKEN_EXPIRATION_MINUTES=15

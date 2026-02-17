@@ -1,9 +1,15 @@
-const TOKEN_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
-
 import { logout } from './auth';
+
+// Refresh token at 80% of expiration time to ensure it's refreshed before it expires
+const EXPIRATION_MINUTES = parseInt(import.meta.env.VITE_ACCESS_TOKEN_EXPIRATION_MINUTES || '0');
+const TOKEN_REFRESH_INTERVAL = EXPIRATION_MINUTES > 0 ? Math.max(EXPIRATION_MINUTES * 60 * 1000 * 0.8, 60000) : 0; // Min 1 minute, refresh at 80% of expiration
 
 let refreshTokenTimer: ReturnType<typeof setInterval> | null = null;
 let isRefreshing = false;
+
+if (TOKEN_REFRESH_INTERVAL <= 0) {
+  console.error('Invalid TOKEN_REFRESH_INTERVAL: ACCESS_TOKEN_EXPIRATION_MINUTES not set or invalid');
+}
 
 export function getUserId(): string | null {
   return localStorage.getItem('userId');
@@ -54,6 +60,11 @@ export function startTokenRefresh(): void {
 
   if (!isLoggedInClient()) {
     console.warn('Token refresh not started: user not logged in');
+    return;
+  }
+
+  if (isNaN(TOKEN_REFRESH_INTERVAL) || TOKEN_REFRESH_INTERVAL <= 0) {
+    console.error('Cannot start token refresh: invalid interval', TOKEN_REFRESH_INTERVAL);
     return;
   }
 

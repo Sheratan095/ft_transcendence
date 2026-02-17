@@ -122,34 +122,49 @@ export async function renderSearchProfileCard(
           const success = await friendsManager.removeFriend(user.id);
           if (success) {
             relationshipStatus = null;
-            updateActionButtons();
           }
         } else if (relationshipStatus === 'pending') {
           // If targetId equals user.id, we sent the request (outgoing) - show Cancel
           // If targetId equals currentUserId, they sent it to us (incoming) - show Accept
           const isIncomingRequest = targetId === currentUserId;
           if (isIncomingRequest) {
-            const success = await friendsManager.acceptFriendRequest(user.id);
-            if (success) {
+            const acceptResult = await friendsManager.acceptFriendRequest(user.id);
+            if (acceptResult.success) {
               relationshipStatus = 'accepted';
-              updateActionButtons();
+            }
+            // If server returned 404 (no pending request), refresh profile to sync state
+            if (acceptResult.status === 404) {
+              try {
+                if (window.location.pathname === '/profile') {
+                  const params = new URLSearchParams(window.location.search);
+                  const id = params.get('id');
+                  if (id === user.id) {
+                    const { goToRoute } = await import('../../spa');
+                    goToRoute(window.location.pathname + window.location.search);
+                  }
+                }
+              } catch (err) {
+                console.error('Failed to refresh profile after accepting friend request:', err);
+              }
             }
           } else {
-            const success = await friendsManager.cancelFriendRequest(user.id);
-            if (success) {
+            const cancelResult = await friendsManager.cancelFriendRequest(user.id);
+            if (cancelResult) {
+              // Cancelled outgoing request -> no relationship anymore
               relationshipStatus = null;
-              updateActionButtons();
+              targetId = null;
             }
           }
         } else {
           const success = await friendsManager.addFriend(user.id);
           if (success) {
             relationshipStatus = 'pending';
-            updateActionButtons();
           }
         }
       } catch (err) {
         console.error('Failed to change friendship:', err);
+      } finally {
+        updateActionButtons();
       }
     });
   }
@@ -161,12 +176,12 @@ export async function renderSearchProfileCard(
     // Chat button: only enabled for accepted friends
     if (relationshipStatus === 'accepted') {
       chatBtn.disabled = false;
-      chatBtn.classList.remove('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
-      chatBtn.classList.add('bg-accent-blue', 'hover:brightness-90', 'text-white');
+      chatBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+      chatBtn.classList.add('hover:brightness-90', 'dark:hover:brightness-110', 'active:brightness-75');
     } else {
       chatBtn.disabled = true;
-      chatBtn.classList.remove('bg-accent-blue', 'hover:brightness-90', 'text-white');
-      chatBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
+      chatBtn.classList.remove('hover:brightness-90', 'dark:hover:brightness-110', 'active:brightness-75');
+      chatBtn.classList.add('opacity-60', 'cursor-not-allowed');
     }
 
     if (!addBtn)
@@ -177,30 +192,29 @@ export async function renderSearchProfileCard(
       // If targetId equals user.id, we sent it (outgoing) - show Cancel
       const isIncomingRequest = targetId === currentUserId;
       addBtn.disabled = false;
+      addBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+      addBtn.classList.add('hover:brightness-90', 'dark:hover:brightness-110', 'active:brightness-75');
+      
       if (isIncomingRequest) {
-        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-neutral-600', 'text-neutral-400');
-        addBtn.classList.add('bg-green-600', 'hover:brightness-90', 'text-white');
+        addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
         addBtn.textContent = '✓ Accept Friend Request';
       } else {
-        addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-neutral-600', 'text-neutral-400');
-        addBtn.classList.add('bg-yellow-600', 'hover:brightness-90', 'text-white');
+        addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-yellow-600 dark:bg-yellow-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
         addBtn.textContent = '⏳ Cancel Request';
       }
     } else if (relationshipStatus === 'accepted') {
       // When already friends, show a red "Remove Friend" button
       addBtn.disabled = false;
-      addBtn.classList.remove('bg-accent-orange', 'bg-green-600', 'bg-yellow-600', 'bg-neutral-600', 'text-neutral-400');
-      addBtn.classList.add('bg-red-600', 'hover:brightness-90', 'text-white');
+      addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
       addBtn.textContent = '✖ Remove Friend';
     } else if (relationshipStatus === 'blocked') {
       addBtn.disabled = true;
-      addBtn.classList.remove('bg-accent-orange', 'bg-red-600', 'bg-green-600', 'bg-yellow-600', 'hover:brightness-90', 'text-white');
-      addBtn.classList.add('bg-neutral-600', 'text-neutral-400', 'cursor-not-allowed');
-      addBtn.textContent = '🚫 Blocked';
+      addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-neutral-700 dark:bg-neutral-700 text-white opacity-60 cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
+      // addBtn.textContent = '🚫 Blocked';
     } else {
-      // no relationship or rejected -> restore original
+      // no relationship or rejected -> restore original neutral/primary state
       addBtn.disabled = false;
-      addBtn.className = originalAddBtnClass;
+      addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-accent-orange dark:bg-accent-green text-black dark:text-black-400 hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
       addBtn.textContent = originalAddBtnText;
     }
   }
@@ -216,41 +230,32 @@ export async function renderSearchProfileCard(
     {
       // UNBLOCK THE USER
       blockBtn.textContent = '🔓 Unblock';
-      blockBtn.classList.remove('bg-red-600');
-      blockBtn.classList.add('bg-green-600');
+      blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
     }
 
     blockBtn.addEventListener('click', async () => {
-        if (relationshipStatus === 'blocked')
-        {
-          try {
-            const success = await friendsManager.unblockUser(user.id);
-            if (success) {
-              blockBtn.textContent = '🔒 Block';
-              blockBtn.classList.remove('bg-green-600');
-              blockBtn.classList.add('bg-red-600');
-              relationshipStatus = null; // Reset relationship status after unblocking
-              updateActionButtons();
-            }
-          } catch (err) {
-            console.error('Failed to unblock user:', err);
-          }
-          return;
-        }
-
       try {
-        const success = await friendsManager.blockUser(user.id);
-        if (success) {
+        if (relationshipStatus === 'blocked') {
+          const success = await friendsManager.unblockUser(user.id);
+          if (success) {
+            blockBtn.textContent = '🔒 Block';
+            blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-accent-red dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
+            relationshipStatus = null; // Reset relationship status after unblocking
+          }
+        } else {
+          const success = await friendsManager.blockUser(user.id);
+          if (success) {
             blockBtn.textContent = '🔓 Unblock';
-            blockBtn.classList.remove('bg-red-600');
-            blockBtn.classList.add('bg-green-600');
-          relationshipStatus = 'blocked';
-          updateActionButtons();
+            blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
+            relationshipStatus = 'blocked';
+          }
         }
       } catch (err) {
-        console.error('Failed to block user:', err);
+        console.error('Failed to block/unblock user:', err);
+      } finally {
+        // Always ensure buttons reflect the final state even on failure
+        updateActionButtons();
       }
-
     });
   }
 
@@ -363,12 +368,12 @@ export async function renderSearchProfileCard(
                 <div id="search-profile-pong-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
                   <div class="flex flex-row gap-6 justify-center items-center text-lg">
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${pongTotal}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${pongWins}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${pongLosses}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${pongWinRate}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${pongElo}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${pongRankDisplay}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-black dark:text-white font-bold text-lg">${pongTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-600 dark:text-green-400 font-bold text-lg">${pongWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-600 dark:text-red-400 font-bold text-lg">${pongLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-600 dark:text-cyan-400 font-bold text-lg">${pongWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-black dark:text-white font-bold text-lg">${pongElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-black dark:text-white font-bold text-lg">${pongRankDisplay}</span></div>
                   </div>
                 </div>
               </div>
@@ -397,12 +402,12 @@ export async function renderSearchProfileCard(
                 <div id="search-profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
                   <div class="flex flex-row gap-6 justify-center items-center text-lg">
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-white font-bold text-lg">${trisTotal}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-400 font-bold text-lg">${trisWins}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-400 font-bold text-lg">${trisLosses}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-400 font-bold text-lg">${trisWinRate}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-white font-bold text-lg">${trisElo}</span></div>
-                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-white font-bold text-lg">${trisRankDisplay}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">P</span><span class="text-black dark:text-white font-bold text-lg">${trisTotal}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">W</span><span class="text-green-600 dark:text-green-400 font-bold text-lg">${trisWins}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">L</span><span class="text-red-600 dark:text-red-400 font-bold text-lg">${trisLosses}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">%</span><span class="text-cyan-600 dark:text-cyan-400 font-bold text-lg">${trisWinRate}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">ELO</span><span class="text-black dark:text-white font-bold text-lg">${trisElo}</span></div>
+                    <div class="flex flex-col items-center"><span class="text-neutral-500 font-bold text-sm">RANK</span><span class="text-black dark:text-white font-bold text-lg">${trisRankDisplay}</span></div>
                   </div>
                 </div>
               </div>
@@ -482,12 +487,14 @@ export async function renderSearchProfileCard(
               const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
-              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
-                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+              return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
                 <div class="text-center">
-                  <span class="font-semibold">(${yourScore})</span> <span class="text-neutral-300">${user.username} vs <span class="font-semibold text-neutral-200">${opponent}</span> <span class="font-semibold">(${opponentScore})</span></span>
+                  <span class="font-semibold">(${yourScore})</span>
+                  <span class="text-neutral-700 dark:text-white">you vs <span class="font-semibold text-neutral-700 dark:text-white">${opponent}</span>
+                  <span class="font-semibold">(${opponentScore})</span></span>
                 </div>
-                <div class="text-right text-neutral-400 whitespace-nowrap pr-15">
+                <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
                   ${dateStr} ${timeStr}
                 </div>
               </div>`;
@@ -497,12 +504,12 @@ export async function renderSearchProfileCard(
               const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
-              return `<div class="grid grid-cols-3 py-1 items-center px-10 text-xs ${isWin ? 'bg-green-900/30 border-l-2 border-green-400' : 'bg-red-900/30 border-l-2 border-red-400'}">
-                <div class="font-black pl-10 ${isWin ? 'text-green-400' : 'text-red-400'}">${isWin ? 'WIN' : 'LOSS'}</div>
+             return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
                 <div class="text-center">
-                  <span class="text-neutral-300">${user.username} vs <span class="font-semibold text-neutral-200">${opponent}</span></span>
+                  <span class="text-black dark:text-white">you vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
                 </div>
-                <div class="text-right text-neutral-400 whitespace-nowrap pr-8">
+                <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
                   ${dateStr} ${timeStr}
                 </div>
               </div>`;

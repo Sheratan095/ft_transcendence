@@ -48,7 +48,8 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
   // ===== Avatar =====
   const avatar = cardEl.querySelector('#profile-avatar') as HTMLImageElement;
-  if (avatar) avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
+  if (avatar)
+      avatar.src = user.avatarUrl ? `/api${user.avatarUrl}` : '/assets/placeholder-avatar.jpg';
 
   // Avatar upload handler
   const avatarInput = cardEl.querySelector('#input-avatar') as HTMLInputElement;
@@ -67,8 +68,12 @@ export async function renderProfileCard(container: HTMLElement | null) {
         if (!res.ok) throw new Error(`Avatar upload failed: ${res.status}`);
         const body = await res.json();
         if (body && body.avatarUrl) {
-          avatar.src = body.avatarUrl.startsWith('http') ? body.avatarUrl : `/api${body.avatarUrl}`;
+          avatar.src = `/api${body.avatarUrl}`;
           user.avatarUrl = body.avatarUrl;
+          SaveCurrentUserProfile(user.id); // Update localStorage with new avatar URL
+          const topbarAvatar = document.getElementById('topbar-avatar');
+          if (topbarAvatar)
+            topbarAvatar.setAttribute('src', `/api${body.avatarUrl}`);
         }
       } catch (err) {
         console.error('Avatar upload error:', err);

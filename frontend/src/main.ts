@@ -18,10 +18,152 @@ import { initCardHoverEffect } from './lib/card';
 import ApexCharts from 'apexcharts';
 import { start } from './spa';
 
+// internalization dictionaries
+import { registerDictionary, setLocale, getLocale, t } from './lib/intlayer';
+import en from './i18n/en.json';
+import fr from './i18n/fr.json';
+import it from './i18n/it.json';
+
+registerDictionary('en', en);
+registerDictionary('fr', fr);
+registerDictionary('it', it);
+// set runtime locale from saved preference (fallback to 'en') and persist via any storage hook
+const _savedLanguage = localStorage.getItem('userLanguage') || 'en';
+setLocale(_savedLanguage);
+try { setLocaleInStorage && setLocaleInStorage(_savedLanguage); } catch {}
+
+// simple language selector handler: persist and reload to ensure full UI picks up the new locale
+document.addEventListener('DOMContentLoaded', () => {
+  // hydrate existing DOM and template contents once on load
+  function hydrateRoot(root: ParentNode = document) {
+    const nodes = Array.from((root as any).querySelectorAll('[data-i18n]') as HTMLElement[]);
+    nodes.forEach(el => {
+      const key = el.dataset.i18n!;
+      const rawVars = el.dataset.i18nVars || '{}';
+      let vars = {};
+      try { vars = JSON.parse(rawVars); } catch {}
+      try {
+        const val = t(key, vars as Record<string, string|number>);
+        el.textContent = val;
+      } catch (err) {
+        // leave the key if translation fails
+        el.textContent = key;
+      }
+    });
+  }
+
+  function hydrateOnce() {
+    hydrateRoot(document);
+    document.querySelectorAll('template').forEach(tpl => hydrateRoot((tpl as HTMLTemplateElement).content));
+  }
+
+  hydrateOnce();
+  const locales = [
+    { code: 'en', label: 'EN' },
+    { code: 'fr', label: 'FR' },
+    { code: 'it', label: 'IT' }
+  ];
+  const langSelect = document.getElementById('profile-language') as HTMLSelectElement | null;
+  if (!langSelect) return;
+
+  // populate selector and set current value
+  langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
+  langSelect.value = _savedLanguage;
+
+  langSelect.addEventListener('change', async () => {
+    const v = langSelect.value;
+    setLocale(v);
+    try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
+    try
+    {
+      if (isLoggedInClient())
+      {
+        localStorage.setItem('userLanguage', v); 
+        const response = await fetch('/api/users/update-user', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ newLanguage: v }),
+        });
+        if (!response.ok)
+          console.error('Failed to update user language:', response.status);
+      }
+    }
+    catch (err)
+    {
+      console.error('Error updating user language:', err);
+    }
+    console.log('Language changed to', v);
+    window.location.reload();
+  });
+});
+
 // Make ApexCharts globally available for UserCardCharts
 if (typeof window !== 'undefined') {
   (window as any).ApexCharts = ApexCharts;
 }
+
+// Delegated fallback: catch change events for dynamically-inserted #profile-language selects
+document.addEventListener('change', (e) => {
+  const target = e.target as Element | null;
+  if (!target) return;
+  if (!(target instanceof HTMLSelectElement)) return;
+  if (target.id !== 'profile-language') return;
+
+  const v = target.value;
+  setLocale(v);
+  try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
+  try { localStorage.setItem('userLanguage', v); } catch {}
+  // reload to ensure all templates/renderers pick up the new locale
+  window.location.reload();
+});
+
+// Debug function for chat modal testing
+(window as any).__debugChatModal = () => {
+  const modal = document.getElementById('chat-modal');
+  if (!modal) {
+    console.error('❌ chat-modal element NOT FOUND in DOM');
+    return;
+  }
+  
+  console.log('📋 MODAL DEBUG INFO:');
+  console.log('✅ Modal element found:', modal);
+  console.log('Classes:', modal.className);
+  console.log('Has "hidden" class:', modal.classList.contains('hidden'));
+  console.log('Computed display:', window.getComputedStyle(modal).display);
+  console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
+  console.log('offsetHeight:', modal.offsetHeight);
+  console.log('offsetWidth:', modal.offsetWidth);
+  console.log('Position:', window.getComputedStyle(modal).position);
+  console.log('z-index:', window.getComputedStyle(modal).zIndex);
+  console.log('background:', window.getComputedStyle(modal).background);
+  
+  console.log('\n🔧 Attempting to show modal with force...');
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+  modal.style.visibility = 'visible';
+  modal.style.opacity = '1';
+  console.log('After forcing display via inline styles:');
+  console.log('Computed display:', window.getComputedStyle(modal).display);
+  console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
+  console.log('Computed opacity:', window.getComputedStyle(modal).opacity);
+  
+  void modal.offsetHeight; // Force reflow
+};
+
+// Also test if modal appears by directly showing it
+(window as any).__forceShowChat = () => {
+  const modal = document.getElementById('chat-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex !important';
+    modal.style.visibility = 'visible !important';
+    modal.style.opacity = '1 !important';
+    console.log('✅ Modal forced visible with inline styles');
+  }
+};
 
 main(window.location.pathname);
 
@@ -31,9 +173,14 @@ main(window.location.pathname);
 export async function main(path: string) {
 await start();
 
-const language = fetchLanguage();
-setLocaleInStorage(language);
+// Load user's saved language preference
+const savedLanguage = localStorage.getItem('userLanguage') || 'en';
+setLocaleInStorage(savedLanguage);
 
+  // IMPORTANT: set the runtime translator locale so t(...) uses it
+setLocale(savedLanguage);
+
+console.log(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 

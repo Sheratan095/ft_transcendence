@@ -7,6 +7,81 @@
 	<link rel="icon" type="image/png" href="/42_Logo.svg" />
 	<link href="./tailwind.css" rel="stylesheet" />
 	<script type="module" src="./src/main.ts"></script>
+	<style>
+		/* Fix for chat modal visibility - ensure flex takes precedence over hidden */
+		#chat-modal:not(.hidden) {
+			display: flex !important;
+			visibility: visible !important;
+		}
+
+		#friend-selection-modal:not(.hidden) {
+			display: flex !important;
+			visibility: visible !important;
+		}
+
+		/* Ensure body doesn't hide modals */
+		body {
+			overflow: visible !important;
+		}
+
+		/* 2FA Lock SVG Animations */
+		@keyframes lockShackleOpen {
+			0% { transform: translateY(0px); }
+			100% { transform: translateY(0px); }
+		}
+
+		/* @keyframes keyholePulse {
+			0%, 100% { opacity: 1; }
+			50% { opacity: 0.5; }
+		} */
+
+		/* Default: shackle sits a bit lower when closed. Use SVG-specific transform-box/origin so
+		   the shackle moves cleanly without detaching from the body. */
+		.btn-lock svg path.lock {
+			transform-box: fill-box;
+			transform-origin: 50% 10%;
+			will-change: transform;
+			transform: translateY(0px);
+			transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+		}
+
+		.btn-lock svg path.lockb {
+			will-change: opacity;
+			transition: opacity 200ms ease;
+		}
+
+		/* Open animation (checked) */
+		#input-lock:checked ~ label svg path.lock {
+			animation: lockShackleOpen 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		}
+
+		#input-lock:checked ~ label svg path.lockb {
+			animation: keyholePulse 0.6s ease-in-out forwards;
+		}
+
+		/* Ensure closed state snaps back to the slightly-lowered position */
+		#input-lock:not(:checked) ~ label svg path.lock {
+			animation: none !important;
+			transform: translateY(0px) !important;
+			opacity: 1;
+		}
+
+		#input-lock:not(:checked) ~ label svg path.lockb {
+			animation: none !important;
+			opacity: 1;
+		}
+
+		/* In dark mode, make the closed lock visually black (only SVG paths) */
+		#input-lock:checked ~ label svg path.lock {
+			stroke: #000000 !important;
+			fill: none !important;
+		}
+
+		#input-lock:checked ~ label svg path.lockb {
+			fill: #000000 !important;
+			stroke: none !important;
+		}
+	</style>
 </head>
 <html lang="en"
  class="dark overflow-hidden selection:bg-accent-orange
@@ -50,15 +125,17 @@
 					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-accent-green text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
 					placeholder="Search for users..." required>
 				<button type="button"
-					class="inline-flex items-center text-black font-bold bg-accent-orange dark:bg-accent-green rounded-r-xl bg-brand hover:bg-brand-strong border-l-0 box-border border border-gray-700 dark:border-accent-green focus:ring-4 focus:ring-brand-medium shadow-xs leading-5 rounded-e-base bx-10 text-sm px-4 py-2.5 focus:outline-none">
+					class="inline-flex items-center text-black font-bold bg-accent-orange dark:bg-accent-green rounded-r-xl bg-brand hover:bg-brand-strong border-l-0 box-border border border-gray-700 dark:border-accent-green focus:ring-4 focus:ring-brand-medium shadow-xs leading-5 rounded-e-base bx-10 text-sm px-4 py-2.5 focus:outline-none"
+					>
 					<svg class="w-4 h-4 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
 						height="24" fill="none" viewBox="0 0 24 24">
 						<path stroke="currentColor" stroke-linecap="round" stroke-width="2"
 							d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
 					</svg>
-					Search
+					<h1 data-i18n="search.button">
+					</h1>
 				</button>
-			</div>
+			</div> 
 		</form>
 
 		<!-- Tris page template -->
@@ -176,6 +253,15 @@
 				</div>
 			</div>
 		</template>
+
+		<!-- Language selector styled like theme button -->
+		<select id="profile-language" aria-label="Select language" title="Select language"
+			class="relative z-30 pointer-events-auto cursor-pointer py-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2 text-white text-sm appearance-auto dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100 dark:text-black">
+			<option value="en">EN</option>
+			<option value="fr">FR</option>
+			<option value="it">IT</option>
+		</select>
+		
 		<!-- Theme Toggle Button -->
 		<button id="theme-toggle-btn" class="p-2 rounded-xl border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2
 					dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100"
@@ -194,6 +280,7 @@
 		<!-- Results will be injected here -->
 	</div>
 
+	<!-- homepage -->
 	<!-- Main content-->
 	<main id="main-content" class="z-0 cards w-full min-h-screen px-4 sm:px-8 lg:px-16" style="padding-top: 0px">
 		<!-- Content will be dynamically injected here -->
@@ -202,9 +289,7 @@
 				class="text-[7vw] px-[10vw] uppercase">
 				FT/<br />TRANSCENDENCE
 			</h1>
-			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4">
-				Yesterday Dr.Phil was just an ordinary human.
-			</p>
+			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4" data-i18n="site.subtitle"></p>
 		</section>
 		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl">
 			<div
@@ -215,13 +300,13 @@
 						class="float-start w-full h-full min-w-[50px] min-h-[50px] sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0 dark:invert" />
 					<div class="flex flex-col space-y-4 md:ml-6">
 						<a href="https://localhost:3000/docs">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./DOCUMENTATION</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.documentation"></h2>
 						</a>
 						<a href="./assets/subject.pdf" target="_blank">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./SUBJECT</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.subject"></h2>
 						</a>
 						<a href="/login" id="cta-login-logout-static">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./LOGIN</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.login"></h2>
 						</a>
 					</div>
 				</div>
@@ -254,20 +339,18 @@
 					Sign in
 				</h1>
 
-				<!-- Description -->
-				<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left">
-					Sign in to your account below.
-				</p>
-				<!-- Email -->
-				<div class="flex flex-col gap-1">
-					<label for="email_log" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
-					<input
-						id="email_log"
-						name="email"
-						type="email"
-						placeholder="you@example.com"
-						class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
-				</div>
+					<!-- Description -->
+					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left" data-i18n="auth.signInDesc"></p>
+					<!-- Email -->
+					<div class="flex flex-col gap-1">
+						<label for="email_log" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
+						<input
+							id="email_log"
+							name="email"
+							type="email"
+							placeholder="you@example.com"
+							class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+					</div>
 
 				<!-- Password -->
 				<div class="flex flex-col gap-1">
@@ -285,25 +368,22 @@
 				<!-- Error container -->
 				<div id="auth-error" class="hidden text-red-400 text-sm"></div>
 
-				<!-- Submit -->
-				<button
-					type="submit"
-					class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 opacity-100
-						font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
-					Sign in
-				</button>
+					<!-- Submit -->
+					<button
+						type="submit"
+						class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 opacity-100
+							font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition" data-i18n="auth.signIn">
+					</button>
 
-				<!-- Footer -->
-				<div class="mt-4 text-xl text-neutral-400 text-center">
-					Don’t have an account?
-					<a
-					id="to-register"
-					href="#"
-					class="text-accent-cyan-light dark:text-accent-cyan hover:underline">
-					Sign up
-					</a>
-				</div>
-				</form>
+					<!-- Footer -->
+					<div class="mt-4 text-xl text-neutral-400 text-center" data-i18n="auth.noAccount">
+						<a
+						id="to-register"
+						href="#"
+						class="text-accent-cyan-light dark:text-accent-cyan hover:underline" data-i18n="site.sign-in">
+						</a>
+					</div>
+					</form>
 
 				<!--REGISTER-->
 
@@ -314,13 +394,11 @@
 							class="flex w-full max-w-2xl flex-col gap-4 p-6">
 
 							<!-- Title -->
-							<h1 id="register-title" class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
-								Create account
+							<h1 id="register-title" class="text-3xl font-bold text-left mb-2 text-black dark:text-white" data-i18n="site.create-account">
 							</h1>
 
 							<!-- Description -->
-							<p id="register-desc" class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left">
-								Pick a username and secure password to get started.
+							<p id="register-desc" class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left" data-i18n="site.pick-name">
 							</p>
 
 							<!-- Username -->
@@ -363,18 +441,17 @@
 							<button
 								id="submit-register"
 								type="submit"
-								class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
-								Create account
+								class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition"
+								data-i18n="site.create-account">
 							</button>
 
 							<!-- Footer -->
-							<div class="mt-4 text-xl text-neutral-400 text-center">
-								Already have an account?
+							<div class="mt-4 text-xl text-neutral-400 text-center" data-i18n="site.already-account">
 								<a
 									id="to-login-from-register"
 									href="#"
-									class="text-accent-cyan-light dark:text-accent-cyan hover:underline">
-									Sign in
+									class="text-accent-cyan-light dark:text-accent-cyan hover:underline"
+									data-i18n="site.sign-in">
 								</a>
 						</form>
 					</div>
@@ -435,8 +512,8 @@
 
 	<!-- Search Profile Card Template -->
 	<template id="search-profile-card-template">
-		<div class="w-full cards flex items-center justify-center gap-10 rounded-xl search-profile-card" style="padding-top: 0px; padding-bottom: 64px;">
-			<div class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden rounded-xl hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300">
+		<div class="w-full cards flex items-center justify-center gap-10 rounded-xl search-profile-card pb-96 -mt-20" style="padding-top: 0px;">
+			<div class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden rounded-xl hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300" style="transform: scale(0.8);">
 				<div class="pt-4 px-4 pb-1 w-full flex flex-col gap-0">
 					<!-- Header with avatar and info -->
 					<div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
@@ -462,21 +539,21 @@
 
 							<!-- Action buttons -->
 							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
-								<button class="rounded spc-chat px-3 sm:px-6 py-2 text-xs bg-blue-accent text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-chat bg-accent-blue dark:bg-accent-blue text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
 									💬 Send Message
 								</button>
-								<button class="rounded spc-add px-3 sm:px-6 py-2 text-xs bg-accent-orange text-white dark:bg-accent-green text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-gray-500 dark:bg-accent-green text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
 									👥 Add Friend
 								</button>
-								<button class="rounded spc-block px-3 sm:px-6 py-2 text-xs bg-red-600 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
-									🛇 Block
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
+									🔒 Block
 								</button>
 							</div>
 						</div>
 					</div>
 
 					<!-- Charts Section -->
-					<div id="search-profile-charts-section" class="flex flex-col gap-6 mt-0 p-4 border-t border-accent-orange dark:border-accent-green">
+					<div id="search-profile-charts-section" class="flex flex-col gap-6 p-4 border-t border-accent-orange dark:border-accent-green">
 						<!-- Dynamically populated stats will go here -->
 					</div>
 				</div>
@@ -486,11 +563,12 @@
 
 	<!-- MAIN PROFILE -->
 	<template id="profile-template">
-		<div class="w-full cards flex items-center justify-center sm:p-6 md:p-8 gap-10 rounded-xl" style="padding-top: 0px;" id="container">
+		<div class="w-full cards flex items-center justify-center pb-96 gap-10 rounded-xl pt-0 -mt-20" id="container">
 			<div
 				class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
 					overflow-hidden rounded-xl
-					hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300">
+					hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300"
+				style="transform: scale(0.8);">
 				<div class="pt-4 px-4 pb-1 w-full flex flex-col gap-0">
 					<!-- Header with avatar and title -->
 					<div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
@@ -511,51 +589,46 @@
 							</label>
 						</div>
 
-						<!-- Title and info section -->
-						<div class="flex-1 w-full z-30">
-							<!-- Username -->
-							<h1 id="profile-username" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">User</h1>
-							
-							<!-- Email-->
-							<div class="flex flex-wrap gap-x-8 gap-y-2 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
-								<div class="flex items-center gap-2">
-									<span class="font-extrabold text-black dark:text-white">Email:</span> 
-									<span class="text-gray-600 dark:text-neutral-400" id="profile-email">email@example.com</span>
+							<!-- Title and info section -->
+							<div class="flex-1 w-full z-30">
+								<!-- Username -->
+								<h1 id="profile-username" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">User</h1>
+								
+								<!-- Email and ID -->
+								<div class="mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
+									<div class="flex items-center gap-2">
+										<span class="font-extrabold text-black dark:text-white">Email:</span> 
+										<span class="text-gray-600 dark:text-neutral-400" id="profile-email">email@example.com</span>
+									</div>
 								</div>
-							</div>
 
 							<!-- Action buttons and 2FA toggle -->
 							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
 								<!-- Chat button -->
-								<button id="profile-chat-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-accent-orange dark:bg-accent-green text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
+								<button id="profile-chat-btn" class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base bg-accent-orange dark:bg-accent-green text-black font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap rounded">
 									Chat
 								</button>
 								<!-- Logout button -->
-								<button id="profile-logout-btn" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-gray-700 dark:border-neutral-600 hover:bg-gray-700 dark:hover:bg-neutral-600 transition whitespace-nowrap">
+								<button id="profile-logout-btn" class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight hover:bg-gray-700 dark:hover:bg-neutral-600 transition whitespace-nowrap rounded">
 									Logout
 								</button>
 								<!-- Delete account button -->
-								<button command="show-modal" commandfor="delete-dialog" class="px-3 sm:px-6 py-2 text-xs sm:text-sm md:text-base bg-red-500 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap">
-									Delete
+								<button command="show-modal" commandfor="delete-dialog" class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base bg-red-500 text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition whitespace-nowrap rounded">
+										<span data-i18n="content.profileDelete"></span>
 								</button>
 
 								<!-- Language selector -->
-								<select id="profile-language" class="px-2 sm:px-4 py-2 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight border-2 border-gray-700 dark:border-neutral-600 hover:bg-gray-700 dark:hover:bg-neutral-600 transition rounded">
-									<option value="en">English</option>
-									<option value="fr">Français</option>
-									<option value="it">Italiano</option>
-								</select>
+								<!-- language selector removed from profile-template (moved to header) -->
 
 								<!-- 2FA toggle -->
 								<div class="flex items-center gap-2 ml-auto">
 									<input id="input-lock" type="checkbox" class="hidden peer">
 									<label
 										for="input-lock"
-										class="btn-lock group inline-flex items-center h-10 px-4 bg-red-600 dark:bg-red-700 border-2 border-gray-700 dark:border-neutral-600 font-extrabold text-white uppercase tracking-tight text-sm cursor-pointer select-none transition-all duration-300 hover:brightness-110 peer-checked:bg-accent-green dark:peer-checked:bg-accent-green"
-									>
-										<svg viewBox="0 0 30 40" class="w-5 h-5 mr-2">
-											<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z"></path>
-											<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21"></path>
+										class="btn-lock group inline-flex items-center h-10 px-4 bg-red-600 dark:bg-red-700 font-extrabold text-white uppercase tracking-tight text-sm cursor-pointer select-none transition-all duration-300 hover:brightness-110 peer-checked:bg-accent-orange dark:peer-checked:bg-accent-green peer-checked:text-black dark:peer-checked:text-black rounded">
+										<svg viewBox="0 0 30 40" class="h-5 mr-2" style="transform-origin: center;" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+											<path class="lockb" d="M27 27C27 34.1797 21.1797 40 14 40C6.8203 40 1 34.1797 1 27C1 19.8203 6.8203 14 14 14C21.1797 14 27 19.8203 27 27ZM15.6298 26.5191C16.4544 25.9845 17 25.056 17 24C17 22.3431 15.6569 21 14 21C12.3431 21 11 22.3431 11 24C11 25.056 11.5456 25.9845 12.3702 26.5191L11 32H17L15.6298 26.5191Z" fill="currentColor" stroke="none" />
+											<path class="lock" d="M6 21V10C6 5.58172 9.58172 2 14 2V2C18.4183 2 22 5.58172 22 10V21" fill="none" stroke="currentColor" />
 										</svg>
 										<span id="profile-tfa" class="whitespace-nowrap">2FA</span>
 									</label>
@@ -587,7 +660,7 @@
 				<div class="bg-neutral-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
 					<div class="sm:flex sm:items-start">
 						<div class="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-500/10 sm:mx-0 sm:size-10">
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-red-400">
+							<svg viewBox="0 0 24 24" fill="none" data-slot="icon" aria-hidden="true" class="size-6 text-red-400">
 								<path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" stroke-linecap="round" stroke-linejoin="round" />
 							</svg>
 						</div>
@@ -631,8 +704,7 @@
 			<h1 class="text-[7vw] px-[10vw] uppercase">
 				FT/<br />TRASCENDENCE
 			</h1>
-			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4">
-				Yesterday Dr.Phil was just an ordinary human.
+			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4" data-i18n="site.subtitle">
 			</p>
 		</section>
 		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"></div>
@@ -733,13 +805,13 @@
 						class="float-start w-full h-full min-w-[50px] min-h-[50px] sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0 dark:invert" />
 					<div class="flex flex-col space-y-4 md:ml-6">
 						<a href="https://localhost:3000/docs">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./DOCUMENTATION</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.documentation"></h2>
 						</a>
 						<a href="/assets/subject.pdf" target="_blank">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./SUBJECT</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.subject"></h2>
 						</a>
 						<a href="/login" id="cta-login-logout">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./LOGIN</h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.login"></h2>
 						</a>
 					</div>
 				</div>
@@ -1029,29 +1101,28 @@
 <div
 	id="chat-modal"
 	tabindex="-1"
-	class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 rounded-xl
+	class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 rounded-xl
 				 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
 >
 	<div class="relative p-4 w-full max-w-4xl max-h-full">
-		<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden
-					shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] 
-					hover:shadow-lg dark:hover:shadow-lg transition-all duration-300 h-[80vh] flex flex-col md:flex-row">
+			<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden
+						shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] 
+						hover:shadow-lg dark:hover:shadow-lg transition-all duration-300 h-[80vh] flex flex-col md:flex-row">
 
-			<!-- Close button -->
-			<button
-				type="button"
-				class="absolute top-3 right-3 z-10 text-gray-600 dark:text-gray-400 bg-transparent 
-							 hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-xl text-sm 
-							 w-9 h-9 inline-flex justify-center items-center transition-colors"
-				id="chat-close-btn"
-				title="Close chat"
-			>
-				<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-					<path stroke-linecap="round" stroke-linejoin="round"
-						d="M6 18L18 6M6 6l12 12"/>
-				</svg>
-				<span class="sr-only">Close modal</span>
-			</button>
+				<!-- Absolute close button in top-right corner -->
+				<button
+					type="button"
+					id="chat-close-btn"
+					class="absolute top-3 right-3 z-50 text-accent-orange dark:text-green-400 bg-transparent hover:bg-gray-300 hover:text-accent-orange dark:hover:bg-gray-600 dark:hover:text-accent-green rounded-lg text-sm w-9 h-9 inline-flex justify-center items-center transition-colors"
+					title="Close chat"
+				>
+					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+					<span class="sr-only">Close modal</span>
+				</button>
+
+
 
 			<!-- Sidebar with chat list -->
 			<div class="w-80 bg-gray-100 dark:bg-gray-800 rounded-l-2xl border-r-2 border-gray-800 dark:border-gray-300 flex flex-col">
@@ -1061,8 +1132,7 @@
 						id="create-group-btn"
 						class="mt-3 w-full bg-accent-orange dark:bg-accent-green text-black px-4 py-2 rounded-xl font-extrabold text-sm 
 								hover:brightness-90 dark:hover:brightness-110 transition-all duration-200 uppercase tracking-tight"
-					>
-						+ Create Group
+						data-i18n="chat.create-group">
 					</button>
 				</div>
 				<div id="chat-list" class="flex-1 overflow-y-auto p-2 space-y-1">
@@ -1073,20 +1143,27 @@
 			<!-- Main chat area -->
 			<div class="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-tr-2xl">
 				<!-- Chat header -->
-				<div class="p-4 border-b-2 rounded-tr-2xl border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
-					<div class="flex items-center gap-4">
+				<div class="p-4 border-b-2 rounded-tr-2xl border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800 flex items-center pr-24">
+					<div id="chat-header-actions" class="mr-4 flex flex-col items-start gap-2">
 						<button
 							id="leave-group-btn"
-							class="hidden px-2 py-1 bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white text-sm font-extrabold 
-									rounded-xl transition-colors uppercase tracking-tight"
+							class="hidden w-8 h-8 flex items-center justify-center bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white rounded-md"
 							title="Leave this group chat"
+							aria-label="Leave group"
 						>
-							Leave Group
+							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M16 17l5-5-5-5" />
+								<path d="M21 12H9" />
+								<path d="M9 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
+							</svg>
+							<span class="sr-only" data-i18n="chat.leave"></span>
 						</button>
-						<div class="flex flex-col">
-							<h2 id="chat-header" class="text-xl font-bold text-black dark:text-white uppercase tracking-tight">Select a chat</h2>
-							<!-- Members list displayed under header -->
-							<div id="chat-members" class="mt-1 text-sm text-neutral-500 dark:text-neutral-300"></div>
+						<!-- add-user-btn will be inserted here dynamically -->
+					</div>
+					<div class="flex-1 min-w-0">
+						<div class="flex flex-col min-w-0">
+							<h2 id="chat-header" class="text-xl font-bold text-black dark:text-white uppercase tracking-tight truncate max-w-[calc(100%-2rem)]" data-i18n="chat.select"></h2>
+							<div id="chat-members" class="mt-1 text-sm text-neutral-500 dark:text-neutral-300 truncate"></div>
 						</div>
 					</div>
 				</div>
@@ -1096,8 +1173,8 @@
 					<button id="load-more-btn" 
 						class="btn mx-auto mb-4 px-4 py-2 bg-accent-orange dark:bg-accent-green text-black font-extrabold rounded-xl 
 								hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight border-2 border-gray-800 dark:border-gray-300" 
-						style="display: none;">
-						Load More Messages
+						style="display: none;"
+						data-i18n="chat.load-more">
 					</button>
 					<div id="chat-messages" class="space-y-3">
 						<!-- Messages will be appended here -->
@@ -1119,8 +1196,7 @@
 							id="chat-send-btn"
 							class="bg-accent-orange dark:bg-accent-green text-black font-extrabold px-4 py-2 rounded-xl 
 									hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight"
-						>
-							Send
+						 	data-i18n="chat.send">
 						</button>
 					</div>
 				</div>
@@ -1133,20 +1209,20 @@
 <div
   id="friend-selection-modal"
   tabindex="-1"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 z-50 
+  class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 z-50 
          justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
 >
-  <div class="relative p-4 w-full max-w-2xl max-h-full">
-    <div class="relative bg-neutral-900 border border-neutral-700 rounded-xl shadow-lg p-6">
+	<div class="relative p-4 w-full max-w-2xl max-h-full">
+		<div class="relative bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-700 rounded-xl shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] p-6">
 
       <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-3 right-3 z-10 text-neutral-400 bg-transparent 
-               hover:bg-neutral-800 hover:text-white rounded-xl text-sm 
-               w-9 h-9 inline-flex justify-center items-center"
-        id="friend-modal-close-btn"
-      >
+			<button
+				type="button"
+				class="absolute top-3 right-3 z-10 text-gray-600 bg-transparent 
+							 hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white rounded-lg text-sm 
+							 w-9 h-9 inline-flex justify-center items-center"
+				id="friend-modal-close-btn"
+			>
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M6 18L18 6M6 6l12 12"/>
@@ -1155,28 +1231,28 @@
       </button>
 
       <!-- Header -->
-      <h2 class="text-2xl font-bold text-white mb-4">Create Group Chat</h2>
-      <p class="text-neutral-400 mb-6">Select friends to add to the group (at least 2):</p>
+      <h2 class="text-2xl font-bold text-white mb-4" data-i18n="chat.create"></h2>
+      <p class="text-neutral-400 mb-6" data-i18n="chat.select-group"></p>
 
       <!-- Group name input -->
       <div class="mb-6">
-        <label for="group-name-input" class="block text-white font-semibold mb-2">Group Name</label>
-        <input
-          id="group-name-input"
-          type="text"
-          class="w-full bg-neutral-700 text-white px-3 py-2 rounded-md border border-neutral-600 focus:outline-none focus:border-[#0dff66]"
-          placeholder="Enter group name..."
-        />
+				<label for="group-name-input" class="block text-gray-800 dark:text-white font-semibold mb-2">Group Name</label>
+				<input
+					id="group-name-input"
+					type="text"
+					class="w-full bg-white dark:bg-neutral-700 text-black dark:text-white px-3 py-2 rounded-md border border-gray-300 dark:border-neutral-600 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green"
+					placeholder="Enter group name..."
+				/>
       </div>
 
       <!-- Friends list -->
-      <div id="friends-list" class="border border-neutral-700 rounded-md p-4 mb-6 max-h-96 overflow-y-auto bg-neutral-800">
-        <div class="text-neutral-400 text-center">Loading friends...</div>
+			<div id="friends-list" class="border rounded-md p-4 mb-6 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700">
+				<div class="text-gray-600 dark:text-neutral-400 text-center">Loading friends...</div>
       </div>
 
       <!-- Selected friends display -->
-      <div id="selected-friends" class="mb-6 p-3 bg-neutral-800 rounded-md border border-neutral-700 min-h-12">
-        <p class="text-sm text-neutral-400 mb-2">Selected: <span id="selected-count">0</span></p>
+			<div id="selected-friends" class="mb-6 p-3 bg-white dark:bg-neutral-800 rounded-md border border-gray-200 dark:border-neutral-700 min-h-12">
+				<p class="text-sm text-gray-600 dark:text-neutral-400 mb-2">Selected: <span id="selected-count">0</span></p>
         <div id="selected-friends-tags" class="flex flex-wrap gap-2">
           <!-- Selected friend tags will appear here -->
         </div>
@@ -1186,16 +1262,15 @@
       <div class="flex gap-3 justify-end">
         <button
           id="friend-modal-cancel-btn"
-          class="px-4 py-2 bg-neutral-700 text-white rounded-md hover:bg-neutral-600 transition"
+					class="px-4 py-2 bg-white/10 dark:bg-neutral-700 text-black dark:text-white rounded-md hover:bg-gray-100 dark:hover:bg-neutral-600 transition"
         >
           Cancel
         </button>
         <button
           id="create-group-submit-btn"
-          class="px-4 py-2 bg-[#0dff66] text-black font-semibold rounded-md hover:brightness-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+					class="px-4 py-2 bg-accent-orange dark:bg-accent-green text-white font-semibold rounded-md hover:brightness-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
           disabled
-        >
-          Create Group
+        	data-i18n="chat.create-group">
         </button>
       </div>
 

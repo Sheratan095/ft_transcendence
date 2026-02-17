@@ -22,8 +22,10 @@ import {
   addUserToChat,
   createGroupChat,
   getChatDisplayName,
-  escapeHtml
+  escapeHtml,
 } from './chatService';
+
+import { t } from '../../lib/intlayer';
 
 // Re-export for backward compatibility
 export { sendChatInvite } from './chatService';
@@ -33,6 +35,7 @@ export { sendChatInvite } from './chatService';
 // ============================================================================
 
 export function initChat(userId: string) {
+  // initialization
   setCurrentUserId(userId);
   connectChatWebSocket().catch(err => console.error('Failed to establish chat connection:', err));
   
@@ -53,8 +56,16 @@ export function initChat(userId: string) {
 
 export async function openChatModal() {
   const modal = document.getElementById('chat-modal');
-  if (!modal) return;
+  if (!modal) {
+    console.error('❌ chat-modal element not found in DOM');
+    return;
+  }
 
+  
+  // FIX: Ensure modal is direct child of body (not inside a hidden parent)
+  if (modal.parentElement !== document.body) {
+    document.body.appendChild(modal);
+  }
   modal.classList.remove('hidden');
 
   if (chats.length === 0) {
@@ -101,10 +112,18 @@ export function closeChatModal() {
 
 export function renderChatList() {
   const chatList = document.getElementById('chat-list');
-  if (!chatList) return;
+  if (!chatList) {
+    console.error('chat-list element not found in DOM');
+    return;
+  }
 
   if (chats.length === 0) {
-    chatList.innerHTML = '<div class="placeholder">${no chats.}</div>';
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    placeholder.textContent = t('chat.no-chat');
+    chatList.innerHTML = '';
+    chatList.appendChild(placeholder);
+    console.warn('No chats to display');
     return;
   }
 
@@ -114,11 +133,8 @@ export function renderChatList() {
     const chatItem = document.createElement('div');
     chatItem.id = `chat-item-${chat.id}`;
     chatItem.className = 'chat-item cursor-pointer';
-    if (getCurrentTheme() === 'dark') {
-      chatItem.classList.add('dark');
-    }
     if (String(currentChatId) === String(chat.id)) {
-      chatItem.classList.add('active', 'border-accent-green', 'border-2', 'rounded', 'p-2');
+      chatItem.classList.add('active', 'border-accent-blue', 'dark:border-accent-green', 'border-2', 'rounded', 'p-2');
       chatItem.setAttribute('aria-selected', 'true');
     } else {
       chatItem.setAttribute('aria-selected', 'false');
@@ -128,11 +144,13 @@ export function renderChatList() {
     };
 
     const chatName = document.createElement('div');
-    chatName.className = 'chat-item-name text-size-lg font-medium';
-    chatName.textContent = getChatDisplayName(chat);
+    chatName.className = 'chat-item-name text-size-lg font-medium truncate';
+    const fullName = getChatDisplayName(chat);
+    chatName.textContent = truncateText(fullName, 30);
+    chatName.title = fullName;
 
     const chatType = document.createElement('div');
-    chatType.className = 'chat-item-type text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
+    chatType.className = 'chat-item-type text-accent-blue dark:text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
     if (chat.chatType === 'dm')
       chatType.textContent = 'Direct Message';
     else
@@ -161,10 +179,7 @@ export function renderChatList() {
 }
 
 async function selectChat(chatId: string) {
-  if (!chatId) {
-    console.warn('selectChat called with invalid chatId:', chatId);
-    return;
-  }
+  if (!chatId) return;
   setCurrentChatId(chatId);
   setMessageOffset(0);
 
@@ -182,19 +197,40 @@ async function selectChat(chatId: string) {
   if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
-      chatHeader.textContent = getChatDisplayName(chat);
+      chatHeader.textContent = truncateText(getChatDisplayName(chat), 28);
       if (chat.chatType === 'group') {
         leaveGroupBtn.classList.remove('hidden');
         if (!addUserBtn) {
           addUserBtn = document.createElement('button');
           addUserBtn.id = 'add-user-btn';
-          addUserBtn.className = 'ml-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm';
-          addUserBtn.textContent = 'Add User';
+          addUserBtn.className = 'w-8 h-8 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-md';
+          addUserBtn.title = 'Add user to group';
+          addUserBtn.setAttribute('aria-label', 'Add user');
+          addUserBtn.innerHTML = `
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <path d="M20 8v6" />
+              <path d="M23 11h-6" />
+            </svg>
+            <span class="sr-only">Add User</span>
+          `;
           addUserBtn.addEventListener('click', () => {
             setAddToChatId(chatId);
             openFriendSelectionModal();
           });
-          leaveGroupBtn.parentElement?.insertBefore(addUserBtn, leaveGroupBtn.nextSibling);
+          const actions = document.getElementById('chat-header-actions');
+            if (actions) {
+              const leaveBtnInDom = document.getElementById('leave-group-btn');
+              if (leaveBtnInDom) {
+                actions.insertBefore(addUserBtn, leaveBtnInDom);
+              } else {
+                actions.appendChild(addUserBtn);
+              }
+            } else {
+              // fallback: insert before leave button if we can't find the actions container
+              leaveGroupBtn.parentElement?.insertBefore(addUserBtn, leaveGroupBtn);
+            }
         } else {
           addUserBtn.classList.remove('hidden');
         }
@@ -234,6 +270,11 @@ export function renderMemberList() {
   const names = members.map((m: any) => m.username || String(m.userId || m.id || 'Unknown'));
   const shown = names.slice(0, maxNames).join(', ');
   container.textContent = shown + (names.length > maxNames ? ' ...' : '');
+}
+
+function truncateText(text: string | undefined | null, max = 30) {
+  if (!text) return '';
+  return text.length > max ? text.slice(0, max - 1) + '…' : text;
 }
 
 // Wrapper function for service to call UI action
@@ -414,6 +455,12 @@ async function openFriendSelectionModal() {
   const modal = document.getElementById('friend-selection-modal');
   if (!modal) return;
 
+  // FIX: Ensure modal is direct child of body (not inside a hidden parent)
+  if (modal.parentElement !== document.body) {
+    console.warn('⚠️ Friend modal parent is not body, moving to body');
+    document.body.appendChild(modal);
+  }
+
   if (addToChatId) {
     try {
       await loadChats();
@@ -436,6 +483,14 @@ async function openFriendSelectionModal() {
   }
 
   renderFriendsList();
+
+  // Re-evaluate submit button state when group name changes
+  if (groupNameInput) {
+    // Use oninput to avoid adding multiple listeners
+    groupNameInput.oninput = () => {
+      updateSelectedFriendsTags();
+    };
+  }
 
   if (groupNameInput) {
     if (addToChatId) {
@@ -462,7 +517,7 @@ async function openFriendSelectionModal() {
     if (desc) desc.textContent = 'Select friends to add to this chat:';
   } else {
     if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+    if (desc) desc.textContent = 'Select friends to add to the group:';
   }
 }
 
@@ -477,6 +532,9 @@ function closeFriendSelectionModal() {
   if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = 'Create Group';
 
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
+  if (groupNameInput) {
+    groupNameInput.oninput = null;
+  }
   if (groupNameInput && groupNameInput.parentElement) groupNameInput.parentElement.style.display = '';
 
   const selectedTags = document.getElementById('selected-friends-tags');
@@ -488,7 +546,7 @@ function closeFriendSelectionModal() {
     const header = modal.querySelector('h2') as HTMLElement | null;
     const desc = modal.querySelector('p') as HTMLElement | null;
     if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+    if (desc) desc.textContent = 'Select friends to add to the group:';
   }
 }
 
@@ -526,7 +584,7 @@ async function renderFriendsList() {
     const friendName = friend.username || friend.name || 'Unknown';
 
     const friendItem = document.createElement('div');
-    friendItem.className = 'flex items-center gap-3 p-3 hover:bg-neutral-700 rounded-md cursor-pointer transition';
+    friendItem.className = 'flex items-center gap-3 p-3 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-md cursor-pointer transition';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -535,7 +593,7 @@ async function renderFriendsList() {
     checkbox.setAttribute('data-friend-id', friendId);
 
     const label = document.createElement('label');
-    label.className = 'flex-1 cursor-pointer text-white';
+    label.className = 'flex-1 cursor-pointer text-black dark:text-white';
     label.textContent = friendName;
 
     checkbox.addEventListener('change', () => {
@@ -605,7 +663,17 @@ function updateSelectedFriendsTags() {
   }
 
   if (submitBtn instanceof HTMLButtonElement) {
-    submitBtn.disabled = selectedFriendsForGroup.size < 1;
+    // Disable when no friends selected
+    let disable = selectedFriendsForGroup.size < 1;
+
+    // If creating a new group (not adding to existing chat), also require a non-empty group name
+    if (!addToChatId) {
+      const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement | null;
+      const groupName = groupNameInput?.value?.trim() || '';
+      if (groupName.length === 0) disable = true;
+    }
+
+    submitBtn.disabled = disable;
   }
 }
 
@@ -661,7 +729,7 @@ async function handleGroupChatSubmit() {
     await loadChats();
     selectChat(chatId);
 
-    console.log('Group chat created:', chatId);
+    // group created
   } catch (err) {
     console.error('Error creating group chat:', err);
     alert(`Failed to create group chat: ${(err as Error).message}`);
@@ -688,7 +756,12 @@ function handleMessageKeyPress(event: KeyboardEvent) {
 // ============================================================================
 
 export function setupChatEventListeners() {
-  if ((window as any).__chat_listeners_attached) return;
+  if ((window as any).__chat_listeners_attached) {
+    console.log('⚠️ Chat event listeners already attached, skipping');
+    return;
+  }
+
+  console.log('🎯 Setting up chat event listeners...');
 
   const closeBtn = document.getElementById('chat-close-btn');
   if (closeBtn) {
@@ -774,4 +847,5 @@ export function setupChatEventListeners() {
   }
 
   (window as any).__chat_listeners_attached = true;
+  console.log('✅ Chat event listeners successfully attached');
 }
