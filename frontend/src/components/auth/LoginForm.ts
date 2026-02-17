@@ -15,6 +15,8 @@ export function createLoginForm(callbacks?: LoginFormCallbacks): void {
 export function attachLogin(): void {
 	const form = document.getElementById('login-form') as HTMLFormElement | null;
 	if (!form) return;
+
+	console.log('attachLogin: login-form element found', form);
 	if (form.dataset.attached === 'true') {
 		// already attached
 		form.classList.remove('hidden');
@@ -30,8 +32,21 @@ export function attachLogin(): void {
 	if (registerLink) {
 		registerLink.addEventListener('click', (e) => {
 			e.preventDefault();
+			console.log('attachLogin: to-register clicked');
+			// quick DOM checks before invoking register attach
+			const regSection = document.getElementById('register-section');
+			const regForm = document.getElementById('register-form');
+			console.log('attachLogin: pre-attach check', { regSection, regForm });
 			hideLogin();
-			attachRegister();
+			// ensure UI is visible even if attachRegister fails for some reason
+			if (regSection) regSection.classList.remove('hidden');
+			if (regForm) regForm.classList.remove('hidden');
+			try {
+				attachRegister();
+				console.log('attachLogin: attachRegister returned');
+			} catch (err) {
+				console.error('attachLogin: attachRegister threw', err);
+			}
 		});
 	}
 	if (!usernameInput || !passwordInput) return;
