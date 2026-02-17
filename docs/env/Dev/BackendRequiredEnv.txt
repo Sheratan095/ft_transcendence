@@ -12,7 +12,7 @@ gateway:
     DOC_PASSWORD=admin
     USE_HTTPS=true
     HTTPS_CERTS_PATH=../certs/certs/
-    RATE_LIMIT_ACTIVE=true
+    RATE_LIMIT_ACTIVE=false
     HOST=127.0.0.1
 
 services/auth:
