@@ -22,8 +22,10 @@ import {
   addUserToChat,
   createGroupChat,
   getChatDisplayName,
-  escapeHtml
+  escapeHtml,
 } from './chatService';
+
+import { t } from '../../lib/intlayer';
 
 // Re-export for backward compatibility
 export { sendChatInvite } from './chatService';
@@ -116,7 +118,12 @@ export function renderChatList() {
   }
 
   if (chats.length === 0) {
-    chatList.innerHTML = '<div class="placeholder">No chats yet</div>';
+    const placeholder = document.createElement('div');
+    placeholder.className = 'placeholder';
+    placeholder.textContent = t('chat.no-chat');
+    chatList.innerHTML = '';
+    chatList.appendChild(placeholder);
+    console.warn('No chats to display');
     return;
   }
 
