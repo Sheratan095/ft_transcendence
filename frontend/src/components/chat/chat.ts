@@ -88,7 +88,10 @@ export function closeChatModal() {
   setCurrentChatId(null);
 
   const chatHeader = document.getElementById('chat-header');
-  if (chatHeader) chatHeader.textContent = 'Select a chat';
+  if (chatHeader) {
+    chatHeader.textContent = t('chat.select');
+    chatHeader.title = '';
+  }
 
   const chatMessages = document.getElementById('chat-messages');
   if (chatMessages) chatMessages.innerHTML = '';
@@ -101,6 +104,9 @@ export function closeChatModal() {
 
   const loadMoreBtn = document.getElementById('load-more-btn');
   if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+
+  const membersEl = document.getElementById('chat-members');
+  if (membersEl) membersEl.innerHTML = '';
 
   renderChatList();
   updateChatControls();
@@ -198,7 +204,7 @@ async function selectChat(chatId: string) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
       const fullName = getChatDisplayName(chat);
-      chatHeader.textContent = truncateText(fullName, 26);
+      chatHeader.textContent = truncateText(fullName, 29);
       chatHeader.title = fullName;
       if (chat.chatType === 'group') {
         leaveGroupBtn.classList.remove('hidden');
