@@ -50,6 +50,36 @@ document.addEventListener('DOMContentLoaded', () => {
         el.textContent = key;
       }
     });
+
+    // Handle placeholder attributes
+    const placeholderNodes = Array.from((root as any).querySelectorAll('[data-i18n-placeholder]') as HTMLElement[]);
+    placeholderNodes.forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder')!;
+      const rawVars = el.getAttribute('data-i18n-vars') || '{}';
+      let vars = {};
+      try { vars = JSON.parse(rawVars); } catch {}
+      try {
+        const val = t(key, vars as Record<string, string|number>);
+        (el as HTMLInputElement).placeholder = val;
+      } catch (err) {
+        (el as HTMLInputElement).placeholder = key;
+      }
+    });
+
+    // Handle title/aria-label attributes
+    const titleNodes = Array.from((root as any).querySelectorAll('[data-i18n-title]') as HTMLElement[]);
+    titleNodes.forEach(el => {
+      const key = el.getAttribute('data-i18n-title')!;
+      const rawVars = el.getAttribute('data-i18n-vars') || '{}';
+      let vars = {};
+      try { vars = JSON.parse(rawVars); } catch {}
+      try {
+        const val = t(key, vars as Record<string, string|number>);
+        el.title = val;
+      } catch (err) {
+        el.title = key;
+      }
+    });
   }
 
   function hydrateOnce() {
@@ -58,6 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   hydrateOnce();
+
+  // Expose hydration functions globally for debugging
+  (window as any).__hydrateRoot = hydrateRoot;
+  (window as any).__hydrateAll = hydrateOnce;
+  
   const locales = [
     { code: 'en', label: 'EN' },
     { code: 'fr', label: 'FR' },
@@ -74,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const v = langSelect.value;
     setLocale(v);
     try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
+    // Re-hydrate with new locale before reload
+    hydrateOnce();
     try
     {
       if (isLoggedInClient())
@@ -116,6 +153,10 @@ document.addEventListener('change', (e) => {
   setLocale(v);
   try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
   try { localStorage.setItem('userLanguage', v); } catch {}
+  // Expose hydrate function before reload
+  const hydrateRoot = (window as any).__hydrateRoot;
+  const hydrateAll = (window as any).__hydrateAll;
+  if (hydrateAll) hydrateAll();
   // reload to ensure all templates/renderers pick up the new locale
   window.location.reload();
 });

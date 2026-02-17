@@ -291,7 +291,7 @@ function updateChatControls() {
 
   if (input) {
     input.disabled = !enabled;
-    input.placeholder = enabled ? 'Type a message...' : 'Select a chat to start messaging';
+    input.placeholder = enabled ? t('chat.typing-placeholder') : t('chat.selector-placeholder');
   }
 
   if (sendBtn) {
