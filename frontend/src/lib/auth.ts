@@ -1,6 +1,7 @@
 import { stopTokenRefresh } from './token';
 import { disconnectChatWebSocket } from '../components/chat/chatService';
 import { disconnectNotificationsWebSocket } from '../components/shared/Notifications';
+import { setLocaleInStorage } from 'intlayer';
 
 export interface User {
 	id: string;
@@ -79,17 +80,19 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
  * Fetch and save the current user's profile to localStorage
  * Used during login/auth flow to persist user data
  */
-export async function SaveCurrentUserProfile(userId: string): Promise<User | null> {
+export async function SaveCurrentUserProfile(userId: string): Promise<User | null>
+{
   const user = await fetchUserProfile(userId);
   
   if (!user) return null;
   
   // Enrich with additional data from localStorage
   (user as any).tfaEnabled = localStorage.getItem('tfaEnabled') === 'true' || false;
-  (user as any).language = user.language || localStorage.getItem('userLanguage') || 'en';
   (user as any).avatarUrl = user.avatarUrl || '/assets/placeholder-avatar.jpg';
   (user as any).createdAt = user.createdAt || new Date().toISOString();
-  
+  (user as any).language = user.language || 'en';
+  localStorage.setItem("userLanguage", user.language as string);
+
   // Save to localStorage
   saveUser(user);
   

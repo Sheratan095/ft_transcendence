@@ -35,7 +35,7 @@ export { sendChatInvite } from './chatService';
 // ============================================================================
 
 export function initChat(userId: string) {
-  console.log('🔧 Initializing chat for user:', userId);
+  // initialization
   setCurrentUserId(userId);
   connectChatWebSocket().catch(err => console.error('Failed to establish chat connection:', err));
   
@@ -48,7 +48,6 @@ export function initChat(userId: string) {
   (window as any).__resetChatUI = resetChatUI;
   (window as any).__refreshChatsIfOpen = refreshChatsIfOpen;
   (window as any).__closeChatModal = closeChatModal;
-  console.log('✅ Chat UI functions exposed to global scope');
 }
 
 // ============================================================================
@@ -62,16 +61,12 @@ export async function openChatModal() {
     return;
   }
 
-  console.log('📂 Opening chat modal...');
   
   // FIX: Ensure modal is direct child of body (not inside a hidden parent)
   if (modal.parentElement !== document.body) {
-    console.warn('⚠️ Modal parent is not body, moving modal to body');
     document.body.appendChild(modal);
   }
-  
   modal.classList.remove('hidden');
-  console.log('✅ Modal is now visible!');
 
   if (chats.length === 0) {
     try {
@@ -122,8 +117,6 @@ export function renderChatList() {
     return;
   }
 
-  console.log(`Rendering chat list with ${chats.length} chats`);
-
   if (chats.length === 0) {
     const placeholder = document.createElement('div');
     placeholder.className = 'placeholder';
@@ -140,11 +133,8 @@ export function renderChatList() {
     const chatItem = document.createElement('div');
     chatItem.id = `chat-item-${chat.id}`;
     chatItem.className = 'chat-item cursor-pointer';
-    if (getCurrentTheme() === 'dark') {
-      chatItem.classList.add('dark');
-    }
     if (String(currentChatId) === String(chat.id)) {
-      chatItem.classList.add('active', 'border-accent-green', 'border-2', 'rounded', 'p-2');
+      chatItem.classList.add('active', 'border-accent-blue', 'dark:border-accent-green', 'border-2', 'rounded', 'p-2');
       chatItem.setAttribute('aria-selected', 'true');
     } else {
       chatItem.setAttribute('aria-selected', 'false');
@@ -154,11 +144,13 @@ export function renderChatList() {
     };
 
     const chatName = document.createElement('div');
-    chatName.className = 'chat-item-name text-size-lg font-medium';
-    chatName.textContent = getChatDisplayName(chat);
+    chatName.className = 'chat-item-name text-size-lg font-medium truncate';
+    const fullName = getChatDisplayName(chat);
+    chatName.textContent = truncateText(fullName, 30);
+    chatName.title = fullName;
 
     const chatType = document.createElement('div');
-    chatType.className = 'chat-item-type text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
+    chatType.className = 'chat-item-type text-accent-blue dark:text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
     if (chat.chatType === 'dm')
       chatType.textContent = 'Direct Message';
     else
@@ -187,10 +179,7 @@ export function renderChatList() {
 }
 
 async function selectChat(chatId: string) {
-  if (!chatId) {
-    console.warn('selectChat called with invalid chatId:', chatId);
-    return;
-  }
+  if (!chatId) return;
   setCurrentChatId(chatId);
   setMessageOffset(0);
 
@@ -208,7 +197,7 @@ async function selectChat(chatId: string) {
   if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
-      chatHeader.textContent = getChatDisplayName(chat);
+      chatHeader.textContent = truncateText(getChatDisplayName(chat), 28);
       if (chat.chatType === 'group') {
         leaveGroupBtn.classList.remove('hidden');
         if (!addUserBtn) {
@@ -281,6 +270,11 @@ export function renderMemberList() {
   const names = members.map((m: any) => m.username || String(m.userId || m.id || 'Unknown'));
   const shown = names.slice(0, maxNames).join(', ');
   container.textContent = shown + (names.length > maxNames ? ' ...' : '');
+}
+
+function truncateText(text: string | undefined | null, max = 30) {
+  if (!text) return '';
+  return text.length > max ? text.slice(0, max - 1) + '…' : text;
 }
 
 // Wrapper function for service to call UI action
@@ -490,6 +484,14 @@ async function openFriendSelectionModal() {
 
   renderFriendsList();
 
+  // Re-evaluate submit button state when group name changes
+  if (groupNameInput) {
+    // Use oninput to avoid adding multiple listeners
+    groupNameInput.oninput = () => {
+      updateSelectedFriendsTags();
+    };
+  }
+
   if (groupNameInput) {
     if (addToChatId) {
       if (groupNameInput.parentElement) groupNameInput.parentElement.style.display = 'none';
@@ -515,7 +517,7 @@ async function openFriendSelectionModal() {
     if (desc) desc.textContent = 'Select friends to add to this chat:';
   } else {
     if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+    if (desc) desc.textContent = 'Select friends to add to the group:';
   }
 }
 
@@ -530,6 +532,9 @@ function closeFriendSelectionModal() {
   if (createGroupSubmitBtn) createGroupSubmitBtn.textContent = 'Create Group';
 
   const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement;
+  if (groupNameInput) {
+    groupNameInput.oninput = null;
+  }
   if (groupNameInput && groupNameInput.parentElement) groupNameInput.parentElement.style.display = '';
 
   const selectedTags = document.getElementById('selected-friends-tags');
@@ -541,7 +546,7 @@ function closeFriendSelectionModal() {
     const header = modal.querySelector('h2') as HTMLElement | null;
     const desc = modal.querySelector('p') as HTMLElement | null;
     if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group (at least 2):';
+    if (desc) desc.textContent = 'Select friends to add to the group:';
   }
 }
 
@@ -579,7 +584,7 @@ async function renderFriendsList() {
     const friendName = friend.username || friend.name || 'Unknown';
 
     const friendItem = document.createElement('div');
-    friendItem.className = 'flex items-center gap-3 p-3 hover:bg-neutral-700 rounded-md cursor-pointer transition';
+    friendItem.className = 'flex items-center gap-3 p-3 hover:bg-neutral-200 dark:hover:bg-neutral-700 rounded-md cursor-pointer transition';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -588,7 +593,7 @@ async function renderFriendsList() {
     checkbox.setAttribute('data-friend-id', friendId);
 
     const label = document.createElement('label');
-    label.className = 'flex-1 cursor-pointer text-white';
+    label.className = 'flex-1 cursor-pointer text-black dark:text-white';
     label.textContent = friendName;
 
     checkbox.addEventListener('change', () => {
@@ -658,7 +663,17 @@ function updateSelectedFriendsTags() {
   }
 
   if (submitBtn instanceof HTMLButtonElement) {
-    submitBtn.disabled = selectedFriendsForGroup.size < 1;
+    // Disable when no friends selected
+    let disable = selectedFriendsForGroup.size < 1;
+
+    // If creating a new group (not adding to existing chat), also require a non-empty group name
+    if (!addToChatId) {
+      const groupNameInput = document.getElementById('group-name-input') as HTMLInputElement | null;
+      const groupName = groupNameInput?.value?.trim() || '';
+      if (groupName.length === 0) disable = true;
+    }
+
+    submitBtn.disabled = disable;
   }
 }
 
@@ -714,7 +729,7 @@ async function handleGroupChatSubmit() {
     await loadChats();
     selectChat(chatId);
 
-    console.log('Group chat created:', chatId);
+    // group created
   } catch (err) {
     console.error('Error creating group chat:', err);
     alert(`Failed to create group chat: ${(err as Error).message}`);

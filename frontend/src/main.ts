@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   hydrateOnce();
   const locales = [
-    { code: 'en', label: 'English' },
-    { code: 'fr', label: 'Français' },
-    { code: 'it', label: 'Italiano' }
+    { code: 'en', label: 'EN' },
+    { code: 'fr', label: 'FR' },
+    { code: 'it', label: 'IT' }
   ];
   const langSelect = document.getElementById('profile-language') as HTMLSelectElement | null;
   if (!langSelect) return;
@@ -70,12 +70,32 @@ document.addEventListener('DOMContentLoaded', () => {
   langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
   langSelect.value = _savedLanguage;
 
-  langSelect.addEventListener('change', () => {
+  langSelect.addEventListener('change', async () => {
     const v = langSelect.value;
     setLocale(v);
     try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
-    try { localStorage.setItem('userLanguage', v); } catch {}
-    // reload page so all templates/renderers pick up the new language
+    try
+    {
+      if (isLoggedInClient())
+      {
+        localStorage.setItem('userLanguage', v); 
+        const response = await fetch('/api/users/update-user', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ newLanguage: v }),
+        });
+        if (!response.ok)
+          console.error('Failed to update user language:', response.status);
+      }
+    }
+    catch (err)
+    {
+      console.error('Error updating user language:', err);
+    }
+    console.log('Language changed to', v);
     window.location.reload();
   });
 });

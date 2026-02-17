@@ -137,6 +137,15 @@
 				</button>
 			</div> 
 		</form>
+
+		<!-- Language selector styled like theme button -->
+		<select id="profile-language" aria-label="Select language" title="Select language"
+			class="relative z-30 pointer-events-auto cursor-pointer py-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2 text-white text-sm appearance-auto dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100 dark:text-black">
+			<option value="en">EN</option>
+			<option value="fr">FR</option>
+			<option value="it">IT</option>
+		</select>
+		
 		<!-- Theme Toggle Button -->
 		<button id="theme-toggle-btn" class="p-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2
 					dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100"
@@ -470,22 +479,10 @@
 								<h1 id="profile-username" class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">User</h1>
 								
 								<!-- Email and ID -->
-								<div class="space-y-2 sm:space-y-3 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
+								<div class="mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
 									<div class="flex items-center gap-2">
 										<span class="font-extrabold text-black dark:text-white">Email:</span> 
 										<span class="text-gray-600 dark:text-neutral-400" id="profile-email">email@example.com</span>
-									</div>
-									<div class="flex items-center gap-2">
-										<span class="font-extrabold text-black dark:text-white" data-i18n="profile.idLabel"></span> 
-										<span class="text-gray-600 dark:text-neutral-400" id="profile-id">0</span>
-									</div>
-									<div class="flex items-center gap-2">
-										<span class="font-extrabold text-black dark:text-white" data-i18n="profile.rankLabel"></span> 
-										<span class="text-gray-600 dark:text-neutral-400" id="profile-rank">Rookie</span>
-									</div>
-									<div class="flex items-center gap-2">
-										<span class="font-extrabold text-black dark:text-white" data-i18n="profile.winsLabel"></span> 
-										<span class="text-gray-600 dark:text-neutral-400" id="profile-wins">0</span>
 									</div>
 								</div>
 
@@ -505,11 +502,7 @@
 								</button>
 
 								<!-- Language selector -->
-								<select id="profile-language" class="h-10 flex items-center px-2 sm:px-4 text-xs sm:text-sm md:text-base bg-gray-600 dark:bg-neutral-700 text-white font-extrabold uppercase tracking-tight appearance-none transition rounded">
-									<option value="en">English</option>
-									<option value="fr">Français</option>
-									<option value="it">Italiano</option>
-								</select>
+								<!-- language selector removed from profile-template (moved to header) -->
 
 								<!-- 2FA toggle -->
 								<div class="flex items-center gap-2 ml-auto">
@@ -933,7 +926,7 @@
 				<button
 					type="button"
 					id="chat-close-btn"
-					class="absolute top-3 right-3 z-50 text-gray-600 dark:text-gray-400 bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white rounded-lg text-sm w-9 h-9 inline-flex justify-center items-center transition-colors"
+					class="absolute top-3 right-3 z-50 text-accent-orange dark:text-green-400 bg-transparent hover:bg-gray-300 hover:text-accent-orange dark:hover:bg-gray-600 dark:hover:text-accent-green rounded-lg text-sm w-9 h-9 inline-flex justify-center items-center transition-colors"
 					title="Close chat"
 				>
 					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -982,7 +975,7 @@
 					</div>
 					<div class="flex-1 min-w-0">
 						<div class="flex flex-col min-w-0">
-							<h2 id="chat-header" class="text-xl font-bold text-black dark:text-white uppercase tracking-tight truncate" data-i18n="chat.select"></h2>
+							<h2 id="chat-header" class="text-xl font-bold text-black dark:text-white uppercase tracking-tight truncate max-w-[calc(100%-2rem)]" data-i18n="chat.select"></h2>
 							<div id="chat-members" class="mt-1 text-sm text-neutral-500 dark:text-neutral-300 truncate"></div>
 						</div>
 					</div>
@@ -1032,17 +1025,17 @@
   class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 z-50 
          justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
 >
-  <div class="relative p-4 w-full max-w-2xl max-h-full">
-    <div class="relative bg-neutral-900 border border-neutral-700 rounded-xl shadow-lg p-6">
+	<div class="relative p-4 w-full max-w-2xl max-h-full">
+		<div class="relative bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-700 rounded-xl shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] p-6">
 
       <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-3 right-3 z-10 text-neutral-400 bg-transparent 
-               hover:bg-neutral-800 hover:text-white rounded-lg text-sm 
-               w-9 h-9 inline-flex justify-center items-center"
-        id="friend-modal-close-btn"
-      >
+			<button
+				type="button"
+				class="absolute top-3 right-3 z-10 text-gray-600 bg-transparent 
+							 hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white rounded-lg text-sm 
+							 w-9 h-9 inline-flex justify-center items-center"
+				id="friend-modal-close-btn"
+			>
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M6 18L18 6M6 6l12 12"/>
@@ -1056,23 +1049,23 @@
 
       <!-- Group name input -->
       <div class="mb-6">
-        <label for="group-name-input" class="block text-white font-semibold mb-2">Group Name</label>
-        <input
-          id="group-name-input"
-          type="text"
-          class="w-full bg-neutral-700 text-white px-3 py-2 rounded-md border border-neutral-600 focus:outline-none focus:border-[#0dff66]"
-          placeholder="Enter group name..."
-        />
+				<label for="group-name-input" class="block text-gray-800 dark:text-white font-semibold mb-2">Group Name</label>
+				<input
+					id="group-name-input"
+					type="text"
+					class="w-full bg-white dark:bg-neutral-700 text-black dark:text-white px-3 py-2 rounded-md border border-gray-300 dark:border-neutral-600 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green"
+					placeholder="Enter group name..."
+				/>
       </div>
 
       <!-- Friends list -->
-      <div id="friends-list" class="border border-neutral-700 rounded-md p-4 mb-6 max-h-96 overflow-y-auto bg-neutral-800">
-        <div class="text-neutral-400 text-center">Loading friends...</div>
+			<div id="friends-list" class="border rounded-md p-4 mb-6 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700">
+				<div class="text-gray-600 dark:text-neutral-400 text-center">Loading friends...</div>
       </div>
 
       <!-- Selected friends display -->
-      <div id="selected-friends" class="mb-6 p-3 bg-neutral-800 rounded-md border border-neutral-700 min-h-12">
-        <p class="text-sm text-neutral-400 mb-2">Selected: <span id="selected-count">0</span></p>
+			<div id="selected-friends" class="mb-6 p-3 bg-white dark:bg-neutral-800 rounded-md border border-gray-200 dark:border-neutral-700 min-h-12">
+				<p class="text-sm text-gray-600 dark:text-neutral-400 mb-2">Selected: <span id="selected-count">0</span></p>
         <div id="selected-friends-tags" class="flex flex-wrap gap-2">
           <!-- Selected friend tags will appear here -->
         </div>
@@ -1082,13 +1075,13 @@
       <div class="flex gap-3 justify-end">
         <button
           id="friend-modal-cancel-btn"
-          class="px-4 py-2 bg-neutral-700 text-white rounded-md hover:bg-neutral-600 transition"
+					class="px-4 py-2 bg-white/10 dark:bg-neutral-700 text-black dark:text-white rounded-md hover:bg-gray-100 dark:hover:bg-neutral-600 transition"
         >
           Cancel
         </button>
         <button
           id="create-group-submit-btn"
-          class="px-4 py-2 bg-[#0dff66] text-black font-semibold rounded-md hover:brightness-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+					class="px-4 py-2 bg-accent-orange dark:bg-accent-green text-white font-semibold rounded-md hover:brightness-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
           disabled
         	data-i18n="chat.create-group">
         </button>
