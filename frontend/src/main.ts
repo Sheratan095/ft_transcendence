@@ -97,7 +97,7 @@ document.addEventListener('change', (e) => {
   setLocale(v);
   try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
   // Expose hydrate function before reload
-  const hydrateRoot = (window as any).__hydrateRoot;
+  // const hydrateRoot = (window as any).__hydrateRoot;
   const hydrateAll = (window as any).__hydrateAll;
   if (hydrateAll) hydrateAll();
   // reload to ensure all templates/renderers pick up the new locale
@@ -137,24 +137,13 @@ document.addEventListener('change', (e) => {
   void modal.offsetHeight; // Force reflow
 };
 
-// Also test if modal appears by directly showing it
-(window as any).__forceShowChat = () => {
-  const modal = document.getElementById('chat-modal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex !important';
-    modal.style.visibility = 'visible !important';
-    modal.style.opacity = '1 !important';
-    console.log('✅ Modal forced visible with inline styles');
-  }
-};
-
 main(window.location.pathname);
 
 // Main application entry point,
 // called on every page load remembering SPA navigation
 // add checks here.
-export async function main(path: string) {
+export async function main(path: string)
+{
 await start();
 
 // Load user's saved language preference
@@ -174,7 +163,25 @@ initCardHoverEffect(); // Initialize card hover effect
   setupGlobalClickHandlers();
   // Setup game card listeners
   initSlideshow();
-if (isLoggedInClient()) initUserServices(path);
+
+  // Handle home button visibility on route changes
+  window.addEventListener('route-rendered', (e: any) => {
+    const currentPath = e.detail?.path || window.location.pathname;
+    if (currentPath === '/') {
+      removeHomeButton();
+    } else {
+      initHomeButton();
+    }
+    // Ensure the CTA in the rendered page reflects the logged-in state
+    if (isLoggedInClient()) modifyIndex();
+  });
+
+  // Show home button if not on home page
+  if (path !== '/')
+    initHomeButton();
+
+  if (isLoggedInClient())
+    initUserServices(path);
 }
 
 /**
@@ -265,18 +272,6 @@ function initUserServices(path: string)
   setupSearchUser();
   attachUserOptions();
   initChat(userId);
-
-  // Handle home button visibility on route changes
-  window.addEventListener('route-rendered', (e: any) => {
-    const currentPath = e.detail?.path || window.location.pathname;
-    if (currentPath === '/') {
-      removeHomeButton();
-    } else {
-      initHomeButton();
-    }
-    // Ensure the CTA in the rendered page reflects the logged-in state
-    modifyIndex();
-  });
 }
 
 // Global click handler for shared/dynamic elements
