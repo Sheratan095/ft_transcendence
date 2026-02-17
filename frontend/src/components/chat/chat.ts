@@ -137,8 +137,10 @@ export function renderChatList() {
     };
 
     const chatName = document.createElement('div');
-    chatName.className = 'chat-item-name text-size-lg font-medium';
-    chatName.textContent = getChatDisplayName(chat);
+    chatName.className = 'chat-item-name text-size-lg font-medium truncate';
+    const fullName = getChatDisplayName(chat);
+    chatName.textContent = truncateText(fullName, 30);
+    chatName.title = fullName;
 
     const chatType = document.createElement('div');
     chatType.className = 'chat-item-type text-accent-blue dark:text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
@@ -188,7 +190,7 @@ async function selectChat(chatId: string) {
   if (chatHeader && leaveGroupBtn) {
     const chat = chats.find(c => c.id === chatId);
     if (chat) {
-      chatHeader.textContent = getChatDisplayName(chat);
+      chatHeader.textContent = truncateText(getChatDisplayName(chat), 28);
       if (chat.chatType === 'group') {
         leaveGroupBtn.classList.remove('hidden');
         if (!addUserBtn) {
@@ -261,6 +263,11 @@ export function renderMemberList() {
   const names = members.map((m: any) => m.username || String(m.userId || m.id || 'Unknown'));
   const shown = names.slice(0, maxNames).join(', ');
   container.textContent = shown + (names.length > maxNames ? ' ...' : '');
+}
+
+function truncateText(text: string | undefined | null, max = 30) {
+  if (!text) return '';
+  return text.length > max ? text.slice(0, max - 1) + '…' : text;
 }
 
 // Wrapper function for service to call UI action
