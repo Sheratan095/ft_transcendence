@@ -16,6 +16,8 @@
     "vite-intlayer": "^8.0.4"
   },
   "dependencies": {
+    "@babylonjs/core": "^8.51.2",
+    "@babylonjs/gui": "^8.51.2",
     "@tailwindcss/vite": "^4.1.18",
     "@vitejs/plugin-react": "^5.1.4",
     "apexcharts": "^5.3.6",
