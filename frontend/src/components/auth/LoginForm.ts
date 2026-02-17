@@ -53,14 +53,18 @@ export function attachLogin(): void {
 
 		try {
 			const body = await loginRequest(username, password);
-			if (body && body.tfaRequired) {
+			if (body && body.tfaRequired)
+			{
 				localStorage.setItem('userId', body.userId);
 				hideLogin();
 				attach2FA();
 				return;
 			}
-			if (body && body.user.id) localStorage.setItem('userId', body.user.id);
-			if (body && body.user && body.user.id) await SaveCurrentUserProfile(body.user.id);
+			if (body && body.user.id)
+				localStorage.setItem('userId', body.user.id);
+			if (body && body.user && body.user.id)
+				await SaveCurrentUserProfile(body.user.id);
+
 			showSuccess(errorEl, 'Signed in successfully.');
 			setTimeout(() => window.location.href = '/profile', 400);
 		} catch (err) {
