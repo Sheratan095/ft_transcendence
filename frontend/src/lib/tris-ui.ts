@@ -38,7 +38,7 @@ export async function openTrisModal() {
   const userId = getUserId();
   console.log("tris modal");	
   const modal = document.getElementById('tris-modal');
-  if (!modal || !userId)
+  if (!modal)
   {
 	showErrorToast('User not logged in');
 	console.error('Tris modal or user ID not found');

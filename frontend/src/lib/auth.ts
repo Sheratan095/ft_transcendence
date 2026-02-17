@@ -1,8 +1,10 @@
 import { stopTokenRefresh } from './token';
+import { disconnectChatWebSocket } from '../components/chat/chatService';
+import { disconnectNotificationsWebSocket } from '../components/shared/Notifications';
 
 export interface User {
 	id: string;
-	UserId: string;
+	userId: string;
     username: string;
     email: string;
 	language?: string;
@@ -10,8 +12,6 @@ export interface User {
 	createdAt?: string;
     tfaEnabled?: boolean;
 }
-
-
 
 export function getUserId(): string | null {
   return localStorage.getItem('userId');
@@ -68,8 +68,6 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
     
     // Ensure UserId field matches id for compatibility
     (user as any).UserId = user.id;
-    
-    console.log('Fetched user profile:', user);
     return user;
   } catch (error) {
     console.error('Error fetching profile:', error);
@@ -102,31 +100,61 @@ export async function SaveCurrentUserProfile(userId: string): Promise<User | nul
 /**
  * Logout user and stop token refresh
  */
-export async function logout(): Promise<void> {
-  localStorage.removeItem('userId');
-  localStorage.removeItem('user');
-  stopTokenRefresh();
-  
-  try {
-    await fetch(`/api/auth/logout`, {
+export async function logout(): Promise<boolean> {  
+  try
+  {
+    // Close all WebSocket connections BEFORE calling logout API
+    // This prevents the server from trying to close already-closed connections
+    disconnectChatWebSocket();
+    disconnectNotificationsWebSocket();
+
+    const response = await fetch(`/api/auth/logout`, {
       method: 'DELETE',
+      credentials: 'include',
     });
-  } catch (err) {
+
+    if (!response.ok)
+    {
+      console.error('Logout response not ok:', response.status);
+      return false;
+    }
+    localStorage.removeItem('userId');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tfaEnabled');
+    stopTokenRefresh();
+
+    return true;
+  }
+  catch (err)
+  {
     console.error('Logout error:', err);
+    return false;
   }
 }
 
-export async function deleteAccout(): Promise<void> {
-  localStorage.removeItem('userId');
-  localStorage.removeItem('user');
-  stopTokenRefresh();
-  
-  try {
-	await fetch(`/api/auth/delete-account`, {
-	  method: 'DELETE',
-    credentials: 'include',
-	});
-  } catch (err) {
-	console.error('Delete account error:', err);
+export async function deleteAccount(): Promise<boolean> {
+  try
+  {
+    const response = await fetch(`/api/auth/delete-account`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+
+    if (!response.ok)
+    {
+      console.error('Delete account response not ok:', response.status);
+      return false;
+    }
+    localStorage.removeItem('userId');
+    localStorage.removeItem('user');
+    localStorage.removeItem('tfaEnabled');
+    stopTokenRefresh();
+
+    return true;
+  }
+  catch (err)
+  {
+    console.error('Delete account error:', err);
+    return false;
   }
 }

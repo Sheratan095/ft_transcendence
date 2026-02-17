@@ -41,6 +41,10 @@ export function	handleError(err, userId)
 
 export function	handleClose(socket, userId)
 {
+	// Connection already removed via API, skip logging and removal
+	if (!chatConnectionManager.getConnection(userId))
+		return;
+
 	console.log(`[CHAT] WebSocket connection closed - User: ${userId}`);
 
 	chatConnectionManager.removeConnection(userId);

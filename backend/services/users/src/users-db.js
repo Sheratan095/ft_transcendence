@@ -118,9 +118,9 @@ export class	UsersDatabase
 	{
 		const	query = `UPDATE users SET deleted = 1, username = ?, avatar_url = NULL WHERE id = ?`;
 
-		const	anonymousUsername = process.env.PLACEHOLDER_DELETED_USERNAMES;
+		const	anonymousUsername = `${process.env.PLACEHOLDER_DELETED_USERNAMES}-${userId}`.toLowerCase();
 
-		await this.db.run(query, [anonymousUsername.toLowerCase(), userId]);
+		await this.db.run(query, [anonymousUsername, userId]);
 	}
 
 	// Get user profile by username

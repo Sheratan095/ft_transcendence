@@ -61,46 +61,24 @@ export async function createGameStatsChart(
     }
   }
 
-  const total = wins + losses;
-
   const options = {
     series: [wins, losses],
-    colors: ['#10b981', '#ef4444'],
+    colors: ['#0dff66', '#ef4444'],
     chart: {
-      height: 250,
+      height: '100%',
       width: '100%',
       type: 'donut',
-      sparkline: { enabled: false },
+      sparkline: { enabled: true },
       toolbar: { show: false },
     },
     stroke: {
       colors: ['transparent'],
-      lineCap: '',
+      width: 0,
     },
     plotOptions: {
       pie: {
         donut: {
-          labels: {
-            show: true,
-            name: {
-              show: false,
-            },
-            total: {
-              showAlways: true,
-              show: true,
-              label: 'Total',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '12px',
-              formatter: () => String(total),
-            },
-            value: {
-              show: true,
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '14px',
-              formatter: (value: any) => value,
-            },
-          },
-          size: '70%',
+          size: '75%',
         },
       },
     },
@@ -108,11 +86,13 @@ export async function createGameStatsChart(
       enabled: false,
     },
     legend: {
-      position: 'bottom',
-      fontFamily: 'Inter, sans-serif',
-      fontSize: '12px',
+      show: false,
     },
     labels: ['Wins', 'Losses'],
+    tooltip: {
+      enabled: true,
+      theme: 'dark'
+    }
   };
 
   try {
@@ -184,32 +164,29 @@ export async function createMatchHistoryChart(
 
   const options = {
     chart: {
-      height: 250,
+      height: '100%',
       width: '100%',
       type: 'area',
       fontFamily: 'Inter, sans-serif',
-      dropShadow: { enabled: false },
+      sparkline: { enabled: true },
       toolbar: { show: false },
     },
-    tooltip: { enabled: true, x: { show: false } },
+    tooltip: { enabled: true, theme: 'dark' },
     fill: {
       type: 'gradient',
-      gradient: { opacityFrom: 0.55, opacityTo: 0, shade: '#3b82f6' },
+      gradient: { opacityFrom: 0.4, opacityTo: 0 },
     },
     dataLabels: { enabled: false },
     stroke: { width: 2, curve: 'smooth' },
-    grid: { show: true, strokeDashArray: 4 },
+    grid: { show: false },
     series: [
-      { name: 'Wins', data: winsData, color: '#10b981' },
+      { name: 'Wins', data: winsData, color: gameType === 'tris' ? '#0dff66' : '#00bcd4' },
       { name: 'Losses', data: lossesData, color: '#ef4444' },
     ],
-    legend: { show: true, position: 'top' },
+    legend: { show: false },
     xaxis: {
       categories,
-      labels: {
-        show: true,
-        style: { fontFamily: 'Inter, sans-serif', fontSize: '12px' },
-      },
+      labels: { show: false },
       axisBorder: { show: false },
       axisTicks: { show: false },
     },

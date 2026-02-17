@@ -257,6 +257,49 @@ html[data-transition-direction="back"] {
   }
 }
 
+  .btn-lock svg .bling {
+    stroke: #fff;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 3;
+    stroke-dashoffset: 15;
+    transition: all 0.3s ease;
+  }
+
+  .btn-lock svg .lock {
+    stroke: #fff;
+    stroke-width: 4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-dasharray: 36;
+    transition: all 0.4s ease;
+  }
+
+  .btn-lock svg .lockb {
+    fill: #fff;
+    fill-rule: evenodd;
+    clip-rule: evenodd;
+    transform: rotate(8deg);
+    transform-origin: 14px 20px;
+    transition: all 0.2s ease;
+  }
+
+    input[type="checkbox"].peer:checked + label svg .bling {
+    animation: bling6132 0.3s linear forwards;
+    animation-delay: 0.2s;
+  }
+
+  input[type="checkbox"].peer:checked + label svg .lock {
+    stroke-dasharray: 48;
+    animation: locked 0.3s linear forwards;
+  }
+
+  input[type="checkbox"].peer:checked + label svg .lockb {
+    transform: rotate(0);
+    transform-origin: 14px 22px;
+  }
+
+
 /* Default/Neutral animations (for initial page load) */
 @keyframes pageExit {
   from {
@@ -290,4 +333,18 @@ html[data-transition-direction="back"] {
   box-shadow: 0 20px 40px rgba(255, 0, 157, 0.2);
   @apply dark:shadow-[0_20px_40px_rgba(13,255,102,0.3)];
 }
+
+/* Hide scrollbars inside the chat modal while preserving scrolling behavior */
+#chat-modal .overflow-y-auto,
+#chat-modal #chat-messages {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+#chat-modal .overflow-y-auto::-webkit-scrollbar,
+#chat-modal #chat-messages::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Keep accessibility: ensure focusable elements are still reachable */
 

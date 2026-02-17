@@ -30,6 +30,7 @@ class	ChatConnectionManager
 	removeConnection(userId)
 	{
 		this._connections.delete(userId);
+		this._cachedUsersInChats.delete(userId);
 		console.log(`[CHAT] User ${userId} disconnected`);
 	}
 
@@ -58,7 +59,7 @@ class	ChatConnectionManager
 			timestamp: timestamp,
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message', timestamp);
+		await this.#dispatchEventToChat(chatId, data, chatDb, true, 'chat.message', timestamp, senderId);
 
 		const	status = await chatDb.getOverallMessageStatus(messageId);
 
@@ -67,7 +68,7 @@ class	ChatConnectionManager
 
 	// Send system message to chat members
 	// excludeUserId: optional user to exclude from receiving the message (e.g., newly added user)
-	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedByUsername, chatDb, timestamp)
+	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedById, invitedByUsername, chatDb, timestamp)
 	{
 		const	message = `User ${newUsername} has been added to the chat by ${invitedByUsername}.`;
 
@@ -83,7 +84,7 @@ class	ChatConnectionManager
 			timestamp: timestamp,
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
+		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage', timestamp, invitedById);
 	
 	}
 
@@ -104,6 +105,20 @@ class	ChatConnectionManager
 		};
 
 		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');
+	}
+
+	async	notifyNewlyAddedUser(toUserId, chatId, chatName, invitedByUsername)
+	{
+		const	data = {
+			chatId: chatId,
+			chatName: chatName,
+			addedBy: invitedByUsername,
+		};
+
+		const	socket = this._connections.get(toUserId);
+		if (socket)
+			this.#dispatchEventToSocket(socket, 'chat.added', data);
+
 	}
 
 	// Send chat.joined event to the newly added user
@@ -197,7 +212,7 @@ class	ChatConnectionManager
 			this.#dispatchEventToSocket(socket, 'chat.messageStatusUpdate', data);
 	}
 
-	async	#dispatchEventToChat(chatId, data, chatDb, createMessageStatus=false, eventType, timestamp=null)
+	async	#dispatchEventToChat(chatId, data, chatDb, createMessageStatus=false, eventType, timestamp=null, excludeUserId=null)
 	{
 		// Get users in chat
 		const	userIds = await chatDb.getUsersInChat(chatId);
@@ -205,6 +220,9 @@ class	ChatConnectionManager
 		// Send to each user in the chat
 		for (const userId of userIds)
 		{
+			if (excludeUserId && userId === excludeUserId)
+				continue;
+
 			const	socket = this._connections.get(userId);
 			if (socket)
 			{
@@ -217,6 +235,7 @@ class	ChatConnectionManager
 						"delivered",
 						timestamp
 					);
+					console.log(`[CHAT] Message ${data.messageId} delivered to user ${userId} in chat ${chatId}`);
 				}
 			}
 			else

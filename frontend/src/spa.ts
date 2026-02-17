@@ -1,22 +1,30 @@
 import { isLoggedInClient } from './lib/auth';
-import { logout } from './lib/token';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
-import { renderProfileCard } from './components/profile';
+import { renderProfileCard } from './components/profile/MainProfileCard';
+import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
+
+// Track current search profile card for cleanup
+let currentSearchProfileCard: HTMLElement | null = null;
 
 type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
   '/': { 
     render: async () => {
-	  const el = document.getElementById('main-content');
-
+      const el = document.getElementById('main-content');
+      const template = document.getElementById('home-template') as HTMLTemplateElement | null;
+      if (!el || !template) return;
+      el.innerHTML = '';
+      const clone = template.content.cloneNode(true);
+      el.appendChild(clone);
+      initCardHoverEffect();
     }
   },
   '/login': {
   render: async () => {
-	if (isLoggedInClient()) {
-		showErrorToast('Already logged in');
+	if (isLoggedInClient())
+  {
 		return;
 	}
     const el = document.getElementById('main-content');
@@ -35,31 +43,48 @@ const routes: Record<string, RouteConfig> = {
   },
   '/profile': {
     render: async () => {
-    const template = document.getElementById('profile-template') as HTMLTemplateElement | null;
     const el = document.getElementById('main-content');
-    if (!el || !template) return;
+    if (!el) return;
     if (!isLoggedInClient()) {
     goToRoute('/login');
     showErrorToast('Please sign in to view your profile');
     return;
     }
+    animatePolygonToBottom();
     el.innerHTML = '';
 
-    const clone = template.content.cloneNode(true);
-    el.appendChild(clone);
-    try {
-      // Find the actual profile card root (not just #profile-content)
-      const content = el.querySelector('#profile-content') as HTMLElement | null;
-      // If the template has a single card child, use it
-      let cardRoot = content;
-      if (content && content.children.length === 1 && content.children[0] instanceof HTMLElement) {
-        cardRoot = content.children[0] as HTMLElement;
+    // Check if viewing another user via query param
+    const params = new URLSearchParams(window.location.search);
+    const userId = params.get('id');
+
+    if (userId && userId !== 'current-user-id')
+    {
+      // Render search profile card for another user
+      try {
+        const result = await renderSearchProfileCard(userId, el);
+        // Store reference for cleanup
+        currentSearchProfileCard = result;
+        // If result is null, it means it's the current user, so render main profile
+        if (result === null) {
+          el.innerHTML = '';
+          await renderProfileCard(el);
+        }
+      } catch (err) {
+        console.error('Failed to load user profile:', err);
+        el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load user profile</div>';
       }
-      await renderProfileCard(cardRoot ?? content ?? el);
+      return;
+    }
+
+    // Render logged-in user's profile
+    try {
+      console.log('Calling renderProfileCard...');
+      await renderProfileCard(el);
+      console.log('Profile card rendered');
     } catch (err) {
       console.error('Failed to render profile:', err);
+      el.innerHTML = '<div class="text-red-500 text-center mt-8">Failed to load profile</div>';
     }
-	initCardHoverEffect();
     }
   },
   '/pong': { 
@@ -100,22 +125,33 @@ let isBackNavigation = false;
  * Updates browser history, detects back/forward navigation, and renders the appropriate route
  */
 async function goToRoute(path: string) {
-  // Instead of SPA rendering, do a full page reload
-  if (window.location.pathname !== path) {
-    window.location.assign(path);
+  const url = new URL(path, window.location.origin);
+  
+  // Real SPA navigation
+  if (url.pathname + url.search !== window.location.pathname + window.location.search) {
+    history.pushState(null, '', path);
+    await renderRoute(url.pathname);
   } else {
-    // If already on the path, force reload
-    window.location.reload();
+    // If already on the path, we can still re-render or do nothing
+    // To support clicking the same link to refresh:
+    await renderRoute(url.pathname);
   }
 }
 
 async function renderRoute(path: string) {
   const route = routes[path] || routes['/'];
   
+  // Cleanup any previous search profile card
+  if (currentSearchProfileCard) {
+    cleanupSearchProfileCard(currentSearchProfileCard);
+    currentSearchProfileCard = null;
+  }
+  
   try {
     // Use View Transitions API for smooth page transitions
     const transitionFn = async () => {
       await route.render();
+      window.dispatchEvent(new CustomEvent('route-rendered', { detail: { path } }));
     };
     
     if (document.startViewTransition) {
@@ -143,6 +179,11 @@ export function linkify() {
     const href = a.getAttribute('href');
     if (!href) return;
     if (href.startsWith('/')) {
+      // Allow explicit new-tab/open/download links to behave normally
+      const target = a.getAttribute('target');
+      if (target === '_blank' || a.hasAttribute('download') || a.hasAttribute('data-no-spa')) {
+        return;
+      }
       ev.preventDefault();
       goToRoute(href);
     }
@@ -160,6 +201,17 @@ export async function start() {
   window.addEventListener('popstate', () => renderRoute(location.pathname));
   let initial = location.pathname || '/';
   await renderRoute(initial);
+}
+
+export function animatePolygonToBottom(): void {
+	const polygon = document.querySelector(
+		'.mix-blend-difference'
+	) as HTMLElement | null;
+
+	if (!polygon) return;
+
+	polygon.style.transition = "clip-path 0.6s ease-in-out";
+	polygon.style.clipPath = "polygon(0% 90%, 100% 90%, 100% 100%, 0% 100%)";
 }
 
 export { goToRoute };

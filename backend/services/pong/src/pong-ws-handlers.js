@@ -32,11 +32,13 @@ export function	handleNewConnection(socket, req)
 
 export function	handleClose(socket, userId)
 {
+	// Connection already removed via API, skip logging and removal
+	if (!pongConnectionManager.getConnection(userId))
+		return;
+
 	console.log(`[PONG] WebSocket connection closed - User: ${userId}`);
 
 	pongConnectionManager.removeConnection(userId);
-	gameManager.handleUserDisconnect(userId);
-	tournamentManager.handleUserDisconnect(userId);
 }
 
 export function	handleError(socket, err, userId)
@@ -45,11 +47,7 @@ export function	handleError(socket, err, userId)
 	
 	// Remove the connection as it's likely broken
 	if (userId)
-	{
 		pongConnectionManager.removeConnection(userId);
-		gameManager.handleUserDisconnect(userId);
-		tournamentManager.handleUserDisconnect(userId);
-	}
 }
 
 export function	handleMessage(socket, msg, userId)

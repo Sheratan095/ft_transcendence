@@ -81,6 +81,12 @@ export const	getMessages = async (req, reply) =>
 		const	limit = req.query.limit;
 		const	offset = req.query.offset;
 
+		if (!chatId)
+		{
+			console.log(`[CHAT] User ${userId} attempted to fetch messages without providing chatId`);
+			return (reply.code(400).send({ error: 'Bad Request', message: 'chatId query parameter is required' }));
+			}
+
 		if (await chatDb.isUserInChat(userId, chatId) === false)
 		{
 			console.log(`[CHAT] User ${userId} attempted to access messages for chat ${chatId} without membership`);
@@ -98,17 +104,18 @@ export const	getMessages = async (req, reply) =>
 		}
 
 		// map to match the response schema
-		const	messages = rawMessages.map(msg => ({
+		const	messages = await Promise.all(rawMessages.map(async msg => ({
 			id: msg.id,
 			chatId: msg.chat_id,
 			senderId: msg.sender_id,
+			from: (msg.type == 'text') ? await chatConnectionManager.getUsernameFromCache(msg.sender_id) : null, // Only set 'from' for text messages, null for system messages
 			content: msg.content,
 			type: msg.type,
 			createdAt: msg.created_at,
 			messageStatus: msg.message_status
-		}));
+		})));
 
-		console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
+		// console.log(`[CHAT] User ${userId} fetched ${messages.length} messages for chat ${chatId} (limit: ${limit}, offset: ${offset})`);
 
 		const timestamp = formatDate(new Date());
 
@@ -153,19 +160,31 @@ export const	addUserToChat = async (req, reply) =>
 		}
 
 		const	timestamp = formatDate(new Date());
+		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
+		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
+
+		// Add system message to chat and notify chat
+		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, userId, fromUsername, chatDb, timestamp);
 
 		// Add the user to the chat
 		await chatDb.addUserToChat(chatId, toUserId, timestamp);
 
-		const	toUsername = await chatConnectionManager.getUsernameFromCache(toUserId, true);
-		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
+		const chatName = await chatDb.getChatName(chatId);
 
-		// Notify the user newly added to the chat
-		if (await notifyUserAddedToChat(toUserId, userId, fromUsername, chatId) == false)
-			console.error(`[CHAT] Failed to notify user ${toUserId} about being added to chat ${chatId}`);
+		// Notify the user newly added to the chat by sending a `chat.joined` event
+		try {
+			await chatConnectionManager.sendChatJoinedToUser(chatId, toUserId, fromUsername, `You were added to "${chatName}" by ${fromUsername}.`, timestamp);
+		} catch (notifyErr) {
+			console.error(`[CHAT] Failed to send chat.joined to user ${toUserId} for chat ${chatId}:`, notifyErr);
+			// Fallback: attempt the older notification method
+			try {
+				const fallback = chatConnectionManager.notifyNewlyAddedUser(toUserId, chatId, chatName, fromUsername);
+				if (fallback === false) console.error(`[CHAT] Fallback notifyNewlyAddedUser also failed for user ${toUserId}`);
+			} catch (fallbackErr) {
+				console.error(`[CHAT] Fallback notify failed for user ${toUserId}:`, fallbackErr);
+			}
+		}
 
-		// Add system message to chat and notify chat
-		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, fromUsername, chatDb, timestamp);
 		console.log(`[CHAT] User ${userId} added user ${toUserId} to chat ${chatId}`);
 
 		return (reply.code(200).send({ success: true }));
@@ -352,13 +371,30 @@ export const	deleteUsernameFromCache = async (req, reply) =>
 		// Force refresh the username in cache, it will be "Unknown" if deleted or updated in case of username change
 		await chatConnectionManager.getUsernameFromCache(userId, true);
 
-		console.log(`[CHAT] Deleted username cache for user ${userId}`);
+		// console.log(`[CHAT] Deleted username cache for user ${userId}`);
 
 		return (reply.code(200).send({ success: true }));
 	}
 	catch (err)
 	{
 		console.error('[CHAT] Error in deleteUsernameFromCache controller:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
+export const	removeWsConnection = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.body.userId;
+
+		chatConnectionManager.removeConnection(userId);
+
+		return (reply.code(200).send({ success: true }));
+	}
+	catch (err)
+	{
+		console.error('[CHAT] Error in removeWsConnection controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }

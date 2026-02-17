@@ -96,7 +96,7 @@ Response (acknowledgment to sender):
 **SERVER → CLIENT EVENTS**
 
 
-- **chat.chatMessage** - Message received in a chat
+- **chat.message** - Message received in a chat
 \`\`\`json
 {
   "event": "chat.message",
@@ -122,6 +122,18 @@ Response (acknowledgment to sender):
     "chatId": "chat789",
     "content": "Hello everyone!",
     "timestamp": "2025-11-19T10:30:00.000Z"
+  }
+}
+\`\`\`
+
+- **chat.added** - You've been added to a chat
+\`\`\`json
+{
+  "event": "chat.added",
+  "data": {
+    "chatId": "chat123",
+    "chatName": "Wonderful Chat",
+    "addedBy": "Alice9023"
   }
 }
 \`\`\`

@@ -3,6 +3,7 @@ import { tournamentManager } from './TournamentManager.js';
 import { getUsernameById, isUserBusyInternal } from './pong-help.js';
 import { GameStatus } from './GameInstance.js';
 import { TournamentStatus } from './TournamentIstance.js';
+import { pongConnectionManager } from './PongConnectionManager.js';
 
 //-----------------------------INTERNAL ROUTES-----------------------------
 
@@ -70,6 +71,24 @@ export const	isUserBusy = async (req, reply) =>
 	catch (err)
 	{
 		console.error('[PONG] Error in isUserBusy controller:', err);
+		return (reply.code(500).send({ error: 'Internal server error' }));
+	}
+}
+
+export const	removeWsConnection = async (req, reply) =>
+{
+	try
+	{
+		const	userId = req.body.userId;
+
+		// Remove WS connection options for the user
+		pongConnectionManager.removeConnection(userId);
+
+		return (reply.code(200).send({ message: 'WS connection removed successfully' }));
+	}
+	catch (err)
+	{
+		console.error('[PONG] Error in removeWsConnection controller:', err);
 		return (reply.code(500).send({ error: 'Internal server error' }));
 	}
 }
@@ -176,14 +195,13 @@ export const	createTournament = async (req, reply) =>
 		if (await isUserBusyInternal(creatorId, true))
 		{
 			console.error(`[PONG] ${creatorId} tried to create a tournament while busy`);
-			pongConnectionManager.sendErrorMessage(creatorId, 'You are already in a game or matchmaking');
-			return ;
+			return (reply.code(400).send({ error: 'You are already in a game or matchmaking' }));
 		}
 
 		// Create a new tournament
 		const	tournament = tournamentManager.createTournament(name, creatorId, creatorUsername);
 
-		console.log(`[PONG] User ${creatorId} creted a tournament named "${name}"`);
+		console.log(`[PONG] User ${creatorId} created a tournament named "${name}"`);
 
 		return (reply.code(201).send({
 			tournamentId: tournament.id,

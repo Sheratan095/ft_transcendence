@@ -7,7 +7,8 @@ import {
 	getActiveUsersCount,
 	sendChatUserAdded,
 	sendGameInvite,
-	sendNowFriends
+	sendNowFriends,
+	removeWsConnection
 } from './notification-controllers.js';
 
 import {
@@ -265,6 +266,32 @@ const	sendChatUserAddedOpts =
 	handler: sendChatUserAdded,
 }
 
+const	removeWsConnectionOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Remove all WebSocket connections for a user (Called by auth service during logout/delete)',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' }, }
+		},
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		},
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: removeWsConnection,
+}
+
 //-----------------------------ROUTES FOR GAME NOTIFICATIONS-----------------------------
 
 const	sendGameInviteOpts = 
@@ -329,4 +356,6 @@ export function	notificationRoutes(fastify)
 	fastify.post('/send-chat-user-added', sendChatUserAddedOpts);
 	fastify.post('/send-now-friends', sendNowFriendsOpts);
 	fastify.post('/send-game-invite', sendGameInviteOpts);
+
+	fastify.delete('/remove-ws-connection', removeWsConnectionOpts);
 }

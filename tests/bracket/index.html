@@ -5,183 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tournament Bracket</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
-        .bracket-container {
-            display: flex;
-            gap: 2rem;
-            overflow-x: auto;
-            /* reduced top padding so header sits closer to bracket */
-            padding: 2.5rem 2rem 2rem 2rem;
-            position: relative;
-            align-items: center;
-            min-height: 90vh;
+        :root{
+            --header: #0C89C1;
+            --bg: #f0f0f0;
+            --card: #ffffff;
+            --text: #000000;
+            --muted: #6b7280;
+            --stroke: #cbd5e1;
+            --match-bg: #c9c9c94d;
+            --winner-text: #ffffff;
+            --loser-text: #000000;
+            --match-status: #000000;
+            --winner-bg: #ff6b35;
+            --loser-score: #ff0000;
         }
-
-        .round-column {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-width: 280px;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 1;
-            height: 100%;
-        }
-
-        .round-column.first-round .matches-container {
-            gap: 2rem;
-        }
-
-        .matches-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .round-title {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 2rem;
-            color: #374151;
-            font-size: 0.95rem;
-            min-height: 2rem;
-        }
-
-        .match-box {
-            border: 1px solid #cbd5e1;
-            border-radius: 0.375rem;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            min-width: 250px;
-            position: relative;
-        }
-
-        svg.connector-lines {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .match-box.bye {
-            opacity: 0.6;
-            background: #f3f4f6;
-        }
-
-        .player-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 0.875rem;
-        }
-
-        .player-row:last-child {
-            border-bottom: none;
-        }
-
-        .player-row.winner {
-            background-color: #dbeafe;
-            font-weight: 600;
-        }
-
-        .player-row.bye {
-            font-style: italic;
-            color: #6b7280;
-        }
-
-        .player-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .player-score {
-            font-weight: 600;
-            min-width: 2rem;
-            text-align: right;
-            margin-left: 1rem;
-        }
-
-        .match-status {
-            font-size: 0.75rem;
-            color: #6b7280;
-            text-align: center;
-            padding: 0.5rem;
-            background: #f9fafb;
-        }
-
-        .tournament-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .tournament-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .info-item h3 {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            margin-bottom: 0.25rem;
-        }
-
-        .info-item p {
-            font-size: 1.25rem;
-            font-weight: bold;
+        .dark{
+            --header: #ff009d;
+            --bg: #000000;
+            --card: #ffffff;
+            --text: #ffffff;
+            --muted: #6b7280;
+            --stroke: #cbd5e1;
+            --match-bg: #404040;
+            --winner-text: #000000;
+            --loser-text: #ffffff;
+            --match-status: #ffffff;
+            --winner-bg: #0dff66;
+            --loser-score: #ff0000;
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class=" bg-[var(--bg)] min-h-screen">
     <div class="max-w-full p-6">
-        <div class="tournament-header">
+        <button id="theme-toggle" class="fixed top-6 right-6 z-50 px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+            🌙 Dark Mode
+        </button>
+        <div class="bg-[var(--header)] text-white p-8 rounded-lg mb-8">
             <h1 id="tournament-name" class="text-3xl font-bold">Tournament</h1>
-            <div class="tournament-info">
-                <div class="info-item">
-                    <h3>Status</h3>
-                    <p id="tournament-status">-</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
+                <div>
+                    <h3 class="text-sm opacity-90 mb-1">Status</h3>
+                    <p id="tournament-status" class="text-xl font-bold">-</p>
                 </div>
-                <div class="info-item">
-                    <h3>Participants</h3>
-                    <p id="tournament-participants">-</p>
+                <div>
+                    <h3 class="text-sm opacity-90 mb-1">Participants</h3>
+                    <p id="tournament-participants" class="text-xl font-bold">-</p>
                 </div>
-                <div class="info-item">
-                    <h3>Rounds</h3>
-                    <p id="tournament-rounds">-</p>
+                <div>
+                    <h3 class="text-sm opacity-90 mb-1">Rounds</h3>
+                    <p id="tournament-rounds" class="text-xl font-bold">-</p>
                 </div>
-                <div class="info-item">
-                    <h3>Winner</h3>
-                    <p id="tournament-winner">-</p>
+                <div>
+                    <h3 class="text-sm opacity-90 mb-1">Winner</h3>
+                    <p id="tournament-winner" class="text-xl font-bold">-</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <div id="bracket-svg-container" style="position: relative;">
-                <svg id="connector-svg" class="connector-lines"></svg>
-                <div id="bracket-container" class="bracket-container"></div>
+        <div class="rounded-lg shadow-lg p-6   ">
+            <div id="bracket-svg-container" class="relative">
+                <svg id="connector-svg" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></svg>
+                <div id="bracket-container" class="flex gap-9 overflow-x-auto px-2 relative pt-0 pb-0 items-center min-h-screen"></div>
             </div>
         </div>
 
-        <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">Status</h2>
-            <div id="status" class="p-4 rounded bg-blue-50 border border-blue-200 font-mono text-sm text-blue-700">
-                Loading...
-            </div>
-        </div>
     </div>
 
     <script src="./index.js"></script>

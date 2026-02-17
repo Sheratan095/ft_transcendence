@@ -7,7 +7,8 @@ import {
 	createGroupChat,
 	leaveGroupChat,
 	startPrivateChat,
-	deleteUsernameFromCache
+	deleteUsernameFromCache,
+	removeWsConnection
 } from './chat-controllers.js';
 
 import {
@@ -113,6 +114,7 @@ const	message =
 		id: { type: 'string' },
 		chatId: { type: 'string' },
 		senderId: { type: 'string' },
+		from : { type: 'string' }, // sender's username, null for system messages
 		content: { type: 'string' },
 		type: { type: 'string', enum: ['text', 'user_join', 'system', 'user_leave', 'chat_created'] },
 		createdAt: { type: 'string', format: 'date-time' },
@@ -159,6 +161,32 @@ const	deleteUserOpts =
 
 	preHandler: validateInternalApiKey,
 	handler: deleteUsernameFromCache
+};
+
+const	removeWsConnectionOpts =
+{
+	schema:
+	{
+		summary: '🔒 Internal - Remove all WebSocket connections for a user (Called by auth service during logout/delete)',
+		tags: ['Notifications', 'Internal'],
+	
+		...withInternalAuth,
+
+		body:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' }, }
+		},
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		},
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: removeWsConnection,
 };
 
 //-----------------------------PUBLIC ROUTES-----------------------------
@@ -396,4 +424,5 @@ export function	chatRoutes(fastify)
 	fastify.post('/leave-group-chat', leaveGroupChatOpts);
 
 	fastify.delete('/delete-user', deleteUserOpts);
+	fastify.delete('/remove-ws-connection', removeWsConnectionOpts);
 }

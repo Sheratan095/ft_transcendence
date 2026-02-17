@@ -10,6 +10,7 @@ interface ToastOptions {
   duration?: number;
   position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
   actions?: ToastAction[];
+  onClick?: () => void | Promise<void>;
 }
 
 function getToastContainer(position: string = 'top-right'): HTMLElement {
@@ -105,7 +106,8 @@ export function showToast(message: string, type: ToastType = 'info', options: To
     const buttons = toast.querySelectorAll('button');
     buttons.forEach((button, index) => {
       if (actions[index]) {
-        button.addEventListener('click', async () => {
+        button.addEventListener('click', async (e) => {
+          e.stopPropagation();
           try {
             await actions[index].onClick();
           } catch (err) {
@@ -113,6 +115,30 @@ export function showToast(message: string, type: ToastType = 'info', options: To
           }
           removeToast();
         });
+      }
+    });
+  }
+
+  // If a top-level onClick handler is provided, make the whole toast clickable
+  if ((options as any).onClick) {
+    const onClickFn = (options as any).onClick as () => void | Promise<void>;
+    toast.classList.add('cursor-pointer');
+    toast.setAttribute('role', 'button');
+    toast.setAttribute('tabindex', '0');
+    const handler = async (e: Event) => {
+      try {
+        await onClickFn();
+      } catch (err) {
+        console.error('Toast onClick error:', err);
+      }
+      removeToast();
+    };
+    toast.addEventListener('click', handler);
+    // Allow keyboard activation
+    toast.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handler(e as unknown as Event);
       }
     });
   }

@@ -171,3 +171,8 @@ I think it's ok
 [x] In docker (just at docker compose up, if docs are refreshed => users docs are loaded correctly, it could be a problem in starting queue of services??)
 	gateway       | ⚠️ Failed to load users docs: connect ECONNREFUSED 172.18.0.7:3002
 	gateway       | [GATEWAY] 📚 Loaded 5/6 specs
+
+[] XSS attack ?? tournament name??
+
+[] both for pong and tris when user hasn't history => TRY CATCH to avoid console error
+	GET https://localhost:4000/api/tris/history?id=0da84a23-0ea9-4f0c-8d38-4f01707bd08d 404 (Not Found)
