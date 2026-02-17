@@ -516,8 +516,8 @@ async function openFriendSelectionModal() {
     if (header) header.textContent = 'Add Users to Chat';
     if (desc) desc.textContent = 'Select friends to add to this chat:';
   } else {
-    if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group:';
+    if (header) header.textContent = t('chat.create-group');
+    if (desc) desc.textContent = t('chat.select-group');
   }
 }
 
@@ -545,8 +545,8 @@ function closeFriendSelectionModal() {
   if (modal) {
     const header = modal.querySelector('h2') as HTMLElement | null;
     const desc = modal.querySelector('p') as HTMLElement | null;
-    if (header) header.textContent = 'Create Group Chat';
-    if (desc) desc.textContent = 'Select friends to add to the group:';
+    if (header) header.textContent = t('chat.create-group');
+    if (desc) desc.textContent = t('chat.select-group');
   }
 }
 
