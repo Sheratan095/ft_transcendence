@@ -102,7 +102,7 @@ export function initHomeButton() {
 
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      goToRoute('/');
+      window.location.href = '/';
     });
 
     container.appendChild(btn);
