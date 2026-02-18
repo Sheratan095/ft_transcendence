@@ -46,8 +46,8 @@ ehthumbs.db
 *.Identifier
 
 # Docker
-**/*.dockerignore
-**/.dockerignore
+# **/*.dockerignore
+# **/.dockerignore
 
 # Temporary files
 *.tmp
