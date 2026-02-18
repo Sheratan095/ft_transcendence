@@ -25,6 +25,10 @@ export async function renderPongPage(container: HTMLElement) {
   if (usernameEl) usernameEl.textContent = userId ? `User: ${userId}` : 'Guest';
   if (avatarEl) avatarEl.src = '/assets/placeholder-avatar.jpg';
 
+  // Render small donut stats chart (if present in template)
+  const chartInner = container.querySelector('#pong-user-chart-inner') as HTMLElement | null;
+  if (chartInner) renderPongStats(chartInner);
+
   // Attach button handlers
   const btnMode = container.querySelector('#pong-open-mode-modal') as HTMLElement | null;
   const btnOnline = container.querySelector('#pong-play-online') as HTMLButtonElement | null;
@@ -88,6 +92,41 @@ export async function renderPongPage(container: HTMLElement) {
       console.error(err);
     }
   });
+}
+
+async function renderPongStats(container: HTMLElement) {
+  const userId = getUserId();
+  if (!userId) {
+    container.innerHTML = '<div class="text-red-600">You must be logged in to view stats</div>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/pong/stats?id=${userId}`, { method: 'GET', credentials: 'include' });
+    const stats = res.ok ? await res.json() : null;
+
+    const gameStats = {
+      pongWins: stats?.gamesWon || 0,
+      pongLosses: stats?.gamesLost || 0,
+    };
+
+    const chartId = container.id || 'pong-user-chart-inner';
+    container.innerHTML = '';
+    try {
+      const { createGameStatsChart } = await import('../profile/UserCardCharts');
+      await createGameStatsChart(chartId, 'pong', gameStats, userId);
+    } catch (err) {
+      console.warn('Failed to render pong donut chart, falling back to text:', err);
+    } finally {
+      const winsEl = document.getElementById('pong-user-wins');
+      const lossesEl = document.getElementById('pong-user-losses');
+      if (winsEl) winsEl.textContent = `Wins: ${gameStats.pongWins || 0}`;
+      if (lossesEl) lossesEl.textContent = `Losses: ${gameStats.pongLosses || 0}`;
+    }
+  } catch (err) {
+    console.error('Error fetching pong stats:', err);
+    container.innerHTML = '<div class="text-red-600">Failed to load stats</div>';
+  }
 }
 
 export default { renderPongPage };

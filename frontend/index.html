@@ -214,10 +214,14 @@
 							</div>
 							<div class="flex items-center gap-4 p-4 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg">
 								<div class="text-right text-sm">
-									<div id="pong-username" class="font-bold">Username</div>
-									<div id="pong-user-stats" class="text-xs text-neutral-600 dark:text-neutral-400">Wins: 0 · Losses: 0</div>
+									<div id="pong-user-stats" class="flex flex-col items-end text-xs text-neutral-600 dark:text-neutral-400">
+										<div id="pong-user-wins">Wins: 0</div>
+										<div id="pong-user-losses">Losses: 0</div>
+									</div>
 								</div>
-								<img id="pong-user-avatar" src="/assets/placeholder-avatar.jpg" alt="avatar" class="w-14 h-14 rounded-xl border-2 dark:border-neutral-600 border-neutral-300 object-cover" />
+								<div id="pong-user-chart" class="w-14 h-14 flex items-center justify-center bg-transparent">
+									<div id="pong-user-chart-inner" class="w-full h-full"></div>
+								</div>
 							</div>
 						</div>
 					</div>
