@@ -749,9 +749,10 @@
 
 <!-- Tris Mode Selection Modal -->
 <div
-  id="tris-mode-modal"
-  tabindex="-1"
-  class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full dark:bg-black bg-white bg-opacity-50"
+	id="tris-mode-modal"
+	tabindex="-1"
+	data-backdrop-close="false"
+	class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full dark:bg-black bg-white bg-opacity-50"
 >
   <div class="relative p-20 w-full max-w-xl">
     <div class="relative dark:bg-neutral-900 bg-neutral-100 border-4 dark:border-neutral-700 border-neutral-300 dark:shadow-[10px_10px_0_0_#ff009d]
@@ -905,10 +906,11 @@
 
 <!-- Tris Game Modal -->
 <div
-  id="tris-modal"
-  tabindex="-1"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-10 
-         justify-center items-center w-full md:inset-0 h-full max-h-full p-4"
+	id="tris-modal"
+	tabindex="-1"
+	data-backdrop-close="false"
+	class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
+				 justify-center items-center w-full md:inset-0 h-full max-h-full p-4"
 >
   <div class="relative z-50 w-full max-w-2xl">
     <div class="relative dark:bg-neutral-900 bg-white/80 backdrop-blur-sm rounded-xl border-4 dark:border-neutral-700 border-neutral-300 
@@ -1200,6 +1202,63 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+	const modalSelector = '[id$="-modal"]';
+	const modals = Array.from(document.querySelectorAll(modalSelector));
+
+	modals.forEach(m => {
+		try {
+			if (m.parentElement !== document.body) document.body.appendChild(m);
+			m.classList.add('fixed');
+			m.style.position = 'fixed';
+			m.style.inset = m.style.inset || '0';
+			m.style.zIndex = '100000';
+
+			if (!m.querySelector(':scope > .__auto_backdrop')) {
+				const bd = document.createElement('div');
+				bd.className = '__auto_backdrop';
+				bd.setAttribute('aria-hidden', 'true');
+				m.insertBefore(bd, m.firstChild);
+				bd.addEventListener('click', () => {
+					if (m.dataset.backdropClose === 'false') return;
+					m.classList.add('hidden');
+				});
+			}
+
+			Array.from(m.children).forEach(child => {
+				if (!child.classList || child.classList.contains('__auto_backdrop')) return;
+				child.classList.add('modal-content-high');
+			});
+		} catch (e) {
+			console.error('modal helper error', e);
+		}
+	});
+
+	const observer = new MutationObserver(records => {
+		records.forEach(r => {
+			if (r.type === 'attributes' && r.attributeName === 'class') {
+				const target = r.target;
+				if (target.matches && target.matches(modalSelector)) {
+					if (!target.classList.contains('hidden')) {
+						document.body.classList.add('modal-open');
+						target.setAttribute('aria-modal', 'true');
+						const focusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+						if (focusable && typeof focusable.focus === 'function') focusable.focus();
+					} else {
+						const anyVisible = Array.from(document.querySelectorAll(modalSelector)).some(x => !x.classList.contains('hidden'));
+						if (!anyVisible) document.body.classList.remove('modal-open');
+						target.removeAttribute('aria-modal');
+					}
+				}
+			}
+		});
+	});
+
+	modals.forEach(m => observer.observe(m, { attributes: true, attributeFilter: ['class'] }));
+});
+</script>
 
 </body>
 

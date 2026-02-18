@@ -33,7 +33,7 @@ export function initChatButton() {
     btn.id = 'chat-btn';
     btn.title = 'Open chat';
     btn.setAttribute('aria-label', 'Open chat');
-    btn.className = `inline-flex items-center justify-center w-14 h-14 flex-shrink-0 rounded-full bg-accent-orange dark:bg-accent-green
+    btn.className = `inline-flex z-30 items-center justify-center w-14 h-14 flex-shrink-0 rounded-full bg-accent-orange dark:bg-accent-green
       shadow-lg hover:shadow-xl transition-all overflow-hidden`;
 
     btn.innerHTML = `

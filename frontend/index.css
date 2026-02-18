@@ -486,3 +486,38 @@ html[data-transition-direction="back"] {
   color: black !important;
 }
 
+/* Modal helper overrides: ensure modals sit on top and backdrops block the page */
+[id$="-modal"] {
+  z-index: 100000 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+[id$="-modal"]:not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+.\__auto_backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+  z-index: 100000;
+}
+
+.modal-content-high {
+  position: relative !important;
+  z-index: 100001 !important;
+}
+
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+
