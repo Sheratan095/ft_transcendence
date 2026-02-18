@@ -1,6 +1,37 @@
 // The class is initialized in ChatConnectionManager.js
 import { chatConnectionManager } from './ChatConnectionManager.js';
 import { notifyMessageStatusUpdates, getRelationshipByIds, formatDate } from './chat-help.js';
+import xss from 'xss';
+
+// Sanitize strings recursively to prevent XSS attacks; track if any value was modified
+// Also trims strings and enforces 2000 char limit
+const	sanitizeValue = (value, ctx = { activated: false, keys: [] }, path = '') =>
+{
+	if (typeof value === 'string')
+	{
+		const	trimmed = value.trim().substring(0, 2000);
+		const	sanitized = xss(trimmed);
+		if (sanitized !== value)
+		{
+			ctx.activated = true;
+			ctx.keys.push(path || '<string>');
+		}
+		return (sanitized);
+	}
+	if (Array.isArray(value))
+		return (value.map((v, i) => sanitizeValue(v, ctx, `${path}[${i}]`)));
+
+	if (value && typeof value === 'object')
+	{
+		const out = {};
+		for (const k of Object.keys(value))
+			out[k] = sanitizeValue(value[k], ctx, path ? `${path}.${k}` : k);
+
+		return (out);
+	}
+
+	return (value);
+};
 
 export function	handleNewConnection(socket, req, chatDb)
 {
@@ -55,6 +86,14 @@ export function	handleMessage(socket, msg, userId, chatDb)
 	try
 	{
 		const	message = JSON.parse(msg.toString());
+		
+		// Sanitize message data to prevent XSS attacks
+		const	ctx = { activated: false, keys: [] };
+		if (message.data && typeof message.data === 'object')
+			message.data = sanitizeValue(message.data, ctx, 'data');
+
+		if (ctx.activated)
+			console.info(`[CHAT][DEFENDER] Sanitized ${ctx.keys.length} field(s) on ${message.event} from user ${userId}: ${ctx.keys.join(', ')}`);
 
 		switch (message.event)
 		{
@@ -126,20 +165,17 @@ async function	handleChatMessage(userId, data, chatDb)
 			return;
 		}
 
-		// Trim and limit content length
-		const	sanitizedContent = content.trim().substring(0, 2000); // 2000 char limit
-
 		const	timestamp = formatDate(new Date());
 
 		// Store message in database
-		const	messageId = await chatDb.addMessageToChat(chatId, userId, sanitizedContent, timestamp);
+		const	messageId = await chatDb.addMessageToChat(chatId, userId, content, timestamp);
 
 		// Send to recipients (including sender)
-		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, sanitizedContent, chatDb, timestamp);
+		const	status = await chatConnectionManager.sendMsgToChat(chatId, userId, messageId, content, chatDb, timestamp);
 		const	targetName = await chatConnectionManager.getGroupChatNameFromCache(chatId, chatDb);
 
 		// Always acknowledge to sender to ensure they see their own message
-		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, sanitizedContent, 'group', targetName);
+		await chatConnectionManager.replyToMessage(userId, chatId, messageId, status, content, 'group', targetName);
 
 		console.log(`[CHAT] Group message from user ${userId} to ${chatId} sent successfully, overall status: ${status}`);
 	}

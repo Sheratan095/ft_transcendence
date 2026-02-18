@@ -7,82 +7,9 @@
 	<link rel="icon" type="image/png" href="/42_Logo.svg" />
 	<link href="./tailwind.css" rel="stylesheet" />
 	<script type="module" src="./src/main.ts"></script>
-	<style>
-		/* Fix for chat modal visibility - ensure flex takes precedence over hidden */
-		#chat-modal:not(.hidden) {
-			display: flex !important;
-			visibility: visible !important;
-		}
 
-		#friend-selection-modal:not(.hidden) {
-			display: flex !important;
-			visibility: visible !important;
-		}
-
-		/* Ensure body doesn't hide modals */
-		body {
-			overflow: visible !important;
-		}
-
-		/* 2FA Lock SVG Animations */
-		@keyframes lockShackleOpen {
-			0% { transform: translateY(0px); }
-			100% { transform: translateY(0px); }
-		}
-
-		/* @keyframes keyholePulse {
-			0%, 100% { opacity: 1; }
-			50% { opacity: 0.5; }
-		} */
-
-		/* Default: shackle sits a bit lower when closed. Use SVG-specific transform-box/origin so
-		   the shackle moves cleanly without detaching from the body. */
-		.btn-lock svg path.lock {
-			transform-box: fill-box;
-			transform-origin: 50% 10%;
-			will-change: transform;
-			transform: translateY(0px);
-			transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
-		}
-
-		.btn-lock svg path.lockb {
-			will-change: opacity;
-			transition: opacity 200ms ease;
-		}
-
-		/* Open animation (checked) */
-		#input-lock:checked ~ label svg path.lock {
-			animation: lockShackleOpen 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-		}
-
-		#input-lock:checked ~ label svg path.lockb {
-			animation: keyholePulse 0.6s ease-in-out forwards;
-		}
-
-		/* Ensure closed state snaps back to the slightly-lowered position */
-		#input-lock:not(:checked) ~ label svg path.lock {
-			animation: none !important;
-			transform: translateY(0px) !important;
-			opacity: 1;
-		}
-
-		#input-lock:not(:checked) ~ label svg path.lockb {
-			animation: none !important;
-			opacity: 1;
-		}
-
-		/* In dark mode, make the closed lock visually black (only SVG paths) */
-		#input-lock:checked ~ label svg path.lock {
-			stroke: #000000 !important;
-			fill: none !important;
-		}
-
-		#input-lock:checked ~ label svg path.lockb {
-			fill: #000000 !important;
-			stroke: none !important;
-		}
-	</style>
 </head>
+
 <html lang="en"
  class="dark overflow-hidden selection:bg-accent-orange
   dark:selection:bg-accent-pink selection:text-black dark:selection:text-white">
@@ -322,11 +249,6 @@
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="w-full flex items-center justify-center p-4">
-			<a href="#" id="tournamentListButton-static" class="hidden">
-				<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./TOURNAMENTS</h2>
-			</a>
 		</div>
 	</main>
 
@@ -707,128 +629,119 @@
 
 	<!-- Home Template -->
 	<template id="home-template">
-		<section class="font-extrabold tracking-tighter h-max leading-[0.8] text-gray-800 dark:text-gray-100" >
-			<h1 class="text-[7vw] px-[10vw] uppercase">
-				FT/<br />TRASCENDENCE
-			</h1>
-			<p class="relative p-4 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4" data-i18n="site.subtitle">
-			</p>
+		<!-- Main Title Section - FT/ aligned right -->
+		<section class="font-extrabold tracking-tighter h-max leading-[0.8] text-gray-800 dark:text-gray-100 p-2 sm:p-4 flex items-center justify-start" >
+			<div class="text-left">
+				<h1 class="text-[7vw] uppercase mb-2">
+					FT/<br />TRASCENDENCE
+				</h1>
+				<p class="relative p-2 md:text-2xl sm:text-sm tracking-wid text-center font-bold px-4" data-i18n="site.subtitle">
+				</p>
+			</div>
 		</section>
-		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"></div>
-		<!-- Slideshow Wrapper -->
-		<div class="relative w-full flex items-center justify-center max-w-[60vh]">
-		<!-- Previous Button -->
-			<button id="slideshow-prev-btn" 
-			class="absolute left-0 z-10 p-2 sm:p-3 dark:bg-accent-pink bg-accent-orange text-black dark:text-white 
-				font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2
-				dark:border-neutral-700 border-neutral-300 rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
-			<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
-			</button>
 
-			<!-- Slides Container -->
-			<div class="w-full mx-auto px-4 sm:px-8 md:px-16">
-				<!-- CARD PONG -->
-				<div id="pong-card-wrapper" class="hidden">
-				<button id="pong-card-btn" class="p-10 w-full
-				border-4 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-900 bg-neutral-100
-				shadow-[10px_10px_0_0_#00a8e8] accent-accent-blue dark:shadow-[10px_10px_0_0_#0dff66]  overflow-hidden
-				hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left
-				slideshow-slide">
+		<!-- Main Content: Slider (screen center) + Info (extreme right) -->
+		<div class="w-full relative min-h-[60vh] flex items-center px-4 py-8">
+			<!-- Slideshow Wrapper - Absolutely Centered on Screen -->
+			<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+				<div class="card relative flex items-center justify-center group shadow-[10px_10px_0_0_#ff9d00] dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 dark:hover:brightness-110 transition-all duration-300 rounded-none dark:rounded-xl">
+				<!-- Previous Button -->
+				<button id="slideshow-prev-btn" type="button" aria-label="Previous slide"
+				class="absolute top-1/2 -translate-y-1/2 p-2 sm:p-3 dark:bg-accent-pink bg-accent-blue text-black dark:text-white 
+					font-extrabold shadow-md hover:brightness-90 active:scale-95 transition-all rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer pointer-events-auto"
+				style="z-index: 900; left: -3rem;">
+					<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+					</svg>
+				</button>
 
-					<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
-					Play pong
-					</h3>
-
-					<div class="w-full aspect-square relative border-4 border-double dark:border-white border-black mx-auto">
-					<div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-full border-dotted border-r-2 dark:border-white border-black"></div>
-					<div class="absolute left-[6%] w-[0.3vw] h-[1.2vw] dark:bg-white bg-black animate-[ping_6s_linear_infinite]"></div>
-					<div class="absolute right-[6%] w-[0.3vw] h-[1.2vw] dark:bg-white bg-black animate-[pong_6s_linear_infinite]"></div>
-					<div class="absolute w-[0.4vw] h-[0.4vw] dark:bg-white bg-black animate-[ball_6s_linear_infinite]"></div>
+				<!-- Slides Container -->
+				<div id="slides-view-port" class="relative w-[30vh] sm:w-[40vh] overflow-visible">
+					<!-- CARD PONG -->
+					<div id="pong-card-wrapper" class="hidden">
+						<button id="pong-card-btn" class="p-8 sm:p-10 w-full
+						border-neutral-300 accent-accent-blue overflow-hidden
+						transition-all duration-300 cursor-pointer block text-left
+						slideshow-slide rounded">
+							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
+								Play pong
+							</h3>
+							<div class="w-full aspect-square relative border-4 border-double dark:border-white border-black mx-auto">
+								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-full border-dotted border-r-2 dark:border-white border-black"></div>
+								<div class="absolute left-[6%] w-[0.3vw] h-[1.2vw] dark:bg-white bg-black animate-[ping_6s_linear_infinite]"></div>
+								<div class="absolute right-[6%] w-[0.3vw] h-[1.2vw] dark:bg-white bg-black animate-[pong_6s_linear_infinite]"></div>
+								<div class="absolute w-[0.4vw] h-[0.4vw] dark:bg-white bg-black animate-[ball_6s_linear_infinite]"></div>
+							</div>
+						</button>
 					</div>
+
+					<!-- Tic tac toe -->
+					<div id="tris-card-wrapper">
+						<button id="tris-card-btn" class="p-8 sm:p-10 w-full
+						dark:border-neutral-700 border-neutral-300 overflow-hidden transition-all duration-300 cursor-pointer block text-left
+						slideshow-slide rounded">
+							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
+								Play tris
+							</h3>
+							<div class="relative w-full aspect-square border-4 border-double dark:border-white border-black mx-auto overflow-hidden pointer-events-none">
+								<!-- Vertical grid lines -->
+								<div class="absolute left-1/3 top-0 w-[2px] h-full dark:bg-white bg-black animate-grid-v"></div>
+								<div class="absolute left-2/3 top-0 w-[2px] h-full dark:bg-white bg-black animate-grid-v" style="animation-delay: 0.2s;"></div>
+
+								<!-- Horizontal grid lines -->
+								<div class="absolute top-1/3 left-0 h-[2px] w-full dark:bg-white bg-black animate-grid-h"></div>
+								<div class="absolute top-2/3 left-0 h-[2px] w-full dark:bg-white bg-black animate-grid-h" style="animation-delay: 0.2s;"></div>
+
+								<!-- X -->
+								<div class="absolute inset-0 animate-x">
+									<div class="absolute top-[40%] left-[40%] w-[30%] h-[2px] dark:bg-white bg-black rotate-45 origin-left"></div>
+									<div class="absolute top-[60%] left-[40%] w-[30%] h-[2px] dark:bg-white bg-black -rotate-45 origin-left"></div>
+								</div>
+
+								<!-- O -->
+								<div class="absolute inset-0 animate-o">
+									<div class="absolute top-[40%] left-[40%] w-[20%] h-[20%] rounded-full border-2 border-black dark:border-white"></div>
+								</div>
+							</div>
+						</button>
+					</div>
+				</div>
+
+				<!-- Next Button -->
+				<button id="slideshow-next-btn" type="button" aria-label="Next slide"
+				class="absolute top-1/2 -translate-y-1/2 p-2 sm:p-3 dark:bg-accent-pink bg-accent-blue text-black dark:text-white 
+					font-extrabold shadow-md active:scale-95 transition-all rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer pointer-events-auto"
+				style="z-index: 61; right: -3rem;">
+					<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+					</svg>
 				</button>
-				</div>
-
-				<!-- Tic tac toe -->
-				<div id="tris-card-wrapper">
-				<button id="tris-card-btn" class="p-10 w-full
-				border-4 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-900 bg-neutral-100
-				shadow-[10px_10px_0_0_#00a8e8] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden
-				hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left
-				slideshow-slide">
-			<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
-				Play tris
-			</h3>
-
-			<div class="relative w-full aspect-square border-4 border-double dark:border-white border-black mx-auto overflow-hidden pointer-events-none">
-
-			<!-- Vertical grid lines -->
-			<div class="absolute left-1/3 top-0 w-[2px] h-full dark:bg-white bg-black animate-grid-v"></div>
-			<div class="absolute left-2/3 top-0 w-[2px] h-full dark:bg-white bg-black animate-grid-v" style="animation-delay: 0.2s;"></div>
-
-			<!-- Horizontal grid lines -->
-			<div class="absolute top-1/3 left-0 h-[2px] w-full dark:bg-white bg-black animate-grid-h"></div>
-			<div class="absolute top-2/3 left-0 h-[2px] w-full dark:bg-white bg-black animate-grid-h" style="animation-delay: 0.2s;"></div>
-
-			<!-- X -->
-			<div class="absolute inset-0 animate-x">
-				<div class="absolute top-[40%] left-[40%] w-[30%] h-[2px] dark:bg-white bg-black rotate-45 origin-left"></div>
-				<div class="absolute top-[60%] left-[40%] w-[30%] h-[2px] dark:bg-white bg-black -rotate-45 origin-left"></div>
+			</div>
 			</div>
 
-			<!-- O -->
-			<div class="absolute inset-0 animate-o">
-				<div class="absolute top-[40%] left-[40%] w-[20%] h-[20%] rounded-full border-2 border-black dark:border-white"></div>
-			</div>
-
-			</div>
-				</button>
-				</div>
-			</div>
-
-			<!-- Next Button -->
-			<label for="slideshow-next-btn">
-			<button id="slideshow-next-btn" 
-				class="absolute right-0 z-10 p-2 sm:p-3 dark:bg-accent-pink bg-accent-blue text-black dark:text-white font-extrabold uppercase tracking-tight hover:brightness-90 transition border-2
-				 border-neutral-300 dark:border-neutral-700 rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center">
-				<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-				</svg>
-			</button>
-			</label>
-						<!-- Slideshow Indicators (dots) -->
-			<div class="flex gap-3 justify-center mt-8">
-			<button class="slideshow-indicator w-3 h-3 rounded-full dark:bg-accent-pink bg-accent-blue transition-all duration-300 active" data-slide="tris"></button>
-			<button class="slideshow-indicator w-3 h-3 rounded-full bg-neutral-300 dark:bg-neutral-700 transition-all duration-300 dark:hover:bg-neutral-600 hover:bg-neutral-200" data-slide="pong"></button>
-				</div>
-			</div>
-		</div>
-			<div
-				class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden rounded-xl
-				dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 transition-all duration-300">
-				<div class="flex w-full max-w-xl flex-col md:flex-row items-start gap-4 mb-8 p-6">
+			<!-- Home Info Card - Extreme Right -->
+			<div class="absolute right-4 top-1/2 -translate-y-1/2">
+				<div id="home-info"
+					class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden rounded-xl
+					dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 transition-all duration-300 w-96">
+				<div class="flex w-full flex-col items-start gap-6 p-8">
 					<img src="./42_Logo.svg" alt="42 Logo"
-						class="float-start w-full h-full min-w-[50px] min-h-[50px] sm:w-32 sm:h-32 md:w-40 md:h-40 flex-shrink-0 dark:invert" />
-					<div class="flex flex-col space-y-4 md:ml-6">
+						class="w-48 h-48 flex-shrink-0 dark:invert self-center" />
+					<div class="flex flex-col space-y-6 w-full">
 						<a href="https://localhost:3000/docs">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.documentation"></h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.documentation"></h2>
 						</a>
 						<a href="/assets/subject.pdf" target="_blank">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.subject"></h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.subject"></h2>
 						</a>
 						<a href="/login" id="cta-login-logout">
-							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.login"></h2>
+							<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" data-i18n="site.login"></h2>
 						</a>
 					</div>
 				</div>
 			</div>
-
 		</div>
-		<div class="w-full flex items-center justify-center p-4">
-			<a href="#" id="tournamentListButton" class="hidden">
-				<h2 class="text-2xl font-bold underline underline-offset-auto tracking-tighter uppercase mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black"> ./TOURNAMENTS</h2>
-			</a>
+
 		</div>
 	</template>
 

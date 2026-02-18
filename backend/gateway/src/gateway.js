@@ -1,5 +1,3 @@
-import { exit } from 'process';
-
 // Validate required environment variables
 import { checkEnvVariables, authenticateJwt } from './gateway-help.js';
 checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 'NOTIFICATION_SERVICE_URL', 'CHAT_SERVICE_URL', 
@@ -7,87 +5,26 @@ checkEnvVariables(['INTERNAL_API_KEY', 'AUTH_SERVICE_URL', 'USERS_SERVICE_URL', 
 	'RATE_LIMIT_ACTIVE', 'HOST']);
 
 import Fastify from 'fastify'
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
-import path from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// HTTPS Configuration
-let	httpsOptions = null;
-
-if (process.env.USE_HTTPS === 'true')
-{
-	try
-	{
-		const certsPath = process.env.HTTPS_CERTS_PATH;
-		httpsOptions =
-		{
-			key: readFileSync(path.join(certsPath, 'key.pem')),
-			cert: readFileSync(path.join(certsPath, 'cert.pem'))
-		};
-	}
-	catch (err)
-	{
-		console.error('[GATEWAY] Failed to load HTTPS certificates:', err.message);
-		console.error('[GATEWAY] Falling back to HTTP');
-
-		exit(1);
-	}
-}
+// Load HTTPS configuration (certs or null for HTTP)
+import { loadHttpsConfig, registerSecurityMiddleware } from './security.js';
+const httpsOptions = loadHttpsConfig();
 
 // Initialize Fastify instance with built-in logging and optional HTTPS
-const	fastify = Fastify({ 
+const	fastify = Fastify(
+{ 
 	logger: false,
 	https: httpsOptions
 })
 
-// Allows to receive requests from different origins
-import cors from '@fastify/cors';
-await fastify.register(cors,
-{
-	origin: (origin, cb) => {
-		// Allow requests from frontend URL and file:// protocol (for testing)
-		const	allowedOrigins = [
-			process.env.FRONTEND_URL,
-			'null', // file:// protocol shows as 'null' // TO DO check it
-		];
-		
-		// Allow any localhost origin for development
-		if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || allowedOrigins.includes(origin))
-			cb(null, true);
-		else
-			cb(new Error('Not allowed by CORS'), false);
-	},
-
-	methods: ['GET', 'POST', 'PUT', 'DELETE'],
- 	credentials: true // Allow cookies to be sent
-});
+// Register all security middleware (CORS, helmet, XSS sanitizer, security headers)
+await registerSecurityMiddleware(fastify);
 
 // Register multipart plugin for file uploads
 import multipart from '@fastify/multipart';
-await fastify.register(multipart, {
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB max file size
-  }
-});
-
-// collection of middleware functions for Node.js designed to
-// 	secure web applications by setting crucial HTTP headers
-import helmet from "@fastify/helmet";
-fastify.register(helmet,
+await fastify.register(multipart,
 {
-	contentSecurityPolicy:
-	{
-		directives: {
-			defaultSrc: ["'self'"],
-			scriptSrc: ["'self'"],
-			objectSrc: ["'none'"],
-			baseUri: ["'self'"],
-			imgSrc: ["'self'", "data:", "blob:"], // Allow images from same origin, data URLs, and blob URLs
-		},
-	},
+	limits: { fileSize: 10 * 1024 * 1024} // 10MB max file size
 });
 
 // Register static file serving for avatars (proxy to users service with auth)

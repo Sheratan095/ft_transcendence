@@ -18,7 +18,8 @@
     "dotenv": "^17.2.4",
     "fastify": "^5.7.4",
     "sqlite3": "^5.1.7",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "xss": "^1.0.14"
   },
   "devDependencies": {
     "dotenv": "^17.2.4",

@@ -12,6 +12,91 @@ html.theme-transitioning * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Slider prev/next buttons: compact sizing */
+#slideshow-prev-btn,
+#slideshow-next-btn {
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0.25rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+  border-radius: 9999px !important;
+}
+
+#slideshow-prev-btn svg,
+#slideshow-next-btn svg {
+  width: 0.9rem !important;
+  height: 0.9rem !important;
+}
+
+/* Ensure body doesn't hide modals */
+body {
+  overflow: visible !important;
+}
+
+/* Default: shackle sits a bit lower when closed. Use SVG-specific transform-box/origin so
+    the shackle moves cleanly without detaching from the body. */
+.btn-lock svg path.lock {
+  transform-box: fill-box;
+  transform-origin: 50% 10%;
+  will-change: transform;
+  transform: translateY(0px);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-lock svg path.lockb {
+  will-change: opacity;
+  transition: opacity 200ms ease;
+}
+
+/* Open animation (checked) */
+#input-lock:checked ~ label svg path.lock {
+  animation: lockShackleOpen 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+#input-lock:checked ~ label svg path.lockb {
+  animation: keyholePulse 0.6s ease-in-out forwards;
+}
+
+/* Ensure closed state snaps back to the slightly-lowered position */
+#input-lock:not(:checked) ~ label svg path.lock {
+  animation: none !important;
+  transform: translateY(0px) !important;
+  opacity: 1;
+}
+
+#input-lock:not(:checked) ~ label svg path.lockb {
+  animation: none !important;
+  opacity: 1;
+}
+
+/* In dark mode, make the closed lock visually black (only SVG paths) */
+#input-lock:checked ~ label svg path.lock {
+  stroke: #000000 !important;
+  fill: none !important;
+}
+
+/* Fix for chat modal visibility - ensure flex takes precedence over hidden */
+#chat-modal:not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+/* 2FA Lock SVG Animations */
+@keyframes lockShackleOpen {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(0px); }
+}
+
+#friend-selection-modal:not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+}
+
+#input-lock:checked ~ label svg path.lockb {
+  fill: #000000 !important;
+  stroke: none !important;
+}
 
 .cards {
   display: flex;
@@ -58,6 +143,8 @@ html.theme-transitioning * {
 
 .card::before {
   content: "";
+  position: absolute;
+  inset: 0;
   top: 0;
   left: 0;
   border-radius: inherit;
@@ -67,9 +154,14 @@ html.theme-transitioning * {
     transparent 35%
   );
   opacity: 0;
-  transition: all 0.15s ease-in-out;
+  transition: opacity 0.35s ease-in-out, box-shadow 0.25s ease;
   pointer-events: none;
   @apply dark:bg-[radial-gradient(60rem_circle_at_var(--xPos)_var(--yPos),_rgba(13,255,102,0.1),_transparent_35%)];
+}
+
+.card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .card-content {
