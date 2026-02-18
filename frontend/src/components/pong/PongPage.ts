@@ -67,6 +67,7 @@ export async function renderPongPage(container: HTMLElement) {
     const friendsManager = new FriendsManager({ currentUserId: userId });
     await openGameInviteModal('pong', async (friendId: string) => {
       try {
+        await openPongModal('online');
         await createCustomGame(friendId);
         showSuccessToast('Game invite sent!');
       } catch (err) {
