@@ -133,7 +133,12 @@ export function attach2FA(userId, callbacks?: TwoFactorFormCallbacks): void
 			if (res.ok)
 			{
 				showSuccess(errorEl, '2FA verified successfully!');
-				setTimeout(() => window.location.href = '/profile', 400);
+				if (body && body.user.id)
+					localStorage.setItem('userId', body.user.id);
+				if (body && body.user && body.user.id)
+					await SaveCurrentUserProfile(body.user.id);
+				window.location.href = '/profile';
+				return;
 			}
 			else
 					showError(errorEl, (body && (body.message || body.error)) || `Verification failed (${res.status})`);
