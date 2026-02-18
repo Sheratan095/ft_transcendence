@@ -78,7 +78,7 @@ export class PongGame {
       new BABYLON.Vector3(60, 100, 20),
       scene
     );
-    light.intensity = 0.5;
+    light.intensity = 0.5; // reduced significantly so shadows are visible and colors don't wash out
 
     /* =======================
        SHADOW LIGHT
@@ -88,7 +88,7 @@ export class PongGame {
       new BABYLON.Vector3(-1, -2, -1),
       scene
     );
-    shadowLight.position = new BABYLON.Vector3(0, 40, 0);
+    shadowLight.position = new BABYLON.Vector3(80, 60, 0);
 
     const shadowGenerator = new BABYLON.ShadowGenerator(1024, shadowLight);
     shadowGenerator.useBlurExponentialShadowMap = true;
@@ -102,23 +102,34 @@ export class PongGame {
     const paddleVisualDepth = gameState.paddles.left.height * worldHeight;
     const ballVisualDiameter = gameState.ball.radius * worldHeight * 2;
 
+    // Create materials for paddles with controlled diffuse and low specular to preserve color
+    const rightPaddleMat = new BABYLON.StandardMaterial("rightPaddleMat", scene);
+    rightPaddleMat.diffuseColor = new BABYLON.Color3(1, 0, 0); // red
+    rightPaddleMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1); // low specular to avoid washout
+    rightPaddleMat.specularPower = 8;
+
+    const leftPaddleMat = new BABYLON.StandardMaterial("leftPaddleMat", scene);
+    leftPaddleMat.diffuseColor = new BABYLON.Color3(0, 0, 1); // blue
+    leftPaddleMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1); // low specular
+    leftPaddleMat.specularPower = 8;
+
     this.rightPaddleMesh = BABYLON.MeshBuilder.CreateBox("rightPaddle", {
-      height: 1, width: 1.5, depth: paddleVisualDepth,
-      faceColors: Array(6).fill(new BABYLON.Color4(1, 0, 0, 1))
+      height: 1, width: 1.5, depth: paddleVisualDepth
     }, scene);
-    this.rightPaddleMesh.position.set(WORLD_BOUNDS.maxX, 4, 0);
+    this.rightPaddleMesh.material = rightPaddleMat;
+    this.rightPaddleMesh.position.set(WORLD_BOUNDS.maxX, 3, 0);
 
     this.leftPaddleMesh = BABYLON.MeshBuilder.CreateBox("leftPaddle", {
-      height: 1, width: 1.5, depth: paddleVisualDepth,
-      faceColors: Array(6).fill(new BABYLON.Color4(0, 0, 1, 1))
+      height: 1, width: 1.5, depth: paddleVisualDepth
     }, scene);
-    this.leftPaddleMesh.position.set(WORLD_BOUNDS.minX, 4, 0);
+    this.leftPaddleMesh.material = leftPaddleMat;
+    this.leftPaddleMesh.position.set(WORLD_BOUNDS.minX, 3, 0);
 
     /* =======================
        BALL
     ======================= */
     this.ballMesh = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: ballVisualDiameter, segments: 32 }, scene);
-    this.ballMesh.position.set(0, 4, 0);
+    this.ballMesh.position.set(0, 3, 0);
 
     shadowGenerator.addShadowCaster(this.ballMesh);
     shadowGenerator.addShadowCaster(this.rightPaddleMesh);
