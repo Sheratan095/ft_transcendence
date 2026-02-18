@@ -17,12 +17,15 @@ export async function renderTrisPage(container: HTMLElement) {
   const clone = template.content.cloneNode(true) as DocumentFragment;
   container.appendChild(clone);
 
-  // Populate user info if available
+  // Populate user info if available and render small donut chart
   const userId = getUserId();
   const usernameEl = container.querySelector('#tris-username') as HTMLElement | null;
-  const avatarEl = container.querySelector('#tris-user-avatar') as HTMLImageElement | null;
+  const chartInner = container.querySelector('#tris-user-chart-inner') as HTMLElement | null;
   if (usernameEl) usernameEl.textContent = userId ? `User: ${userId}` : 'Guest';
-  if (avatarEl) avatarEl.src = '/assets/placeholder-avatar.jpg';
+
+  if (chartInner)
+    renderTrisStats(chartInner);
+  
 
   // Attach button handlers
   const btnMode = container.querySelector('#tris-open-mode-modal') as HTMLElement | null;
@@ -79,6 +82,54 @@ export async function renderTrisPage(container: HTMLElement) {
     });
   });
   if (btnResetLocal) btnResetLocal.addEventListener('click', () => resetLocalGame());
+}
+
+async function renderTrisStats(container: HTMLElement)
+{
+  const userId = getUserId();
+  if (!userId)
+  {
+    container.innerHTML = '<div class="text-red-600">You must be logged in to view stats</div>';
+    return;
+  }
+  
+  try
+  {
+    const res = await fetch(`/api/tris/stats?id=${userId}`, { method: 'GET', credentials: 'include' });
+    const stats = res.ok ? await res.json() : null;
+
+    const gameStats = {
+      trisWins: stats?.gamesWon || 0,
+      trisLosses: stats?.gamesLost || 0,
+    };
+
+    // Try to render donut chart; if charts are unavailable, fall back to text
+    const chartId = container.id || 'tris-user-chart-inner';
+    container.innerHTML = ''; // clear
+    try
+    {
+      const { createGameStatsChart } = await import('../profile/UserCardCharts');
+      await createGameStatsChart(chartId, 'tris', gameStats, userId);
+    }
+    catch (err)
+    {
+      console.warn('Failed to render tris donut chart, falling back to text:', err);
+    }
+    finally
+    {
+      const winsEl = document.getElementById('tris-user-wins');
+      const lossesEl = document.getElementById('tris-user-losses');
+      if (winsEl)
+        winsEl.textContent = `Wins: ${gameStats.trisWins || 0}`;
+      if (lossesEl)
+        lossesEl.textContent = `Losses: ${gameStats.trisLosses || 0}`;
+    }
+  }
+  catch (err)
+  {
+    console.error('Error fetching tris stats:', err);
+    container.innerHTML = '<div class="text-red-600">Failed to load stats</div>';
+  }
 }
 
 export default { renderTrisPage };

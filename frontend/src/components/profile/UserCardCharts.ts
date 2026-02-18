@@ -61,9 +61,15 @@ export async function createGameStatsChart(
     }
   }
 
-  const options = {
+  // Determine current theme from document <html> class
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const winsColor = isDark ? '#0dff66' : '#0ea5ff'; // green in dark, blue in light
+  const lossesColor = '#ef4444';
+  const chartBg = isDark ? '#0b1220' : '#ffffff';
+
+  const options: any = {
     series: [wins, losses],
-    colors: ['#0dff66', '#ef4444'],
+    colors: [winsColor, lossesColor],
     chart: {
       height: '100%',
       width: '100%',
@@ -91,26 +97,54 @@ export async function createGameStatsChart(
     labels: ['Wins', 'Losses'],
     tooltip: {
       enabled: true,
-      theme: 'dark'
+      // Use a custom tooltip so we can specifically style the loss hover text in dark mode
+      custom: function(opts: any) {
+        try {
+          const series = opts.series;
+          const idx = opts.seriesIndex;
+          const val = Array.isArray(series) ? series[idx] : series;
+          const label = (opts.w && opts.w.config && opts.w.config.labels && opts.w.config.labels[idx]) || (idx === 0 ? 'Wins' : 'Losses');
+          const bg = chartBg;
+          const baseText = isDark ? '#ffffff' : '#000000';
+          // If dark mode and this is the Losses entry, force the value text to black per request
+          const valueColor = baseText;
+          const labelColor = idx === 0 ? winsColor : lossesColor;
+          return `
+            <div style="padding:8px;border-radius:6px;background:${bg};color:${baseText};font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;">
+              <div style="font-size:12px;color:${labelColor};margin-bottom:4px;">${label}</div>
+              <div style="font-weight:700;font-size:14px;color:${valueColor};">${val}</div>
+            </div>
+          `;
+        } catch (e) {
+          return '';
+        }
+      }
     }
   };
 
   try {
-    // Clear existing chart if present
+    // Clear existing chart if present (destroy stored chart object)
     if ((window as any).chartInstances && (window as any).chartInstances[containerId]) {
-      (window as any).chartInstances[containerId].destroy();
+      try {
+        const existing = (window as any).chartInstances[containerId];
+        if (existing && existing.chart && typeof existing.chart.destroy === 'function') {
+          existing.chart.destroy();
+        }
+      } catch (e) {
+        // ignore
+      }
     }
 
     // Initialize ApexCharts
     const chart = new window.ApexCharts(container, options);
     await chart.render();
 
-    // Store instance for later cleanup
-    if (!(window as any).chartInstances) {
+    // Store instance and metadata for later cleanup / re-rendering
+    if (!(window as any).chartInstances)
       (window as any).chartInstances = {};
-    }
-    (window as any).chartInstances[containerId] = chart;
-  } catch (error) {
+
+    (window as any).chartInstances[containerId] = { chart, gameType, stats, userId, chartKind: 'donut' };
+  }catch (error) {
     console.error(`Failed to create ${gameType} chart:`, error);
   }
 }
@@ -195,7 +229,12 @@ export async function createMatchHistoryChart(
 
   try {
     if ((window as any).chartInstances && (window as any).chartInstances[containerId]) {
-      (window as any).chartInstances[containerId].destroy();
+      try {
+        const existing = (window as any).chartInstances[containerId];
+        if (existing && existing.chart && typeof existing.chart.destroy === 'function') {
+          existing.chart.destroy();
+        }
+      } catch (e) {}
     }
 
     const chart = new window.ApexCharts(container, options);
@@ -204,7 +243,7 @@ export async function createMatchHistoryChart(
     if (!(window as any).chartInstances) {
       (window as any).chartInstances = {};
     }
-    (window as any).chartInstances[containerId] = chart;
+    (window as any).chartInstances[containerId] = { chart, gameType, stats, userId, chartKind: 'history' };
   } catch (error) {
     console.error(`Failed to create ${gameType} history chart:`, error);
   }
@@ -215,10 +254,10 @@ export async function createMatchHistoryChart(
  */
 export function cleanupCharts(): void {
   if ((window as any).chartInstances) {
-    Object.values((window as any).chartInstances).forEach((chart: any) => {
+    Object.values((window as any).chartInstances).forEach((entry: any) => {
       try {
-        if (chart && typeof chart.destroy === 'function') {
-          chart.destroy();
+        if (entry && entry.chart && typeof entry.chart.destroy === 'function') {
+          entry.chart.destroy();
         }
       } catch (err) {
         console.error('Failed to destroy chart:', err);
@@ -226,4 +265,42 @@ export function cleanupCharts(): void {
     });
     (window as any).chartInstances = {};
   }
+}
+
+// Re-render charts automatically when theme (dark class) changes on <html>
+if (typeof document !== 'undefined') {
+  let lastIsDark = document.documentElement.classList.contains('dark');
+  const rerenderAll = async () => {
+    const instances = (window as any).chartInstances;
+    if (!instances) return;
+    const keys = Object.keys(instances);
+    for (const id of keys) {
+      try {
+        const meta = instances[id];
+        if (!meta) continue;
+        // Recreate the proper chart type with same params
+        if (meta.chartKind === 'history') {
+          await createMatchHistoryChart(id, meta.gameType, meta.stats, meta.userId);
+        } else {
+          await createGameStatsChart(id, meta.gameType, meta.stats, meta.userId);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  };
+
+  const mo = new MutationObserver((mutations) => {
+    for (const m of mutations) {
+      if (m.type === 'attributes' && m.attributeName === 'class') {
+        const now = document.documentElement.classList.contains('dark');
+        if (now !== lastIsDark) {
+          lastIsDark = now;
+          // schedule rerender
+          void rerenderAll();
+        }
+      }
+    }
+  });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 }
