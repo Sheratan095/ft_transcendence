@@ -132,16 +132,17 @@
 
 	<!-- TEMPLATES (PLACED OUTSIDE MAIN-CONTENT TO AVOID BEING CLEARED BY ROUTER) -->
 
-	<!-- Login & Register -->
+	<!-- Login & Register & 2fa-->
 	<template id="login-template">
-		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl relative z-30"
-			id="container">
-			<div
-				class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
+		<div id="container"
+			class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl relative z-30">
+
+			<div class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
 					overflow-hidden rounded-xl
 					hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300">
-				<form
-				id="login-form"
+
+				<!-- LOGIN -->
+				<form id="login-form"
 				class="flex w-full max-w-2xl flex-col gap-4 p-6">
 
 					<!-- Title -->
@@ -194,126 +195,119 @@
 
 				<!--REGISTER-->
 
-				<div class="w-full flex hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
-				id ="register-section">
-						<form
-							id="register-form"
-							class="flex w-full max-w-2xl flex-col gap-4 p-6">
+				<div id ="register-section"
+					class="w-full flex hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl">
+					<form
+						id="register-form"
+						class="flex w-full max-w-2xl flex-col gap-4 p-6">
 
-							<!-- Title -->
-							<h1 id="register-title" class="text-3xl font-bold text-left mb-2 text-black dark:text-white" data-i18n="site.create-account">
-							</h1>
-
-							<!-- Description -->
-							<p id="register-desc" class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left" data-i18n="site.pick-name">
-							</p>
-
-							<!-- Username -->
-							<div class="flex flex-col gap-1">
-								<label for="register-username" class="text-sm text-neutral-700 dark:text-neutral-300">Username</label>
-								<input
-									id="register-username"
-									name="username"
-									type="text"
-									placeholder="john_doe"
-									class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
-							</div>
-
-							<!-- Email -->
-							<div class="flex flex-col gap-1">
-								<label for="register-email" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
-								<input
-									id="register-email"
-									name="email"
-									type="email"
-									placeholder="you@example.com"
-									class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
-							</div>
-
-							<!-- Password -->
-							<div class="flex flex-col gap-1">
-								<label for="register-password" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
-								<input
-									id="register-password"
-									name="password"
-									type="password"
-									placeholder="••••••••"
-									class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
-							</div>
-
-							<!-- Error container -->
-							<div id="register-error" class="hidden text-red-400 text-sm"></div>
-
-							<!-- Submit -->
-							<button
-								id="submit-register"
-								type="submit"
-								class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition"
-								data-i18n="site.create-account">
-							</button>
-
-							<!-- Footer -->
-							<div class="mt-4 text-xl text-neutral-400 text-center">
-								<a
-									id="to-login-from-register"
-									href="#"
-									class="text-accent-blue dark:text-accent-cyan hover:underline"
-									data-i18n="site.sign-in">
-								</a>
-							</div>
-						</form>
-					</div>
-				</div>
-				
-				<!-- TWO FACTOR AUTH-->
-
-				<div class="w-full flex hidden items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl"
-				id="2fa-section">
-					<div
-					class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
-						overflow-hidden rounded-xl bg-white dark:bg-black
-						hover:shadow-lg dark:hover:brightness-95 hover:brightness-105 transition-all duration-300 w-full max-md"
-					>
-					<form id="2fa-form" novalidate class="flex w-full flex-col gap-4 p-6">
-						
-						<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
-						Two-Factor Auth
+						<!-- Title -->
+						<h1 id="register-title" class="text-3xl font-bold text-left mb-2 text-black dark:text-white" data-i18n="site.create-account">
 						</h1>
 
-						<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left">
-						Enter the 6-digit code from your authenticator app.
+						<!-- Description -->
+						<p id="register-desc" class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left" data-i18n="site.pick-name">
 						</p>
 
-						<div class="flex flex-col gap-2">
-						<label class="text-sm text-neutral-700 dark:text-neutral-300">Verification Code</label>
-						<div class="flex justify-between gap-2" data-pin-input>
-							<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
-							class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
-							<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
-							class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
-							<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
-							class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
-							<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
-							class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
-							<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
-							class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
-							<input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*"
-							class="w-12 h-14 text-center text-2xl font-bold rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[#ff6b35] dark:focus:ring-[#0dff66]" />
+						<!-- Username -->
+						<div class="flex flex-col gap-1">
+							<label for="register-username" class="text-sm text-neutral-700 dark:text-neutral-300">Username</label>
+							<input
+								id="register-username"
+								name="username"
+								type="text"
+								placeholder="john_doe"
+								class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
 						</div>
 
-						<div id="2fa-error" class="hidden text-red-400 text-sm">Invalid code. Please try again.</div>
+						<!-- Email -->
+						<div class="flex flex-col gap-1">
+							<label for="register-email" class="text-sm text-neutral-700 dark:text-neutral-300">Email</label>
+							<input
+								id="register-email"
+								name="email"
+								type="email"
+								placeholder="you@example.com"
+								class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
 						</div>
 
+						<!-- Password -->
+						<div class="flex flex-col gap-1">
+							<label for="register-password" class="text-sm text-neutral-700 dark:text-neutral-300">Password</label>
+							<input
+								id="register-password"
+								name="password"
+								type="password"
+								placeholder="••••••••"
+								class="rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 px-4 py-2 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
+						</div>
+
+						<!-- Error container -->
+						<div id="register-error" class="hidden text-red-400 text-sm"></div>
+
+						<!-- Submit -->
 						<button
-						type="submit"
-						class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2
-							font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
-						Log in
+							id="submit-register"
+							type="submit"
+							class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2 font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition"
+							data-i18n="site.create-account">
 						</button>
+
+						<!-- Footer -->
+						<div class="mt-4 text-xl text-neutral-400 text-center">
+							<a
+								id="to-login-from-register"
+								href="#"
+								class="text-accent-blue dark:text-accent-cyan hover:underline"
+								data-i18n="site.sign-in">
+							</a>
+						</div>
 					</form>
-					</div>
 				</div>
 			</div>
+
+			<!-- TWO FACTOR AUTH-->
+			<div id="2fa-section"
+				class="w-full flex hidden items-center justify-center sm:p-6 md:p-8 gap-10 rounded-xl">	
+				<div class="shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66]
+					overflow-hidden rounded-xl bg-white dark:bg-black
+					hover:shadow-lg dark:hover:brightness-95 hover:brightness-105 transition-all duration-300 w-fit mx-auto">
+					<form id="2fa-form" novalidate class="flex flex-col gap-4 p-6 max-w-[20rem] sm:max-w-[30rem] mx-auto">
+					
+					<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
+					Two-Factor Auth
+					</h1>
+
+					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left break-words">
+						Enter the 6-digit code sent you by email to complete authentication.
+					</p>
+
+					<div class="flex flex-col w-full">
+					<label class="text-sm text-neutral-700 dark:text-neutral-300">Verification Code</label>
+					<div class="flex justify-center gap-x-2 py-2" data-pin-input>
+						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="0" aria-label="Digit 1" class="otp-tile" />
+						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="1" aria-label="Digit 2" class="otp-tile" />
+						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="2" aria-label="Digit 3" class="otp-tile" />
+						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="3" aria-label="Digit 4" class="otp-tile" />
+						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="4" aria-label="Digit 5" class="otp-tile" />
+						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="5" aria-label="Digit 6" class="otp-tile" />
+					</div>
+					<!-- Hidden single input to enable OS-level one-time-code autofill on mobile -->
+					<input id="2fa-otp-hidden" autocomplete="one-time-code" inputmode="numeric" type="text" class="sr-only" aria-hidden="true" />
+
+					<div id="2fa-error" class="hidden text-red-400 text-sm">Invalid code. Please try again.</div>
+					</div>
+
+					<button
+					type="submit"
+					class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2
+						font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
+					Log in
+					</button>
+				</form>
+				</div>
+			</div>
+
 		</div>
 	</template>
 

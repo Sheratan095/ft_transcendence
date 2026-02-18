@@ -221,6 +221,48 @@ body {
   100% { transform: scaleY(1); }
 }
 
+/* OTP input tile styling */
+[data-pin-input] {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.otp-tile {
+  width: 3.75rem;
+  height: 4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #0b0b0b;
+  border: 1px solid rgba(0,0,0,0.12);
+  transition: box-shadow 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.dark .otp-tile {
+  background: #0b0b0b;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.otp-tile:focus {
+  outline: none;
+  border-color: rgba(255,107,53,1);
+  box-shadow: 0 0 0 4px rgba(255,107,53,0.12);
+}
+
+/* Prevent number input spinners if browsers treat it as numeric */
+.otp-tile::-webkit-outer-spin-button,
+.otp-tile::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @keyframes gridH {
   0%   { transform: scaleX(0); }
   20%  { transform: scaleX(1); }
