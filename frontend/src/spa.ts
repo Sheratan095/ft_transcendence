@@ -14,6 +14,7 @@ type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
   '/': { 
     render: async () => {
+      animatePolygonToTop();
       const el = document.getElementById('main-content');
       const template = document.getElementById('home-template') as HTMLTemplateElement | null;
       if (!el || !template) return;
@@ -100,7 +101,7 @@ const routes: Record<string, RouteConfig> = {
           showErrorToast('Please sign in to play Pong');
           return;
         }
-
+      animatePolygonToBottom();
       const el = document.getElementById('main-content');
       if (!el) return;
       try {
@@ -120,6 +121,7 @@ const routes: Record<string, RouteConfig> = {
         showErrorToast('Please sign in to play Tris');
         return;
       }
+      animatePolygonToBottom();
       const el = document.getElementById('main-content');
       if (!el) return;
       // Dynamically import the tris page renderer
@@ -229,6 +231,17 @@ export function animatePolygonToBottom(): void {
 
 	polygon.style.transition = "clip-path 0.6s ease-in-out";
 	polygon.style.clipPath = "polygon(0% 90%, 100% 90%, 100% 100%, 0% 100%)";
+}
+
+export function animatePolygonToTop(): void {
+  const polygon = document.querySelector(
+    '.mix-blend-difference'
+  ) as HTMLElement | null;
+
+  if (!polygon) return;
+   
+  polygon.style.transition = "clip-path 0.6s ease-in-out";
+  polygon.style.clipPath = "polygon(0% 0%, 100% 0%, 100% 10%, 0% 10%)";
 }
 
 export { goToRoute };
