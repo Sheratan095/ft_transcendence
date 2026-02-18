@@ -6,8 +6,8 @@ import { GameManager, GAME_MODES } from "./game/GameManager.js";
 /**
  * World coordinate bounds for converting normalized to 3D
  */
-const fieldWidthEnv = parseInt(import.meta.env.VITE_FIELD_WIDTH) || 50;
-const fieldHeightEnv = parseInt(import.meta.env.VITE_FIELD_HEIGHT) || 50;
+const fieldWidthEnv = parseInt(import.meta.env.VITE_FIELD_WIDTH) || 130;
+const fieldHeightEnv = parseInt(import.meta.env.VITE_FIELD_HEIGHT) || 70;
 
 export const WORLD_BOUNDS = {
   minX: -fieldWidthEnv / 2,
@@ -23,8 +23,11 @@ export class PongGame {
       throw new Error(`Canvas with id ${canvasId} not found`);
     }
 
-    this.engine = new BABYLON.Engine(this.canvas, true);
-    this.gameManager = new GameManager(mode, config);
+    this.engine = new BABYLON.Engine(this.canvas, true, { preserveDrawingBuffer: true, stencil: true, premultipliedAlpha: false, alpha: true });
+    // allow placing the human player on the right side for the current top-down camera
+    const gmConfig = { ...config };
+    if (mode === GAME_MODES.LOCAL_VS_AI && gmConfig.playerSide === undefined) gmConfig.playerSide = "right";
+    this.gameManager = new GameManager(mode, gmConfig);
     this.scene = this.createScene();
     
     this.setupRenderLoop();
@@ -33,18 +36,38 @@ export class PongGame {
 
   createScene() {
     const scene = new BABYLON.Scene(this.engine);
-    scene.clearColor = new BABYLON.Color3(0.6, 0.5, 0);
+    scene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // transparent background
+
+    // compute field dimensions early so we can fit the camera to the field
+    this._fieldWidth = WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX;
+    this._fieldDepth = WORLD_BOUNDS.maxZ - WORLD_BOUNDS.minZ;
+
+    this._fitCamera = (width, depth) => {
+      const maxDim = Math.max(width, depth); // use the larger dimension to set camera distance, ensuring the whole field fits in view
+      const radius = 110; // distance from camera to target (field center), set based on field size but with a reasonable minimum
+      const beta = 0.6; // near top-down (smaller = more overhead)
+      const alpha = -(Math.PI / 2); // face the long axis
+      return { alpha, beta, radius };
+    };
 
     /* =======================
        CAMERA
     ======================= */
-    const camera = new BABYLON.UniversalCamera(
+    // use ArcRotateCamera so we can position it near-top and allow smooth wheel-zoom
+    const fit = this._fitCamera(this._fieldWidth, this._fieldDepth);
+    const camera = new BABYLON.ArcRotateCamera(
       "camera",
-      new BABYLON.Vector3(0, 100, -40),
+      fit.alpha,
+      fit.beta,
+      fit.radius,
+      new BABYLON.Vector3(0, 0, 0),
       scene
     );
+    // Do NOT attach any controls to the camera: fully disable user interaction
     camera.inputs.clear();
-    camera.attachControl(this.canvas, true);
+    camera.detachControl(this.canvas);
+    camera.lowerRadiusLimit = Math.max(10, Math.max(this._fieldWidth, this._fieldDepth) * 0.3);
+    camera.upperRadiusLimit = Math.max(200, Math.max(this._fieldWidth, this._fieldDepth) * 4);
     scene.activeCamera = camera;
 
     /* =======================
@@ -104,20 +127,27 @@ export class PongGame {
     /* =======================
        GROUND
     ======================= */
-    const fieldWidth = WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX;
-    const fieldDepth = WORLD_BOUNDS.maxZ - WORLD_BOUNDS.minZ;
+    const fieldWidth = this._fieldWidth;
+    const fieldDepth = this._fieldDepth;
     
     // Create ground slightly larger than the field
     const ground = BABYLON.MeshBuilder.CreateGround("ground", { 
-      width: fieldWidth * 1.2, 
-      height: fieldDepth * 1.2 
+      width: fieldWidth * 1.25, 
+      height: fieldDepth * 1.25
     }, scene);
     ground.position.y = -1;
     ground.receiveShadows = true;
+    // save ground center for camera targeting and resize re-fit
+    this._groundPosition = ground.position.clone();
+    // offset target so the field center appears higher in the canvas
+    // negative Z moves the target away from the camera, lifting the field up on screen
+    this._targetOffset = new BABYLON.Vector3(0, 0, -this._fieldDepth * 0.1);
 
     const groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
     groundMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.2);
     groundMaterial.specularColor = BABYLON.Color3.Black();
+    // keep the ground visible (green) while scene background remains transparent
+    groundMaterial.alpha = 1;
     ground.material = groundMaterial;
 
     /* =======================
@@ -153,7 +183,7 @@ export class PongGame {
     centerLine.position.set(0, markY, 0);
     centerLine.material = markMaterial;
 
-    camera.setTarget(ground.position);
+    camera.setTarget(this._groundPosition.add(this._targetOffset));
 
     /* =======================
        GAME MANAGER CALLBACKS
@@ -201,6 +231,17 @@ export class PongGame {
   setupResize() {
     window.addEventListener("resize", () => {
       this.engine.resize();
+      // re-fit ArcRotateCamera to field when the canvas size changes
+      if (this._fitCamera && this.scene && this.scene.activeCamera) {
+        const fit = this._fitCamera(this._fieldWidth, this._fieldDepth);
+        const cam = this.scene.activeCamera;
+        if (cam.radius !== undefined) {
+          cam.alpha = fit.alpha;
+          cam.beta = fit.beta;
+          cam.radius = fit.radius;
+          if (this._groundPosition) cam.setTarget(this._groundPosition.add(this._targetOffset || BABYLON.Vector3.Zero()));
+        }
+      }
     });
   }
 
