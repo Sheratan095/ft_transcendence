@@ -12,6 +12,23 @@ html.theme-transitioning * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Slider prev/next buttons: compact sizing */
+#slideshow-prev-btn,
+#slideshow-next-btn {
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0.25rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+  border-radius: 9999px !important;
+}
+
+#slideshow-prev-btn svg,
+#slideshow-next-btn svg {
+  width: 0.9rem !important;
+  height: 0.9rem !important;
+}
+
 /* Ensure body doesn't hide modals */
 body {
   overflow: visible !important;
