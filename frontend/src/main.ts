@@ -165,32 +165,6 @@ function setupSearchUser()
 
   searchForm.classList.remove('hidden');
   initSearchAutocomplete();
-  
-  searchForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const query = searchInput.value.trim();
-    if (!query) {
-      showErrorToast('Please enter a username or ID to search');
-      return;
-    }
-
-    try {
-      showInfoToast('Searching for user...');
-
-      const user = await searchUser(query);
-      if (!user) {
-        showErrorToast('User not found');
-        return;
-      }
-
-      mainContainer.innerHTML = '';
-      await renderSearchResult(user, mainContainer);
-      searchInput.value = '';
-    } catch (err) {
-      showErrorToast('Error searching for user');
-    }
-  });
 }
 
 function modifyIndex()
@@ -309,56 +283,60 @@ document.addEventListener('DOMContentLoaded', () => {
   initTheme(); // Initialize theme on DOMContentLoaded
 });
 
-function fetchLanguage(): string {
-let language = localStorage.getItem('locale');
-if (!language) {
-	  language = navigator.language || 'en';
+function fetchLanguage(): string
+{
+  let language = localStorage.getItem('locale');
+  if (!language) {
+      language = navigator.language || 'en';
 
-	switch (language) {
-	case 'fr':
-		setLocaleInStorage('fr');
-		break;
-	case 'it':
-		setLocaleInStorage('it');
-		break;
-	default:
-		setLocaleInStorage('en');
-		break;
-	}
-}
-return language;
-}
-
-  function hydrateOnce() {
-    hydrateRoot(document);
-    document.querySelectorAll('template').forEach(tpl => hydrateRoot((tpl as HTMLTemplateElement).content));
+    switch (language) {
+    case 'fr':
+      setLocaleInStorage('fr');
+      break;
+    case 'it':
+      setLocaleInStorage('it');
+      break;
+    default:
+      setLocaleInStorage('en');
+      break;
+    }
   }
-  function hydrateRoot(root: ParentNode = document) {
-    // translate element text content
-    const nodes = Array.from((root as any).querySelectorAll('[data-i18n]') as HTMLElement[]);
-    nodes.forEach(el => {
-      const key = el.dataset.i18n!;
-      const rawVars = el.dataset.i18nVars || '{}';
-      let vars = {};
-      try { vars = JSON.parse(rawVars); } catch {}
-      try {
-        const val = t(key, vars as Record<string, string|number>);
-        el.textContent = val;
-      } catch (err) {
-        el.textContent = key;
-      }
-    });
+  return language;
+}
 
-    // translate input placeholders (data-i18n-placeholder)
-    const phNodes = Array.from((root as any).querySelectorAll('[data-i18n-placeholder]') as HTMLInputElement[]);
-    phNodes.forEach(el => {
-      const key = el.dataset.i18nPlaceholder!;
-      try {
-        el.placeholder = t(key);
-      } catch (err) {
-        el.placeholder = key;
-      }
-    });
-  }
+function hydrateOnce()
+{
+  hydrateRoot(document);
+  document.querySelectorAll('template').forEach(tpl => hydrateRoot((tpl as HTMLTemplateElement).content));
+}
+
+function hydrateRoot(root: ParentNode = document)
+{
+  // translate element text content
+  const nodes = Array.from((root as any).querySelectorAll('[data-i18n]') as HTMLElement[]);
+  nodes.forEach(el => {
+    const key = el.dataset.i18n!;
+    const rawVars = el.dataset.i18nVars || '{}';
+    let vars = {};
+    try { vars = JSON.parse(rawVars); } catch {}
+    try {
+      const val = t(key, vars as Record<string, string|number>);
+      el.textContent = val;
+    } catch (err) {
+      el.textContent = key;
+    }
+  });
+
+  // translate input placeholders (data-i18n-placeholder)
+  const phNodes = Array.from((root as any).querySelectorAll('[data-i18n-placeholder]') as HTMLInputElement[]);
+  phNodes.forEach(el => {
+    const key = el.dataset.i18nPlaceholder!;
+    try {
+      el.placeholder = t(key);
+    } catch (err) {
+      el.placeholder = key;
+    }
+  });
+}
 
 export default {};

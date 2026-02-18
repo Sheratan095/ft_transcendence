@@ -8,7 +8,8 @@ export interface SearchResult extends User {
 /**
  * Initialize search autocomplete behavior
  */
-export function initSearchAutocomplete(): void {
+export function initSearchAutocomplete(): void
+{
   const input = document.getElementById('search-user-input') as HTMLInputElement;
   const dropdown = document.getElementById('search-results-dropdown') as HTMLElement;
   const form = document.getElementById('search-user-form') as HTMLFormElement;
@@ -73,8 +74,41 @@ export function initSearchAutocomplete(): void {
     if (input.value.trim()) dropdown.classList.remove('hidden');
   });
 
+  // Prevent Enter key from selecting the first dropdown item automatically
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const isHidden = dropdown.classList.contains('hidden');
+      if (!isHidden) {
+        e.preventDefault();
+        e.stopPropagation();
+        // keep dropdown open but don't auto-activate first item
+      }
+    } else if (e.key === 'Escape') {
+      dropdown.classList.add('hidden');
+    }
+  });
+
   document.addEventListener('click', (e) => {
     if (!input.contains(e.target as Node) && !dropdown.contains(e.target as Node)) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  // Prevent default form submit navigation; perform search and navigate only if a result is found
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const q = input.value.trim();
+    if (!q) return;
+    try {
+      const res = await searchUser(q);
+      if (res && res.id) {
+        dropdown.classList.add('hidden');
+        form.reset();
+        goToRoute(`/profile?id=${res.id}`);
+      }
+    } catch (err) {
+      // No result or search error - do nothing (avoid redirect)
       dropdown.classList.add('hidden');
     }
   });
