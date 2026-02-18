@@ -735,10 +735,10 @@
 		<div class="w-full relative min-h-[60vh] flex items-center px-4 py-8">
 			<!-- Slideshow Wrapper - Absolutely Centered on Screen -->
 			<div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
-				<div class="relative flex items-center justify-center group/slider">
+				<div class="card relative flex items-center justify-center group shadow-[10px_10px_0_0_#ff9d00] dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 dark:hover:brightness-110 transition-all duration-300 rounded-none dark:rounded-xl">
 				<!-- Previous Button -->
 				<button id="slideshow-prev-btn" type="button" aria-label="Previous slide"
-				class="absolute top-1/2 -translate-y-1/2 p-2 sm:p-3 dark:bg-accent-pink bg-accent-orange text-black dark:text-white 
+				class="absolute top-1/2 -translate-y-1/2 p-2 sm:p-3 dark:bg-accent-pink bg-accent-blue text-black dark:text-white 
 					font-extrabold shadow-md hover:brightness-90 active:scale-95 transition-all rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer pointer-events-auto"
 				style="z-index: 900; left: -3rem;">
 					<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -751,10 +751,9 @@
 					<!-- CARD PONG -->
 					<div id="pong-card-wrapper" class="hidden">
 						<button id="pong-card-btn" class="p-8 sm:p-10 w-full
-						border-4 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-900 bg-neutral-100
-						shadow-[10px_10px_0_0_#00a8e8] accent-accent-blue dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden
-						hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left
-						slideshow-slide">
+						border-neutral-300 accent-accent-blue overflow-hidden
+						transition-all duration-300 cursor-pointer block text-left
+						slideshow-slide rounded">
 							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
 								Play pong
 							</h3>
@@ -770,10 +769,8 @@
 					<!-- Tic tac toe -->
 					<div id="tris-card-wrapper">
 						<button id="tris-card-btn" class="p-8 sm:p-10 w-full
-						border-4 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-900 bg-neutral-100
-						shadow-[10px_10px_0_0_#00a8e8] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden
-						hover:shadow-lg hover:brightness-110 transition-all duration-300 cursor-pointer block text-left
-						slideshow-slide">
+						dark:border-neutral-700 border-neutral-300 overflow-hidden transition-all duration-300 cursor-pointer block text-left
+						slideshow-slide rounded">
 							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
 								Play tris
 							</h3>
@@ -803,8 +800,8 @@
 
 				<!-- Next Button -->
 				<button id="slideshow-next-btn" type="button" aria-label="Next slide"
-				class="absolute top-1/2 -translate-y-1/2 p-2 sm:p-3 dark:bg-accent-pink bg-accent-orange text-black dark:text-white 
-					font-extrabold shadow-md hover:brightness-90 active:scale-95 transition-all rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer pointer-events-auto"
+				class="absolute top-1/2 -translate-y-1/2 p-2 sm:p-3 dark:bg-accent-pink bg-accent-blue text-black dark:text-white 
+					font-extrabold shadow-md active:scale-95 transition-all rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer pointer-events-auto"
 				style="z-index: 61; right: -3rem;">
 					<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

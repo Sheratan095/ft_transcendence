@@ -58,6 +58,8 @@ html.theme-transitioning * {
 
 .card::before {
   content: "";
+  position: absolute;
+  inset: 0;
   top: 0;
   left: 0;
   border-radius: inherit;
@@ -67,9 +69,14 @@ html.theme-transitioning * {
     transparent 35%
   );
   opacity: 0;
-  transition: all 0.15s ease-in-out;
+  transition: opacity 0.35s ease-in-out, box-shadow 0.25s ease;
   pointer-events: none;
   @apply dark:bg-[radial-gradient(60rem_circle_at_var(--xPos)_var(--yPos),_rgba(13,255,102,0.1),_transparent_35%)];
+}
+
+.card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .card-content {
