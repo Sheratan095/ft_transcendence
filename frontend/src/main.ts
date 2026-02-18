@@ -28,12 +28,13 @@ registerDictionary('en', en);
 registerDictionary('fr', fr);
 registerDictionary('it', it);
 
+  setLocale(fetchLanguage() || 'en');
+
+
 // simple language selector handler: persist and reload to ensure full UI picks up the new locale
 document.addEventListener('DOMContentLoaded', () => {
   // hydrate existing DOM and template contents once on load
   hydrateOnce();
-
-  setLocale(fetchLanguage() || 'en');
 
   // Expose hydration functions globally for debugging
   (window as any).__hydrateRoot = hydrateRoot;
