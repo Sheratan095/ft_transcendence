@@ -15,15 +15,12 @@ export function attachRegister(callbacks?: RegisterFormCallbacks): void {
   const form = document.getElementById('register-form') as HTMLFormElement | null;
   if (!form) return;
 
-  console.log('attachRegister: register-form element found', form);
-
   const registerSection = document.getElementById('register-section');
   if (registerSection) {
     registerSection.classList.remove("hidden");
   }
   // ensure the form itself is visible (in case it was hidden individually)
   form.classList.remove('hidden');
-  console.log('attachRegister: post-unhide check', { hiddenClass: registerSection?.classList.contains('hidden'), display: registerSection?.style.display });
   if (form.dataset.attached === 'true') return;
   form.dataset.attached = 'true';
   const usernameInput = document.getElementById('register-username') as HTMLInputElement | null;
@@ -39,7 +36,6 @@ export function attachRegister(callbacks?: RegisterFormCallbacks): void {
   if (loginLink) {
     loginLink.addEventListener('click', (e) => {
       e.preventDefault();
-    console.log('attachRegister: to-login-from-register clicked');
       hideRegister();
       attachLogin();
     });
