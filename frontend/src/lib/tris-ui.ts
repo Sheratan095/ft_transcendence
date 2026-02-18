@@ -513,8 +513,16 @@ function attachTrisCardListener() {
     console.error('Tris card button not found');
     return;
   }
+
   console.log('Attaching tris card listener');
   trisCard.addEventListener('click', async (e) => {
+    if (!isLoggedInClient())
+    {
+      showErrorToast('You must be logged in to play Tris');
+      return;
+    }
+
+
     e.preventDefault();
     console.log('Tris card clicked - navigating to /tris');
     goToRoute('/tris');

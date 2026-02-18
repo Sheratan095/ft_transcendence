@@ -3,6 +3,7 @@ import { goToRoute } from '../spa';
 import { initPong, onPongEvent, startMatchmaking, startPaddleMove, stopPaddleMove, closePong, getCurrentGameId } from './pong';
 import { getUserId } from './auth';
 import { openGameInviteModal } from './game-invite';
+import { isLoggedInClient } from './token';
 
 // Render constants
 const PADDLE_WIDTH = 15;
@@ -72,7 +73,14 @@ function attachPongCardListener() {
     console.error('Pong card button not found');
     return;
   }
-  pongCard.addEventListener('click', (e) => {
+  pongCard.addEventListener('click', (e) =>
+  {
+    if (!isLoggedInClient())
+    {
+      showErrorToast('You must be logged in to play Pong');
+      return;
+    }
+
     e.preventDefault();
     goToRoute('/pong');
   });
