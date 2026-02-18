@@ -6,8 +6,8 @@ import { GameManager, GAME_MODES } from "./game/GameManager.js";
 /**
  * World coordinate bounds for converting normalized to 3D
  */
-const fieldWidthEnv = parseInt(import.meta.env.VITE_FIELD_WIDTH) || 50;
-const fieldHeightEnv = parseInt(import.meta.env.VITE_FIELD_HEIGHT) || 50;
+const fieldWidthEnv = parseInt(import.meta.env.VITE_FIELD_WIDTH) || 130;
+const fieldHeightEnv = parseInt(import.meta.env.VITE_FIELD_HEIGHT) || 70;
 
 export const WORLD_BOUNDS = {
   minX: -fieldWidthEnv / 2,
@@ -23,8 +23,11 @@ export class PongGame {
       throw new Error(`Canvas with id ${canvasId} not found`);
     }
 
-    this.engine = new BABYLON.Engine(this.canvas, true);
-    this.gameManager = new GameManager(mode, config);
+    this.engine = new BABYLON.Engine(this.canvas, true, { preserveDrawingBuffer: true, stencil: true, premultipliedAlpha: false, alpha: true });
+    // allow placing the human player on the right side for the current top-down camera
+    const gmConfig = { ...config };
+    if (mode === GAME_MODES.LOCAL_VS_AI && gmConfig.playerSide === undefined) gmConfig.playerSide = "right";
+    this.gameManager = new GameManager(mode, gmConfig);
     this.scene = this.createScene();
     
     this.setupRenderLoop();
@@ -33,18 +36,38 @@ export class PongGame {
 
   createScene() {
     const scene = new BABYLON.Scene(this.engine);
-    scene.clearColor = new BABYLON.Color3(0.6, 0.5, 0);
+    scene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // transparent background
+
+    // compute field dimensions early so we can fit the camera to the field
+    this._fieldWidth = WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX;
+    this._fieldDepth = WORLD_BOUNDS.maxZ - WORLD_BOUNDS.minZ;
+
+    this._fitCamera = (width, depth) => {
+      const maxDim = Math.max(width, depth); // use the larger dimension to set camera distance, ensuring the whole field fits in view
+      const radius = 110; // distance from camera to target (field center), set based on field size but with a reasonable minimum
+      const beta = 0.6; // near top-down (smaller = more overhead)
+      const alpha = -(Math.PI / 2); // face the long axis
+      return { alpha, beta, radius };
+    };
 
     /* =======================
        CAMERA
     ======================= */
-    const camera = new BABYLON.UniversalCamera(
+    // use ArcRotateCamera so we can position it near-top and allow smooth wheel-zoom
+    const fit = this._fitCamera(this._fieldWidth, this._fieldDepth);
+    const camera = new BABYLON.ArcRotateCamera(
       "camera",
-      new BABYLON.Vector3(0, 100, -40),
+      fit.alpha,
+      fit.beta,
+      fit.radius,
+      new BABYLON.Vector3(0, 0, 0),
       scene
     );
+    // Do NOT attach any controls to the camera: fully disable user interaction
     camera.inputs.clear();
-    camera.attachControl(this.canvas, true);
+    camera.detachControl(this.canvas);
+    camera.lowerRadiusLimit = Math.max(10, Math.max(this._fieldWidth, this._fieldDepth) * 0.3);
+    camera.upperRadiusLimit = Math.max(200, Math.max(this._fieldWidth, this._fieldDepth) * 4);
     scene.activeCamera = camera;
 
     /* =======================
@@ -55,7 +78,7 @@ export class PongGame {
       new BABYLON.Vector3(60, 100, 20),
       scene
     );
-    light.intensity = 0.5;
+    light.intensity = 0.5; // reduced significantly so shadows are visible and colors don't wash out
 
     /* =======================
        SHADOW LIGHT
@@ -65,7 +88,7 @@ export class PongGame {
       new BABYLON.Vector3(-1, -2, -1),
       scene
     );
-    shadowLight.position = new BABYLON.Vector3(0, 40, 0);
+    shadowLight.position = new BABYLON.Vector3(80, 60, 0);
 
     const shadowGenerator = new BABYLON.ShadowGenerator(1024, shadowLight);
     shadowGenerator.useBlurExponentialShadowMap = true;
@@ -79,23 +102,34 @@ export class PongGame {
     const paddleVisualDepth = gameState.paddles.left.height * worldHeight;
     const ballVisualDiameter = gameState.ball.radius * worldHeight * 2;
 
+    // Create materials for paddles with controlled diffuse and low specular to preserve color
+    const rightPaddleMat = new BABYLON.StandardMaterial("rightPaddleMat", scene);
+    rightPaddleMat.diffuseColor = new BABYLON.Color3(1, 0, 0); // red
+    rightPaddleMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1); // low specular to avoid washout
+    rightPaddleMat.specularPower = 8;
+
+    const leftPaddleMat = new BABYLON.StandardMaterial("leftPaddleMat", scene);
+    leftPaddleMat.diffuseColor = new BABYLON.Color3(0, 0, 1); // blue
+    leftPaddleMat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1); // low specular
+    leftPaddleMat.specularPower = 8;
+
     this.rightPaddleMesh = BABYLON.MeshBuilder.CreateBox("rightPaddle", {
-      height: 1, width: 1.5, depth: paddleVisualDepth,
-      faceColors: Array(6).fill(new BABYLON.Color4(1, 0, 0, 1))
+      height: 1, width: 1.5, depth: paddleVisualDepth
     }, scene);
-    this.rightPaddleMesh.position.set(WORLD_BOUNDS.maxX, 4, 0);
+    this.rightPaddleMesh.material = rightPaddleMat;
+    this.rightPaddleMesh.position.set(WORLD_BOUNDS.maxX, 3, 0);
 
     this.leftPaddleMesh = BABYLON.MeshBuilder.CreateBox("leftPaddle", {
-      height: 1, width: 1.5, depth: paddleVisualDepth,
-      faceColors: Array(6).fill(new BABYLON.Color4(0, 0, 1, 1))
+      height: 1, width: 1.5, depth: paddleVisualDepth
     }, scene);
-    this.leftPaddleMesh.position.set(WORLD_BOUNDS.minX, 4, 0);
+    this.leftPaddleMesh.material = leftPaddleMat;
+    this.leftPaddleMesh.position.set(WORLD_BOUNDS.minX, 3, 0);
 
     /* =======================
        BALL
     ======================= */
     this.ballMesh = BABYLON.MeshBuilder.CreateSphere("ball", { diameter: ballVisualDiameter, segments: 32 }, scene);
-    this.ballMesh.position.set(0, 4, 0);
+    this.ballMesh.position.set(0, 3, 0);
 
     shadowGenerator.addShadowCaster(this.ballMesh);
     shadowGenerator.addShadowCaster(this.rightPaddleMesh);
@@ -104,20 +138,27 @@ export class PongGame {
     /* =======================
        GROUND
     ======================= */
-    const fieldWidth = WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX;
-    const fieldDepth = WORLD_BOUNDS.maxZ - WORLD_BOUNDS.minZ;
+    const fieldWidth = this._fieldWidth;
+    const fieldDepth = this._fieldDepth;
     
     // Create ground slightly larger than the field
     const ground = BABYLON.MeshBuilder.CreateGround("ground", { 
-      width: fieldWidth * 1.2, 
-      height: fieldDepth * 1.2 
+      width: fieldWidth * 1.25, 
+      height: fieldDepth * 1.25
     }, scene);
     ground.position.y = -1;
     ground.receiveShadows = true;
+    // save ground center for camera targeting and resize re-fit
+    this._groundPosition = ground.position.clone();
+    // offset target so the field center appears higher in the canvas
+    // negative Z moves the target away from the camera, lifting the field up on screen
+    this._targetOffset = new BABYLON.Vector3(0, 0, -this._fieldDepth * 0.1);
 
     const groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
     groundMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.2);
     groundMaterial.specularColor = BABYLON.Color3.Black();
+    // keep the ground visible (green) while scene background remains transparent
+    groundMaterial.alpha = 1;
     ground.material = groundMaterial;
 
     /* =======================
@@ -153,7 +194,7 @@ export class PongGame {
     centerLine.position.set(0, markY, 0);
     centerLine.material = markMaterial;
 
-    camera.setTarget(ground.position);
+    camera.setTarget(this._groundPosition.add(this._targetOffset));
 
     /* =======================
        GAME MANAGER CALLBACKS
@@ -201,6 +242,17 @@ export class PongGame {
   setupResize() {
     window.addEventListener("resize", () => {
       this.engine.resize();
+      // re-fit ArcRotateCamera to field when the canvas size changes
+      if (this._fitCamera && this.scene && this.scene.activeCamera) {
+        const fit = this._fitCamera(this._fieldWidth, this._fieldDepth);
+        const cam = this.scene.activeCamera;
+        if (cam.radius !== undefined) {
+          cam.alpha = fit.alpha;
+          cam.beta = fit.beta;
+          cam.radius = fit.radius;
+          if (this._groundPosition) cam.setTarget(this._groundPosition.add(this._targetOffset || BABYLON.Vector3.Zero()));
+        }
+      }
     });
   }
 
