@@ -348,3 +348,49 @@ html[data-transition-direction="back"] {
 
 /* Keep accessibility: ensure focusable elements are still reachable */
 
+
+/* Tris win color: light mode uses Tailwind green-600, dark mode keeps accent green */
+.tris-win-color {
+  color: rgb(34,197,94); /* text-green-600 (light mode) */
+}
+
+/* TRIS selector button: neutral by default; background applied only when `.selected` */
+.tris-selector {
+  background-color: transparent;
+  border-color: var(--neutral-border, #374151);
+  color: inherit;
+}
+.tris-selector:hover {
+  filter: brightness(0.98);
+}
+.tris-selector.selected {
+  background-color: rgb(34,197,94);
+  border-color: rgb(34,197,94);
+  color: black;
+}
+.dark .tris-selector.selected {
+  background-color: #0dff66 !important;
+  border-color: #0dff66 !important;
+  color: black !important;
+}
+
+/* PONG selector button: neutral by default; background applied only when `.selected` */
+.pong-selector {
+  background-color: transparent;
+  border-color: var(--neutral-border, #374151);
+  color: inherit;
+}
+.pong-selector:hover {
+  filter: brightness(0.98);
+}
+.pong-selector.selected {
+  background-color: #00bcd4;
+  border-color: #00bcd4;
+  color: black;
+}
+.dark .pong-selector.selected {
+  background-color: #00bcd4 !important;
+  border-color: #00bcd4 !important;
+  color: black !important;
+}
+

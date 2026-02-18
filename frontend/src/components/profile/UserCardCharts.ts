@@ -18,6 +18,12 @@ export interface GameStats {
   trisHistory?: Array<{ endedAt: string; winnerId: string | null }>;
 }
 
+// Color constants shared by both chart functions
+const TRIS_LIGHT_COLOR = '#16a34a'; // Tailwind text-green-600
+const TRIS_DARK_ACCENT = '#0dff66'; // accent green used in dark mode
+const PONG_COLOR = '#00bcd4';
+const LOSSES_COLOR = '#ef4444';
+
 /**
  * Create a donut chart for win/loss ratio
  */
@@ -63,8 +69,9 @@ export async function createGameStatsChart(
 
   // Determine current theme from document <html> class
   const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-  const winsColor = isDark ? '#0dff66' : '#0ea5ff'; // green in dark, blue in light
-  const lossesColor = '#ef4444';
+  // For tris: use Tailwind text-green-600 in light mode, keep accent green in dark mode
+  const winsColor = gameType === 'tris' ? (isDark ? TRIS_DARK_ACCENT : TRIS_LIGHT_COLOR) : PONG_COLOR;
+  const lossesColor = LOSSES_COLOR;
   const chartBg = isDark ? '#0b1220' : '#ffffff';
 
   const options: any = {
@@ -205,7 +212,7 @@ export async function createMatchHistoryChart(
       sparkline: { enabled: true },
       toolbar: { show: false },
     },
-    tooltip: { enabled: true, theme: 'dark' },
+    tooltip: { enabled: false, theme: 'dark' },
     fill: {
       type: 'gradient',
       gradient: { opacityFrom: 0.4, opacityTo: 0 },
@@ -214,8 +221,8 @@ export async function createMatchHistoryChart(
     stroke: { width: 2, curve: 'smooth' },
     grid: { show: false },
     series: [
-      { name: 'Wins', data: winsData, color: gameType === 'tris' ? '#0dff66' : '#00bcd4' },
-      { name: 'Losses', data: lossesData, color: '#ef4444' },
+      { name: 'Wins', data: winsData, color: gameType === 'tris' ? (document.documentElement.classList.contains('dark') ? TRIS_DARK_ACCENT : TRIS_LIGHT_COLOR) : PONG_COLOR },
+      { name: 'Losses', data: lossesData, color: LOSSES_COLOR },
     ],
     legend: { show: false },
     xaxis: {
