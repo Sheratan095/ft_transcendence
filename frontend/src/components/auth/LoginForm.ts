@@ -70,9 +70,9 @@ export function attachLogin(): void {
 			const body = await loginRequest(username, password);
 			if (body && body.tfaRequired)
 			{
-				localStorage.setItem('userId', body.userId);
+				console.log('Login requires 2FA, showing 2FA form id:', body.userId);
 				hideLogin();
-				attach2FA();
+				attach2FA(body.userId);
 				return;
 			}
 			if (body && body.user.id)
@@ -82,13 +82,15 @@ export function attachLogin(): void {
 
 			showSuccess(errorEl, 'Signed in successfully.');
 			setTimeout(() => window.location.href = '/profile', 400);
-		} catch (err) {
+		}
+		catch (err) {
 			showError(errorEl, (err as Error).message || 'Login failed');
 		}
 	});
 }
 
-export function hideLogin(): void {
+export function hideLogin(): void
+{
 	const form = document.getElementById('login-form') as HTMLFormElement | null;
 	if (form) {
 		form.classList.add('hidden');
