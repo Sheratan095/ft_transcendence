@@ -4,7 +4,6 @@ import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
-import { openTrisModeModal } from './lib/tris-mode';
 import { setupTrisCardListener } from './lib/tris-ui';
 import { setupPongCardListener } from './lib/pong-ui';
 

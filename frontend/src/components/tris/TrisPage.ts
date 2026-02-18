@@ -1,5 +1,5 @@
 import { getUserId } from '../../lib/auth';
-import { openTrisModeModal, initializeModeSpecificBehaviors, resetLocalGame } from '../../lib/tris-mode';
+import { initializeModeSpecificBehaviors, resetLocalGame } from '../../lib/tris-mode';
 import { openTrisModal } from '../../lib/tris-ui';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
@@ -28,14 +28,11 @@ export async function renderTrisPage(container: HTMLElement) {
   
 
   // Attach button handlers
-  const btnMode = container.querySelector('#tris-open-mode-modal') as HTMLElement | null;
   const btnOnline = container.querySelector('#tris-play-online') as HTMLButtonElement | null;
   const btnOffline1v1 = container.querySelector('#tris-play-offline-1v1') as HTMLButtonElement | null;
   const btnOfflineAI = container.querySelector('#tris-play-offline-ai') as HTMLButtonElement | null;
   const btnInviteFriend = container.querySelector('#tris-invite-friend') as HTMLButtonElement | null;
   const btnResetLocal = container.querySelector('#tris-reset-local') as HTMLButtonElement | null;
-
-  if (btnMode) btnMode.addEventListener('click', () => openTrisModeModal());
   if (btnOnline) btnOnline.addEventListener('click', async () => {
     try {
       await openTrisModal();

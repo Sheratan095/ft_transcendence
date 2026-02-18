@@ -5,7 +5,7 @@ import { setupChatEventListeners, initChat } from './components/chat/chat';
 import { initChatButton, initHomeButton, removeHomeButton } from './components/shared/FloatingButtons';
 import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
-import { getIntlayer, setLocaleInStorage } from "intlayer";
+import { getIntlayer, getLocaleFromStorage, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket } from './components/shared/Notifications';
 import { setFriendsManager } from './components/shared/Notifications';
 import { showTournamentListModal } from './components/tournaments/TournamentsList';
@@ -27,15 +27,13 @@ import it from './i18n/it.json';
 registerDictionary('en', en);
 registerDictionary('fr', fr);
 registerDictionary('it', it);
-// set runtime locale from saved preference (fallback to 'en') and persist via any storage hook
-let _savedLanguage = localStorage.getItem('locale');
-if (!_savedLanguage) _savedLanguage = fetchLanguage(); // will set to navigator language or default and persist
-setLocale(_savedLanguage);
 
 // simple language selector handler: persist and reload to ensure full UI picks up the new locale
 document.addEventListener('DOMContentLoaded', () => {
   // hydrate existing DOM and template contents once on load
   hydrateOnce();
+
+  setLocale(fetchLanguage() || 'en');
 
   // Expose hydration functions globally for debugging
   (window as any).__hydrateRoot = hydrateRoot;
@@ -51,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // populate selector and set current value
   langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
-  langSelect.value = _savedLanguage;
+  langSelect.value = fetchLanguage();
 
   langSelect.addEventListener('change', async () => {
     const v = langSelect.value;
@@ -112,15 +110,6 @@ main(window.location.pathname);
 export async function main(path: string)
 {
 await start();
-
-// Load user's saved language preference
-const savedLanguage = localStorage.getItem('locale') || 'en';
-setLocaleInStorage(savedLanguage);
-
-  // IMPORTANT: set the runtime translator locale so t(...) uses it
-setLocale(savedLanguage);
-
-console.log(savedLanguage);
 
 getIntlayer("app"); // Initialize intlayer
 
