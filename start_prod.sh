@@ -4,7 +4,7 @@ set -euo pipefail
 # Run the project's Prod env generator then start docker compose.
 # Usage: ./start_prod.sh [docker-compose-args]
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 POPULATE_SCRIPT="$ROOT_DIR/docs/env/Prod/populate_env.bash"
 
 if [[ ! -f "$POPULATE_SCRIPT" ]]; then
