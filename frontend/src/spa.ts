@@ -92,7 +92,15 @@ const routes: Record<string, RouteConfig> = {
     }
   },
   '/pong': { 
-    render: async () => {
+    render: async () =>
+      {
+        if (!isLoggedInClient())
+        {
+          goToRoute('/login');
+          showErrorToast('Please sign in to play Pong');
+          return;
+        }
+
       const el = document.getElementById('main-content');
       if (!el) return;
       try {
@@ -106,6 +114,12 @@ const routes: Record<string, RouteConfig> = {
   },
   '/tris': { 
     render: async () => {
+      if (!isLoggedInClient())
+      {
+        goToRoute('/login');
+        showErrorToast('Please sign in to play Tris');
+        return;
+      }
       const el = document.getElementById('main-content');
       if (!el) return;
       // Dynamically import the tris page renderer
