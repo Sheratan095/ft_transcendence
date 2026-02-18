@@ -15,6 +15,7 @@
   dark:selection:bg-accent-pink selection:text-black dark:selection:text-white">
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
 	<div id="container-grid"
 		class="relative h-max flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-black">
 		<div id="main-grid" class="fixed inset-0 bg-[length:40px_40px] pointer-events-none z-20
@@ -26,11 +27,14 @@
 		</div>
 	</div>
 
+	<!-- Decorative shadows -->
 	<div class="shadow-[10px_10px_0_0] shadow-accent-orange dark:shadow-accent-green"> </div>
+
 	<!-- Search bar, small user card and theme switch button-->
 	<div id="top-bar"
 		class="flex z-20 items-end justify-end p-2 space-x-4 text-black dark:text-white w-full shadow-md
-			border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-blue dark:hover:border-accent-green transition-colors">
+		border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-blue dark:hover:border-accent-green transition-colors">
+
 		<!-- User options -->
 		<div id="user-options" title="Go to profile"
 			class="flex z-30 w-[10vw] hidden items-center justify-center">
@@ -65,133 +69,6 @@
 			</div> 
 		</form>
 
-		<!-- Tris page template -->
-		<template id="tris-template">
-			<div class="min-h-screen p-6 md:p-8">
-				<!-- Header Card -->
-				<div class="max-w-5xl mx-auto mb-8">
-					<div class="bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 from-neutral-100 to-neutral-50 rounded-xl border-4 dark:border-neutral-700 border-neutral-300 p-6 dark:shadow-[10px_10px_0_0_rgba(255,0,157,0.2)] shadow-[10px_10px_0_0_rgba(0,168,232,0.2)]">
-						<div class="flex items-center justify-between">
-							<div>
-								<h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange mb-2">Tris</h1>
-								<p class="text-sm text-neutral-600 dark:text-neutral-400">Tic-Tac-Toe multiplayer game</p>
-							</div>
-							<div class="flex items-center gap-4 p-4 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg">
-								<div class="text-right text-sm">
-									<!-- <div id="tris-username" class="font-bold">Username</div> -->
-									<div id="tris-user-stats" class="flex flex-col items-end text-xs text-neutral-600 dark:text-neutral-400">
-										<div id="tris-user-wins">Wins: 0</div>
-										<div id="tris-user-losses">Losses: 0</div>
-									</div>
-								</div>
-								<div id="tris-user-chart" class="w-14 h-14 flex items-center justify-center bg-transparent">
-									<div id="tris-user-chart-inner" class="w-full h-full"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Content Grid -->
-				<div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-					<!-- Main Play Card -->
-					<div class="md:col-span-2">
-						<div class="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl border-3 dark:border-neutral-700 border-neutral-300 overflow-hidden dark:shadow-lg shadow-md">
-							<div class="bg-gradient-to-r dark:from-accent-pink/20 dark:to-accent-pink/10 from-accent-orange/20 to-accent-orange/10 p-6 border-b-2 dark:border-neutral-700 border-neutral-300">
-								<h2 class="text-2xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Play Game</h2>
-							</div>
-							<div class="p-6 space-y-3">
-								<button id="tris-play-online" class="w-full btn-primary">🎮 Play Online (Matchmaking)</button>
-								<button id="tris-play-offline-1v1" class="w-full btn-muted">👥 Offline 1v1 (Local)</button>
-								<button id="tris-play-offline-ai" class="w-full btn-muted">🤖 Play vs AI</button>
-								<div class="pt-3 border-t dark:border-neutral-700 border-neutral-300">
-									<button id="tris-open-mode-modal" class="text-sm font-semibold capitalize text-accent-orange hover:text-accent-orange/80
-									 dark:text-accent-pink dark:hover:text-accent-pink/80 transition">Please Log in to Play</button>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Sidebar Quick Menu Card -->
-					<aside>
-						<div class="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl border-3 dark:border-neutral-700 border-neutral-300 overflow-hidden dark:shadow-lg shadow-md h-full">
-							<div class="bg-gradient-to-r dark:from-accent-green/20 dark:to-accent-green/10 from-accent-cyan/20 to-accent-cyan/10 p-6 border-b-2 dark:border-neutral-700 border-neutral-300">
-								<h3 class="text-lg font-extrabold uppercase tracking-tight dark:text-accent-green text-accent-cyan">Quick Menu</h3>
-							</div>
-							<div class="p-6 space-y-3">
-								<button id="tris-invite-friend" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">👋 Invite Friend</button>
-								<button id="tris-view-lobby" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">👀 View Lobby</button>
-								<button id="tris-reset-local" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">🔄 Reset Game</button>
-							</div>
-						</div>
-					</aside>
-				</div>
-			</div>
-		</template>
-
-		<!-- Pong page template -->
-		<template id="pong-template">
-			<div class="min-h-screen p-6 md:p-8">
-				<!-- Header Card -->
-				<div class="max-w-5xl mx-auto mb-8">
-					<div class="bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 from-neutral-100 to-neutral-50 rounded-xl border-4 dark:border-neutral-700 border-neutral-300 p-6 dark:shadow-[10px_10px_0_0_rgba(255,0,157,0.2)] shadow-[10px_10px_0_0_rgba(0,168,232,0.2)]">
-						<div class="flex items-center justify-between">
-							<div>
-								<h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-tight dark:text-accent-green text-accent-cyan mb-2">Pong</h1>
-								<p class="text-sm text-neutral-600 dark:text-neutral-400">Classic paddle game with multiplayer</p>
-							</div>
-							<div class="flex items-center gap-4 p-4 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg">
-								<div class="text-right text-sm">
-									<div id="pong-user-stats" class="flex flex-col items-end text-xs text-neutral-600 dark:text-neutral-400">
-										<div id="pong-user-wins">Wins: 0</div>
-										<div id="pong-user-losses">Losses: 0</div>
-									</div>
-								</div>
-								<div id="pong-user-chart" class="w-14 h-14 flex items-center justify-center bg-transparent">
-									<div id="pong-user-chart-inner" class="w-full h-full"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Content Grid -->
-				<div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-					<!-- Main Play Card -->
-					<div class="md:col-span-2">
-						<div class="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl border-3 dark:border-neutral-700 border-neutral-300 overflow-hidden dark:shadow-lg shadow-md">
-							<div class="bg-gradient-to-r dark:from-accent-green/20 dark:to-accent-green/10 from-accent-cyan/20 to-accent-cyan/10 p-6 border-b-2 dark:border-neutral-700 border-neutral-300">
-								<h2 class="text-2xl font-extrabold uppercase tracking-tight dark:text-accent-green text-accent-cyan">Play Game</h2>
-							</div>
-							<div class="p-6 space-y-3">
-								<button id="pong-play-online" class="w-full btn-primary">🎮 Play Online (Matchmaking)</button>
-								<button id="pong-play-offline-1v1" class="w-full btn-muted">👥 Offline 1v1 (Local)</button>
-								<button id="pong-play-offline-ai" class="w-full btn-muted">🤖 Play vs AI</button>
-								<div class="pt-3 border-t dark:border-neutral-700 border-neutral-300">
-									<button id="pong-open-mode-modal" class="text-sm font-semibold text-accent-green hover:text-accent-green/80 transition">⚙️ Open Mode Selector</button>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Sidebar Quick Menu Card -->
-					<aside>
-						<div class="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl border-3 dark:border-neutral-700 border-neutral-300 overflow-hidden dark:shadow-lg shadow-md h-full">
-							<div class="bg-gradient-to-r dark:from-accent-pink/20 dark:to-accent-pink/10 from-accent-orange/20 to-accent-orange/10 p-6 border-b-2 dark:border-neutral-700 border-neutral-300">
-								<h3 class="text-lg font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Quick Menu</h3>
-							</div>
-							<div class="p-6 space-y-3">
-								<button id="pong-invite-friend" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">👋 Invite Friend</button>
-								<button id="pong-view-lobby" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">👀 View Lobby</button>
-								<button id="pong-tournaments-btn" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">🏆 Tournaments</button>
-								<button id="pong-reset-local" class="w-full text-left px-4 py-2 rounded-lg dark:bg-neutral-700/50 bg-neutral-100/50 hover:dark:bg-neutral-700 hover:bg-neutral-100 transition font-semibold text-sm">🔄 Reset Game</button>
-							</div>
-						</div>
-					</aside>
-				</div>
-			</div>
-		</template>
-
 		<!-- Language selector styled like theme button -->
 		<select id="profile-language" aria-label="Select language" title="Select language"
 			class="relative z-30 pointer-events-auto cursor-pointer py-2 rounded-lg border-2 border-neutral-800 bg-neutral-700 hover:bg-gray-900 transition-colors ml-2 text-white text-sm appearance-auto dark:border-neutral-200 dark:bg-neutral-300 dark:hover:bg-neutral-100 dark:text-black">
@@ -218,9 +95,9 @@
 		<!-- Results will be injected here -->
 	</div>
 
-	<!-- homepage -->
 	<!-- Main content-->
-	<main id="main-content" class="z-0 cards w-full min-h-screen px-4 sm:px-8 lg:px-16" style="padding-top: 0px">
+	<main id="main-content"
+		class="z-0 cards w-full min-h-screen px-4 sm:px-8 lg:px-16" style="padding-top: 0px">
 		<!-- Content will be dynamically injected here -->
 		<section class="font-extrabold tracking-tighter h-max leading-[0.8] text-gray-800 dark:text-gray-100" >
 			<h1
@@ -252,9 +129,10 @@
 		</div>
 	</main>
 
-	<!-- Templates (placed outside main-content to avoid being cleared by router) -->
-	
-	<!-- LOGIN & REGISTER -->
+
+	<!-- TEMPLATES (PLACED OUTSIDE MAIN-CONTENT TO AVOID BEING CLEARED BY ROUTER) -->
+
+	<!-- Login & Register -->
 	<template id="login-template">
 		<div class="w-full flex items-center justify-center p-4 sm:p-6 md:p-8 gap-10 rounded-xl relative z-30"
 			id="container">
@@ -439,58 +317,7 @@
 		</div>
 	</template>
 
-	<!-- Search Profile Card Template -->
-	<template id="search-profile-card-template">
-		<div class="w-full cards flex items-center justify-center gap-10 rounded-xl search-profile-card pb-96 -mt-20" style="padding-top: 0px;">
-			<div class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden rounded-xl hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300" style="transform: scale(0.8);">
-				<div class="pt-4 px-4 pb-1 w-full flex flex-col gap-0">
-					<!-- Header with avatar and info -->
-					<div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
-						<!-- Avatar -->
-						<div class="relative flex-shrink-0 z-30">
-							<div class="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 aspect-square rounded-md overflow-hidden border-4 border-gray-400 dark:border-neutral-400 flex items-center justify-center bg-gray-200 dark:bg-neutral-800">
-								<img class="spc-avatar w-full h-full object-cover" src="/assets/placeholder-avatar.jpg" alt="User avatar" />
-							</div>
-						</div>
-
-						<!-- User info section -->
-						<div class="flex-1 w-full z-30">
-							<!-- Username -->
-							<h1 class="spc-username text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">Username</h1>
-							
-							<!-- Email -->
-							<div class="flex flex-wrap gap-x-8 gap-y-2 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
-								<div class="flex items-center gap-2">
-									<span class="font-extrabold text-black dark:text-white">Email:</span> 
-									<span class="spc-email text-gray-600 dark:text-neutral-400">email@example.com</span>
-								</div>
-							</div>
-
-							<!-- Action buttons -->
-							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-chat bg-accent-blue dark:bg-accent-blue text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									💬 Send Message
-								</button>
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-gray-500 dark:bg-accent-green text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									👥 Add Friend
-								</button>
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									🔒 Block
-								</button>
-							</div>
-						</div>
-					</div>
-
-					<!-- Charts Section -->
-					<div id="search-profile-charts-section" class="flex flex-col gap-6 p-4 border-t border-accent-orange dark:border-accent-green">
-						<!-- Dynamically populated stats will go here -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</template>
-
-	<!-- MAIN PROFILE -->
+	<!-- Main profile -->
 	<template id="profile-template">
 		<div class="w-full cards flex items-center justify-center pb-96 gap-10 rounded-xl pt-0 -mt-20" id="container">
 			<div
@@ -575,13 +402,61 @@
 		</div>
 	</template>
 
+	<!-- Search Profile -->
+	<template id="search-profile-card-template">
+		<div class="w-full cards flex items-center justify-center gap-10 rounded-xl search-profile-card pb-96 -mt-20" style="padding-top: 0px;">
+			<div class="card shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] overflow-hidden rounded-xl hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300" style="transform: scale(0.8);">
+				<div class="pt-4 px-4 pb-1 w-full flex flex-col gap-0">
+					<!-- Header with avatar and info -->
+					<div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
+						<!-- Avatar -->
+						<div class="relative flex-shrink-0 z-30">
+							<div class="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 aspect-square rounded-md overflow-hidden border-4 border-gray-400 dark:border-neutral-400 flex items-center justify-center bg-gray-200 dark:bg-neutral-800">
+								<img class="spc-avatar w-full h-full object-cover" src="/assets/placeholder-avatar.jpg" alt="User avatar" />
+							</div>
+						</div>
 
-	<!-- Delete Dialog -->
-	<div
-		id="delete-dialog"
+						<!-- User info section -->
+						<div class="flex-1 w-full z-30">
+							<!-- Username -->
+							<h1 class="spc-username text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6 capitalize">Username</h1>
+							
+							<!-- Email -->
+							<div class="flex flex-wrap gap-x-8 gap-y-2 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
+								<div class="flex items-center gap-2">
+									<span class="font-extrabold text-black dark:text-white">Email:</span> 
+									<span class="spc-email text-gray-600 dark:text-neutral-400">email@example.com</span>
+								</div>
+							</div>
+
+							<!-- Action buttons -->
+							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-chat bg-accent-blue dark:bg-accent-blue text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
+									💬 Send Message
+								</button>
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-gray-500 dark:bg-accent-green text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
+									👥 Add Friend
+								</button>
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
+									🔒 Block
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Charts Section -->
+					<div id="search-profile-charts-section" class="flex flex-col gap-6 p-4 border-t border-accent-orange dark:border-accent-green">
+						<!-- Dynamically populated stats will go here -->
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!-- Delete Account Dialog -->
+	<div id="delete-dialog"
 		tabindex="-1"
-		class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-	>
+		class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 		<div class="relative p-4 w-full max-w-lg">
 			<div class="relative bg-neutral-900 border border-neutral-700 rounded-xl pb-6 
 						shadow-[10px_10px_0_0_#f73c3c] transition-all duration-[0.4s] hover:shadow-lg
@@ -609,8 +484,7 @@
 		</div>
 	</div>
 
-	<!-- TOURNAMENTS -->
-
+	<!-- Tournaments -->
 	<div id="tournament-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
 		<!-- Backdrop -->
 		<div id="tournament-backdrop" class="absolute inset-0 bg-gradient-to-br from-black/60 via-transparent to-black/40 backdrop-blur-sm" aria-hidden="true"></div>
@@ -745,520 +619,507 @@
 		</div>
 	</template>
 
-<!-- Tris Game Modals-->
-
-<!-- Tris Mode Selection Modal -->
-<div
-	id="tris-mode-modal"
-	tabindex="-1"
-	data-backdrop-close="false"
-	class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full dark:bg-black bg-white bg-opacity-50"
->
-  <div class="relative p-20 w-full max-w-xl">
-    <div class="relative dark:bg-neutral-900 bg-neutral-100 border-4 dark:border-neutral-700 border-neutral-300 dark:shadow-[10px_10px_0_0_#ff009d]
-	shadow-[10px_10px_0_0_#0dff66] h-auto flex flex-col hover:shadow-lg transition duration-300">
-      
-      <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-4 right-4 z-10 dark:text-neutral-400 text-neutral-600 bg-transparent 
-               hover:bg-neutral-800 hover:text-white transition border-2 dark:border-neutral-700 border-neutral-300 rounded-md
-               w-8 h-8 inline-flex justify-center items-center"
-        id="tris-mode-close-btn"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-
-      <!-- Header -->
-      <div class="p-8 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-800 bg-neutral-200">
-        <h2 class="text-3xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Select Game Mode</h2>
-        <p class="dark:text-neutral-400 text-neutral-600 text-sm mt-2">Choose how you want to play Tris</p>
-      </div>
-
-      <!-- Mode selection area -->
-      <div class="p-8 flex flex-col gap-4">
-        <!-- Online Mode -->
-        <button
-          id="tris-mode-online"
-          class="group relative p-6 bg-gradient-to-br dark:from-neutral-800 from-neutral-200 
-		  		dark:to-neutral-900 to-neutral-100 border-3 dark:border-neutral-700 border-neutral-300 
-                 hover:border-accent-orange dark:hover:border-accent-green transition-all duration-300 
-				 hover:shadow-[0_0_20px_#ff6b35] dark:hover:shadow-[0_0_20px_#0dff66]
-                 flex flex-col items-start gap-2 cursor-pointer rounded-xl"
-        >
-          <span class="text-xl font-extrabold uppercase dark:text-accent-green text-accent-orange">Online</span>
-          <span class="text-sm dark:text-neutral-400 dark:group-hover:text-neutral-300 text-neutral-600 group-hover:text-neutral-700 transition">
-            Play against other players online with matchmaking
-          </span>
-        </button>
-
-        <!-- Offline 1v1 Mode -->
-        <button
-          id="tris-mode-offline-1v1"
-          class="group relative p-6 bg-gradient-to-br dark:from-neutral-800 from-neutral-200 
-		  		dark:to-neutral-900 to-neutral-100 border-3 dark:border-neutral-700 border-neutral-300 
-                 hover:border-accent-blue dark:hover:border-x-accent-cyan dark:hover:border-accent-purple transition-all duration-300 
-				 hover:shadow-[0_0_20px_#00a8e8] dark:hover:shadow-[0_0_20px_#00ffff]
-                 flex flex-col items-start gap-2 cursor-pointer rounded-xl"
-        >
-          <span class="text-xl font-extrabold uppercase dark:text-accent-cyan text-accent-blue">Offline 1v1</span>
-          <span class="text-sm dark:text-neutral-400 dark:group-hover:text-neutral-300 text-neutral-600 group-hover:text-neutral-700 transition">
-            Play against a friend on the same device
-          </span>
-        </button>
-
-        <!-- Offline AI Mode -->
-        <button
-          id="tris-mode-offline-ai"
-          class="group relative p-6 bg-gradient-to-br dark:from-neutral-800 from-neutral-200 
-		  		dark:to-neutral-900 to-neutral-100 border-3 dark:border-neutral-700 border-neutral-300 
-                 hover:border-accent-red dark:hover:border-accent-pink transition-all duration-300 
-				 hover:shadow-[0_0_20px_#ff6b35] dark:hover:shadow-[0_0_20px_#ff6b35]
-                 flex flex-col items-start gap-2 cursor-pointer rounded-xl"
-        >
-          <span class="text-xl font-extrabold uppercase dark:text-accent-pink text-accent-red">Offline Bot</span>
-          <span class="text-sm dark:text-neutral-400 dark:group-hover:text-neutral-300 text-neutral-600 group-hover:text-neutral-700 transition">
-            Play against an AI bot locally
-          </span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Pong Game modals-->
-
-<!-- Pong Mode Selection Modal -->
-<div
-	id="pong-mode-modal"
-	tabindex="-1"
-	class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full dark:bg-black bg-white bg-opacity-50"
->
-	<div class="relative p-20 w-full max-w-xl">
-		<div class="relative dark:bg-neutral-900 bg-neutral-100 border-4 dark:border-neutral-700 border-neutral-300 h-auto flex flex-col hover:shadow-lg transition duration-300">
-			<button id="pong-mode-close-btn" class="absolute top-4 right-4 w-8 h-8 inline-flex justify-center items-center rounded-md border-2 dark:border-neutral-700 border-neutral-300 bg-transparent hover:bg-neutral-800 hover:text-white">✕</button>
-			<div class="p-8 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-neutral-800 bg-neutral-200">
-				<h2 class="text-3xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Select Pong Mode</h2>
-				<p class="dark:text-neutral-400 text-neutral-600 text-sm mt-2">Choose how you want to play Pong</p>
-			</div>
-			<div class="p-8 flex flex-col gap-4">
-				<button id="pong-mode-online" class="group relative p-6 bg-gradient-to-br dark:from-neutral-800 from-neutral-200 dark:to-neutral-900 to-neutral-100 border-3 dark:border-neutral-700 border-neutral-300 rounded-xl">Online</button>
-				<button id="pong-mode-offline-1v1" class="group relative p-6 bg-gradient-to-br dark:from-neutral-800 from-neutral-200 dark:to-neutral-900 to-neutral-100 border-3 dark:border-neutral-700 border-neutral-300 rounded-xl">Offline 1v1</button>
-				<button id="pong-mode-offline-ai" class="group relative p-6 bg-gradient-to-br dark:from-neutral-800 from-neutral-200 dark:to-neutral-900 to-neutral-100 border-3 dark:border-neutral-700 border-neutral-300 rounded-xl">Offline vs Bot</button>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!-- Pong Game Modal -->
-<div
-	id="pong-modal"
-	tabindex="-1"
-	class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 justify-center items-center w-full md:inset-0 h-full max-h-full p-4"
->
-	<div class="relative z-50 w-full max-w-4xl">
-		<div class="relative dark:bg-neutral-900 bg-white/80 backdrop-blur-sm rounded-xl border-4 dark:border-neutral-700 border-neutral-300 dark:shadow-[15px_15px_0_0_rgba(255,0,157,0.3)] shadow-[15px_15px_0_0_rgba(0,168,232,0.3)] overflow-hidden flex flex-col">
-			<!-- Close button -->
-			<button id="pong-close-btn" class="absolute top-4 right-4 z-10 w-8 h-8 inline-flex justify-center items-center rounded-md border-2 dark:border-neutral-700 border-neutral-300 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">✕</button>
-
+	<!-- Pong Page template -->
+	<template id="pong-template">
+		<div class="min-h-screen p-6 md:p-8">
 			<!-- Header Card -->
-			<div class="p-6 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 bg-gradient-to-r from-neutral-100 to-neutral-50">
-				<div class="flex items-center gap-3">
-					<h2 class="text-3xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Pong</h2>
-					<span id="pong-game-id" class="text-sm dark:text-neutral-400 text-neutral-600 font-mono px-3 py-1 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg"></span>
-				</div>
-			</div>
-
-			<!-- Main Content -->
-			<div class="p-8 flex flex-col gap-6 max-h-[calc(100vh-300px)]">
-				<!-- Game Canvas Card -->
-				<div class="flex-1 rounded-lg overflow-hidden border-3 dark:border-neutral-700 border-neutral-300 bg-black shadow-lg">
-					<canvas id="pong-canvas" class="w-full h-full"></canvas>
-				</div>
-
-				<!-- Status Card -->
-				<div id="pong-status" class="text-center p-4 dark:bg-neutral-800/80 bg-neutral-100 rounded-lg border-2 dark:border-neutral-700 border-neutral-300 text-black dark:text-white font-semibold uppercase tracking-wide">Connecting...</div>
-
-				<!-- Controls Card -->
-				<div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
-					<!-- Player names and score inputs -->
-					<div class="flex gap-3 items-center flex-wrap">
-						<label for="pong-player-names" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Players</label>
-						<input id="pong-player-names" type="text" placeholder="Player1, Player2"
-						class="px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
-					</div>
-					<div class="flex gap-3 items-center flex-wrap">
-						<label for="pong-target-score" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Score</label>
-						<input id="pong-target-score" type="number" min="1" placeholder="5"
-						class="w-20 px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
-					</div>
-
-					<button id="pong-start-btn" class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan">Start</button>
-					<button id="pong-reset-btn" class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300">Reset</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!-- Tris Game Modal -->
-<div
-	id="tris-modal"
-	tabindex="-1"
-	data-backdrop-close="false"
-	class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
-				 justify-center items-center w-full md:inset-0 h-full max-h-full p-4"
->
-  <div class="relative z-50 w-full max-w-2xl">
-    <div class="relative dark:bg-neutral-900 bg-white/80 backdrop-blur-sm rounded-xl border-4 dark:border-neutral-700 border-neutral-300 
-	dark:shadow-[15px_15px_0_0_rgba(255,0,157,0.3)] shadow-[15px_15px_0_0_rgba(0,168,232,0.3)] overflow-hidden flex flex-col">
-
-      <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-4 right-4 z-10 dark:text-neutral-400 text-neutral-600 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700
-               transition border-2 dark:border-neutral-700 border-neutral-300 rounded-md
-               w-8 h-8 inline-flex justify-center items-center"
-        id="tris-close-btn"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-
-      <!-- Header Card -->
-      <div class="p-6 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 bg-gradient-to-r from-neutral-100 to-neutral-50">
-        <div class="flex items-center gap-3">
-          <h2 class="text-3xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Tris</h2>
-          <span id="tris-game-id" class="text-sm dark:text-neutral-400 text-neutral-600 font-mono px-3 py-1 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg"></span>
-        </div>
-      </div>
-
-      <!-- Game area -->
-      <div class="p-8 flex flex-col gap-6">
-        <!-- Game board (3x3 grid) Card -->
-        <div class="flex flex-col items-center gap-3">
-          <h3 class="text-sm font-semibold uppercase tracking-wide dark:text-neutral-300 text-neutral-700">Game Board</h3>
-          <div id="tris-board" class="grid grid-cols-3 gap-3 p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
-            <!-- Cells will be generated by JS -->
-          </div>
-        </div>
-
-        <!-- Game status Card -->
-        <div id="tris-status" class="text-center p-4 dark:bg-neutral-800/80 bg-neutral-100 rounded-lg border-2 dark:border-neutral-700 border-neutral-300
-	 text-black dark:text-white font-semibold uppercase tracking-wide">
-          Connecting...
-        </div>
-
-        <!-- Control buttons Card -->
-        <div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
-          <button 
-            id="tris-start-btn"
-            class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight
-	 hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan rounded-lg">
-            Start
-          </button>
-          <button 
-            id="tris-surrender-btn"
-            class="px-6 py-3 dark:bg-accent-red bg-accent-red dark:text-white text-black font-extrabold uppercase tracking-tight 
-	hover:brightness-110 transition border-2 dark:border-accent-red border-accent-red rounded-lg"
-          >
-            Surrender
-          </button>
-          <button 
-            id="tris-reset-btn"
-            class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight
-	 hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300 rounded-lg"
-          >
-            Reset
-          </button>
-        </div>
-
-        <!-- Error message -->
-        <div id="tris-error" class="text-red-500 text-sm text-center hidden"></div>
-      </div>
-    </div>
-  </div>
-</div><!-- Generic Game Invite Modal (used by Tris and Pong) -->
-<div
-  id="game-invite-modal"
-  tabindex="-1"
-  class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 
-         flex justify-center items-center w-full md:inset-0 h-full max-h-full"
->
-  <div class="relative p-4 w-full max-w-md max-h-full">
-    <div class="relative dark:bg-neutral-900 bg-neutral-100 border-4 dark:border-neutral-700 border-neutral-300 
-	dark:shadow-[10px_10px_0_0_#00ffff] shadow-[10px_10px_0_0_#ff6b35] h-auto flex flex-col">
-
-      <!-- Close button -->
-      <button
-        type="button"
-        class="absolute top-4 right-4 z-50 dark:text-white text-black bg-transparent 
-               dark:hover:bg-neutral-800 hover:bg-neutral-200 hover:text-white transition border-2 dark:border-neutral-700 border-neutral-300
-               w-8 h-8 inline-flex justify-center items-center"
-        id="game-invite-close-btn"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
-
-      <!-- Header -->
-      <div class="p-6 border-b-2 dark:border-neutral-700 dark:bg-neutral-800 border-neutral-300 bg-neutral-200">
-        <h2 id="game-invite-title" class="text-2xl font-extrabold uppercase tracking-tight dark:text-[#00ffff] text-accent-orange">Invite Friend</h2>
-        <p id="game-invite-subtitle" class="dark:text-neutral-400 text-neutral-600 text-sm mt-2">Select a friend to invite</p>
-      </div>
-
-      <!-- Friends list -->
-      <div id="game-invite-friends-list" class="p-6 flex flex-col gap-2 max-h-96 overflow-y-auto">
-        <div class="dark:text-neutral-400 text-neutral-600 text-center py-4">Loading friends...</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Chat Modal -->
-<div
-	id="chat-modal"
-	tabindex="-1"
-	class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 rounded-xl
-				 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
->
-	<div class="relative p-4 w-full max-w-4xl max-h-full">
-			<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden
-						shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] 
-						hover:shadow-lg dark:hover:shadow-lg transition-all duration-300 h-[80vh] flex flex-col md:flex-row">
-
-				<!-- Absolute close button in top-right corner -->
-				<button
-					type="button"
-					id="chat-close-btn"
-					class="absolute top-3 right-3 z-50 text-accent-orange dark:text-green-400 bg-transparent hover:bg-gray-300 hover:text-accent-orange dark:hover:bg-gray-600 dark:hover:text-accent-green rounded-lg text-sm w-9 h-9 inline-flex justify-center items-center transition-colors"
-					title="Close chat"
-				>
-					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-					<span class="sr-only">Close modal</span>
-				</button>
-
-
-
-			<!-- Sidebar with chat list -->
-			<div class="w-80 bg-gray-100 dark:bg-gray-800 rounded-l-2xl border-r-2 border-gray-800 dark:border-gray-300 flex flex-col">
-				<div class="p-4 border-b-2 border-gray-800 dark:border-gray-300">
-					<h3 class="text-lg font-bold text-black dark:text-white uppercase tracking-tight">Chats</h3>
-					<button
-						id="create-group-btn"
-						class="mt-3 w-full bg-accent-orange dark:bg-accent-green text-black px-4 py-2 rounded-xl font-extrabold text-sm 
-								hover:brightness-90 dark:hover:brightness-110 transition-all duration-200 uppercase tracking-tight"
-						data-i18n="chat.create-group">
-					</button>
-				</div>
-				<div id="chat-list" class="flex-1 overflow-y-auto p-2 space-y-1">
-					<!-- Chat items will be populated here -->
-				</div>
-			</div>
-
-			<!-- Main chat area -->
-			<div class="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-tr-2xl">
-				<!-- Chat header -->
-				<div class="p-2 border-b-2 rounded-tr-2xl border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800 flex items-center h-17">
-					<div id="chat-header-actions" class="pr-4 flex flex-col items-center gap-2 flex-shrink-0">
-						<button
-							id="leave-group-btn"
-							class="hidden w-8 h-8 flex items-center justify-center bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white rounded-md"
-							title="Leave this group chat"
-							aria-label="Leave group"
-						>
-							<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M16 17l5-5-5-5" />
-								<path d="M21 12H9" />
-								<path d="M9 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
-							</svg>
-							<span class="sr-only" data-i18n="chat.leave"></span>
-						</button>
-						<!-- add-user-btn will be inserted here dynamically -->
-					</div>
-					<div class="flex-1 min-w-0">
-						<div class="flex flex-col min-w-0">
-							<h2 id="chat-header" class="text-xl font-bold text-black dark:text-white uppercase tracking-tight truncate" data-i18n="chat.select"></h2>
-							<div id="chat-members" class="mt-1 text-sm text-neutral-500 dark:text-neutral-300 truncate"></div>
+			<div class="max-w-5xl mx-auto mb-8">
+				<div class="bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 from-neutral-100 to-neutral-50 rounded-xl border-4 dark:border-neutral-700 border-neutral-300 p-6 dark:shadow-[10px_10px_0_0_rgba(255,0,157,0.2)] shadow-[10px_10px_0_0_rgba(0,168,232,0.2)]">
+					<div class="flex items-center justify-between">
+						<div>
+							<h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-tight dark:text-accent-green text-accent-cyan mb-2">Pong</h1>
+							<p class="text-sm text-neutral-600 dark:text-neutral-400">Classic paddle game with multiplayer</p>
+						</div>
+						<div class="flex items-center gap-4 p-4 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg">
+							<div class="text-right text-sm">
+								<div id="pong-user-stats" class="flex flex-col items-end text-xs text-neutral-600 dark:text-neutral-400">
+									<div id="pong-user-wins">Wins: 0</div>
+									<div id="pong-user-losses">Losses: 0</div>
+								</div>
+							</div>
+							<div id="pong-user-chart" class="w-14 h-14 flex items-center justify-center bg-transparent">
+								<div id="pong-user-chart-inner" class="w-full h-full"></div>
+							</div>
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<!-- Messages container with load more button -->
-				<div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white dark:bg-gray-900 flex flex-col">
-					<button id="load-more-btn" 
-						class="btn mx-auto mb-4 px-4 py-2 bg-accent-orange dark:bg-accent-green text-black font-extrabold rounded-xl 
-								hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight border-2 border-gray-800 dark:border-gray-300" 
-						style="display: none;"
-						data-i18n="chat.load-more">
-					</button>
-					<div id="chat-messages" class="space-y-3">
-						<!-- Messages will be appended here -->
+			<!-- Content Grid -->
+			<div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+				<!-- Main Play Card -->
+				<div class="md:col-span-2">
+					<div class="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl border-3 dark:border-neutral-700 border-neutral-300 overflow-hidden dark:shadow-lg shadow-md">
+						<div class="bg-gradient-to-r dark:from-accent-green/20 dark:to-accent-green/10 from-accent-cyan/20 to-accent-cyan/10 p-6 border-b-2 dark:border-neutral-700 border-neutral-300">
+							<h2 class="text-2xl font-extrabold uppercase tracking-tight dark:text-accent-green text-accent-cyan">Play Game</h2>
+						</div>
+						<div class="p-6 space-y-3">
+							<button id="pong-play-online" class="w-full btn-primary">🎮 Play Online (Matchmaking)</button>
+							<button id="pong-play-offline-1v1" class="w-full btn-muted">👥 Offline 1v1 (Local)</button>
+							<button id="pong-play-offline-ai" class="w-full btn-muted">🤖 Play vs AI</button>
+							<div class="pt-3 border-t dark:border-neutral-700 border-neutral-300">
+								<button id="pong-open-mode-modal" class="text-sm font-semibold text-accent-green hover:text-accent-green/80 transition">⚙️ Open Mode Selector</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!-- Pong Game Modal -->
+	<div id="pong-modal"
+		tabindex="-1"
+		class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 justify-center items-center w-full md:inset-0 h-full max-h-full p-4"
+	>
+		<div class="relative z-50 w-full max-w-4xl">
+			<div class="relative dark:bg-neutral-900 bg-white/80 backdrop-blur-sm rounded-xl border-4 dark:border-neutral-700 border-neutral-300 dark:shadow-[15px_15px_0_0_rgba(255,0,157,0.3)] shadow-[15px_15px_0_0_rgba(0,168,232,0.3)] overflow-hidden flex flex-col">
+				<!-- Close button -->
+				<button id="pong-close-btn" class="absolute top-4 right-4 z-10 w-8 h-8 inline-flex justify-center items-center rounded-md border-2 dark:border-neutral-700 border-neutral-300 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">✕</button>
+
+				<!-- Header Card -->
+				<div class="p-6 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 bg-gradient-to-r from-neutral-100 to-neutral-50">
+					<div class="flex items-center gap-3">
+						<h2 class="text-3xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Pong</h2>
+						<span id="pong-game-id" class="text-sm dark:text-neutral-400 text-neutral-600 font-mono px-3 py-1 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg"></span>
 					</div>
 				</div>
 
-				<!-- Chat input -->
-				<div class="p-4 border-t-2 border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800">
-					<div class="flex gap-2">
-						<input
-							id="chat-input"
-							type="text"
-							class="flex-1 bg-white dark:bg-gray-700 text-black dark:text-white px-3 py-2 rounded-xl border-2 
-									border-gray-800 dark:border-gray-300 focus:outline-none focus:ring-2 
-									focus:ring-accent-orange dark:focus:ring-accent-green placeholder-gray-600 dark:placeholder-gray-400"
-							placeholder="Type a message..."
-						/>
-						<button
-							id="chat-send-btn"
-							class="bg-accent-orange dark:bg-accent-green text-black font-extrabold px-4 py-2 rounded-xl 
-									hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight"
-						 	data-i18n="chat.send">
-						</button>
+				<!-- Main Content -->
+				<div class="p-8 flex flex-col gap-6 max-h-[calc(100vh-300px)]">
+					<!-- Game Canvas Card -->
+					<div class="flex-1 rounded-lg overflow-hidden border-3 dark:border-neutral-700 border-neutral-300 bg-black shadow-lg">
+						<canvas id="pong-canvas" class="w-full h-full"></canvas>
+					</div>
+
+					<!-- Status Card -->
+					<div id="pong-status" class="text-center p-4 dark:bg-neutral-800/80 bg-neutral-100 rounded-lg border-2 dark:border-neutral-700 border-neutral-300 text-black dark:text-white font-semibold uppercase tracking-wide">Connecting...</div>
+
+					<!-- Controls Card -->
+					<div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
+						<!-- Player names and score inputs -->
+						<div class="flex gap-3 items-center flex-wrap">
+							<label for="pong-player-names" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Players</label>
+							<input id="pong-player-names" type="text" placeholder="Player1, Player2"
+							class="px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
+						</div>
+						<div class="flex gap-3 items-center flex-wrap">
+							<label for="pong-target-score" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Score</label>
+							<input id="pong-target-score" type="number" min="1" placeholder="5"
+							class="w-20 px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
+						</div>
+
+						<button id="pong-start-btn" class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan">Start</button>
+						<button id="pong-reset-btn" class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300">Reset</button>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-</div>
 
-<!-- Friend Selection Modal for Group Creation -->
-<div
-  id="friend-selection-modal"
-  tabindex="-1"
-  class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 z-50 
-         justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
->
-	<div class="relative p-4 w-full max-w-2xl max-h-full">
-		<div class="relative bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-700 rounded-xl shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] p-6">
+	<!-- Tris Page template -->
+	<template id="tris-template">
+		<div class="min-h-screen p-6 md:p-8">
+			<!-- Header Card -->
+			<div class="max-w-5xl mx-auto mb-8">
+				<div class="bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 from-neutral-100 to-neutral-50 rounded-xl border-4 dark:border-neutral-700 border-neutral-300 p-6 dark:shadow-[10px_10px_0_0_rgba(255,0,157,0.2)] shadow-[10px_10px_0_0_rgba(0,168,232,0.2)]">
+					<div class="flex items-center justify-between">
+						<div>
+							<h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange mb-2">Tris</h1>
+							<p class="text-sm text-neutral-600 dark:text-neutral-400">Tic-Tac-Toe multiplayer game</p>
+						</div>
+						<div class="flex items-center gap-4 p-4 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg">
+							<div class="text-right text-sm">
+								<!-- <div id="tris-username" class="font-bold">Username</div> -->
+								<div id="tris-user-stats" class="flex flex-col items-end text-xs text-neutral-600 dark:text-neutral-400">
+									<div id="tris-user-wins">Wins: 0</div>
+									<div id="tris-user-losses">Losses: 0</div>
+								</div>
+							</div>
+							<div id="tris-user-chart" class="w-14 h-14 flex items-center justify-center bg-transparent">
+								<div id="tris-user-chart-inner" class="w-full h-full"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-      <!-- Close button -->
-			<button
-				type="button"
-				class="absolute top-3 right-3 z-10 text-gray-600 bg-transparent 
-							 hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white rounded-lg text-sm 
-							 w-9 h-9 inline-flex justify-center items-center"
-				id="friend-modal-close-btn"
+			<!-- Content Grid -->
+			<div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+				<!-- Main Play Card -->
+				<div class="md:col-span-2">
+					<div class="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-sm rounded-xl border-3 dark:border-neutral-700 border-neutral-300 overflow-hidden dark:shadow-lg shadow-md">
+						<div class="bg-gradient-to-r dark:from-accent-pink/20 dark:to-accent-pink/10 from-accent-orange/20 to-accent-orange/10 p-6 border-b-2 dark:border-neutral-700 border-neutral-300">
+							<h2 class="text-2xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Play Game</h2>
+						</div>
+						<div class="p-6 space-y-3">
+							<button id="tris-play-online" class="w-full btn-primary">🎮 Play Online (Matchmaking)</button>
+							<button id="tris-play-offline-1v1" class="w-full btn-muted">👥 Offline 1v1 (Local)</button>
+							<button id="tris-play-offline-ai" class="w-full btn-muted">🤖 Play vs AI</button>
+							<div class="pt-3 border-t dark:border-neutral-700 border-neutral-300">
+								<button id="tris-open-mode-modal" class="text-sm font-semibold capitalize text-accent-orange hover:text-accent-orange/80
+									dark:text-accent-pink dark:hover:text-accent-pink/80 transition">Please Log in to Play</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!-- Tris Game Modal -->
+	<div id="tris-modal"
+		tabindex="-1"
+		data-backdrop-close="false"
+		class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
+					justify-center items-center w-full md:inset-0 h-full max-h-full p-4"
+	>
+	<div class="relative z-50 w-full max-w-2xl">
+		<div class="relative dark:bg-neutral-900 bg-white/80 backdrop-blur-sm rounded-xl border-4 dark:border-neutral-700 border-neutral-300 
+		dark:shadow-[15px_15px_0_0_rgba(255,0,157,0.3)] shadow-[15px_15px_0_0_rgba(0,168,232,0.3)] overflow-hidden flex flex-col">
+
+		<!-- Close button -->
+		<button
+			type="button"
+			class="absolute top-4 right-4 z-10 dark:text-neutral-400 text-neutral-600 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700
+				transition border-2 dark:border-neutral-700 border-neutral-300 rounded-md
+				w-8 h-8 inline-flex justify-center items-center"
+			id="tris-close-btn"
+		>
+			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+				d="M6 18L18 6M6 6l12 12"/>
+			</svg>
+		</button>
+
+		<!-- Header Card -->
+		<div class="p-6 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 bg-gradient-to-r from-neutral-100 to-neutral-50">
+			<div class="flex items-center gap-3">
+			<h2 class="text-3xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Tris</h2>
+			<span id="tris-game-id" class="text-sm dark:text-neutral-400 text-neutral-600 font-mono px-3 py-1 dark:bg-neutral-700/50 bg-neutral-200/50 rounded-lg"></span>
+			</div>
+		</div>
+
+		<!-- Game area -->
+		<div class="p-8 flex flex-col gap-6">
+			<!-- Game board (3x3 grid) Card -->
+			<div class="flex flex-col items-center gap-3">
+			<h3 class="text-sm font-semibold uppercase tracking-wide dark:text-neutral-300 text-neutral-700">Game Board</h3>
+			<div id="tris-board" class="grid grid-cols-3 gap-3 p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
+				<!-- Cells will be generated by JS -->
+			</div>
+			</div>
+
+			<!-- Game status Card -->
+			<div id="tris-status" class="text-center p-4 dark:bg-neutral-800/80 bg-neutral-100 rounded-lg border-2 dark:border-neutral-700 border-neutral-300
+		text-black dark:text-white font-semibold uppercase tracking-wide">
+			Connecting...
+			</div>
+
+			<!-- Control buttons Card -->
+			<div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
+			<button 
+				id="tris-start-btn"
+				class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight
+		hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan rounded-lg">
+				Start
+			</button>
+			<button 
+				id="tris-surrender-btn"
+				class="px-6 py-3 dark:bg-accent-red bg-accent-red dark:text-white text-black font-extrabold uppercase tracking-tight 
+		hover:brightness-110 transition border-2 dark:border-accent-red border-accent-red rounded-lg"
 			>
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-        <span class="sr-only">Close modal</span>
-      </button>
+				Surrender
+			</button>
+			<button 
+				id="tris-reset-btn"
+				class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight
+		hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300 rounded-lg"
+			>
+				Reset
+			</button>
+			</div>
 
-      <!-- Header -->
-      <h2 class="text-2xl font-bold text-white mb-4" data-i18n="chat.create"></h2>
-      <p class="text-neutral-400 mb-6" data-i18n="chat.select-group"></p>
+			<!-- Error message -->
+			<div id="tris-error" class="text-red-500 text-sm text-center hidden"></div>
+		</div>
+		</div>
+	</div>
+	</div>
 
-      <!-- Group name input -->
-      <div class="mb-6">
-				<label for="group-name-input" class="block text-gray-800 dark:text-white font-semibold mb-2" data-i18n="chat.group-name"></label>
-				<input
-					id="group-name-input"
-					type="text"
-					class="w-full bg-white dark:bg-neutral-700 text-black dark:text-white px-3 py-2 rounded-md border border-gray-300 dark:border-neutral-600 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green"
-					data-i18n-placeholder="chat.groupNamePlaceholder"
-				/>
-      </div>
+	<!-- Generic Game Invite Modal (used by Tris and Pong) -->
+	<div id="game-invite-modal"
+	tabindex="-1"
+	class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 
+			flex justify-center items-center w-full md:inset-0 h-full max-h-full"
+	>
+	<div class="relative p-4 w-full max-w-md max-h-full">
+		<div class="relative dark:bg-neutral-900 bg-neutral-100 border-4 dark:border-neutral-700 border-neutral-300 
+		dark:shadow-[10px_10px_0_0_#00ffff] shadow-[10px_10px_0_0_#ff6b35] h-auto flex flex-col">
 
-      <!-- Friends list -->
-			<div id="friends-list" class="border rounded-md p-4 mb-6 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700">
-				<div class="text-gray-600 dark:text-neutral-400 text-center">Loading friends...</div>
-      </div>
+		<!-- Close button -->
+		<button
+			type="button"
+			class="absolute top-4 right-4 z-50 dark:text-white text-black bg-transparent 
+				dark:hover:bg-neutral-800 hover:bg-neutral-200 hover:text-white transition border-2 dark:border-neutral-700 border-neutral-300
+				w-8 h-8 inline-flex justify-center items-center"
+			id="game-invite-close-btn"
+		>
+			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+				d="M6 18L18 6M6 6l12 12"/>
+			</svg>
+		</button>
 
-      <!-- Selected friends display -->
-			<div id="selected-friends" class="mb-6 p-3 bg-white dark:bg-neutral-800 rounded-md border border-gray-200 dark:border-neutral-700 min-h-12">
-				<p class="text-sm text-gray-600 dark:text-neutral-400 mb-2" data-i18n="chat.selected-count"> <span id="selected-count">0</span></p>
-        <div id="selected-friends-tags" class="flex flex-wrap gap-2">
-          <!-- Selected friend tags will appear here -->
-        </div>
-      </div>
+		<!-- Header -->
+		<div class="p-6 border-b-2 dark:border-neutral-700 dark:bg-neutral-800 border-neutral-300 bg-neutral-200">
+			<h2 id="game-invite-title" class="text-2xl font-extrabold uppercase tracking-tight dark:text-[#00ffff] text-accent-orange">Invite Friend</h2>
+			<p id="game-invite-subtitle" class="dark:text-neutral-400 text-neutral-600 text-sm mt-2">Select a friend to invite</p>
+		</div>
 
-      <!-- Buttons -->
-      <div class="flex gap-3 justify-end">
-        <button
-          id="friend-modal-cancel-btn"
-					class="px-4 py-2 bg-white/10 dark:bg-neutral-700 text-black dark:text-white rounded-md hover:bg-gray-100 dark:hover:bg-neutral-600 transition"
-        >
-          Cancel
-        </button>
-        <button
-          id="create-group-submit-btn"
-					class="px-4 py-2 bg-accent-orange dark:bg-accent-green text-white font-semibold rounded-md hover:brightness-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled
-        	data-i18n="chat.create-group">
-        </button>
-      </div>
+		<!-- Friends list -->
+		<div id="game-invite-friends-list" class="p-6 flex flex-col gap-2 max-h-96 overflow-y-auto">
+			<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">Loading friends...</div>
+		</div>
+		</div>
+	</div>
+	</div>
 
-    </div>
-  </div>
-</div>
+	<!-- Chat Modal -->
+	<div id="chat-modal"
+		tabindex="-1"
+		class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 rounded-xl
+					justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
+	>
+		<div class="relative p-4 w-full max-w-4xl max-h-full">
+				<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden
+							shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] 
+							hover:shadow-lg dark:hover:shadow-lg transition-all duration-300 h-[80vh] flex flex-col md:flex-row">
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-	const modalSelector = '[id$="-modal"]';
-	const modals = Array.from(document.querySelectorAll(modalSelector));
+					<!-- Absolute close button in top-right corner -->
+					<button
+						type="button"
+						id="chat-close-btn"
+						class="absolute top-3 right-3 z-50 text-accent-orange dark:text-green-400 bg-transparent hover:bg-gray-300 hover:text-accent-orange dark:hover:bg-gray-600 dark:hover:text-accent-green rounded-lg text-sm w-9 h-9 inline-flex justify-center items-center transition-colors"
+						title="Close chat"
+					>
+						<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+						<span class="sr-only">Close modal</span>
+					</button>
 
-	modals.forEach(m => {
-		try {
-			if (m.parentElement !== document.body) document.body.appendChild(m);
-			m.classList.add('fixed');
-			m.style.position = 'fixed';
-			m.style.inset = m.style.inset || '0';
-			m.style.zIndex = '100000';
 
-			if (!m.querySelector(':scope > .__auto_backdrop')) {
-				const bd = document.createElement('div');
-				bd.className = '__auto_backdrop';
-				bd.setAttribute('aria-hidden', 'true');
-				m.insertBefore(bd, m.firstChild);
-				bd.addEventListener('click', () => {
-					if (m.dataset.backdropClose === 'false') return;
-					m.classList.add('hidden');
-				});
-			}
 
-			Array.from(m.children).forEach(child => {
-				if (!child.classList || child.classList.contains('__auto_backdrop')) return;
-				child.classList.add('modal-content-high');
-			});
-		} catch (e) {
-			console.error('modal helper error', e);
-		}
-	});
+				<!-- Sidebar with chat list -->
+				<div class="w-80 bg-gray-100 dark:bg-gray-800 rounded-l-2xl border-r-2 border-gray-800 dark:border-gray-300 flex flex-col">
+					<div class="p-4 border-b-2 border-gray-800 dark:border-gray-300">
+						<h3 class="text-lg font-bold text-black dark:text-white uppercase tracking-tight">Chats</h3>
+						<button
+							id="create-group-btn"
+							class="mt-3 w-full bg-accent-orange dark:bg-accent-green text-black px-4 py-2 rounded-xl font-extrabold text-sm 
+									hover:brightness-90 dark:hover:brightness-110 transition-all duration-200 uppercase tracking-tight"
+							data-i18n="chat.create-group">
+						</button>
+					</div>
+					<div id="chat-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+						<!-- Chat items will be populated here -->
+					</div>
+				</div>
 
-	const observer = new MutationObserver(records => {
-		records.forEach(r => {
-			if (r.type === 'attributes' && r.attributeName === 'class') {
-				const target = r.target;
-				if (target.matches && target.matches(modalSelector)) {
-					if (!target.classList.contains('hidden')) {
-						document.body.classList.add('modal-open');
-						target.setAttribute('aria-modal', 'true');
-						const focusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-						if (focusable && typeof focusable.focus === 'function') focusable.focus();
-					} else {
-						const anyVisible = Array.from(document.querySelectorAll(modalSelector)).some(x => !x.classList.contains('hidden'));
-						if (!anyVisible) document.body.classList.remove('modal-open');
-						target.removeAttribute('aria-modal');
-					}
+				<!-- Main chat area -->
+				<div class="flex-1 flex flex-col bg-white dark:bg-gray-900 rounded-tr-2xl">
+					<!-- Chat header -->
+					<div class="p-2 border-b-2 rounded-tr-2xl border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800 flex items-center h-17">
+						<div id="chat-header-actions" class="pr-4 flex flex-col items-center gap-2 flex-shrink-0">
+							<button
+								id="leave-group-btn"
+								class="hidden w-8 h-8 flex items-center justify-center bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white rounded-md"
+								title="Leave this group chat"
+								aria-label="Leave group"
+							>
+								<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M16 17l5-5-5-5" />
+									<path d="M21 12H9" />
+									<path d="M9 19H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
+								</svg>
+								<span class="sr-only" data-i18n="chat.leave"></span>
+							</button>
+							<!-- add-user-btn will be inserted here dynamically -->
+						</div>
+						<div class="flex-1 min-w-0">
+							<div class="flex flex-col min-w-0">
+								<h2 id="chat-header" class="text-xl font-bold text-black dark:text-white uppercase tracking-tight truncate" data-i18n="chat.select"></h2>
+								<div id="chat-members" class="mt-1 text-sm text-neutral-500 dark:text-neutral-300 truncate"></div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Messages container with load more button -->
+					<div id="chat-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white dark:bg-gray-900 flex flex-col">
+						<button id="load-more-btn" 
+							class="btn mx-auto mb-4 px-4 py-2 bg-accent-orange dark:bg-accent-green text-black font-extrabold rounded-xl 
+									hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight border-2 border-gray-800 dark:border-gray-300" 
+							style="display: none;"
+							data-i18n="chat.load-more">
+						</button>
+						<div id="chat-messages" class="space-y-3">
+							<!-- Messages will be appended here -->
+						</div>
+					</div>
+
+					<!-- Chat input -->
+					<div class="p-4 border-t-2 border-gray-800 dark:border-gray-300 bg-gray-50 dark:bg-gray-800">
+						<div class="flex gap-2">
+							<input
+								id="chat-input"
+								type="text"
+								class="flex-1 bg-white dark:bg-gray-700 text-black dark:text-white px-3 py-2 rounded-xl border-2 
+										border-gray-800 dark:border-gray-300 focus:outline-none focus:ring-2 
+										focus:ring-accent-orange dark:focus:ring-accent-green placeholder-gray-600 dark:placeholder-gray-400"
+								placeholder="Type a message..."
+							/>
+							<button
+								id="chat-send-btn"
+								class="bg-accent-orange dark:bg-accent-green text-black font-extrabold px-4 py-2 rounded-xl 
+										hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight"
+								data-i18n="chat.send">
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Friend Selection Modal for Group Creation -->
+	<div id="friend-selection-modal"
+	tabindex="-1"
+	class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 z-50 
+			justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50"
+	>
+		<div class="relative p-4 w-full max-w-2xl max-h-full">
+			<div class="relative bg-white dark:bg-neutral-900 border-2 border-gray-200 dark:border-neutral-700 rounded-xl shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] p-6">
+
+		<!-- Close button -->
+				<button
+					type="button"
+					class="absolute top-3 right-3 z-10 text-gray-600 bg-transparent 
+								hover:bg-gray-200 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white rounded-lg text-sm 
+								w-9 h-9 inline-flex justify-center items-center"
+					id="friend-modal-close-btn"
+				>
+			<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+				d="M6 18L18 6M6 6l12 12"/>
+			</svg>
+			<span class="sr-only">Close modal</span>
+		</button>
+
+		<!-- Header -->
+		<h2 class="text-2xl font-bold text-white mb-4" data-i18n="chat.create"></h2>
+		<p class="text-neutral-400 mb-6" data-i18n="chat.select-group"></p>
+
+		<!-- Group name input -->
+		<div class="mb-6">
+					<label for="group-name-input" class="block text-gray-800 dark:text-white font-semibold mb-2" data-i18n="chat.group-name"></label>
+					<input
+						id="group-name-input"
+						type="text"
+						class="w-full bg-white dark:bg-neutral-700 text-black dark:text-white px-3 py-2 rounded-md border border-gray-300 dark:border-neutral-600 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green"
+						data-i18n-placeholder="chat.groupNamePlaceholder"
+					/>
+		</div>
+
+		<!-- Friends list -->
+				<div id="friends-list" class="border rounded-md p-4 mb-6 max-h-96 overflow-y-auto bg-white dark:bg-neutral-800 border-gray-200 dark:border-neutral-700">
+					<div class="text-gray-600 dark:text-neutral-400 text-center">Loading friends...</div>
+		</div>
+
+		<!-- Selected friends display -->
+				<div id="selected-friends" class="mb-6 p-3 bg-white dark:bg-neutral-800 rounded-md border border-gray-200 dark:border-neutral-700 min-h-12">
+					<p class="text-sm text-gray-600 dark:text-neutral-400 mb-2" data-i18n="chat.selected-count"> <span id="selected-count">0</span></p>
+			<div id="selected-friends-tags" class="flex flex-wrap gap-2">
+			<!-- Selected friend tags will appear here -->
+			</div>
+		</div>
+
+		<!-- Buttons -->
+		<div class="flex gap-3 justify-end">
+			<button
+			id="friend-modal-cancel-btn"
+						class="px-4 py-2 bg-white/10 dark:bg-neutral-700 text-black dark:text-white rounded-md hover:bg-gray-100 dark:hover:bg-neutral-600 transition"
+			>
+			Cancel
+			</button>
+			<button
+			id="create-group-submit-btn"
+						class="px-4 py-2 bg-accent-orange dark:bg-accent-green text-white font-semibold rounded-md hover:brightness-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+			disabled
+				data-i18n="chat.create-group">
+			</button>
+		</div>
+
+		</div>
+	</div>
+	</div>
+
+	<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const modalSelector = '[id$="-modal"]';
+		const modals = Array.from(document.querySelectorAll(modalSelector));
+
+		modals.forEach(m => {
+			try {
+				if (m.parentElement !== document.body) document.body.appendChild(m);
+				m.classList.add('fixed');
+				m.style.position = 'fixed';
+				m.style.inset = m.style.inset || '0';
+				m.style.zIndex = '100000';
+
+				if (!m.querySelector(':scope > .__auto_backdrop')) {
+					const bd = document.createElement('div');
+					bd.className = '__auto_backdrop';
+					bd.setAttribute('aria-hidden', 'true');
+					m.insertBefore(bd, m.firstChild);
+					bd.addEventListener('click', () => {
+						if (m.dataset.backdropClose === 'false') return;
+						m.classList.add('hidden');
+					});
 				}
+
+				Array.from(m.children).forEach(child => {
+					if (!child.classList || child.classList.contains('__auto_backdrop')) return;
+					child.classList.add('modal-content-high');
+				});
+			} catch (e) {
+				console.error('modal helper error', e);
 			}
 		});
-	});
 
-	modals.forEach(m => observer.observe(m, { attributes: true, attributeFilter: ['class'] }));
-});
-</script>
+		const observer = new MutationObserver(records => {
+			records.forEach(r => {
+				if (r.type === 'attributes' && r.attributeName === 'class') {
+					const target = r.target;
+					if (target.matches && target.matches(modalSelector)) {
+						if (!target.classList.contains('hidden')) {
+							document.body.classList.add('modal-open');
+							target.setAttribute('aria-modal', 'true');
+							const focusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+							if (focusable && typeof focusable.focus === 'function') focusable.focus();
+						} else {
+							const anyVisible = Array.from(document.querySelectorAll(modalSelector)).some(x => !x.classList.contains('hidden'));
+							if (!anyVisible) document.body.classList.remove('modal-open');
+							target.removeAttribute('aria-modal');
+						}
+					}
+				}
+			});
+		});
+
+		modals.forEach(m => observer.observe(m, { attributes: true, attributeFilter: ['class'] }));
+	});
+	</script>
 
 </body>
 
