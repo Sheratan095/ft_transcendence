@@ -4,7 +4,7 @@ import { initPong, onPongEvent, startMatchmaking, startPaddleMove, stopPaddleMov
 import { getUserId, getUser } from './auth';
 import { openGameInviteModal } from './game-invite';
 import { PongGame, GAME_MODES } from '../components/pong/pong.js';
-import type { PongModeType } from './pong-mode';
+import type { PongModeType } from './pong-menù.js';
 import { isLoggedInClient } from './token';
 
 // Render constants
@@ -19,6 +19,7 @@ let currentGameMode: 'online' | 'offline-1v1' | 'offline-ai' = 'online';
 let pongInitialized = false;
 let gameStatus: 'lobby' | 'playing' | 'looking' = 'lobby';
 let userReady = false;
+let overlayLoopId: number | null = null;
 
 /**
  * Handle incoming WebSocket events from pong server
@@ -193,6 +194,7 @@ export async function openPongModal(mode: PongModeType = 'online') {
 		if (currentGameInstance) {
 			currentGameInstance.destroy();
 			currentGameInstance = null;
+			stopOverlayLoop();
 		}
 
 		currentGameMode = mode;
@@ -253,6 +255,9 @@ export async function openPongModal(mode: PongModeType = 'online') {
 
 		currentGameInstance = game;
 
+		// Start overlay updates for names and score
+		startOverlayLoop();
+
 		// Update status
 		if (status) {
 			const modeNames: Record<string, string> = {
@@ -304,6 +309,8 @@ export function closePongModal() {
 		currentGameInstance = null;
 	}
 
+	stopOverlayLoop();
+
 	if (currentGameMode === 'online') {
 		closePong();
 	}
@@ -339,4 +346,36 @@ function attachPongCardListener() {
 		e.preventDefault();
 		goToRoute('/pong');
 	});
+}
+
+function updatePongOverlay() {
+	if (!currentGameInstance) return;
+	try {
+		const gs = currentGameInstance.gameManager.getGameState();
+		const leftNameEl = document.getElementById('pong-left-name');
+		const rightNameEl = document.getElementById('pong-right-name');
+		const centerScoreEl = document.getElementById('pong-center-score');
+		if (leftNameEl) leftNameEl.textContent = (gs.playerNames && gs.playerNames.left) || 'Player 1';
+		if (rightNameEl) rightNameEl.textContent = (gs.playerNames && gs.playerNames.right) || 'Player 2';
+		const scores = gs.scores || { left: 0, right: 0 };
+		if (centerScoreEl) centerScoreEl.textContent = `${scores.left ?? 0} - ${scores.right ?? 0}`;
+	} catch (e) {
+		// ignore overlay errors
+	}
+}
+
+function startOverlayLoop() {
+	if (overlayLoopId) return;
+	const loop = () => {
+		updatePongOverlay();
+		overlayLoopId = requestAnimationFrame(loop);
+	};
+	overlayLoopId = requestAnimationFrame(loop);
+}
+
+function stopOverlayLoop() {
+	if (overlayLoopId) {
+		cancelAnimationFrame(overlayLoopId);
+		overlayLoopId = null;
+	}
 }

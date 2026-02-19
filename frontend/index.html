@@ -599,129 +599,126 @@
 	</template>
 
 	<!-- Pong Page template -->
-<template id="pong-template">
-  <div class="bg-neutral-950 min-h-screen py-24">
-    <div class="mx-auto max-w-7xl px-6">
+	<template id="pong-template">
+	<div class="bg-neutral-950 min-h-screen py-24">
+		<div class="mx-auto max-w-7xl px-6">
 
-      <!-- Page Heading -->
-      <div class="text-center mb-16">
-        <h1 class="text-5xl font-semibold tracking-tight text-white">
-          Pong
-        </h1>
-        <p class="mt-4 text-neutral-400">
-          Classic paddle game with local and online multiplayer.
-        </p>
-      </div>
+		<!-- Page Heading -->
+		<div class="text-center mb-16">
+			<h1 class="text-5xl font-semibold tracking-tight text-white">
+			Pong
+			</h1>
+			<p class="mt-4 text-neutral-400">
+			Classic paddle game with local and online multiplayer.
+			</p>
+		</div>
 
-      <!-- Seamless Bento Wrapper -->
-      <div class="mx-auto max-w-6xl border border-neutral-800 rounded-3xl overflow-hidden bg-neutral-900">
+		<!-- Seamless Bento Wrapper -->
+		<div class="mx-auto max-w-6xl border border-neutral-800 rounded-3xl overflow-hidden bg-neutral-900">
 
-        <div class="grid lg:grid-cols-3 lg:grid-rows-2">
+			<div class="grid lg:grid-cols-3 lg:grid-rows-2">
 
-          <!-- LEFT LARGE (row-span-2) -->
-          <div class="lg:row-span-2 border-r border-neutral-800 p-10 flex flex-col">
-            <h2 class="text-2xl font-semibold text-white">
-              Play Online
-            </h2>
-            <p class="mt-3 text-neutral-400">
-              Match with players in real time and climb the leaderboard.
-            </p>
+			<!-- LEFT LARGE (row-span-2) -->
+			<div class="lg:row-span-2 border-r border-neutral-800 p-10 flex flex-col">
+				<h2 class="text-2xl font-semibold text-white">
+				Play Online
+				</h2>
+				<p class="mt-3 text-neutral-400">
+				Match with players in real time and climb the leaderboard.
+				</p>
 
-            <div class="mt-auto pt-10">
-              <button id="pong-play-online"
-                class="w-full rounded-xl bg-white text-black py-4 font-medium hover:bg-neutral-200 transition">
-                🎮 Start Matchmaking
-              </button>
-            </div>
-          </div>
+				<div class="mt-auto pt-10">
+				<button id="pong-play-online"
+					class="w-full rounded-xl bg-white text-black py-4 font-medium hover:bg-neutral-200 transition">
+					🎮 Start Matchmaking
+				</button>
+				</div>
+			</div>
 
-          <!-- TOP MIDDLE -->
-          <div class="border-r border-neutral-800 border-b border-neutral-800 p-8 flex flex-col">
-            <h3 class="text-xl font-semibold text-white">
-              Offline Modes
-            </h3>
+			<!-- TOP MIDDLE -->
+			<div class="border-r border-neutral-800 border-b border-neutral-800 p-8 flex flex-col">
+				<h3 class="text-xl font-semibold text-white">
+				Offline Modes
+				</h3>
 
-            <div class="mt-6 flex flex-col gap-4">
-              <button id="pong-play-offline-1v1"
-                class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
-                👥 Local 1v1
-              </button>
+				<div class="mt-6 flex flex-col gap-4">
+				<button id="pong-play-offline-1v1"
+					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					👥 Local 1v1
+				</button>
 
-              <button id="pong-play-offline-ai"
-                class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
-                🤖 Play vs AI
-              </button>
-            </div>
-          </div>
+				<button id="pong-play-offline-ai"
+					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					🤖 Play vs AI
+				</button>
+				</div>
+			</div>
 
-          <!-- BOTTOM MIDDLE -->
-          <div class="border-r border-neutral-800 p-8 flex flex-col">
-            <h3 class="text-xl font-semibold text-white">
-              Tournaments
-            </h3>
+			<!-- BOTTOM MIDDLE -->
+			<div class="border-r border-neutral-800 p-8 flex flex-col">
+				<h3 class="text-xl font-semibold text-white">
+				Tournaments
+				</h3>
 
-            <p class="mt-3 text-sm text-neutral-400">
-              Compete in structured brackets and seasonal events.
-            </p>
+				<p class="mt-3 text-sm text-neutral-400">
+				Compete in structured brackets and seasonal events.
+				</p>
 
-            <div class="mt-auto pt-6">
-              <button id="pong-tournaments-btn"
-                class="w-full rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
-                🏆 View Tournaments
-              </button>
-            </div>
-          </div>
+				<div class="mt-auto pt-6">
+				<button id="pong-tournaments-btn"
+					class="w-full rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					🏆 View Tournaments
+				</button>
+				</div>
+			</div>
 
-          <!-- RIGHT LARGE (row-span-2) -->
-          <div class="lg:row-span-2 p-10 flex flex-col">
-            <h2 class="text-2xl font-semibold text-white">
-              Your Stats
-            </h2>
+			<!-- RIGHT LARGE (row-span-2) -->
+			<div class="lg:row-span-2 p-10 flex flex-col">
+				<h2 class="text-2xl font-semibold text-white">
+				Your Stats
+				</h2>
 
-            <div class="mt-6 flex items-center justify-between">
-              <div class="text-neutral-400 space-y-2">
-                <div id="pong-user-wins">Wins: 0</div>
-                <div id="pong-user-losses">Losses: 0</div>
-              </div>
+				<div class="mt-6 flex items-center justify-between">
+				<div class="text-neutral-400 space-y-2">
+					<div id="pong-user-wins">Wins: 0</div>
+					<div id="pong-user-losses">Losses: 0</div>
+				</div>
 
-              <div id="pong-user-chart" class="w-24 h-24">
-                <div id="pong-user-chart-inner" class="w-full h-full"></div>
-              </div>
-            </div>
+				<div id="pong-user-chart" class="w-24 h-24">
+					<div id="pong-user-chart-inner" class="w-full h-full"></div>
+				</div>
+				</div>
 
-            <div class="mt-10 border-t border-neutral-800 pt-8 flex flex-col gap-4">
-              <button id="pong-invite-friend"
-                class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
-                👥 Invite Friend
-              </button>
+				<div class="mt-10 border-t border-neutral-800 pt-8 flex flex-col gap-4">
+				<button id="pong-invite-friend"
+					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					👥 Invite Friend
+				</button>
 
-              <button id="pong-reset-local"
-                class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
-                🔄 Reset Local Data
-              </button>
-            </div>
-          </div>
+				<button id="pong-reset-local"
+					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					🔄 Reset Local Data
+				</button>
+				</div>
+			</div>
 
-        </div>
-      </div>
+			</div>
+		</div>
 
-    </div>
-  </div>
-</template>
-
-
+		</div>
+	</div>
+	</template>
 
 	<!-- Pong Game Modal -->
 	<div id="pong-modal"
-		tabindex="-1"
-		class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 justify-center items-center w-full md:inset-0 h-full max-h-full p-4"
-	>
+		tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-30 justify-center items-center w-full md:inset-0 h-full max-h-full p-4">
 		<div class="relative z-50 w-full max-w-4xl">
 			<div class="relative dark:bg-neutral-900 bg-white/80 backdrop-blur-sm rounded-xl border-4 dark:border-neutral-700 border-neutral-300 dark:shadow-[15px_15px_0_0_rgba(255,0,157,0.3)] shadow-[15px_15px_0_0_rgba(0,168,232,0.3)] overflow-hidden flex flex-col">
+
 				<!-- Close button -->
 				<button id="pong-close-btn" class="absolute top-4 right-4 z-10 w-8 h-8 inline-flex justify-center items-center rounded-md border-2 dark:border-neutral-700 border-neutral-300 bg-neutral-200 dark:bg-neutral-800 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition">✕</button>
 
-				<!-- Header Card -->
+				<!-- Header -->
 				<div class="p-6 border-b-2 dark:border-neutral-700 border-neutral-300 dark:bg-gradient-to-r dark:from-neutral-800 dark:to-neutral-900 bg-gradient-to-r from-neutral-100 to-neutral-50">
 					<div class="flex items-center gap-3">
 						<h2 class="text-3xl font-extrabold uppercase tracking-tight dark:text-accent-pink text-accent-orange">Pong</h2>
@@ -729,10 +726,18 @@
 					</div>
 				</div>
 
-				<!-- Main Content -->
+				<!-- Main Content (Canvas + Score) -->
 				<div class="p-8 flex flex-col gap-6 max-h-[calc(100vh-300px)]">
-					<!-- Game Canvas Card -->
+
 					<div class="flex-1 rounded-lg overflow-hidden border-3 dark:border-red-700 border-neutral-300 shadow-lg">
+						<!-- Names and center score bar (placed before the canvas) -->
+						<div id="pong-scorebar" class="w-full flex items-center justify-between px-4 py-2 border-b-2 dark:border-neutral-700 border-neutral-200">
+							<div id="pong-left-name" class="text-heading font-semibold text-sm">Player 1</div>
+							<div id="pong-center-score" class="text-heading font-extrabold text-lg">0 - 0</div>
+							<div id="pong-right-name" class="text-heading font-semibold text-sm">Player 2</div>
+						</div>
+
+						<!-- Game Canvas -->
 						<canvas id="pong-canvas" class="w-full h-full"></canvas>
 					</div>
 
@@ -741,20 +746,7 @@
 
 					<!-- Controls Card -->
 					<div class="flex gap-3 justify-center flex-wrap p-4 dark:bg-neutral-800/50 bg-neutral-50/50 rounded-lg border-2 dark:border-neutral-700 border-neutral-300">
-						<!-- Player names and score inputs -->
-						<div class="flex gap-3 items-center flex-wrap">
-							<label for="pong-player-names" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Players</label>
-							<input id="pong-player-names" type="text" placeholder="Player1, Player2"
-							class="px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
-						</div>
-						<div class="flex gap-3 items-center flex-wrap">
-							<label for="pong-target-score" class="text-sm font-semibold dark:text-neutral-300 text-neutral-700">Score</label>
-							<input id="pong-target-score" type="number" min="1" placeholder="5"
-							class="w-20 px-3 py-2 rounded-md dark:bg-black bg-white border dark:border-neutral-700 border-neutral-300 text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-accent-cyan" />
-						</div>
-
-						<button id="pong-start-btn" class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan">Start</button>
-						<button id="pong-reset-btn" class="px-6 py-3 dark:bg-neutral-700 bg-neutral-300 dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-neutral-700 border-neutral-300">Reset</button>
+						<button id="pong-btn" class="px-6 py-3 dark:bg-accent-green bg-accent-cyan dark:text-white text-black font-extrabold uppercase tracking-tight rounded-lg hover:brightness-110 transition border-2 dark:border-accent-green border-accent-cyan">Start</button>
 					</div>
 				</div>
 			</div>

@@ -58,7 +58,7 @@ export class PongGame {
     this._fitCamera = (width, depth) => {
       const maxDim = Math.max(width, depth); // use the larger dimension to set camera distance, ensuring the whole field fits in view
       const radius = 110; // distance from camera to target (field center), set based on field size but with a reasonable minimum
-      const beta = 0.6; // near top-down (smaller = more overhead)
+      const beta = 0.7; // near top-down (smaller = more overhead)
       const alpha = -(Math.PI / 2); // face the long axis
       return { alpha, beta, radius };
     };
@@ -165,7 +165,7 @@ export class PongGame {
     this._groundPosition = ground.position.clone();
     // offset target so the field center appears higher in the canvas
     // negative Z moves the target away from the camera, lifting the field up on screen
-    this._targetOffset = new BABYLON.Vector3(0, 0, -this._fieldDepth * 0.1);
+    this._targetOffset = new BABYLON.Vector3(0, 0, -this._fieldDepth * 0.23);
 
     const groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
     groundMaterial.diffuseColor = new BABYLON.Color3(0.2, 0.6, 0.2);
