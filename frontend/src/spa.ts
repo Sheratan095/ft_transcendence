@@ -5,7 +5,7 @@ import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
 import { setupTrisCardListener } from './lib/tris-ui';
-import { setupPongCardListener } from './components/pong/PongMenù.ts';
+import { setupPongCardListener } from './lib/slideshow';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;

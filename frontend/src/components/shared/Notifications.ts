@@ -1,9 +1,8 @@
 import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } from './Toast';
 import { FriendsManager } from '../profile/FriendsManager';
 import { openTrisModalAndJoinGame } from '../../lib/tris-ui';
-import { openPongModal } from '../pong/game/pong-ui';
+import { openPongModal } from '../../lib/pong-ui';2
 import { joinCustomGame } from '../../lib/pong';
-import { goToRoute } from '../../spa';
 
 let notifSocket: WebSocket | null = null;
 let friendsManager: FriendsManager | null = null;
