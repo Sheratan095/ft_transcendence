@@ -173,14 +173,17 @@ export function handleError(data: any)
 // ============== Modal Control ==============
 
 // Setup global listeners once
-if (typeof window !== 'undefined') {
-	window.addEventListener('pong.gameLocalEnded', (e: any) => {
+if (typeof window !== 'undefined')
+{
+	window.addEventListener('pong.gameLocalEnded', (e: any) =>
+	{
 		const { winnerName } = e.detail;
 		updatePongStatus(`Game Over! ${winnerName} won.`);
 		showSuccessToast(`${winnerName} won!`);
 
 		const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
-		if (startBtn) {
+		if (startBtn)
+		{
 			startBtn.disabled = false;
 			startBtn.textContent = 'Restart';
 			// Reset to original colors
@@ -229,13 +232,10 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 					currentGameInstance.gameManager.enableOfflineInput();
 					currentGameInstance.gameManager.resumeGame(); // Ensure unpaused
 					
-					if (newStartBtn.textContent === 'Start') {
+					if (newStartBtn.textContent === 'Start')
 						currentGameInstance.gameManager.activateBall(); // Start ball on click
-						updatePongStatus(mode === 'offline-1v1' ? 'Game started! (Local 1v1)' : 'Game started! (vs Bot)');
-					}
-					else { // It's "Continue"
-						updatePongStatus('Game continued');
-					}
+
+					updatePongStatus("Game in progress...");
 
 					// Update button to 'STOP' and red
 					newStartBtn.textContent = 'STOP';
@@ -319,7 +319,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 			playerNames:
 			{
 				left: mode === 'offline-1v1' ? 'Player left' : 'You',
-				right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Bot' : 'Opponent')
+				right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Ai' : 'Opponent')
 			},
 			maxScore: 5,
 			aiDifficulty: 'medium'
@@ -331,15 +331,16 @@ export async function openPongModal(mode: PongModeType = 'online')
 		{
 			const modeNames: Record<string, string> = {
 				'online': 'Online - Waiting for opponent...',
-				'offline-1v1': 'Local 1v1',
-				'offline-ai': 'Offline vs Bot'
+				'offline-1v1': 'Offline 1v1',
+				'offline-ai': 'Offline vs Ai'
 			};
 			status.textContent = modeNames[mode] || 'Pong Game';
 		}
 
 		// Reset start button for new game
 		const startBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
-		if (startBtn) {
+		if (startBtn)
+		{
 			startBtn.disabled = false;
 			startBtn.textContent = 'Start';
 			// Ensure we reset to starting colors
