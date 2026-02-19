@@ -1,5 +1,5 @@
 import { getUserId } from '../../lib/auth';
-import { openPongModal } from '../../lib/pong-ui';
+import { openPongModal } from './modal';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
 import { showTournamentListModal } from '../tournaments/TournamentsList';

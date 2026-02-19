@@ -1,5 +1,5 @@
-import * as Physics from "./physics.ts";
-import { LocalInputController, AIController, NetworkInputController } from "./InputController.ts";
+import * as Physics from "./game/physics.ts";
+import { LocalInputController, AIController, NetworkInputController } from "./game/InputController.ts";
 
 /**
  * Game modes enum

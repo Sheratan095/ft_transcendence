@@ -27,7 +27,7 @@ import {
 
 import { t } from '../../lib/intlayer';
 import { showSuccessToast, showErrorToast } from '../shared/Toast';
-import { sendGameInvite as sendPongInvite } from '../../lib/pong';
+import { sendGameInvite as sendPongInvite } from '../pong/ws';
 import { createCustomGame as createTrisCustomGame } from '../../lib/tris';
 
 // Re-export for backward compatibility
