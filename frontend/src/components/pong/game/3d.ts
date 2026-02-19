@@ -24,7 +24,7 @@ const GAME_CONFIG = {
 	groundY: -1,
 	markerY: -0.95,
 	cameraAlpha: -(Math.PI / 2),
-	cameraBeta: 0.7,
+	cameraBeta: 0.85,
 	cameraRadius: 110,
 	shadowMapSize: 1024,
 	lightIntensity: 0.5,
