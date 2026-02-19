@@ -1,7 +1,7 @@
 
 import * as BABYLON from "@babylonjs/core";
 import * as GUI from "@babylonjs/gui";
-import { GameManager, GAME_MODES } from "./game/GameManager.js";
+import { GameManager, GAME_MODES } from "./game/GameManager.ts";
 
 /**
  * World coordinate bounds for converting normalized to 3D
@@ -17,8 +17,21 @@ export const WORLD_BOUNDS = {
 };
 
 export class PongGame {
-  constructor(canvasId, mode = GAME_MODES.LOCAL_VS_AI, config = {}) {
-    this.canvas = document.getElementById(canvasId);
+  canvas: HTMLCanvasElement | null;
+  engine: BABYLON.Engine | null;
+  scene: BABYLON.Scene | null;
+  gameManager: GameManager;
+  rightPaddleMesh: BABYLON.Mesh | null = null;
+  leftPaddleMesh: BABYLON.Mesh | null = null;
+  ballMesh: BABYLON.Mesh | null = null;
+  _fieldWidth!: number;
+  _fieldDepth!: number;
+  _fitCamera!: (width: number, depth: number) => any;
+  _groundPosition!: BABYLON.Vector3;
+  _targetOffset!: BABYLON.Vector3;
+
+  constructor(canvasId: string, mode: string = GAME_MODES.LOCAL_VS_AI, config: any = {}) {
+    this.canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
     if (!this.canvas) {
       throw new Error(`Canvas with id ${canvasId} not found`);
     }
@@ -35,7 +48,7 @@ export class PongGame {
   }
 
   createScene() {
-    const scene = new BABYLON.Scene(this.engine);
+    const scene = new BABYLON.Scene(this.engine!);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 0); // transparent background
 
     // compute field dimensions early so we can fit the camera to the field
@@ -65,7 +78,7 @@ export class PongGame {
     );
     // Do NOT attach any controls to the camera: fully disable user interaction
     camera.inputs.clear();
-    camera.detachControl(this.canvas);
+    camera.detachControl();
     camera.lowerRadiusLimit = Math.max(10, Math.max(this._fieldWidth, this._fieldDepth) * 0.3);
     camera.upperRadiusLimit = Math.max(200, Math.max(this._fieldWidth, this._fieldDepth) * 4);
     scene.activeCamera = camera;
@@ -216,7 +229,7 @@ export class PongGame {
   }
 
   setupRenderLoop() {
-    this.engine.runRenderLoop(() => {
+    this.engine?.runRenderLoop(() => {
       // Update game logic via GameManager
       this.gameManager.update();
 
@@ -229,23 +242,21 @@ export class PongGame {
       );
 
       // Update visual representation
-      this.ballMesh.position.x = worldCoords.ball.x;
-      this.ballMesh.position.z = worldCoords.ball.z;
+      this.ballMesh?.position.set(worldCoords.ball.x, 3, worldCoords.ball.z);
+      this.leftPaddleMesh?.position.set(WORLD_BOUNDS.minX, 3, worldCoords.paddles.left.z);
+      this.rightPaddleMesh?.position.set(WORLD_BOUNDS.maxX, 3, worldCoords.paddles.right.z);
 
-      this.leftPaddleMesh.position.z = worldCoords.paddles.left.z;
-      this.rightPaddleMesh.position.z = worldCoords.paddles.right.z;
-
-      this.scene.render();
+      this.scene?.render();
     });
   }
 
   setupResize() {
     window.addEventListener("resize", () => {
-      this.engine.resize();
+      this.engine?.resize();
       // re-fit ArcRotateCamera to field when the canvas size changes
       if (this._fitCamera && this.scene && this.scene.activeCamera) {
         const fit = this._fitCamera(this._fieldWidth, this._fieldDepth);
-        const cam = this.scene.activeCamera;
+        const cam = this.scene.activeCamera as BABYLON.ArcRotateCamera;
         if (cam.radius !== undefined) {
           cam.alpha = fit.alpha;
           cam.beta = fit.beta;
@@ -276,7 +287,7 @@ export class PongGame {
 
   destroy() {
     this.gameManager.destroy();
-    this.engine.dispose();
+    this.engine?.dispose();
   }
 }
 

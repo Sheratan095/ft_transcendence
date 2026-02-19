@@ -17,7 +17,7 @@ const PHYSICS_CONFIG =
  * @param {string} playerRightId - ID of right player
  * @returns {object} Initial game state
  */
-export function initGameState(playerLeftId, playerRightId)
+export function initGameState(playerLeftId: string, playerRightId: string): any
 {
 	const ballComponents = generateStartingBallComponents(PHYSICS_CONFIG.BALL_INITIAL_SPEED);
 	const paddleHeight = PHYSICS_CONFIG.PADDLE_HEIGHT;
@@ -61,7 +61,7 @@ export function initGameState(playerLeftId, playerRightId)
  * @param {object} ball - Ball state
  * @param {number} deltaTime - Time delta (for frame-independent movement)
  */
-export function updateBallPosition(ball, deltaTime = 1)
+export function updateBallPosition(ball: any, deltaTime: number = 1): void
 {
 	ball.x += ball.vx * deltaTime;
 	ball.y += ball.vy * deltaTime;
@@ -73,7 +73,7 @@ export function updateBallPosition(ball, deltaTime = 1)
  * @param {string} direction - 'up' or 'down'
  * @returns {number} New Y position
  */
-export function movePaddle(startingY, direction)
+export function movePaddle(startingY: number, direction: string): number
 {
 	const moveAmount = PHYSICS_CONFIG.PADDLE_SPEED;
 
@@ -99,19 +99,17 @@ export function movePaddle(startingY, direction)
  * @param {object} paddle - Paddle state
  * @returns {boolean} True if collision detected
  */
-export function checkPaddleCollision(ball, paddle)
+export function checkPaddleCollision(ball: any, paddle: any): boolean
 {
-	const paddleWidth = 0.02; // Small width in normalized coords
-
-	// Check X overlap (paddle is at x=0 or x=1)
+	// Check X overlap using paddle's x position (treat paddle as vertical line)
 	const ballLeft = ball.x - ball.radius;
 	const ballRight = ball.x + ball.radius;
-	
+
 	let xOverlap = false;
-	if (paddle.x === 0) // Left paddle
-		xOverlap = ballLeft <= paddleWidth;
-	else // Right paddle
-		xOverlap = ballRight >= 1 - paddleWidth;
+	if (paddle.x === 0) // Left paddle at x=0
+		xOverlap = ballLeft <= paddle.x;
+	else // Right paddle at x=1
+		xOverlap = ballRight >= paddle.x;
 
 	// Check Y overlap
 	const ballTop = ball.y - ball.radius;
@@ -128,7 +126,7 @@ export function checkPaddleCollision(ball, paddle)
  * @param {number} direction - -1 for left, 1 for right
  * @returns {object} Modified ball state
  */
-export function elaboratePaddleCollision(ball, paddle, direction)
+export function elaboratePaddleCollision(ball: any, paddle: any, direction: number): any
 {
 	// Increase ball speed upon paddle hit
 	ball.speed *= PHYSICS_CONFIG.BALL_SPEED_FACTOR;
@@ -160,7 +158,7 @@ export function elaboratePaddleCollision(ball, paddle, direction)
  * Elaborate wall collision (top/bottom)
  * @param {object} ball - Ball state (modified in place)
  */
-export function elaborateWallCollision(ball)
+export function elaborateWallCollision(ball: any): void
 {
 	// Invert vertical velocity
 	ball.vy = -ball.vy;
@@ -177,7 +175,7 @@ export function elaborateWallCollision(ball)
  * @param {object} ball - Ball state
  * @returns {string|null} 'left' if left player scored, 'right' if right player scored, null otherwise
  */
-export function checkGoal(ball)
+export function checkGoal(ball: any): string | null
 {
 	if (ball.x < 0)
 		return "right"; // Right player scored
@@ -193,7 +191,7 @@ export function checkGoal(ball)
  * @param {object} ball - Ball state (modified in place)
  * @param {number} direction - -1 for left, 1 for right
  */
-export function resetBall(ball, direction)
+export function resetBall(ball: any, direction: number): void
 {
 	ball.x = 0.5;
 	ball.y = 0.5;
@@ -210,7 +208,7 @@ export function resetBall(ball, direction)
  * @param {number} [forcedDirection] - Force direction (-1 or 1), random if not provided
  * @returns {object} Ball velocity components
  */
-export function generateStartingBallComponents(initialSpeed, forcedDirection)
+export function generateStartingBallComponents(initialSpeed: number, forcedDirection?: number): any
 {
 	const angleDegrees = Math.random() * 120 - 60; // Random angle between -60 and +60 degrees
 	const direction = forcedDirection !== undefined ? forcedDirection : (Math.random() < 0.5 ? -1 : 1);
@@ -227,7 +225,7 @@ export function generateStartingBallComponents(initialSpeed, forcedDirection)
  * @param {number} direction - -1 for left, 1 for right
  * @returns {object} Velocity components {vx, vy}
  */
-export function calculateBallComponents(speed, angleDegrees, direction)
+export function calculateBallComponents(speed: number, angleDegrees: number, direction: number): any
 {
 	const theta = (angleDegrees * Math.PI) / 180; // Convert to radians
 
@@ -244,7 +242,7 @@ export function calculateBallComponents(speed, angleDegrees, direction)
  * @param {number} max - Maximum value
  * @returns {number} Clamped value
  */
-export function clamp(value, min, max)
+export function clamp(value: number, min: number, max: number): number
 {
 	if (value < min)
 		return min;
@@ -259,7 +257,7 @@ export function clamp(value, min, max)
  * Get physics configuration (for debugging/tuning)
  * @returns {object} Physics configuration
  */
-export function getPhysicsConfig()
+export function getPhysicsConfig(): any
 {
 	return { ...PHYSICS_CONFIG };
 }
@@ -268,7 +266,7 @@ export function getPhysicsConfig()
  * Update physics configuration
  * @param {object} updates - Configuration updates
  */
-export function updatePhysicsConfig(updates)
+export function updatePhysicsConfig(updates: any): void
 {
 	Object.assign(PHYSICS_CONFIG, updates);
 }

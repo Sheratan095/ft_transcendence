@@ -3,12 +3,12 @@
  */
 class InputController
 {
-	getMovement()
+	getMovement(): string | null
 	{
 		throw new Error("getMovement() must be implemented");
 	}
 
-	destroy()
+	destroy(): void
 	{
 		// Override if cleanup is needed
 	}
@@ -19,7 +19,13 @@ class InputController
  */
 export class LocalInputController extends InputController
 {
-	constructor(upKeys, downKeys)
+	upKeys: string[];
+	downKeys: string[];
+	inputMap: Record<string, boolean>;
+	onKeyDown: ((evt: KeyboardEvent) => void) | null = null;
+	onKeyUp: ((evt: KeyboardEvent) => void) | null = null;
+
+	constructor(upKeys: string | string[], downKeys: string | string[])
 	{
 		super();
 		this.upKeys = Array.isArray(upKeys) ? upKeys : [upKeys];
@@ -28,7 +34,7 @@ export class LocalInputController extends InputController
 		this.setupListeners();
   }
 
-	setupListeners()
+	setupListeners(): void
 	{
 		this.onKeyDown = (evt) => {
 			this.inputMap[evt.key] = true;
@@ -46,7 +52,7 @@ export class LocalInputController extends InputController
 	 * Get current movement direction
 	 * @returns {string|null} 'up', 'down', or null
 	 */
-	getMovement()
+	getMovement(): string | null
 	{
 		const upPressed = this.upKeys.some(key => this.inputMap[key] || 
 						(key.toLowerCase() === "w" && this.inputMap["W"]) ||
@@ -67,15 +73,15 @@ export class LocalInputController extends InputController
 	 * Check if any movement key is pressed (for ball activation)
 	 * @returns {boolean}
 	 */
-	isAnyKeyPressed()
+	isAnyKeyPressed(): boolean
 	{
 		return this.getMovement() !== null;
 	}
 
-	destroy()
+	destroy(): void
 	{
-		window.removeEventListener("keydown", this.onKeyDown);
-		window.removeEventListener("keyup", this.onKeyUp);
+		if (this.onKeyDown) window.removeEventListener("keydown", this.onKeyDown);
+		if (this.onKeyUp) window.removeEventListener("keyup", this.onKeyUp);
 	}
 }
 
@@ -84,7 +90,12 @@ export class LocalInputController extends InputController
  */
 export class AIController extends InputController
 {
-	constructor(gameState, playerId, difficulty = "medium")
+	gameState: any;
+	playerId: string;
+	difficulty: string;
+	params: any;
+
+	constructor(gameState: any, playerId: string, difficulty: string = "medium")
 	{
 		super();
 		this.gameState = gameState;
@@ -95,7 +106,7 @@ export class AIController extends InputController
 		this.params = this.getDifficultyParams(difficulty);
   }
 
-	getDifficultyParams(difficulty)
+	getDifficultyParams(difficulty: string): any
 	{
 		const params =
 		{
@@ -132,7 +143,7 @@ export class AIController extends InputController
 	 * Predict where the ball will be when it reaches the paddle
 	 * @returns {number} Predicted Y position (0-1)
 	 */
-	predictBallPosition()
+	predictBallPosition(): number
 	{
 		const ball = this.gameState.ball;
 		const paddle = this.gameState.paddles[this.playerId];
@@ -165,7 +176,7 @@ export class AIController extends InputController
 	 * Get AI movement decision
 	 * @returns {string|null} 'up', 'down', or null
 	 */
-	getMovement()
+	getMovement(): string | null
 	{
 		const ball = this.gameState.ball;
 		const paddle = this.gameState.paddles[this.playerId];
@@ -210,7 +221,7 @@ export class AIController extends InputController
 	 * Update AI difficulty
 	 * @param {string} difficulty - New difficulty level
 	 */
-	setDifficulty(difficulty)
+	setDifficulty(difficulty: string): void
 	{
 		this.difficulty = difficulty;
 		this.params = this.getDifficultyParams(difficulty);
@@ -222,7 +233,11 @@ export class AIController extends InputController
  */
 export class NetworkInputController extends InputController
 {
-	constructor(websocket)
+	websocket: any;
+	lastMovement: string | null;
+	serverGameState: any;
+
+	constructor(websocket: any)
 	{
 		super();
 		this.websocket = websocket;
@@ -230,7 +245,7 @@ export class NetworkInputController extends InputController
 		this.setupWebSocket();
 	}
 
-	setupWebSocket()
+	setupWebSocket(): void
 	{
 		if (!this.websocket)
 			return;
@@ -245,7 +260,7 @@ export class NetworkInputController extends InputController
 		});
 	}
 
-	getMovement()
+	getMovement(): string | null
 	{
 		return this.lastMovement;
 	}
@@ -254,7 +269,7 @@ export class NetworkInputController extends InputController
 	 * Send local player movement to server
 	 * @param {string|null} movement - 'up', 'down', or null
 	 */
-	sendMovement(movement)
+	sendMovement(movement: string | null): void
 	{
 		if (this.websocket && this.websocket.connected)
 			this.websocket.emit("player_move", { movement });
@@ -264,7 +279,7 @@ export class NetworkInputController extends InputController
 	 * Set server-authoritative game state (called externally)
 	 * @param {object} state - Server game state
 	 */
-	setServerGameState(state)
+	setServerGameState(state: any): void
 	{
 		this.serverGameState = state;
 	}
@@ -274,14 +289,14 @@ export class NetworkInputController extends InputController
 	 * Consumes the state (clears it after reading) to prevent re-applying old data
 	 * @returns {object|null} Server game state
 	 */
-	getServerGameState()
+	getServerGameState(): any
 	{
 		const state = this.serverGameState;
 		this.serverGameState = null; // Clear after reading
 		return state;
 	}
 
-	destroy()
+	destroy(): void
 	{
 		if (this.websocket)
 		{

@@ -1,5 +1,5 @@
-import * as Physics from "./physics.js";
-import { LocalInputController, AIController, NetworkInputController } from "./InputController.js";
+import * as Physics from "./physics.ts";
+import { LocalInputController, AIController, NetworkInputController } from "./InputController.ts";
 
 /**
  * Game modes enum
@@ -16,7 +16,21 @@ export const GAME_MODES =
  */
 export class GameManager
 {
-	constructor(mode, config = {})
+	mode: string;
+	config: any;
+	gameState: any;
+	targetBall: any;
+	targetPaddles: any;
+	interpolationSpeed: number;
+	leftInputController: any;
+	rightInputController: any;
+	networkController: any;
+	localPlayerId: string;
+	onGoal?: (scorer: string, scores: any) => void;
+	onGameOver?: (winner: string) => void;
+	onBallActivate?: () => void;
+
+	constructor(mode: string, config: any = {})
 	{
 		this.mode = mode;
 		this.config =
@@ -61,7 +75,7 @@ export class GameManager
 	/**
 	 * Initialize input controllers based on game mode
 	 */
-	initializeMode()
+	initializeMode(): void
 	{
 		switch (this.mode)
 		{
@@ -107,7 +121,7 @@ export class GameManager
 	 * Main update loop - call this every frame
 	 * @param {number} deltaTime - Time delta (default 1 for 60fps)
 	 */
-	update(deltaTime = 1)
+	update(deltaTime: number = 1): void
 	{
 		if (this.gameState.gameOver)
 			return;
@@ -148,10 +162,14 @@ export class GameManager
 				// Map server paddles to client paddles based on X position
 				if (serverState.paddles)
 				{
-					for (const paddle of Object.values(serverState.paddles)) {
-						if (paddle.x === 0 || paddle.x < 0.5) {
+					for (const paddle of Object.values(serverState.paddles) as any[])
+					{
+						if (paddle.x === 0 || paddle.x < 0.5)
+						{
 							this.targetPaddles.left.y = paddle.y;
-						} else {
+						}
+						else
+						{
 							this.targetPaddles.right.y = paddle.y;
 						}
 					}
@@ -232,19 +250,19 @@ export class GameManager
 	 * @param {number} left - Left score
 	 * @param {number} right - Right score
 	 */
-	setScores(left, right)
+	setScores(left: number, right: number): void
 	{
 		this.gameState.scores.left = left;
 		this.gameState.scores.right = right;
 		if (this.onGoal)
-			this.onGoal(null, this.gameState.scores);
+			this.onGoal("", this.gameState.scores);
 	}
 
 	/**
 	 * Handle goal scoring
 	 * @param {string} scorer - 'left' or 'right'
 	 */
-	handleGoal(scorer)
+	handleGoal(scorer: string): void
 	{
 		// Update score
 		this.gameState.scores[scorer]++;
@@ -263,7 +281,8 @@ export class GameManager
 		{
 			this.gameState.gameOver = true;
 			this.gameState.winner = scorer;
-			this.onGameOver(scorer);
+			if (this.onGameOver)
+				this.onGameOver(scorer);
 		}
 		else 
 		{
@@ -281,17 +300,12 @@ export class GameManager
 	 * Called when game is over
 	 * @param {string} winner - 'left' or 'right'
 	 */
-	onGameOver(winner)
-	{
-		console.log(`[GameManager] Game Over! Winner: ${winner}`);
-		// Override this or use setCallbacks
-	}
 
 	/**
 	 * Set event callbacks
 	 * @param {object} callbacks - Object with callback functions
 	 */
-	setCallbacks(callbacks) 
+	setCallbacks(callbacks: any): void 
 	{
 		if (callbacks.onGoal)
 			this.onGoal = callbacks.onGoal;
@@ -305,7 +319,7 @@ export class GameManager
  * Get current game state (for rendering)
  * @returns {object} Current game state
  */
-getGameState()
+getGameState(): any
 {
 	return this.gameState;
 }
@@ -318,7 +332,7 @@ getGameState()
  * @param {number} maxZ - Max Z in world coordinates
  * @returns {object} World coordinates for rendering
  */
-getWorldCoordinates(minX, maxX, minZ, maxZ)
+getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 {
 	const ball = this.gameState.ball;
 	const leftPaddle = this.gameState.paddles.left;
@@ -355,7 +369,7 @@ getWorldCoordinates(minX, maxX, minZ, maxZ)
 	/**
 	 * Reset game to initial state
 	 */
-	reset()
+	reset(): void
 	{
 		this.gameState = Physics.initGameState("left", "right");
 		this.gameState.playerNames = this.config.playerNames;
@@ -370,7 +384,7 @@ getWorldCoordinates(minX, maxX, minZ, maxZ)
 	 * @param {string} newMode - New game mode
 	 * @param {object} newConfig - New configuration
 	 */
-	changeMode(newMode, newConfig = {})
+	changeMode(newMode: string, newConfig: any = {}): void
 	{
 		this.destroy();
 		this.mode = newMode;
@@ -383,7 +397,7 @@ getWorldCoordinates(minX, maxX, minZ, maxZ)
 	 * Interpolate positions towards targets for smooth movement in online mode
 	 * @param {number} deltaTime
 	 */
-	interpolatePositions(deltaTime)
+	interpolatePositions(deltaTime: number): void
 	{
 		const lerp = (current, target, speed) => current + (target - current) * speed * deltaTime;
 
@@ -399,7 +413,7 @@ getWorldCoordinates(minX, maxX, minZ, maxZ)
 	/**
 	 * Clean up resources
 	 */
-	destroy()
+	destroy(): void
 	{
 		if (this.leftInputController?.destroy)
 			this.leftInputController.destroy();
