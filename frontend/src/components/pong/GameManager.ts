@@ -178,17 +178,27 @@ export class GameManager
 				// Update scores
 				if (serverState.scores)
 				{
-					const scoreValues = Object.values(serverState.scores);
-					// This assumes the first score corresponds to the left paddle's owner
-					// A better way would be to map via player IDs, but this matches the server's state format
-					// In the tester, we might need more precision
-					
-					// Let's try to find which score belongs to whom if possible, 
-					// or just use the order provided by server if it's consistent.
-					// pong-game-test.html uses leftPlayerId and rightPlayerId caches.
-					
-					// For now, let's just use the fact that serverState.scores is an object {id: score}
-					// If we have player side info, we can do better.
+					let scoreChanged = false;
+
+					for (const [id, score] of Object.entries(serverState.scores) as [string, number][])
+					{
+						// Map score to side based on paddle position in the SAME serverState
+						const paddle = serverState.paddles ? serverState.paddles[id] : null;
+						if (paddle)
+						{
+							const side = (paddle.x === 0 || paddle.x < 0.5) ? "left" : "right";
+							if (this.gameState.scores[side] !== score)
+							{
+								this.gameState.scores[side] = score;
+								scoreChanged = true;
+							}
+						}
+					}
+
+					if (scoreChanged && this.onGoal)
+					{
+						this.onGoal("", this.gameState.scores);
+					}
 				}
 			}
 			
@@ -256,6 +266,14 @@ export class GameManager
 		this.gameState.scores.right = right;
 		if (this.onGoal)
 			this.onGoal("", this.gameState.scores);
+	}
+
+	/**
+	 * Set player names
+	 */
+	setPlayerNames(left: string, right: string): void
+	{
+		this.gameState.playerNames = { left, right };
 	}
 
 	/**

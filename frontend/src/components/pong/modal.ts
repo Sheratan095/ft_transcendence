@@ -65,11 +65,26 @@ export function handleGameStarted(data: any)
 	const sideText = yourSide ? `Playing as ${yourSide}` : 'Game started';
 	updatePongStatus(`${sideText}. ${opponentUsername ? `vs ${opponentUsername}` : ''}`);
 	showSuccessToast('Game started!');
+
+	// Update scoreboard names
+	if (currentGameInstance && yourSide && opponentUsername)
+	{
+		const user = getUser();
+		const myName = user?.username || 'You';
+		const left = (yourSide === 'left') ? myName : opponentUsername;
+		const right = (yourSide === 'right') ? myName : opponentUsername;
+		currentGameInstance.gameManager.setPlayerNames(left, right);
+		currentGameInstance.updateScorebarNames();
+	}
 }
 
-export function handleGameState(_data: any)
+export function handleGameState(data: any)
 {
 	// Game state handled by renderer
+	if (currentGameInstance)
+	{
+		currentGameInstance.updateOnlineState(data);
+	}
 }
 
 export function handleGameEnded(data: any)

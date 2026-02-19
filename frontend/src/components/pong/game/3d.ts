@@ -129,12 +129,35 @@ export class PongGame {
 		// Field Markings
 		this.setupFieldMarkings(scene);
 
+		// Initialize Scorebar Names
+		this.updateScorebarNames();
+
 		this.gameManager.setCallbacks({
-			onGoal: (_scorer: string, _scores: any) => {},
-			onGameOver: (_winner: string) => {}
+			onGoal: (_scorer: string, scores: any) => {
+				this.updateScorebar(scores.left, scores.right);
+			},
+			onGameOver: (winner: string) => {
+				console.log(`Game Over! Winner: ${winner}`);
+			}
 		});
 
 		return scene;
+	}
+
+	public updateScorebarNames() {
+		const names = this.gameManager.gameState.playerNames;
+		const leftNameEl = document.getElementById('pong-left-name');
+		const rightNameEl = document.getElementById('pong-right-name');
+
+		if (leftNameEl) leftNameEl.textContent = names.left;
+		if (rightNameEl) rightNameEl.textContent = names.right;
+	}
+
+	public updateScorebar(left: number, right: number) {
+		const scoreEl = document.getElementById('pong-center-score');
+		if (scoreEl) {
+			scoreEl.textContent = `${left} - ${right}`;
+		}
 	}
 
 	private setupPaddles(scene: BABYLON.Scene, shadowGenerator: BABYLON.ShadowGenerator) {
