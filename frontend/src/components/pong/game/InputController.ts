@@ -24,6 +24,7 @@ export class LocalInputController extends InputController
 	inputMap: Record<string, boolean>;
 	onKeyDown: ((evt: KeyboardEvent) => void) | null = null;
 	onKeyUp: ((evt: KeyboardEvent) => void) | null = null;
+	enabled: boolean = false; // Input disabled until explicitly enabled
 
 	constructor(upKeys: string | string[], downKeys: string | string[])
 	{
@@ -54,6 +55,9 @@ export class LocalInputController extends InputController
 	 */
 	getMovement(): string | null
 	{
+		if (!this.enabled)
+			return null;
+
 		const upPressed = this.upKeys.some(key => this.inputMap[key] || 
 						(key.toLowerCase() === "w" && this.inputMap["W"]) ||
 						(key.toLowerCase() === "s" && this.inputMap["S"]));

@@ -413,6 +413,29 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 	/**
 	 * Clean up resources
 	 */
+	/**
+	 * Enable input for offline modes (local 1v1 and AI)
+	 */
+	enableOfflineInput(): void
+	{
+		if (this.leftInputController && typeof this.leftInputController.enabled !== 'undefined')
+		{
+			this.leftInputController.enabled = true;
+		}
+		if (this.rightInputController && typeof this.rightInputController.enabled !== 'undefined')
+		{
+			this.rightInputController.enabled = true;
+		}
+	}
+
+	/**
+	 * Activate the ball immediately
+	 */
+	activateBall(): void
+	{
+		this.gameState.ball.active = true;
+	}
+
 	destroy(): void
 	{
 		if (this.leftInputController?.destroy)

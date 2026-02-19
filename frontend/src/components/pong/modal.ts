@@ -14,6 +14,11 @@ import { isLoggedInClient } from '../../lib/token';
 let currentGameInstance: PongGame | null = null;
 let currentGameMode: 'online' | 'offline-1v1' | 'offline-ai' = 'online';
 
+// Export game instance for external control
+export function getCurrentGameInstance(): PongGame | null {
+	return currentGameInstance;
+}
+
 // ============== Event Handlers ==============
 
 function updatePongStatus(statusText: string)
@@ -137,12 +142,21 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 	if (closeBtn)
 		closeBtn.addEventListener('click', closePongModal);
 
-	const startBtn = container.querySelector('#pong-start-btn') as HTMLButtonElement | null;
+	const startBtn = container.querySelector('#pong-btn') as HTMLButtonElement | null;
 	if (startBtn)
 	{
 		startBtn.addEventListener('click', () => {
 			if (mode === 'online') {
 				startMatchmaking();
+			} else if (mode === 'offline-1v1' || mode === 'offline-ai') {
+				// For offline modes, enable player input and activate ball
+				if (currentGameInstance) {
+					currentGameInstance.gameManager.enableOfflineInput();
+					currentGameInstance.gameManager.activateBall();
+				}
+				updatePongStatus(mode === 'offline-1v1' ? 'Game started! (Local 1v1)' : 'Game started! (vs Bot)');
+				startBtn.disabled = true;
+				startBtn.textContent = 'Game Running';
 			}
 		});
 	}
@@ -221,6 +235,13 @@ export async function openPongModal(mode: PongModeType = 'online')
 				'offline-ai': 'Offline vs Bot'
 			};
 			status.textContent = modeNames[mode] || 'Pong Game';
+		}
+
+		// Reset start button for new game
+		const startBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		if (startBtn) {
+			startBtn.disabled = false;
+			startBtn.textContent = 'Start';
 		}
 
 		attachButtonHandlers(modal, mode);

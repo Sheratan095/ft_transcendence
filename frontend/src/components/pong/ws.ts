@@ -4,7 +4,7 @@
  */
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
-import { getUserId } from '../../lib/auth';
+import { getUserId, isLoggedInClient } from '../../lib/auth';
 import * as modalHandlers from './modal';
 
 let ws: WebSocket | null = null;
@@ -19,23 +19,30 @@ let paddleMoveInterval: any = null;
 /**
  * Send a message through WebSocket
  */
-export function sendPongMessage(event: string, data: any = {}): boolean {
-	if (ws && ws.readyState === WebSocket.OPEN) {
+export function sendPongMessage(event: string, data: any = {}): boolean
+{
+	if (ws && ws.readyState === WebSocket.OPEN)
+	{
 		const msg = JSON.stringify({ event, data });
 		ws.send(msg);
-		return true;
+		return (true);
 	}
+
 	console.warn('[WS] Cannot send: not connected');
-	return false;
+	return (false);
 }
 
 /**
  * Initialize WebSocket connection
  */
-export async function initPong(uid: string) {
-	if (!uid) throw new Error('No user id');
+export async function initPong(uid: string)
+{
+	if (!uid)
+		throw new Error('No user id');
 	currentUserId = uid;
-	if (ws && ws.readyState === WebSocket.OPEN) return;
+
+	if (ws && ws.readyState === WebSocket.OPEN)
+		return;
 
 	const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws/pong`;
 	try {
@@ -88,7 +95,8 @@ export async function initPong(uid: string) {
 /**
  * Route event to appropriate handler
  */
-function routeEvent(event: string, data: any) {
+function routeEvent(event: string, data: any)
+{
 	console.log('[WS] Event:', event);
 
 	switch (event) {
@@ -181,9 +189,11 @@ export function leaveMatchmaking() {
  */
 export async function createCustomGame(otherId: string) {
 	if (!isPongConnected()) {
-		const userId = getUserId();
-		if (!userId) throw new Error('Not logged in');
-		await initPong(userId);
+
+		if (!isLoggedInClient())
+			throw new Error('Not logged in');
+
+		await initPong(getUserId() as string);
 	}
 	sendPongMessage('pong.createCustomGame', { otherId });
 }
@@ -199,14 +209,16 @@ export function joinCustomGame(gameId: string)
 /**
  * Cancel a custom game
  */
-export function cancelCustomGame(gameId: string) {
+export function cancelCustomGame(gameId: string)
+{
 	sendPongMessage('pong.cancelCustomGame', { gameId });
 }
 
 /**
  * Quit current game
  */
-export function quitGame(gameId: string) {
+export function quitGame(gameId: string)
+{
 	sendPongMessage('pong.userQuit', { gameId });
 }
 
