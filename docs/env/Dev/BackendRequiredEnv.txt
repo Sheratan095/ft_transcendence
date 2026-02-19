@@ -75,8 +75,8 @@ services/pong:
     MAX_BOUNCE_ANGLE=60 # Maximum angle (in degrees) for ball deflection upon paddle hit
     BALL_RADIUS=0.015 # Radius of the ball respective to the game area (0.02 = 2% of the game area)
     BALL_INITIAL_SPEED=0.2 # Initial ball speed per SECOND (0.5 = 50% of the game area per second)
-    BALL_SPEED_FACTOR=1.1 # Factor by which the ball speed increases after each paddle hit
-    BALL_MAX_SPEED=2.0 # Maximum ball speed per SECOND to prevent infinite acceleration
+    BALL_SPEED_FACTOR=1.07 # Factor by which the ball speed increases after each paddle hit
+    BALL_MAX_SPEED=0.7 # Maximum ball speed per SECOND to prevent infinite acceleration
     MIN_PLAYERS_FOR_TOURNAMENT_START=4
     HOST=127.0.0.1
 
