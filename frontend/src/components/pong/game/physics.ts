@@ -32,6 +32,7 @@ export function initGameState(playerLeftId: string, playerRightId: string): any
 			vy: ballComponents.newVy,
 			speed: PHYSICS_CONFIG.BALL_INITIAL_SPEED,
 			radius: PHYSICS_CONFIG.BALL_RADIUS,
+			active: false,
 		},
 		paddles:
 		{

@@ -208,25 +208,32 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 		const newStartBtn = startBtn.cloneNode(true) as HTMLButtonElement;
 		startBtn.parentNode?.replaceChild(newStartBtn, startBtn);
 
-		newStartBtn.addEventListener('click', () => {
+		newStartBtn.addEventListener('click', () =>
+		{
 			if (newStartBtn.textContent === 'Restart' || newStartBtn.textContent === 'Play Again') {
 				openPongModal(mode);
 				return;
 			}
 
-			if (mode === 'online') {
+			if (mode === 'online')
+			{
 				startMatchmaking();
-			} else if (mode === 'offline-1v1' || mode === 'offline-ai') {
-				if (!currentGameInstance) return;
+			}
+			else if (mode === 'offline-1v1' || mode === 'offline-ai')
+			{
+				if (!currentGameInstance)
+					return;
 
 				if (newStartBtn.textContent === 'Start' || newStartBtn.textContent === 'Continue') {
 					// Logic for starting or resuming the game
 					currentGameInstance.gameManager.enableOfflineInput();
+					currentGameInstance.gameManager.resumeGame(); // Ensure unpaused
+					
 					if (newStartBtn.textContent === 'Start') {
-						currentGameInstance.gameManager.activateBall();
+						currentGameInstance.gameManager.activateBall(); // Start ball on click
 						updatePongStatus(mode === 'offline-1v1' ? 'Game started! (Local 1v1)' : 'Game started! (vs Bot)');
-					} else { // It's "Continue"
-						currentGameInstance.gameManager.resumeGame();
+					}
+					else { // It's "Continue"
 						updatePongStatus('Game continued');
 					}
 
@@ -234,7 +241,8 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 					newStartBtn.textContent = 'STOP';
 					newStartBtn.classList.remove('dark:bg-accent-green', 'bg-accent-cyan', 'dark:border-accent-green', 'border-accent-cyan');
 					newStartBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'border-red-600');
-				} else if (newStartBtn.textContent === 'STOP') {
+				}
+				else if (newStartBtn.textContent === 'STOP') {
 					// STOP / PAUSE logic
 					currentGameInstance.gameManager.disableOfflineInput();
 					currentGameInstance.gameManager.pauseGame();
@@ -308,7 +316,11 @@ export async function openPongModal(mode: PongModeType = 'online')
 
 		const game = new PongGame(canvas.id, gameMode,
 		{
-			playerNames: { left: 'Player 1', right: 'Player 2' },
+			playerNames:
+			{
+				left: mode === 'offline-1v1' ? 'Player left' : 'You',
+				right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Bot' : 'Opponent')
+			},
 			maxScore: 5,
 			aiDifficulty: 'medium'
 		});

@@ -48,7 +48,7 @@ export class GameManager
 		this.gameState.playerNames = this.config.playerNames;
 		this.gameState.maxScore = this.config.maxScore;
 		this.gameState.gameOver = false;
-		this.gameState.paused = false;
+		this.gameState.paused = (this.mode !== GAME_MODES.ONLINE);
 		this.gameState.winner = null;
 		this.gameState.isCooldown = false;
 		this.gameState.cooldownTimer = 0;
@@ -224,8 +224,8 @@ export class GameManager
 		{
 			this.gameState.paddles.right.y = Physics.movePaddle(this.gameState.paddles.right.y, rightMovement);
 		
-			// Activate ball on first movement
-			if (!this.gameState.ball.active)
+			// Activate ball on first movement (unless it's AI)
+			if (!this.gameState.ball.active && this.mode !== GAME_MODES.LOCAL_VS_AI)
 				this.gameState.ball.active = true;
 		}
 
@@ -484,6 +484,7 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 	activateBall(): void
 	{
 		this.gameState.ball.active = true;
+		this.gameState.paused = false;
 	}
 
 	destroy(): void

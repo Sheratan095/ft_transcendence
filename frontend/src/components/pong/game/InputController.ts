@@ -3,6 +3,8 @@
  */
 class InputController
 {
+	enabled: boolean = false;
+
 	getMovement(): string | null
 	{
 		throw new Error("getMovement() must be implemented");
@@ -24,7 +26,6 @@ export class LocalInputController extends InputController
 	inputMap: Record<string, boolean>;
 	onKeyDown: ((evt: KeyboardEvent) => void) | null = null;
 	onKeyUp: ((evt: KeyboardEvent) => void) | null = null;
-	enabled: boolean = false; // Input disabled until explicitly enabled
 
 	constructor(upKeys: string | string[], downKeys: string | string[])
 	{
@@ -49,14 +50,10 @@ export class LocalInputController extends InputController
 		window.addEventListener("keyup", this.onKeyUp);
 	}
 
-	/**
-	 * Get current movement direction
-	 * @returns {string|null} 'up', 'down', or null
-	 */
 	getMovement(): string | null
 	{
 		if (!this.enabled)
-			return null;
+			return (null);
 
 		const upPressed = this.upKeys.some(key => this.inputMap[key] || 
 						(key.toLowerCase() === "w" && this.inputMap["W"]) ||
@@ -66,32 +63,27 @@ export class LocalInputController extends InputController
 							(key.toLowerCase() === "s" && this.inputMap["S"]));
 
 		if (upPressed)
-			return "up";
+			return ("up");
 		if (downPressed)
-			return "down";
+			return ("down");
 
-		return null;
+		return (null);
 	}
 
-	/**
-	 * Check if any movement key is pressed (for ball activation)
-	 * @returns {boolean}
-	 */
 	isAnyKeyPressed(): boolean
 	{
-		return this.getMovement() !== null;
+		return (this.getMovement() !== null);
 	}
 
 	destroy(): void
 	{
-		if (this.onKeyDown) window.removeEventListener("keydown", this.onKeyDown);
-		if (this.onKeyUp) window.removeEventListener("keyup", this.onKeyUp);
+		if (this.onKeyDown)
+			window.removeEventListener("keydown", this.onKeyDown);
+		if (this.onKeyUp)
+			window.removeEventListener("keyup", this.onKeyUp);
 	}
 }
 
-/**
- * AI controller that follows the ball
- */
 export class AIController extends InputController
 {
 	gameState: any;
@@ -182,6 +174,9 @@ export class AIController extends InputController
 	 */
 	getMovement(): string | null
 	{
+		if (!this.enabled)
+			return null;
+
 		const ball = this.gameState.ball;
 		const paddle = this.gameState.paddles[this.playerId];
 		
