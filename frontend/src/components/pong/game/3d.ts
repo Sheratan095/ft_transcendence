@@ -129,15 +129,22 @@ export class PongGame {
 		// Field Markings
 		this.setupFieldMarkings(scene);
 
-		// Initialize Scorebar Names
+		// Initialize Scorebar Names and Scores to 0-0
 		this.updateScorebarNames();
+		this.updateScorebar(0, 0);
 
 		this.gameManager.setCallbacks({
 			onGoal: (_scorer: string, scores: any) => {
 				this.updateScorebar(scores.left, scores.right);
 			},
 			onGameOver: (winner: string) => {
-				console.log(`Game Over! Winner: ${winner}`);
+				const names = this.gameManager.gameState.playerNames;
+				const winnerName = (winner === 'left') ? names.left : names.right;
+				
+				// Dispatch event so modal can handle UI state changes
+				window.dispatchEvent(new CustomEvent('pong.gameLocalEnded', { 
+					detail: { winner, winnerName } 
+				}));
 			}
 		});
 

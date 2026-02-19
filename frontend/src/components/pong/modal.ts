@@ -120,6 +120,16 @@ export function handleGameEnded(data: any)
 	else {
 		showErrorToast(message);
 	}
+
+	// Update start button to 'Play Again'
+	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
+	if (startBtn) {
+		startBtn.disabled = false;
+		startBtn.textContent = 'Play Again';
+		// Reset colors if needed (online mode doesn't switch to STOP normally but better safe)
+		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600');
+		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-cyan', 'dark:border-accent-green', 'border-accent-cyan');
+	}
 }
 
 export function handlePlayerQuitCustomGameInLobby(_data: any)
@@ -134,7 +144,18 @@ export function handleMatchedInRandomGame(data: any)
 	const sideText = yourSide || 'a paddle';
 
 	updatePongStatus(`Matched with ${opponentUsername}. You are ${sideText}`);
-	// showSuccessToast(`Matched with ${opponentUsername}!`);
+	
+	// Update player names in the game UI
+	if (currentGameInstance) {
+		const user = getUser();
+		const myName = user?.username || 'You';
+		if (yourSide === 'left') {
+			currentGameInstance.gameManager.setPlayerNames(myName, opponentUsername);
+		} else {
+			currentGameInstance.gameManager.setPlayerNames(opponentUsername, myName);
+		}
+		currentGameInstance.updateScorebarNames();
+	}
 }
 
 export function handleInvalidMove(data: any)
@@ -151,27 +172,79 @@ export function handleError(data: any)
 
 // ============== Modal Control ==============
 
+// Setup global listeners once
+if (typeof window !== 'undefined') {
+	window.addEventListener('pong.gameLocalEnded', (e: any) => {
+		const { winnerName } = e.detail;
+		updatePongStatus(`Game Over! ${winnerName} won.`);
+		showSuccessToast(`${winnerName} won!`);
+
+		const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
+		if (startBtn) {
+			startBtn.disabled = false;
+			startBtn.textContent = 'Restart';
+			// Reset to original colors
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-cyan', 'dark:border-accent-green', 'border-accent-cyan');
+		}
+	});
+}
+
 function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 {
 	const closeBtn = container.querySelector('#pong-close-btn') as HTMLButtonElement | null;
 	if (closeBtn)
-		closeBtn.addEventListener('click', closePongModal);
+	{
+		// Replace to clear listeners
+		const newCloseBtn = closeBtn.cloneNode(true) as HTMLButtonElement;
+		closeBtn.parentNode?.replaceChild(newCloseBtn, closeBtn);
+		newCloseBtn.addEventListener('click', closePongModal);
+	}
 
 	const startBtn = container.querySelector('#pong-btn') as HTMLButtonElement | null;
 	if (startBtn)
 	{
-		startBtn.addEventListener('click', () => {
+		// Replace to clear listeners
+		const newStartBtn = startBtn.cloneNode(true) as HTMLButtonElement;
+		startBtn.parentNode?.replaceChild(newStartBtn, startBtn);
+
+		newStartBtn.addEventListener('click', () => {
+			if (newStartBtn.textContent === 'Restart' || newStartBtn.textContent === 'Play Again') {
+				openPongModal(mode);
+				return;
+			}
+
 			if (mode === 'online') {
 				startMatchmaking();
 			} else if (mode === 'offline-1v1' || mode === 'offline-ai') {
-				// For offline modes, enable player input and activate ball
-				if (currentGameInstance) {
+				if (!currentGameInstance) return;
+
+				if (newStartBtn.textContent === 'Start' || newStartBtn.textContent === 'Continue') {
+					// Logic for starting or resuming the game
 					currentGameInstance.gameManager.enableOfflineInput();
-					currentGameInstance.gameManager.activateBall();
+					if (newStartBtn.textContent === 'Start') {
+						currentGameInstance.gameManager.activateBall();
+						updatePongStatus(mode === 'offline-1v1' ? 'Game started! (Local 1v1)' : 'Game started! (vs Bot)');
+					} else { // It's "Continue"
+						currentGameInstance.gameManager.resumeGame();
+						updatePongStatus('Game continued');
+					}
+
+					// Update button to 'STOP' and red
+					newStartBtn.textContent = 'STOP';
+					newStartBtn.classList.remove('dark:bg-accent-green', 'bg-accent-cyan', 'dark:border-accent-green', 'border-accent-cyan');
+					newStartBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'border-red-600');
+				} else if (newStartBtn.textContent === 'STOP') {
+					// STOP / PAUSE logic
+					currentGameInstance.gameManager.disableOfflineInput();
+					currentGameInstance.gameManager.pauseGame();
+					updatePongStatus('Game paused');
+
+					// Update button back to 'Continue' and primary colors
+					newStartBtn.textContent = 'Continue';
+					newStartBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600');
+					newStartBtn.classList.add('dark:bg-accent-green', 'bg-accent-cyan', 'dark:border-accent-green', 'border-accent-cyan');
 				}
-				updatePongStatus(mode === 'offline-1v1' ? 'Game started! (Local 1v1)' : 'Game started! (vs Bot)');
-				startBtn.disabled = true;
-				startBtn.textContent = 'Game Running';
 			}
 		});
 	}
@@ -257,6 +330,9 @@ export async function openPongModal(mode: PongModeType = 'online')
 		if (startBtn) {
 			startBtn.disabled = false;
 			startBtn.textContent = 'Start';
+			// Ensure we reset to starting colors
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-cyan', 'dark:border-accent-green', 'border-accent-cyan');
 		}
 
 		attachButtonHandlers(modal, mode);
@@ -273,8 +349,18 @@ export async function openPongModal(mode: PongModeType = 'online')
 export function closePongModal()
 {
 	const modal = document.getElementById('pong-modal');
-	if (modal)
+	if (modal) {
 		modal.classList.add('hidden');
+		
+		// Reset button state on close for next time
+		const startBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		if (startBtn) {
+			startBtn.textContent = 'Start';
+			startBtn.disabled = false;
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-cyan', 'dark:border-accent-green', 'border-accent-cyan');
+		}
+	}
 
 	if (currentGameInstance)
 	{

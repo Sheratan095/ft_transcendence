@@ -48,6 +48,7 @@ export class GameManager
 		this.gameState.playerNames = this.config.playerNames;
 		this.gameState.maxScore = this.config.maxScore;
 		this.gameState.gameOver = false;
+		this.gameState.paused = false;
 		this.gameState.winner = null;
 		this.gameState.isCooldown = false;
 		this.gameState.cooldownTimer = 0;
@@ -123,7 +124,7 @@ export class GameManager
 	 */
 	update(deltaTime: number = 1): void
 	{
-		if (this.gameState.gameOver)
+		if (this.gameState.gameOver || this.gameState.paused)
 			return;
 
 		// Handle cooldown between points
@@ -444,6 +445,37 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 		{
 			this.rightInputController.enabled = true;
 		}
+	}
+
+	/**
+	 * Disable input for offline modes
+	 */
+	disableOfflineInput(): void
+	{
+		if (this.leftInputController && typeof this.leftInputController.enabled !== 'undefined')
+		{
+			this.leftInputController.enabled = false;
+		}
+		if (this.rightInputController && typeof this.rightInputController.enabled !== 'undefined')
+		{
+			this.rightInputController.enabled = false;
+		}
+	}
+
+	/**
+	 * Pause the game
+	 */
+	pauseGame(): void
+	{
+		this.gameState.paused = true;
+	}
+
+	/**
+	 * Resume the game
+	 */
+	resumeGame(): void
+	{
+		this.gameState.paused = false;
 	}
 
 	/**
