@@ -494,42 +494,6 @@ function showTrisError(message: string) {
 }
 
 /**
- * Setup the tris card button click handler
- */
-export function setupTrisCardListener() {
-  // Wait for DOM to be ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      attachTrisCardListener();
-    });
-  } else {
-    attachTrisCardListener();
-  }
-}
-
-function attachTrisCardListener() {
-  const trisCard = document.getElementById('tris-card-btn');
-  if (!trisCard) {
-    console.error('Tris card button not found');
-    return;
-  }
-
-  console.log('Attaching tris card listener');
-  trisCard.addEventListener('click', async (e) => {
-    if (!isLoggedInClient())
-    {
-      showErrorToast('You must be logged in to play Tris');
-      return;
-    }
-
-
-    e.preventDefault();
-    console.log('Tris card clicked - navigating to /tris');
-    goToRoute('/tris');
-  });
-}
-
-/**
  * Handle mode selection from the mode modal
  */
 async function handleModeSelection(mode: string) {

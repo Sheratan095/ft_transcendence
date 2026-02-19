@@ -4,8 +4,7 @@ import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
-import { setupTrisCardListener } from './lib/tris-ui';
-import { setupPongCardListener } from './lib/slideshow';
+import { setupPongCardListener, setupTrisCardListener } from './lib/slideshow';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -22,8 +21,8 @@ const routes: Record<string, RouteConfig> = {
       const clone = template.content.cloneNode(true);
       el.appendChild(clone);
       initCardHoverEffect();
-	  setupTrisCardListener();
-	  setupPongCardListener();
+      setupTrisCardListener();
+      setupPongCardListener();
     }
   },
   '/login': {
