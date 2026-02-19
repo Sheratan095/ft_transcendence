@@ -11,7 +11,6 @@ import { setFriendsManager } from './components/shared/Notifications';
 import { showTournamentListModal } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setupTrisCardListener, setTrisFriendsManager } from './lib/tris-ui';
-import { setupPongCardListener } from './lib/pong-ui';
 import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
 import { initCardHoverEffect } from './lib/card';

@@ -5,7 +5,7 @@ import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
 import { setupTrisCardListener } from './lib/tris-ui';
-import { setupPongCardListener } from './lib/pong-ui';
+import { setupPongCardListener } from './components/pong/PongMenù.ts';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -105,7 +105,7 @@ const routes: Record<string, RouteConfig> = {
       const el = document.getElementById('main-content');
       if (!el) return;
       try {
-        const mod = await import('./components/pong/PongPage.ts');
+        const mod = await import('./components/pong/PongMenù.ts');
         await mod.renderPongPage(el);
       } catch (err) {
         console.error('Failed to render Pong page:', err);
