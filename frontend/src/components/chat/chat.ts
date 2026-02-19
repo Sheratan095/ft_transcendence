@@ -258,7 +258,7 @@ async function selectChat(chatId: string) {
         if (!pongBtn) {
           pongBtn = document.createElement('button');
           pongBtn.id = 'chat-pong-btn';
-          pongBtn.className = 'w-8 h-8 flex items-center justify-center bg-accent-cyan hover:bg-accent-cyan/90 text-black rounded-md';
+          pongBtn.className = 'w-8 h-8 flex items-center justify-center bg-accent-blue hover:bg-accent-blue/90 text-black rounded-md';
           pongBtn.title = 'Invite to Pong';
           pongBtn.setAttribute('aria-label', 'Pong invite');
           pongBtn.innerHTML = `
