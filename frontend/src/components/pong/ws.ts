@@ -5,30 +5,16 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { getUserId } from '../../lib/auth';
+import * as modalHandlers from './modal';
 
 let ws: WebSocket | null = null;
 let currentUserId: string | null = null;
 let currentGameId: string | null = null;
 let playerSide: string | null = null;
 
-const listeners: Array<(event: string, data: any) => void> = [];
 let paddleMoveInterval: any = null;
 
 // ============== WebSocket Connection ==============
-
-/**
- * Register a callback for WebSocket events
- */
-export function onPongEvent(cb: (event: string, data: any) => void) {
-	listeners.push(cb);
-}
-
-/**
- * Emit an event to all registered listeners
- */
-function emitEvent(event: string, data: any) {
-	listeners.forEach((cb) => cb(event, data));
-}
 
 /**
  * Send a message through WebSocket
@@ -61,7 +47,6 @@ export async function initPong(uid: string) {
 	}
 
 	ws.onopen = () => {
-		emitEvent('open', {});
 		showSuccessToast('Pong WebSocket connected', { duration: 1200 } as any);
 	};
 
@@ -80,15 +65,15 @@ export async function initPong(uid: string) {
 				currentGameId = null;
 				playerSide = null;
 			}
-			// Emit to listeners for UI handling
-			emitEvent(msg.event, msg.data || {});
-		} catch (err) {
+			// Route to event-specific handler
+			routeEvent(msg.event, msg.data || {});
+		}
+		catch (err) {
 			console.error('[WS] Failed to parse message', err);
 		}
 	};
 
 	ws.onclose = () => {
-		emitEvent('close', {});
 		ws = null;
 		currentGameId = null;
 		playerSide = null;
@@ -96,9 +81,51 @@ export async function initPong(uid: string) {
 
 	ws.onerror = (err) => {
 		console.error('[WS] Error', err);
-		emitEvent('error', err);
 		ws = null;
 	};
+}
+
+/**
+ * Route event to appropriate handler
+ */
+function routeEvent(event: string, data: any) {
+	console.log('[WS] Event:', event);
+
+	switch (event) {
+		case 'pong.customGameCreated':
+			modalHandlers.handleCustomGameCreated(data);
+			break;
+		case 'pong.customGameJoinSuccess':
+			modalHandlers.handleCustomGameJoinSuccess(data);
+			break;
+		case 'pong.playerJoinedCustomGame':
+			modalHandlers.handlePlayerJoinedCustomGame(data);
+			break;
+		case 'pong.customGameCanceled':
+			modalHandlers.handleCustomGameCanceled(data);
+			break;
+		case 'pong.gameStarted':
+			modalHandlers.handleGameStarted(data);
+			break;
+		case 'pong.gameState':
+			modalHandlers.handleGameState(data);
+			break;
+		case 'pong.gameEnded':
+			modalHandlers.handleGameEnded(data);
+			break;
+		case 'pong.playerQuitCustomGameInLobby':
+			modalHandlers.handlePlayerQuitCustomGameInLobby(data);
+			break;
+		case 'pong.matchedInRandomGame':
+			modalHandlers.handleMatchedInRandomGame(data);
+			break;
+		case 'pong.invalidMove':
+			modalHandlers.handleInvalidMove(data);
+			break;
+		case 'error':
+			modalHandlers.handleError(data);
+			break;
+	}
 }
 
 /**

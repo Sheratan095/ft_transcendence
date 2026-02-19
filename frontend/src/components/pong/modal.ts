@@ -5,14 +5,14 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { initPong, onPongEvent, closePong, startMatchmaking } from './ws';
+import { initPong, closePong, startMatchmaking } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import type { PongModeType } from '../../lib/pong-mode';
 import { isLoggedInClient } from '../../lib/token';
+
 let currentGameInstance: PongGame | null = null;
 let currentGameMode: 'online' | 'offline-1v1' | 'offline-ai' = 'online';
-let pongInitialized = false;
 
 // ============== Event Handlers ==============
 
@@ -25,7 +25,7 @@ function updatePongStatus(statusText: string)
 	statusEl.textContent = statusText;
 }
 
-function handleCustomGameCreated(data: any)
+export function handleCustomGameCreated(data: any)
 {
 	const { opponentUsername } = data;
 
@@ -34,7 +34,7 @@ function handleCustomGameCreated(data: any)
 }
 
 /* YOU JOINED A CUSTOM GAME*/
-function handleCustomGameJoinSuccess(data: any)
+export function handleCustomGameJoinSuccess(data: any)
 {
 	const { creatorUsername } = data;
 	updatePongStatus(`Joined game! Playing against ${creatorUsername}`);
@@ -42,19 +42,19 @@ function handleCustomGameJoinSuccess(data: any)
 }
 
 /* INVITED PLAYER JOINED YOUR GAME */
-function handlePlayerJoinedCustomGame(_data: any)
+export function handlePlayerJoinedCustomGame(_data: any)
 {
 	updatePongStatus('Opponent joined! Ready to start');
 	// showSuccessToast('Opponent joined!');
 }
 
-function handleCustomGameCanceled(_data: any)
+export function handleCustomGameCanceled(_data: any)
 {
 	updatePongStatus('Game was canceled');
 	showErrorToast('Game was canceled');
 }
 
-function handleGameStarted(data: any)
+export function handleGameStarted(data: any)
 {
 	const { yourSide, opponentUsername } = data;
 	const sideText = yourSide ? `Playing as ${yourSide}` : 'Game started';
@@ -62,12 +62,12 @@ function handleGameStarted(data: any)
 	showSuccessToast('Game started!');
 }
 
-function handleGameState(_data: any)
+export function handleGameState(_data: any)
 {
 	// Game state handled by renderer
 }
 
-function handleGameEnded(data: any)
+export function handleGameEnded(data: any)
 {
 	const { winner, quit, timedOut, reason } = data;
 	const user = getUser();
@@ -102,13 +102,13 @@ function handleGameEnded(data: any)
 	}
 }
 
-function handlePlayerQuitCustomGameInLobby(_data: any)
+export function handlePlayerQuitCustomGameInLobby(_data: any)
 {
 	updatePongStatus('Opponent quit');
 	// showErrorToast('Opponent quit');
 }
 
-function handleMatchedInRandomGame(data: any)
+export function handleMatchedInRandomGame(data: any)
 {
 	const { yourSide, opponentUsername } = data;
 	const sideText = yourSide || 'a paddle';
@@ -117,58 +117,16 @@ function handleMatchedInRandomGame(data: any)
 	// showSuccessToast(`Matched with ${opponentUsername}!`);
 }
 
-function handleInvalidMove(data: any)
+export function handleInvalidMove(data: any)
 {
 	updatePongStatus(`Invalid move: ${data.message}`);
 	// showErrorToast(`Invalid move: ${data.message}`);
 }
 
-function handleError(data: any)
+export function handleError(data: any)
 {
 	updatePongStatus(`Error: ${data.message}`);
 	// showErrorToast(`Error: ${data.message}`);
-}
-
-function handlePongEvent(event: string, data: any)
-{
-	console.log('[Modal] Pong event:', event);
-
-	switch (event)
-	{
-		case 'pong.customGameCreated':
-			handleCustomGameCreated(data);
-			break;
-		case 'pong.customGameJoinSuccess':
-			handleCustomGameJoinSuccess(data);
-			break;
-		case 'pong.playerJoinedCustomGame':
-			handlePlayerJoinedCustomGame(data);
-			break;
-		case 'pong.customGameCanceled':
-			handleCustomGameCanceled(data);
-			break;
-		case 'pong.gameStarted':
-			handleGameStarted(data);
-			break;
-		case 'pong.gameState':
-			handleGameState(data);
-			break;
-		case 'pong.gameEnded':
-			handleGameEnded(data);
-			break;
-		case 'pong.playerQuitCustomGameInLobby':
-			handlePlayerQuitCustomGameInLobby(data);
-			break;
-		case 'pong.matchedInRandomGame':
-			handleMatchedInRandomGame(data);
-			break;
-		case 'pong.invalidMove':
-			handleInvalidMove(data);
-			break;
-		case 'error':
-			handleError(data);
-			break;
-	}
 }
 
 // ============== Modal Control ==============
@@ -224,12 +182,6 @@ export async function openPongModal(mode: PongModeType = 'online')
 				return;
 			}
 			await initPong(userId);
-
-			if (!pongInitialized)
-			{
-				onPongEvent(handlePongEvent);
-				pongInitialized = true;
-			}
 		}
 
 		const canvas = document.getElementById('pong-canvas') as HTMLCanvasElement | null;

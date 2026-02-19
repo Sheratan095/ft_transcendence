@@ -6,7 +6,6 @@
 // WebSocket & Commands
 export {
 	initPong,
-	onPongEvent,
 	closePong,
 	isPongConnected,
 	getCurrentGameId,
