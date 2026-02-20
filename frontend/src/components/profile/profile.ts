@@ -1,5 +1,4 @@
 import type { User } from '../../lib/auth';
-import { initChat } from '../chat/chat';
 
 export async function attachUserOptions() {
 	const userOptions = document.getElementById('user-options') as HTMLElement | null;
@@ -17,11 +16,14 @@ export async function attachUserOptions() {
 	const usernameEl = userOptions.querySelector('#topbar-username') as HTMLElement | null;
 	
 	if (avatar) {
-		avatar.src = user.avatarUrl
-			? (user.avatarUrl.startsWith('http') || user.avatarUrl.startsWith('/api') ? user.avatarUrl : `/api${user.avatarUrl}`)
-			: '/assets/placeholder-avatar.jpg';
+		if (user.avatarUrl) {
+			const src = user.avatarUrl.startsWith('/api') || user.avatarUrl.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl}`;
+			avatar.src = src;
+		} else {
+			avatar.src = '/assets/placeholder-avatar.jpg';
+		}
+		avatar.onerror = () => { avatar.src = '/assets/placeholder-avatar.jpg'; };
 	}
-	if (usernameEl) {
+	if (usernameEl)
 		usernameEl.textContent = user.username || 'Unknown User';
-	}
 }

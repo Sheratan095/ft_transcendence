@@ -52,7 +52,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
   if (avatar)
       avatar.src = user.avatarUrl ? `/api${user.avatarUrl}` : '/assets/placeholder-avatar.jpg';
 
-  // Avatar upload handler
+  // Avatar upload handlers
   const avatarInput = cardEl.querySelector('#input-avatar') as HTMLInputElement;
   if (avatarInput && avatar) {
     avatarInput.addEventListener('change', async () => {
