@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { closePong, startMatchmaking, setReady, getCurrentGameId, getPlayerSide } from './ws';
+import { closePong, startMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
@@ -103,6 +103,22 @@ export function handleGameStarted(data: any)
 		currentGameInstance.gameManager.setPlayerNames(left, right);
 		currentGameInstance.updateScorebarNames();
 	}
+
+	// Hide ready button and show main button with "Quit" text
+	const modal = document.getElementById('pong-modal');
+	if (modal)
+	{
+		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+		const mainBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		
+		if (readyBtn)
+			readyBtn.classList.add('hidden');
+		if (mainBtn)
+		{
+			mainBtn.textContent = 'Quit';
+			mainBtn.classList.remove('hidden');
+		}
+	}
 }
 
 export function handleGameState(data: any)
@@ -121,7 +137,7 @@ export function handleGameEnded(data: any)
 	let message = '';
 
 	if (quit) {
-		message = 'Opponent quit';
+		message = 'Opponent quit, you win!';
 	}
 	else if (timedOut) {
 		message = 'Connection timeout';
@@ -138,15 +154,15 @@ export function handleGameEnded(data: any)
 
 	updatePongStatus(message);
 
-	if (quit || timedOut) {
-		showErrorToast(message);
-	}
-	else if (winner === user?.id) {
-		showSuccessToast(message);
-	}
-	else {
-		showErrorToast(message);
-	}
+	// if (quit || timedOut) {
+	// 	showErrorToast(message);
+	// }
+	// else if (winner === user?.id) {
+	// 	showSuccessToast(message);
+	// }
+	// else {
+	// 	showErrorToast(message);
+	// }
 
 	// Update start button to 'Play Again'
 	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
@@ -229,33 +245,6 @@ export function handlePlayerReadyStatus(data: any)
 		// Update opponent's ready status in GameManager
 		currentGameInstance.gameManager.setPlayerReadyStatus(opponentSide as 'left' | 'right', readyStatus);
 	}
-}
-
-function updateReadyIndicators()
-{
-	if (!currentGameInstance)
-		return;
-
-	// This will be called when opponent's ready status changes
-	// The ready indicators are managed in the game state
-	const leftReady = document.getElementById('pong-left-ready') as HTMLElement | null;
-	const rightReady = document.getElementById('pong-right-ready') as HTMLElement | null;
-	
-	if (!leftReady || !rightReady)
-		return;
-	
-	console.log('[Pong] Updating ready indicators - Left:', currentGameInstance.gameManager.playerLeftReady, 'Right:', currentGameInstance.gameManager.playerRightReady);
-	
-	// Update based on GameManager state
-	if (currentGameInstance.gameManager.playerLeftReady)
-		leftReady.classList.remove('hidden');
-	else
-		leftReady.classList.add('hidden');
-
-	if (currentGameInstance.gameManager.playerRightReady)
-		rightReady.classList.remove('hidden');
-	else
-		rightReady.classList.add('hidden');
 }
 
 // ============== Modal Control ==============
@@ -360,6 +349,19 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 		{
 			if (newStartBtn.textContent === 'Restart' || newStartBtn.textContent === 'Play Again') {
 				openPongModal(mode);
+				return;
+			}
+
+			// Quit during active game
+			if (newStartBtn.textContent === 'Quit')
+			{
+				const gameId = getCurrentGameId();
+				if (gameId)
+				{
+					quitGame(gameId);
+					closePongModal();
+					// showSuccessToast('You quit the game');
+				}
 				return;
 			}
 
@@ -588,7 +590,11 @@ export function closePongModal()
 	}
 
 	if (currentGameMode === 'online')
-		closePong();
+	{
+		const gameId = getCurrentGameId();
+		if (gameId)
+			quitGame(gameId);
+	}
 }
 
 /**
