@@ -68,5 +68,14 @@ else
   cp -f "$FRONTEND_CERT_DIR/key.pem" "$BACKEND_CERT_DIR/"
 fi
 
+if command -v docker >/dev/null 2>&1; then
+  echo "Cleaning Docker: stopping/removing containers and pruning system..."
+  docker stop $(docker ps -aq) 2>/dev/null || true
+  docker rm $(docker ps -aq) 2>/dev/null || true
+  docker system prune -a --volumes -f || true
+else
+  echo "Warning: docker not found in PATH; skipping Docker cleanup." >&2
+fi
+
 echo "Running: docker compose up $*"
 docker compose up "$@"
