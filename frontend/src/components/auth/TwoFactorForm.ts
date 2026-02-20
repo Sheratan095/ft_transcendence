@@ -1,5 +1,6 @@
 import { SaveCurrentUserProfile } from '../../lib/auth';
 import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
+import { goToRoute } from '../../spa';
 
 export interface TwoFactorFormCallbacks
 {
@@ -137,7 +138,7 @@ export function attach2FA(userId, callbacks?: TwoFactorFormCallbacks): void
 					localStorage.setItem('userId', body.user.id);
 				if (body && body.user && body.user.id)
 					await SaveCurrentUserProfile(body.user.id);
-				window.location.href = '/profile';
+			goToRoute('/profile');
 				return;
 			}
 			else

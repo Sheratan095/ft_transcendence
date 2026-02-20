@@ -133,7 +133,7 @@ function attachPongCardListener()
 	pongCard.addEventListener('click', (e) =>
 	{
 		e.preventDefault();
-		window.location.href = '/pong';
+		goToRoute('/pong');
 	});
 }
 
@@ -165,6 +165,6 @@ function attachTrisCardListener() {
 
     e.preventDefault();
     console.log('Tris card clicked - navigating to /tris');
-    window.location.href = '/tris';
+    goToRoute('/tris');
   });
 }

@@ -2,6 +2,7 @@ import { createErrorContainer, showError, showSuccess, showLoading, hideError } 
 import { attachRegister } from './RegisterForm';
 import { SaveCurrentUserProfile } from '../../lib/auth';
 import { attach2FA } from './TwoFactorForm';
+import { goToRoute } from '../../spa';
 
 export interface LoginFormCallbacks {
 	onRegisterClick?: () => void;
@@ -78,7 +79,7 @@ export function attachLogin(): void {
 				await SaveCurrentUserProfile(body.user.id);
 
 			showSuccess(errorEl, 'Signed in successfully.');
-			setTimeout(() => window.location.href = '/profile', 400);
+			goToRoute('/profile');
 		}
 		catch (err) {
 			showError(errorEl, (err as Error).message || 'Login failed');

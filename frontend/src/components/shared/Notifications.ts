@@ -3,9 +3,13 @@ import { FriendsManager } from '../profile/FriendsManager';
 import { openTrisModalAndJoinGame } from '../../lib/tris-ui';
 import { openPongModal } from '../pong/modal';
 import { joinCustomGame } from '../pong/ws';
+import { goToRoute } from '../../spa';
 
 let notifSocket: WebSocket | null = null;
 let friendsManager: FriendsManager | null = null;
+let connectionAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000; // 3 seconds
 
 // Callback registry for relationship events
 type RelationshipEventCallback = (event: { type: string; userId: string; status: string }) => void;
@@ -40,7 +44,7 @@ export function connectNotificationsWebSocket() {
     return;
   }
 
-  if (notifSocket && notifSocket.readyState === WebSocket.OPEN) {
+  if (notifSocket) {
     console.log('Notifications WebSocket already connected');
     return;
   };
@@ -51,6 +55,7 @@ export function connectNotificationsWebSocket() {
 
   notifSocket.addEventListener('open', () => {
     console.log('Notifications WebSocket connected');
+    connectionAttempts = 0; // Reset attempt counter on successful connection
     showInfoToast('Connected to notifications', { duration: 2000 });
   });
 
@@ -65,8 +70,19 @@ export function connectNotificationsWebSocket() {
 
   notifSocket.addEventListener('close', () => {
     console.log('Notifications WebSocket closed');
-    showWarningToast('Disconnected from notifications', { duration: 2000 });
     notifSocket = null;
+    
+    // Only attempt to reconnect if we haven't exceeded max attempts
+    // and it wasn't a manual disconnect
+    if (connectionAttempts < MAX_RECONNECT_ATTEMPTS) {
+      connectionAttempts++;
+      console.log(`Attempting to reconnect (attempt ${connectionAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+      setTimeout(() => {
+        connectNotificationsWebSocket();
+      }, RECONNECT_DELAY);
+    } else {
+      showWarningToast('Disconnected from notifications', { duration: 2000 });
+    }
   });
 
   notifSocket.addEventListener('error', (error) => {
@@ -76,11 +92,16 @@ export function connectNotificationsWebSocket() {
   });
 }
 
+export function isNotificationsWebSocketConnected(): boolean {
+  return notifSocket !== null && notifSocket.readyState === WebSocket.OPEN;
+}
+
 export function disconnectNotificationsWebSocket() 
 {
   if (!notifSocket)
 	return;
   console.log('Disconnecting from notifications WebSocket');
+  connectionAttempts = 0; // Reset attempts on manual disconnect
   notifSocket.close();
   notifSocket = null;
 }
@@ -158,7 +179,7 @@ function handleNotificationEvent(data: any) {
 													const params = new URLSearchParams(window.location.search);
 													const id = params.get('id');
 													if (id === userId) {
-														window.location.href = '/profile?id=' + userId; // force full reload to sync
+														goToRoute('/profile?id=' + userId); // Refresh profile via SPA routing
 													}
 												}
 											} catch (err) {
@@ -200,7 +221,7 @@ function handleNotificationEvent(data: any) {
 												const id = params.get('id');
 												if (id === userId) {
 													// Re-render the profile route to reflect the rejection
-													window.location.href = '/profile?id=' + userId; // Force reload to update profile state
+													goToRoute('/profile?id=' + userId); // Update profile via SPA routing
 												}
 											}
 										} catch (err) {
