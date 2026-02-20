@@ -18,6 +18,8 @@
   "site.statistics": "Statistics",
   "site.trend": "Trend",
   "site.recent": "Recent Matches",
+  "site.play-pong": "Play Pong",
+  "site.play-tris": "Play Tris",
   "chat.load-more": "Load More Messages",
   "chat.leave": "Leave group",
   "chat.send": "Send",

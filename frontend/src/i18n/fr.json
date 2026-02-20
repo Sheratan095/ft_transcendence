@@ -11,6 +11,8 @@
   "site.documentation": "./Documentation",
   "site.subject": "./Sujet",
   "site.login": "./Login",
+  "site.play-pong": "Jouer au Pong",
+  "site.play-tris": "Jouer au Tris",
   "search.button": "Rechercher",
   "search.placeholder": "Rechercher des utilisateurs...",
   "site.sign-in": "Avez-vous déjà un compte ?",
