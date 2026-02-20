@@ -255,16 +255,14 @@
 					hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-90 hover:brightness-105 transition-all duration-300">
 					<form id="2fa-form" novalidate class="flex flex-col gap-4 p-6 sm:max-w-[30rem] mx-auto">
 					
-					<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white">
-					Two-Factor Auth
+					<h1 class="text-3xl font-bold text-left mb-2 text-black dark:text-white" data-i18n="auth.2fa.title">
 					</h1>
 
-					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left break-words">
-						Enter the 6-digit code sent you by email to complete authentication.
+					<p class="text-xl text-neutral-600 dark:text-neutral-400 mb-4 text-left break-words" data-i18n="auth.2fa.desc">
 					</p>
 
 					<div class="flex flex-col w-full">
-					<label class="text-sm text-neutral-700 dark:text-neutral-300">Verification Code</label>
+					<label class="text-sm text-neutral-700 dark:text-neutral-300" data-i18n="auth.2fa.codeLabel">Verification Code</label>
 					<div class="flex justify-center gap-x-2 py-2" data-pin-input>
 						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="0" aria-label="Digit 1" class="otp-tile" />
 						<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" data-index="1" aria-label="Digit 2" class="otp-tile" />
@@ -276,14 +274,14 @@
 					<!-- Hidden single input to enable OS-level one-time-code autofill on mobile -->
 					<input id="2fa-otp-hidden" autocomplete="one-time-code" inputmode="numeric" type="text" class="sr-only" aria-hidden="true" />
 
-					<div id="2fa-error" class="hidden text-red-400 text-sm">Invalid code. Please try again.</div>
+					<div id="2fa-error" class="hidden text-red-400 text-sm" data-i18n="auth.2fa.invalid">Invalid code. Please try again.</div>
 					</div>
 
 					<button
 					type="submit"
 					class="mt-4 w-full rounded-md bg-[#ff6b35] dark:bg-[#0dff66] px-4 py-2
 						font-bold text-white dark:text-black hover:brightness-105 dark:hover:brightness-90 transition">
-					Log in
+					<span data-i18n="auth.2fa.submit"></span>
 					</button>
 				</form>
 				</div>
