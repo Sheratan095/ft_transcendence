@@ -94,8 +94,6 @@ document.addEventListener('change', (e) => {
   const v = target.value;
   setLocale(v);
   try { setLocaleInStorage && setLocaleInStorage(v); } catch {}
-  // Expose hydrate function before reload
-  // const hydrateRoot = (window as any).__hydrateRoot;
   const hydrateAll = (window as any).__hydrateAll;
   if (hydrateAll) hydrateAll();
   // reload to ensure all templates/renderers pick up the new locale

@@ -5,6 +5,7 @@ import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
 import { setupPongCardListener, setupTrisCardListener } from './lib/slideshow';
+import { initSlideshow } from './lib/slideshow';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -20,6 +21,7 @@ const routes: Record<string, RouteConfig> = {
       el.innerHTML = '';
       const clone = template.content.cloneNode(true);
       el.appendChild(clone);
+      initSlideshow();
       initCardHoverEffect();
       setupTrisCardListener();
       setupPongCardListener();
