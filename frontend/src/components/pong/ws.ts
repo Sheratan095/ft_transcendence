@@ -7,7 +7,7 @@ import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { getUserId, isLoggedInClient } from '../../lib/auth';
 import * as modalHandlers from './modal';
 
-let ws: WebSocket | null = null;
+let pongWs: WebSocket | null = null;
 let currentUserId: string | null = null;
 let currentGameId: string | null = null;
 let playerSide: string | null = null;
@@ -21,10 +21,10 @@ let paddleMoveInterval: any = null;
  */
 export function sendPongMessage(event: string, data: any = {}): boolean
 {
-	if (ws && ws.readyState === WebSocket.OPEN)
+	if (pongWs && pongWs.readyState === WebSocket.OPEN)
 	{
 		const msg = JSON.stringify({ event, data });
-		ws.send(msg);
+		pongWs.send(msg);
 		return (true);
 	}
 
@@ -41,23 +41,24 @@ export async function initPong(uid: string)
 		throw new Error('No user id');
 	currentUserId = uid;
 
-	if (ws && ws.readyState === WebSocket.OPEN)
+	if (pongWs && pongWs.readyState === WebSocket.OPEN)
 		return;
 
 	const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws/pong`;
 	try {
-		ws = new WebSocket(wsUrl);
-	} catch (err) {
+		pongWs = new WebSocket(wsUrl);
+	}
+	catch (err) {
 		console.error('[WS] Failed to create WebSocket', err);
 		showErrorToast('Failed to connect to Pong');
 		return;
 	}
 
-	ws.onopen = () => {
+	pongWs.onopen = () => {
 		showSuccessToast('Pong WebSocket connected', { duration: 1200 } as any);
 	};
 
-	ws.onmessage = (ev) => {
+	pongWs.onmessage = (ev) => {
 		try {
 			const msg = JSON.parse(ev.data);
 			// Update game tracking for paddle moves
@@ -80,15 +81,15 @@ export async function initPong(uid: string)
 		}
 	};
 
-	ws.onclose = () => {
-		ws = null;
+	pongWs.onclose = () => {
+		pongWs = null;
 		currentGameId = null;
 		playerSide = null;
 	};
 
-	ws.onerror = (err) => {
+	pongWs.onerror = (err) => {
 		console.error('[WS] Error', err);
-		ws = null;
+		pongWs = null;
 	};
 }
 
@@ -140,9 +141,9 @@ function routeEvent(event: string, data: any)
  * Close WebSocket connection
  */
 export function closePong() {
-	if (ws) {
-		ws.close();
-		ws = null;
+	if (pongWs) {
+		pongWs.close();
+		pongWs = null;
 	}
 	currentUserId = null;
 	currentGameId = null;
@@ -153,7 +154,7 @@ export function closePong() {
  * Check if WebSocket is connected
  */
 export function isPongConnected(): boolean {
-	return ws !== null && ws.readyState === WebSocket.OPEN;
+	return pongWs !== null && pongWs.readyState === WebSocket.OPEN;
 }
 
 /**

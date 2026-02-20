@@ -1,10 +1,11 @@
-import { isLoggedInClient } from './lib/auth';
+import { isLoggedInClient, getUserId } from './lib/auth';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/MainProfileCard';
 import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/profile/SearchProfileCard';
 import { initCardHoverEffect } from './lib/card';
 import { setupPongCardListener, setupTrisCardListener } from './lib/slideshow';
+import { initPong } from './components/pong/ws';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -100,6 +101,7 @@ const routes: Record<string, RouteConfig> = {
       try {
         const mod = await import('./components/pong/PongMenù.ts');
         const isLoggedIn = isLoggedInClient();
+        initPong(getUserId() as string);
         await mod.renderPongPage(el, isLoggedIn);
       } catch (err) {
         console.error('Failed to render Pong page:', err);
