@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { initPong, closePong, startMatchmaking } from './ws';
+import { closePong, startMatchmaking } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';

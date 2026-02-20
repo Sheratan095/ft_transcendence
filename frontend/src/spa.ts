@@ -103,7 +103,8 @@ const routes: Record<string, RouteConfig> = {
       try {
         const mod = await import('./components/pong/PongMenù.ts');
         const isLoggedIn = isLoggedInClient();
-        await initPong(getUserId() as string);
+        if (isLoggedIn) // connect to WS just if the user is logged in
+          await initPong(getUserId() as string);
         await mod.renderPongPage(el, isLoggedIn);
       } catch (err) {
         console.error('Failed to render Pong page:', err);

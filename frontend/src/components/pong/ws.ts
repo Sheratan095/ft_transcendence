@@ -3,7 +3,7 @@
  * Handles WebSocket lifecycle, message routing, and game commands
  */
 
-import { showErrorToast, showSuccessToast } from '../shared/Toast';
+import { showErrorToast, showInfoToast, showSuccessToast } from '../shared/Toast';
 import { getUserId, isLoggedInClient } from '../../lib/auth';
 import * as modalHandlers from './modal';
 
@@ -45,8 +45,7 @@ export function sendPongMessage(event: string, data: any = {}): boolean
  * Initialize WebSocket connection (matches Chat service pattern)
  */
 export function initPong(uid: string): Promise<WebSocket> {
-	if (!uid)
-		throw new Error('No user id');
+
 	currentUserId = uid;
 
 	// Return existing connection if already open
@@ -62,7 +61,7 @@ export function initPong(uid: string): Promise<WebSocket> {
 	// Set flag to indicate connection is starting
 	isConnecting = true;
 
-	const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws/pong`;
+	const wsUrl = '/pong/ws';
 
 	connectionPromise = new Promise((resolve, reject) => {
 		try {
@@ -70,7 +69,7 @@ export function initPong(uid: string): Promise<WebSocket> {
 			pongWs = socket;
 
 			socket.onopen = () => {
-				showSuccessToast('Pong WebSocket connected', { duration: 1200 } as any);
+				showInfoToast('Connected to Pong', { duration: 1200 } as any);
 				isConnecting = false;
 				reconnectAttempts = 0; // Reset on successful connection
 				connectionPromise = null;
