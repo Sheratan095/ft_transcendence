@@ -11,6 +11,7 @@ import { initCardHoverEffect } from '../../lib/card';
 import { getUserId } from '../../lib/token';
 import { attachUserOptions } from './profile';
 import { t } from '../../lib/intlayer';
+import { showErrorToast } from '../shared';
 
 export async function renderProfileCard(container: HTMLElement | null) {
   if (!container) {
@@ -99,7 +100,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
       input.type = 'text';
       input.value = currentUsername;
       // Preserve the flex sizing from the h1 to avoid layout shifts
-      input.className = 'flex-1 min-w-0 sm:text-3xl md:text-4xl tracking-tight text-accent-orange dark:text-accent-green bg-transparent border-b-2 border-accent-orange dark:border-accent-green focus:outline-none overflow-hidden';
+      input.className = 'flex-1 min-w-0 sm:text-3xl md:text-4xl tracking-tight text-accent-orange text-transform:lowercase dark:text-accent-green bg-transparent border-b-2 border-accent-orange dark:border-accent-green focus:outline-none overflow-hidden';
       // Ensure input fills available space without causing parent to grow
       (input.style as any).boxSizing = 'border-box';
       (input.style as any).width = '100%';
@@ -115,17 +116,36 @@ export async function renderProfileCard(container: HTMLElement | null) {
       // Handle Enter key
       const handleKeyDown = async (e: KeyboardEvent) => {
         if (e.key === 'Enter') {
-          const newUsername = input.value.trim();
+          const newUsername = input.value.trim().toLocaleLowerCase();
           
           if (!newUsername) {
-            alert('Username cannot be empty');
+            showErrorToast('Username cannot be empty', { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);
             return;
           }
           
-          if (newUsername === currentUsername) {
+          // Validate username length (2-30 characters)
+          if (newUsername.length < 2 || newUsername.length > 20) {
+            showErrorToast('Username must be between 2 and 30 characters long', { duration: 4000, position: 'top-right' });
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          // Validate username format (letters, numbers, _, .)
+          if (!/^[a-zA-Z0-9_.]+$/.test(newUsername)) {
+            showErrorToast('Username can only contain letters, numbers, underscores, and periods', { duration: 4000, position: 'top-right' });
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          if (newUsername === currentUsername)
+          {
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);
@@ -140,7 +160,15 @@ export async function renderProfileCard(container: HTMLElement | null) {
               body: JSON.stringify({ newUsername }),
             });
             
-            if (!res.ok) throw new Error(`Username update failed: ${res.status}`);
+            if (!res.ok)
+            {
+              if (res.status === 429)
+                showErrorToast('Username cannot contain reserved words.', { duration: 4000, position: 'top-right' });
+              else if (res.status === 400)
+                showErrorToast('Failed to update username.', { duration: 4000, position: 'top-right' });
+              else if (res.status === 409)
+                showErrorToast('Username already taken.', { duration: 4000, position: 'top-right' });
+            }
             
             const responseBody = await res.json();
             
