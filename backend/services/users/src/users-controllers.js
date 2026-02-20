@@ -165,6 +165,20 @@ export const	updateUser = async (req, reply) =>
 			}
 		}
 
+		if (newLanguage && (newLanguage.length < 2 || newLanguage.length > 20))
+		{
+			console.log('[USERS] UpdateUser error: Language must be between 2 and 20 characters');
+			return (reply.code(400).send({ error: 'Language must be between 2 and 20 characters' }));
+		}
+
+		// Check for reserved words in username
+		const	reservedWords = ['admin', 'root', 'user', 'null', 'undefined', 'system'];
+		reservedWords.forEach(element =>
+		{
+			if (newUsername && newUsername.toLowerCase().includes(element))
+				return (reply.code(429).send({ error: `Username cannot contain reserved word: ${element}` }));
+		});
+
 		const	updatedUser = await usersDb.updateUser(user.id, newUsername, newLanguage);
 
 		console.log(`[USERS] User ${user.id} updated`);
