@@ -29,6 +29,7 @@ export class GameManager {
   private userSymbol: string | null = null;
   private isUserTurn: boolean = false;
   private userReady: boolean = false;
+  private isPaused: boolean = true;
 
   private onGameEndedCallback?: (result: string) => void;
 
@@ -41,6 +42,10 @@ export class GameManager {
     this.initializeMode();
   }
 
+  public onGameEnded(callback: (result: string) => void) {
+    this.onGameEndedCallback = callback;
+  }
+
   private initializeMode(): void {
     this.renderer.updateStatus('Initializing mode...');
     
@@ -50,8 +55,8 @@ export class GameManager {
         this.playerOController = new LocalInputController();
         this.playerXController.onMove(m => this.handleLocalMove('X', m));
         this.playerOController.onMove(m => this.handleLocalMove('O', m));
-        this.renderer.updateStatus('Local 1v1: Your turn X');
-        this.renderer.toggleInteraction(true);
+        this.renderer.updateStatus('Press Start to play');
+        this.renderer.toggleInteraction(false);
         break;
 
       case TRIS_MODES.OFFLINE_AI:
@@ -59,8 +64,9 @@ export class GameManager {
         this.playerOController = new AIController(this.gameState, 'O');
         this.playerXController.onMove(m => this.handleLocalMove('X', m));
         this.playerOController.onMove(m => this.handleLocalMove('O', m));
-        this.renderer.updateStatus('Vs Bot: Your turn (X)');
-        this.renderer.toggleInteraction(true);
+        this.renderer.updateStatus('Press Start to play');
+		
+        this.renderer.toggleInteraction(false);
         break;
 
       case TRIS_MODES.ONLINE:
@@ -81,7 +87,7 @@ export class GameManager {
       return;
     }
 
-    if (this.gameState.currentPlayer !== player || this.gameState.isGameOver) {
+    if (this.isPaused || this.gameState.currentPlayer !== player || this.gameState.isGameOver) {
       return;
     }
 
@@ -152,6 +158,10 @@ export class GameManager {
     this.renderer.updateStatus(msg);
     if (this.gameState.winner === 'X') showSuccessToast(msg);
     else showErrorToast(msg);
+
+    if (this.onGameEndedCallback) {
+      this.onGameEndedCallback(msg);
+    }
   }
 
   private handleOnlineGameOver(data: any) {
@@ -165,13 +175,23 @@ export class GameManager {
 	this.renderer.updateStatus(message);
 	if (data.winner === this.userId) showSuccessToast(message);
 	else showErrorToast(message);
+
+    if (this.onGameEndedCallback) {
+      this.onGameEndedCallback(message);
+    }
   }
 
-  private updateStatusText() {
+  public updateStatusText() {
+    if (this.gameState.isGameOver) return;
+
     const turn = this.gameState.currentPlayer;
-    const text = (this.mode === TRIS_MODES.OFFLINE_AI && turn === 'O') 
-                 ? 'Bot is thinking...' 
-                 : `Player ${turn}'s turn`;
+    let text = "";
+
+    if (this.mode === TRIS_MODES.OFFLINE_AI) {
+      text = turn === "X" ? "You (X)'s turn" : "Ai (O) is thinking...";
+    } else {
+      text = turn === "X" ? "Player Left (X)" : "Player Right (O)";
+    }
     this.renderer.updateStatus(text);
   }
 
@@ -183,7 +203,18 @@ export class GameManager {
   public reset() {
     this.gameState = Physics.initGameState();
     this.renderer.renderBoard();
+    this.isPaused = true;
     this.initializeMode();
+  }
+
+  public pauseGame() {
+    this.isPaused = true;
+    this.renderer.toggleInteraction(false);
+  }
+
+  public resumeGame() {
+    this.isPaused = false;
+    this.renderer.toggleInteraction(true);
   }
 
   public destroy() {
