@@ -55,12 +55,8 @@ export class LocalInputController extends InputController
 		if (!this.enabled)
 			return (null);
 
-		const upPressed = this.upKeys.some(key => this.inputMap[key] || 
-						(key.toLowerCase() === "w" && this.inputMap["W"]) ||
-						(key.toLowerCase() === "s" && this.inputMap["S"]));
-		const downPressed = this.downKeys.some(key => this.inputMap[key] ||
-							(key.toLowerCase() === "w" && this.inputMap["W"]) ||
-							(key.toLowerCase() === "s" && this.inputMap["S"]));
+		const upPressed = this.upKeys.some(key => this.inputMap[key]);
+		const downPressed = this.downKeys.some(key => this.inputMap[key]);
 
 		if (upPressed)
 			return ("up");
@@ -232,31 +228,19 @@ export class AIController extends InputController
  */
 export class NetworkInputController extends InputController
 {
-	websocket: any;
+	sendFn: ((direction: string) => void) | null;
 	lastMovement: string | null;
 	serverGameState: any;
+	_hasNewState: boolean = false;
+	_sendInterval: any = null;
+	_currentDirection: string | null = null;
 
-	constructor(websocket: any)
+	constructor(sendFn: ((direction: string) => void) | null = null)
 	{
 		super();
-		this.websocket = websocket;
+		this.sendFn = sendFn;
 		this.lastMovement = null;
-		this.setupWebSocket();
-	}
-
-	setupWebSocket(): void
-	{
-		if (!this.websocket)
-			return;
-
-		this.websocket.on("opponent_move", (data) => {
-		this.lastMovement = data.movement; // 'up', 'down', or null
-		});
-
-		this.websocket.on("game_state", (data) => {
-		// Receive full game state from server
-		this.serverGameState = data;
-		});
+		this.serverGameState = null;
 	}
 
 	getMovement(): string | null
@@ -266,12 +250,37 @@ export class NetworkInputController extends InputController
 
 	/**
 	 * Send local player movement to server
+	 * Uses a 50ms interval to throttle sends while a direction is held
 	 * @param {string|null} movement - 'up', 'down', or null
 	 */
 	sendMovement(movement: string | null): void
 	{
-		if (this.websocket && this.websocket.connected)
-			this.websocket.emit("player_move", { movement });
+		if (!this.sendFn)
+			return;
+
+		// Only react to direction changes
+		if (movement === this._currentDirection)
+			return;
+
+		this._currentDirection = movement;
+
+		// Clear existing interval
+		if (this._sendInterval)
+		{
+			clearInterval(this._sendInterval);
+			this._sendInterval = null;
+		}
+
+		// If there's a direction, send immediately and start interval
+		if (movement)
+		{
+			this.sendFn(movement);
+			this._sendInterval = setInterval(() =>
+			{
+				if (this._currentDirection && this.sendFn)
+					this.sendFn(this._currentDirection);
+			}, 50);
+		}
 	}
 
 	/**
@@ -281,26 +290,41 @@ export class NetworkInputController extends InputController
 	setServerGameState(state: any): void
 	{
 		this.serverGameState = state;
+		this._hasNewState = true;
 	}
 
 	/**
 	 * Get server-authoritative game state (if available)
-	 * Consumes the state (clears it after reading) to prevent re-applying old data
+	 * Does NOT consume the state - use consumeNewState() after processing
 	 * @returns {object|null} Server game state
 	 */
 	getServerGameState(): any
 	{
-		const state = this.serverGameState;
-		this.serverGameState = null; // Clear after reading
-		return state;
+		return this.serverGameState;
+	}
+
+	/**
+	 * Check if a new server state has arrived since last consume
+	 */
+	hasNewServerState(): boolean
+	{
+		return this._hasNewState;
+	}
+
+	/**
+	 * Mark the current server state as consumed
+	 */
+	consumeNewState(): void
+	{
+		this._hasNewState = false;
 	}
 
 	destroy(): void
 	{
-		if (this.websocket)
+		if (this._sendInterval)
 		{
-			this.websocket.off("opponent_move");
-			this.websocket.off("game_state");
+			clearInterval(this._sendInterval);
+			this._sendInterval = null;
 		}
 	}
 }

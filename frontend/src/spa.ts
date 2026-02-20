@@ -1,4 +1,4 @@
-import { isLoggedInClient } from './lib/auth';
+import { isLoggedInClient, getUserId } from './lib/auth';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/MainProfileCard';
@@ -7,6 +7,7 @@ import { initCardHoverEffect } from './lib/card';
 import { setupPongCardListener, setupTrisCardListener } from './lib/slideshow';
 import { initSlideshow } from './lib/slideshow';
 import { loadTournaments } from './components/tournaments/TournamentsList';
+import { initPong } from './components/pong/ws.ts';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -103,6 +104,8 @@ const routes: Record<string, RouteConfig> = {
       try {
         const mod = await import('./components/pong/PongMenù.ts');
         const isLoggedIn = isLoggedInClient();
+        if (isLoggedIn) // connect to WS just if the user is logged in
+          await initPong(getUserId() as string);
         await mod.renderPongPage(el, isLoggedIn);
       } catch (err) {
         console.error('Failed to render Pong page:', err);

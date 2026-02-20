@@ -58,6 +58,7 @@ export class PongGame {
 	_fitCamera!: (width: number, depth: number) => any;
 	_groundPosition!: BABYLON.Vector3;
 	_targetOffset!: BABYLON.Vector3;
+	_resizeHandler: (() => void) | null = null;
 
 	constructor(canvasId: string, mode: string = GAME_MODES.LOCAL_VS_AI, config: any = {}) {
 		this.canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
@@ -156,8 +157,17 @@ export class PongGame {
 		const leftNameEl = document.getElementById('pong-left-name');
 		const rightNameEl = document.getElementById('pong-right-name');
 
-		if (leftNameEl) leftNameEl.textContent = names.left;
-		if (rightNameEl) rightNameEl.textContent = names.right;
+		// Update only the text span, not the ready icon
+		if (leftNameEl) {
+			const textSpan = leftNameEl.querySelector('span:first-child');
+			if (textSpan) textSpan.textContent = names.left;
+			else leftNameEl.textContent = names.left;
+		}
+		if (rightNameEl) {
+			const textSpan = rightNameEl.querySelector('span:last-child');
+			if (textSpan) textSpan.textContent = names.right;
+			else rightNameEl.textContent = names.right;
+		}
 	}
 
 	public updateScorebar(left: number, right: number) {
@@ -286,7 +296,7 @@ export class PongGame {
 	}
 
 	setupResize() {
-		window.addEventListener("resize", () => {
+		this._resizeHandler = () => {
 			this.engine?.resize();
 			if (this._fitCamera && this.scene && this.scene.activeCamera) {
 				const fit = this._fitCamera(this._fieldWidth, this._fieldDepth);
@@ -300,7 +310,8 @@ export class PongGame {
 					}
 				}
 			}
-		});
+		};
+		window.addEventListener("resize", this._resizeHandler);
 	}
 
 	updateOnlineState(serverState: any) {
@@ -310,12 +321,26 @@ export class PongGame {
 		}
 	}
 
+	resetState() {
+		this.gameManager.reset();
+		// Reset 3D mesh positions to center
+		this.ballMesh?.position.set(0, GAME_CONFIG.ballY, 0);
+		this.leftPaddleMesh?.position.set(WORLD_BOUNDS.minX, GAME_CONFIG.paddleY, 0);
+		this.rightPaddleMesh?.position.set(WORLD_BOUNDS.maxX, GAME_CONFIG.paddleY, 0);
+		// Reset scorebar
+		this.updateScorebar(0, 0);
+	}
+
 	changeMode(mode: string, config: any = {}) {
 		this.gameManager.changeMode(mode, config);
 	}
 
 	destroy() {
 		this.gameManager.destroy();
+		if (this._resizeHandler) {
+			window.removeEventListener("resize", this._resizeHandler);
+			this._resizeHandler = null;
+		}
 		this.engine?.dispose();
 	}
 }

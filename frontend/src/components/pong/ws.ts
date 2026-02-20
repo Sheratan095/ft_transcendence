@@ -3,16 +3,25 @@
  * Handles WebSocket lifecycle, message routing, and game commands
  */
 
-import { showErrorToast, showSuccessToast } from '../shared/Toast';
+import { showErrorToast, showInfoToast, showSuccessToast } from '../shared/Toast';
 import { getUserId, isLoggedInClient } from '../../lib/auth';
 import * as modalHandlers from './modal';
 
-let ws: WebSocket | null = null;
+let pongWs: WebSocket | null = null;
 let currentUserId: string | null = null;
 let currentGameId: string | null = null;
 let playerSide: string | null = null;
 
 let paddleMoveInterval: any = null;
+
+// WebSocket connection state management
+let isConnecting = false;
+let connectionPromise: Promise<WebSocket> | null = null;
+
+// Reconnection parameters
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000;
 
 // ============== WebSocket Connection ==============
 
@@ -21,75 +30,113 @@ let paddleMoveInterval: any = null;
  */
 export function sendPongMessage(event: string, data: any = {}): boolean
 {
-	if (ws && ws.readyState === WebSocket.OPEN)
+	if (pongWs && pongWs.readyState === WebSocket.OPEN)
 	{
 		const msg = JSON.stringify({ event, data });
-		ws.send(msg);
+		pongWs.send(msg);
 		return (true);
 	}
 
-	console.warn('[WS] Cannot send: not connected');
+	console.warn('[PONG WS] Cannot send: not connected');
 	return (false);
 }
 
 /**
- * Initialize WebSocket connection
+ * Initialize WebSocket connection (matches Chat service pattern)
  */
-export async function initPong(uid: string)
-{
-	if (!uid)
-		throw new Error('No user id');
+export function initPong(uid: string): Promise<WebSocket> {
+
 	currentUserId = uid;
 
-	if (ws && ws.readyState === WebSocket.OPEN)
-		return;
-
-	const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws/pong`;
-	try {
-		ws = new WebSocket(wsUrl);
-	} catch (err) {
-		console.error('[WS] Failed to create WebSocket', err);
-		showErrorToast('Failed to connect to Pong');
-		return;
+	// Return existing connection if already open
+	if (pongWs && pongWs.readyState === WebSocket.OPEN) {
+		return Promise.resolve(pongWs);
 	}
 
-	ws.onopen = () => {
-		showSuccessToast('Pong WebSocket connected', { duration: 1200 } as any);
-	};
+	// If connecting is in progress, return the existing promise to avoid multiple concurrent attempts
+	if (isConnecting && connectionPromise) {
+		return connectionPromise;
+	}
 
-	ws.onmessage = (ev) => {
+	// Set flag to indicate connection is starting
+	isConnecting = true;
+
+	const wsUrl = '/pong/ws';
+
+	connectionPromise = new Promise((resolve, reject) => {
 		try {
-			const msg = JSON.parse(ev.data);
-			// Update game tracking for paddle moves
-			if (msg.event === 'pong.matchedInRandomGame') {
-				currentGameId = msg.data.gameId;
-				playerSide = msg.data.yourSide;
-			} else if (msg.event === 'pong.customGameJoinSuccess' || msg.event === 'pong.customGameCreated') {
-				currentGameId = msg.data.gameId;
-			} else if (msg.event === 'pong.gameStarted') {
-				playerSide = msg.data.yourSide;
-			} else if (msg.event === 'pong.gameEnded' || msg.event === 'pong.customGameCanceled') {
+			const socket = new WebSocket(wsUrl);
+			pongWs = socket;
+
+			socket.onopen = () => {
+				showInfoToast('Connected to Pong', { duration: 1200 } as any);
+				isConnecting = false;
+				reconnectAttempts = 0; // Reset on successful connection
+				connectionPromise = null;
+				resolve(socket);
+			};
+
+			socket.onmessage = (ev) => {
+				try {
+					const msg = JSON.parse(ev.data);
+					// Update game tracking for paddle moves
+					if (msg.event === 'pong.matchedInRandomGame') {
+						currentGameId = msg.data.gameId;
+						playerSide = msg.data.yourSide;
+					} else if (msg.event === 'pong.customGameJoinSuccess' || msg.event === 'pong.customGameCreated') {
+						currentGameId = msg.data.gameId;
+					} else if (msg.event === 'pong.gameStarted') {
+						playerSide = msg.data.yourSide;
+					} else if (msg.event === 'pong.gameEnded' || msg.event === 'pong.customGameCanceled') {
+						currentGameId = null;
+						playerSide = null;
+					}
+					// Route to event-specific handler
+					routeEvent(msg.event, msg.data || {});
+				}
+				catch (err) {
+					console.error('[PONG WS] Failed to parse message', err);
+				}
+			};
+
+			socket.onerror = (event) => {
+				showErrorToast('Pong WebSocket error', { duration: 4000, position: 'top-right' });
+				isConnecting = false;
+				connectionPromise = null;
+				reject(event);
+			};
+
+			socket.onclose = () => {
+				showErrorToast('⚠️ Pong disconnected', { duration: 4000, position: 'top-right' });
+				isConnecting = false;
+				connectionPromise = null;
+				pongWs = null;
 				currentGameId = null;
 				playerSide = null;
-			}
-			// Route to event-specific handler
-			routeEvent(msg.event, msg.data || {});
-		}
-		catch (err) {
-			console.error('[WS] Failed to parse message', err);
-		}
-	};
 
-	ws.onclose = () => {
-		ws = null;
-		currentGameId = null;
-		playerSide = null;
-	};
+				// Attempt to reconnect with exponential backoff
+				if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+					reconnectAttempts++;
+					const delayMs = RECONNECT_DELAY * Math.pow(1.5, reconnectAttempts - 1);
+					setTimeout(() => {
+						if (currentUserId) {
+							initPong(currentUserId).catch(err => console.error('[PONG WS] Reconnection failed:', err));
+						}
+					}, delayMs);
+				} else {
+					console.error('[PONG WS] Max reconnection attempts reached');
+					showErrorToast('❌ Pong disconnected (could not reconnect)', { duration: 5000, position: 'top-right' });
+				}
+			};
+		} catch (error) {
+			console.error('[PONG WS] Connection initialization error:', error);
+			isConnecting = false;
+			connectionPromise = null;
+			reject(error);
+		}
+	});
 
-	ws.onerror = (err) => {
-		console.error('[WS] Error', err);
-		ws = null;
-	};
+	return connectionPromise;
 }
 
 /**
@@ -97,7 +144,7 @@ export async function initPong(uid: string)
  */
 function routeEvent(event: string, data: any)
 {
-	console.log('[WS] Event:', event);
+	console.log('[PONG WS] Event:', event);
 
 	switch (event) {
 		case 'pong.customGameCreated':
@@ -121,6 +168,9 @@ function routeEvent(event: string, data: any)
 		case 'pong.gameEnded':
 			modalHandlers.handleGameEnded(data);
 			break;
+		case 'pong.playerReadyStatus':
+			modalHandlers.handlePlayerReadyStatus(data);
+			break;
 		case 'pong.playerQuitCustomGameInLobby':
 			modalHandlers.handlePlayerQuitCustomGameInLobby(data);
 			break;
@@ -140,10 +190,17 @@ function routeEvent(event: string, data: any)
  * Close WebSocket connection
  */
 export function closePong() {
-	if (ws) {
-		ws.close();
-		ws = null;
+	// Prevent reconnection attempts when manually disconnecting
+	reconnectAttempts = MAX_RECONNECT_ATTEMPTS;
+	
+	if (pongWs) {
+		if (pongWs.readyState === WebSocket.OPEN) {
+			pongWs.close();
+		}
+		pongWs = null;
 	}
+	isConnecting = false;
+	connectionPromise = null;
 	currentUserId = null;
 	currentGameId = null;
 	playerSide = null;
@@ -153,7 +210,7 @@ export function closePong() {
  * Check if WebSocket is connected
  */
 export function isPongConnected(): boolean {
-	return ws !== null && ws.readyState === WebSocket.OPEN;
+	return pongWs !== null && pongWs.readyState === WebSocket.OPEN;
 }
 
 /**
@@ -189,11 +246,15 @@ export function leaveMatchmaking() {
  */
 export async function createCustomGame(otherId: string) {
 	if (!isPongConnected()) {
-
 		if (!isLoggedInClient())
 			throw new Error('Not logged in');
 
-		await initPong(getUserId() as string);
+		try {
+			await initPong(getUserId() as string);
+		} catch (err) {
+			console.error('[PONG WS] Failed to connect before creating custom game:', err);
+			throw err;
+		}
 	}
 	sendPongMessage('pong.createCustomGame', { otherId });
 }
