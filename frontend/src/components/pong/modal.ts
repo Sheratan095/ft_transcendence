@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { closePong, startMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame } from './ws';
+import { closePong, startMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame, sendPongMessage } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
@@ -512,7 +512,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 
 		let game: PongGame;
 		try {
-			game = new PongGame(canvas.id, gameMode,
+			const gameConfig: any =
 			{
 				playerNames:
 				{
@@ -521,7 +521,19 @@ export async function openPongModal(mode: PongModeType = 'online')
 				},
 				maxScore: 5,
 				aiDifficulty: 'medium'
-			});
+			};
+
+			if (mode === 'online')
+			{
+				gameConfig.sendFn = (direction: string) =>
+				{
+					const gameId = getCurrentGameId();
+					if (gameId)
+						sendPongMessage('pong.paddleMove', { gameId, direction });
+				};
+			}
+
+			game = new PongGame(canvas.id, gameMode, gameConfig);
 		} catch (err) {
 			console.error('[Modal] Failed to initialize PongGame:', err);
 			showErrorToast('Failed to initialize game renderer');

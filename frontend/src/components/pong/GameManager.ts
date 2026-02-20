@@ -104,17 +104,19 @@ export class GameManager
 
 			case GAME_MODES.ONLINE:
 				// Local player and network opponent
-				this.networkController = new NetworkInputController(this.config.websocket);
+				this.networkController = new NetworkInputController(this.config.sendFn || null);
 				
 				if (this.localPlayerId === "left")
 				{
-					this.leftInputController = new LocalInputController("ArrowUp", "ArrowDown");
+					this.leftInputController = new LocalInputController(["ArrowUp", "w", "W"], ["ArrowDown", "s", "S"]);
+					this.leftInputController.enabled = true;
 					this.rightInputController = this.networkController;
 				}
 				else
 				{
 					this.leftInputController = this.networkController;
-					this.rightInputController = new LocalInputController("ArrowUp", "ArrowDown");
+					this.rightInputController = new LocalInputController(["ArrowUp", "w", "W"], ["ArrowDown", "s", "S"]);
+					this.rightInputController.enabled = true;
 				}
 
 				break;
