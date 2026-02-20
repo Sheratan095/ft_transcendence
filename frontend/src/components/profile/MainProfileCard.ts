@@ -98,7 +98,14 @@ export async function renderProfileCard(container: HTMLElement | null) {
       const input = document.createElement('input');
       input.type = 'text';
       input.value = currentUsername;
-      input.className = 'text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green bg-transparent border-b-2 border-accent-orange dark:border-accent-green focus:outline-none';
+      // Preserve the flex sizing from the h1 to avoid layout shifts
+      input.className = 'flex-1 min-w-0 sm:text-3xl md:text-4xl tracking-tight text-accent-orange dark:text-accent-green bg-transparent border-b-2 border-accent-orange dark:border-accent-green focus:outline-none overflow-hidden';
+      // Ensure input fills available space without causing parent to grow
+      (input.style as any).boxSizing = 'border-box';
+      (input.style as any).width = '100%';
+      (input.style as any).whiteSpace = 'nowrap';
+      // Use a flex basis of 0 so the input doesn't force parent to expand
+      (input.style as any).flex = '1 1 0%';
       
       // Replace the h1 with input
       username.replaceWith(input);
