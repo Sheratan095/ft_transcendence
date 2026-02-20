@@ -124,7 +124,8 @@ export function handleGameEnded(data: any)
 
 	// Update start button to 'Play Again'
 	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
-	if (startBtn) {
+	if (startBtn)
+	{
 		startBtn.disabled = false;
 		startBtn.textContent = 'Play Again';
 		// Reset colors if needed (online mode doesn't switch to STOP normally but better safe)
@@ -221,7 +222,28 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 
 			if (mode === 'online')
 			{
-				startMatchmaking();
+				if (newStartBtn.textContent === 'Quit matchmaking')
+				{
+					// quitMatchmaking(); // TO DO
+					updatePongStatus('Online - Not in matchmaking');
+					// Reset button to 'Start Matchmaking'
+					newStartBtn.textContent = 'Start Matchmaking';
+
+					// Keep original colors for searching state
+					newStartBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+					newStartBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+				}
+				else
+				{
+					startMatchmaking();
+					updatePongStatus('Searching for opponent...');
+	
+					newStartBtn.textContent = 'Quit matchmaking';
+
+					// Reset colors to original
+					newStartBtn.classList.remove('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+					newStartBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+				}
 			}
 			else if (mode === 'offline-1v1' || mode === 'offline-ai')
 			{
@@ -331,7 +353,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 		if (status)
 		{
 			const modeNames: Record<string, string> = {
-				'online': 'Online - Waiting for opponent...',
+				'online': 'Online - Not in matchmaking',
 				'offline-1v1': 'Offline 1v1',
 				'offline-ai': 'Offline vs Ai'
 			};
@@ -343,7 +365,10 @@ export async function openPongModal(mode: PongModeType = 'online')
 		if (startBtn)
 		{
 			startBtn.disabled = false;
-			startBtn.textContent = 'Start';
+			if (mode === 'online')
+				startBtn.textContent = 'Start Matchmaking';
+			else
+				startBtn.textContent = 'Start';
 			// Ensure we reset to starting colors
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
