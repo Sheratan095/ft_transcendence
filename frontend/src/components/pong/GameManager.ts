@@ -26,6 +26,8 @@ export class GameManager
 	rightInputController: any;
 	networkController: any;
 	localPlayerId: string;
+	playerLeftReady: boolean;
+	playerRightReady: boolean;
 	onGoal?: (scorer: string, scores: any) => void;
 	onGameOver?: (winner: string) => void;
 	onBallActivate?: () => void;
@@ -68,6 +70,10 @@ export class GameManager
 		// For network mode
 		this.networkController = null;
 		this.localPlayerId = config.localPlayerId || "left";
+
+		// Ready status tracking for online mode
+		this.playerLeftReady = false;
+		this.playerRightReady = false;
 
 		// Initialize based on mode
 		this.initializeMode();
@@ -485,6 +491,43 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 	{
 		this.gameState.ball.active = true;
 		this.gameState.paused = false;
+	}
+
+	setPlayerReadyStatus(side: 'left' | 'right', ready: boolean): void
+	{
+		if (side === 'left')
+			this.playerLeftReady = ready;
+		else
+			this.playerRightReady = ready;
+		
+		console.log('[GameManager] Player ready status updated:', side, ready, 'Left:', this.playerLeftReady, 'Right:', this.playerRightReady);
+		
+		// Update UI indicators
+		this.updateReadyIndicators();
+	}
+
+	private updateReadyIndicators(): void
+	{
+		const leftReady = document.getElementById('pong-left-ready') as HTMLElement | null;
+		const rightReady = document.getElementById('pong-right-ready') as HTMLElement | null;
+		
+		console.log('[GameManager] Updating ready indicators - Left:', leftReady, 'Right:', rightReady);
+		
+		if (leftReady) {
+			console.log('[GameManager] Left ready:', this.playerLeftReady, 'Action:', this.playerLeftReady ? 'show' : 'hide');
+			if (this.playerLeftReady)
+				leftReady.classList.remove('hidden');
+			else
+				leftReady.classList.add('hidden');
+		}
+
+		if (rightReady) {
+			console.log('[GameManager] Right ready:', this.playerRightReady, 'Action:', this.playerRightReady ? 'show' : 'hide');
+			if (this.playerRightReady)
+				rightReady.classList.remove('hidden');
+			else
+				rightReady.classList.add('hidden');
+		}
 	}
 
 	destroy(): void

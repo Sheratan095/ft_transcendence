@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { closePong, startMatchmaking } from './ws';
+import { closePong, startMatchmaking, setReady, getCurrentGameId, getPlayerSide } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
@@ -44,6 +44,19 @@ export function handleCustomGameJoinSuccess(data: any)
 {
 	const { creatorUsername } = data;
 	updatePongStatus(`Joined game! Playing against ${creatorUsername}`);
+	
+	// Show the ready button and hide main button for custom games
+	const modal = document.getElementById('pong-modal');
+	if (modal)
+	{
+		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+		const mainBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		
+		if (readyBtn)
+			readyBtn.classList.remove('hidden');
+		if (mainBtn)
+			mainBtn.classList.add('hidden');
+	}
 	// showSuccessToast(`Joined game with ${creatorUsername}!`);
 }
 
@@ -51,6 +64,19 @@ export function handleCustomGameJoinSuccess(data: any)
 export function handlePlayerJoinedCustomGame(_data: any)
 {
 	updatePongStatus('Opponent joined! Ready to start');
+	
+	// Show the ready button and hide main button
+	const modal = document.getElementById('pong-modal');
+	if (modal)
+	{
+		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+		const mainBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		
+		if (readyBtn)
+			readyBtn.classList.remove('hidden');
+		if (mainBtn)
+			mainBtn.classList.add('hidden');
+	}
 	// showSuccessToast('Opponent joined!');
 }
 
@@ -158,6 +184,19 @@ export function handleMatchedInRandomGame(data: any)
 		}
 		currentGameInstance.updateScorebarNames();
 	}
+
+	// Show the ready button and hide the main button when matched
+	const modal = document.getElementById('pong-modal');
+	if (modal)
+	{
+		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+		const mainBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		
+		if (readyBtn)
+			readyBtn.classList.remove('hidden');
+		if (mainBtn)
+			mainBtn.classList.add('hidden');
+	}
 }
 
 export function handleInvalidMove(data: any)
@@ -170,6 +209,53 @@ export function handleError(data: any)
 {
 	updatePongStatus(`Error: ${data.message}`);
 	// showErrorToast(`Error: ${data.message}`);
+}
+
+export function handlePlayerReadyStatus(data: any)
+{
+	const { readyStatus } = data;
+	console.log('[Pong] Opponent ready status changed:', readyStatus);
+	
+	// Update scorebar to show opponent's ready status
+	if (currentGameInstance)
+	{
+		// The opponent changed their ready status
+		// Determine which side is the opponent
+		const playerSide = getPlayerSide();
+		const opponentSide = playerSide === 'left' ? 'right' : 'left';
+		
+		console.log('[Pong] Player side:', playerSide, 'Opponent side:', opponentSide, 'Ready:', readyStatus);
+		
+		// Update opponent's ready status in GameManager
+		currentGameInstance.gameManager.setPlayerReadyStatus(opponentSide as 'left' | 'right', readyStatus);
+	}
+}
+
+function updateReadyIndicators()
+{
+	if (!currentGameInstance)
+		return;
+
+	// This will be called when opponent's ready status changes
+	// The ready indicators are managed in the game state
+	const leftReady = document.getElementById('pong-left-ready') as HTMLElement | null;
+	const rightReady = document.getElementById('pong-right-ready') as HTMLElement | null;
+	
+	if (!leftReady || !rightReady)
+		return;
+	
+	console.log('[Pong] Updating ready indicators - Left:', currentGameInstance.gameManager.playerLeftReady, 'Right:', currentGameInstance.gameManager.playerRightReady);
+	
+	// Update based on GameManager state
+	if (currentGameInstance.gameManager.playerLeftReady)
+		leftReady.classList.remove('hidden');
+	else
+		leftReady.classList.add('hidden');
+
+	if (currentGameInstance.gameManager.playerRightReady)
+		rightReady.classList.remove('hidden');
+	else
+		rightReady.classList.add('hidden');
 }
 
 // ============== Modal Control ==============
@@ -206,6 +292,63 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 		newCloseBtn.addEventListener('click', closePongModal);
 	}
 
+	// Ready Button (online mode only)
+	const readyBtn = container.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+	if (readyBtn && mode === 'online')
+	{
+		const newReadyBtn = readyBtn.cloneNode(true) as HTMLButtonElement;
+		readyBtn.parentNode?.replaceChild(newReadyBtn, readyBtn);
+		
+		newReadyBtn.addEventListener('click', () =>
+		{
+			const gameId = getCurrentGameId();
+			if (!gameId)
+			{
+				console.warn('[Pong] No game ID available for ready button');
+				return;
+			}
+
+			const isReady = newReadyBtn.textContent?.includes('✓');
+			console.log('[Pong] Ready button clicked, current state:', isReady, 'gameId:', gameId);
+			
+			// Toggle ready status
+			if (isReady)
+			{
+				// Set not ready
+				console.log('[Pong] Setting not ready');
+				setReady(gameId, false);
+				newReadyBtn.textContent = '✗ Not Ready';
+				newReadyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+				newReadyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+				
+				// Update GameManager
+				if (currentGameInstance)
+				{
+					const playerSide = getPlayerSide();
+					if (playerSide)
+						currentGameInstance.gameManager.setPlayerReadyStatus(playerSide as 'left' | 'right', false);
+				}
+			}
+			else
+			{
+				// Set ready
+				console.log('[Pong] Setting ready');
+				setReady(gameId, true);
+				newReadyBtn.textContent = '✓ Ready';
+				newReadyBtn.classList.remove('dark:bg-red-600', 'bg-red-600');
+				newReadyBtn.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
+				
+				// Update GameManager
+				if (currentGameInstance)
+				{
+					const playerSide = getPlayerSide();
+					if (playerSide)
+						currentGameInstance.gameManager.setPlayerReadyStatus(playerSide as 'left' | 'right', true);
+				}
+			}
+		});
+	}
+
 	const startBtn = container.querySelector('#pong-btn') as HTMLButtonElement | null;
 	if (startBtn)
 	{
@@ -232,6 +375,11 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 					// Keep original colors for searching state
 					newStartBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 					newStartBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+					
+					// Hide ready button
+					const readyBtn = container.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+					if (readyBtn)
+						readyBtn.classList.add('hidden');
 				}
 				else
 				{
@@ -380,6 +528,31 @@ export async function openPongModal(mode: PongModeType = 'online')
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
 		}
+
+		// Reset ready button for online mode
+		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+		if (readyBtn)
+		{
+			if (mode === 'online')
+			{
+				readyBtn.textContent = '✗ Not Ready';
+				readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+				readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+				readyBtn.classList.add('hidden'); // Hidden until game is created
+			}
+			else
+			{
+				readyBtn.classList.add('hidden');
+			}
+		}
+
+		// Reset ready indicators in scorebar
+		const leftReady = document.getElementById('pong-left-ready') as HTMLElement | null;
+		const rightReady = document.getElementById('pong-right-ready') as HTMLElement | null;
+		if (leftReady)
+			leftReady.classList.add('hidden');
+		if (rightReady)
+			rightReady.classList.add('hidden');
 
 		attachButtonHandlers(modal, mode);
 	}

@@ -168,6 +168,9 @@ function routeEvent(event: string, data: any)
 		case 'pong.gameEnded':
 			modalHandlers.handleGameEnded(data);
 			break;
+		case 'pong.playerReadyStatus':
+			modalHandlers.handlePlayerReadyStatus(data);
+			break;
 		case 'pong.playerQuitCustomGameInLobby':
 			modalHandlers.handlePlayerQuitCustomGameInLobby(data);
 			break;

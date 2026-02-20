@@ -156,8 +156,17 @@ export class PongGame {
 		const leftNameEl = document.getElementById('pong-left-name');
 		const rightNameEl = document.getElementById('pong-right-name');
 
-		if (leftNameEl) leftNameEl.textContent = names.left;
-		if (rightNameEl) rightNameEl.textContent = names.right;
+		// Update only the text span, not the ready icon
+		if (leftNameEl) {
+			const textSpan = leftNameEl.querySelector('span:first-child');
+			if (textSpan) textSpan.textContent = names.left;
+			else leftNameEl.textContent = names.left;
+		}
+		if (rightNameEl) {
+			const textSpan = rightNameEl.querySelector('span:last-child');
+			if (textSpan) textSpan.textContent = names.right;
+			else rightNameEl.textContent = names.right;
+		}
 	}
 
 	public updateScorebar(left: number, right: number) {
