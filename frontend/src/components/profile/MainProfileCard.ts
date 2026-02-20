@@ -71,7 +71,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         if (body && body.avatarUrl) {
           avatar.src = `/api${body.avatarUrl}`;
           user.avatarUrl = body.avatarUrl;
-          SaveCurrentUserProfile(user.id); // Update localStorage with new avatar URL
+          await SaveCurrentUserProfile(user.id); // Update localStorage with new avatar URL
           const topbarAvatar = document.getElementById('topbar-avatar');
           if (topbarAvatar)
             topbarAvatar.setAttribute('src', `/api${body.avatarUrl}`);

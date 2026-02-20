@@ -480,7 +480,6 @@ export async function openPongModal(mode: PongModeType = 'online')
 
 		document.body.style.overflow = 'hidden'; // SCROLL LOCK
 		document.getElementsByTagName('html')[0].style.overflow = 'hidden'; // Ensure html scroll is also unlocked
-		console.log('[Modal] Opening Pong modal in mode:', mode, document.body.style.overflow);
 		modal.classList.remove('hidden');
 
 		const userId = getUserId();

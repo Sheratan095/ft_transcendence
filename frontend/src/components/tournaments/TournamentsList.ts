@@ -29,9 +29,7 @@ let tournamentList: HTMLElement;
 // ==============================
 
 export async function loadTournaments() {
-    tournamentList = document.getElementById(
-    "tournament-list"
-  ) as HTMLElement;
+    tournamentList = document.getElementById("tournament-list") as HTMLElement;
 
   if (!tournamentList) {
     throw new Error("Tournament list element not found");

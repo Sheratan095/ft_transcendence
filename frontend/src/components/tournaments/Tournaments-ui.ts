@@ -6,7 +6,6 @@ function StopTournamentModal()
 	const modal = document.getElementById('tournament-modal');
 	if (modal) {
 		modal.classList.add('hidden');
-		document.body.style.overflow = 'auto'; // UNLOCK SCROLLING
 	}
 }
 
@@ -77,6 +76,5 @@ export function CloseTournamentModal()
 	const modal = document.getElementById('tournament-modal');
 	if (modal) {
 		modal.classList.add('hidden');
-		document.body.style.overflow = 'auto'; // UNLOCK SCROLLING
 	}
 }

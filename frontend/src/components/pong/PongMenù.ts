@@ -2,6 +2,7 @@ import { getUserId } from '../../lib/auth';
 import { openPongModal } from './modal';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
+import { loadTournaments } from '../tournaments/TournamentsList';
 import { createTournament } from '../tournaments/TournamentsList';
 
 export async function renderPongPage(container: HTMLElement, isLoggedIn: boolean = true)
@@ -28,6 +29,8 @@ export async function renderPongPage(container: HTMLElement, isLoggedIn: boolean
 	if (chartInner)
 		renderPongStats(chartInner);
 
+	// Attach tournament button handler and disable if not logged in
+	loadTournaments();
 	// Attach button handlers
 	attachBtnHandlers(container, isLoggedIn);
 }
@@ -133,7 +136,7 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 				try {
 					await createTournament(prompt("Tournament name?") || "Unnamed Tournament");
 					showSuccessToast('Tournament created successfully!');
-					
+
 				} catch (err) {
 					console.error('Failed to create tournament:', err);
 					showErrorToast('Failed to create tournament');
@@ -213,5 +216,3 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 		}
 	}
 }
-
-export default { renderPongPage };
