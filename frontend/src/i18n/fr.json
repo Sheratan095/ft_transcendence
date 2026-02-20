@@ -5,6 +5,8 @@
   "profile.chat": "Chat",
   "profile.logout": "Se déconnecter",
   "profile.2fa": "2FA",
+  "profile.enable2fa": "Activer 2FA",
+  "profile.disable2fa": "Désactiver 2FA",
   "site.subtitle": "Hier Dr.Phil était juste un humain ordinaire.",
   "site.documentation": "./Documentation",
   "site.subject": "./Sujet",

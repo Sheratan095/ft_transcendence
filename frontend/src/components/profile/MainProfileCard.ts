@@ -95,7 +95,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
   const lockIcon = lockLabel ? lockLabel.querySelector('svg') : null;
   if (input2FA && enabled2FA && lockLabel && lockIcon) {
     input2FA.checked = user.tfaEnabled || false;
-    enabled2FA.textContent = user.tfaEnabled ? 'DISABLE 2FA' : 'ENABLE 2FA';
+    enabled2FA.textContent = user.tfaEnabled ? t('profile.disable2fa') : t('profile.enable2fa');
     input2FA.addEventListener('change', async () => {
       const tfaEnabled = input2FA.checked;
       try {
@@ -108,7 +108,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         if (!res.ok) throw new Error(`2FA update failed: ${res.status}`);
         user.tfaEnabled = tfaEnabled;
         localStorage.setItem('tfaEnabled', tfaEnabled ? 'true' : 'false');
-        enabled2FA.textContent = tfaEnabled ? 'DISABLE 2FA' : 'ENABLE 2FA';
+        enabled2FA.textContent = tfaEnabled ? t('profile.disable2fa') : t('profile.enable2fa');
       } catch (err) {
         console.error('2FA update error:', err);
         input2FA.checked = !tfaEnabled;

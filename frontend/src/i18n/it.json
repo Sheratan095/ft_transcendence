@@ -5,6 +5,8 @@
   "profile.chat": "Chat",
   "profile.logout": "Esci",
   "profile.2fa": "2FA",
+  "profile.enable2fa": "Abilita 2FA",
+  "profile.disable2fa": "Disabilita 2FA",
   "site.subtitle": "Ieri il dott. Phil era solo un essere umano normale.",
   "site.documentation": "./Documentazione",
   "site.subject": "./Consegna",

@@ -1,0 +1,2 @@
+export MSYS_NO_PATHCONV=1
+./generate_certs.sh
