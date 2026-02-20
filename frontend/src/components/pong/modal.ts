@@ -91,7 +91,8 @@ export function handleGameStarted(data: any)
 	const { yourSide, opponentUsername } = data;
 	const sideText = yourSide ? `Playing as ${yourSide}` : 'Game started';
 	updatePongStatus(`${sideText}. ${opponentUsername ? `vs ${opponentUsername}` : ''}`);
-	showSuccessToast('Game started!');
+
+	console.log('[Pong] Game started with data:', data);
 
 	// Reset game state and update scoreboard names
 	if (currentGameInstance && yourSide && opponentUsername)
@@ -101,8 +102,8 @@ export function handleGameStarted(data: any)
 
 		const user = getUser();
 		const myName = user?.username || 'You';
-		const left = (yourSide === 'left') ? myName : opponentUsername;
-		const right = (yourSide === 'right') ? myName : opponentUsername;
+		const left = (yourSide === 'LEFT') ? myName : opponentUsername;
+		const right = (yourSide === 'RIGHT') ? myName : opponentUsername;
 		currentGameInstance.gameManager.setPlayerNames(left, right);
 		currentGameInstance.updateScorebarNames();
 	}
