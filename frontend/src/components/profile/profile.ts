@@ -17,7 +17,9 @@ export async function attachUserOptions() {
 	const usernameEl = userOptions.querySelector('#topbar-username') as HTMLElement | null;
 	
 	if (avatar) {
-		avatar.src = user.avatarUrl || '/assets/placeholder-avatar.jpg';
+		avatar.src = user.avatarUrl
+			? (user.avatarUrl.startsWith('http') || user.avatarUrl.startsWith('/api') ? user.avatarUrl : `/api${user.avatarUrl}`)
+			: '/assets/placeholder-avatar.jpg';
 	}
 	if (usernameEl) {
 		usernameEl.textContent = user.username || 'Unknown User';
