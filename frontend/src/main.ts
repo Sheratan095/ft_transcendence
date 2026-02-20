@@ -9,7 +9,6 @@ import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, getLocaleFromStorage, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket, isNotificationsWebSocketConnected } from './components/shared/Notifications';
 import { setFriendsManager } from './components/shared/Notifications';
-import { showTournamentListModal } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
 import { setTrisFriendsManager } from './lib/tris-ui';
 import { initSlideshow, goToSlide } from './lib/slideshow';
@@ -218,16 +217,6 @@ function setupGlobalClickHandlers() {
       if (deleteDialog) {
         deleteDialog.classList.add('hidden');
       }
-      return;
-    }
-
-    // Handle Tournament Button
-    const tournamentBtn = target.closest('#tournamentListButton, #tournamentListButton-static');
-    if (tournamentBtn) {
-      e.preventDefault();
-      const modal = document.getElementById('tournament-modal');
-      if (modal) modal.classList.remove('hidden');
-      showTournamentListModal();
       return;
     }
 

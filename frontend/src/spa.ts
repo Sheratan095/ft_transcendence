@@ -6,6 +6,7 @@ import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/
 import { initCardHoverEffect } from './lib/card';
 import { setupPongCardListener, setupTrisCardListener } from './lib/slideshow';
 import { initSlideshow } from './lib/slideshow';
+import { loadTournaments } from './components/tournaments/TournamentsList';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -107,6 +108,7 @@ const routes: Record<string, RouteConfig> = {
         console.error('Failed to render Pong page:', err);
         if (el) el.innerHTML = '<div class="text-red-600">Failed to load Pong page</div>';
       }
+      await loadTournaments();
     }
   },
   '/tris': { 

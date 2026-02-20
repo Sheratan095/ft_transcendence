@@ -2,7 +2,7 @@ import { getUserId } from '../../lib/auth';
 import { openPongModal } from './modal';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
-import { showTournamentListModal } from '../tournaments/TournamentsList';
+import { createTournament } from '../tournaments/TournamentsList';
 
 export async function renderPongPage(container: HTMLElement, isLoggedIn: boolean = true)
 {
@@ -121,6 +121,27 @@ async function renderPongStats(container: HTMLElement)
 
 async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = true)
 {
+	const btnTournament = container.querySelector('#tournament-btn') as HTMLButtonElement | null;
+	if (btnTournament) {
+		if (!isLoggedIn) {
+			btnTournament.disabled = true;
+			btnTournament.title = 'Sign in to create tournaments';
+			btnTournament.style.opacity = '0.5';
+			btnTournament.style.cursor = 'not-allowed';
+		} else {
+			btnTournament.addEventListener('click', async () => {
+				try {
+					await createTournament(prompt("Tournament name?") || "Unnamed Tournament");
+					showSuccessToast('Tournament created successfully!');
+					
+				} catch (err) {
+					console.error('Failed to create tournament:', err);
+					showErrorToast('Failed to create tournament');
+				}
+			});
+		}
+	}
+
 	const btnOnline = container.querySelector('#pong-play-online') as HTMLButtonElement | null;
 	if (btnOnline) {
 		if (!isLoggedIn) {
@@ -191,12 +212,6 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 			});
 		}
 	}
-
-	const btnTournaments = container.querySelector('#pong-tournaments-btn') as HTMLButtonElement | null;
-	if (btnTournaments) btnTournaments.addEventListener('click', () =>
-	{
-		showTournamentListModal();
-	});
 }
 
 export default { renderPongPage };
