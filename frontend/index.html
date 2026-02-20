@@ -36,18 +36,15 @@
 		border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-blue dark:hover:border-accent-green transition-colors bg-gray-100 dark:bg-gray-900">
 
 		<!-- User options -->
-		<div id="user-options" title="Go to profile"
-			class="flex z-30 w-[10vw] hidden items-center justify-center">
-			<a href="/profile" class="flex">
+		<div id="user-options" title="Go to profile" class="flex z-30 items-center hidden justify-center min-w-0">
+			<a href="/profile" class="flex items-center gap-3 min-w-0">
 				<img id="topbar-avatar"
 					src="/assets/placeholder-avatar.jpg"
 					alt="avatar"
 					width="40" height="40"
 					style="min-width:40px;min-height:40px;"
-					class="content-evenly w-10 h-10 border-neutral-800 dark:border-neutral-200 object-cover
-					 rounded-xl bg-neutral-700 hover:bg-gray-900 border-2 transition-colors dark:bg-neutral-300 dark:hover:bg-neutral-100" />
-			<p id="topbar-username" class="sm:block ms-2 text-xl font-bold justify-start px-4 underline underline-offset-auto 
-			tracking-tight mb-2 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black">Username</p>
+					class="content-evenly w-10 h-10 border-neutral-800 dark:border-neutral-200 object-cover rounded-xl bg-neutral-700 hover:bg-gray-900 border-2 transition-colors dark:bg-neutral-300 dark:hover:bg-neutral-100 flex-shrink-0" />
+				<p id="topbar-username" style="min-width:25ch; max-width:40vw;" class="sm:block ms-2 text-xl font-bold truncate px-2 tracking-tight mb-0 hover:text-white hover:bg-black dark:hover:bg-white dark:hover:text-black">Username</p>
 			</a>
 		</div>
 
