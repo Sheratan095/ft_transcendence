@@ -65,5 +65,8 @@
   "profile.emailLabel": "Email:",
   "profile.idLabel": "ID utente:",
   "profile.rankLabel": "Rango:",
-  "profile.winsLabel": "Vittorie:"
+  "profile.winsLabel": "Vittorie:",
+  "toast.logout": "Disconnesso con successo",
+  "toast.error-logout": "Errore durante la disconnessione. Riprova.",
+  "toast.profileDelete": "Profilo eliminato con successo"
 }

@@ -65,5 +65,8 @@
   "profile.emailLabel": "Email:",
   "profile.idLabel": "User ID:",
   "profile.rankLabel": "Rank:",
-  "profile.winsLabel": "Wins:"
+  "profile.winsLabel": "Wins:",
+  "toast.logout": "Logged out successfully",
+  "toast.error-logout": "Error logging out. Please try again.",
+  "toast.profileDelete": "Profile deleted successfully"
 }
