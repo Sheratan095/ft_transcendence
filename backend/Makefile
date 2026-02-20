@@ -252,7 +252,7 @@ fclean: stop clean
 .PHONY: gen-certs
 gen-certs:
 	@echo "Generating self-signed SSL certificates..."
-	@cd ./certs/ && bash ./generate-certs.sh 
+	@bash ./generate_certs.sh 
 
 # Rebuild from scratch
 .PHONY: re

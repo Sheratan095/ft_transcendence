@@ -1,0 +1,1 @@
+GET error when fetching past games when there are none

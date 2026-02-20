@@ -2,8 +2,6 @@
 node_modules/
 **/node_modules/
 
-# css
-*.css
 
 #package files
 package-lock.json
@@ -46,8 +44,8 @@ ehthumbs.db
 *.Identifier
 
 # Docker
-**/*.dockerignore
-**/.dockerignore
+# **/*.dockerignore
+# **/.dockerignore
 
 # Temporary files
 *.tmp
@@ -66,6 +64,4 @@ ehthumbs.db
 **/data/
 data/
 
-frontend/tailwind.css
 frontend/package-lock.json
-frontend/tailwind.css

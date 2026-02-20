@@ -128,8 +128,8 @@ export function handleGameEnded(data: any)
 		startBtn.disabled = false;
 		startBtn.textContent = 'Play Again';
 		// Reset colors if needed (online mode doesn't switch to STOP normally but better safe)
-		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600', 'text-white', 'dark:text-white');
-		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:border-white', 'dark:text-black');
+		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
 	}
 }
 
@@ -188,8 +188,8 @@ if (typeof window !== 'undefined')
 			startBtn.disabled = false;
 			startBtn.textContent = 'Restart';
 			// Reset to original colors
-			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600', 'text-white', 'dark:text-white');
-			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:border-white', 'dark:text-black');
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
 		}
 	});
 }
@@ -240,8 +240,8 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 
 					// Update button to 'STOP' and red
 						newStartBtn.textContent = 'STOP';
-						newStartBtn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:border-accent-green', 'dark:text-black');
-						newStartBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'border-red-600', 'border-2');
+						newStartBtn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
+						newStartBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 				}
 				else if (newStartBtn.textContent === 'STOP') {
 					// STOP / PAUSE logic
@@ -251,8 +251,8 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 
 					// Update button back to 'Continue' and primary colors
 					newStartBtn.textContent = 'Continue';
-						newStartBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600', 'text-white', 'dark:text-white');
-						newStartBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:border-accent-green', 'dark:text-black');
+						newStartBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+						newStartBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
 				}
 			}
 		});
@@ -345,8 +345,8 @@ export async function openPongModal(mode: PongModeType = 'online')
 			startBtn.disabled = false;
 			startBtn.textContent = 'Start';
 			// Ensure we reset to starting colors
-			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600', 'text-white', 'dark:text-white');
-			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:border-white', 'dark:text-black');
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
 		}
 
 		attachButtonHandlers(modal, mode);
@@ -371,8 +371,8 @@ export function closePongModal()
 		if (startBtn) {
 			startBtn.textContent = 'Start';
 			startBtn.disabled = false;
-			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'border-red-600', 'text-white', 'dark:text-white');
-			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:border-accent-green', 'dark:text-black');
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
 		}
 	}
 
