@@ -1,4 +1,4 @@
-import { isLoggedInClient } from './lib/auth';
+import { isLoggedInClient, getUserId } from './lib/auth';
 import { attachLogin } from './components/auth/LoginForm';
 import { showErrorToast } from './components/shared';
 import { renderProfileCard } from './components/profile/MainProfileCard';
@@ -6,6 +6,9 @@ import { renderSearchProfileCard, cleanupSearchProfileCard } from './components/
 import { initCardHoverEffect } from './lib/card';
 import { setupPongCardListener, setupTrisCardListener } from './lib/slideshow';
 import { initSlideshow } from './lib/slideshow';
+import { initPong } from './components/pong/ws.ts';
+import { main } from './main.ts';
+import { initUserServices } from './main.ts';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -21,8 +24,9 @@ const routes: Record<string, RouteConfig> = {
       el.innerHTML = '';
       const clone = template.content.cloneNode(true);
       el.appendChild(clone);
+
+      if (isLoggedInClient()) modifyIndex(); // Update CTA to logout if logged in
       initSlideshow();
-      initCardHoverEffect();
       setupTrisCardListener();
       setupPongCardListener();
     }
@@ -102,6 +106,10 @@ const routes: Record<string, RouteConfig> = {
       try {
         const mod = await import('./components/pong/PongMenù.ts');
         const isLoggedIn = isLoggedInClient();
+        if (isLoggedIn) // connect to WS just if the user is logged in
+        { 
+          await initPong(getUserId() as string);
+        }
         await mod.renderPongPage(el, isLoggedIn);
       } catch (err) {
         console.error('Failed to render Pong page:', err);
@@ -116,7 +124,7 @@ const routes: Record<string, RouteConfig> = {
       if (!el) return;
       // Dynamically import the tris page renderer
       try {
-        const mod = await import('./components/tris/TrisPage');
+        const mod = await import('./components/tris/TrisMenù');
         const isLoggedIn = isLoggedInClient();
         await mod.renderTrisPage(el, isLoggedIn);
       } catch (err) {
@@ -135,6 +143,7 @@ let isBackNavigation = false;
  * Updates browser history, detects back/forward navigation, and renders the appropriate route
  */
 async function goToRoute(path: string) {
+  main(window.location.pathname); // Ensure main is called on every route change to re-attach listeners and initialize components as needed
   const url = new URL(path, window.location.origin);
   
   // Real SPA navigation
@@ -181,6 +190,21 @@ async function renderRoute(path: string) {
     console.error(err);
   }
 }
+
+function modifyIndex()
+{
+  // Support both the dynamic and static login anchors
+  const link = document.querySelector('#cta-login-logout, #cta-login-logout-static') as HTMLAnchorElement | null;
+  if (link)
+  {
+    const h2 = link.getElementsByTagName('h2')[0];
+    if (h2)
+      h2.textContent = './LOGOUT';
+    
+    // Clicks are handled via event delegation in setupGlobalClickHandlers()
+  }
+}
+
 
 export function linkify() {
   document.addEventListener('click', (ev) => {

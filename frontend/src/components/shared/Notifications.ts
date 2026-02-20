@@ -1,6 +1,6 @@
 import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } from './Toast';
 import { FriendsManager } from '../profile/FriendsManager';
-import { openTrisModalAndJoinGame } from '../../lib/tris-ui';
+import { openTrisModalAndJoinGame } from '../tris/modal';
 import { openPongModal } from '../pong/modal';
 import { joinCustomGame } from '../pong/ws';
 import { goToRoute } from '../../spa';

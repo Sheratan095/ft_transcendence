@@ -1,150 +1,180 @@
-import { showErrorToast } from "../shared";
+// ==============================
+// Types
+// ==============================
 
-export async function showTournamentListModal()
-{
-  const modal = document.getElementById('tournament-modal');
-  if (!modal) {
-    console.error('Tournament modal not found');
+interface Tournament {
+  id: string;
+  name: string;
+  status: string;
+  createdAt: string;
+  creatorUsername: string;
+  participantCount: number;
+}
+
+interface ApiError {
+  statusCode: number;
+  code: string;
+  error: string;
+  message: string;
+}
+
+// ==============================
+// Static Element
+// ==============================
+
+let tournamentList: HTMLElement;
+
+// ==============================
+// Load Tournaments (GET)
+// ==============================
+
+export async function loadTournaments() {
+    tournamentList = document.getElementById("tournament-list") as HTMLElement;
+
+  if (!tournamentList) {
+    throw new Error("Tournament list element not found");
+  }
+  try {
+    tournamentList.innerHTML = `
+      <div class="text-sm text-gray-500 dark:text-neutral-400">
+        Loading tournaments...
+      </div>
+    `;
+
+    const response = await fetch("/api/pong/get-all-tournaments", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const error: ApiError = await response.json();
+      throw new Error(error.message || "Failed to load tournaments");
+    }
+
+    console.log('Tournaments loaded successfully, response:', response);
+    const tournaments: Tournament[] = await response.json();
+    renderTournaments(tournaments);
+
+  } catch (err) {
+    renderError((err as Error).message);
+  }
+}
+
+// ==============================
+// Render Tournaments
+// ==============================
+
+function renderTournaments(tournaments: Tournament[]): void {
+  tournamentList.innerHTML = "";
+
+  if (tournaments.length === 0) {
+    tournamentList.innerHTML = `
+      <div class="text-sm text-gray-500 dark:text-neutral-400">
+        No tournaments available.
+      </div>
+    `;
     return;
   }
 
-  try
-  {
-    const response = await fetch('/api/pong/get-all-tournaments', {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-      },
-    });
+  tournaments.forEach((tournament) => {
+    const card = document.createElement("div");
 
-    if (!response.ok)
-    {
-      console.error('Failed to load tournaments', response.status);
-      showErrorToast('Failed to load tournaments');
-      return;
-    }
+    card.className =
+      "border border-gray-300 dark:border-neutral-800 rounded-xl p-4 bg-gray-100 dark:bg-neutral-800 flex justify-between items-center mb-3";
 
-    const tournaments = await response.json();
-
-    const list = document.getElementById('list');
-    if (!list) {
-      console.error('Tournament list element not found');
-      return;
-    }
-
-    list.innerHTML = '';
-
-    tournaments.forEach((tournament: any) =>
-    {
-      const item = document.createElement('div');
-
-      item.className = 'mb-4 p-3 rounded border border-gray-300 dark:border-neutral-400 shadow-sm';
-      item.innerHTML = `
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-lg font-semibold text-accent-orange dark:text-accent-green">
-              ${escapeHtml(tournament.name)}
-            </h2>
-            <p class="text-sm text-black dark:text-white">Participants:
-              ${tournament.participants?.length ?? 0}
-            </p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button data-id="${tournament.id}" class="join-tournament-button px-3 py-1 rounded bg-accent-orange dark:bg-accent-green text-white dark:text-black font-bold">Join</button>
-          </div>
+    card.innerHTML = `
+      <div>
+        <div class="font-semibold text-gray-900 dark:text-white">
+          ${tournament.name}
         </div>
-      `;
+        <div class="text-xs text-gray-600 dark:text-neutral-400">
+          Created by ${tournament.creatorUsername}
+        </div>
+        <div class="text-xs text-gray-600 dark:text-neutral-400">
+          ${tournament.participantCount} participants
+        </div>
+      </div>
 
-      const joinBtn = item.querySelector('.join-tournament-button') as HTMLButtonElement | null;
-      if (joinBtn)
-        joinBtn.addEventListener('click', joinTournament.bind(null, tournament.id));
+      <span class="text-xs px-2 py-1 rounded-full ${getStatusColor(
+        tournament.status
+      )}">
+        ${tournament.status}
+      </span>
+    `;
 
-      list.appendChild(item);
+    tournamentList.appendChild(card);
+  });
+}
+
+// ==============================
+// Create Tournament (POST)
+// ==============================
+
+export async function createTournament(name: string): Promise<void> {
+  try {
+    const response = await fetch("/api/pong/create-tournament", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name }),
     });
 
-    // Show the modal after populating the list
-    modal.classList.remove('hidden');
-  }
-  catch (err)
-  {
-    console.error('Error loading tournaments', err);
-    showErrorToast('Failed to load tournaments');
-  }
-}
-
-function escapeHtml(str: string)
-{
-  return String(str).replace(/[&<>"']/g, (s) =>
-  {
-    switch (s)
-    {
-      case '&':
-        return '&amp;';
-      case '<':
-        return '&lt;';
-      case '>':
-        return '&gt;';
-      case '"':
-        return '&quot;';
-      case "'":
-        return '&#39;';
-      default:
-        return s;
+    if (!response.ok) {
+      const error: ApiError = await response.json();
+      throw new Error(error.message || "Failed to create tournament");
     }
-  });
+
+    // Refresh list after creation
+    await loadTournaments();
+
+  } catch (err) {
+    alert((err as Error).message);
+  }
 }
 
-// Wire modal open/close when this module is loaded
-document.addEventListener('DOMContentLoaded', () =>
-{
-  const modal = document.getElementById('tournament-modal');
-  const backdrop = document.getElementById('tournament-backdrop');
-  const closeBtn = document.getElementById('tournament-close-btn');
+// ==============================
+// Helpers
+// ==============================
 
-  function closeModal()
-  {
-    if (!modal)
-      return;
+function renderError(message: string): void {
+  tournamentList.innerHTML = `
+    <div class="text-sm text-red-500">
+      ${message}
+    </div>
+  `;
+}
 
-    modal.classList.add('hidden');
+function getStatusColor(status: string): string {
+  switch (status.toLowerCase()) {
+    case "open":
+      return "bg-green-200 text-green-800";
+    case "in_progress":
+      return "bg-yellow-200 text-yellow-800";
+    case "finished":
+      return "bg-gray-300 text-gray-700";
+    default:
+      return "bg-gray-200 text-gray-800";
   }
+}
 
-  if (closeBtn)
-    closeBtn.addEventListener('click', closeModal);
-  if (backdrop)
-    backdrop.addEventListener('click', closeModal);
+// ==============================
+// Auto Load on Page Ready
+// ==============================
 
-  // close on Escape
-  document.addEventListener('keydown', (ev) =>
-  {
-    if (ev.key === 'Escape')
-      closeModal();
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  loadTournaments();
 });
 
-async function joinTournament(id: string)
-{
-    if (!id)
-      return;
-    // Simple join request - adapt endpoint as needed
-    try
-    {
-      const res = await fetch(`/api/pong/join-tournament/${id}`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+// ==============================
+// Optional: Hook Create Button
+// ==============================
 
-      if (!res.ok)
-        throw new Error('Join failed');
-
-      // Optionally refresh list or show feedback
-      // await showTournamentListModal();
-      // TO DO redirect to tournament page
+document
+  .getElementById("tournament-create-btn")
+  ?.addEventListener("click", () => {
+    const name = prompt("Tournament name?");
+    if (name) {
+      createTournament(name);
     }
-    catch (err)
-    {
-      console.error('Failed to join tournament', err);
-      showErrorToast('Failed to join tournament');
-    }
-}
+  });

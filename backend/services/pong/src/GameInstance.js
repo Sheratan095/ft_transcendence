@@ -62,6 +62,7 @@
 
 			// Game loop control
 			this.gameLoop = null;
+			this._cooldownTimer = null;
 			this.lastUpdateTime = Date.now();
 			this.frameRate = 60; // 60 FPS
 			this.frameInterval = 1000 / this.frameRate;
@@ -72,7 +73,7 @@
 		startGame()
 		{
 			this.gameStatus = GameStatus.IN_PROGRESS;
-			this._startGameLoop();
+			this._timerBeforeBallMove();
 		}
 
 		processMove(playerId, direction)
@@ -103,7 +104,7 @@
 			if (this.gameLoop)
 				clearInterval(this.gameLoop);
 
-			this._timerBeforeBallMove();
+			this.lastUpdateTime = Date.now();
 
 			// Every frameInterval milliseconds, update the game state
 			this.gameLoop = setInterval(() =>
@@ -234,8 +235,15 @@
 			// Small delay before restarting next point
 			this.stopGameLoop();
 
-			setTimeout(() => {
-				this.lastUpdateTime = Date.now();
+			// Clear any existing cooldown timer
+			if (this._cooldownTimer)
+			{
+				clearTimeout(this._cooldownTimer);
+				this._cooldownTimer = null;
+			}
+
+			this._cooldownTimer = setTimeout(() => {
+				this._cooldownTimer = null;
 				this._startGameLoop();
 			}, this.COOLDOWN_BETWEEN_POINTS_MS);
 		}
@@ -244,6 +252,13 @@
 		{
 			this.gameStatus = GameStatus.FINISHED;
 			this.stopGameLoop();
+
+			// Clear cooldown timer
+			if (this._cooldownTimer)
+			{
+				clearTimeout(this._cooldownTimer);
+				this._cooldownTimer = null;
+			}
 
 			const	loserId = winnerId === this.playerLeftId ? this.playerRightId : this.playerLeftId;
 			const	winnerUsername = winnerId === this.playerLeftId ? this.playerLeftUsername : this.playerRightUsername;
@@ -316,5 +331,10 @@
 		destroy()
 		{
 			this.stopGameLoop();
+			if (this._cooldownTimer)
+			{
+				clearTimeout(this._cooldownTimer);
+				this._cooldownTimer = null;
+			}
 		}
 	}

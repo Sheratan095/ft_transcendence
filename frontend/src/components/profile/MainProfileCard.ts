@@ -11,6 +11,7 @@ import { initCardHoverEffect } from '../../lib/card';
 import { getUserId } from '../../lib/token';
 import { attachUserOptions } from './profile';
 import { t } from '../../lib/intlayer';
+import { showErrorToast } from '../shared';
 
 export async function renderProfileCard(container: HTMLElement | null) {
   if (!container) {
@@ -71,7 +72,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         if (body && body.avatarUrl) {
           avatar.src = `/api${body.avatarUrl}`;
           user.avatarUrl = body.avatarUrl;
-          SaveCurrentUserProfile(user.id); // Update localStorage with new avatar URL
+          await SaveCurrentUserProfile(user.id); // Update localStorage with new avatar URL
           const topbarAvatar = document.getElementById('topbar-avatar');
           if (topbarAvatar)
             topbarAvatar.setAttribute('src', `/api${body.avatarUrl}`);
@@ -84,8 +85,163 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
   // ===== Username =====
   const username = cardEl.querySelector('#profile-username') as HTMLElement;
+  const editUsernameBtn = cardEl.querySelector('#profile-edit-username-btn') as HTMLButtonElement;
   if (username) {
     username.textContent = user.username || user.email || 'User';
+  }
+
+  // ===== Username Edit Handler =====
+  if (editUsernameBtn && username) {
+    editUsernameBtn.addEventListener('click', async () => {
+      const currentUsername = username.textContent || '';
+      
+      // Create input field
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentUsername;
+      // Preserve the visual sizing from the h1 but limit width to 20 characters
+      input.className = 'flex-none min-w-0 text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange text-transform:lowercase dark:text-accent-green bg-transparent focus:outline-none overflow-hidden';
+      // Copy computed sizing from the existing h1 so the input keeps identical height
+      try {
+        const computed = window.getComputedStyle(username);
+        (input.style as any).height = computed.height;
+        (input.style as any).lineHeight = computed.lineHeight;
+        (input.style as any).fontSize = computed.fontSize;
+        (input.style as any).fontWeight = computed.fontWeight;
+        (input.style as any).paddingTop = computed.paddingTop;
+        (input.style as any).paddingBottom = computed.paddingBottom;
+        (input.style as any).boxSizing = computed.boxSizing || 'border-box';
+        // Restrict width to 20 characters so layout doesn't change
+        (input.style as any).maxWidth = '20ch';
+        (input.style as any).width = 'auto';
+        // Prevent flex from expanding/shrinking the input while editing
+        (input.style as any).flex = '0 0 auto';
+        (input.style as any).display = 'inline-block';
+        (input.style as any).verticalAlign = 'middle';
+        (input.style as any).margin = '0';
+        (input.style as any).minWidth = '0';
+        (input.style as any).overflow = 'hidden';
+        (input.style as any).textOverflow = 'ellipsis';
+      } catch (e) {
+        // ignore if computed styles aren't available in some environments
+      }
+      // Ensure input fills available space without causing parent to grow
+      (input.style as any).boxSizing = 'border-box';
+      // keep max constraint (20ch enforced above)
+      (input.style as any).maxWidth = (input.style as any).maxWidth || '20ch';
+      (input.style as any).whiteSpace = 'nowrap';
+      (input.style as any).padding = '0';
+      (input.style as any).margin = '0';
+      (input.style as any).border = 'none';
+      (input.style as any).outline = 'none';
+      // draw a single continuous underline using background so there are no end-caps
+      (input.style as any).boxShadow = '';
+      (input.style as any).backgroundImage = 'linear-gradient(currentColor, currentColor)';
+      (input.style as any).backgroundSize = '100% 2px';
+      (input.style as any).backgroundRepeat = 'no-repeat';
+      (input.style as any).backgroundPosition = 'bottom left';
+      (input.style as any).display = 'inline-block';
+      
+      // Replace the h1 with input
+      username.replaceWith(input);
+      input.focus();
+      input.select();
+      
+      // Handle Enter key
+      const handleKeyDown = async (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+          const newUsername = input.value.trim().toLocaleLowerCase();
+          
+          if (!newUsername) {
+            showErrorToast('Username cannot be empty', { duration: 4000, position: 'top-right' });
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          // Validate username length (2-20 characters)
+          if (newUsername.length < 2 || newUsername.length > 20) {
+            showErrorToast('Username must be between 2 and 20 characters long', { duration: 4000, position: 'top-right' });
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          // Validate username format (letters, numbers, _, .)
+          if (!/^[a-zA-Z0-9_.]+$/.test(newUsername)) {
+            showErrorToast('Username can only contain letters, numbers, underscores, and periods', { duration: 4000, position: 'top-right' });
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          if (newUsername === currentUsername)
+          {
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          try {
+            const res = await fetch(`/api/users/update-user`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ newUsername }),
+            });
+            
+            if (!res.ok)
+            {
+              if (res.status === 429)
+                showErrorToast('Username cannot contain reserved words.', { duration: 4000, position: 'top-right' });
+              else if (res.status === 400)
+                showErrorToast('Failed to update username.', { duration: 4000, position: 'top-right' });
+              else if (res.status === 409)
+                showErrorToast('Username already taken.', { duration: 4000, position: 'top-right' });
+            }
+            
+            const responseBody = await res.json();
+            
+            if (responseBody && responseBody.username) {
+              username.textContent = responseBody.username;
+              user.username = responseBody.username;
+              SaveCurrentUserProfile(user.id);
+              
+              // Update topbar username if it exists
+              const topbarUsername = document.getElementById('topbar-username');
+              if (topbarUsername) {
+                topbarUsername.textContent = responseBody.username;
+              }
+            }
+          } catch (err) {
+            console.error('Failed to update username:', err);
+            alert('Failed to update username. Please try again.');
+          }
+          
+          input.replaceWith(username);
+          input.removeEventListener('keydown', handleKeyDown);
+          input.removeEventListener('blur', handleBlur);
+        } else if (e.key === 'Escape') {
+          input.replaceWith(username);
+          input.removeEventListener('keydown', handleKeyDown);
+          input.removeEventListener('blur', handleBlur);
+        }
+      };
+      
+      // Handle blur to cancel edit
+      const handleBlur = () => {
+        input.replaceWith(username);
+        input.removeEventListener('keydown', handleKeyDown);
+        input.removeEventListener('blur', handleBlur);
+      };
+      
+      input.addEventListener('keydown', handleKeyDown);
+      input.addEventListener('blur', handleBlur);
+    });
   }
 
   // ===== 2FA Toggle =====

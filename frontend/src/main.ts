@@ -9,9 +9,8 @@ import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, getLocaleFromStorage, setLocaleInStorage } from "intlayer";
 import { connectNotificationsWebSocket, isNotificationsWebSocketConnected } from './components/shared/Notifications';
 import { setFriendsManager } from './components/shared/Notifications';
-import { showTournamentListModal } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
-import { setTrisFriendsManager } from './lib/tris-ui';
+import { setTrisFriendsManager } from './components/tris/modal';
 import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
 import { initCardHoverEffect } from './lib/card';
@@ -126,8 +125,6 @@ initCardHoverEffect(); // Initialize card hover effect
     } else {
       initHomeButton();
     }
-    // Ensure the CTA in the rendered page reflects the logged-in state
-    if (isLoggedInClient()) modifyIndex();
   });
 
   // Show home button if not on home page
@@ -154,38 +151,13 @@ function setupSearchUser()
   initSearchAutocomplete();
 }
 
-function modifyIndex()
-{
-  // Support both the dynamic and static login anchors
-  const link = document.querySelector('#cta-login-logout, #cta-login-logout-static') as HTMLAnchorElement | null;
-  if (link)
-  {
-    const h2 = link.getElementsByTagName('h2')[0];
-    if (h2)
-      h2.textContent = './LOGOUT';
-    
-    // Clicks are handled via event delegation in setupGlobalClickHandlers()
-  }
-
-  const showTournamentsBtn = document.getElementById('tournamentListButton');
-  if (showTournamentsBtn) {
-    showTournamentsBtn.classList.remove('hidden');
-  }
-
-  const showTournamentsBtnStatic = document.getElementById('tournamentListButton-static');
-  if (showTournamentsBtnStatic) {
-    showTournamentsBtnStatic.classList.remove('hidden');
-  }
-}
-
-function initUserServices(path: string)
+export function initUserServices(path: string)
 {
 	const userId = getUserId();
 	if (!userId)
       return;
 
   startTokenRefresh();
-  modifyIndex();
   setupChatEventListeners();
   if (!isChatWebSocketConnected()) {
     initChat(userId);
@@ -218,16 +190,6 @@ function setupGlobalClickHandlers() {
       if (deleteDialog) {
         deleteDialog.classList.add('hidden');
       }
-      return;
-    }
-
-    // Handle Tournament Button
-    const tournamentBtn = target.closest('#tournamentListButton, #tournamentListButton-static');
-    if (tournamentBtn) {
-      e.preventDefault();
-      const modal = document.getElementById('tournament-modal');
-      if (modal) modal.classList.remove('hidden');
-      showTournamentListModal();
       return;
     }
 

@@ -19,6 +19,8 @@ class	NotificationConnectionManager
 		// Then notify other connected users that this user is now online
 		if (onlineFriends.length > 0)
 			this.#dispatchEventToFriends(userId, 'friend.online', { userId, username }, onlineFriends);
+
+		console.log(`[NOTIFICATION] User ${userId} connected. Total connections: ${this.count()}`);
 	}
 
 	async	removeConnection(userId)
