@@ -314,7 +314,6 @@ export async function openPongModal(mode: PongModeType = 'online')
 				showErrorToast('You must be logged in');
 				return;
 			}
-			await initPong(userId);
 		}
 
 		const canvas = document.getElementById('pong-canvas') as HTMLCanvasElement | null;
@@ -337,16 +336,24 @@ export async function openPongModal(mode: PongModeType = 'online')
 			gameMode = GAME_MODES.ONLINE;
 		}
 
-		const game = new PongGame(canvas.id, gameMode,
-		{
-			playerNames:
+		let game: PongGame;
+		try {
+			game = new PongGame(canvas.id, gameMode,
 			{
-				left: mode === 'offline-1v1' ? 'Player left' : (mode === 'offline-ai' ? 'You' : '--------'),
-				right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Ai' : '--------')
-			},
-			maxScore: 5,
-			aiDifficulty: 'medium'
-		});
+				playerNames:
+				{
+					left: mode === 'offline-1v1' ? 'Player left' : (mode === 'offline-ai' ? 'You' : '--------'),
+					right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Ai' : '--------')
+				},
+				maxScore: 5,
+				aiDifficulty: 'medium'
+			});
+		} catch (err) {
+			console.error('[Modal] Failed to initialize PongGame:', err);
+			showErrorToast('Failed to initialize game renderer');
+			modal.classList.add('hidden');
+			return;
+		}
 
 		currentGameInstance = game;
 
