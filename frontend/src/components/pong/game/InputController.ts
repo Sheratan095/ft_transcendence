@@ -235,12 +235,14 @@ export class NetworkInputController extends InputController
 	websocket: any;
 	lastMovement: string | null;
 	serverGameState: any;
+	_hasNewState: boolean = false;
 
 	constructor(websocket: any)
 	{
 		super();
 		this.websocket = websocket;
 		this.lastMovement = null;
+		this.serverGameState = null;
 		this.setupWebSocket();
 	}
 
@@ -281,18 +283,33 @@ export class NetworkInputController extends InputController
 	setServerGameState(state: any): void
 	{
 		this.serverGameState = state;
+		this._hasNewState = true;
 	}
 
 	/**
 	 * Get server-authoritative game state (if available)
-	 * Consumes the state (clears it after reading) to prevent re-applying old data
+	 * Does NOT consume the state - use consumeNewState() after processing
 	 * @returns {object|null} Server game state
 	 */
 	getServerGameState(): any
 	{
-		const state = this.serverGameState;
-		this.serverGameState = null; // Clear after reading
-		return state;
+		return this.serverGameState;
+	}
+
+	/**
+	 * Check if a new server state has arrived since last consume
+	 */
+	hasNewServerState(): boolean
+	{
+		return this._hasNewState;
+	}
+
+	/**
+	 * Mark the current server state as consumed
+	 */
+	consumeNewState(): void
+	{
+		this._hasNewState = false;
 	}
 
 	destroy(): void

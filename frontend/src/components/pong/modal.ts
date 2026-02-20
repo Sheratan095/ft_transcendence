@@ -93,9 +93,12 @@ export function handleGameStarted(data: any)
 	updatePongStatus(`${sideText}. ${opponentUsername ? `vs ${opponentUsername}` : ''}`);
 	showSuccessToast('Game started!');
 
-	// Update scoreboard names
+	// Reset game state and update scoreboard names
 	if (currentGameInstance && yourSide && opponentUsername)
 	{
+		// Reset 3D scene (ball, paddles, score) for the new game
+		currentGameInstance.resetState();
+
 		const user = getUser();
 		const myName = user?.username || 'You';
 		const left = (yourSide === 'left') ? myName : opponentUsername;
@@ -126,6 +129,11 @@ export function handleGameState(data: any)
 	// Game state handled by renderer
 	if (currentGameInstance)
 	{
+		// Ignore stale game states from previous games
+		const currentGame = getCurrentGameId();
+		if (!currentGame || (data.gameId && data.gameId !== currentGame))
+			return;
+
 		currentGameInstance.updateOnlineState(data);
 	}
 }
@@ -451,6 +459,22 @@ export async function openPongModal(mode: PongModeType = 'online')
 		{
 			goToRoute('/pong');
 			return;
+		}
+
+		// Reset all DOM elements BEFORE showing modal to prevent flash of old state
+		const scoreEl = document.getElementById('pong-center-score');
+		if (scoreEl) scoreEl.textContent = '0 - 0';
+		const statusEl = document.getElementById('pong-status');
+		if (statusEl) statusEl.textContent = 'Loading...';
+		const leftNameEl = document.getElementById('pong-left-name');
+		if (leftNameEl) {
+			const textSpan = leftNameEl.querySelector('span:first-child');
+			if (textSpan) textSpan.textContent = '--------';
+		}
+		const rightNameEl = document.getElementById('pong-right-name');
+		if (rightNameEl) {
+			const textSpan = rightNameEl.querySelector('span:last-child');
+			if (textSpan) textSpan.textContent = '--------';
 		}
 
 		modal.classList.remove('hidden');

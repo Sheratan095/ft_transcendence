@@ -156,63 +156,57 @@ export class GameManager
 			const localMovement = this.localPlayerId === "left" ? leftMovement : rightMovement;
 			this.networkController.sendMovement(localMovement);
 
-			// 2. Apply server state if available
+			// 2. Only apply state when a NEW server update arrives (no interpolation)
+			if (!this.networkController.hasNewServerState())
+				return;
+
 			const serverState = this.networkController.getServerGameState();
-			if (serverState)
+			this.networkController.consumeNewState();
+
+			if (!serverState)
+				return;
+
+			// Directly set ball position
+			if (serverState.ball) {
+				this.gameState.ball.x = serverState.ball.x;
+				this.gameState.ball.y = serverState.ball.y;
+			}
+
+			// Directly set paddle positions (mapped by X position)
+			if (serverState.paddles)
 			{
-				// Set targets for interpolation
-				if (serverState.ball) {
-					this.targetBall.x = serverState.ball.x;
-					this.targetBall.y = serverState.ball.y;
-				}
-				
-				// Map server paddles to client paddles based on X position
-				if (serverState.paddles)
+				for (const paddle of Object.values(serverState.paddles) as any[])
 				{
-					for (const paddle of Object.values(serverState.paddles) as any[])
-					{
-						if (paddle.x === 0 || paddle.x < 0.5)
-						{
-							this.targetPaddles.left.y = paddle.y;
-						}
-						else
-						{
-							this.targetPaddles.right.y = paddle.y;
-						}
-					}
-				}
-				
-				// Update scores
-				if (serverState.scores)
-				{
-					let scoreChanged = false;
-
-					for (const [id, score] of Object.entries(serverState.scores) as [string, number][])
-					{
-						// Map score to side based on paddle position in the SAME serverState
-						const paddle = serverState.paddles ? serverState.paddles[id] : null;
-						if (paddle)
-						{
-							const side = (paddle.x === 0 || paddle.x < 0.5) ? "left" : "right";
-							if (this.gameState.scores[side] !== score)
-							{
-								this.gameState.scores[side] = score;
-								scoreChanged = true;
-							}
-						}
-					}
-
-					if (scoreChanged && this.onGoal)
-					{
-						this.onGoal("", this.gameState.scores);
-					}
+					if (paddle.x === 0 || paddle.x < 0.5)
+						this.gameState.paddles.left.y = paddle.y;
+					else
+						this.gameState.paddles.right.y = paddle.y;
 				}
 			}
-			
-			// Interpolate positions for smooth movement
-			this.interpolatePositions(deltaTime);
-			
-			// 3. EXIT - Do not run local physics simulation
+
+			// Update scores only when changed
+			if (serverState.scores)
+			{
+				let scoreChanged = false;
+
+				for (const [id, score] of Object.entries(serverState.scores) as [string, number][])
+				{
+					const paddle = serverState.paddles ? serverState.paddles[id] : null;
+					if (paddle)
+					{
+						const side = (paddle.x === 0 || paddle.x < 0.5) ? "left" : "right";
+						if (this.gameState.scores[side] !== score)
+						{
+							this.gameState.scores[side] = score;
+							scoreChanged = true;
+						}
+					}
+				}
+
+				if (scoreChanged && this.onGoal)
+					this.onGoal("", this.gameState.scores);
+			}
+
 			return;
 		}
 
@@ -400,8 +394,28 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 		this.gameState.playerNames = this.config.playerNames;
 		this.gameState.maxScore = this.config.maxScore;
 		this.gameState.gameOver = false;
+		this.gameState.paused = (this.mode !== GAME_MODES.ONLINE);
 		this.gameState.winner = null;
+		this.gameState.isCooldown = false;
+		this.gameState.cooldownTimer = 0;
 		this.gameState.ball.active = false;
+
+		// Reset interpolation targets
+		this.targetBall = { x: this.gameState.ball.x, y: this.gameState.ball.y };
+		this.targetPaddles = {
+			left: { y: this.gameState.paddles.left.y },
+			right: { y: this.gameState.paddles.right.y }
+		};
+
+		// Reset network controller state
+		if (this.networkController) {
+			this.networkController.serverGameState = null;
+			this.networkController._hasNewState = false;
+		}
+
+		// Reset ready status
+		this.playerLeftReady = false;
+		this.playerRightReady = false;
 	}
 
 	/**
