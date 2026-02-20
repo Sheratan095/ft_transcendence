@@ -1,6 +1,7 @@
 import { SaveCurrentUserProfile } from '../../lib/auth';
 import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
 import { attachLogin } from './LoginForm';
+import { goToRoute } from '../../spa';
 
 export interface RegisterFormCallbacks {
   onLoginClick?: () => void;
@@ -75,7 +76,7 @@ export function attachRegister(callbacks?: RegisterFormCallbacks): void {
           }
         }
         showSuccess(errorEl, 'Registration successful.');
-        setTimeout(() => window.location.href = '/profile', 400);
+        goToRoute('/profile');
       } else {
         showError(errorEl, (body && (body.message || body.error)) || `Register failed (${res.status})`);
       }

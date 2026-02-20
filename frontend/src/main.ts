@@ -2,11 +2,12 @@ import { fetchUserProfile, getUserId, logout } from './lib/auth';
 import { isLoggedInClient, startTokenRefresh } from './lib/token';
 import { attachUserOptions } from './components/profile/profile';
 import { setupChatEventListeners, initChat } from './components/chat/chat';
+import { isChatWebSocketConnected } from './components/chat/chatService';
 import { initChatButton, initHomeButton, removeHomeButton } from './components/shared/FloatingButtons';
 import { searchUser, renderSearchResult, initSearchAutocomplete } from './lib/search';
 import { showErrorToast, showToast, showInfoToast } from './components/shared';
 import { getIntlayer, getLocaleFromStorage, setLocaleInStorage } from "intlayer";
-import { connectNotificationsWebSocket } from './components/shared/Notifications';
+import { connectNotificationsWebSocket, isNotificationsWebSocketConnected } from './components/shared/Notifications';
 import { setFriendsManager } from './components/shared/Notifications';
 import { showTournamentListModal } from './components/tournaments/TournamentsList';
 import { FriendsManager } from './components/profile/FriendsManager';
@@ -15,7 +16,7 @@ import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
 import { initCardHoverEffect } from './lib/card';
 import ApexCharts from 'apexcharts';
-import { start } from './spa';
+import { start, goToRoute } from './spa';
 
 // internalization dictionaries
 import { registerDictionary, setLocale, getLocale, t } from './lib/intlayer';
@@ -75,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error updating user language:', err);
     }
     console.log('Language changed to', v);
-    window.location.reload();
   });
 });
 
@@ -189,9 +189,14 @@ function initUserServices(path: string)
   startTokenRefresh();
   modifyIndex();
   setupChatEventListeners();
+  if (!isChatWebSocketConnected()) {
+    initChat(userId);
+  }
   initChatButton();
   initHomeButton();
-  connectNotificationsWebSocket();
+  if (!isNotificationsWebSocketConnected()) {
+    connectNotificationsWebSocket();
+  }
   
   // Initialize global FriendsManager for notifications
   const globalFriendsManager = new FriendsManager({ currentUserId: userId });
@@ -201,7 +206,6 @@ function initUserServices(path: string)
   
   setupSearchUser();
   attachUserOptions();
-  initChat(userId);
 }
 
 // Global click handler for shared/dynamic elements
@@ -236,11 +240,9 @@ function setupGlobalClickHandlers() {
       try {
         await logout();
         showToast('Logged out successfully');
-        // Navigate to home and force a full reload to ensure fresh state
-        setTimeout(() => {
-          window.location.href = '/';
-          setTimeout(() => window.location.reload(), 60);
-        }, 300);
+        // Navigate to home with full reload to ensure fresh state
+        goToRoute('/');
+        setTimeout(() => window.location.reload(), 500);
       }
       catch (err) {
         console.error('Logout (client) error:', err);

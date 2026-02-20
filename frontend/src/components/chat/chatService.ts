@@ -118,6 +118,13 @@ export function connectChatWebSocket(): Promise<WebSocket> {
 }
 
 /**
+ * Check if the chat WebSocket connection is currently open
+ */
+export function isChatWebSocketConnected(): boolean {
+  return chatSocket !== null && chatSocket.readyState === WebSocket.OPEN;
+}
+
+/**
  * Gracefully disconnect the chat WebSocket connection
  */
 export function disconnectChatWebSocket(): void {

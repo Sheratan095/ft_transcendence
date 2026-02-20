@@ -259,8 +259,8 @@ function handleResetButtonClick() {
     resetLocalGame();
     showSuccessToast('Game reset!');
   } else {
-    // Reload page for online mode
-    location.reload();
+    // Reload page for online mode by navigating back to tris
+    goToRoute('/tris');
   }
 }
 
