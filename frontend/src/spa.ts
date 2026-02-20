@@ -124,7 +124,7 @@ const routes: Record<string, RouteConfig> = {
       if (!el) return;
       // Dynamically import the tris page renderer
       try {
-        const mod = await import('./components/tris/TrisPage');
+        const mod = await import('./components/tris/TrisMenù');
         const isLoggedIn = isLoggedInClient();
         await mod.renderTrisPage(el, isLoggedIn);
       } catch (err) {

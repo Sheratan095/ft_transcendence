@@ -10,7 +10,7 @@ import { getIntlayer, getLocaleFromStorage, setLocaleInStorage } from "intlayer"
 import { connectNotificationsWebSocket, isNotificationsWebSocketConnected } from './components/shared/Notifications';
 import { setFriendsManager } from './components/shared/Notifications';
 import { FriendsManager } from './components/profile/FriendsManager';
-import { setTrisFriendsManager } from './lib/tris-ui';
+import { setTrisFriendsManager } from './components/tris/modal';
 import { initSlideshow, goToSlide } from './lib/slideshow';
 import { initTheme } from './lib/theme';
 import { initCardHoverEffect } from './lib/card';
