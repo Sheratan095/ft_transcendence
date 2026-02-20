@@ -165,16 +165,6 @@ function modifyIndex()
     
     // Clicks are handled via event delegation in setupGlobalClickHandlers()
   }
-
-  const showTournamentsBtn = document.getElementById('tournamentListButton');
-  if (showTournamentsBtn) {
-    showTournamentsBtn.classList.remove('hidden');
-  }
-
-  const showTournamentsBtnStatic = document.getElementById('tournamentListButton-static');
-  if (showTournamentsBtnStatic) {
-    showTournamentsBtnStatic.classList.remove('hidden');
-  }
 }
 
 function initUserServices(path: string)

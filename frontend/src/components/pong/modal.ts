@@ -477,6 +477,9 @@ export async function openPongModal(mode: PongModeType = 'online')
 			if (textSpan) textSpan.textContent = '--------';
 		}
 
+		document.body.style.overflow = 'hidden'; // SCROLL LOCK
+		document.getElementsByTagName('html')[0].style.overflow = 'hidden'; // Ensure html scroll is also unlocked
+		console.log('[Modal] Opening Pong modal in mode:', mode, document.body.style.overflow);
 		modal.classList.remove('hidden');
 
 		const userId = getUserId();
@@ -608,7 +611,8 @@ export function closePongModal()
 	const modal = document.getElementById('pong-modal');
 	if (modal) {
 		modal.classList.add('hidden');
-		
+		document.body.style.overflow = 'auto'; // UNLOCK SCROLLING
+		document.getElementsByTagName('html')[0].style.overflow = 'auto'; // Ensure html scroll is also unlocked
 		// Reset button state on close for next time
 		const startBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
 		if (startBtn) {
