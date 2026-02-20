@@ -4,7 +4,7 @@ import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
 import { showTournamentListModal } from '../tournaments/TournamentsList';
 
-export async function renderPongPage(container: HTMLElement)
+export async function renderPongPage(container: HTMLElement, isLoggedIn: boolean = true)
 {
 	const template = document.getElementById('pong-template') as HTMLTemplateElement | null;
 	if (!template)
@@ -29,7 +29,7 @@ export async function renderPongPage(container: HTMLElement)
 		renderPongStats(chartInner);
 
 	// Attach button handlers
-	attachBtnHandlers(container);
+	attachBtnHandlers(container, isLoggedIn);
 }
 
 async function renderPongStats(container: HTMLElement)
@@ -37,7 +37,29 @@ async function renderPongStats(container: HTMLElement)
 	const userId = getUserId();
 	if (!userId)
 	{
-		container.innerHTML = '<div class="text-red-600">You must be logged in to view stats</div>';
+		// Display a red error graph instead of text
+		try {
+			const { createGameStatsChart } = await import('../profile/UserCardCharts');
+			// Create a red graph showing failed state (0 wins, 100 losses)
+			await createGameStatsChart(
+				container.id || 'pong-user-chart-inner',
+				'pong',
+				{ pongWins: 0, pongLosses: 100 },
+				userId || 'guest'
+			);
+		} catch (chartErr) {
+			console.warn('Failed to render error graph:', chartErr);
+			container.innerHTML = '<div class="text-red-600 text-center">Unable to load stats</div>';
+		}
+
+			// Still update the win/loss text
+		const winsEl = document.getElementById('pong-user-wins');
+		if (winsEl)
+			winsEl.textContent = `Wins: --`;
+
+		const lossesEl = document.getElementById('pong-user-losses');
+		if (lossesEl)
+			lossesEl.textContent = `Losses: --`;
 		return;
 	}
 
@@ -71,23 +93,54 @@ async function renderPongStats(container: HTMLElement)
 	}
 	catch (err) {
 		console.error('Error fetching pong stats:', err);
-		container.innerHTML = '<div class="text-red-600">Failed to load stats</div>';
+		// Display a red error graph instead of text
+		try {
+			const { createGameStatsChart } = await import('../profile/UserCardCharts');
+			// Create a red graph showing failed state (0 wins, 100 losses)
+			await createGameStatsChart(
+				container.id || 'pong-user-chart-inner', 
+				'pong', 
+				{ pongWins: 0, pongLosses: 100 }, 
+				userId || 'guest'
+			);
+		} catch (chartErr) {
+			console.warn('Failed to render error graph:', chartErr);
+			container.innerHTML = '<div class="text-red-600 text-center">Unable to load stats</div>';
+		}
+		
+		// Still update the win/loss text
+		const winsEl = document.getElementById('pong-user-wins');
+		if (winsEl)
+			winsEl.textContent = `Wins: --`;
+
+		const lossesEl = document.getElementById('pong-user-losses');
+		if (lossesEl)
+			lossesEl.textContent = `Losses: --`;
 	}
 }
 
-async function attachBtnHandlers(container: HTMLElement)
+async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = true)
 {
 	const btnOnline = container.querySelector('#pong-play-online') as HTMLButtonElement | null;
-	if (btnOnline) btnOnline.addEventListener('click', async () =>
-	{
-		try {
-			await openPongModal('online');
+	if (btnOnline) {
+		if (!isLoggedIn) {
+			btnOnline.disabled = true;
+			btnOnline.title = 'Sign in to play online';
+			btnOnline.style.opacity = '0.5';
+			btnOnline.style.cursor = 'not-allowed';
+		} else {
+			btnOnline.addEventListener('click', async () =>
+			{
+				try {
+					await openPongModal('online');
+				}
+				catch (err) {
+					console.error(err);
+					showErrorToast('Failed to start online pong');
+				}
+			});
 		}
-		catch (err) {
-			console.error(err);
-			showErrorToast('Failed to start online pong');
-		}
-	});
+	}
 
 	const btnOffline1v1 = container.querySelector('#pong-play-offline-1v1') as HTMLButtonElement | null;
 	if (btnOffline1v1) btnOffline1v1.addEventListener('click', async () =>
@@ -115,20 +168,29 @@ async function attachBtnHandlers(container: HTMLElement)
 	});
 
 	const btnInviteFriend = container.querySelector('#pong-invite-friend') as HTMLButtonElement | null;
-	if (btnInviteFriend) btnInviteFriend.addEventListener('click', async () =>
-	{
-		await openGameInviteModal('pong', async (friendId: string) =>
-		{
-			try {
-				await openPongModal('online');
-				showSuccessToast('Game invite sent!');
-			}
-			catch (err) {
-				console.error('Failed to send game invite:', err);
-				showErrorToast('Failed to send game invite');
-			}
-		});
-	});
+	if (btnInviteFriend) {
+		if (!isLoggedIn) {
+			btnInviteFriend.disabled = true;
+			btnInviteFriend.title = 'Sign in to invite friends';
+			btnInviteFriend.style.opacity = '0.5';
+			btnInviteFriend.style.cursor = 'not-allowed';
+		} else {
+			btnInviteFriend.addEventListener('click', async () =>
+			{
+				await openGameInviteModal('pong', async (friendId: string) =>
+				{
+					try {
+						await openPongModal('online');
+						showSuccessToast('Game invite sent!');
+					}
+					catch (err) {
+						console.error('Failed to send game invite:', err);
+						showErrorToast('Failed to send game invite');
+					}
+				});
+			});
+		}
+	}
 
 	const btnTournaments = container.querySelector('#pong-tournaments-btn') as HTMLButtonElement | null;
 	if (btnTournaments) btnTournaments.addEventListener('click', () =>

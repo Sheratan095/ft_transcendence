@@ -6,6 +6,31 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+		#pong-canvas {
+			position: relative !important;
+			display: block !important;
+			width: 100% !important;
+			margin: 0 !important;
+			padding: 0 !important;
+			outline: none !important;
+			pointer-events: none !important;
+		}
+
+		/* Darken header shader in light mode only */
+		html:not(.dark) #header-shader {
+			background-color: #e14f2b !important; /* slightly darker orange */
+		}
+
+		/* Hide scrollbar */
+		html {
+			scrollbar-width: none;
+			-ms-overflow-style: none;
+		}
+
+		html::-webkit-scrollbar {
+			display: none;
+		}
+
 /* Theme transition animation */
 html.theme-transitioning,
 html.theme-transitioning * {

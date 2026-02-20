@@ -2,6 +2,12 @@ import { showErrorToast } from "../shared";
 
 export async function showTournamentListModal()
 {
+  const modal = document.getElementById('tournament-modal');
+  if (!modal) {
+    console.error('Tournament modal not found');
+    return;
+  }
+
   try
   {
     const response = await fetch('/api/pong/get-all-tournaments', {
@@ -15,13 +21,17 @@ export async function showTournamentListModal()
     if (!response.ok)
     {
       console.error('Failed to load tournaments', response.status);
+      showErrorToast('Failed to load tournaments');
       return;
     }
 
     const tournaments = await response.json();
 
     const list = document.getElementById('list');
-    if (!list) return;
+    if (!list) {
+      console.error('Tournament list element not found');
+      return;
+    }
 
     list.innerHTML = '';
 
@@ -52,6 +62,9 @@ export async function showTournamentListModal()
 
       list.appendChild(item);
     });
+
+    // Show the modal after populating the list
+    modal.classList.remove('hidden');
   }
   catch (err)
   {
@@ -85,18 +98,9 @@ function escapeHtml(str: string)
 // Wire modal open/close when this module is loaded
 document.addEventListener('DOMContentLoaded', () =>
 {
-  const openBtn = document.getElementById('tournamentListButton');
   const modal = document.getElementById('tournament-modal');
   const backdrop = document.getElementById('tournament-backdrop');
   const closeBtn = document.getElementById('tournament-close-btn');
-
-  async function openModal()
-  {
-    if (!modal)
-      return;
-    modal.classList.remove('hidden');
-    await showTournamentListModal();
-  }
 
   function closeModal()
   {
@@ -106,8 +110,6 @@ document.addEventListener('DOMContentLoaded', () =>
     modal.classList.add('hidden');
   }
 
-  if (openBtn)
-    openBtn.addEventListener('click', openModal);
   if (closeBtn)
     closeBtn.addEventListener('click', closeModal);
   if (backdrop)

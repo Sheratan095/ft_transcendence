@@ -132,12 +132,6 @@ function attachPongCardListener()
 	}
 	pongCard.addEventListener('click', (e) =>
 	{
-		if (!isLoggedInClient())
-		{
-			showErrorToast('You must be logged in to play Pong');
-			return;
-		}
-
 		e.preventDefault();
 		window.location.href = '/pong';
 	});
@@ -166,11 +160,7 @@ function attachTrisCardListener() {
 
   console.log('Attaching tris card listener');
   trisCard.addEventListener('click', async (e) => {
-    if (!isLoggedInClient())
-    {
-      showErrorToast('You must be logged in to play Tris');
-      return;
-    }
+
 
 
     e.preventDefault();

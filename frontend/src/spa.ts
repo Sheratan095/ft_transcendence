@@ -94,18 +94,13 @@ const routes: Record<string, RouteConfig> = {
   '/pong': { 
     render: async () =>
       {
-        if (!isLoggedInClient())
-        {
-          goToRoute('/login');
-          showErrorToast('Please sign in to play Pong');
-          return;
-        }
       animatePolygonToBottom();
       const el = document.getElementById('main-content');
       if (!el) return;
       try {
         const mod = await import('./components/pong/PongMenù.ts');
-        await mod.renderPongPage(el);
+        const isLoggedIn = isLoggedInClient();
+        await mod.renderPongPage(el, isLoggedIn);
       } catch (err) {
         console.error('Failed to render Pong page:', err);
         if (el) el.innerHTML = '<div class="text-red-600">Failed to load Pong page</div>';
@@ -114,19 +109,14 @@ const routes: Record<string, RouteConfig> = {
   },
   '/tris': { 
     render: async () => {
-      if (!isLoggedInClient())
-      {
-        goToRoute('/login');
-        showErrorToast('Please sign in to play Tris');
-        return;
-      }
       animatePolygonToBottom();
       const el = document.getElementById('main-content');
       if (!el) return;
       // Dynamically import the tris page renderer
       try {
         const mod = await import('./components/tris/TrisPage');
-        await mod.renderTrisPage(el);
+        const isLoggedIn = isLoggedInClient();
+        await mod.renderTrisPage(el, isLoggedIn);
       } catch (err) {
         console.error('Failed to render Tris page:', err);
         if (el) el.innerHTML = '<div class="text-red-600">Failed to load Tris page</div>';

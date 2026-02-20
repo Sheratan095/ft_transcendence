@@ -8,28 +8,10 @@
 	<link href="./tailwind.css" rel="stylesheet" />
 	<script type="module" src="./src/main.ts"></script>
 
-	<!-- Pong canvas layout fix -->
-	<style>
-		#pong-canvas {
-			position: relative !important;
-			display: block !important;
-			width: 100% !important;
-			margin: 0 !important;
-			padding: 0 !important;
-			outline: none !important;
-			pointer-events: none !important;
-		}
-
-		/* Darken header shader in light mode only */
-		html:not(.dark) #header-shader {
-			background-color: #e14f2b !important; /* slightly darker orange */
-		}
-	</style>
-
 </head>
 
 <html lang="en"
- class="dark overflow-hidden selection:bg-accent-orange
+ class="dark overflow-x-hidden selection:bg-accent-orange
   dark:selection:bg-accent-pink selection:text-black dark:selection:text-white">
 
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -50,8 +32,8 @@
 
 	<!-- Search bar, small user card and theme switch button-->
 	<div id="top-bar"
-		class="flex z-20 items-end justify-end p-2 space-x-4 text-black dark:text-white w-full shadow-md
-		border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-blue dark:hover:border-accent-green transition-colors">
+		class=" flex z-20 items-end justify-end p-2 space-x-4 text-black dark:text-white w-full shadow-md
+		border-b-[2px] border-gray-800 dark:border-gray-300 hover:border-accent-blue dark:hover:border-accent-green transition-colors bg-gray-100 dark:bg-gray-900">
 
 		<!-- User options -->
 		<div id="user-options" title="Go to profile"
@@ -511,15 +493,15 @@
 			</div>
 		</section>
 
-		<!-- Main Content: Slider (screen center) + Info (extreme right) -->
-		<div class="w-full relative min-h-[60vh] max-w-[60vw] flex items-center px-4 py-8">
-			<!-- Slideshow Wrapper - Absolutely Centered on Screen -->
-			<div class="absolute">
+		<div class="w-full relative min-h-[60vh] flex flex-col lg:flex-row items-center lg:items-start 
+            justify-center lg:justify-between px-[12vw] py-8 gap-12">
+			<!-- Slideshow Wrapper -->
+			<div class="flex-shrink-0">
 				<div class="card relative flex items-center justify-center group shadow-[10px_10px_0_0_#ff9d00] dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 dark:hover:brightness-110 transition-all duration-300 rounded-none dark:rounded-xl">
 				<!-- Previous Button -->
 				<button id="slideshow-prev-btn" type="button" aria-label="Previous slide"
 				class="absolute top-1/2 -translate-y-1/2 p-2 sm:p-3 dark:bg-accent-pink bg-accent-blue text-black dark:text-white 
-					font-extrabold shadow-md hover:brightness-90 active:scale-95 transition-all rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer pointer-events-auto"
+					font-extrabold shadow-md hover:brightness-110 active:scale-95 transition-all rounded-full w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center cursor-pointer pointer-events-auto"
 				style="z-index: 900; left: -3rem;">
 					<svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -590,11 +572,11 @@
 			</div>
 			</div>
 
-			<!-- Home Info Card - Extreme Right -->
-			<div class="absolute right-4 top-1/2 -translate-y-1/2">
+			<!-- Home Info Card -->
+			<div class="flex-shrink-0">
 				<div id="home-info"
 					class="card shadow-[10px_10px_0_0_#ff9d00] overflow-hidden rounded-xl
-					dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-90 transition-all duration-300 w-96">
+					dark:shadow-[10px_10px_0_0_#0dff66] hover:shadow-lg dark:hover:shadow-lg hover:brightness-110 transition-all duration-300 w-96">
 				<div class="flex w-full flex-col items-start gap-6 p-8">
 					<img src="./42_Logo.svg" alt="42 Logo"
 						class="w-48 h-48 flex-shrink-0 dark:invert self-center" />
@@ -618,103 +600,96 @@
 
 	<!-- Pong Page template -->
 	<template id="pong-template">
-	<div class="bg-neutral-950 min-h-screen py-24">
-		<div class="mx-auto max-w-7xl px-6">
-
-		<!-- Page Heading -->
-		<div class="text-center mb-16">
-			<h1 class="text-5xl font-semibold tracking-tight text-white">
-			Pong
-			</h1>
-			<p class="mt-4 text-neutral-400">
-			Classic paddle game with local and online multiplayer.
-			</p>
-		</div>
+	<div class=" min-h-screen">
+		<div class="mx-auto max-w-7xl px-6 pt-[2vw] cards">
 
 		<!-- Seamless Bento Wrapper -->
-		<div class="mx-auto max-w-6xl border border-neutral-800 rounded-3xl overflow-hidden bg-neutral-900">
+		<div class="card border border-gray-300 dark:border-neutral-800 rounded-2xl overflow-hidden bg-white dark:bg-neutral-900 p-6
+					shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] 
+					hover:shadow-lg dark:hover:shadow-lg dark:hover:brightness-110 hover:brightness-105 transition-all duration-300">
 
-			<div class="grid lg:grid-cols-3 lg:grid-rows-2">
+					
+			<div class="grid lg:grid-cols-3 lg:grid-rows-2 gap-4 items-stretch">
 
 			<!-- LEFT LARGE (row-span-2) -->
-			<div class="lg:row-span-2 border-r border-neutral-800 p-10 flex flex-col">
-				<h2 class="text-2xl font-semibold text-white">
+			<div class="lg:row-span-2 h-full border border-gray-300 dark:border-neutral-800 rounded-2xl p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
 				Play Online
 				</h2>
-				<p class="mt-3 text-neutral-400">
+				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
 				Match with players in real time and climb the leaderboard.
 				</p>
 
-				<div class="mt-auto pt-10">
+				<div class="mt-auto pt-20">
 				<button id="pong-play-online"
-					class="w-full rounded-xl bg-white text-black py-4 font-medium hover:bg-neutral-200 transition">
-					🎮 Start Matchmaking
+					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition">
+						 Start Matchmaking
 				</button>
 				</div>
 			</div>
 
 			<!-- TOP MIDDLE -->
-			<div class="border-r border-neutral-800 border-b border-neutral-800 p-8 flex flex-col">
-				<h3 class="text-xl font-semibold text-white">
+			<div class="border border-gray-300 dark:border-neutral-800 rounded-2xl p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
 				Offline Modes
 				</h3>
 
-				<div class="mt-6 flex flex-col gap-4">
+				<div class="mt-4 flex flex-col gap-3">
 				<button id="pong-play-offline-1v1"
-					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
 					👥 Local 1v1
 				</button>
 
 				<button id="pong-play-offline-ai"
-					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
 					🤖 Play vs AI
 				</button>
 				</div>
 			</div>
 
-			<!-- BOTTOM MIDDLE -->
-			<div class="border-r border-neutral-800 p-8 flex flex-col">
-				<h3 class="text-xl font-semibold text-white">
+			<!-- RiGHT -->
+			<div class="border border-gray-300 dark:border-neutral-800 rounded-2xl p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
 				Tournaments
 				</h3>
 
-				<p class="mt-3 text-sm text-neutral-400">
+				<p class="mt-2 text-xs text-gray-600 dark:text-neutral-400">
 				Compete in structured brackets and seasonal events.
 				</p>
 
-				<div class="mt-auto pt-6">
+				<div class="mt-auto pt-3">
 				<button id="pong-tournaments-btn"
-					class="w-full rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					class="w-full rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
 					🏆 View Tournaments
 				</button>
 				</div>
 			</div>
 
-			<!-- RIGHT LARGE (row-span-2) -->
-			<div class="lg:row-span-2 p-10 flex flex-col">
-				<h2 class="text-2xl font-semibold text-white">
+			<!-- BOTTOM MIDDLE -->
+			<div class="lg:row-span-2 border border-gray-300 dark:border-neutral-800 rounded-2xl p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
 				Your Stats
 				</h2>
 
-				<div class="mt-6 flex items-center justify-between">
-				<div class="text-neutral-400 space-y-2">
+				<div class="mt-4 flex items-center justify-between">
+				<div class="text-gray-600 dark:text-neutral-400 space-y-1 text-sm">
 					<div id="pong-user-wins">Wins: 0</div>
 					<div id="pong-user-losses">Losses: 0</div>
 				</div>
 
-				<div id="pong-user-chart" class="w-24 h-24">
+				<div id="pong-user-chart" class="w-16 h-16">
 					<div id="pong-user-chart-inner" class="w-full h-full"></div>
 				</div>
 				</div>
 
-				<div class="mt-10 border-t border-neutral-800 pt-8 flex flex-col gap-4">
+				<div class="mt-5 border-t border-gray-300 dark:border-neutral-800 pt-4 flex flex-col gap-3">
 				<button id="pong-invite-friend"
-					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
 					👥 Invite Friend
 				</button>
 
 				<button id="pong-reset-local"
-					class="rounded-lg bg-neutral-800 py-3 text-white hover:bg-neutral-700 transition">
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
 					🔄 Reset Local Data
 				</button>
 				</div>
@@ -970,7 +945,7 @@
 							title="create group"
 							id="create-group-btn"
 							class="mt-3 w-full bg-accent-orange dark:bg-accent-green text-black px-4 py-2 rounded-xl font-extrabold text-sm 
-									hover:brightness-90 dark:hover:brightness-110 transition-all duration-200 uppercase tracking-tight"
+									hover:brightness-110 dark:hover:brightness-110 transition-all duration-200 uppercase tracking-tight"
 							data-i18n="chat.create-group">
 						</button>
 					</div>
