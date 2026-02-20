@@ -84,8 +84,95 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
   // ===== Username =====
   const username = cardEl.querySelector('#profile-username') as HTMLElement;
+  const editUsernameBtn = cardEl.querySelector('#profile-edit-username-btn') as HTMLButtonElement;
   if (username) {
     username.textContent = user.username || user.email || 'User';
+  }
+
+  // ===== Username Edit Handler =====
+  if (editUsernameBtn && username) {
+    editUsernameBtn.addEventListener('click', async () => {
+      const currentUsername = username.textContent || '';
+      
+      // Create input field
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = currentUsername;
+      input.className = 'text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green bg-transparent border-b-2 border-accent-orange dark:border-accent-green focus:outline-none';
+      
+      // Replace the h1 with input
+      username.replaceWith(input);
+      input.focus();
+      input.select();
+      
+      // Handle Enter key
+      const handleKeyDown = async (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+          const newUsername = input.value.trim();
+          
+          if (!newUsername) {
+            alert('Username cannot be empty');
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          if (newUsername === currentUsername) {
+            input.replaceWith(username);
+            input.removeEventListener('keydown', handleKeyDown);
+            input.removeEventListener('blur', handleBlur);
+            return;
+          }
+          
+          try {
+            const res = await fetch(`/api/users/update-user`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ newUsername }),
+            });
+            
+            if (!res.ok) throw new Error(`Username update failed: ${res.status}`);
+            
+            const responseBody = await res.json();
+            
+            if (responseBody && responseBody.username) {
+              username.textContent = responseBody.username;
+              user.username = responseBody.username;
+              SaveCurrentUserProfile(user.id);
+              
+              // Update topbar username if it exists
+              const topbarUsername = document.getElementById('topbar-username');
+              if (topbarUsername) {
+                topbarUsername.textContent = responseBody.username;
+              }
+            }
+          } catch (err) {
+            console.error('Failed to update username:', err);
+            alert('Failed to update username. Please try again.');
+          }
+          
+          input.replaceWith(username);
+          input.removeEventListener('keydown', handleKeyDown);
+          input.removeEventListener('blur', handleBlur);
+        } else if (e.key === 'Escape') {
+          input.replaceWith(username);
+          input.removeEventListener('keydown', handleKeyDown);
+          input.removeEventListener('blur', handleBlur);
+        }
+      };
+      
+      // Handle blur to cancel edit
+      const handleBlur = () => {
+        input.replaceWith(username);
+        input.removeEventListener('keydown', handleKeyDown);
+        input.removeEventListener('blur', handleBlur);
+      };
+      
+      input.addEventListener('keydown', handleKeyDown);
+      input.addEventListener('blur', handleBlur);
+    });
   }
 
   // ===== 2FA Toggle =====
