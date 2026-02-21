@@ -71,12 +71,13 @@ services/pong:
     TOURNAMENT_EARNED_WIN_POINTS=200 # Points awarded for winning a tournament
     COOLDOWN_BETWEEN_POINTS_MS=3000 # Time between points in milliseconds
     PADDLE_HEIGHT=0.3 # Height of the paddle respective to the game area (0.5 = half the game area)
-    PADDLE_SPEED=0.7 # Speed of the paddle per SECOND (1.5 = 150% of the game area per second)
+    PADDLE_SPEED=2 # Speed of the paddle per SECOND (1.5 = 150% of the game area per second)
     MAX_BOUNCE_ANGLE=60 # Maximum angle (in degrees) for ball deflection upon paddle hit
     BALL_RADIUS=0.015 # Radius of the ball respective to the game area (0.02 = 2% of the game area)
-    BALL_INITIAL_SPEED=0.2 # Initial ball speed per SECOND (0.5 = 50% of the game area per second)
+    BALL_INITIAL_SPEED=0.4 # Initial ball speed per SECOND (0.5 = 50% of the game area per second)
     BALL_SPEED_FACTOR=1.07 # Factor by which the ball speed increases after each paddle hit
-    BALL_MAX_SPEED=0.7 # Maximum ball speed per SECOND to prevent infinite acceleration
+    BALL_MAX_SPEED=0.9 # Maximum ball speed per SECOND to prevent infinite acceleration
+    FRAME_RATE=120
     MIN_PLAYERS_FOR_TOURNAMENT_START=4
     HOST=127.0.0.1
 

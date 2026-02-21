@@ -139,7 +139,7 @@ export class GameManager
 		if (this.gameState.isCooldown) {
 			// Convert ms to roughly frames (assuming 60fps if deltaTime=1)
 			// deltaTime is usually constant in this simple implementation
-			this.gameState.cooldownTimer -= deltaTime * (1000 / 60); 
+			this.gameState.cooldownTimer -= deltaTime * (1000 / Process.env.FRAME_RATE); 
 			if (this.gameState.cooldownTimer <= 0) {
 				this.gameState.isCooldown = false;
 				this.gameState.ball.active = true;
