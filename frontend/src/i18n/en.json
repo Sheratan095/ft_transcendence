@@ -68,5 +68,16 @@
   "profile.winsLabel": "Wins:",
   "toast.logout": "Logged out successfully",
   "toast.error-logout": "Error logging out. Please try again.",
-  "toast.profileDelete": "Profile deleted successfully"
+  "toast.profileDelete": "Profile deleted successfully",
+  "toast.pleaseSignIn": "Please sign in to view your profile",
+  "toast.pongInviteSent": "Pong invite sent to {{ user }}",
+  "toast.pongInviteFailed": "Failed to send Pong invite",
+  "toast.trisInviteSent": "Tris invite sent to {{ user }}",
+  "toast.trisInviteFailed": "Failed to send Tris invite",
+  "toast.inviteModalNotFound": "Invite modal elements not found",
+  "toast.failedToSendInvite": "Failed to send {{ game }} invite",
+  "toast.inviteSent": "Invite sent!",
+  "toast.inviteFailed": "Failed to invite",
+  "error.pongCardNotFound": "Pong card button not found",
+  "error.trisCardNotFound": "Tris card button not found"
 }

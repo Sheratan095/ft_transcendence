@@ -68,5 +68,16 @@
   "profile.winsLabel": "Victoires:",
   "toast.logout": "Déconnecté avec succès",
   "toast.error-logout": "Erreur lors de la déconnexion. Veuillez réessayer.",
-  "toast.profileDelete": "Profil supprimé avec succès"
+  "toast.profileDelete": "Profil supprimé avec succès",
+  "toast.pleaseSignIn": "Veuillez vous connecter pour voir votre profil",
+  "toast.pongInviteSent": "Invitation Pong envoyée à {{ user }}",
+  "toast.pongInviteFailed": "Échec de l'envoi de l'invitation Pong",
+  "toast.trisInviteSent": "Invitation Tris envoyée à {{ user }}",
+  "toast.trisInviteFailed": "Échec de l'envoi de l'invitation Tris",
+  "toast.inviteModalNotFound": "Éléments de la fenêtre d'invitation introuvables",
+  "toast.failedToSendInvite": "Échec de l'envoi de l'invitation {{ game }}",
+  "toast.inviteSent": "Invitation envoyée !",
+  "toast.inviteFailed": "Échec de l'invitation",
+  "error.pongCardNotFound": "Bouton de carte Pong introuvable",
+  "error.trisCardNotFound": "Bouton de carte Tris introuvable"
 }

@@ -9,6 +9,7 @@ import { initSlideshow } from './lib/slideshow';
 import { initPong } from './components/pong/ws.ts';
 import { main } from './main.ts';
 import { initUserServices } from './main.ts';
+import { t } from './lib/intlayer.ts';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -57,7 +58,7 @@ const routes: Record<string, RouteConfig> = {
     if (!el) return;
     if (!isLoggedInClient()) {
     goToRoute('/login');
-    showErrorToast('Please sign in to view your profile');
+    showErrorToast(t('toast.pleaseSignIn'));
     return;
     }
     animatePolygonToBottom();

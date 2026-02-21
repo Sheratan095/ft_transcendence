@@ -268,8 +268,8 @@ async function selectChat(chatId: string) {
             if (!chat.otherUserId) return;
             try {
               const ok = await sendPongInvite(chat.otherUserId);
-              if (ok) showSuccessToast(`Pong invite sent to ${chat.otherUserId}`);
-              else showErrorToast('Failed to send Pong invite');
+                  if (ok) showSuccessToast(t('toast.pongInviteSent', { user: chat.otherUserId }));
+                  else showErrorToast(t('toast.pongInviteFailed'));
             } catch (err) {
               console.error('Pong invite error', err);
               showErrorToast('Failed to send Pong invite');
@@ -292,13 +292,13 @@ async function selectChat(chatId: string) {
           `;
           trisBtn.addEventListener('click', () => {
             if (!chat.otherUserId) return;
-            try {
-              createTrisCustomGame(chat.otherUserId);
-              showSuccessToast(`Tris invite sent to ${chat.otherUserId}`);
-            } catch (err) {
-              console.error('Tris invite error', err);
-              showErrorToast('Failed to send Tris invite');
-            }
+                try {
+                  createTrisCustomGame(chat.otherUserId);
+                  showSuccessToast(t('toast.trisInviteSent', { user: chat.otherUserId }));
+                } catch (err) {
+                  console.error('Tris invite error', err);
+                  showErrorToast(t('toast.trisInviteFailed'));
+                }
           });
         } else {
           trisBtn.classList.remove('hidden');
