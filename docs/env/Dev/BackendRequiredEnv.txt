@@ -11,7 +11,7 @@ gateway:
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
     USE_HTTPS=true
-    HTTPS_CERTS_PATH=../certs/certs/
+    HTTPS_CERTS_PATH=../certs/
     RATE_LIMIT_ACTIVE=false
     HOST=127.0.0.1
 
