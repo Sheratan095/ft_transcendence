@@ -94,8 +94,7 @@
   "toast.chat.aChat": "una chat",
   "toast.chat.someone": "qualcuno",
   "error.pongCardNotFound": "Pulsante della carta Pong non trovato",
-  "error.trisCardNotFound": "Pulsante della carta Tris non trovato"
-  ,
+  "error.trisCardNotFound": "Pulsante della carta Tris non trovato",
   "toast.notifications.connected": "Connesso alle notifiche",
   "toast.notifications.disconnected": "Disconnesso dalle notifiche",
   "toast.notifications.error": "Errore di connessione alle notifiche",

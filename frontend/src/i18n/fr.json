@@ -94,8 +94,7 @@
   "toast.chat.aChat": "un chat",
   "toast.chat.someone": "quelqu'un",
   "error.pongCardNotFound": "Bouton de carte Pong introuvable",
-  "error.trisCardNotFound": "Bouton de carte Tris introuvable"
-  ,
+  "error.trisCardNotFound": "Bouton de carte Tris introuvable",
   "toast.notifications.connected": "Connecté aux notifications",
   "toast.notifications.disconnected": "Déconnecté des notifications",
   "toast.notifications.error": "Erreur de connexion aux notifications",
