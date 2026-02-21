@@ -1,4 +1,5 @@
 import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } from './Toast';
+import { t } from '../../lib/intlayer';
 import { FriendsManager } from '../profile/FriendsManager';
 import { openTrisModalAndJoinGame } from '../tris/modal';
 import { openPongModal } from '../pong/modal';
@@ -56,7 +57,7 @@ export function connectNotificationsWebSocket() {
   notifSocket.addEventListener('open', () => {
     console.log('Notifications WebSocket connected');
     connectionAttempts = 0; // Reset attempt counter on successful connection
-    showInfoToast('Connected to notifications', { duration: 2000 });
+		showInfoToast(t('toast.notifications.connected'), { duration: 2000 });
   });
 
   notifSocket.addEventListener('message', (event) => {
@@ -80,16 +81,16 @@ export function connectNotificationsWebSocket() {
       setTimeout(() => {
         connectNotificationsWebSocket();
       }, RECONNECT_DELAY);
-    } else {
-      showWarningToast('Disconnected from notifications', { duration: 2000 });
-    }
+		} else {
+			showWarningToast(t('toast.notifications.disconnected'), { duration: 2000 });
+		}
   });
 
-  notifSocket.addEventListener('error', (error) => {
-    console.error('Notifications WebSocket error:', error);
-    showErrorToast('Notification connection error', { duration: 3000 });
-    notifSocket = null;
-  });
+	notifSocket.addEventListener('error', (error) => {
+		console.error('Notifications WebSocket error:', error);
+		showErrorToast(t('toast.notifications.error'), { duration: 3000 });
+		notifSocket = null;
+	});
 }
 
 export function isNotificationsWebSocketConnected(): boolean {
@@ -119,35 +120,35 @@ function handleNotificationEvent(data: any) {
 
 		case 'friend.online':
 			{
-				const username = data.data?.username || 'A friend';
-				showInfoToast(`${username} is now online`, { duration: 3000 });
+								const username = data.data?.username || t('toast.friend.someone');
+								showInfoToast(t('toast.friend.online', { user: username }), { duration: 3000 });
 			}
 			break;
 
 		case 'friend.offline':
 			{
-				const username = data.data?.username || 'A friend';
-				showInfoToast(`${username} is now offline`, { duration: 3000 });
+								const username = data.data?.username || t('toast.friend.someone');
+								showInfoToast(t('toast.friend.offline', { user: username }), { duration: 3000 });
 			}
 			break;
 
 		case 'friend.request':
 			{
 				console.log('[Notifications] friend.request data:', data);
-				const username = data.data?.username || 'Someone';
+				const username = data.data?.username || t('toast.friend.someone');
 				let userId = data.data?.userId || data.data?.id || data.data?.requesterId || data.userId || data.id;
 				console.log('[Notifications] Extracted userId:', userId, 'from data:', data.data);
-				
+            
 				// Notify subscribers
 				if (userId) {
 					notifyRelationshipEvent('friend.request', userId, 'pending');
 				}
-				
-				showWarningToast(`Friend request from ${username}`, { 
+            
+				showWarningToast(t('toast.friend.request', { user: username }), { 
 					duration: 0, // Keep toast until user acts
 					actions: [
 						{
-							label: '✓ Accept',
+							label: t('toast.action.accept'),
 							style: 'primary',
 							onClick: async () => {
 								console.log('[Notifications] Accept button clicked');
@@ -156,12 +157,12 @@ function handleNotificationEvent(data: any) {
 								console.log('  - username:', username);
 								console.log('  - Full data object:', data);
 								if (!friendsManager) {
-									showErrorToast('Friends manager not initialized', { duration: 3000 });
+									showErrorToast(t('toast.error.friendsManagerNotInitialized'), { duration: 3000 });
 									return;
 								}
 								if (!userId) {
 									console.error('[Notifications] userId is missing. Available data:', data.data);
-									showErrorToast('User ID not available. Data: ' + JSON.stringify(data.data), { duration: 3000 });
+									showErrorToast(t('toast.error.userIdNotAvailable') + ': ' + JSON.stringify(data.data), { duration: 3000 });
 									return;
 								}
 								try {
@@ -187,25 +188,25 @@ function handleNotificationEvent(data: any) {
 											}
 										}
 									} else {
-										showErrorToast(`Failed to accept friend request`, { duration: 3000 });
+										showErrorToast(t('toast.error.acceptFriendFailed'), { duration: 3000 });
 									}
 								} catch (err) {
 									console.error('Error accepting friend request:', err);
-									showErrorToast(`Failed to accept friend request`, { duration: 3000 });
+									showErrorToast(t('toast.error.acceptFriendFailed'), { duration: 3000 });
 								}
 							}
 						},
 						{
-							label: '✕ Reject',
+							label: t('toast.action.reject'),
 							style: 'secondary',
 							onClick: async () => {
 								console.log('[Notifications] Reject button clicked, friendsManager:', friendsManager, 'userId:', userId);
 								if (!friendsManager) {
-									showErrorToast('Friends manager not initialized', { duration: 3000 });
+									showErrorToast(t('toast.error.friendsManagerNotInitialized'), { duration: 3000 });
 									return;
 								}
 								if (!userId) {
-									showErrorToast('User ID not available', { duration: 3000 });
+									showErrorToast(t('toast.error.userIdNotAvailable'), { duration: 3000 });
 									return;
 								}
 								try {
@@ -213,7 +214,7 @@ function handleNotificationEvent(data: any) {
 									const result = await friendsManager.rejectFriendRequest(userId);
 									console.log('[Notifications] Reject result:', result);
 									if (result) {
-										showInfoToast(`You rejected ${username}'s friend request`, { duration: 3000 });
+										showInfoToast(t('toast.info.rejectedFriendRequest', { user: username }), { duration: 3000 });
 										await friendsManager.loadFriendRequests();
 										try {
 											if (window.location.pathname === '/profile') {
@@ -228,11 +229,11 @@ function handleNotificationEvent(data: any) {
 											console.error('Failed to refresh profile after rejecting friend request:', err);
 										}
 									} else {
-										showErrorToast(`Failed to reject friend request`, { duration: 3000 });
+										showErrorToast(t('toast.error.rejectFriendFailed'), { duration: 3000 });
 									}
 								} catch (err) {
 									console.error('Error rejecting friend request:', err);
-									showErrorToast(`Failed to reject friend request`, { duration: 3000 });
+									showErrorToast(t('toast.error.rejectFriendFailed'), { duration: 3000 });
 								}
 							}
 						}
@@ -243,7 +244,7 @@ function handleNotificationEvent(data: any) {
 
 		case 'friend.accept':
 			{
-				const username = data.data?.username || 'A user';
+				const username = data.data?.username || t('toast.friend.someone');
 				const userId = data.data?.userId;
 				
 				// Notify subscribers
@@ -251,7 +252,7 @@ function handleNotificationEvent(data: any) {
 					notifyRelationshipEvent('friend.accept', userId, 'accepted');
 				}
 				
-				showSuccessToast(`${username} accepted your friend request!`, { duration: 4000 });
+				showSuccessToast(t('toast.success.friendAccepted', { user: username }), { duration: 4000 });
 				
 				// Reload friends list if FriendsManager is available
 				if (friendsManager) {
@@ -264,7 +265,7 @@ function handleNotificationEvent(data: any) {
 
 		case 'friend.userAdded':
 			{
-				const username = data.data?.username || 'Someone';
+				const username = data.data?.username || t('toast.friend.someone');
 				const userId = data.data?.userId;
 				
 				// Notify subscribers
@@ -272,7 +273,7 @@ function handleNotificationEvent(data: any) {
 					notifyRelationshipEvent('friend.userAdded', userId, 'accepted');
 				}
 				
-				showSuccessToast(`You are now friends with ${username}!`, { duration: 4000 });
+				showSuccessToast(t('toast.success.nowFriends', { user: username }), { duration: 4000 });
 				
 				// Reload both friends and requests if FriendsManager is available
 				if (friendsManager) {
@@ -288,7 +289,7 @@ function handleNotificationEvent(data: any) {
 
 		case 'friend.rejected':
 			{
-				const username = data.data?.username || 'Someone';
+				const username = data.data?.username || t('toast.friend.someone');
 				const userId = data.data?.userId;
 				
 				// Notify subscribers
@@ -296,13 +297,13 @@ function handleNotificationEvent(data: any) {
 					notifyRelationshipEvent('friend.rejected', userId, 'rejected');
 				}
 				
-				showInfoToast(`${username} rejected your friend request`, { duration: 4000 });
+				showInfoToast(t('toast.info.friendRejected', { user: username }), { duration: 4000 });
 			}
 			break;
 
 		case 'friend.removed':
 			{
-				const username = data.data?.username || 'Someone';
+				const username = data.data?.username || t('toast.friend.someone');
 				const userId = data.data?.userId;
 				
 				// Notify subscribers
@@ -310,7 +311,7 @@ function handleNotificationEvent(data: any) {
 					notifyRelationshipEvent('friend.removed', userId, 'none');
 				}
 				
-				showWarningToast(`${username} removed you as a friend`, { duration: 4000 });
+				showWarningToast(t('toast.warning.removedFriend', { user: username }), { duration: 4000 });
 				
 				// Reload friends list if FriendsManager is available
 				if (friendsManager) {
@@ -323,15 +324,15 @@ function handleNotificationEvent(data: any) {
 
 		case 'game.invite':
 			{
-				const username = data.data?.username || 'Someone';
+				const username = data.data?.username || t('toast.friend.someone');
 				const gameType = data.data?.gameType || 'tris';
 				const gameId = data.data?.gameId || '';
 
-				showWarningToast(`${username} invited you to play ${gameType}`, { 
+				showWarningToast(t('toast.game.invite', { user: username, game: gameType }), { 
 					duration: 0, // Keep toast until user acts
 					actions: [
 						{
-							label: '✓ Accept',
+							label: t('toast.action.accept'),
 							style: 'primary',
 							onClick: async () => {
 								try {
@@ -344,28 +345,28 @@ function handleNotificationEvent(data: any) {
 										// For pong, open the pong modal and join the custom game
 										await openPongModal();
 										joinCustomGame(gameId);
-										showSuccessToast('Joined pong game!', { duration: 2000 });
+										showSuccessToast(t('toast.info.joinedPongGame'), { duration: 2000 });
 									}
 								} catch (err) {
 									console.error('Error accepting game invite:', err);
-									showErrorToast(`Failed to join game`, { duration: 3000 });
+									showErrorToast(t('toast.error.joinGameFailed'), { duration: 3000 });
 								}
 							}
 						},
 						{
-							label: '✕ Reject',
+							label: t('toast.action.reject'),
 							style: 'secondary',
 							onClick: async () => {
 								try {
 									// If it's a tris game, cancel via WebSocket
 									if (gameType === 'tris' && gameId) {
-										showInfoToast(`You rejected ${username}'s invitation`, { duration: 3000 });
+										showInfoToast(t('toast.info.rejectedGameInvite', { user: username }), { duration: 3000 });
 									} else if (gameType === 'pong' && gameId) {
-										showInfoToast(`You rejected ${username}'s pong invitation`, { duration: 3000 });
+										showInfoToast(t('toast.info.rejectedPongInvite', { user: username }), { duration: 3000 });
 									}
 								} catch (err) {
 									console.error('Error rejecting game invite:', err);
-									showErrorToast(`Failed to reject invitation`, { duration: 3000 });
+									showErrorToast(t('toast.error.rejectInviteFailed'), { duration: 3000 });
 								}
 							}
 						}
@@ -377,7 +378,7 @@ function handleNotificationEvent(data: any) {
 		case 'game.started':
 			{
 				const gameId = data.data?.gameId || 'unknown';
-				showInfoToast(`Game ${gameId} has started`, { duration: 3000 });
+				showInfoToast(t('toast.info.gameStarted', { id: gameId }), { duration: 3000 });
 			}
 			break;
 
@@ -385,15 +386,15 @@ function handleNotificationEvent(data: any) {
 			{
 				const gameId = data.data?.gameId || 'unknown';
 				const winner = data.data?.winner || 'Unknown';
-				showInfoToast(`Game ${gameId} ended. Winner: ${winner}`, { duration: 4000 });
+				showInfoToast(t('toast.info.gameEnded', { id: gameId, winner }), { duration: 4000 });
 			}
 			break;
 
 		case 'chat.message':
 			{
-				const sender = data.data?.sender || 'Someone';
-				const preview = data.data?.message?.substring(0, 30) || 'sent you a message';
-				showInfoToast(`${sender}: ${preview}...`, { duration: 4000 });
+				const sender = data.data?.sender || t('toast.friend.someone');
+				const preview = data.data?.message?.substring(0, 30) || t('toast.chat.messagePreview');
+				showInfoToast(t('toast.chat.notification', { sender, preview }), { duration: 4000 });
 			}
 			break;
 
@@ -408,7 +409,7 @@ function handleNotificationEvent(data: any) {
 		case 'Now friend':
 			{
 				console.log('[Notifications] Now friend event:', data);
-				const username = data.data?.username || 'A user';
+				const username = data.data?.username || t('toast.friend.someone');
 				const userId = data.data?.userId || data.data?.id || data.userId || data.id;
 				
 				console.log('[Notifications] Now friends with:', username, 'userId:', userId);
@@ -419,7 +420,7 @@ function handleNotificationEvent(data: any) {
 				}
 				
 				// Show success message
-				showSuccessToast(`You are now friends with ${username}!`, { duration: 4000 });
+				showSuccessToast(t('toast.success.nowFriends', { user: username }), { duration: 4000 });
 				
 				// Reload friends list if FriendsManager is available
 				if (friendsManager) {
@@ -435,6 +436,6 @@ function handleNotificationEvent(data: any) {
 
 		default:
 			console.log('Unknown notification event:', data.event);
-			showInfoToast(`Notification: ${data.event}`, { duration: 3000 });
+			showInfoToast(t('toast.notification.generic', { event: data.event }), { duration: 3000 });
 	}
 }
