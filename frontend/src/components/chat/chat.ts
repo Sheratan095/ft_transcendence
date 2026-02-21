@@ -272,7 +272,7 @@ async function selectChat(chatId: string) {
                   else showErrorToast(t('toast.pongInviteFailed'));
             } catch (err) {
               console.error('Pong invite error', err);
-              showErrorToast('Failed to send Pong invite');
+              showErrorToast(t('toast.pongInviteFailed'));
             }
           });
         } else {
