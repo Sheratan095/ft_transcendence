@@ -1,4 +1,3 @@
-import { getCurrentTheme } from '../../lib/theme';
 import {
   chatSocket,
   currentUserId,
@@ -28,7 +27,7 @@ import {
 import { t } from '../../lib/intlayer';
 import { showSuccessToast, showErrorToast } from '../shared/Toast';
 import { sendGameInvite as sendPongInvite } from '../pong/ws';
-import { createCustomGame as createTrisCustomGame } from '../../lib/tris';
+import { createCustomGame as createTrisCustomGame } from '../tris/ws';
 
 // Re-export for backward compatibility
 export { sendChatInvite } from './chatService';

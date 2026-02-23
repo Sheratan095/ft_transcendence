@@ -11,7 +11,7 @@ gateway:
     DOC_USERNAME=admin
     DOC_PASSWORD=admin
     USE_HTTPS=true
-    HTTPS_CERTS_PATH=/usr/src/certs/certs/
+    HTTPS_CERTS_PATH=/usr/src/certs/
     RATE_LIMIT_ACTIVE=true
     HOST=0.0.0.0
 

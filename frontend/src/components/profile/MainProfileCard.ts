@@ -99,14 +99,48 @@ export async function renderProfileCard(container: HTMLElement | null) {
       const input = document.createElement('input');
       input.type = 'text';
       input.value = currentUsername;
-      // Preserve the flex sizing from the h1 to avoid layout shifts
-      input.className = 'flex-1 min-w-0 sm:text-3xl md:text-4xl tracking-tight text-accent-orange text-transform:lowercase dark:text-accent-green bg-transparent border-b-2 border-accent-orange dark:border-accent-green focus:outline-none overflow-hidden';
+      // Preserve the visual sizing from the h1 but limit width to 20 characters
+      input.className = 'flex-none min-w-0 text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange text-transform:lowercase dark:text-accent-green bg-transparent focus:outline-none overflow-hidden';
+      // Copy computed sizing from the existing h1 so the input keeps identical height
+      try {
+        const computed = window.getComputedStyle(username);
+        (input.style as any).height = computed.height;
+        (input.style as any).lineHeight = computed.lineHeight;
+        (input.style as any).fontSize = computed.fontSize;
+        (input.style as any).fontWeight = computed.fontWeight;
+        (input.style as any).paddingTop = computed.paddingTop;
+        (input.style as any).paddingBottom = computed.paddingBottom;
+        (input.style as any).boxSizing = computed.boxSizing || 'border-box';
+        // Restrict width to 20 characters so layout doesn't change
+        (input.style as any).maxWidth = '20ch';
+        (input.style as any).width = 'auto';
+        // Prevent flex from expanding/shrinking the input while editing
+        (input.style as any).flex = '0 0 auto';
+        (input.style as any).display = 'inline-block';
+        (input.style as any).verticalAlign = 'middle';
+        (input.style as any).margin = '0';
+        (input.style as any).minWidth = '0';
+        (input.style as any).overflow = 'hidden';
+        (input.style as any).textOverflow = 'ellipsis';
+      } catch (e) {
+        // ignore if computed styles aren't available in some environments
+      }
       // Ensure input fills available space without causing parent to grow
       (input.style as any).boxSizing = 'border-box';
-      (input.style as any).width = '100%';
+      // keep max constraint (20ch enforced above)
+      (input.style as any).maxWidth = (input.style as any).maxWidth || '20ch';
       (input.style as any).whiteSpace = 'nowrap';
-      // Use a flex basis of 0 so the input doesn't force parent to expand
-      (input.style as any).flex = '1 1 0%';
+      (input.style as any).padding = '0';
+      (input.style as any).margin = '0';
+      (input.style as any).border = 'none';
+      (input.style as any).outline = 'none';
+      // draw a single continuous underline using background so there are no end-caps
+      (input.style as any).boxShadow = '';
+      (input.style as any).backgroundImage = 'linear-gradient(currentColor, currentColor)';
+      (input.style as any).backgroundSize = '100% 2px';
+      (input.style as any).backgroundRepeat = 'no-repeat';
+      (input.style as any).backgroundPosition = 'bottom left';
+      (input.style as any).display = 'inline-block';
       
       // Replace the h1 with input
       username.replaceWith(input);
@@ -126,9 +160,9 @@ export async function renderProfileCard(container: HTMLElement | null) {
             return;
           }
           
-          // Validate username length (2-30 characters)
+          // Validate username length (2-20 characters)
           if (newUsername.length < 2 || newUsername.length > 20) {
-            showErrorToast('Username must be between 2 and 30 characters long', { duration: 4000, position: 'top-right' });
+            showErrorToast('Username must be between 2 and 20 characters long', { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);

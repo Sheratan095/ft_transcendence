@@ -1,10 +1,9 @@
 import { getUserId } from '../../lib/auth';
-import { initializeModeSpecificBehaviors, resetLocalGame } from '../../lib/tris-mode';
-import { openTrisModal } from '../../lib/tris-ui';
+import { initializeModeSpecificBehaviors, resetLocalGame, openTrisModal } from './modal';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
 import { FriendsManager } from '../profile/FriendsManager';
-import { createCustomGame } from '../../lib/tris';
+import { createCustomGame } from './ws';
 
 export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean = true) {
   const template = document.getElementById('tris-template') as HTMLTemplateElement | null;

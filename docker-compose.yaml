@@ -88,7 +88,7 @@ services:
     environment:
       - HOST=0.0.0.0   
     volumes:
-      - ./backend/certs/certs:/usr/src/certs/certs:ro
+      - ./backend/certs:/usr/src/certs:ro
     depends_on:
       - auth
       - users

@@ -165,10 +165,10 @@ export const	updateUser = async (req, reply) =>
 			}
 		}
 
-		if (newLanguage && (newLanguage.length < 2 || newLanguage.length > 20))
+		if (newUsername && (newUsername.length < 2 || newUsername.length > 20))
 		{
-			console.log('[USERS] UpdateUser error: Language must be between 2 and 20 characters');
-			return (reply.code(400).send({ error: 'Language must be between 2 and 20 characters' }));
+			console.log('[USERS] UpdateUser error: Username must be between 2 and 20 characters');
+			return (reply.code(400).send({ error: 'Username must be between 2 and 20 characters' }));
 		}
 
 		// Check for reserved words in username

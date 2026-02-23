@@ -2,13 +2,13 @@
 // Note: Speeds are per SECOND in .env, converted to per-frame (60fps) here
 const PHYSICS_CONFIG =
 {
-	BALL_INITIAL_SPEED: (parseFloat(import.meta.env.VITE_BALL_INITIAL_SPEED) || 0.5) / 60,
+	BALL_INITIAL_SPEED: (parseFloat(import.meta.env.VITE_BALL_INITIAL_SPEED) || 0.5) / import.meta.env.FRAME_RATE,
 	BALL_SPEED_FACTOR: parseFloat(import.meta.env.VITE_BALL_SPEED_FACTOR) || 1.1,
-	BALL_MAX_SPEED: (parseFloat(import.meta.env.VITE_BALL_MAX_SPEED) || 2.0) / 60,
+	BALL_MAX_SPEED: (parseFloat(import.meta.env.VITE_BALL_MAX_SPEED) || 2.0) / import.meta.env.FRAME_RATE,
 	BALL_RADIUS: parseFloat(import.meta.env.VITE_BALL_RADIUS) || 0.015,
 	PADDLE_HEIGHT: parseFloat(import.meta.env.VITE_PADDLE_HEIGHT) || 0.3,
-	PADDLE_SPEED: (parseFloat(import.meta.env.VITE_PADDLE_SPEED) || 1.5) / 60,
-	MAX_BOUNCE_ANGLE: parseFloat(import.meta.env.VITE_MAX_BOUNCE_ANGLE) || 60, // degrees
+	PADDLE_SPEED: (parseFloat(import.meta.env.VITE_PADDLE_SPEED) || 1.5) / import.meta.env.FRAME_RATE,
+	MAX_BOUNCE_ANGLE: parseFloat(import.meta.env.VITE_MAX_BOUNCE_ANGLE) || import.meta.env.FRAME_RATE, // degrees
 };
 
 /**
