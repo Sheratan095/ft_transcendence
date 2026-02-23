@@ -19,7 +19,8 @@ setUserReady,
 quitGame,
 cancelCustomGame,
 createCustomGame,
-setTrisEventCallback
+setTrisEventCallback,
+getCurrentSymbol
 } from './ws';
 import { GameManager, TRIS_MODES } from './GameManager';
 import { openGameInviteModal, closeGameInviteModal } from '../../lib/game-invite';
@@ -101,18 +102,48 @@ export async function openTrisModal() {
   modal.classList.remove('hidden');
   setupModalButtons();
 
+  // Reset ready button to initial state
+  const readyBtn = document.getElementById('tris-ready-btn') as HTMLButtonElement | null;
+  if (readyBtn) {
+    readyBtn.textContent = '✗ Not Ready';
+    readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+    readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+    readyBtn.classList.add('hidden');
+  }
+
+  // Reset ready indicators
+  const leftReady  = document.getElementById('tris-left-ready');
+  const rightReady = document.getElementById('tris-right-ready');
+  if (leftReady)  leftReady.classList.add('hidden');
+  if (rightReady) rightReady.classList.add('hidden');
+
   // Reset UI each time modal opens: re-render buttons, ensure start text and status are correct
+  const startBtnPre = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+  if (startBtnPre) {
+    startBtnPre.textContent = currentMode === 'online' ? 'Start Matchmaking' : 'Start';
+    startBtnPre.disabled = false;
+    startBtnPre.classList.remove('hidden', 'bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+    startBtnPre.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
+  }
+
   renderAndAttachButtons();
+  
+  // Explicitly ensure start button is visible after rendering
   const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
-  if (startBtn) updateStartBtnText(startBtn);
+  if (startBtn) {
+    startBtn.classList.remove('hidden');
+    startBtn.disabled = false;
+  }
+  
   if (currentMode) {
     updateScoreboardNames(currentMode);
-    updateTrisStatus(currentMode === 'online' ? 'Ready to play online' : 'Press start to play');
+    updateTrisStatus(currentMode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
   } else updateTrisStatus('Select mode');
 
   if (!trisInitialized && userId) {
     try {
-      await initTris(userId);
+      const userId = getUserId();
+      await initTris(userId as string);
       setTrisEventCallback(handleTrisEvent);
       trisInitialized = true;
       
@@ -131,6 +162,8 @@ export function closeTrisModal() {
   const modal = document.getElementById('tris-modal');
   if (modal) modal.classList.add('hidden');
   
+  setCurrentGameId(null);
+
   if (currentGameManager) {
     currentGameManager.destroy();
     currentGameManager = null;
@@ -167,6 +200,7 @@ export function initializeModeSpecificBehaviors(mode: TrisModeType) {
       } else {
         btn.textContent = 'Restart';
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+        btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
       }
     }
   });
@@ -177,7 +211,7 @@ export function initializeModeSpecificBehaviors(mode: TrisModeType) {
   }
   
   updateScoreboardNames(mode);
-  updateTrisStatus(mode === 'online' ? 'Ready to play online' : 'Press start to play');
+  updateTrisStatus(mode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
   userReady = false;
   renderAndAttachButtons();
 }
@@ -187,20 +221,32 @@ function updateTrisStatus(text: string) {
   if (el) el.textContent = text;
 }
 
-function updateScoreboardNames(mode: TrisModeType) {
-  const left = document.getElementById('tris-left-name');
-  const right = document.getElementById('tris-right-name');
-  if (!left || !right) return;
+function updateScoreboardNames(mode: TrisModeType, leftName?: string, rightName?: string) {
+  const leftEl  = document.getElementById('tris-left-name');
+  const rightEl = document.getElementById('tris-right-name');
 
-  if (mode === 'offline-ai') {
-    left.textContent = 'You (X)';
-    right.textContent = 'Ai (O)';
-  } else if (mode === 'offline-1v1') {
-    left.textContent = 'Player Left (X)';
-    right.textContent = 'Player Right (O)';
-  } else {
-    left.textContent = 'Player X';
-    right.textContent = 'Player O';
+  let lName = leftName;
+  let rName = rightName;
+
+  if (!lName || !rName) {
+    if (mode === 'offline-ai') {
+      lName = 'You (X)'; rName = 'Ai (O)';
+    } else if (mode === 'offline-1v1') {
+      lName = 'Player X'; rName = 'Player O';
+    } else {
+      lName = '--------'; rName = '--------';
+    }
+  }
+
+  if (leftEl) {
+    const span = leftEl.querySelector('span:first-child');
+    if (span) span.textContent = lName;
+    else leftEl.textContent = lName;
+  }
+  if (rightEl) {
+    const span = rightEl.querySelector('span:last-child');
+    if (span) span.textContent = rName;
+    else rightEl.textContent = rName;
   }
 }
 
@@ -214,17 +260,59 @@ function setupModalButtons() {
 }
 
 function renderAndAttachButtons() {
+  const modal = document.getElementById('tris-modal');
+  if (!modal) return;
+
   // Fresh button references
-  const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
-  const surrenderBtn = document.getElementById('tris-surrender-btn') as HTMLButtonElement | null;
-  const resetBtn = document.getElementById('tris-reset-btn') as HTMLButtonElement | null;
-  const inviteBtn = document.getElementById('tris-invite-btn') as HTMLButtonElement | null;
+  const startBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+  const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+  const surrenderBtn = modal.querySelector('#tris-surrender-btn') as HTMLButtonElement | null;
+  const resetBtn = modal.querySelector('#tris-reset-btn') as HTMLButtonElement | null;
+  const inviteBtn = modal.querySelector('#tris-invite-btn') as HTMLButtonElement | null;
 
   if (startBtn) {
     const newStart = startBtn.cloneNode(true) as HTMLButtonElement;
     startBtn.replaceWith(newStart);
     newStart.addEventListener('click', handleStartClick);
     updateStartBtnText(newStart);
+  }
+
+  // Ready button (online mode only)
+  if (readyBtn && currentMode === 'online') {
+    const newReady = readyBtn.cloneNode(true) as HTMLButtonElement;
+    readyBtn.replaceWith(newReady);
+    newReady.addEventListener('click', () => {
+      const gid = getCurrentGameId();
+      if (!gid) {
+        console.warn('[Tris] No game ID available for ready button');
+        return;
+      }
+
+      const isReady = newReady.textContent?.includes('✓');
+      if (isReady) {
+        // Set not ready
+        userReady = false;
+        setUserReady(false);
+        newReady.textContent = '✗ Not Ready';
+        newReady.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+        newReady.classList.add('dark:bg-red-600', 'bg-red-600');
+        // Hide own ready indicator
+        const mySymbol = getCurrentSymbol();
+        const myReadyEl = document.getElementById(mySymbol === 'X' ? 'tris-left-ready' : 'tris-right-ready');
+        if (myReadyEl) myReadyEl.classList.add('hidden');
+      } else {
+        // Set ready
+        userReady = true;
+        setUserReady(true);
+        newReady.textContent = '✓ Ready';
+        newReady.classList.remove('dark:bg-red-600', 'bg-red-600');
+        newReady.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
+        // Show own ready indicator
+        const mySymbol = getCurrentSymbol();
+        const myReadyEl = document.getElementById(mySymbol === 'X' ? 'tris-left-ready' : 'tris-right-ready');
+        if (myReadyEl) myReadyEl.classList.remove('hidden');
+      }
+    });
   }
 
   if (surrenderBtn) {
@@ -260,21 +348,22 @@ function renderAndAttachButtons() {
 
 function updateStartBtnText(btn: HTMLButtonElement) {
   const gid = getCurrentGameId();
+  const modal = document.getElementById('tris-modal');
+  const readyBtn = modal?.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+
   if (currentMode === 'online') {
     if (btn.textContent === 'Play Again') return; 
     if (gid) {
       if (btn.textContent === 'Quit') return; // Game is running!
-      btn.textContent = userReady ? '✓ Ready' : 'Ready';
-      if (userReady) {
-        btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
-        btn.classList.add('bg-accent-orange', 'dark:bg-accent-orange');
-      } else {
-        btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
-      }
+      // In online mode with game, show the ready button instead of using main button for ready state
+      btn.textContent = 'Quit';
+      btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
+      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
     } else {
       if (btn.textContent === 'Quit matchmaking') return; 
       btn.textContent = 'Start Matchmaking';
       btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
+      if (readyBtn) readyBtn.classList.add('hidden');
     }
   } else {
     // Offline / AI
@@ -293,7 +382,7 @@ function handleStartClick() {
     if (currentGameManager) currentGameManager.reset();
     btn.textContent = currentMode === 'online' ? 'Start Matchmaking' : 'Start';
     btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
-    updateTrisStatus(currentMode === 'online' ? 'Ready to play online' : 'Press start to play');
+    updateTrisStatus(currentMode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
     return;
   }
 
@@ -306,20 +395,22 @@ function handleStartClick() {
   if (currentMode === 'online') {
     const gid = getCurrentGameId();
     if (gid) {
-      userReady = !userReady;
-      setUserReady(userReady);
-      updateStartBtnText(btn);
+      // Game is active, quit
+      quitGame();
+      closeTrisModal();
     } else {
       if (btn.textContent === 'Start Matchmaking') {
         startMatchmaking();
         updateTrisStatus('Looking for match...');
         btn.textContent = 'Quit matchmaking';
+        btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
         btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       } else {
         stopMatchmaking();
-        updateTrisStatus('Matchmaking canceled');
+        updateTrisStatus('Online - Not in matchmaking');
         btn.textContent = 'Start Matchmaking';
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+        btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
       }
     }
   } else {
@@ -330,12 +421,14 @@ function handleStartClick() {
       currentGameManager.resumeGame();
       currentGameManager.updateStatusText();
       btn.textContent = 'STOP';
-      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
+      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-dark');
     } else {
       currentGameManager.pauseGame();
       updateTrisStatus('Game paused');
       btn.textContent = 'Continue';
-      btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-dark');
+      btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
     }
   }
 }
@@ -346,7 +439,7 @@ function handleSurrenderClick() {
     quitGame();
   } else {
     stopMatchmaking();
-    updateTrisStatus('Matchmaking canceled');
+    updateTrisStatus('Online - Not in matchmaking');
     renderAndAttachButtons();
   }
 }
@@ -357,34 +450,109 @@ function handleSurrenderClick() {
 function handleTrisEvent(event: string, data: any) {
   console.log('[TRIS MODAL] Event:', event, data);
   
-  if (event === 'tris.customGameJoinSuccess') {
-      closeGameInviteModal();
+  if (event === 'tris.playerReadyStatus') {
+    const { readyStatus } = data;
+    // Show the opponent's ready indicator in the scorebar
+    const mySymbol = getCurrentSymbol(); // 'X' or 'O'
+    const opponentIsLeft = (mySymbol === 'O'); // if I'm O, opponent is X = left
+    const leftReady  = document.getElementById('tris-left-ready');
+    const rightReady = document.getElementById('tris-right-ready');
+    if (opponentIsLeft) {
+      if (leftReady)  leftReady.classList.toggle('hidden', !readyStatus);
+    } else {
+      if (rightReady) rightReady.classList.toggle('hidden', !readyStatus);
+    }
   }
 
-  const btn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+  if (event === 'tris.customGameJoinSuccess') {
+      closeGameInviteModal();
+      const modal = document.getElementById('tris-modal');
+      if (modal) {
+        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+        const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+        if (readyBtn) readyBtn.classList.remove('hidden');
+        if (mainBtn) mainBtn.classList.add('hidden');
+      }
+  }
+
+  if (event === 'tris.customGameCreated') {
+      const modal = document.getElementById('tris-modal');
+      if (modal) {
+        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+        if (readyBtn) readyBtn.classList.remove('hidden');
+      }
+  }
 
   if (event === 'tris.matchedInRandomGame') {
       userReady = false;
-      if (btn) {
-        btn.textContent = 'Ready';
-        btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+
+      // Update scorebar player names
+      const { yourSymbol, opponentUsername } = data;
+      updateTrisStatus(`Matched with ${opponentUsername || 'Opponent'}. You are ${yourSymbol}`);
+      const leftName  = (yourSymbol === 'X') ? 'You (X)' : `${opponentUsername || 'Opponent'} (X)`;
+      const rightName = (yourSymbol === 'O') ? 'You (O)' : `${opponentUsername || 'Opponent'} (O)`;
+      updateScoreboardNames('online', leftName, rightName);
+
+      // Reset ready indicators
+      const leftReady  = document.getElementById('tris-left-ready');
+      const rightReady = document.getElementById('tris-right-ready');
+      if (leftReady)  leftReady.classList.add('hidden');
+      if (rightReady) rightReady.classList.add('hidden');
+
+      const modal = document.getElementById('tris-modal');
+      if (modal) {
+        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+        const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+        if (readyBtn) {
+          readyBtn.textContent = '✗ Not Ready';
+          readyBtn.classList.remove('hidden');
+          readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+          readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+        }
+        if (mainBtn) mainBtn.classList.add('hidden');
       }
   }
 
   if (event === 'tris.gameStarted') {
     userReady = false;
-    if (btn) {
-      btn.textContent = 'Quit';
-      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+
+    const modal = document.getElementById('tris-modal');
+    if (modal) {
+      const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+      const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+      if (readyBtn) readyBtn.classList.add('hidden');
+      if (mainBtn) {
+        mainBtn.textContent = 'Quit';
+        mainBtn.classList.remove('hidden', 'dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
+        mainBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      }
+    }
+  }
+
+  if (event === 'tris.gameEnded') {
+    // Hide ready indicators
+    const leftReady  = document.getElementById('tris-left-ready');
+    const rightReady = document.getElementById('tris-right-ready');
+    if (leftReady)  leftReady.classList.add('hidden');
+    if (rightReady) rightReady.classList.add('hidden');
+
+    const modal = document.getElementById('tris-modal');
+    if (modal) {
+      const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+      const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+      if (readyBtn) readyBtn.classList.add('hidden');
+      if (mainBtn) {
+        mainBtn.textContent = 'Play Again';
+        mainBtn.classList.remove('hidden');
+        mainBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+        mainBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
+      }
     }
   }
 
   if (currentGameManager) {
     currentGameManager.handleNetworkEvent(event, data);
   }
-  
-  // UI updates for specific events
-  // Note: we don't call renderAndAttachButtons() here to avoid cloning and losing button state (text/listeners)
 }
 
 export function resetLocalGame() {

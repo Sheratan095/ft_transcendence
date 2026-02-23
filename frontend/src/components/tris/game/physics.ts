@@ -109,7 +109,11 @@ export function getBestMove(gameState: GameState): number {
 
 	// Last resort, take any available spot
 	const available = gameState.board.map((v, i) => v === null ? i : -1).filter(i => i !== -1);
-	return available[Math.floor(Math.random() * available.length)];
+	if (available.length > 0) {
+		return available[Math.floor(Math.random() * available.length)];
+	}
+	// No moves available (shouldn't happen if game logic is correct)
+	return -1;
 }
 
 function findWinningMove(board: (string | null)[], symbol: string): number {

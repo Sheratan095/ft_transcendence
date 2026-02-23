@@ -806,7 +806,7 @@ async function handleGroupChatSubmit() {
   if (addToChatId) {
     // Add users to existing chat
     if (selectedFriendsForGroup.size < 1) {
-      alert('Please select at least one friend to add');
+      showErrorToast('Please select at least one friend to add');
       return;
     }
 
@@ -817,7 +817,7 @@ async function handleGroupChatSubmit() {
           await addUserToChat(addToChatId, memberId);
         } catch (err) {
           console.error(`Error adding user ${memberId} to chat:`, err);
-          alert(`Failed to add user ${memberId} to chat: ${(err as Error).message}`);
+          showErrorToast(`Failed to add user ${memberId}`);
         }
       }
 
@@ -827,19 +827,19 @@ async function handleGroupChatSubmit() {
       addToChatId = null;
     } catch (err) {
       console.error('Error adding users to chat:', err);
-      alert(`Failed to add users: ${(err as Error).message}`);
+      showErrorToast(`Failed to add users: ${(err as Error).message}`);
     }
     return;
   }
 
   // Create new group chat
   if (!groupName) {
-    alert('Please enter a group name');
+    showErrorToast('Please enter a group name');
     return;
   }
 
   if (selectedFriendsForGroup.size < 1) {
-    alert('Please select at least one friend');
+    showErrorToast('Please select at least one friend');
     return;
   }
 
@@ -854,7 +854,7 @@ async function handleGroupChatSubmit() {
     // group created
   } catch (err) {
     console.error('Error creating group chat:', err);
-    alert(`Failed to create group chat: ${(err as Error).message}`);
+    showErrorToast(`Failed to create group chat: ${(err as Error).message}`);
   }
 }
 
@@ -909,13 +909,10 @@ export function setupChatEventListeners() {
       const chat = chats.find(c => c.id === currentChatId);
       if (!chat) return;
 
-      const chatName = getChatDisplayName(chat);
-      if (confirm(`Are you sure you want to leave "${chatName}"?`)) {
-        try {
-          await leaveGroupChat(currentChatId);
-        } catch (err) {
-          alert(`Failed to leave group: ${(err as Error).message}`);
-        }
+      try {
+        await leaveGroupChat(currentChatId);
+      } catch (err) {
+        showErrorToast(`Failed to leave group: ${(err as Error).message}`);
       }
     });
   }

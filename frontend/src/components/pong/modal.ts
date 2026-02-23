@@ -100,10 +100,11 @@ export function handleGameStarted(data: any)
 		// Reset 3D scene (ball, paddles, score) for the new game
 		currentGameInstance.resetState();
 
-		const user = getUser();
-		const myName = user?.username || 'You';
-		const left = (yourSide === 'LEFT') ? myName : opponentUsername;
-		const right = (yourSide === 'RIGHT') ? myName : opponentUsername;
+		// Show "You" as the local player (consistent with matched state)
+		const myName = 'You';
+		const side = yourSide.toString().toLowerCase();
+		const left = (side === 'left') ? myName : opponentUsername;
+		const right = (side === 'right') ? myName : opponentUsername;
 		currentGameInstance.gameManager.setPlayerNames(left, right);
 		currentGameInstance.updateScorebarNames();
 	}
@@ -198,11 +199,11 @@ export function handleMatchedInRandomGame(data: any)
 
 	updatePongStatus(`Matched with ${opponentUsername}. You are ${sideText}`);
 	
-	// Update player names in the game UI
+	// Update player names in the game UI: show "You" for local player (not username)
 	if (currentGameInstance) {
-		const user = getUser();
-		const myName = user?.username || 'You';
-		if (yourSide === 'left') {
+		const myName = 'You';
+		const side = (yourSide || '').toString().toLowerCase();
+		if (side === 'left') {
 			currentGameInstance.gameManager.setPlayerNames(myName, opponentUsername);
 		} else {
 			currentGameInstance.gameManager.setPlayerNames(opponentUsername, myName);
@@ -395,7 +396,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				else
 				{
 					startMatchmaking();
-					updatePongStatus('Searching for opponent...');
+					updatePongStatus('Looking for match...');
 	
 					newStartBtn.textContent = 'Quit matchmaking';
 

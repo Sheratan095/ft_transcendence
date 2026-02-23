@@ -46,15 +46,21 @@ export class BoardRenderer {
    * Update a specific cell in the grid
    */
   public updateCell(position: number, symbol: string) {
-    const cell = document.getElementById(`tris-cell-${position}`);
+    const cell = document.getElementById(`tris-cell-${position}`) as HTMLButtonElement | null;
     if (cell) {
       cell.textContent = symbol;
       if (symbol === 'X') {
         cell.classList.add('text-[#0dff66]');
         cell.classList.remove('text-[#ff009d]');
+        cell.disabled = true;
+        cell.classList.remove('cursor-pointer');
+        cell.classList.add('cursor-not-allowed');
       } else if (symbol === 'O') {
         cell.classList.add('text-[#ff009d]');
         cell.classList.remove('text-[#0dff66]');
+        cell.disabled = true;
+        cell.classList.remove('cursor-pointer');
+        cell.classList.add('cursor-not-allowed');
       } else {
 	// Empty cell
 	cell.classList.remove('text-[#0dff66]', 'text-[#ff009d]', 'opacity-50');
@@ -92,12 +98,17 @@ export class BoardRenderer {
 	if (!this.boardElement) return;
 	const cells = this.boardElement.querySelectorAll('button');
 	cells.forEach(cell => {
-	  if (enable) {
-		cell.classList.remove('cursor-not-allowed');
-		cell.classList.add('cursor-pointer');
+	  const btn = cell as HTMLButtonElement;
+	  // Never re-enable a cell that already has a symbol placed
+	  const isFilled = !!btn.textContent?.trim();
+	  if (enable && !isFilled) {
+		btn.disabled = false;
+		btn.classList.remove('cursor-not-allowed');
+		btn.classList.add('cursor-pointer');
 	  } else {
-		cell.classList.remove('cursor-pointer');
-		cell.classList.add('cursor-not-allowed');
+		btn.disabled = true;
+		btn.classList.remove('cursor-pointer');
+		btn.classList.add('cursor-not-allowed');
 	  }
 	});
   }
