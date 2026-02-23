@@ -121,35 +121,35 @@ export function sendTrisCommand(event: string, data: any = {}): boolean {
 }
 
 export function makeTrisMove(position: number) {
-	sendTrisCommand('makeMove', { gameId: currentGameId, position });
+	sendTrisCommand('tris.makeMove', { gameId: currentGameId, position });
 }
 
 export async function createCustomGame(targetPlayerId: string): Promise<void> {
-  sendTrisCommand('createCustomGame', { guestEmail: targetPlayerId });
+  sendTrisCommand('tris.createCustomGame', { guestEmail: targetPlayerId });
 }
 
 export function joinCustomGame(gameId: string) {
-	sendTrisCommand('joinCustomGame', { gameId });
+	sendTrisCommand('tris.joinCustomGame', { gameId });
 }
 
 export function cancelCustomGame(gameId: string) {
-	sendTrisCommand('cancelCustomGame', { gameId });
+	sendTrisCommand('tris.cancelCustomGame', { gameId });
 }
 
 export function setUserReady(ready: boolean) {
-	sendTrisCommand('readyToStart', { gameId: currentGameId, ready });
+	sendTrisCommand('tris.readyToStart', { gameId: currentGameId, ready });
 }
 
 export function quitGame() {
-	sendTrisCommand('quitGame', { gameId: currentGameId });
+	sendTrisCommand('tris.quitGame', { gameId: currentGameId });
 }
 
 export function startMatchmaking() {
-	sendTrisCommand('startMatchmaking');
+	sendTrisCommand('tris.joinMatchmaking');
 }
 
 export function stopMatchmaking() {
-	sendTrisCommand('stopMatchmaking');
+	sendTrisCommand('tris.leaveMatchmaking');
 }
 
 // Tracking accessors

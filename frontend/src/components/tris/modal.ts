@@ -100,17 +100,20 @@ export async function openTrisModal() {
   modal.classList.remove('hidden');
   setupModalButtons();
 
+  // Hide ready button initially
+  const readyBtn = document.getElementById('tris-ready-btn') as HTMLButtonElement | null;
+  if (readyBtn) {
+    readyBtn.classList.add('hidden');
+  }
+
   // Reset UI each time modal opens: re-render buttons, ensure start text and status are correct
   renderAndAttachButtons();
   
-  // Explicitly reset the start button to clean state
+  // Explicitly ensure start button is visible after rendering
   const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
   if (startBtn) {
-    startBtn.textContent = 'Start';
+    startBtn.classList.remove('hidden');
     startBtn.disabled = false;
-    startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
-    startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
-    updateStartBtnText(startBtn);
   }
   
   if (currentMode) {
@@ -224,17 +227,51 @@ function setupModalButtons() {
 }
 
 function renderAndAttachButtons() {
+  const modal = document.getElementById('tris-modal');
+  if (!modal) return;
+
   // Fresh button references
-  const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
-  const surrenderBtn = document.getElementById('tris-surrender-btn') as HTMLButtonElement | null;
-  const resetBtn = document.getElementById('tris-reset-btn') as HTMLButtonElement | null;
-  const inviteBtn = document.getElementById('tris-invite-btn') as HTMLButtonElement | null;
+  const startBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+  const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+  const surrenderBtn = modal.querySelector('#tris-surrender-btn') as HTMLButtonElement | null;
+  const resetBtn = modal.querySelector('#tris-reset-btn') as HTMLButtonElement | null;
+  const inviteBtn = modal.querySelector('#tris-invite-btn') as HTMLButtonElement | null;
 
   if (startBtn) {
     const newStart = startBtn.cloneNode(true) as HTMLButtonElement;
     startBtn.replaceWith(newStart);
     newStart.addEventListener('click', handleStartClick);
     updateStartBtnText(newStart);
+  }
+
+  // Ready button (online mode only)
+  if (readyBtn && currentMode === 'online') {
+    const newReady = readyBtn.cloneNode(true) as HTMLButtonElement;
+    readyBtn.replaceWith(newReady);
+    newReady.addEventListener('click', () => {
+      const gid = getCurrentGameId();
+      if (!gid) {
+        console.warn('[Tris] No game ID available for ready button');
+        return;
+      }
+
+      const isReady = newReady.textContent?.includes('✓');
+      if (isReady) {
+        // Set not ready
+        userReady = false;
+        setUserReady(false);
+        newReady.textContent = '✗ Not Ready';
+        newReady.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+        newReady.classList.add('dark:bg-red-600', 'bg-red-600');
+      } else {
+        // Set ready
+        userReady = true;
+        setUserReady(true);
+        newReady.textContent = '✓ Ready';
+        newReady.classList.remove('dark:bg-red-600', 'bg-red-600');
+        newReady.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
+      }
+    });
   }
 
   if (surrenderBtn) {
@@ -270,21 +307,21 @@ function renderAndAttachButtons() {
 
 function updateStartBtnText(btn: HTMLButtonElement) {
   const gid = getCurrentGameId();
+  const modal = document.getElementById('tris-modal');
+  const readyBtn = modal?.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+
   if (currentMode === 'online') {
     if (btn.textContent === 'Play Again') return; 
     if (gid) {
       if (btn.textContent === 'Quit') return; // Game is running!
-      btn.textContent = userReady ? '✓ Ready' : 'Ready';
-      if (userReady) {
-        btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
-        btn.classList.add('bg-accent-orange', 'dark:bg-accent-orange');
-      } else {
-        btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
-      }
+      // In online mode with game, show the ready button instead of using main button for ready state
+      btn.textContent = 'Quit';
+      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
     } else {
       if (btn.textContent === 'Quit matchmaking') return; 
       btn.textContent = 'Start Matchmaking';
       btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
+      if (readyBtn) readyBtn.classList.add('hidden');
     }
   } else {
     // Offline / AI
@@ -316,9 +353,9 @@ function handleStartClick() {
   if (currentMode === 'online') {
     const gid = getCurrentGameId();
     if (gid) {
-      userReady = !userReady;
-      setUserReady(userReady);
-      updateStartBtnText(btn);
+      // Game is active, quit
+      quitGame();
+      closeTrisModal();
     } else {
       if (btn.textContent === 'Start Matchmaking') {
         startMatchmaking();
@@ -371,32 +408,71 @@ function handleTrisEvent(event: string, data: any) {
   
   if (event === 'tris.customGameJoinSuccess') {
       closeGameInviteModal();
+      const modal = document.getElementById('tris-modal');
+      if (modal) {
+        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+        const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+        if (readyBtn) readyBtn.classList.remove('hidden');
+        if (mainBtn) mainBtn.classList.add('hidden');
+      }
   }
 
-  const btn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+  if (event === 'tris.customGameCreated') {
+      const modal = document.getElementById('tris-modal');
+      if (modal) {
+        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+        if (readyBtn) readyBtn.classList.remove('hidden');
+      }
+  }
 
   if (event === 'tris.matchedInRandomGame') {
       userReady = false;
-      if (btn) {
-        btn.textContent = 'Ready';
-        btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      const modal = document.getElementById('tris-modal');
+      if (modal) {
+        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+        const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+        if (readyBtn) {
+          readyBtn.textContent = '✗ Not Ready';
+          readyBtn.classList.remove('hidden');
+          readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+          readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+        }
+        if (mainBtn) mainBtn.classList.add('hidden');
       }
   }
 
   if (event === 'tris.gameStarted') {
     userReady = false;
-    if (btn) {
-      btn.textContent = 'Quit';
-      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+    const modal = document.getElementById('tris-modal');
+    if (modal) {
+      const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+      const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+      if (readyBtn) readyBtn.classList.add('hidden');
+      if (mainBtn) {
+        mainBtn.textContent = 'Quit';
+        mainBtn.classList.remove('hidden');
+        mainBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      }
+    }
+  }
+
+  if (event === 'tris.gameEnded') {
+    const modal = document.getElementById('tris-modal');
+    if (modal) {
+      const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+      const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+      if (readyBtn) readyBtn.classList.add('hidden');
+      if (mainBtn) {
+        mainBtn.textContent = 'Play Again';
+        mainBtn.classList.remove('hidden');
+        mainBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      }
     }
   }
 
   if (currentGameManager) {
     currentGameManager.handleNetworkEvent(event, data);
   }
-  
-  // UI updates for specific events
-  // Note: we don't call renderAndAttachButtons() here to avoid cloning and losing button state (text/listeners)
 }
 
 export function resetLocalGame() {
