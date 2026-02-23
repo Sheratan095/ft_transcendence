@@ -179,33 +179,6 @@ export async function	notifyMessageStatusUpdates(chatId, updatedTime, chatDb)
 	}
 }
 
-export async function	notifyUserAddedToChat(toUserId, senderId, senderUsername, chatId)
-{
-	try
-	{
-		const	response = await fetch(`${process.env.NOTIFICATION_SERVICE_URL}/send-chat-user-added`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'x-internal-api-key': process.env.INTERNAL_API_KEY,
-			},
-			body: JSON.stringify({
-				from: senderUsername,
-				senderId: senderId,
-				targetId: toUserId,
-				chatId: chatId,
-			}),
-		});
-
-		return (response.ok);
-	}
-	catch (err)
-	{
-		console.error(`[CHAT] Error notifying user ${toUserId} about being added to chat ${chatId}:`, err.message);
-		return (false);
-	}
-}
-
 export async function	getChatsForUser(userId, chatDb)
 {
 	// Fetch all chats for the user from the database

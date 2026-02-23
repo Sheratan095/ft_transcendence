@@ -3,7 +3,6 @@ import { chatConnectionManager } from './ChatConnectionManager.js';
 
 import {
 	extractUserData,
-	notifyUserAddedToChat,
 	notifyMessageStatusUpdates,
 	getRelationshipByIds,
 	formatDate
@@ -362,14 +361,17 @@ export const	startPrivateChat = async (req, reply) =>
 	}
 }
 
-export const	deleteUsernameFromCache = async (req, reply) =>
+export const	deleteUserChats = async (req, reply) =>
 {
 	try
 	{
 		const	userId = req.body.userId;
+		const	chatDb = req.server.chatDb;
 
 		// Force refresh the username in cache, it will be "Unknown" if deleted or updated in case of username change
 		await chatConnectionManager.getUsernameFromCache(userId, true);
+
+		await chatDb.deletePrivateChatsForUser(userId);
 
 		// console.log(`[CHAT] Deleted username cache for user ${userId}`);
 
@@ -377,7 +379,7 @@ export const	deleteUsernameFromCache = async (req, reply) =>
 	}
 	catch (err)
 	{
-		console.error('[CHAT] Error in deleteUsernameFromCache controller:', err);
+		console.error('[CHAT] Error in deleteUsernameChats controller:', err);
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
@@ -398,3 +400,4 @@ export const	removeWsConnection = async (req, reply) =>
 		return (reply.code(500).send({error: 'Internal server error' }));
 	}
 }
+
