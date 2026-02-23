@@ -18,10 +18,20 @@ export async function attachUserOptions() {
 	const usernameEl = userOptions.querySelector('#topbar-username') as HTMLElement | null;
 	
 	if (avatar) {
-		if (user.avatarUrl) {
-			const src = user.avatarUrl.startsWith('/api') || user.avatarUrl.startsWith('http') ? user.avatarUrl : `/api${user.avatarUrl}`;
-			avatar.src = src;
-		} else {
+		if (user.avatarUrl)
+		{
+			if (user.avatarUrl.startsWith('/api') || user.avatarUrl.startsWith('http'))
+			{
+				avatar.src = user.avatarUrl;
+			}
+			else
+			{
+				avatar.src = '/assets/placeholder-avatar.jpg';
+			}
+		}
+		else
+		{
+			console.warn('User has no avatar URL, using placeholder');
 			avatar.src = '/assets/placeholder-avatar.jpg';
 		}
 		avatar.onerror = () => { avatar.src = '/assets/placeholder-avatar.jpg'; };
