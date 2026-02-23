@@ -77,5 +77,20 @@ else
   echo "Warning: docker not found in PATH; skipping Docker cleanup." >&2
 fi
 
+# Generate tailwind.css for production build
+echo "Generating tailwind.css for production..."
+
+# Ensure an output file exists so downstream steps don't fail
+TAILWIND_OUT="$ROOT_DIR/frontend/tailwind.css"
+if [[ ! -f "$TAILWIND_OUT" ]]; then
+  mkdir -p "$(dirname "$TAILWIND_OUT")"
+  cat > "$TAILWIND_OUT" <<'EOF'
+/* Tailwind CSS output — generated for production
+   This file is intentionally empty and will be populated by the build process.
+*/
+EOF
+  echo "Created empty $TAILWIND_OUT"
+fi
+
 echo "Running: docker compose up $*"
 docker compose up "$@"

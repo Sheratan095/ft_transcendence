@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { closePong, startMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame, sendPongMessage } from './ws';
+import { closePong, startMatchmaking, leaveMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame, sendPongMessage } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
@@ -379,7 +379,8 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 			{
 				if (newStartBtn.textContent === 'Quit matchmaking')
 				{
-					// quitMatchmaking(); // TO DO
+					// Tell server to leave matchmaking queue
+					leaveMatchmaking();
 					updatePongStatus('Online - Not in matchmaking');
 					// Reset button to 'Start Matchmaking'
 					newStartBtn.textContent = 'Start Matchmaking';
