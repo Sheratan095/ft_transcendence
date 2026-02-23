@@ -56,9 +56,22 @@ export async function renderProfileCard(container: HTMLElement | null) {
   // Avatar upload handlers
   const avatarInput = cardEl.querySelector('#input-avatar') as HTMLInputElement;
   if (avatarInput && avatar) {
+    // Restrict selectable file types in the file picker
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    avatarInput.accept = allowedTypes.join(',');
+
     avatarInput.addEventListener('change', async () => {
       const file = avatarInput.files ? avatarInput.files[0] : null;
       if (!file) return;
+
+      // Validate MIME type on the frontend before uploading
+      if (!allowedTypes.includes(file.type)) {
+        showErrorToast('Unsupported image type. Allowed: JPEG, PNG, GIF, WEBP.', { duration: 4000, position: 'top-right' });
+        // Clear the invalid selection so the user can pick again
+        try { avatarInput.value = ''; } catch (e) { /* ignore */ }
+        return;
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       try {
@@ -67,7 +80,14 @@ export async function renderProfileCard(container: HTMLElement | null) {
           credentials: 'include',
           body: formData,
         });
-        if (!res.ok) throw new Error(`Avatar upload failed: ${res.status}`);
+
+        if (!res.ok)
+        {
+          if (res.status === 400)
+            showErrorToast('Avatar upload failed.', { duration: 4000, position: 'top-right' });
+          return; 
+        }
+
         const body = await res.json();
         if (body && body.avatarUrl) {
           avatar.src = `/api${body.avatarUrl}`;
