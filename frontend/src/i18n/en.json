@@ -24,7 +24,7 @@
   "chat.leave": "Leave group",
   "chat.send": "Send",
   "chat.create": "Create Group Chat",
-  "chat.select-group": "Select friends to add to the group (at least 2):",
+  "chat.select-group": "Select friends to add to the group:",
   "chat.create-group": "Create group",
   "chat.no-friends": "No friends available to add",
   "chat.add-selected": "Add selected",
