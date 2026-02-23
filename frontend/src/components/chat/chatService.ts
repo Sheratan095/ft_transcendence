@@ -222,15 +222,7 @@ function handleChatMessage(data: any) {
     isPrivate: false
   });
 
-  // If the user is currently viewing this chat, re-render messages immediately
-  if (String(currentChatId) === String(chatId)) {
-    const renderUI = (window as any).__renderMessages;
-    if (renderUI) renderUI();
-    const scroll = (window as any).__scrollToBottom;
-    if (scroll) scroll();
-    // mark as read on receipt
-    markChatAsRead(chatId).catch(() => {});
-  }
+  refreshCurrentChat(chatId);
 
   // Show toast notification if not currently viewing this chat
   if (currentChatId !== chatId) {
@@ -256,7 +248,7 @@ function handleChatMessage(data: any) {
   }
 }
 
-function refreshCurrentChat(String: chatId)
+function refreshCurrentChat(chatId: string)
 {
     // If the user is currently viewing this chat, re-render messages immediately
   if (String(currentChatId) === String(chatId)) {
@@ -267,7 +259,6 @@ function refreshCurrentChat(String: chatId)
     // mark as read on receipt
     markChatAsRead(chatId).catch(() => {});
   }
-
 }
 
 function handleSystemMessage(data: any) {
@@ -287,6 +278,7 @@ function handleSystemMessage(data: any) {
     isSystem: true
   });
 
+  refreshCurrentChat(chatId);
   // Update chat members for join/leave system events
   const ev = messageData.event || messageData.type || null;
   if (ev === 'userJoin' || ev === 'userLeave') {
@@ -342,13 +334,11 @@ function handleSystemMessage(data: any) {
           if (openChat) openChat(chatId);
         }
       });
-
       const unreadCount = (unreadCounts.get(chatId) || 0) + 1;
       unreadCounts.set(chatId, unreadCount);
     }
     return;
   }
-
   // Generic system messages
   if (currentChatId !== chatId) {
     const chat = chats.find(c => c.id === chatId);
@@ -408,6 +398,7 @@ function handleMessageStatusUpdate(data: any) {
       message.messageStatus = status;
     }
   }
+  refreshCurrentChat(chatId);
 }
 
 function handlePrivateMessage(data: any) {
@@ -517,6 +508,7 @@ function handleChatJoined(data: any) {
     return;
   }
 
+  refreshCurrentChat(chatId);
   // Show a clear toast with an action to open the chat
   const displayChatName = chatName || t('toast.chat.aChat');
   const inviter = invitedBy || t('toast.chat.someone');

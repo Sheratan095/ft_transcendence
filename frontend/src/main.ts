@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   const langSelect = document.getElementById('profile-language') as HTMLSelectElement | null;
 
+  if (!langSelect) return;
   // populate selector and set current value
   langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
   langSelect.value = fetchLanguage();
