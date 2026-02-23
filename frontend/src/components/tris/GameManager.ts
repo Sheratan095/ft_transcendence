@@ -7,7 +7,6 @@ import * as Physics from './game/physics';
 import { LocalInputController, AIController, NetworkInputController } from './game/InputController';
 import type { InputController } from './game/InputController';
 import { BoardRenderer } from './game/ui';
-import { showSuccessToast, showErrorToast } from '../shared/Toast';
 import { getUserId } from '../../lib/auth';
 import type { GameState } from './game/physics';
 
@@ -92,12 +91,16 @@ export class GameManager {
     }
 
     if (!Physics.isValidMove(this.gameState, position)) {
-      showErrorToast('Invalid move');
       return;
     }
 
     this.gameState = Physics.applyMove(this.gameState, position);
     this.renderer.updateBoard(this.gameState.board);
+
+    // Update AI's gameState reference if in AI mode
+    if (this.mode === TRIS_MODES.OFFLINE_AI && this.playerOController instanceof AIController) {
+      (this.playerOController as AIController).updateGameState(this.gameState);
+    }
 
     if (this.gameState.isGameOver) {
       this.handleGameOver();
@@ -127,7 +130,6 @@ export class GameManager {
 		this.renderer.renderBoard(); // Fresh board
 		this.renderer.toggleInteraction(this.isUserTurn);
 		this.updateNetworkStatus();
-		showSuccessToast(`Game started! You are ${this.userSymbol}`);
 		break;
 
 	  case 'tris.moveMade':
@@ -156,8 +158,7 @@ export class GameManager {
       }
     }
     this.renderer.updateStatus(msg);
-    if (this.gameState.winner === 'X') showSuccessToast(msg);
-    else showErrorToast(msg);
+
 
     if (this.onGameEndedCallback) {
       this.onGameEndedCallback(msg);
@@ -173,8 +174,6 @@ export class GameManager {
 	else message = 'You lost!';
 
 	this.renderer.updateStatus(message);
-	if (data.winner === this.userId) showSuccessToast(message);
-	else showErrorToast(message);
 
     if (this.onGameEndedCallback) {
       this.onGameEndedCallback(message);
@@ -190,7 +189,7 @@ export class GameManager {
     if (this.mode === TRIS_MODES.OFFLINE_AI) {
       text = turn === "X" ? "You (X)'s turn" : "Ai (O) is thinking...";
     } else {
-      text = turn === "X" ? "Player Left (X)" : "Player Right (O)";
+      text = turn === "X" ? "Player X's turn" : "Player O's turn";
     }
     this.renderer.updateStatus(text);
   }

@@ -102,8 +102,17 @@ export async function openTrisModal() {
 
   // Reset UI each time modal opens: re-render buttons, ensure start text and status are correct
   renderAndAttachButtons();
+  
+  // Explicitly reset the start button to clean state
   const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
-  if (startBtn) updateStartBtnText(startBtn);
+  if (startBtn) {
+    startBtn.textContent = 'Start';
+    startBtn.disabled = false;
+    startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
+    startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
+    updateStartBtnText(startBtn);
+  }
+  
   if (currentMode) {
     updateScoreboardNames(currentMode);
     updateTrisStatus(currentMode === 'online' ? 'Ready to play online' : 'Press start to play');
@@ -111,7 +120,8 @@ export async function openTrisModal() {
 
   if (!trisInitialized) {
     try {
-      await initTris(userId);
+      const userId = getUserId();
+      await initTris(userId as string);
       setTrisEventCallback(handleTrisEvent);
       trisInitialized = true;
       
@@ -195,8 +205,8 @@ function updateScoreboardNames(mode: TrisModeType) {
     left.textContent = 'You (X)';
     right.textContent = 'Ai (O)';
   } else if (mode === 'offline-1v1') {
-    left.textContent = 'Player Left (X)';
-    right.textContent = 'Player Right (O)';
+    left.textContent = 'Player X';
+    right.textContent = 'Player O';
   } else {
     left.textContent = 'Player X';
     right.textContent = 'Player O';

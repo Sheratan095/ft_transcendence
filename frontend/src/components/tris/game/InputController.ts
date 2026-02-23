@@ -58,6 +58,13 @@ export class AIController implements InputController {
 		this.callback = callback;
 	}
 
+	/**
+	 * Update the gameState reference to keep it in sync with GameManager
+	 */
+	updateGameState(gameState: any) {
+		this.gameState = gameState;
+	}
+
 	// AI logic will be called explicitly by GameManager when it's AI's turn
 	async generateMove(): Promise<void> {
 		if (!this.callback) return;
@@ -65,10 +72,14 @@ export class AIController implements InputController {
 		// Add a small delay to simulate thinking
 		await new Promise(resolve => setTimeout(resolve, 800));
 
-		const { getBestMove } = await import('./physics');
+		const { getBestMove, isValidMove } = await import('./physics');
 		const move = getBestMove(this.gameState);
-		if (move !== -1) {
+		
+		// Validate move is legal before executing
+		if (move !== -1 && isValidMove(this.gameState, move)) {
 			this.callback(move);
+		} else {
+			console.error('[AI] Invalid move generated:', move);
 		}
 	}
 
