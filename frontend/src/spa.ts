@@ -27,6 +27,7 @@ const routes: Record<string, RouteConfig> = {
       el.appendChild(clone);
 
       if (isLoggedInClient()) modifyIndex(); // Update CTA to logout if logged in
+      initCardHoverEffect();
       initSlideshow();
       setupTrisCardListener();
       setupPongCardListener();
@@ -61,6 +62,7 @@ const routes: Record<string, RouteConfig> = {
     showErrorToast('Please sign in to view your profile');
     return;
     } else await initUserServices('/');
+    initCardHoverEffect();
     animatePolygonToBottom();
     el.innerHTML = '';
 
@@ -116,6 +118,7 @@ const routes: Record<string, RouteConfig> = {
         console.error('Failed to render Pong page:', err);
         if (el) el.innerHTML = '<div class="text-red-600">Failed to load Pong page</div>';
       }
+      initCardHoverEffect();
     }
   },
   '/tris': { 
@@ -132,6 +135,7 @@ const routes: Record<string, RouteConfig> = {
         console.error('Failed to render Tris page:', err);
         if (el) el.innerHTML = '<div class="text-red-600">Failed to load Tris page</div>';
       }
+      initCardHoverEffect();
     }
   }
 };
