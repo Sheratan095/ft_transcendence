@@ -307,6 +307,12 @@ function handleSystemMessage(data: any) {
       if (chatObj && chatObj.members) chatObj.members = chatObj.members.filter((m: any) => String(m.userId) !== String(messageData.userId));
     }
 
+    // If currently viewing this chat, update the member list UI
+    if (String(currentChatId) === String(chatId)) {
+      const renderMembers = (window as any).__renderMemberList;
+      if (renderMembers) renderMembers();
+    }
+
     // If the current user was removed from this chat and they are viewing it, reset UI
     const removedUserId = messageData.userId ? String(messageData.userId) : null;
     const currentUserRemoved = removedUserId && String(removedUserId) === String(currentUserId);
@@ -800,14 +806,21 @@ export async function addUserToChat(chatId: string, toUserId: string) {
     body: JSON.stringify({ chatId, toUserId })
   });
 
-  if (!response.ok) {
+  let json: any = null;
+  if (response.ok) {
+    try {
+      json = await response.json();
+    } catch (parseErr) {
+      // Non-fatal if we can't parse response
+      console.warn('Could not parse add-user response:', parseErr);
+    }
+  } else {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.message || `Failed to add user to chat: ${response.statusText}`);
   }
 
   // Try to update local state immediately so UI reflects the change without a full refresh
   try {
-    const json = await response.json().catch(() => null);
     // Determine added member info if returned by the API
     const returnedMember = json && (json.member || json.addedMember || json.user || null);
     const memberObj: any = returnedMember

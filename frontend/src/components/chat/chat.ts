@@ -44,6 +44,7 @@ export function initChat(userId: string) {
   // Expose UI control functions to global scope for service to call
   (window as any).__renderMessages = renderMessages;
   (window as any).__renderChatList = renderChatList;
+  (window as any).__renderMemberList = renderMemberList;
   (window as any).__scrollToBottom = scrollToBottom;
   (window as any).__updateLoadMoreBtn = updateLoadMoreBtn;
   (window as any).__openChat = openChatAction;
