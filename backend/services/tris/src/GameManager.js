@@ -244,7 +244,7 @@ class	GameManager
 		const	index = this._waitingPlayers.indexOf(playerId);
 		if (index === -1)
 		{
-			console.error(`[TRIS] ${playerId} is not in the matchmaking queue`);
+			console.error(`[TRIS] ${playerId} tried to leave matchmaking queue but is not in it`);
 			trisConnectionManager.sendErrorMessage(playerId, 'You are not in the matchmaking queue');
 			return ;
 		}
