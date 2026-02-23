@@ -47,10 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const langSelect = document.getElementById('profile-language') as HTMLSelectElement | null;
 
   // populate selector and set current value
-  langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
-  langSelect.value = fetchLanguage();
+  if (langSelect) {
+    langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
+    langSelect.value = fetchLanguage();
 
-  langSelect.addEventListener('change', async () => {
+    langSelect.addEventListener('change', async () => {
     const v = langSelect.value;
     try
     {
@@ -75,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     console.log('Language changed to', v);
   });
+  }
 });
 
 // Make ApexCharts globally available for UserCardCharts

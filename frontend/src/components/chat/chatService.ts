@@ -256,7 +256,7 @@ function handleChatMessage(data: any) {
   }
 }
 
-function refreshCurrentChat(String: chatId)
+function refreshCurrentChat(chatId: string)
 {
     // If the user is currently viewing this chat, re-render messages immediately
   if (String(currentChatId) === String(chatId)) {
