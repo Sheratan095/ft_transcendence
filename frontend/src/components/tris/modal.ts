@@ -96,6 +96,7 @@ export async function openTrisModal() {
     return;
   }
 
+  const userId = getUserId();
   modal.classList.remove('hidden');
   setupModalButtons();
 
@@ -108,7 +109,7 @@ export async function openTrisModal() {
     updateTrisStatus(currentMode === 'online' ? 'Ready to play online' : 'Press start to play');
   } else updateTrisStatus('Select mode');
 
-  if (!trisInitialized) {
+  if (!trisInitialized && userId) {
     try {
       await initTris(userId);
       setTrisEventCallback(handleTrisEvent);

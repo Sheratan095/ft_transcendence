@@ -1018,7 +1018,7 @@
 				</p>
 
 				<div class="mt-4 flex items-center gap-3"
-				id="tournament-list">
+				id="tris-win-list">
 					<!-- Dynamically populated list of tournaments will go here -->
 				</div>
 
@@ -1239,16 +1239,42 @@
 							<input
 								id="chat-input"
 								type="text"
-								class="flex-1 bg-white dark:bg-gray-700 text-black dark:text-white px-3 py-2 rounded-xl border-2 
-										border-gray-800 dark:border-gray-300 focus:outline-none focus:ring-2 
-										focus:ring-accent-orange dark:focus:ring-accent-green placeholder-gray-600 dark:placeholder-gray-400"
+								class="flex-1 
+									bg-white dark:bg-gray-700 
+									text-black dark:text-white 
+									px-3 py-2 
+									rounded-xl 
+									border-2 border-gray-800 dark:border-gray-300 
+									focus:outline-none focus:ring-2 
+									focus:ring-accent-orange dark:focus:ring-accent-green 
+									placeholder-gray-600 dark:placeholder-gray-400
+
+									disabled:opacity-50 
+									disabled:cursor-not-allowed 
+									disabled:bg-gray-200 
+									dark:disabled:bg-gray-600 
+									disabled:border-gray-400 
+									dark:disabled:border-gray-500"
 								placeholder="Type a message..."
 							/>
 							<button
 								title="send message"
 								id="chat-send-btn"
-								class="bg-accent-orange dark:bg-accent-green text-white dark:text-black font-extrabold px-4 py-2 rounded-xl 
-										hover:brightness-90 dark:hover:brightness-110 transition-all uppercase tracking-tight"
+								class="bg-accent-orange dark:bg-accent-green 
+									text-white dark:text-black 
+									font-extrabold 
+									px-4 py-2 
+									rounded-xl 
+									transition-all 
+									uppercase tracking-tight
+
+									hover:brightness-90 
+									dark:hover:brightness-110
+
+									disabled:opacity-50 
+									disabled:cursor-not-allowed 
+									disabled:pointer-events-none 
+									disabled:hover:brightness-100"
 								data-i18n="chat.send">
 							</button>
 						</div>

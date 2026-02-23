@@ -1,4 +1,4 @@
-import { getUserId } from '../../lib/auth';
+import { getUser, getUserId } from '../../lib/auth';
 import { initializeModeSpecificBehaviors, resetLocalGame, openTrisModal } from './modal';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
@@ -18,6 +18,7 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
 
   // Populate user info if available and render small donut chart
   const userId = getUserId();
+  if (userId) insertTrisMatchHistory(userId)
   const usernameEl = container.querySelector('#tris-username') as HTMLElement | null;
   const chartInner = container.querySelector('#tris-user-chart-inner') as HTMLElement | null;
   if (usernameEl) usernameEl.textContent = userId ? `User: ${userId}` : 'Guest';
@@ -70,24 +71,94 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
       showErrorToast('Failed to start AI mode');
     }
   });
-  if (btnInviteFriend) btnInviteFriend.addEventListener('click', async () => {
-    if (!userId) {
-      showErrorToast('You must be logged in to invite friends');
+  if (btnInviteFriend) {
+    if (!isLoggedIn) {
+      btnInviteFriend.disabled = true;
+      btnInviteFriend.title = 'Sign in to invite friends';
+      btnInviteFriend.style.opacity = '0.5';
+      btnInviteFriend.style.cursor = 'not-allowed';
+    } else {
+      btnInviteFriend.addEventListener('click', async () =>
+      {
+        await openGameInviteModal('pong', async (friendId: string) =>
+        {
+          try {
+            await openTrisModal();
+            showSuccessToast('Game invite sent!');
+          }
+          catch (err) {
+            console.error('Failed to send game invite:', err);
+            showErrorToast('Failed to send game invite');
+          }
+        });
+      });
+    }
+  }
+  if (btnResetLocal) btnResetLocal.addEventListener('click', () => resetLocalGame());
+}
+
+async function insertTrisMatchHistory(userId: string) {
+  const container = document.getElementById('tris-win-list');
+  if (!container) return;
+
+  container.innerHTML = ''; // clear previous content
+
+  try {
+    const res = await fetch(`/api/tris/history?id=${userId}`, {
+      method: 'GET',
+      credentials: 'include'
+    });
+
+    const matches = res.ok ? await res.json() : [];
+
+    if (!matches || matches.length === 0) {
+      container.innerHTML = `
+        <div class="w-full text-center text-sm text-neutral-500 dark:text-neutral-400 italic py-4">
+          No matches available
+        </div>
+      `;
       return;
     }
-    const friendsManager = new FriendsManager({ currentUserId: userId });
-    await openGameInviteModal('tris', async (friendId: string) => {
-      try {
-        await createCustomGame(friendId);
-		openTrisModal();
-        showSuccessToast('Game invite sent!');
-      } catch (err) {
-        console.error('Failed to send game invite:', err);
-        showErrorToast('Failed to send game invite');
-      }
-    });
-  });
-  if (btnResetLocal) btnResetLocal.addEventListener('click', () => resetLocalGame());
+
+    const recentMatches = matches.slice(-5).reverse();
+
+    container.innerHTML = recentMatches.map((match: any) => {
+      const isWin = match.winnerId === userId;
+      const opponent =
+        match.playerOId === userId
+          ? match.playerXUsername
+          : match.playerOUsername;
+
+      const matchDate = new Date(match.endedAt);
+      const dateStr = matchDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+
+      return `
+        <div class="w-full grid grid-cols-3 items-center 
+                    px-4 py-2 rounded-xl text-xs 
+                    border-2 ${isWin ? 'border-green-400' : 'border-red-400'}
+                    bg-white dark:bg-neutral-900">
+
+          <div class="font-black ${isWin ? 'text-green-600' : 'text-red-600'}">
+            ${isWin ? 'WIN' : 'LOSS'}
+          </div>
+
+          <div class="text-center text-neutral-800 dark:text-white">
+            you vs <span class="font-semibold">${opponent}</span>
+          </div>
+
+          <div class="text-right text-neutral-500 dark:text-neutral-400">
+            ${dateStr}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Failed to load Tris match history:', err);
+  }
 }
 
 async function renderTrisStats(container: HTMLElement)

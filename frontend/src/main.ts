@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     { code: 'it', label: 'IT' }
   ];
   const langSelect = document.getElementById('profile-language') as HTMLSelectElement | null;
-  if (!langSelect) return;
 
   // populate selector and set current value
   langSelect.innerHTML = locales.map(l => `<option value="${l.code}">${l.label}</option>`).join('');
@@ -237,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function fetchLanguage(): string
 {
-  let language = localStorage.getItem('locale');
+  let language = localStorage.getItem('locale') || 'en';
   if (!language) {
       language = navigator.language || 'en';
 
