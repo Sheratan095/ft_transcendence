@@ -120,7 +120,7 @@ async function insertTrisMatchHistory(userId: string) {
       return;
     }
 
-    const recentMatches = matches.slice(-5).reverse();
+    const recentMatches = matches.slice(-6).reverse();
 
     container.innerHTML = recentMatches.map((match: any) => {
       const isWin = match.winnerId === userId;
@@ -136,23 +136,23 @@ async function insertTrisMatchHistory(userId: string) {
       });
 
       return `
-        <div class="w-full grid grid-cols-3 items-center 
-                    px-4 py-2 rounded-xl text-xs 
-                    border-2 ${isWin ? 'border-green-400' : 'border-red-400'}
-                    bg-white dark:bg-neutral-900">
+          <div class="w-full flex flex-col sm:flex-row sm:items-center justify-between 
+                      px-4 py-3 rounded-xl text-xs gap-2
+                      border-2 ${isWin ? 'border-green-400' : 'border-red-400'}
+                      bg-white dark:bg-neutral-900">
 
-          <div class="font-black ${isWin ? 'text-green-600' : 'text-red-600'}">
-            ${isWin ? 'WIN' : 'LOSS'}
-          </div>
+            <div class="font-black shrink-0 ${isWin ? 'text-green-600' : 'text-red-600'}">
+              ${isWin ? 'WIN' : 'LOSS'}
+            </div>
 
-          <div class="text-center text-neutral-800 dark:text-white">
-            you vs <span class="font-semibold">${opponent}</span>
-          </div>
+            <div class="flex-1 sm:text-center text-neutral-800 dark:text-white truncate">
+              you vs <span class="font-semibold">${opponent}</span>
+            </div>
 
-          <div class="text-right text-neutral-500 dark:text-neutral-400">
-            ${dateStr}
+            <div class="shrink-0 sm:text-right text-neutral-500 dark:text-neutral-400">
+              ${dateStr}
+            </div>
           </div>
-        </div>
       `;
     }).join('');
 

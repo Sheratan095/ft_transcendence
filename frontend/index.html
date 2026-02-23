@@ -53,7 +53,8 @@
 			<div class="flex shadow-xs rounded-base -space-x-1">
 				<input type="search" id="search-user-input"
 					title="search users"
-					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900 dark:border-accent-green text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
+					class="px-3 py-2.5 bg-gray-300 dark:bg-gray-800 rounded-l-xl border border-medium border-gray-900
+					 dark:border-accent-green text-heading text-sm focus:ring-brand focus:border-brand block w-full placeholder:text-body"
 					data-i18n-placeholder="search.placeholder" required>
 				<button type="button"
 					title="confirm search"
@@ -88,12 +89,11 @@
 					d="M12 3v1m6.364 1.636l-.707.707M21 12h-1m-1.636-6.364l-.707-.707M12 21v-1m-6.364-1.636l.707-.707M3 12h1m1.636 6.364l.707.707M12 12a3 3 0 110-6 3 3 0 010 6z" />
 			</svg>
 		</button>
-	</div>
-
-	<!-- Search Results Dropdown -->
-	<div id="search-results-dropdown"
-		class="fixed left-0 right-0 z-40 bg-neutral-900 dark:bg-neutral-800 border-x-2 border-b-2 border-accent-orange dark:border-accent-green hidden shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
-		<!-- Results will be injected here -->
+										<!-- Search Results Dropdown -->
+				<div id="search-results-dropdown"
+					class="fixed left-0 right-0 z-40 bg-neutral-900 dark:bg-neutral-800 border-x-2 border-b-2 border-accent-orange dark:border-accent-green hidden shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+					<!-- Results will be injected here -->
+				</div>
 	</div>
 
 	<!-- Main content-->
@@ -1006,22 +1006,13 @@
 			<!-- RIGHT LARGE -->
 			<div class="lg:row-span-2 h-full border border-gray-300 dark:border-neutral-800 rounded-3xl rounded-tl-lg rounded-bl-lg p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
 				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Play in a Tournament
+				Recent Matches	
 				</h2>
-				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-				Rise to the top by competing in ranked matches and tournaments against players worldwide.
-				</p>
 
-				<div class="mt-4 flex items-center gap-3"
+				<div class="mt-4 pt-4 gap-3"
 				id="tris-win-list">
 					<!-- Dynamically populated list of tournaments will go here -->
-				</div>
-
-				<div class="mt-auto pt-20">
-				<button id="tournament-btn"
-					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition">
-						 Create tournament
-				</button>
+					 Log in to see your matches!
 				</div>
 			</div>
 

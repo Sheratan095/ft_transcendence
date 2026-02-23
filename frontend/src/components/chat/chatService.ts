@@ -256,6 +256,20 @@ function handleChatMessage(data: any) {
   }
 }
 
+function refreshCurrentChat(String: chatId)
+{
+    // If the user is currently viewing this chat, re-render messages immediately
+  if (String(currentChatId) === String(chatId)) {
+    const renderUI = (window as any).__renderMessages;
+    if (renderUI) renderUI();
+    const scroll = (window as any).__scrollToBottom;
+    if (scroll) scroll();
+    // mark as read on receipt
+    markChatAsRead(chatId).catch(() => {});
+  }
+
+}
+
 function handleSystemMessage(data: any) {
   const messageData = data.data || data;
   const chatId = messageData.chatId;
