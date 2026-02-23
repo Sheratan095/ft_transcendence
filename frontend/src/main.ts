@@ -199,14 +199,14 @@ function setupGlobalClickHandlers() {
       (window as any).__manualLogout = true;
       try {
         await logout();
-        showToast('Logged out successfully');
+        showToast(t('toast.logout'));
         // Navigate to home with full reload to ensure fresh state
         goToRoute('/');
         setTimeout(() => window.location.reload(), 500);
       }
       catch (err) {
         console.error('Logout (client) error:', err);
-        showErrorToast('Error logging out');
+        showErrorToast(t('toast.error-logout'));
       }
       // clear the flag after a short delay so future 401s behave normally
       setTimeout(() => { (window as any).__manualLogout = false; }, 2000);

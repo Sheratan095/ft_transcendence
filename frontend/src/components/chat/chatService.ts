@@ -1,4 +1,5 @@
 import { showInfoToast, showToast, showErrorToast } from '../shared/Toast';
+import { t } from '../../lib/intlayer';
 import { renderMemberList } from './chat';
 
 // ============================================================================
@@ -66,7 +67,7 @@ export function connectChatWebSocket(): Promise<WebSocket> {
       chatSocket = socket;
 
       socket.onopen = () => {
-        showInfoToast('Connected to chat', { duration: 3000 });
+        showInfoToast(t('toast.chat.connected'), { duration: 3000 });
         isConnecting = false;
         reconnectAttempts = 0; // Reset on successful connection
         connectionPromise = null;
@@ -82,14 +83,14 @@ export function connectChatWebSocket(): Promise<WebSocket> {
       };
 
       socket.onerror = (event) => {
-        showErrorToast('Chat WebSocket error', { duration: 4000, position: 'top-right' });
+        showErrorToast(t('toast.chat.wsError'), { duration: 4000, position: 'top-right' });
         isConnecting = false;
         connectionPromise = null;
         reject(event);
       };
 
       socket.onclose = () => {
-        showErrorToast('⚠️ Chat disconnected', { duration: 4000, position: 'top-right' });
+        showErrorToast(t('toast.chat.disconnected'), { duration: 4000, position: 'top-right' });
         isConnecting = false;
         connectionPromise = null;
         chatSocket = null;
@@ -102,9 +103,9 @@ export function connectChatWebSocket(): Promise<WebSocket> {
           setTimeout(() => {
             connectChatWebSocket().catch(err => console.error('Reconnection failed:', err));
           }, delayMs);
-        } else {
+          } else {
           console.error('❌ Max reconnection attempts reached');
-          showErrorToast('❌ Chat disconnected (could not reconnect)', { duration: 5000, position: 'top-right' });
+          showErrorToast(t('toast.chat.disconnectedPermanent'), { duration: 5000, position: 'top-right' });
         }
       };
     } catch (error) {
@@ -185,7 +186,7 @@ function handleWebSocketMessage(data: any) {
     case 'error':
       const errPayload = data.data || data;
       console.error('WebSocket error event from server:', errPayload && errPayload.message ? errPayload.message : errPayload);
-      showToast(`⚠️ Chat error: ${errPayload?.message || 'See console'}`, 'error', { duration: 4000, position: 'top-right' });
+      showToast(t('toast.chat.error', { message: errPayload?.message || 'See console' }), 'error', { duration: 4000, position: 'top-right' });
       break;
     default:
       // ignore unknown events
@@ -202,7 +203,7 @@ function handleChatMessage(data: any) {
 
   if (!chatId) {
     console.warn('Received chat message without chatId', messageData);
-    showToast('Received message for unknown chat (missing chatId)', 'error', { duration: 4000, position: 'top-right' });
+    showToast(t('toast.chat.unknownChat'), 'error', { duration: 4000, position: 'top-right' });
     return;
   }
 
@@ -233,14 +234,14 @@ function handleChatMessage(data: any) {
 
   // Show toast notification if not currently viewing this chat
   if (currentChatId !== chatId) {
-    const sender = messageData.from || 'Someone';
+    const sender = messageData.from || t('toast.chat.someone');
     const preview = messageData.content.substring(0, 30);
     const displayText = preview.length < messageData.content.length ? `${preview}...` : preview;
 
     const chat = chats.find(c => c.id === chatId);
-    const chatName = chat ? getChatDisplayName(chat) : 'Group Chat';
+    const chatName = chat ? getChatDisplayName(chat) : t('toast.chat.aChat');
 
-    showToast(`🗣️ ${chatName}: ${sender} - ${displayText}`, 'info', {
+    showToast(t('toast.chat.newMessage', { chat: chatName, sender, preview: displayText }), 'info', {
       duration: 0,
       position: 'top-right',
       onClick: () => {
@@ -300,7 +301,6 @@ function handleSystemMessage(data: any) {
       if (chatObj && chatObj.members) chatObj.members = chatObj.members.filter((m: any) => String(m.userId) !== String(messageData.userId));
     }
 
-    renderMemberList();
     // If the current user was removed from this chat and they are viewing it, reset UI
     const removedUserId = messageData.userId ? String(messageData.userId) : null;
     const currentUserRemoved = removedUserId && String(removedUserId) === String(currentUserId);
@@ -311,16 +311,16 @@ function handleSystemMessage(data: any) {
       // Signal UI to reset
       const resetUI = (window as any).__resetChatUI;
       if (resetUI) resetUI(chatId);
-      showToast('You have left this chat', 'info', { duration: 4000, position: 'top-right' });
+        showToast(t('toast.chat.left'), 'info', { duration: 4000, position: 'top-right' });
       return;
     }
 
     // If not viewing this chat, show a toast
     if (currentChatId !== chatId) {
       const chat = chats.find(c => c.id === chatId);
-      const chatName = chat ? getChatDisplayName(chat) : 'Group Chat';
+      const chatName = chat ? getChatDisplayName(chat) : t('toast.chat.aChat');
       const emoji = ev === 'userJoin' ? '➕' : '➖';
-      showToast(`${emoji} ${chatName}: ${messageData.message}`, 'info', {
+      showToast(t('toast.chat.systemEvent', { emoji, chat: chatName, message: messageData.message }), 'info', {
         duration: 4000,
         position: 'top-right',
         onClick: () => {
@@ -338,8 +338,8 @@ function handleSystemMessage(data: any) {
   // Generic system messages
   if (currentChatId !== chatId) {
     const chat = chats.find(c => c.id === chatId);
-    const chatName = chat ? getChatDisplayName(chat) : 'Group Chat';
-    showToast(`📌 ${chatName}: ${messageData.message}`, 'info', {
+    const chatName = chat ? getChatDisplayName(chat) : t('toast.chat.aChat');
+    showToast(t('toast.chat.systemEvent', { emoji: '📌', chat: chatName, message: messageData.message }), 'info', {
       duration: 4000,
       position: 'top-right',
       onClick: () => {
@@ -401,7 +401,7 @@ function handlePrivateMessage(data: any) {
   const { chatId, senderId, from, content, timestamp } = messageData;
 
   if (!senderId) {
-    showToast('Received private message with missing sender', 'error', { duration: 4000, position: 'top-right' });
+    showToast(t('toast.chat.privateMissingSender'), 'error', { duration: 4000, position: 'top-right' });
     return;
   }
 
@@ -445,7 +445,7 @@ function handlePrivateMessage(data: any) {
   if (currentChatId !== dmChat.id) {
     const preview = content.substring(0, 30);
     const displayText = preview.length < content.length ? `${preview}...` : preview;
-    showToast(`💬 ${from}: ${displayText}`, 'info', {
+    showToast(t('toast.chat.privateMessage', { from, preview: displayText }), 'info', {
       duration: 3000,
       position: 'top-right',
       onClick: () => {
@@ -475,7 +475,7 @@ function handleChatAdded(data: any) {
     return;
   }
 
-  showToast(`➕ You've been added to "${chatName}" by ${addedBy}`, 'info', {
+  showToast(t('toast.chat.addedBy', { chat: chatName, user: addedBy }), 'info', {
     duration: 4000,
     position: 'top-right',
     onClick: async () => {
@@ -504,7 +504,9 @@ function handleChatJoined(data: any) {
   }
 
   // Show a clear toast with an action to open the chat
-  showToast(`➕ You've been added to "${chatName || 'a chat'}" by ${invitedBy || 'someone'}`, 'info', {
+  const displayChatName = chatName || t('toast.chat.aChat');
+  const inviter = invitedBy || t('toast.chat.someone');
+  showToast(t('toast.chat.joinedBy', { chat: displayChatName, user: inviter }), 'info', {
     duration: 5000,
     position: 'top-right',
     onClick: async () => {

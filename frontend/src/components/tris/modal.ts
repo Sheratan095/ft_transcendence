@@ -4,6 +4,7 @@
  */
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
+import { t } from '../../lib/intlayer';
 import { getUserId } from '../../lib/auth';
 import { goToRoute } from '../../spa';
 import { 
@@ -248,9 +249,9 @@ function renderAndAttachButtons() {
        openGameInviteModal('tris', async (friendId: string) => {
           try {
             await createCustomGame(friendId);
-            showSuccessToast('Invite sent!');
+            showSuccessToast(t('toast.inviteSent'));
           } catch(e) {
-            showErrorToast('Failed to invite');
+            showErrorToast(t('toast.inviteFailed'));
           }
        });
     });
