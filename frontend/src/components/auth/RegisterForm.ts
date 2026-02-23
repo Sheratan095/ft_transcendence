@@ -76,7 +76,7 @@ export function attachRegister(callbacks?: RegisterFormCallbacks): void {
           }
         }
         showSuccess(errorEl, 'Registration successful.');
-        goToRoute('/profile');
+        window.location.href = "/profile";
       } else {
         showError(errorEl, (body && (body.message || body.error)) || `Register failed (${res.status})`);
       }
