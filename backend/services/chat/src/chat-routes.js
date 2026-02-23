@@ -7,7 +7,7 @@ import {
 	createGroupChat,
 	leaveGroupChat,
 	startPrivateChat,
-	deleteUsernameFromCache,
+	deleteUserChats,
 	removeWsConnection
 } from './chat-controllers.js';
 
@@ -160,7 +160,7 @@ const	deleteUserOpts =
 	},
 
 	preHandler: validateInternalApiKey,
-	handler: deleteUsernameFromCache
+	handler: deleteUserChats
 };
 
 const	removeWsConnectionOpts =
