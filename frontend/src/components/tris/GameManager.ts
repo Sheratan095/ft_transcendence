@@ -8,6 +8,7 @@ import { LocalInputController, AIController, NetworkInputController } from './ga
 import type { InputController } from './game/InputController';
 import { BoardRenderer } from './game/ui';
 import { getUserId } from '../../lib/auth';
+import { makeTrisMove } from './ws';
 import type { GameState } from './game/physics';
 
 export const TRIS_MODES = {
@@ -29,6 +30,7 @@ export class GameManager {
   private isUserTurn: boolean = false;
   private userReady: boolean = false;
   private isPaused: boolean = true;
+  private onlineBoardClickHandler: ((e: MouseEvent) => void) | null = null;
 
   private onGameEndedCallback?: (result: string) => void;
 
@@ -73,6 +75,19 @@ export class GameManager {
         this.networkConnector.onMove(m => this.handleLocalMove(this.userSymbol === 'X' ? 'O' : 'X', m));
         this.renderer.updateStatus('Ready to play online');
         this.renderer.toggleInteraction(false);
+        // Attach click handler for sending moves to the server
+        this.onlineBoardClickHandler = (e: MouseEvent) => {
+          if (!this.isUserTurn) return;
+          const target = e.target as HTMLElement;
+          const cell = target.closest('[data-index]') as HTMLElement | null;
+          const cellIndex = cell?.dataset?.index;
+          if (cellIndex === undefined || cellIndex === null) return;
+          const pos = parseInt(cellIndex);
+          this.isUserTurn = false;
+          this.renderer.toggleInteraction(false);
+          makeTrisMove(pos);
+        };
+        document.getElementById('tris-board')?.addEventListener('click', this.onlineBoardClickHandler);
         break;
     }
   }
@@ -220,5 +235,9 @@ export class GameManager {
     this.playerXController?.destroy();
     this.playerOController?.destroy();
     this.networkConnector?.destroy();
+    if (this.onlineBoardClickHandler) {
+      document.getElementById('tris-board')?.removeEventListener('click', this.onlineBoardClickHandler);
+      this.onlineBoardClickHandler = null;
+    }
   }
 }
