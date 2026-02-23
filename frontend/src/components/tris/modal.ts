@@ -356,6 +356,7 @@ function updateStartBtnText(btn: HTMLButtonElement) {
       if (btn.textContent === 'Quit') return; // Game is running!
       // In online mode with game, show the ready button instead of using main button for ready state
       btn.textContent = 'Quit';
+      btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
       btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
     } else {
       if (btn.textContent === 'Quit matchmaking') return; 
@@ -401,12 +402,14 @@ function handleStartClick() {
         startMatchmaking();
         updateTrisStatus('Looking for match...');
         btn.textContent = 'Quit matchmaking';
+        btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
         btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       } else {
         stopMatchmaking();
         updateTrisStatus('Matchmaking canceled');
         btn.textContent = 'Start Matchmaking';
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+        btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
       }
     }
   } else {
@@ -518,7 +521,7 @@ function handleTrisEvent(event: string, data: any) {
       if (readyBtn) readyBtn.classList.add('hidden');
       if (mainBtn) {
         mainBtn.textContent = 'Quit';
-        mainBtn.classList.remove('hidden');
+        mainBtn.classList.remove('hidden', 'dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
         mainBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       }
     }
@@ -540,6 +543,7 @@ function handleTrisEvent(event: string, data: any) {
         mainBtn.textContent = 'Play Again';
         mainBtn.classList.remove('hidden');
         mainBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+        mainBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
       }
     }
   }
