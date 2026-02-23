@@ -176,6 +176,7 @@ export function initializeModeSpecificBehaviors(mode: TrisModeType) {
       } else {
         btn.textContent = 'Restart';
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+        btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
       }
     }
   });
@@ -339,12 +340,14 @@ function handleStartClick() {
       currentGameManager.resumeGame();
       currentGameManager.updateStatusText();
       btn.textContent = 'STOP';
-      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
+      btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-dark');
     } else {
       currentGameManager.pauseGame();
       updateTrisStatus('Game paused');
       btn.textContent = 'Continue';
-      btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+      btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-dark');
+      btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
     }
   }
 }
