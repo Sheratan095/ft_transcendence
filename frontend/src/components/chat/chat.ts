@@ -57,6 +57,8 @@ export function initChat(userId: string) {
 // ============================================================================
 
 export async function openChatModal() {
+  if (!chatSocket)
+    await connectChatWebSocket();
   const modal = document.getElementById('chat-modal');
   if (!modal) {
     console.error('❌ chat-modal element not found in DOM');
@@ -401,8 +403,11 @@ function updateChatControls() {
 
   const enabled = !!currentChatId;
 
-  if (!enabled)
-    sendBtn?.setAttribute('disabled', 'true');
+  if (input && sendBtn)
+  {
+    input.disabled = enabled;
+    sendBtn.disabled = enabled;
+  }
   if (input) {
     input.disabled = !enabled;
     input.placeholder = enabled ? t('chat.typing-placeholder') : t('chat.selector-placeholder');

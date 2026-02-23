@@ -1,5 +1,6 @@
 import { showInfoToast, showToast, showErrorToast } from '../shared/Toast';
 import { t } from '../../lib/intlayer';
+import { renderMemberList } from './chat';
 
 // ============================================================================
 // STATE MANAGEMENT
@@ -276,6 +277,7 @@ function handleSystemMessage(data: any) {
   const ev = messageData.event || messageData.type || null;
   if (ev === 'userJoin' || ev === 'userLeave') {
     const members = chatMembers.get(chatId) || [];
+    //USER LEFT
 
     if (ev === 'userJoin' && messageData.userId) {
       const exists = members.find((m: any) => String(m.userId) === String(messageData.userId));
@@ -299,7 +301,7 @@ function handleSystemMessage(data: any) {
       if (chatObj && chatObj.members) chatObj.members = chatObj.members.filter((m: any) => String(m.userId) !== String(messageData.userId));
     }
 
-      // If the current user was removed from this chat and they are viewing it, reset UI
+    // If the current user was removed from this chat and they are viewing it, reset UI
     const removedUserId = messageData.userId ? String(messageData.userId) : null;
     const currentUserRemoved = removedUserId && String(removedUserId) === String(currentUserId);
     const currentMembers = chatMembers.get(chatId) || [];
