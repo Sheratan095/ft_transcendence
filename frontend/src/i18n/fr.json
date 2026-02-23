@@ -93,6 +93,7 @@
   "toast.chat.joinedBy": "➕ Vous avez été ajouté à {{ chat }} par {{ user }}",
   "toast.chat.aChat": "un chat",
   "toast.chat.someone": "quelqu'un",
+  "toast.friend.someone": "quelqu'un",
   "error.pongCardNotFound": "Bouton de carte Pong introuvable",
   "error.trisCardNotFound": "Bouton de carte Tris introuvable",
   "toast.notifications.connected": "Connecté aux notifications",
@@ -120,5 +121,6 @@
   "toast.chat.messagePreview": "vous a envoyé un message",
   "toast.chat.notification": "{{ sender }} : {{ preview }}",
   "toast.notification.generic": "Notification : {{ event }}",
-  "toast.success.friendAccepted": "{{ user }} a accepté votre demande d'ami !"
+  "toast.success.friendAccepted": "{{ user }} a accepté votre demande d'ami !",
+  "toast.success.nowFriends": "Vous êtes maintenant ami avec {{ user }} !"
 }

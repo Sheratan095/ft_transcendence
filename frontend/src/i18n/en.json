@@ -93,6 +93,7 @@
   "toast.chat.joinedBy": "➕ You've been added to {{ chat }} by {{ user }}",
   "toast.chat.aChat": "a chat",
   "toast.chat.someone": "someone",
+  "toast.friend.someone": "someone",
   "error.pongCardNotFound": "Pong card button not found",
   "error.trisCardNotFound": "Tris card button not found",
   "toast.notifications.connected": "Connected to notifications",
@@ -120,5 +121,6 @@
   "toast.chat.messagePreview": "sent you a message",
   "toast.chat.notification": "{{ sender }}: {{ preview }}",
   "toast.notification.generic": "Notification: {{ event }}",
-  "toast.success.friendAccepted": "{{ user }} accepted your friend request!"
+  "toast.success.friendAccepted": "{{ user }} accepted your friend request!",
+  "toast.success.nowFriends": "You are now friends with {{ user }}!"
 }
