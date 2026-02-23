@@ -84,7 +84,7 @@ class	ChatConnectionManager
 			timestamp: timestamp,
 		};
 
-		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage', timestamp, invitedById);
+		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage', timestamp);
 	
 	}
 
