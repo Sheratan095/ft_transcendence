@@ -136,7 +136,7 @@ export async function openTrisModal() {
   
   if (currentMode) {
     updateScoreboardNames(currentMode);
-    updateTrisStatus(currentMode === 'online' ? 'Ready to play online' : 'Press start to play');
+    updateTrisStatus(currentMode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
   } else updateTrisStatus('Select mode');
 
   if (!trisInitialized) {
@@ -210,7 +210,7 @@ export function initializeModeSpecificBehaviors(mode: TrisModeType) {
   }
   
   updateScoreboardNames(mode);
-  updateTrisStatus(mode === 'online' ? 'Ready to play online' : 'Press start to play');
+  updateTrisStatus(mode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
   userReady = false;
   renderAndAttachButtons();
 }
@@ -381,7 +381,7 @@ function handleStartClick() {
     if (currentGameManager) currentGameManager.reset();
     btn.textContent = currentMode === 'online' ? 'Start Matchmaking' : 'Start';
     btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
-    updateTrisStatus(currentMode === 'online' ? 'Ready to play online' : 'Press start to play');
+    updateTrisStatus(currentMode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
     return;
   }
 
@@ -406,7 +406,7 @@ function handleStartClick() {
         btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       } else {
         stopMatchmaking();
-        updateTrisStatus('Matchmaking canceled');
+        updateTrisStatus('Online - Not in matchmaking');
         btn.textContent = 'Start Matchmaking';
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
         btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
@@ -438,7 +438,7 @@ function handleSurrenderClick() {
     quitGame();
   } else {
     stopMatchmaking();
-    updateTrisStatus('Matchmaking canceled');
+    updateTrisStatus('Online - Not in matchmaking');
     renderAndAttachButtons();
   }
 }
@@ -487,6 +487,7 @@ function handleTrisEvent(event: string, data: any) {
 
       // Update scorebar player names
       const { yourSymbol, opponentUsername } = data;
+      updateTrisStatus(`Matched with ${opponentUsername || 'Opponent'}. You are ${yourSymbol}`);
       const leftName  = (yourSymbol === 'X') ? 'You (X)' : `${opponentUsername || 'Opponent'} (X)`;
       const rightName = (yourSymbol === 'O') ? 'You (O)' : `${opponentUsername || 'Opponent'} (O)`;
       updateScoreboardNames('online', leftName, rightName);

@@ -73,7 +73,7 @@ export class GameManager {
       case TRIS_MODES.ONLINE:
         this.networkConnector = new NetworkInputController();
         this.networkConnector.onMove(m => this.handleLocalMove(this.userSymbol === 'X' ? 'O' : 'X', m));
-        this.renderer.updateStatus('Ready to play online');
+        this.renderer.updateStatus('Online - Not in matchmaking');
         this.renderer.toggleInteraction(false);
         // Attach click handler for sending moves to the server
         this.onlineBoardClickHandler = (e: MouseEvent) => {
