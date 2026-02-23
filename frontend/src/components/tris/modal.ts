@@ -117,6 +117,14 @@ export async function openTrisModal() {
   if (rightReady) rightReady.classList.add('hidden');
 
   // Reset UI each time modal opens: re-render buttons, ensure start text and status are correct
+  const startBtnPre = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+  if (startBtnPre) {
+    startBtnPre.textContent = currentMode === 'online' ? 'Start Matchmaking' : 'Start';
+    startBtnPre.disabled = false;
+    startBtnPre.classList.remove('hidden', 'bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+    startBtnPre.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
+  }
+
   renderAndAttachButtons();
   
   // Explicitly ensure start button is visible after rendering
@@ -153,6 +161,8 @@ export function closeTrisModal() {
   const modal = document.getElementById('tris-modal');
   if (modal) modal.classList.add('hidden');
   
+  setCurrentGameId(null);
+
   if (currentGameManager) {
     currentGameManager.destroy();
     currentGameManager = null;
@@ -474,9 +484,8 @@ function handleTrisEvent(event: string, data: any) {
 
       // Update scorebar player names
       const { yourSymbol, opponentUsername } = data;
-      const myName = (getUserId() || 'You');
-      const leftName  = (yourSymbol === 'X') ? `${myName} (X)` : `${opponentUsername || 'Opponent'} (X)`;
-      const rightName = (yourSymbol === 'O') ? `${myName} (O)` : `${opponentUsername || 'Opponent'} (O)`;
+      const leftName  = (yourSymbol === 'X') ? 'You (X)' : `${opponentUsername || 'Opponent'} (X)`;
+      const rightName = (yourSymbol === 'O') ? 'You (O)' : `${opponentUsername || 'Opponent'} (O)`;
       updateScoreboardNames('online', leftName, rightName);
 
       // Reset ready indicators
