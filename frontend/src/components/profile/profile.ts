@@ -4,6 +4,8 @@ export async function attachUserOptions() {
 	const userOptions = document.getElementById('user-options') as HTMLElement | null;
 	if (!userOptions) return;
 	
+	if (!userOptions.classList.contains('hidden')) return;
+
 	userOptions.classList.remove('hidden'); 
 	const raw = localStorage.getItem('user');
 	const user: User | null = raw ? JSON.parse(raw) : null;

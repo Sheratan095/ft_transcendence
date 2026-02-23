@@ -9,6 +9,7 @@ import { initSlideshow } from './lib/slideshow';
 import { initPong } from './components/pong/ws.ts';
 import { main } from './main.ts';
 import { initUserServices } from './main.ts';
+import { attachUserOptions } from './components/profile/profile.ts';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -56,10 +57,10 @@ const routes: Record<string, RouteConfig> = {
     const el = document.getElementById('main-content');
     if (!el) return;
     if (!isLoggedInClient()) {
-    goToRoute('/login');
+    goToRoute('/');
     showErrorToast('Please sign in to view your profile');
     return;
-    }
+    } else await initUserServices('/');
     animatePolygonToBottom();
     el.innerHTML = '';
 
@@ -143,7 +144,6 @@ let isBackNavigation = false;
  * Updates browser history, detects back/forward navigation, and renders the appropriate route
  */
 async function goToRoute(path: string) {
-  main(window.location.pathname); // Ensure main is called on every route change to re-attach listeners and initialize components as needed
   const url = new URL(path, window.location.origin);
   
   // Real SPA navigation
