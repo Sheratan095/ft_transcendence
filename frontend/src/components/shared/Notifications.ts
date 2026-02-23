@@ -135,7 +135,7 @@ function handleNotificationEvent(data: any) {
 		case 'friend.request':
 			{
 				console.log('[Notifications] friend.request data:', data);
-				const username = data.data?.username || t('toast.friend.someone');
+				const username = data.data?.username || data.data?.from || t('toast.friend.someone');
 				let userId = data.data?.userId || data.data?.id || data.data?.requesterId || data.userId || data.id;
 				console.log('[Notifications] Extracted userId:', userId, 'from data:', data.data);
             
@@ -244,7 +244,7 @@ function handleNotificationEvent(data: any) {
 
 		case 'friend.accept':
 			{
-				const username = data.data?.username || t('toast.friend.someone');
+				const username = data.data?.username || data.data?.from || t('toast.friend.someone');
 				const userId = data.data?.userId;
 				
 				// Notify subscribers
@@ -324,7 +324,7 @@ function handleNotificationEvent(data: any) {
 
 		case 'game.invite':
 			{
-				const username = data.data?.username || t('toast.friend.someone');
+				const username = data.data?.username || data.data?.from || t('toast.friend.someone');
 				const gameType = data.data?.gameType || 'tris';
 				const gameId = data.data?.gameId || '';
 
