@@ -1,6 +1,7 @@
 import { showErrorToast } from "../components/shared/Toast";
 import { goToRoute } from "../spa";
 import { isLoggedInClient } from "./auth";
+import { t } from "./intlayer";
 
 let currentSlide = 0;
 const SLIDES = ['tris', 'pong']; // Slide identifiers
@@ -127,7 +128,7 @@ function attachPongCardListener()
 {
 	const pongCard = document.getElementById('pong-card-btn');
 	if (!pongCard) {
-		console.error('Pong card button not found');
+		console.error(t('error.pongCardNotFound'));
 		return;
 	}
 	pongCard.addEventListener('click', (e) =>
@@ -154,7 +155,7 @@ export function setupTrisCardListener() {
 function attachTrisCardListener() {
   const trisCard = document.getElementById('tris-card-btn');
   if (!trisCard) {
-    console.error('Tris card button not found');
+    console.error(t('error.trisCardNotFound'));
     return;
   }
 

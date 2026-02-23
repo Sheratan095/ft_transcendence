@@ -1,3 +1,5 @@
+import { t } from '../../lib/intlayer';
+
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface ToastAction {
@@ -183,4 +185,25 @@ export function showInfoToast(message: string, options?: ToastOptions): void {
 
 export function showWarningToast(message: string, options?: ToastOptions): void {
   showToast(message, 'warning', options);
+}
+
+// Dev debug helpers: expose simple toast triggers on window for manual testing
+if (typeof window !== 'undefined') {
+  (window as any).debugToast = (message: string, type: ToastType = 'info') => {
+    try {
+      showToast(String(message), type);
+    } catch (err) {
+      console.error('debugToast error:', err);
+    }
+  };
+
+  (window as any).debugShowToast = (key: string, vars?: Record<string, any>, type: ToastType = 'info') => {
+    try {
+      const msg = t ? t(key, vars) : key;
+      showToast(String(msg), type);
+    } catch (err) {
+      console.error('debugShowToast error:', err);
+      showToast(key, type);
+    }
+  };
 }

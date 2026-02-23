@@ -4,6 +4,7 @@
  */
 
 import { showErrorToast, showSuccessToast } from '../components/shared/Toast';
+import { t } from './intlayer';
 import { FriendsManager } from '../components/profile/FriendsManager';
 
 let currentGameType: 'tris' | 'pong' | null = null;
@@ -21,7 +22,7 @@ export async function openGameInviteModal(
   const closeBtn = document.getElementById('game-invite-close-btn');
 
   if (!modal || !title || !subtitle || !friendsList || !closeBtn) {
-    showErrorToast('Invite modal elements not found');
+    showErrorToast(t('toast.inviteModalNotFound'));
     return;
   }
 
@@ -90,7 +91,7 @@ async function selectFriend(friendId: string) {
     closeGameInviteModal();
   } catch (err) {
     console.error('Error inviting friend:', err);
-    showErrorToast(`Failed to send ${currentGameType} invite`);
+    showErrorToast(t('toast.failedToSendInvite', { game: String(currentGameType || '') }));
   }
 }
 

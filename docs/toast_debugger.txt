@@ -1,0 +1,14 @@
+Usage:
+
+// Simple message (defaults to 'info')
+debugToast('Hello world');
+
+// With type
+debugToast('Saved successfully', 'success');
+debugToast('Save failed', 'error');
+
+// Show a localized message by key (uses current locale + interpolation vars)
+debugShowToast('toast.chat.newMessage', { chat: 'General', sender: 'Alice', preview: 'hi' });
+
+// With explicit toast type
+debugShowToast('toast.friend.request', { user: 'Bob' }, 'info');
