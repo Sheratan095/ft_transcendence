@@ -24,7 +24,9 @@ export class BoardRenderer {
     // Create 3x3 grid of cells
     for (let i = 0; i < 9; i++) {
       const cell = document.createElement('button');
-      cell.className = 'w-full h-full aspect-square bg-neutral-800 dark:bg-neutral-700/50 border-2 dark:border-neutral-600 hover:border-accent-green hover:bg-neutral-700 dark:hover:bg-neutral-600 transition text-4xl sm:text-5xl md:text-5xl font-extrabold text-white rounded-xl cursor-not-allowed shadow-md hover:shadow-lg hover:shadow-accent-green/20';
+      cell.className = 'w-full h-full aspect-square border-neutral-400 bg-neutral-200 dark:bg-neutral-800 border-2 hover:bg-neutral-300 \
+      dark:border-neutral-600 hover:border-accent-orange dark:hover:border-accent-green dark:hover:bg-neutral-700 transition text-4xl \
+      sm:text-5xl md:text-5xl font-extrabold dark:text-white text-black rounded-xl cursor-not-allowed shadow-md hover:shadow-lg hover:shadow-accent-orange dark:hover:shadow-accent-green/20';
       cell.dataset.index = i.toString();
       cell.id = `tris-cell-${i}`;
       this.boardElement.appendChild(cell);

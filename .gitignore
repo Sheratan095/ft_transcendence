@@ -65,3 +65,4 @@ ehthumbs.db
 data/
 
 frontend/package-lock.json
+frontend/tailwind.css
