@@ -233,7 +233,7 @@ function updateScoreboardNames(mode: TrisModeType, leftName?: string, rightName?
     } else if (mode === 'offline-1v1') {
       lName = 'Player X'; rName = 'Player O';
     } else {
-      lName = 'Player X'; rName = 'Player O';
+      lName = '--------'; rName = '--------';
     }
   }
 
