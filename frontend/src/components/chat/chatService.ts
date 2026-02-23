@@ -480,23 +480,23 @@ function handleChatAdded(data: any) {
     return;
   }
 
+  // Proactively load chats so the new group appears in the list immediately
+  loadChats()
+    .then(() => {
+      // Signal UI to refresh
+      const refreshChats = (window as any).__refreshChatsIfOpen;
+      if (refreshChats) refreshChats();
+    })
+    .catch(err => console.error('Failed to reload chats after being added:', err));
+
   showToast(t('toast.chat.addedBy', { chat: chatName, user: addedBy }), 'info', {
     duration: 4000,
     position: 'top-right',
     onClick: async () => {
-      try {
-        await loadChats();
-      } catch (err) {
-        console.error('Failed to reload chats on toast click', err);
-      }
       const openChat = (window as any).__openChat;
       if (openChat) openChat(chatId);
     }
   });
-
-  // Signal UI to refresh chat list if modal is open
-  const refreshChats = (window as any).__refreshChatsIfOpen;
-  if (refreshChats) refreshChats();
 }
 
 function handleChatJoined(data: any) {
@@ -803,6 +803,34 @@ export async function addUserToChat(chatId: string, toUserId: string) {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.message || `Failed to add user to chat: ${response.statusText}`);
+  }
+
+  // Try to update local state immediately so UI reflects the change without a full refresh
+  try {
+    const json = await response.json().catch(() => null);
+    // Determine added member info if returned by the API
+    const returnedMember = json && (json.member || json.addedMember || json.user || null);
+    const memberObj: any = returnedMember
+      ? { userId: String(returnedMember.userId || returnedMember.id || toUserId), username: returnedMember.username || returnedMember.name }
+      : { userId: String(toUserId) };
+
+    const existing = chatMembers.get(chatId) || (chats.find(c => c.id === chatId)?.members || []);
+    // Prevent duplicates
+    if (!existing.find((m: any) => String(m.userId || m.id) === String(memberObj.userId))) {
+      existing.push(memberObj);
+      chatMembers.set(chatId, existing);
+      const chatObj = chats.find(c => c.id === chatId);
+      if (chatObj) chatObj.members = existing;
+    }
+
+    // Notify UI to re-render member list and chat list if available
+    const renderList = (window as any).__renderChatList;
+    if (renderList) renderList();
+    const renderMembers = (window as any).__renderMemberList;
+    if (renderMembers) renderMembers();
+  } catch (err) {
+    // Non-fatal: if we can't parse or update, the later loadChats() call will correct state
+    console.warn('Could not update local chat members after addUserToChat:', err);
   }
 }
 
