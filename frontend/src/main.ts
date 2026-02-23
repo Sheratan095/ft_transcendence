@@ -147,11 +147,12 @@ function setupSearchUser()
   if (!searchForm || !searchInput || !mainContainer)
     return;
 
+  if (!searchForm.classList.contains('hidden')) return;
   searchForm.classList.remove('hidden');
   initSearchAutocomplete();
 }
 
-export function initUserServices(path: string)
+export async function initUserServices(path: string)
 {
 	const userId = getUserId();
 	if (!userId)

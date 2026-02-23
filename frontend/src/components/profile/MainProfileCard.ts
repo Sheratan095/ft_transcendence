@@ -326,7 +326,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         {
           deleteDialog.classList.add('hidden');
           await attachUserOptions();
-          goToRoute('/login');
+          window.location.href = '/';
         }
         else
           throw new Error('Delete failed');

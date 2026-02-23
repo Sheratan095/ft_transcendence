@@ -401,6 +401,8 @@ function updateChatControls() {
 
   const enabled = !!currentChatId;
 
+  if (!enabled)
+    sendBtn?.setAttribute('disabled', 'true');
   if (input) {
     input.disabled = !enabled;
     input.placeholder = enabled ? t('chat.typing-placeholder') : t('chat.selector-placeholder');

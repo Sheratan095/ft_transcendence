@@ -37,7 +37,7 @@ export function	initGameState(playerLeftId, playerRightId)
 // return new y of paddle
 export function	movePaddle(startingY, direction)
 {
-	const	moveAmount = parseFloat(process.env.PADDLE_SPEED) / 60; // Divide by 60 to get per-frame amount
+	const	moveAmount = parseFloat(process.env.PADDLE_SPEED) / process.env.FRAME_RATE; // Divide by 60 to get per-frame amount
 	
 	switch (direction)
 	{

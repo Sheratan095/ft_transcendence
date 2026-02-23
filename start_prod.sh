@@ -13,7 +13,7 @@ echo "Generating .env files from docs/env/Prod..."
 "$POPULATE_SCRIPT"
 
 FRONTEND_CERT_DIR="$ROOT_DIR/frontend/certs/certs"
-BACKEND_CERT_DIR="$ROOT_DIR/backend/certs/certs"
+BACKEND_CERT_DIR="$ROOT_DIR/backend/certs"
 GEN_SCRIPT="$ROOT_DIR/frontend/certs/generate-certs.sh"
 
 if [[ ! -f "$FRONTEND_CERT_DIR/cert.pem" || ! -f "$FRONTEND_CERT_DIR/key.pem" ]]; then

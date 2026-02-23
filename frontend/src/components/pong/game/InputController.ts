@@ -104,7 +104,7 @@ export class AIController extends InputController
 		{
 		easy: {
 			reactionDelay: 0.15, // React slower
-			errorMargin: 0.1, // More error in positioning
+			errorMargin: 1, // More error in positioning
 			trackingSpeed: 0.7, // Move slower
 			predictionDepth: 0, // Don't predict ball trajectory
 		},
@@ -199,7 +199,9 @@ export class AIController extends InputController
 		// Calculate paddle center
 		const paddleCenter = paddle.y + paddle.height / 2;
 		const diff = targetY - paddleCenter;
-		
+		if (targetY > paddle.y && targetY < (paddle.y + paddle.height))
+			return null;
+
 		// Dead zone to prevent jittering
 		const deadZone = 0.01;
 		if (Math.abs(diff) < deadZone)

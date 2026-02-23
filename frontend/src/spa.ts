@@ -10,6 +10,7 @@ import { initPong } from './components/pong/ws.ts';
 import { main } from './main.ts';
 import { initUserServices } from './main.ts';
 import { t } from './lib/intlayer.ts';
+import { attachUserOptions } from './components/profile/profile.ts';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
@@ -27,6 +28,7 @@ const routes: Record<string, RouteConfig> = {
       el.appendChild(clone);
 
       if (isLoggedInClient()) modifyIndex(); // Update CTA to logout if logged in
+      initCardHoverEffect();
       initSlideshow();
       setupTrisCardListener();
       setupPongCardListener();
@@ -57,10 +59,11 @@ const routes: Record<string, RouteConfig> = {
     const el = document.getElementById('main-content');
     if (!el) return;
     if (!isLoggedInClient()) {
-    goToRoute('/login');
+    goToRoute('/');
     showErrorToast(t('toast.pleaseSignIn'));
     return;
-    }
+    } else await initUserServices('/');
+    initCardHoverEffect();
     animatePolygonToBottom();
     el.innerHTML = '';
 
@@ -116,6 +119,7 @@ const routes: Record<string, RouteConfig> = {
         console.error('Failed to render Pong page:', err);
         if (el) el.innerHTML = '<div class="text-red-600">Failed to load Pong page</div>';
       }
+      initCardHoverEffect();
     }
   },
   '/tris': { 
@@ -132,6 +136,7 @@ const routes: Record<string, RouteConfig> = {
         console.error('Failed to render Tris page:', err);
         if (el) el.innerHTML = '<div class="text-red-600">Failed to load Tris page</div>';
       }
+      initCardHoverEffect();
     }
   }
 };
@@ -144,7 +149,6 @@ let isBackNavigation = false;
  * Updates browser history, detects back/forward navigation, and renders the appropriate route
  */
 async function goToRoute(path: string) {
-  main(window.location.pathname); // Ensure main is called on every route change to re-attach listeners and initialize components as needed
   const url = new URL(path, window.location.origin);
   
   // Real SPA navigation

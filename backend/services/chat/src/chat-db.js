@@ -405,6 +405,21 @@ export class	ChatDatabase
 
 	}
 
+	async	deletePrivateChatsForUser(userId)
+	{
+		// Get all chat IDs the user is part of
+		const	chatsQuery = `
+			DELETE FROM chats
+			WHERE id IN (
+				SELECT chat_id 
+				FROM chat_members 
+				WHERE user_id = ?)
+			AND chat_type = 'dm'
+			`;
+
+		await this.db.run(chatsQuery, [String(userId)]);
+	}
+
 	//-----------------------------MESSAGE QUERIES----------------------------
 
 	async	addMessageToChat(chatId, senderId, message, timestamp, type = "text")
