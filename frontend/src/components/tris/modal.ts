@@ -90,10 +90,9 @@ function setupModeSelectionListeners(onModeSelected?: (mode: TrisModeType) => Pr
  * Open the main game modal
  */
 export async function openTrisModal() {
-  const userId = getUserId();
   const modal = document.getElementById('tris-modal');
-  if (!modal || !userId) {
-    showErrorToast('Please sign in to play');
+  if (!modal) {
+    showErrorToast('Error opening modal');
     return;
   }
 
