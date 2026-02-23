@@ -19,7 +19,8 @@ setUserReady,
 quitGame,
 cancelCustomGame,
 createCustomGame,
-setTrisEventCallback
+setTrisEventCallback,
+getCurrentSymbol
 } from './ws';
 import { GameManager, TRIS_MODES } from './GameManager';
 import { openGameInviteModal, closeGameInviteModal } from '../../lib/game-invite';
@@ -100,11 +101,20 @@ export async function openTrisModal() {
   modal.classList.remove('hidden');
   setupModalButtons();
 
-  // Hide ready button initially
+  // Reset ready button to initial state
   const readyBtn = document.getElementById('tris-ready-btn') as HTMLButtonElement | null;
   if (readyBtn) {
+    readyBtn.textContent = '✗ Not Ready';
+    readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+    readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
     readyBtn.classList.add('hidden');
   }
+
+  // Reset ready indicators
+  const leftReady  = document.getElementById('tris-left-ready');
+  const rightReady = document.getElementById('tris-right-ready');
+  if (leftReady)  leftReady.classList.add('hidden');
+  if (rightReady) rightReady.classList.add('hidden');
 
   // Reset UI each time modal opens: re-render buttons, ensure start text and status are correct
   renderAndAttachButtons();
@@ -200,20 +210,32 @@ function updateTrisStatus(text: string) {
   if (el) el.textContent = text;
 }
 
-function updateScoreboardNames(mode: TrisModeType) {
-  const left = document.getElementById('tris-left-name');
-  const right = document.getElementById('tris-right-name');
-  if (!left || !right) return;
+function updateScoreboardNames(mode: TrisModeType, leftName?: string, rightName?: string) {
+  const leftEl  = document.getElementById('tris-left-name');
+  const rightEl = document.getElementById('tris-right-name');
 
-  if (mode === 'offline-ai') {
-    left.textContent = 'You (X)';
-    right.textContent = 'Ai (O)';
-  } else if (mode === 'offline-1v1') {
-    left.textContent = 'Player X';
-    right.textContent = 'Player O';
-  } else {
-    left.textContent = 'Player X';
-    right.textContent = 'Player O';
+  let lName = leftName;
+  let rName = rightName;
+
+  if (!lName || !rName) {
+    if (mode === 'offline-ai') {
+      lName = 'You (X)'; rName = 'Ai (O)';
+    } else if (mode === 'offline-1v1') {
+      lName = 'Player X'; rName = 'Player O';
+    } else {
+      lName = 'Player X'; rName = 'Player O';
+    }
+  }
+
+  if (leftEl) {
+    const span = leftEl.querySelector('span:first-child');
+    if (span) span.textContent = lName;
+    else leftEl.textContent = lName;
+  }
+  if (rightEl) {
+    const span = rightEl.querySelector('span:last-child');
+    if (span) span.textContent = rName;
+    else rightEl.textContent = rName;
   }
 }
 
@@ -263,6 +285,10 @@ function renderAndAttachButtons() {
         newReady.textContent = '✗ Not Ready';
         newReady.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
         newReady.classList.add('dark:bg-red-600', 'bg-red-600');
+        // Hide own ready indicator
+        const mySymbol = getCurrentSymbol();
+        const myReadyEl = document.getElementById(mySymbol === 'X' ? 'tris-left-ready' : 'tris-right-ready');
+        if (myReadyEl) myReadyEl.classList.add('hidden');
       } else {
         // Set ready
         userReady = true;
@@ -270,6 +296,10 @@ function renderAndAttachButtons() {
         newReady.textContent = '✓ Ready';
         newReady.classList.remove('dark:bg-red-600', 'bg-red-600');
         newReady.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
+        // Show own ready indicator
+        const mySymbol = getCurrentSymbol();
+        const myReadyEl = document.getElementById(mySymbol === 'X' ? 'tris-left-ready' : 'tris-right-ready');
+        if (myReadyEl) myReadyEl.classList.remove('hidden');
       }
     });
   }
@@ -406,6 +436,20 @@ function handleSurrenderClick() {
 function handleTrisEvent(event: string, data: any) {
   console.log('[TRIS MODAL] Event:', event, data);
   
+  if (event === 'tris.playerReadyStatus') {
+    const { readyStatus } = data;
+    // Show the opponent's ready indicator in the scorebar
+    const mySymbol = getCurrentSymbol(); // 'X' or 'O'
+    const opponentIsLeft = (mySymbol === 'O'); // if I'm O, opponent is X = left
+    const leftReady  = document.getElementById('tris-left-ready');
+    const rightReady = document.getElementById('tris-right-ready');
+    if (opponentIsLeft) {
+      if (leftReady)  leftReady.classList.toggle('hidden', !readyStatus);
+    } else {
+      if (rightReady) rightReady.classList.toggle('hidden', !readyStatus);
+    }
+  }
+
   if (event === 'tris.customGameJoinSuccess') {
       closeGameInviteModal();
       const modal = document.getElementById('tris-modal');
@@ -427,6 +471,20 @@ function handleTrisEvent(event: string, data: any) {
 
   if (event === 'tris.matchedInRandomGame') {
       userReady = false;
+
+      // Update scorebar player names
+      const { yourSymbol, opponentUsername } = data;
+      const myName = (getUserId() || 'You');
+      const leftName  = (yourSymbol === 'X') ? `${myName} (X)` : `${opponentUsername || 'Opponent'} (X)`;
+      const rightName = (yourSymbol === 'O') ? `${myName} (O)` : `${opponentUsername || 'Opponent'} (O)`;
+      updateScoreboardNames('online', leftName, rightName);
+
+      // Reset ready indicators
+      const leftReady  = document.getElementById('tris-left-ready');
+      const rightReady = document.getElementById('tris-right-ready');
+      if (leftReady)  leftReady.classList.add('hidden');
+      if (rightReady) rightReady.classList.add('hidden');
+
       const modal = document.getElementById('tris-modal');
       if (modal) {
         const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
@@ -443,6 +501,7 @@ function handleTrisEvent(event: string, data: any) {
 
   if (event === 'tris.gameStarted') {
     userReady = false;
+
     const modal = document.getElementById('tris-modal');
     if (modal) {
       const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
@@ -457,6 +516,12 @@ function handleTrisEvent(event: string, data: any) {
   }
 
   if (event === 'tris.gameEnded') {
+    // Hide ready indicators
+    const leftReady  = document.getElementById('tris-left-ready');
+    const rightReady = document.getElementById('tris-right-ready');
+    if (leftReady)  leftReady.classList.add('hidden');
+    if (rightReady) rightReady.classList.add('hidden');
+
     const modal = document.getElementById('tris-modal');
     if (modal) {
       const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
