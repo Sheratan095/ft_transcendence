@@ -191,6 +191,18 @@ export function renderChatList() {
 
 async function selectChat(chatId: string) {
   if (!chatId) return;
+  
+  // Check if chat exists in local cache; if not, fetch all chats
+  const chatExists = chats.find(c => c.id === chatId);
+  if (!chatExists) {
+    try {
+      console.log(`💾 Chat ${chatId} not in cache, loading all chats...`);
+      await loadChats();
+    } catch (err) {
+      console.error('Failed to load chats when opening from notification:', err);
+    }
+  }
+  
   setCurrentChatId(chatId);
   setMessageOffset(0);
 
@@ -567,6 +579,7 @@ async function fetchFriends(): Promise<any[]> {
     }
 
     const friends = await response.json();
+    console.log('✅ Fetched friends from API:', friends);
     return Array.isArray(friends) ? friends : [];
   } catch (err) {
     console.error('Error fetching friends:', err);
@@ -586,7 +599,16 @@ async function openFriendSelectionModal() {
 
   if (addToChatId) {
     try {
+      console.log(`📌 Opening add-user modal for chat: ${addToChatId}`);
       await loadChats();
+      // Force clear and refresh the specific chat's members from the cache
+      const currentChat = chats.find(c => c.id === addToChatId);
+      if (currentChat && currentChat.members) {
+        console.log(`📋 Chat members after loadChats:`, currentChat.members);
+        chatMembers.set(addToChatId, currentChat.members);
+      } else {
+        console.warn(`⚠️ Could not find chat ${addToChatId} or its members after loadChats`);
+      }
     } catch (err) {
       console.error('Failed to refresh chats before opening add-user modal', err);
     }
@@ -692,9 +714,28 @@ async function renderFriendsList() {
   if (addToChatId) {
     const existing = new Set<string>();
     const members = chatMembers.get(addToChatId) || (chats.find(c => c.id === addToChatId)?.members || []);
-    members.forEach((m: any) => existing.add(String(m.userId)));
+    
+    // Normalize member IDs - handle both userId and id fields
+    members.forEach((m: any) => {
+      const memberId = String(m.userId || m.id);
+      existing.add(memberId);
+    });
+    
     if (currentUserId) existing.add(String(currentUserId));
-    friendsToShow = friends.filter(f => !existing.has(String(f.id || f.userId)));
+    
+    console.log('Existing members in chat:', Array.from(existing));
+    console.log('All friends:', friends.map((f: any) => ({ id: f.id, userId: f.userId, friendId: String(f.id || f.userId) })));
+    
+    friendsToShow = friends.filter(f => {
+      const friendId = String(f.id || f.userId);
+      const isAlreadyMember = existing.has(friendId);
+      if (isAlreadyMember) {
+        console.log(`Friend ${friendId} is already a member, filtering out`);
+      }
+      return !isAlreadyMember;
+    });
+    
+    console.log('Friends to show after filtering:', friendsToShow);
   }
 
   if (friendsToShow.length === 0) {
