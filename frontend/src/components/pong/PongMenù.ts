@@ -1,5 +1,6 @@
 import { getUserId } from '../../lib/auth';
 import { openPongModal } from './modal';
+import { sendGameInvite } from './ws';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
 import { loadTournaments } from '../tournaments/TournamentsList';
@@ -203,6 +204,9 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 				{
 					try {
 						await openPongModal('online');
+						const sent = await sendGameInvite(friendId);
+						if (!sent)
+							throw new Error('Invite send failed');
 						showSuccessToast('Game invite sent!');
 					}
 					catch (err) {
