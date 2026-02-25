@@ -51,9 +51,11 @@ let cooldownInterval: number | null = null;
 
 document.addEventListener('DOMContentLoaded', () => {
 	const startBtn   = document.getElementById('tm-btn-start');
+	const cancelBtn  = document.getElementById('tm-btn-cancel');
 	const quitBtn    = document.getElementById('tm-btn-quit');
 
 	if (startBtn)  startBtn.addEventListener('click', _handleStart);
+	if (cancelBtn) cancelBtn.addEventListener('click', _handleCancel);
 	if (quitBtn)   quitBtn.addEventListener('click', _handleQuit);
 });
 
@@ -64,7 +66,7 @@ export async function openTournamentModal(
 	tournamentInfo: TournamentInfo,
 	partecipants: any[],
 ) {
-	currentTournamentId = tournamentId;
+	currentTournamentId = String(tournamentId);
 	currentCreatorId    = tournamentInfo.creatorId;
 	currentUserId       = getUserId();
 
@@ -101,7 +103,7 @@ export async function closeTournamentModal() {
 }
 
 export async function addPartecipantToModal(tournamentId: string, player: any) {
-	if (tournamentId !== currentTournamentId) return;
+	if (String(tournamentId) !== String(currentTournamentId)) return;
 
 	const isCreator = player.id === currentCreatorId || !!player.isCreator;
 	if (!isCreator)
@@ -111,14 +113,14 @@ export async function addPartecipantToModal(tournamentId: string, player: any) {
 }
 
 export async function removePartecipantFromModal(tournamentId: string, player: any) {
-	if (tournamentId !== currentTournamentId) return;
+	if (String(tournamentId) !== String(currentTournamentId)) return;
 
 	document.getElementById(`tm-player-${player.id}`)?.remove();
 	_incrementCount(-1);
 }
 
 export async function updateBracketInModal(tournamentId: string, bracketInfo: BracketInfo) {
-	if (tournamentId !== currentTournamentId) return;
+	if (String(tournamentId) !== String(currentTournamentId)) return;
 
 	if (bracketInfo.status)
 		_setStatusBadge(bracketInfo.status);
@@ -127,7 +129,7 @@ export async function updateBracketInModal(tournamentId: string, bracketInfo: Br
 }
 
 export async function updateCooldownInModal(tournamentId: string, cooldownInfo: any) {
-	if (tournamentId !== currentTournamentId) return;
+	if (String(tournamentId) !== String(currentTournamentId)) return;
 
 	const overlay  = document.getElementById('tm-cooldown-overlay');
 	const roundEl  = document.getElementById('tm-cooldown-round');
@@ -441,8 +443,14 @@ function _setActionButtons(isCreator: boolean): void {
 
 async function _handleStart(): Promise<void> {
 	if (!currentTournamentId) return;
-	// TODO: Wire up tournament start via WebSocket
-	console.log('[TournamentModal] Start tournament:', currentTournamentId);
+	const { startTournament } = await import('./Tournament');
+	await startTournament(currentTournamentId);
+}
+
+async function _handleCancel(): Promise<void> {
+	if (!currentTournamentId) return;
+	const { cancelTournament } = await import('./Tournament');
+	await cancelTournament(currentTournamentId);
 }
 
 async function _handleQuit(): Promise<void> {

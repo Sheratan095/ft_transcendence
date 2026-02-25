@@ -401,5 +401,10 @@ export function leaveTournament(tournamentId: string)
 
 export function cancelTournament(tournamentId: string)
 {
-	sendPongMessage('tournament.cancel', { tournamentId });
+	sendPongMessage('tournament.leave', { tournamentId });
+}
+
+export function startTournament(tournamentId: string)
+{
+	sendPongMessage('tournament.start', { tournamentId });
 }

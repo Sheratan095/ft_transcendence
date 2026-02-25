@@ -2,7 +2,8 @@ import { showErrorToast, showInfoToast } from "../shared";
 import { fetchUserProfile, getUser } from '../../lib/auth';
 
 import { leaveTournament as leaveTournamentWs ,
-		cancelTournament as cancelTournamentWs } from "../pong/ws";
+		cancelTournament as cancelTournamentWs ,
+		startTournament as startTournamentWs } from "../pong/ws";
 import {openTournamentModal,
 	addPartecipantToModal,
 	removePartecipantFromModal,
@@ -112,6 +113,11 @@ export async function cancelTournament(tournamentId: string)
 {
 	cancelTournamentWs(tournamentId);
 	closeTournamentModal();
+}
+
+export async function startTournament(tournamentId: string)
+{
+	startTournamentWs(tournamentId);
 }
 
 export async function createTournament(name: string): Promise<void>

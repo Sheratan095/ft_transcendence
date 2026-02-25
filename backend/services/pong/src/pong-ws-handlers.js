@@ -102,6 +102,10 @@ export function	handleMessage(socket, msg, userId)
 				handleTournamentLeave(userId, message.data.tournamentId);
 				break;
 
+			case 'tournament.join':
+				tournamentManager.addParticipant(message.data.tournamentId, userId);
+				break;
+
 			case 'tournament.start':
 				handleTournamentStart(userId, message.data.tournamentId);
 				break;
