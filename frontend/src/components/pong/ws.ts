@@ -11,6 +11,8 @@ let pongWs: WebSocket | null = null;
 let currentUserId: string | null = null;
 let currentGameId: string | null = null;
 let playerSide: string | null = null;
+let currentTournamentId: string | null = null;
+let currentMatchId: string | null = null;
 
 let paddleMoveInterval: any = null;
 
@@ -89,6 +91,14 @@ export function initPong(uid: string): Promise<WebSocket> {
 						playerSide = msg.data.yourSide;
 					} else if (msg.event === 'pong.gameEnded' || msg.event === 'pong.customGameCanceled') {
 						currentGameId = null;
+						playerSide = null;
+					} else if (msg.event === 'pong.tournamentMatchStarted') {
+						currentGameId = msg.data.gameId;
+						currentMatchId = msg.data.matchId;
+						playerSide = msg.data.yourSide;
+					} else if (msg.event === 'pong.tournamentMatchEnded') {
+						currentGameId = null;
+						currentMatchId = null;
 						playerSide = null;
 					}
 					// Route to event-specific handler
@@ -179,6 +189,33 @@ function routeEvent(event: string, data: any)
 			break;
 		case 'pong.invalidMove':
 			modalHandlers.handleInvalidMove(data);
+			break;
+		case 'pong.tournamentMatchStarted':
+			// TODO: Handle tournament match started
+			break;
+		case 'pong.tournamentPlayerReady':
+			// TODO: Handle tournament player ready
+			break;
+		case 'pong.tournamentMatchEnded':
+			// TODO: Handle tournament match ended
+			break;
+		case 'pong.tournamentRoundInfo':
+			// TODO: Handle tournament round info
+			break;
+		case 'pong.tournamentStarted':
+			// TODO: Handle tournament started
+			break;
+		case 'pong.tournamentParticipantJoined':
+			// TODO: Handle tournament participant joined
+			break;
+		case 'pong.tournamentParticipantLeft':
+			// TODO: Handle tournament participant left
+			break;
+		case 'pong.tournamentCancelled':
+			// TODO: Handle tournament cancelled
+			break;
+		case 'pong.tournamentRoundCooldown':
+			// TODO: Handle tournament round cooldown
 			break;
 		case 'error':
 			modalHandlers.handleError(data);
