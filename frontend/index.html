@@ -638,7 +638,7 @@
 				Rise to the top by competing in ranked matches and tournaments against players worldwide.
 				</p>
 
-				<div class="mt-4 flex items-center gap-3"
+				<div class="mt-4 flex flex-col gap-3 overflow-y-auto max-h-64"
 				id="tournament-list">
 					<!-- Dynamically populated list of tournaments will go here -->
 				</div>
@@ -684,100 +684,106 @@
 	</div>
 	</template>
 
+	<!-- Create Tournament name mini-modal -->
+	<div id="tournament-create-modal" tabindex="-1" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+		<div class="relative bg-white dark:bg-gray-900 rounded-2xl border-4 border-gray-800 dark:border-gray-700 shadow-[8px_8px_0_0_#ff6b35] dark:shadow-[8px_8px_0_0_#0dff66] w-full max-w-sm mx-4 p-8">
+			<button id="tournament-create-cancel" type="button" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-lg border-2 border-gray-800 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" title="Cancel">
+				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+			</button>
+			<h3 class="text-xl font-black uppercase tracking-tighter text-gray-900 dark:text-white mb-1">New Tournament</h3>
+			<p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-widest mb-6">Choose a name to get started</p>
+			<input id="tournament-create-name" type="text" maxlength="48" placeholder="Tournament name…"
+				class="w-full px-4 py-3 rounded-xl border-2 border-gray-800 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold placeholder-gray-400 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green transition mb-5" />
+			<p id="tournament-create-error" class="hidden text-xs text-red-500 font-bold mb-3 -mt-3"></p>
+			<button id="tournament-create-confirm" type="button"
+				class="w-full py-3 bg-black dark:bg-white text-white dark:text-black font-black uppercase tracking-tighter rounded-xl border-2 border-gray-800 shadow-[4px_4px_0_0_#ff6b35] dark:shadow-[4px_4px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all">
+				Create &amp; Join
+			</button>
+		</div>
+	</div>
+
 	<div id="tournament-modal" tabindex="-1" class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 rounded-xl justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50 backdrop-blur-sm">
 		<div class="relative p-4 w-full max-w-6xl max-h-full">
 			<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] border-4 border-gray-800 dark:border-gray-700 transition-all duration-300 h-[85vh] flex flex-col md:flex-row">
 
-				<button type="button" id="lobby-close-btn" class="absolute top-4 right-4 z-50 text-black dark:text-white bg-white dark:bg-gray-800 border-2
-				 border-gray-800 dark:border-gray-300 hover:bg-accent-orange dark:hover:bg-accent-green rounded-lg text-sm w-10 h-10 inline-flex justify-center 
-				 items-center transition-all active:translate-x-1 active:translate-y-1"
-				 title="Close lobby">
-					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
-
-				<div class="w-full md:w-80 bg-gray-100 dark:bg-gray-800 border-r-4 border-gray-800 dark:border-gray-700 flex flex-col">
-					<div class="p-5 border-b-4 border-gray-800 dark:border-gray-700 bg-accent-orange dark:bg-accent-green">
-						<h3 class="text-xl font-black text-black uppercase tracking-tighter italic">Lobby Players</h3>
-						<div class="flex justify-between items-center mt-1">
-							<span class="text-xs font-bold uppercase text-black/70">Slot: 12/16</span>
-							<span class="text-xs font-bold uppercase bg-black text-white px-2 py-0.5 rounded">Public</span>
-						</div>
+				<!-- Action buttons area (creator or participant) -->
+				<div class="absolute top-4 right-4 z-50 flex gap-2">
+					<!-- Creator buttons -->
+					<div id="tm-creator-buttons" class="hidden flex gap-2">
+						<button type="button" id="tm-btn-start" class="px-4 py-2 bg-green-500 dark:bg-green-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Start tournament">
+							Start
+						</button>
+						<button type="button" id="tm-btn-cancel" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Cancel tournament">
+							Cancel
+						</button>
 					</div>
-					
-					<div id="player-list" class="flex-1 overflow-y-auto p-4 space-y-3">
-						<div class="flex items-center p-3 gap-3 bg-white dark:bg-gray-700 border-2 border-gray-800 dark:border-gray-300 shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#0dff66] rounded-xl">
-							<div class="relative">
-								<div class="w-10 h-10 rounded-lg bg-blue-400 border-2 border-gray-800 flex items-center justify-center font-black">P1</div>
-								<div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-gray-800 rounded-full"></div>
-							</div>
-							<div class="flex-1 min-w-0">
-								<div class="font-black text-black dark:text-white text-sm truncate uppercase">Viper_Striker</div>
-								<div class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Rank: Diamond</div>
-							</div>
-						</div>
-
-						<div class="flex items-center p-3 gap-3 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-xl opacity-60">
-							<div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600"></div>
-							<div class="font-bold text-gray-400 dark:text-gray-500 uppercase text-xs italic italic">Waiting for player...</div>
-						</div>
-					</div>
-
-					<div class="p-4 bg-white dark:bg-gray-900 border-t-4 border-gray-800 dark:border-gray-700">
-						<button class="w-full py-3 bg-white dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-300 text-black dark:text-white font-black uppercase tracking-tighter hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#0dff66] active:shadow-none active:translate-x-1 active:translate-y-1">
-							Invite Friends
+					<!-- Participant button -->
+					<div id="tm-participant-buttons" class="hidden">
+						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament">
+							Quit
 						</button>
 					</div>
 				</div>
 
-				<div class="flex-1 flex flex-col bg-white dark:bg-gray-900 overflow-hidden">
-					<div class="p-6 border-b-4 border-gray-800 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
-						<div>
-							<h2 class="text-3xl font-black text-black dark:text-white uppercase tracking-tighter">Grand Finals Analytics</h2>
-							<p class="text-sm font-bold text-gray-500 dark:text-accent-green uppercase tracking-widest">Match ID: #TRN-9920</p>
-						</div>
-						<div class="flex items-center gap-3">
-							<div class="text-right hidden sm:block">
-								<p class="text-[10px] font-black uppercase text-gray-400">Prize Pool</p>
-								<p class="text-xl font-black text-black dark:text-white">$2,500.00</p>
-							</div>
-							<button class="bg-accent-orange dark:bg-accent-green text-black px-6 py-2 rounded-lg border-2 border-gray-800 font-black uppercase shadow-[4px_4px_0_0_#000] hover:brightness-110 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all">
-								Ready Up
-							</button>
+				<!-- ===== LEFT COLUMN: Participants ===== -->
+				<div class="w-full md:w-72 bg-gray-100 dark:bg-gray-800 border-r-4 border-gray-800 dark:border-gray-700 flex flex-col flex-shrink-0">
+
+					<!-- Left header -->
+					<div class="p-5 border-b-4 border-gray-800 dark:border-gray-700 bg-accent-orange dark:bg-accent-green flex-shrink-0">
+						<h3 class="text-xl font-black text-black uppercase tracking-tighter italic">Participants</h3>
+						<div class="flex items-center gap-2 mt-1">
+							<span id="tm-participant-count" class="text-xs font-bold uppercase text-black/70">0 players</span>
+							<span id="tm-tournament-status" class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-black text-white">WAITING</span>
 						</div>
 					</div>
 
-					<div class="flex-1 p-6 overflow-y-auto">
-						<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-							<div class="lg:col-span-3 bg-gray-50 dark:bg-gray-800/50 border-2 border-gray-800 dark:border-gray-700 rounded-2xl p-4">
-								<div class="flex items-center justify-between mb-4">
-									<h4 class="font-black uppercase text-gray-800 dark:text-gray-200">Win Probability Over Time</h4>
-									<span class="text-[10px] font-bold py-1 px-2 bg-red-500 text-white rounded uppercase">Live Feed</span>
-								</div>
-								
-								<div id="tournament-chart" class="w-full h-80 bg-white dark:bg-gray-900 border-2 border-gray-800 dark:border-gray-700 rounded-xl flex items-center justify-center">
-									<p class="text-gray-400 font-bold italic uppercase">Apex Chart Initializing...</p>
-								</div>
+					<!-- Creator section (pinned at top) -->
+					<div class="flex-shrink-0 p-4 border-b-4 border-gray-800 dark:border-gray-700 bg-white dark:bg-gray-900">
+						<p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-widest mb-2">👑 Creator</p>
+						<div id="tm-creator-card" class="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-300 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] rounded-xl">
+							<div id="tm-creator-avatar" class="w-10 h-10 flex-shrink-0 rounded-lg bg-accent-orange dark:bg-accent-green border-2 border-gray-800 flex items-center justify-center font-black text-black text-sm">—</div>
+							<div class="flex-1 min-w-0">
+								<div id="tm-creator-name" class="font-black text-black dark:text-white text-sm truncate uppercase">—</div>
 							</div>
+						</div>
+					</div>
 
-							<div class="flex flex-col gap-4">
-								<div class="flex-1 bg-white dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-700 rounded-2xl p-4 shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#ff6b35]">
-									<h5 class="text-[10px] font-black uppercase text-gray-500 mb-1">Top Performer</h5>
-									<p class="font-black text-lg dark:text-white truncate">Ghost_X</p>
-									<div class="mt-2 h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-										<div class="h-full bg-accent-orange" style="width: 85%"></div>
-									</div>
-								</div>
-								<div class="flex-1 bg-white dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-700 rounded-2xl p-4 shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#0dff66]">
-									<h5 class="text-[10px] font-black uppercase text-gray-500 mb-1">Avg Kill Rate</h5>
-									<p class="font-black text-lg dark:text-white">4.2 K/D</p>
-									<div class="mt-2 h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-										<div class="h-full bg-accent-green" style="width: 62%"></div>
-									</div>
+					<!-- Scrollable participants list -->
+					<div id="tm-player-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+						<!-- Populated by TournamentModal.ts -->
+					</div>
+				</div>
+
+				<!-- ===== RIGHT COLUMN: Bracket ===== -->
+				<div class="flex-1 flex flex-col bg-white dark:bg-gray-900 overflow-hidden">
+
+					<!-- Right header -->
+					<div class="p-5 border-b-4 border-gray-800 dark:border-gray-700 flex items-center gap-4 flex-shrink-0">
+						<div>
+							<h2 id="tm-tournament-name" class="text-2xl font-black text-black dark:text-white uppercase tracking-tighter">Tournament</h2>
+							<p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-0.5">Bracket View</p>
+						</div>
+					</div>
+
+					<!-- Bracket area (relative so cooldown overlay can be absolute) -->
+					<div class="flex-1 relative overflow-hidden">
+
+						<!-- Cooldown overlay -->
+						<div id="tm-cooldown-overlay" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
+							<p id="tm-cooldown-round" class="text-white font-black uppercase text-sm tracking-widest mb-3">Next round starting in</p>
+							<p id="tm-cooldown-timer" class="text-7xl font-black text-accent-orange dark:text-accent-green tabular-nums">5</p>
+						</div>
+
+						<!-- Scrollable bracket -->
+						<div id="tm-bracket-scroll" class="absolute inset-0 overflow-auto">
+							<div id="tm-bracket-svg-wrapper" class="relative p-6 pt-8 inline-flex items-stretch min-h-full min-w-full">
+								<svg id="tm-connector-svg" class="absolute top-0 left-0 pointer-events-none z-0" style="width:100%;height:100%;overflow:visible;"></svg>
+								<div id="tm-bracket-container" class="flex gap-8 relative z-10 items-center">
+									<p class="text-gray-400 font-bold italic uppercase text-sm m-auto select-none">Waiting for tournament to start…</p>
 								</div>
 							</div>
 						</div>
+
 					</div>
 				</div>
 

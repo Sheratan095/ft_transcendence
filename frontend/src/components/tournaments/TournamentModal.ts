@@ -1,0 +1,445 @@
+// ============================================================
+// TournamentModal — sole owner of the tournament modal UI
+// ============================================================
+
+import { loadTournaments } from './TournamentsList';
+import { getUserId } from '../../lib/auth';
+
+// -------------------- Types --------------------
+
+export interface TournamentInfo {
+	name?: string;
+	status?: string;
+	creatorId?: string;
+	creatorUsername?: string;
+}
+
+interface Match {
+	id: string;
+	playerLeftId: string;
+	playerLeftUsername: string;
+	playerRightId: string;
+	playerRightUsername: string;
+	playerLeftScore: number;
+	playerRightScore: number;
+	status: string;
+	winnerId: string;
+	isBye: boolean;
+}
+
+interface Round {
+	roundNumber: number;
+	matches: Match[];
+}
+
+interface BracketInfo {
+	rounds: Round[];
+	name?: string;
+	status?: string;
+	totalRounds?: number;
+}
+
+// -------------------- State --------------------
+
+let currentTournamentId: string | null = null;
+let currentCreatorId: string | undefined;
+let currentUserId: string | null = null;
+let cooldownInterval: number | null = null;
+
+// -------------------- Init (wire up buttons) --------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+	const startBtn   = document.getElementById('tm-btn-start');
+	const cancelBtn  = document.getElementById('tm-btn-cancel');
+	const quitBtn    = document.getElementById('tm-btn-quit');
+
+	if (startBtn)  startBtn.addEventListener('click', _handleStart);
+	if (cancelBtn) cancelBtn.addEventListener('click', _handleCancel);
+	if (quitBtn)   quitBtn.addEventListener('click', _handleQuit);
+});
+
+// -------------------- Public API --------------------
+
+export async function openTournamentModal(
+	tournamentId: string,
+	tournamentInfo: TournamentInfo,
+	partecipants: any[],
+) {
+	currentTournamentId = tournamentId;
+	currentCreatorId    = tournamentInfo.creatorId;
+	currentUserId       = getUserId();
+
+	const isCreator = currentUserId === currentCreatorId;
+
+	_setTournamentName(tournamentInfo.name ?? 'Tournament');
+	_setStatusBadge(tournamentInfo.status ?? 'WAITING');
+	_setCreator(tournamentInfo.creatorUsername, tournamentInfo.creatorId);
+	_clearPlayerList();
+	_clearBracket();
+	_hideCooldown();
+	_setActionButtons(isCreator);
+
+	for (const p of partecipants) {
+		const isCreator = p.id === tournamentInfo.creatorId || !!p.isCreator;
+		if (!isCreator)
+			_appendParticipantCard(p);
+	}
+
+	_setCount(partecipants.length);
+	_showModal();
+}
+
+export async function closeTournamentModal() {
+	_hideModal();
+	currentTournamentId = null;
+	currentCreatorId    = undefined;
+	_stopCooldown();
+	await loadTournaments(); // Refresh the tournament list when modal closes
+}
+
+export async function addPartecipantToModal(tournamentId: string, player: any) {
+	if (tournamentId !== currentTournamentId) return;
+
+	const isCreator = player.id === currentCreatorId || !!player.isCreator;
+	if (!isCreator)
+		_appendParticipantCard(player);
+
+	_incrementCount(1);
+}
+
+export async function removePartecipantFromModal(tournamentId: string, player: any) {
+	if (tournamentId !== currentTournamentId) return;
+
+	document.getElementById(`tm-player-${player.id}`)?.remove();
+	_incrementCount(-1);
+}
+
+export async function updateBracketInModal(tournamentId: string, bracketInfo: BracketInfo) {
+	if (tournamentId !== currentTournamentId) return;
+
+	if (bracketInfo.status)
+		_setStatusBadge(bracketInfo.status);
+
+	_renderBracket(bracketInfo);
+}
+
+export async function updateCooldownInModal(tournamentId: string, cooldownInfo: any) {
+	if (tournamentId !== currentTournamentId) return;
+
+	const overlay  = document.getElementById('tm-cooldown-overlay');
+	const roundEl  = document.getElementById('tm-cooldown-round');
+	const timerEl  = document.getElementById('tm-cooldown-timer');
+	if (!overlay) return;
+
+	_stopCooldown();
+
+	if (!cooldownInfo || cooldownInfo.secondsLeft <= 0) {
+		_hideCooldown();
+		return;
+	}
+
+	if (roundEl) roundEl.textContent = `Round ${cooldownInfo.round ?? ''} starting in`;
+	let seconds = Math.ceil(cooldownInfo.secondsLeft);
+	if (timerEl) timerEl.textContent = String(seconds);
+	overlay.classList.remove('hidden');
+
+	cooldownInterval = window.setInterval(() => {
+		seconds -= 1;
+		if (timerEl) timerEl.textContent = String(seconds);
+		if (seconds <= 0) {
+			_stopCooldown();
+			_hideCooldown();
+		}
+	}, 1000);
+}
+
+// -------------------- Private helpers --------------------
+
+function _showModal() {
+	document.getElementById('tournament-modal')?.classList.remove('hidden');
+}
+
+function _hideModal() {
+	document.getElementById('tournament-modal')?.classList.add('hidden');
+}
+
+function _hideCooldown() {
+	document.getElementById('tm-cooldown-overlay')?.classList.add('hidden');
+}
+
+function _stopCooldown() {
+	if (cooldownInterval !== null) {
+		clearInterval(cooldownInterval);
+		cooldownInterval = null;
+	}
+}
+
+function _setTournamentName(name: string) {
+	const el = document.getElementById('tm-tournament-name');
+	if (el) el.textContent = name;
+}
+
+function _setStatusBadge(status: string) {
+	const el = document.getElementById('tm-tournament-status');
+	if (!el) return;
+	el.textContent = status;
+	el.className   = 'text-[10px] font-black uppercase px-2 py-0.5 rounded';
+	switch (status.toUpperCase()) {
+		case 'OPEN':
+		case 'WAITING':
+			el.classList.add('bg-green-500', 'text-white');
+			break;
+		case 'IN_PROGRESS':
+		case 'STARTED':
+			el.classList.add('bg-yellow-400', 'text-black');
+			break;
+		case 'FINISHED':
+			el.classList.add('bg-gray-400', 'text-white');
+			break;
+		default:
+			el.classList.add('bg-black', 'text-white');
+	}
+}
+
+function _setCount(n: number) {
+	const el = document.getElementById('tm-participant-count');
+	if (el) el.textContent = `${n} player${n !== 1 ? 's' : ''}`;
+}
+
+function _incrementCount(delta: number) {
+	const el = document.getElementById('tm-participant-count');
+	if (!el) return;
+	const current = parseInt(el.textContent ?? '0') || 0;
+	_setCount(current + delta);
+}
+
+function _setCreator(username?: string, id?: string) {
+	const nameEl   = document.getElementById('tm-creator-name');
+	const avatarEl = document.getElementById('tm-creator-avatar');
+	const display  = username ?? '—';
+	if (nameEl)   nameEl.textContent   = display.toUpperCase();
+	if (avatarEl) {
+		avatarEl.textContent = display.slice(0, 2).toUpperCase();
+		const color = _avatarColor(id ?? username ?? '?');
+		avatarEl.className = `w-10 h-10 flex-shrink-0 rounded-lg ${color} border-2 border-gray-800 flex items-center justify-center font-black text-black text-sm`;
+	}
+}
+
+function _clearPlayerList() {
+	const el = document.getElementById('tm-player-list');
+	if (el) el.innerHTML = '';
+}
+
+function _clearBracket() {
+	const el = document.getElementById('tm-bracket-container');
+	if (el) {
+		el.innerHTML = '';
+		const placeholder = document.createElement('p');
+		placeholder.className = 'text-gray-400 font-bold italic uppercase text-sm m-auto select-none';
+		placeholder.textContent = 'Waiting for tournament to start…';
+		el.appendChild(placeholder);
+	}
+	const svg = document.getElementById('tm-connector-svg');
+	if (svg) svg.innerHTML = '';
+}
+
+function _appendParticipantCard(player: any) {
+	const list = document.getElementById('tm-player-list');
+	if (!list) return;
+	list.appendChild(_createParticipantCard(player));
+}
+
+// -------------------- Participant card --------------------
+
+const AVATAR_COLORS = [
+	'bg-blue-400', 'bg-purple-400', 'bg-pink-400',
+	'bg-yellow-400', 'bg-green-400', 'bg-red-400', 'bg-indigo-400',
+];
+
+function _avatarColor(seed: string): string {
+	let h = 0;
+	for (let i = 0; i < seed.length; i++) h = (h + seed.charCodeAt(i)) % AVATAR_COLORS.length;
+	return AVATAR_COLORS[h];
+}
+
+function _createParticipantCard(player: any): HTMLElement {
+	const card     = document.createElement('div');
+	card.id        = `tm-player-${player.id}`;
+	card.className = 'flex items-center gap-3 p-3 bg-white dark:bg-gray-700 border-2 border-gray-800 dark:border-gray-300 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] rounded-xl';
+
+	const initials = (player.username ?? '?').slice(0, 2).toUpperCase();
+	const color    = _avatarColor(player.id ?? player.username ?? '?');
+
+	card.innerHTML = `
+		<div class="w-10 h-10 flex-shrink-0 rounded-lg ${color} border-2 border-gray-800 flex items-center justify-center font-black text-white text-sm">${initials}</div>
+		<div class="flex-1 min-w-0">
+			<div class="font-black text-black dark:text-white text-sm truncate uppercase">${player.username ?? 'Unknown'}</div>
+		</div>
+	`;
+	return card;
+}
+
+// -------------------- Bracket rendering --------------------
+
+function _renderBracket(tournament: BracketInfo) {
+	const container = document.getElementById('tm-bracket-container');
+	if (!container) return;
+
+	container.innerHTML = '';
+
+	if (!tournament.rounds?.length) {
+		const p = document.createElement('p');
+		p.className   = 'text-gray-400 font-bold italic uppercase text-sm m-auto select-none';
+		p.textContent = 'No bracket data yet.';
+		container.appendChild(p);
+		return;
+	}
+
+	const matchElements: Record<string, HTMLElement> = {};
+
+	tournament.rounds.forEach((round, roundIndex) => {
+		const col       = document.createElement('div');
+		col.className   = 'flex flex-col justify-around min-w-[220px] flex-shrink-0 relative z-10 gap-4';
+		col.dataset.round = String(roundIndex);
+
+		// Round label
+		const label     = document.createElement('div');
+		label.className = 'text-center font-black text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 absolute -top-6 left-0 right-0';
+		label.textContent = `Round ${round.roundNumber}`;
+		col.style.position = 'relative';
+		col.style.marginTop = '1.5rem';
+		col.appendChild(label);
+
+		round.matches.forEach((match) => {
+			const box              = _createMatchBox(match);
+			box.dataset.matchId    = match.id;
+			box.dataset.roundIndex = String(roundIndex);
+			matchElements[match.id] = box;
+			col.appendChild(box);
+		});
+
+		container.appendChild(col);
+	});
+
+	// Draw connector lines after layout settles
+	setTimeout(() => _drawConnectorLines(tournament, matchElements), 50);
+}
+
+function _createMatchBox(match: Match): HTMLElement {
+	const box       = document.createElement('div');
+	const isFinished = match.status === 'FINISHED';
+	const leftWon   = isFinished && match.winnerId === match.playerLeftId && !match.isBye;
+	const rightWon  = isFinished && match.winnerId === match.playerRightId && !match.isBye;
+
+	box.className   = 'rounded-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#444]';
+
+	if (match.isBye) {
+		box.innerHTML = `
+			<div class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-xs font-black uppercase text-center text-gray-500 dark:text-gray-400">
+				${match.playerLeftUsername || '—'} <span class="ml-1 text-green-600 dark:text-green-400">(BYE)</span>
+			</div>`;
+		return box;
+	}
+
+	const winnerBg  = 'bg-accent-orange dark:bg-accent-green';
+	const normalBgL = 'bg-white dark:bg-gray-900';
+	const normalBgR = 'bg-gray-50 dark:bg-gray-800';
+
+	const leftScore  = isFinished ? String(match.playerLeftScore  ?? 0) : '';
+	const rightScore = isFinished ? String(match.playerRightScore ?? 0) : '';
+
+	box.innerHTML = `
+		<div class="flex justify-between items-center px-3 py-2 text-sm border-b border-gray-200 dark:border-gray-700 ${leftWon  ? winnerBg : normalBgL}">
+			<span class="flex-1 truncate font-bold ${leftWon  ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${match.playerLeftUsername  || '—'}</span>
+			<span class="ml-3 font-black min-w-5 text-right ${leftWon  ? 'text-black' : 'text-gray-400 dark:text-gray-500'}">${leftScore}</span>
+		</div>
+		<div class="flex justify-between items-center px-3 py-2 text-sm ${rightWon ? winnerBg : normalBgR}">
+			<span class="flex-1 truncate font-bold ${rightWon ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${match.playerRightUsername || '—'}</span>
+			<span class="ml-3 font-black min-w-5 text-right ${rightWon ? 'text-black' : 'text-gray-400 dark:text-gray-500'}">${rightScore}</span>
+		</div>
+		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">✓ Finished</div>` : ''}
+	`;
+	return box;
+}
+
+function _drawConnectorLines(tournament: BracketInfo, matchElements: Record<string, HTMLElement>) {
+	const svgEl   = document.getElementById('tm-connector-svg') as SVGSVGElement | null;
+	const wrapper = document.getElementById('tm-bracket-svg-wrapper');
+	if (!svgEl || !wrapper) return;
+
+	svgEl.innerHTML = '';
+	const wRect = wrapper.getBoundingClientRect();
+
+	for (let ri = 0; ri < tournament.rounds.length - 1; ri++) {
+		const curr = tournament.rounds[ri];
+		const next = tournament.rounds[ri + 1];
+
+		curr.matches.forEach((cm) => {
+			if (!cm.winnerId) return;
+
+			next.matches.forEach((nm) => {
+				if (nm.playerLeftId !== cm.winnerId && nm.playerRightId !== cm.winnerId) return;
+
+				const fromEl = matchElements[cm.id];
+				const toEl   = matchElements[nm.id];
+				if (!fromEl || !toEl) return;
+
+				const fRect  = fromEl.getBoundingClientRect();
+				const tRect  = toEl.getBoundingClientRect();
+
+				const fromX  = fRect.right  - wRect.left;
+				const fromY  = fRect.top    - wRect.top  + fRect.height / 2;
+				const toX    = tRect.left   - wRect.left;
+				const toY    = tRect.top    - wRect.top  + tRect.height / 2;
+				const midX   = fromX + (toX - fromX) / 2;
+
+				const path   = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+				path.setAttribute('d',              `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`);
+				path.setAttribute('stroke',         'var(--tm-line-color, #cbd5e1)');
+				path.setAttribute('stroke-width',   '2');
+				path.setAttribute('fill',           'none');
+				path.setAttribute('stroke-linecap', 'round');
+				svgEl.appendChild(path);
+			});
+		});
+	}
+
+	// Size SVG to match wrapper content
+	svgEl.setAttribute('width',  String(wrapper.scrollWidth));
+	svgEl.setAttribute('height', String(wrapper.scrollHeight));
+}
+
+// -------------------- Action buttons --------------------
+
+function _setActionButtons(isCreator: boolean): void {
+	const creatorBtns = document.getElementById('tm-creator-buttons');
+	const userBtns    = document.getElementById('tm-participant-buttons');
+
+	if (isCreator) {
+		creatorBtns?.classList.remove('hidden');
+		userBtns?.classList.add('hidden');
+	} else {
+		creatorBtns?.classList.add('hidden');
+		userBtns?.classList.remove('hidden');
+	}
+}
+
+async function _handleStart(): Promise<void> {
+	if (!currentTournamentId) return;
+	// TODO: Wire up tournament start via WebSocket
+	console.log('[TournamentModal] Start tournament:', currentTournamentId);
+}
+
+async function _handleCancel(): Promise<void> {
+	if (!currentTournamentId) return;
+	// Import here to avoid circular dependency
+	const { cancelTournament } = await import('./Tournament');
+	await cancelTournament(currentTournamentId);
+}
+
+async function _handleQuit(): Promise<void> {
+	if (!currentTournamentId) return;
+	// Import here to avoid circular dependency
+	const { leaveTournament } = await import('./Tournament');
+	await leaveTournament(currentTournamentId);
+}

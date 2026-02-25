@@ -290,56 +290,12 @@ class	TournamentManager
 		console.log(`[PONG] Tournament ${tournamentId} started with ${tournament.participants.size} players`);
 	}
 
-	playerReady(tournamentId, userId)
-	{
-		const	tournament = this._tournaments.get(tournamentId);
-		if (!tournament)
-		{
-			console.log(`[PONG] User ${userId} tried to ready up in non-existent tournament ${tournamentId}`);
-			pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
-			return ;
-		}
-
-		if (tournament.status !== TournamentStatus.IN_PROGRESS)
-		{
-			console.log(`[PONG] User ${userId} tried to ready up but tournament ${tournamentId} is not in progress`);
-			pongConnectionManager.sendErrorMessage(userId, 'Tournament is not in progress');
-			return ;
-		}
-
-		const	match = tournament.playerReady(userId);
-		if (!match)
-		{
-			console.log(`[PONG] User ${userId} tried to ready up but has no active match in tournament ${tournamentId}`);
-			pongConnectionManager.sendErrorMessage(userId, 'You have no active match');
-			return ;
-		}
-
-		// Notify opponent that this player is ready
-		const	opponentId = match.playerLeftId === userId ? match.playerRightId : match.playerLeftId;
-		if (opponentId)
-			pongConnectionManager.notifyTournamentPlayerReady(opponentId, userId, match.id);
-
-		// If both players are ready, clear timer and start the match immediately
-		if (tournament.isMatchReady(match.id))
-		{
-			this._clearMatchTimer(match.id);
-			this._startMatch(tournament, match);
-		}
-
-		console.log(`[PONG] User ${userId} ready for match ${match.id}`);
-	}
-
 	_startMatch(tournament, gameInstance)
 	{
-		// The gameInstance is already created by TournamentInstance, just need to:
-		// 1. Register it with GameManager for game loop processing
-		// 2. Start the game
-		// 3. Notify players
+		// Game is already registered with GameManager in _startNewRound
+		// Just update tournament status and notify players
 
-		gameManager._games.set(gameInstance.id, gameInstance);
-
-		// Start the match
+		// Update the match status to IN_PROGRESS
 		const	startedMatch = tournament.startMatch(gameInstance.id);
 		if (!startedMatch)
 		{
@@ -347,9 +303,9 @@ class	TournamentManager
 			return ;
 		}
 
-		// Notify both players
-		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerLeftId, gameInstance.id, gameInstance.id);
-		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerRightId, gameInstance.id, gameInstance.id);
+		// Notify both players that the match is starting
+		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerLeftId, gameInstance.id, gameInstance.id, gameInstance.playerRightUsername, 'LEFT');
+		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerRightId, gameInstance.id, gameInstance.id, gameInstance.playerLeftUsername, 'RIGHT');
 
 		console.log(`[PONG] Tournament match ${gameInstance.id} started`);
 	}
@@ -417,6 +373,13 @@ class	TournamentManager
 			return ;
 
 		const	currentMatches = tournament.getCurrentMatches();
+		
+		// Register all tournament matches with GameManager for normal game processing
+		for (let match of currentMatches)
+		{
+			if (!match.isBye && match.gameStatus === GameStatus.WAITING)
+				gameManager._games.set(match.id, match);
+		}
 		
 		// Start ready timers for all matches in this round
 		for (let match of currentMatches)

@@ -4,7 +4,7 @@ import { sendGameInvite } from './ws';
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
 import { loadTournaments } from '../tournaments/TournamentsList';
-import { createTournament } from '../tournaments/TournamentsList';
+import { openCreateModal } from '../tournaments/TournamentsList';
 
 export async function renderPongPage(container: HTMLElement, isLoggedIn: boolean = true)
 {
@@ -135,12 +135,10 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 		} else {
 			btnTournament.addEventListener('click', async () => {
 				try {
-					await createTournament(prompt("Tournament name?") || "Unnamed Tournament");
-					showSuccessToast('Tournament created successfully!');
-
+					await openCreateModal();
 				} catch (err) {
-					console.error('Failed to create tournament:', err);
-					showErrorToast('Failed to create tournament');
+					console.error('Failed to open tournament creation modal:', err);
+					showErrorToast('Failed to open tournament creation modal');
 				}
 			});
 		}

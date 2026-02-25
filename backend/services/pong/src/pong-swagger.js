@@ -65,7 +65,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **pong.userReady** - Mark yourself as ready in lobby
+- **pong.userReady** - Mark yourself as ready (works for both custom games and tournament matches)
 \`\`\`json
 {
   "event": "pong.userReady",
@@ -126,16 +126,6 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 \`\`\`json
 {
   "event": "tournament.start",
-  "data": {
-    "tournamentId": "tourney123"
-  }
-}
-\`\`\`
-
-- **tournament.ready** - Mark yourself as ready for your tournament match
-\`\`\`json
-{
-  "event": "tournament.ready",
   "data": {
     "tournamentId": "tourney123"
   }
@@ -396,13 +386,15 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **pong.tournamentMatchStarted** - Your tournament match is starting
+- **pong.tournamentMatchStarted** - Your tournament match is starting with ready information
 \`\`\`json
 {
   "event": "pong.tournamentMatchStarted",
   "data": {
     "gameId": "game123",
-    "matchId": "match123"
+    "matchId": "match123",
+    "opponentUsername": "opponent_name",
+    "yourSide": "LEFT"
   }
 }
 \`\`\`
