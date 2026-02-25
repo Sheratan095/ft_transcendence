@@ -144,14 +144,10 @@ function ensureListenersSetUp(): void {
   if (listenersSetUp) return;
   listenersSetUp = true;
 
-  console.log('[TournamentsList] Setting up event listeners for create modal');
-
   const modal        = document.getElementById('tournament-create-modal');
   const cancelBtn    = document.getElementById('tournament-create-cancel');
   const confirmBtn   = document.getElementById('tournament-create-confirm');
   const nameInput    = document.getElementById('tournament-create-name');
-
-  console.log('[TournamentsList] Modal:', !!modal, 'Cancel:', !!cancelBtn, 'Confirm:', !!confirmBtn, 'Input:', !!nameInput);
 
   // Cancel button
   if (cancelBtn) {
@@ -187,15 +183,11 @@ export function openCreateModal(): void {
   const modal   = document.getElementById('tournament-create-modal');
   const input   = document.getElementById('tournament-create-name') as HTMLInputElement | null;
   const errEl   = document.getElementById('tournament-create-error');
-  if (!modal) {
-    console.error('[TournamentsList] Modal not found!');
-    return;
-  }
+  if (!modal) return;
 
   if (input)  input.value = '';
   if (errEl)  { errEl.textContent = ''; errEl.classList.add('hidden'); }
 
-  console.log('[TournamentsList] Opening create modal');
   modal.classList.remove('hidden');
   setTimeout(() => input?.focus(), 50);
 }
@@ -203,20 +195,17 @@ export function openCreateModal(): void {
 function closeCreateModal(): void {
   const modal = document.getElementById('tournament-create-modal');
   if (modal) {
-    console.log('[TournamentsList] Closing create modal');
     modal.classList.add('hidden');
   }
 }
 
 async function handleCreateConfirm(): Promise<void> {
-  console.log('[TournamentsList] Create confirm clicked');
   const input   = document.getElementById('tournament-create-name') as HTMLInputElement | null;
   const errEl   = document.getElementById('tournament-create-error');
   const btn     = document.getElementById('tournament-create-confirm') as HTMLButtonElement | null;
 
   const name = input?.value.trim() ?? '';
   if (!name) {
-    console.log('[TournamentsList] No name entered');
     if (errEl) { errEl.textContent = 'Please enter a tournament name.'; errEl.classList.remove('hidden'); }
     input?.focus();
     return;
@@ -226,12 +215,10 @@ async function handleCreateConfirm(): Promise<void> {
   if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
 
   try {
-    console.log('[TournamentsList] Creating tournament:', name);
     await createTournament(name);
     closeCreateModal();
     await loadTournaments(); // refresh list in background
   } catch (err) {
-    console.error('[TournamentsList] Error creating tournament:', err);
     if (errEl) { errEl.textContent = 'Failed to create tournament. Try again.'; errEl.classList.remove('hidden'); }
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Create & Join'; }
@@ -243,7 +230,6 @@ async function handleCreateConfirm(): Promise<void> {
 // ==============================
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log('[TournamentsList] Page loaded, setting up...');
   loadTournaments();
   // Listeners will be set up when modal is first opened
 });
