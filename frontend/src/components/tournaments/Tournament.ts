@@ -1,4 +1,5 @@
 import { showErrorToast, showInfoToast } from "../shared";
+import { fetchUserProfile, getUser } from '../../lib/auth';
 
 import { leaveTournament as leaveTournamentWs ,
 		cancelTournament as cancelTournamentWs } from "../pong/ws";
@@ -18,13 +19,13 @@ export async function joinTournament(tournamentId: string, tournamentCreator: st
 {
 	// RESET
 	partecipants = [];
-	tournamentId = "";
-	tournamentCreator = "";
 
 	try {
-		const response = await fetch(`/api/pong/join-tournament/${tournamentId}`, {
+		const response = await fetch(`/api/pong/join-tournament`, {
 			method: 'POST',
 			credentials: 'include',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ tournamentId }),
 		});
 
 		if (!response.ok)
@@ -33,18 +34,27 @@ export async function joinTournament(tournamentId: string, tournamentCreator: st
 			return ;
 		}
 
-		tournamentCreator = tournamentCreator;
-		tournamentId = tournamentId;
-
 		// Get the partecipants list from the response
 		const data = await response.json();
 		partecipants = data.partecipants || [];
+
+		// Fetch creator's full profile to get avatar if not in response
+		let creatorAvatar = data.creatorAvatar;
+		if (!creatorAvatar && data.creatorId) {
+			try {
+				const creatorProfile = await fetchUserProfile(data.creatorId);
+				creatorAvatar = creatorProfile?.avatarUrl;
+			} catch (err) {
+				console.warn('Failed to fetch creator profile:', err);
+			}
+		}
 
 		openTournamentModal(tournamentId, {
 			name: data.name,
 			status: data.status,
 			creatorId: data.creatorId,
 			creatorUsername: tournamentCreator || data.creatorUsername,
+			creatorAvatar: creatorAvatar,
 		}, partecipants);
 
 	} catch (err) {
@@ -125,12 +135,32 @@ export async function createTournament(name: string): Promise<void>
 		if (!id)
 			throw new Error('Server did not return a tournament ID');
 
+		// Get creator username from response or fallback to current user
+		let creatorUsername = data.creatorUsername;
+		let creatorAvatar = data.creatorAvatar;
+		if (!creatorUsername) {
+			const user = getUser();
+			creatorUsername = user?.username ?? 'Creator';
+			creatorAvatar = creatorAvatar || user?.avatarUrl;
+		}
+
+		// Fetch creator's full profile to get avatar if not in response
+		if (!creatorAvatar && data.creatorId) {
+			try {
+				const creatorProfile = await fetchUserProfile(data.creatorId);
+				creatorAvatar = creatorProfile?.avatarUrl;
+			} catch (err) {
+				console.warn('Failed to fetch creator profile:', err);
+			}
+		}
+
 		// Join own tournament — this opens the modal
 		openTournamentModal(id, {
 			name: data.name,
 			status: data.status,
 			creatorId: data.creatorId,
-			creatorUsername: data.creatorUsername,
+			creatorUsername: creatorUsername,
+			creatorAvatar: creatorAvatar,
 		}, []);
 
 		showInfoToast('Tournament created successfully!');

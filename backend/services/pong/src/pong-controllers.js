@@ -253,8 +253,24 @@ export const	joinTournament = async (req, reply) =>
 		tournamentManager.addParticipant(tournamentId, userId, username);
 
 		const	participants = tournamentManager.getParticipants(tournamentId);
+		const	tournament = tournamentManager.getTournament(tournamentId);
 
-		return (reply.code(200).send({ message: 'Joined tournament successfully', participants: participants }));
+		if (!tournament)
+		{
+			console.error(`[PONG] Tournament ${tournamentId} not found after join`);
+			return (reply.code(404).send({ error: 'Tournament not found' }));
+		}
+
+		console.log(`[PONG] User ${userId} joined tournament ${tournamentId}`);
+
+		return (reply.code(200).send({
+			message: 'Joined tournament successfully',
+			partecipants: participants,
+			name: tournament.name,
+			status: tournament.status,
+			creatorId: tournament.creatorId,
+			creatorUsername: tournament.creatorUsername
+		}));
 	}
 	catch (err)
 	{

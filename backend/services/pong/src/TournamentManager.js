@@ -95,6 +95,17 @@ class	TournamentManager
 		})));
 	}
 
+	getTournament(tournamentId)
+	{
+		const	tournament = this._tournaments.get(tournamentId);
+		if (!tournament)
+		{
+			return (null);
+		}
+
+		return (tournament);
+	}
+
 	async handleUserDisconnect(userId)
 	{
 		for (let tournament of this._tournaments.values())

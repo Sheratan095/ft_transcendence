@@ -12,6 +12,7 @@ export interface TournamentInfo {
 	status?: string;
 	creatorId?: string;
 	creatorUsername?: string;
+	creatorAvatar?: string;
 }
 
 interface Match {
@@ -71,9 +72,13 @@ export async function openTournamentModal(
 
 	const isCreator = currentUserId === currentCreatorId;
 
+	console.log('[TournamentModal] Opening modal for tournament:', tournamentId);
+	console.log('[TournamentModal] Tournament info:', tournamentInfo);
+	console.log('[TournamentModal] Is creator?', isCreator, 'CurrentUserId:', currentUserId, 'CreatorId:', currentCreatorId);
+
 	_setTournamentName(tournamentInfo.name ?? 'Tournament');
 	_setStatusBadge(tournamentInfo.status ?? 'WAITING');
-	_setCreator(tournamentInfo.creatorUsername, tournamentInfo.creatorId);
+	_setCreator(tournamentInfo.creatorUsername, tournamentInfo.creatorId, tournamentInfo.creatorAvatar);
 	_clearPlayerList();
 	_clearBracket();
 	_hideCooldown();
@@ -213,15 +218,27 @@ function _incrementCount(delta: number) {
 	_setCount(current + delta);
 }
 
-function _setCreator(username?: string, id?: string) {
+function _setCreator(username?: string, id?: string, avatar?: string) {
 	const nameEl   = document.getElementById('tm-creator-name');
 	const avatarEl = document.getElementById('tm-creator-avatar');
 	const display  = username ?? '—';
 	if (nameEl)   nameEl.textContent   = display.toUpperCase();
 	if (avatarEl) {
-		avatarEl.textContent = display.slice(0, 2).toUpperCase();
+		avatarEl.innerHTML = '';
+		if (avatar) {
+			const img = document.createElement('img');
+			img.src = avatar;
+			img.alt = display;
+			img.className = 'w-full h-full object-cover rounded-lg';
+			img.onerror = () => {
+				avatarEl.innerHTML = display.slice(0, 2).toUpperCase();
+			};
+			avatarEl.appendChild(img);
+		} else {
+			avatarEl.textContent = display.slice(0, 2).toUpperCase();
+		}
 		const color = _avatarColor(id ?? username ?? '?');
-		avatarEl.className = `w-10 h-10 flex-shrink-0 rounded-lg ${color} border-2 border-gray-800 flex items-center justify-center font-black text-black text-sm`;
+		avatarEl.className = `w-10 h-10 flex-shrink-0 rounded-lg ${color} border-2 border-gray-800 flex items-center justify-center font-black text-black text-sm overflow-hidden`;
 	}
 }
 
