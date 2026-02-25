@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { pongConnectionManager } from './PongConnectionManager.js';
 import { sendGameInviteNotification, getUsernameById, sleep, checkBlock, isUserBusyInternal } from './pong-help.js';
 import { pongDatabase as pongDb } from './pong.js';
+import { tournamentManager } from './TournamentManager.js';
 
 class	GameManager
 {
@@ -303,12 +304,47 @@ class	GameManager
 			otherPlayerId = gameInstance.playerLeftId;
 		}
 
-		// Notify other player of ready status change
-		pongConnectionManager.sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus);
+		// For tournament matches, use tournament-specific notification
+		if (gameInstance.tournamentId)
+		{
+			if (otherPlayerId)
+				pongConnectionManager.notifyTournamentPlayerReady(otherPlayerId, playerId, gameId);
+		}
+		else
+		{
+			// For normal games, use standard ready status notification
+			pongConnectionManager.sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus);
+		}
 
 		// If both players are ready, start the game
 		if (gameInstance.playerLeftReady && gameInstance.playerRightReady)
+		{
+			// For tournament matches, clear timer and update tournament status
+			if (gameInstance.tournamentId)
+			{
+				const	matchTimerId = tournamentManager._matchTimers.get(gameId);
+				if (matchTimerId)
+				{
+					tournamentManager._clearMatchTimer(gameId);
+				}
+
+				const	tournament = tournamentManager._tournaments.get(gameInstance.tournamentId);
+				if (tournament)
+				{
+					// Update tournament match status
+					const	startedMatch = tournament.startMatch(gameId);
+					if (startedMatch)
+					{
+						// Notify both players that the match is starting
+						pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerLeftId, gameId, gameId, gameInstance.playerRightUsername, 'LEFT');
+						pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerRightId, gameId, gameId, gameInstance.playerLeftUsername, 'RIGHT');
+					}
+				}
+			}
+
+			// Start the game (works for both tournament and non-tournament matches)
 			this._gameStart(gameInstance);
+		}
 	}
 
 	processPaddleMove(playerId, gameId, direction)

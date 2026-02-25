@@ -106,9 +106,6 @@ export function	handleMessage(socket, msg, userId)
 				handleTournamentStart(userId, message.data.tournamentId);
 				break;
 
-			case 'tournament.ready':
-				handleTournamentReady(userId, message.data.tournamentId);
-				break;
 
 			default:
 				console.log(`[PONG] Unknown event: ${message.event}`);
@@ -327,26 +324,5 @@ export async function	handleTournamentStart(userId, tournamentId)
 	{
 		console.error(`[PONG] Error starting tournament ${tournamentId}:`, err.message);
 		pongConnectionManager.sendErrorMessage(userId, 'Failed to start tournament');
-	}
-}
-
-export async function	handleTournamentReady(userId, tournamentId)
-{
-	try
-	{
-		if (!tournamentId)
-		{
-			console.error(`[PONG] No tournamentId provided by user ${userId} to ready up`);
-			pongConnectionManager.sendErrorMessage(userId, 'No tournament ID provided');
-			return ;
-		}
-
-		// TO DO check it
-		tournamentManager.playerReady(tournamentId, userId);
-	}
-	catch (err)
-	{
-		console.error(`[PONG] Error readying up for tournament ${tournamentId}:`, err.message);
-		pongConnectionManager.sendErrorMessage(userId, 'Failed to ready up');
 	}
 }

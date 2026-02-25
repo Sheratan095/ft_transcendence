@@ -250,13 +250,15 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentPlayerReady', data);
 	}
 
-	async	sendTournamentMatchStarted(userId, gameId, matchId)
+	async	sendTournamentMatchStarted(userId, gameId, matchId, opponentUsername, yourSide)
 	{
 		const	socket = this._connections.get(userId);
 
 		const	data = {
 			gameId,
 			matchId,
+			opponentUsername,
+			yourSide,
 		};
 
 		if (socket)
