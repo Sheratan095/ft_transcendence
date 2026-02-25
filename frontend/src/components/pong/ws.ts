@@ -6,6 +6,12 @@
 import { showErrorToast, showInfoToast, showSuccessToast } from '../shared/Toast';
 import { getUserId, isLoggedInClient } from '../../lib/auth';
 import * as modalHandlers from './modal';
+import { playerJoinedTournament,
+	playerLeftTournament,
+	tournamentMatchStarted,
+	tournamentCancelled, 
+	tournamentRoundCooldown,
+	bracketUpdate } from '../tournaments/Tournament';
 
 let pongWs: WebSocket | null = null;
 let currentUserId: string | null = null;
@@ -199,23 +205,23 @@ function routeEvent(event: string, data: any)
 		case 'pong.tournamentMatchEnded':
 			// TODO: Handle tournament match ended
 			break;
-		case 'pong.tournamentRoundInfo':
-			// TODO: Handle tournament round info
+		case 'pong.tournamentBracketUpdate':
+			bracketUpdate(data.tournamentId, data.bracketInfo);
 			break;
 		case 'pong.tournamentStarted':
-			// TODO: Handle tournament started
+			tournamentMatchStarted(data.tournamentId, data.matchInfo);
 			break;
 		case 'pong.tournamentParticipantJoined':
-			// TODO: Handle tournament participant joined
+			playerJoinedTournament(data.tournamentId, data.player);
 			break;
 		case 'pong.tournamentParticipantLeft':
-			// TODO: Handle tournament participant left
+			playerLeftTournament(data.tournamentId, data.player);
 			break;
 		case 'pong.tournamentCancelled':
-			// TODO: Handle tournament cancelled
+			tournamentCancelled(data.tournamentId);
 			break;
 		case 'pong.tournamentRoundCooldown':
-			// TODO: Handle tournament round cooldown
+			tournamentRoundCooldown(data.tournamentId, data.cooldownInfo);
 			break;
 		case 'error':
 			modalHandlers.handleError(data);
@@ -386,4 +392,14 @@ export function acceptGameInvite(inviteId: string) {
  */
 export function declineGameInvite(inviteId: string) {
 	sendPongMessage('pong.declineGameInvite', { inviteId });
+}
+
+export function leaveTournament(tournamentId: string)
+{
+	sendPongMessage('tournament.leave', { tournamentId });
+}
+
+export function cancelTournament(tournamentId: string)
+{
+	sendPongMessage('tournament.cancel', { tournamentId });
 }
