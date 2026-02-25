@@ -103,3 +103,41 @@ export async function cancelTournament(tournamentId: string)
 	cancelTournamentWs(tournamentId);
 	closeTournamentModal();
 }
+
+export async function createTournament(name: string): Promise<void>
+{
+	try {
+		const response = await fetch('/api/pong/create-tournament', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({ name }),
+		});
+
+		if (!response.ok)
+		{
+			const err = await response.json().catch(() => ({}));
+			throw new Error(err.message || 'Failed to create tournament');
+		}
+
+		const data = await response.json();
+		const id   = data.id ?? data.tournamentId;
+		if (!id)
+			throw new Error('Server did not return a tournament ID');
+
+		// Join own tournament — this opens the modal
+		openTournamentModal(id, {
+			name: data.name,
+			status: data.status,
+			creatorId: data.creatorId,
+			creatorUsername: data.creatorUsername,
+		}, []);
+
+		showInfoToast('Tournament created successfully!');
+
+	} catch (err) {
+		console.error('Error creating tournament:', err);
+		showErrorToast((err as Error).message || 'An error occurred while creating the tournament');
+		throw err; // re-throw so caller can react (e.g. show error in mini modal)
+	}
+}
