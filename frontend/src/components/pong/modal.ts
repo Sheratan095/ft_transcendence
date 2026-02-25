@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { closePong, startMatchmaking, leaveMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame, sendPongMessage } from './ws';
+import { closePong, initPong, startMatchmaking, leaveMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame, sendPongMessage } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
@@ -493,6 +493,8 @@ export async function openPongModal(mode: PongModeType = 'online')
 				showErrorToast('You must be logged in');
 				return;
 			}
+
+			await initPong(userId);
 		}
 
 		const canvas = document.getElementById('pong-canvas') as HTMLCanvasElement | null;

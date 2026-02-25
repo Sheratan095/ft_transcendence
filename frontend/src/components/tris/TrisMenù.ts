@@ -80,10 +80,12 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
     } else {
       btnInviteFriend.addEventListener('click', async () =>
       {
-        await openGameInviteModal('pong', async (friendId: string) =>
+        await openGameInviteModal('tris', async (friendId: string) =>
         {
           try {
             await openTrisModal();
+            initializeModeSpecificBehaviors('online');
+            await createCustomGame(friendId);
             showSuccessToast('Game invite sent!');
           }
           catch (err) {

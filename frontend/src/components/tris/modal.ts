@@ -176,6 +176,7 @@ export function closeTrisModal() {
 }
 
 export async function openTrisModalAndJoinGame(gameId: string) {
+  currentMode = 'online';
   pendingGameJoin = gameId;
   await openTrisModal();
 }
