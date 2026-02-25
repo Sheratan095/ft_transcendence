@@ -2,6 +2,9 @@
 // TournamentModal — sole owner of the tournament modal UI
 // ============================================================
 
+import { loadTournaments } from './TournamentsList';
+import { getUserId } from '../../lib/auth';
+
 // -------------------- Types --------------------
 
 export interface TournamentInfo {
@@ -40,14 +43,19 @@ interface BracketInfo {
 
 let currentTournamentId: string | null = null;
 let currentCreatorId: string | undefined;
+let currentUserId: string | null = null;
 let cooldownInterval: number | null = null;
 
-// -------------------- Init (wire up close btn) --------------------
+// -------------------- Init (wire up buttons) --------------------
 
 document.addEventListener('DOMContentLoaded', () => {
-	document.getElementById('lobby-close-btn')?.addEventListener('click', () => {
-		closeTournamentModal();
-	});
+	const startBtn   = document.getElementById('tm-btn-start');
+	const cancelBtn  = document.getElementById('tm-btn-cancel');
+	const quitBtn    = document.getElementById('tm-btn-quit');
+
+	if (startBtn)  startBtn.addEventListener('click', _handleStart);
+	if (cancelBtn) cancelBtn.addEventListener('click', _handleCancel);
+	if (quitBtn)   quitBtn.addEventListener('click', _handleQuit);
 });
 
 // -------------------- Public API --------------------
@@ -59,6 +67,9 @@ export async function openTournamentModal(
 ) {
 	currentTournamentId = tournamentId;
 	currentCreatorId    = tournamentInfo.creatorId;
+	currentUserId       = getUserId();
+
+	const isCreator = currentUserId === currentCreatorId;
 
 	_setTournamentName(tournamentInfo.name ?? 'Tournament');
 	_setStatusBadge(tournamentInfo.status ?? 'WAITING');
@@ -66,6 +77,7 @@ export async function openTournamentModal(
 	_clearPlayerList();
 	_clearBracket();
 	_hideCooldown();
+	_setActionButtons(isCreator);
 
 	for (const p of partecipants) {
 		const isCreator = p.id === tournamentInfo.creatorId || !!p.isCreator;
@@ -82,6 +94,7 @@ export async function closeTournamentModal() {
 	currentTournamentId = null;
 	currentCreatorId    = undefined;
 	_stopCooldown();
+	await loadTournaments(); // Refresh the tournament list when modal closes
 }
 
 export async function addPartecipantToModal(tournamentId: string, player: any) {
@@ -394,4 +407,39 @@ function _drawConnectorLines(tournament: BracketInfo, matchElements: Record<stri
 	// Size SVG to match wrapper content
 	svgEl.setAttribute('width',  String(wrapper.scrollWidth));
 	svgEl.setAttribute('height', String(wrapper.scrollHeight));
+}
+
+// -------------------- Action buttons --------------------
+
+function _setActionButtons(isCreator: boolean): void {
+	const creatorBtns = document.getElementById('tm-creator-buttons');
+	const userBtns    = document.getElementById('tm-participant-buttons');
+
+	if (isCreator) {
+		creatorBtns?.classList.remove('hidden');
+		userBtns?.classList.add('hidden');
+	} else {
+		creatorBtns?.classList.add('hidden');
+		userBtns?.classList.remove('hidden');
+	}
+}
+
+async function _handleStart(): Promise<void> {
+	if (!currentTournamentId) return;
+	// TODO: Wire up tournament start via WebSocket
+	console.log('[TournamentModal] Start tournament:', currentTournamentId);
+}
+
+async function _handleCancel(): Promise<void> {
+	if (!currentTournamentId) return;
+	// Import here to avoid circular dependency
+	const { cancelTournament } = await import('./Tournament');
+	await cancelTournament(currentTournamentId);
+}
+
+async function _handleQuit(): Promise<void> {
+	if (!currentTournamentId) return;
+	// Import here to avoid circular dependency
+	const { leaveTournament } = await import('./Tournament');
+	await leaveTournament(currentTournamentId);
 }
