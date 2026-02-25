@@ -170,7 +170,7 @@ export async function createTournament(name: string): Promise<void>
 			creatorId: data.creatorId,
 			creatorUsername: creatorUsername,
 			creatorAvatar: creatorAvatar,
-		}, []);
+		}, data.partecipants ?? []);
 
 		showInfoToast('Tournament created successfully!');
 

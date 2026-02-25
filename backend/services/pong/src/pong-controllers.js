@@ -211,7 +211,7 @@ export const	createTournament = async (req, reply) =>
 			status: tournament.status,
 			creatorId: tournament.creatorId,
 			creatorUsername: tournament.creatorUsername,
-			partecipants: []
+			partecipants: tournamentManager.getParticipants(tournament.id)
 		}));
 	}
 	catch (err)

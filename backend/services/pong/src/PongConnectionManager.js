@@ -169,28 +169,28 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentCreated', data);
 	}
 
-	async	notifyTournamentParticipantJoined(participantId, newUsername, tournamentName, tournamentId)
+	async	notifyTournamentParticipantJoined(participantId, newUserId, newUsername, tournamentName, tournamentId)
 	{
 		const	socket = this._connections.get(participantId);
 
 		const	data = {
 			tournamentId,
 			tournamentName,
-			"participantUsername": newUsername,
+			player: { id: newUserId, username: newUsername },
 		};
 
 		if (socket)
 			this.#dispatchEventToSocket(socket, 'pong.tournamentParticipantJoined', data);
 	}
 
-	async	notifyTournamentParticipantLeft(participantId, leavingUsername, tournamentName, tournamentId)
+	async	notifyTournamentParticipantLeft(participantId, leavingUserId, leavingUsername, tournamentName, tournamentId)
 	{
 		const	socket = this._connections.get(participantId);
 
 		const	data = {
 			tournamentId,
 			tournamentName,
-			"participantUsername": leavingUsername,
+			player: { id: leavingUserId, username: leavingUsername },
 		};
 
 		if (socket)

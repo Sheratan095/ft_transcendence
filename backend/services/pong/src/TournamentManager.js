@@ -76,7 +76,7 @@ class	TournamentManager
 		for (let participant of tournament.participants)
 		{
 			if (participant.userId !== userId)
-				pongConnectionManager.notifyTournamentParticipantJoined(participant.userId, username, tournament.name, tournamentId);
+				pongConnectionManager.notifyTournamentParticipantJoined(participant.userId, userId, username, tournament.name, tournamentId);
 		}
 	}
 
@@ -90,7 +90,7 @@ class	TournamentManager
 		}
 
 		return (Array.from(tournament.participants).map(participant => ({
-			userId: participant.userId,
+			id: participant.userId,
 			username: participant.username
 		})));
 	}
@@ -201,6 +201,10 @@ class	TournamentManager
 			}
 		}
 
+		// Capture leaving participant's username before removal
+		const	leavingParticipant = Array.from(tournament.participants).find(p => p.userId === userId);
+		const	leavingUsername = leavingParticipant?.username ?? '';
+
 		// Remove participant from tournament
 		tournament.removeParticipant(userId);
 
@@ -242,9 +246,10 @@ class	TournamentManager
 		for (let participant of tournament.participants)
 		{
 			pongConnectionManager.notifyTournamentParticipantLeft(
-				participant.userId, 
-				userId, 
-				tournament.name, 
+				participant.userId,
+				userId,
+				leavingUsername,
+				tournament.name,
 				tournamentId
 			);
 		}
