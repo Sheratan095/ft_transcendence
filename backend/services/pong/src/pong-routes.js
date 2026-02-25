@@ -413,8 +413,14 @@ const	createTournament =
 				type: 'object',
 				properties:
 				{
+					id: { type: 'string' },
 					tournamentId: { type: 'string' },
-					message: { type: 'string' }
+					message: { type: 'string' },
+					name: { type: 'string' },
+					status: { type: 'string' },
+					creatorId: { type: 'string' },
+					creatorUsername: { type: 'string' },
+					partecipants: { type: 'array' }
 				}
 			},
 			400: ErrorResponse,

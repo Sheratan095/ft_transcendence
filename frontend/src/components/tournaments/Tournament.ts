@@ -131,9 +131,12 @@ export async function createTournament(name: string): Promise<void>
 		}
 
 		const data = await response.json();
+		console.log('[createTournament] Response data:', data);
 		const id   = data.id ?? data.tournamentId;
 		if (!id)
 			throw new Error('Server did not return a tournament ID');
+
+		console.log('[createTournament] Tournament data:', { id, name: data.name, status: data.status, creatorId: data.creatorId });
 
 		// Get creator username from response or fallback to current user
 		let creatorUsername = data.creatorUsername;

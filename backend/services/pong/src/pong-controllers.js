@@ -202,10 +202,17 @@ export const	createTournament = async (req, reply) =>
 		const	tournament = tournamentManager.createTournament(name, creatorId, creatorUsername);
 
 		console.log(`[PONG] User ${creatorId} created a tournament named "${name}"`);
+		console.log('[PONG] Returning tournament data:', { id: tournament.id, name: tournament.name, status: tournament.status, creatorId: tournament.creatorId });
 
 		return (reply.code(201).send({
+			id: tournament.id,
 			tournamentId: tournament.id,
-			message: 'Tournament created successfully'
+			message: 'Tournament created successfully',
+			name: tournament.name,
+			status: tournament.status,
+			creatorId: tournament.creatorId,
+			creatorUsername: tournament.creatorUsername,
+			partecipants: []
 		}));
 	}
 	catch (err)

@@ -51,11 +51,9 @@ let cooldownInterval: number | null = null;
 
 document.addEventListener('DOMContentLoaded', () => {
 	const startBtn   = document.getElementById('tm-btn-start');
-	const cancelBtn  = document.getElementById('tm-btn-cancel');
 	const quitBtn    = document.getElementById('tm-btn-quit');
 
 	if (startBtn)  startBtn.addEventListener('click', _handleStart);
-	if (cancelBtn) cancelBtn.addEventListener('click', _handleCancel);
 	if (quitBtn)   quitBtn.addEventListener('click', _handleQuit);
 });
 
@@ -445,13 +443,6 @@ async function _handleStart(): Promise<void> {
 	if (!currentTournamentId) return;
 	// TODO: Wire up tournament start via WebSocket
 	console.log('[TournamentModal] Start tournament:', currentTournamentId);
-}
-
-async function _handleCancel(): Promise<void> {
-	if (!currentTournamentId) return;
-	// Import here to avoid circular dependency
-	const { cancelTournament } = await import('./Tournament');
-	await cancelTournament(currentTournamentId);
 }
 
 async function _handleQuit(): Promise<void> {
