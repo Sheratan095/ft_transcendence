@@ -35,9 +35,9 @@ export async function joinTournament(tournamentId: string, tournamentCreator: st
 			return ;
 		}
 
-		// Get the partecipants list from the response
+		// Get the participants list from the response
 		const data = await response.json();
-		partecipants = data.partecipants || [];
+		partecipants = data.participants || [];
 
 		// Fetch creator's full profile to get avatar if not in response
 		let creatorAvatar = data.creatorAvatar;
@@ -170,7 +170,7 @@ export async function createTournament(name: string): Promise<void>
 			creatorId: data.creatorId,
 			creatorUsername: creatorUsername,
 			creatorAvatar: creatorAvatar,
-		}, data.partecipants ?? []);
+		}, data.participants ?? []);
 
 		showInfoToast('Tournament created successfully!');
 

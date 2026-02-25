@@ -115,7 +115,7 @@ const	TournamentParticipant =
 	type: 'object',
 	properties:
 	{
-		userId: { type: 'string' },
+		id: { type: 'string' },
 		username: { type: 'string' }
 	}
 };
@@ -420,7 +420,7 @@ const	createTournament =
 					status: { type: 'string' },
 					creatorId: { type: 'string' },
 					creatorUsername: { type: 'string' },
-					partecipants: { type: 'array' }
+					participants: { type: 'array' }
 				}
 			},
 			400: ErrorResponse,
@@ -486,11 +486,14 @@ const	joinTournament =
 				properties:
 				{
 					message: { type: 'string' },
-					participants:
-					{
+					participants: {
 						type: 'array',
 						items: TournamentParticipant
 					},
+					name: { type: 'string' },
+					status: { type: 'string' },
+					creatorId: { type: 'string' },
+					creatorUsername: { type: 'string' }
 				}
 			},
 			400: ErrorResponse,

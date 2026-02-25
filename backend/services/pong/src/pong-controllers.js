@@ -211,7 +211,7 @@ export const	createTournament = async (req, reply) =>
 			status: tournament.status,
 			creatorId: tournament.creatorId,
 			creatorUsername: tournament.creatorUsername,
-			partecipants: tournamentManager.getParticipants(tournament.id)
+			participants: tournamentManager.getParticipants(tournament.id)
 		}));
 	}
 	catch (err)
@@ -271,7 +271,7 @@ export const	joinTournament = async (req, reply) =>
 
 		return (reply.code(200).send({
 			message: 'Joined tournament successfully',
-			partecipants: participants,
+			participants: participants,
 			name: tournament.name,
 			status: tournament.status,
 			creatorId: tournament.creatorId,

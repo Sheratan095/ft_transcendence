@@ -84,12 +84,14 @@ export async function openTournamentModal(
 	_hideCooldown();
 	_setActionButtons(isCreator);
 
-	for (const p of partecipants) {
-		const isCreator = p.id === tournamentInfo.creatorId || !!p.isCreator;
-		if (!isCreator)
-			_appendParticipantCard(p);
+	// Filter out creator from participant display list (but count includes creator)
+	const nonCreatorParticipants = partecipants.filter(p => p.id !== tournamentInfo.creatorId && !p.isCreator);
+
+	for (const p of nonCreatorParticipants) {
+		_appendParticipantCard(p);
 	}
 
+	// Count includes the creator + other participants
 	_setCount(partecipants.length);
 	_showModal();
 }
@@ -106,16 +108,24 @@ export async function addPartecipantToModal(tournamentId: string, player: any) {
 	if (String(tournamentId) !== String(currentTournamentId)) return;
 
 	const isCreator = player.id === currentCreatorId || !!player.isCreator;
-	if (!isCreator)
+	if (!isCreator) {
 		_appendParticipantCard(player);
+	}
 
+	// Always increment count (includes creator)
 	_incrementCount(1);
 }
 
 export async function removePartecipantFromModal(tournamentId: string, player: any) {
 	if (String(tournamentId) !== String(currentTournamentId)) return;
 
-	document.getElementById(`tm-player-${player.id}`)?.remove();
+	const isCreator = player.id === currentCreatorId || !!player.isCreator;
+	const element = document.getElementById(`tm-player-${player.id}`);
+	if (element && !isCreator) {
+		element.remove();
+	}
+
+	// Always decrement count (includes creator)
 	_incrementCount(-1);
 }
 

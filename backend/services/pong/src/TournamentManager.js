@@ -27,6 +27,8 @@ class	TournamentManager
 
 		this._tournaments.set(id, tournament);
 
+
+
 		pongConnectionManager.replyTournamentCreated(creatorId, name, id);
 
 		return (tournament);
