@@ -234,7 +234,7 @@ export function handleInvalidMove(data: any)
 export function handleError(data: any)
 {
 	updatePongStatus(`Error: ${data.message}`);
-	// showErrorToast(`Error: ${data.message}`);
+	showErrorToast(`Error: ${data.message}`);
 }
 
 export function handlePlayerReadyStatus(data: any)

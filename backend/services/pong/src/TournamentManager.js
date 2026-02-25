@@ -14,7 +14,7 @@ class	TournamentManager
 		this._matchTimers = new Map(); // matchId -> timer
 		this._roundTransitionTimers = new Map(); // tournamentId -> timer
 
-		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START);
+		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START) || 4;
 		this.ROUND_TRANSITION_COOLDOWN_MS = parseInt(process.env.ROUND_TRANSITION_COOLDOWN_MS) || 5000;
 	}
 	

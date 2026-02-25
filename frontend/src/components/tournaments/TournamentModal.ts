@@ -66,7 +66,7 @@ export async function openTournamentModal(
 	tournamentInfo: TournamentInfo,
 	partecipants: any[],
 ) {
-	currentTournamentId = String(tournamentId);
+	currentTournamentId = tournamentId;
 	currentCreatorId    = tournamentInfo.creatorId;
 	currentUserId       = getUserId();
 

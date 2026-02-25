@@ -70,7 +70,6 @@ export const	createTournament = async (req, reply) =>
 			headers: getAuthHeaders(req),
 		})
 		
-		console.log('[GATEWAY] createTournament response from pong service:', response.data);
 		return (reply.send(response.data))
 	}
 	catch (err)
