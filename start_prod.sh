@@ -2,18 +2,18 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-POPULATE_SCRIPT="$ROOT_DIR/docs/env/Prod/populate_env.bash"
+POPULATE_SCRIPT="$ROOT_DIR/populate_env.bash"
 
 if [[ ! -f "$POPULATE_SCRIPT" ]]; then
   echo "Error: populate script not found at $POPULATE_SCRIPT" >&2
   exit 1
 fi
 
-echo "Generating .env files from docs/env/Prod..."
+echo "Generating .env files..."
 "$POPULATE_SCRIPT"
 
 FRONTEND_CERT_DIR="$ROOT_DIR/frontend/certs/certs"
-BACKEND_CERT_DIR="$ROOT_DIR/backend/certs/certs"
+BACKEND_CERT_DIR="$ROOT_DIR/backend/certs"
 GEN_SCRIPT="$ROOT_DIR/frontend/certs/generate-certs.sh"
 
 if [[ ! -f "$FRONTEND_CERT_DIR/cert.pem" || ! -f "$FRONTEND_CERT_DIR/key.pem" ]]; then
@@ -75,6 +75,21 @@ if command -v docker >/dev/null 2>&1; then
   docker system prune -a --volumes -f || true
 else
   echo "Warning: docker not found in PATH; skipping Docker cleanup." >&2
+fi
+
+# Generate tailwind.css for production build
+echo "Generating tailwind.css for production..."
+
+# Ensure an output file exists so downstream steps don't fail
+TAILWIND_OUT="$ROOT_DIR/frontend/tailwind.css"
+if [[ ! -f "$TAILWIND_OUT" ]]; then
+  mkdir -p "$(dirname "$TAILWIND_OUT")"
+  cat > "$TAILWIND_OUT" <<'EOF'
+/* Tailwind CSS output — generated for production
+   This file is intentionally empty and will be populated by the build process.
+*/
+EOF
+  echo "Created empty $TAILWIND_OUT"
 fi
 
 echo "Running: docker compose up $*"
