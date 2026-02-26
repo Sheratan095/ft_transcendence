@@ -381,6 +381,8 @@ function _renderBracket(tournament: BracketInfo) {
 	}
 
 	const matchElements: Record<string, HTMLElement> = {};
+	const isLastRound = (roundIndex: number) => roundIndex === normalizedTournament.rounds.length - 1;
+	const tournamentFinished = normalizedTournament.status === 'FINISHED';
 
 	normalizedTournament.rounds.forEach((round, roundIndex) => {
 		const col       = document.createElement('div');
@@ -396,7 +398,7 @@ function _renderBracket(tournament: BracketInfo) {
 		col.appendChild(label);
 
 		round.matches.forEach((match) => {
-			const box              = _createMatchBox(match);
+			const box              = _createMatchBox(match, isLastRound(roundIndex), tournamentFinished);
 			box.dataset.matchId    = match.id;
 			box.dataset.roundIndex = String(roundIndex);
 			matchElements[match.id] = box;
@@ -410,7 +412,7 @@ function _renderBracket(tournament: BracketInfo) {
 	setTimeout(() => _drawConnectorLines(normalizedTournament, matchElements), 50);
 }
 
-function _createMatchBox(match: Match): HTMLElement {
+function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished: boolean): HTMLElement {
 	const box       = document.createElement('div');
 	const isFinished = match.status === 'FINISHED';
 	const leftWon   = isFinished && match.winnerId === match.playerLeftId && !match.isBye;
@@ -426,21 +428,39 @@ function _createMatchBox(match: Match): HTMLElement {
 		return box;
 	}
 
-	const winnerBg  = 'bg-accent-blue dark:bg-accent-green';
+	// Determine winner styling based on tournament state
+	let winnerBg = 'bg-yellow-400 dark:bg-yellow-500';
+	let disableWinnerStyling = false;
+
+	if (tournamentFinished) {
+		// Tournament finished: only show styling for final round winner
+		disableWinnerStyling = !isLastRound;
+	}
+
 	const normalBgL = 'bg-white dark:bg-gray-900';
 	const normalBgR = 'bg-gray-50 dark:bg-gray-800';
 
 	const leftScore  = isFinished ? String(match.playerLeftScore  ?? 0) : '';
 	const rightScore = isFinished ? String(match.playerRightScore ?? 0) : '';
 
+	const leftWinnerBg = (leftWon && !disableWinnerStyling) ? winnerBg : normalBgL;
+	const rightWinnerBg = (rightWon && !disableWinnerStyling) ? winnerBg : normalBgR;
+	const leftWinnerText = (leftWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-800 dark:text-gray-100';
+	const rightWinnerText = (rightWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-800 dark:text-gray-100';
+	const leftWinnerScore = (leftWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-400 dark:text-gray-500';
+	const rightWinnerScore = (rightWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-400 dark:text-gray-500';
+
+	const leftCrown = (leftWon && !disableWinnerStyling && isLastRound && tournamentFinished) ? '👑 ' : '';
+	const rightCrown = (rightWon && !disableWinnerStyling && isLastRound && tournamentFinished) ? '👑 ' : '';
+
 	box.innerHTML = `
-		<div class="flex justify-between items-center px-3 py-2 text-sm border-b border-gray-200 dark:border-gray-700 ${leftWon  ? winnerBg : normalBgL}">
-			<span class="flex-1 truncate font-bold ${leftWon  ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${leftWon ? '👑 ' : ''}${match.playerLeftUsername  || '—'}</span>
-			<span class="ml-3 font-black min-w-5 text-right ${leftWon  ? 'text-black' : 'text-gray-400 dark:text-gray-500'}">${leftScore}</span>
+		<div class="flex justify-between items-center px-3 py-2 text-sm border-b border-gray-200 dark:border-gray-700 ${leftWinnerBg}">
+			<span class="flex-1 truncate font-bold ${leftWinnerText}">${leftCrown}${match.playerLeftUsername  || '—'}</span>
+			<span class="ml-3 font-black min-w-5 text-right ${leftWinnerScore}">${leftScore}</span>
 		</div>
-		<div class="flex justify-between items-center px-3 py-2 text-sm ${rightWon ? winnerBg : normalBgR}">
-			<span class="flex-1 truncate font-bold ${rightWon ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${rightWon ? '👑 ' : ''}${match.playerRightUsername || '—'}</span>
-			<span class="ml-3 font-black min-w-5 text-right ${rightWon ? 'text-black' : 'text-gray-400 dark:text-gray-500'}">${rightScore}</span>
+		<div class="flex justify-between items-center px-3 py-2 text-sm ${rightWinnerBg}">
+			<span class="flex-1 truncate font-bold ${rightWinnerText}">${rightCrown}${match.playerRightUsername || '—'}</span>
+			<span class="ml-3 font-black min-w-5 text-right ${rightWinnerScore}">${rightScore}</span>
 		</div>
 		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">✓ Finished</div>` : ''}
 	`;
