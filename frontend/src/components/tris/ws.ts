@@ -124,8 +124,8 @@ export function makeTrisMove(position: number) {
 	sendTrisCommand('tris.makeMove', { gameId: currentGameId, position });
 }
 
-export async function createCustomGame(targetPlayerId: string): Promise<void> {
-  sendTrisCommand('tris.createCustomGame', { guestEmail: targetPlayerId });
+export async function createCustomGame(otherId: string): Promise<void> {
+  sendTrisCommand('tris.createCustomGame', { otherId });
 }
 
 export function joinCustomGame(gameId: string) {
