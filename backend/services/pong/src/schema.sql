@@ -75,6 +75,9 @@ VALUES ('2', 27, 10, 17, 0, 2);
 INSERT INTO user_stats (user_id, games_played, wins, losses, tournament_wins, tournaments_participated)
 VALUES ('3', 21, 9, 12, 1, 3);
 
+INSERT INTO user_stats (user_id, games_played, wins, losses, tournament_wins, tournaments_participated)
+VALUES ('4', 0, 0, 0, 0, 0);
+
 -- Sample matches for charting (Pong)
 INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong1', '1', '2', 10, 5, '1', '2026-01-01 10:00:00');
 INSERT INTO matches (id, player_left_id, player_right_id, player_left_score, player_right_score, winner_id, ended_at) VALUES ('pong2', '1', '2', 8, 10, '2', '2026-01-02 11:00:00');

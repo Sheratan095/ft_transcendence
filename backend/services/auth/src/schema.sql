@@ -50,3 +50,6 @@ VALUES ('2', 'test2@gmail.com', '$2b$10$mUv8z0znMrFPbTfkAQtV..MDZ/8rRsv0NrFyFIGL
 
 INSERT INTO auth_accounts (id, email, password, created_at, tfa_enabled)
 VALUES ('3', 'test3@gmail.com', '$2b$10$mUv8z0znMrFPbTfkAQtV..MDZ/8rRsv0NrFyFIGLR0i65MSYdlgga', CURRENT_TIMESTAMP, 0);
+
+INSERT INTO auth_accounts (id, email, password, created_at, tfa_enabled)
+VALUES ('4', 'test4@gmail.com', '$2b$10$mUv8z0znMrFPbTfkAQtV..MDZ/8rRsv0NrFyFIGLR0i65MSYdlgga', CURRENT_TIMESTAMP, 0);

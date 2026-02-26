@@ -40,6 +40,9 @@ VALUES ('2', 8, 10);
 INSERT INTO user_stats (user_id, wins, losses)
 VALUES ('3', 5, 9);
 
+INSERT INTO user_stats (user_id, wins, losses)
+VALUES ('4', 0, 0);
+
 INSERT INTO matches (id, player_x_id, player_o_id, winner_id, ended_at)
 VALUES ('match1', '1', '2', '1', '2026-01-01 10:00:00');
 
