@@ -155,5 +155,6 @@
   "friend.add": "👥 Add Friend",
   "win": "Victory",
   "loss": "Defeat",
-  "draw": "Draw"
+  "draw": "Draw",
+  "game.no_recent_matches": "No matches available"
 }

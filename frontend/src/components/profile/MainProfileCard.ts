@@ -566,7 +566,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         } else {
           pongHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">${t('site.trend')}</h4>
-            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           historyRow.appendChild(pongHistoryWrapper);
           pongStatsElements.push(pongHistoryWrapper);
@@ -589,7 +589,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         } else {
           trisHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black tris-win-color uppercase tracking-[0.2em]">${t('site.trend')}</h4>
-            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
           trisStatsElements.push(trisHistoryWrapper);
@@ -617,7 +617,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
               return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
-                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
                 <div class="text-center">
                   <span class="font-semibold">(${yourScore})</span>
                   <span class="text-neutral-700 dark:text-white">you vs <span class="font-semibold text-neutral-700 dark:text-white">${opponent}</span>
@@ -636,7 +636,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
               return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
-                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
                 <div class="text-center">
                   <span class="text-black dark:text-white">you vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
                 </div>
@@ -663,7 +663,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         } else {
           pongListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">${t('site.recent')}</h4>
-            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           matchListRow.appendChild(pongListWrapper);
           pongStatsElements.push(pongListWrapper);
@@ -684,7 +684,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         } else {
           trisListWrapper.innerHTML = `
             <h4 class="text-lg font-black tris-win-color mb-2 text-center uppercase tracking-[0.2em]">${t('site.recent')}</h4>
-            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           matchListRow.appendChild(trisListWrapper);
           trisStatsElements.push(trisListWrapper);

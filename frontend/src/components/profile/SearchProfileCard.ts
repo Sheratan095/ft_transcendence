@@ -439,7 +439,7 @@ export async function renderSearchProfileCard(
         } else {
           pongHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">${t('site.trend')}</h4>
-            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           historyRow.appendChild(pongHistoryWrapper);
           pongStatsElements.push(pongHistoryWrapper);
@@ -462,7 +462,7 @@ export async function renderSearchProfileCard(
         } else {
           trisHistoryWrapper.innerHTML = `
             <h4 class="text-lg text-center font-black tris-win-color uppercase tracking-[0.2em]">${t('site.trend')}</h4>
-            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
           trisStatsElements.push(trisHistoryWrapper);
@@ -533,7 +533,7 @@ export async function renderSearchProfileCard(
         } else {
           pongListWrapper.innerHTML = `
             <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">${t('site.recent')}</h4>
-            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           matchListRow.appendChild(pongListWrapper);
           pongStatsElements.push(pongListWrapper);
@@ -554,7 +554,7 @@ export async function renderSearchProfileCard(
         } else {
           trisListWrapper.innerHTML = `
             <h4 class="text-lg font-black tris-win-color mb-2 text-center uppercase tracking-[0.2em]">${t('site.recent')}</h4>
-            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
+            <div class="flex-1 flex items-center justify-center text-neutral-500 italic">${t('game.no_recent_matches')}</div>
           `;
           matchListRow.appendChild(trisListWrapper);
           trisStatsElements.push(trisListWrapper);

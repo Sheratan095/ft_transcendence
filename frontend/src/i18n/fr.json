@@ -155,5 +155,6 @@
   "friend.add": "👥 Ajouter en ami",
   "win": "Victoire",
   "loss": "Défaite",
-  "draw": "Égalité"
+  "draw": "Égalité",
+  "game.no_recent_matches": "Aucune partie disponible"
 }
