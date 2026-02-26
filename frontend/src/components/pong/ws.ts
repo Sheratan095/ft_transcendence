@@ -307,10 +307,24 @@ export async function createCustomGame(otherId: string) {
 }
 
 /**
- * Join a custom game
+ * Join a custom game (auto-connects if needed)
  */
-export function joinCustomGame(gameId: string)
+export async function joinCustomGame(gameId: string): Promise<void>
 {
+	if (!isPongConnected())
+	{
+		if (!isLoggedInClient())
+			throw new Error('Not logged in');
+		try
+		{
+			await initPong(getUserId() as string);
+		}
+		catch (err)
+		{
+			console.error('[PONG WS] Failed to connect before joining custom game:', err);
+			throw err;
+		}
+	}
 	sendPongMessage('pong.joinCustomGame', { gameId });
 }
 

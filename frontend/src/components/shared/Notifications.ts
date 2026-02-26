@@ -2,7 +2,6 @@ import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } fro
 import { t } from '../../lib/intlayer';
 import { FriendsManager } from '../profile/FriendsManager';
 import { openTrisModalAndJoinGame } from '../tris/modal';
-import {joinCustomGame as joinCustomGameTris} from '../tris/ws';
 import { joinCustomGame } from '../pong/ws';
 import { goToRoute } from '../../spa';
 
@@ -338,12 +337,11 @@ function handleNotificationEvent(data: any) {
 								try {
 									// If it's a tris game invite, open modal and join via WebSocket
 									if (gameType === 'tris' && gameId) {
-										// Import and call function to open tris modal and join game
-										joinCustomGameTris(gameId); // For tris, join custom game (modal will open on customGameJoinSuccess event)
-										// Note: Success feedback will come from handleCustomGameJoinSuccess event
-									} else if (gameType === 'pong' && gameId) {
-										// For pong, join custom game (modal will open on customGameJoinSuccess event)
-										joinCustomGame(gameId);
+									// openTrisModalAndJoinGame handles WS init + join + modal open
+									await openTrisModalAndJoinGame(gameId);
+								} else if (gameType === 'pong' && gameId) {
+									// joinCustomGame auto-connects if needed; modal opens on customGameJoinSuccess
+									await joinCustomGame(gameId);
 									}
 								} catch (err) {
 									console.error('Error accepting game invite:', err);
