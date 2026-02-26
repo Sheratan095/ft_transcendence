@@ -48,6 +48,7 @@ interface BracketInfo {
 let currentTournamentId: string | null = null;
 let currentCreatorId: string | undefined;
 let currentUserId: string | null = null;
+let currentTournamentStatus: string | null = null;
 let cooldownInterval: number | null = null;
 
 // -------------------- Init (wire up buttons) --------------------
@@ -80,12 +81,13 @@ export async function openTournamentModal(
 	console.log('[TournamentModal] Is creator?', isCreator, 'CurrentUserId:', currentUserId, 'CreatorId:', currentCreatorId);
 
 	_setTournamentName(tournamentInfo.name ?? 'Tournament');
-	_setStatusBadge(tournamentInfo.status ?? 'WAITING');
+	currentTournamentStatus = tournamentInfo.status ?? 'WAITING';
+	_setStatusBadge(currentTournamentStatus);
 	_setCreator(tournamentInfo.creatorUsername, tournamentInfo.creatorId, tournamentInfo.creatorAvatar);
 	_clearPlayerList();
 	_clearBracket();
 	_hideCooldown();
-	_setActionButtons(isCreator);
+	_setActionButtons(isCreator, currentTournamentStatus);
 
 	// Filter out creator from participant display list (but count includes creator)
 	const nonCreatorParticipants = partecipants.filter(p => p.id !== tournamentInfo.creatorId && !p.isCreator);
@@ -140,8 +142,11 @@ export async function updateBracketInModal(tournamentId: string, bracketInfo: Br
 		return;
 	}
 
-	if (bracketInfo.status)
+	if (bracketInfo.status) {
+		currentTournamentStatus = bracketInfo.status;
 		_setStatusBadge(bracketInfo.status);
+		_setActionButtons(currentUserId === currentCreatorId, currentTournamentStatus);
+	}
 
 	try {
 		_renderBracket(bracketInfo);
@@ -496,14 +501,22 @@ function _drawConnectorLines(tournament: BracketInfo, matchElements: Record<stri
 
 // -------------------- Action buttons --------------------
 
-function _setActionButtons(isCreator: boolean): void {
+function _setActionButtons(isCreator: boolean, status?: string): void {
 	const creatorBtns = document.getElementById('tm-creator-buttons');
 	const userBtns    = document.getElementById('tm-participant-buttons');
 
-	if (isCreator) {
+	const isStarted = status && ['IN_PROGRESS', 'STARTED', 'FINISHED'].includes(status);
+
+	if (isStarted) {
+		// When tournament has started, show quit button for everyone
+		creatorBtns?.classList.add('hidden');
+		userBtns?.classList.remove('hidden');
+	} else if (isCreator) {
+		// Before tournament starts, creator sees start/cancel buttons
 		creatorBtns?.classList.remove('hidden');
 		userBtns?.classList.add('hidden');
 	} else {
+		// Before tournament starts, non-creator sees quit button
 		creatorBtns?.classList.add('hidden');
 		userBtns?.classList.remove('hidden');
 	}
