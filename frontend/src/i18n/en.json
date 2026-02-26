@@ -141,5 +141,19 @@
   "game.tournaments": "Play in a Tournament",
   "tournament.desc": "Rise to the top by competing in ranked matches and tournaments against players worldwide.",
   "tournament.create": "Create tournament",
-  "tournament.no-tournaments": "No tournaments available"
+  "tournament.no-tournaments": "No tournaments available",
+  "create": "Create",
+  "tournament.cancel": "Cancel tournament",
+  "quit": "Quit",
+  "friend.send": "💬 Send Message",
+  "friend.block": "🔒 Block",
+  "friend.cancel": "⏳ Cancel Request",
+  "friend.remove": "✖ Remove Friend",
+  "friend.accept": "✓ Accept",
+  "friend.reject": "✕ Reject",
+  "friend.unblock": "🔓 Unblock",
+  "friend.add": "👥 Add Friend",
+  "win": "Victory",
+  "loss": "Defeat",
+  "draw": "Draw"
 }

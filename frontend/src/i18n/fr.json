@@ -141,5 +141,19 @@
   "game.tournaments": "Jouer dans un tournoi",
   "tournament.desc": "Grimpez au sommet en participant à des matchs classés et des tournois contre des joueurs du monde entier.",
   "tournament.create": "Créer un tournoi",
-  "tournament.no-tournaments": "Aucun tournoi disponible pour le moment."
+  "tournament.no-tournaments": "Aucun tournoi disponible pour le moment.",
+  "create": "Créer",
+  "tournament.cancel": "Annuler le tournoi",
+  "quit": "Quitter",
+  "friend.send": "💬 Envoyer un message",
+  "friend.block": "🔒 Bloquer",
+  "friend.cancel": "⏳ Annuler la demande",
+  "friend.remove": "✖ Supprimer l'ami",
+  "friend.accept": "✓ Accepter",
+  "friend.reject": "✕ Refuser",
+  "friend.unblock": "🔓 Débloquer",
+  "friend.add": "👥 Ajouter en ami",
+  "win": "Victoire",
+  "loss": "Défaite",
+  "draw": "Égalité"
 }

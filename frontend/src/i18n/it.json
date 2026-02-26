@@ -141,5 +141,19 @@
   "game.tournaments": "Partecipa a un torneo",
   "tournament.desc": "Raggiungi la vetta competendo in partite classificate e tornei contro giocatori di tutto il mondo.",
   "tournament.create": "Crea torneo",
-  "tournament.no-tournaments": "Nessun torneo disponibile al momento"
+  "tournament.no-tournaments": "Nessun torneo disponibile al momento",
+  "create": "Crea",
+  "tournament.cancel": "Annulla torneo",
+  "quit": "Esci",
+  "friend.send": "💬 Invia Messaggio",
+  "friend.block": "🔒 Blocca",
+  "friend.cancel": "⏳ Annulla Richiesta",
+  "friend.remove": "✖ Rimuovi Amico",
+  "friend.accept": "✓ Accetta",
+  "friend.reject": "✕ Rifiuta",
+  "friend.unblock": "🔓 Sblocca",
+  "friend.add": "👥 Aggiungi Amico",
+  "win": "Vittoria",
+  "loss": "Sconfitta",
+  "draw": "Pareggio"
 }

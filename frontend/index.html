@@ -411,14 +411,11 @@
 
 							<!-- Action buttons -->
 							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-chat bg-accent-blue dark:bg-accent-blue text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									💬 Send Message
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-chat bg-accent-blue dark:bg-accent-blue text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100" data-i18n="friend.send">			
 								</button>
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-gray-500 dark:bg-accent-green text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									👥 Add Friend
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-gray-500 dark:bg-accent-green text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100"data-i18n="friend.add">
 								</button>
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									🔒 Block
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100" data-i18n="friend.block">
 								</button>
 							</div>
 						</div>
@@ -685,8 +682,7 @@
 				class="w-full px-4 py-3 rounded-xl border-2 border-gray-800 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold placeholder-gray-400 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green transition mb-5" />
 			<p id="tournament-create-error" class="hidden text-xs text-red-500 font-bold mb-3 -mt-3"></p>
 			<button id="tournament-create-confirm" type="button"
-				class="w-full py-3 bg-accent-orange dark:bg-white text-white dark:text-black font-black uppercase tracking-tighter rounded-xl border-2 hover:brightness-110 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all">
-				Create
+				class="w-full py-3 bg-accent-orange dark:bg-white text-white dark:text-black font-black uppercase tracking-tighter rounded-xl border-2 hover:brightness-110 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all" data-i18n="create">
 			</button>
 		</div>
 	</div>
@@ -702,14 +698,12 @@
 						<button type="button" id="tm-btn-start" class="px-4 py-2 bg-accent-blue dark:bg-green-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Start tournament">
 							Start
 						</button>
-						<button type="button" id="tm-btn-cancel" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Cancel tournament">
-							Cancel tournament
+						<button type="button" id="tm-btn-cancel" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Cancel tournament" data-i18n="tournament.cancel">
 						</button>
 					</div>
 					<!-- Participant button -->
 					<div id="tm-participant-buttons" class="hidden">
-						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament">
-							Quit
+						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament" data-i18n="quit">
 						</button>
 					</div>
 				</div>
@@ -863,8 +857,7 @@
 						border-neutral-300 accent-accent-blue overflow-hidden
 						transition-all duration-300 cursor-pointer block text-left
 						slideshow-slide rounded">
-							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
-								Play pong
+							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300" data-i18n="site.play-pong">
 							</h3>
 							<div class="w-full aspect-square relative border-4 border-double dark:border-white border-black mx-auto">
 								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-full border-dotted border-r-2 dark:border-white border-black"></div>

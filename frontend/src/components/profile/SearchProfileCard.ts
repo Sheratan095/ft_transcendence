@@ -4,6 +4,7 @@ import type { GameStats } from './UserCardCharts';
 import { getAllMatchHistories } from '../../lib/matchHistory';
 import { initCardHoverEffect } from '../../lib/card';
 import { onRelationshipEvent } from '../shared/Notifications';
+import { t } from '../../lib/intlayer';
 
 export async function renderSearchProfileCard(
   userId: string,
@@ -197,16 +198,16 @@ export async function renderSearchProfileCard(
       
       if (isIncomingRequest) {
         addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
-        addBtn.textContent = '✓ Accept Friend Request';
+        addBtn.textContent = t('friend.accept'); // "Accept Friend Request"
       } else {
         addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-yellow-600 dark:bg-yellow-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
-        addBtn.textContent = '⏳ Cancel Request';
+        addBtn.textContent = t('friend.cancel'); // "Cancel Friend Request"
       }
     } else if (relationshipStatus === 'accepted') {
       // When already friends, show a red "Remove Friend" button
       addBtn.disabled = false;
       addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
-      addBtn.textContent = '✖ Remove Friend';
+      addBtn.textContent = t('friend.remove'); // "Remove Friend"
     } else if (relationshipStatus === 'blocked') {
       addBtn.disabled = true;
       addBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-neutral-700 dark:bg-neutral-700 text-white opacity-60 cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
@@ -229,7 +230,7 @@ export async function renderSearchProfileCard(
     if (relationshipStatus === 'blocked')
     {
       // UNBLOCK THE USER
-      blockBtn.textContent = '🔓 Unblock';
+      blockBtn.textContent = t('friend.unblock'); // "Unblock"
       blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
     }
 
@@ -238,14 +239,14 @@ export async function renderSearchProfileCard(
         if (relationshipStatus === 'blocked') {
           const success = await friendsManager.unblockUser(user.id);
           if (success) {
-            blockBtn.textContent = '🔒 Block';
+            blockBtn.textContent = t('friend.block'); // "Block"
             blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-accent-red dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
             relationshipStatus = null; // Reset relationship status after unblocking
           }
         } else {
           const success = await friendsManager.blockUser(user.id);
           if (success) {
-            blockBtn.textContent = '🔓 Unblock';
+            blockBtn.textContent = t('friend.unblock'); // "Unblock"
             blockBtn.className = 'h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-green-600 dark:bg-green-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100';
             relationshipStatus = 'blocked';
           }
@@ -363,7 +364,7 @@ export async function renderSearchProfileCard(
 
           pongDiv.innerHTML = `
             <div class="w-full">
-              <h3 class="text-lg font-black text-[#00bcd4] uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
+              <h3 class="text-lg font-black text-[#00bcd4] uppercase tracking-[0.2em] mb-2 text-center">${t('site.statistics')}</h3>
               <div class="flex flex-row items-center justify-center gap-4">
                 <div id="search-profile-pong-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
@@ -397,7 +398,7 @@ export async function renderSearchProfileCard(
 
           trisDiv.innerHTML = `
             <div class="w-full">
-              <h3 class="text-lg font-black tris-win-color uppercase tracking-[0.2em] mb-2 text-center">STATISTICS</h3>
+              <h3 class="text-lg font-black tris-win-color uppercase tracking-[0.2em] mb-2 text-center">${t('site.statistics')}</h3>
               <div class="flex flex-row items-center justify-center gap-4">
                 <div id="search-profile-tris-donut" class="w-12 h-12 flex-shrink-0"></div>
                 <div>
@@ -427,7 +428,7 @@ export async function renderSearchProfileCard(
         const pongHistoryChartId = `search-profile-pong-history-chart`;
         if (pongHistory && pongHistory.length > 0) {
           pongHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">${t('site.trend')}</h4>
             <div id="${pongHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(pongHistoryWrapper);
@@ -437,7 +438,7 @@ export async function renderSearchProfileCard(
           } catch (e) { console.warn(e); }
         } else {
           pongHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black text-[#00bcd4] uppercase tracking-[0.2em]">${t('site.trend')}</h4>
             <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           historyRow.appendChild(pongHistoryWrapper);
@@ -450,7 +451,7 @@ export async function renderSearchProfileCard(
         const trisHistoryChartId = `search-profile-tris-history-chart`;
         if (trisHistory && trisHistory.length > 0) {
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black tris-win-color uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black tris-win-color uppercase tracking-[0.2em]">${t('site.trend')}</h4>
             <div id="${trisHistoryChartId}" class="w-full flex-1"></div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
@@ -460,7 +461,7 @@ export async function renderSearchProfileCard(
           } catch (e) { console.warn(e); }
         } else {
           trisHistoryWrapper.innerHTML = `
-            <h4 class="text-lg text-center font-black tris-win-color uppercase tracking-[0.2em]">TREND</h4>
+            <h4 class="text-lg text-center font-black tris-win-color uppercase tracking-[0.2em]">${t('site.trend')}</h4>
             <div class="w-full flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           historyRow.appendChild(trisHistoryWrapper);
@@ -488,7 +489,7 @@ export async function renderSearchProfileCard(
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
               return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
-                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
                 <div class="text-center">
                   <span class="font-semibold">(${yourScore})</span>
                   <span class="text-neutral-700 dark:text-white">you vs <span class="font-semibold text-neutral-700 dark:text-white">${opponent}</span>
@@ -505,7 +506,7 @@ export async function renderSearchProfileCard(
               const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
               
              return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
-                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? 'WIN' : 'LOSS'}</div>
+                <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
                 <div class="text-center">
                   <span class="text-black dark:text-white">you vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
                 </div>
@@ -522,7 +523,7 @@ export async function renderSearchProfileCard(
         pongListWrapper.className = 'rounded-lg pt-4 flex-1 min-w-[250px] flex flex-col';
         if (pongHistory && pongHistory.length > 0) {
           pongListWrapper.innerHTML = `
-            <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">${t('site.recent')}</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
               ${createMatchListHTML(pongHistory, 'pong', 5)}
             </div>
@@ -531,7 +532,7 @@ export async function renderSearchProfileCard(
           pongStatsElements.push(pongListWrapper);
         } else {
           pongListWrapper.innerHTML = `
-            <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black text-center text-[#00bcd4] mb-2 uppercase tracking-[0.2em]">${t('site.recent')}</h4>
             <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           matchListRow.appendChild(pongListWrapper);
@@ -543,7 +544,7 @@ export async function renderSearchProfileCard(
         trisListWrapper.className = 'rounded-lg pt-4 flex-1 min-w-[250px] flex flex-col hidden';
         if (trisHistory && trisHistory.length > 0) {
           trisListWrapper.innerHTML = `
-            <h4 class="text-lg font-black tris-win-color mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black tris-win-color mb-2 text-center uppercase tracking-[0.2em]">${t('site.recent')}</h4>
             <div class="space-y-1 flex-1 overflow-y-auto text-xs">
               ${createMatchListHTML(trisHistory, 'tris', 5)}
             </div>
@@ -552,7 +553,7 @@ export async function renderSearchProfileCard(
           trisStatsElements.push(trisListWrapper);
         } else {
           trisListWrapper.innerHTML = `
-            <h4 class="text-lg font-black tris-win-color mb-2 text-center uppercase tracking-[0.2em]">RECENT MATCHES</h4>
+            <h4 class="text-lg font-black tris-win-color mb-2 text-center uppercase tracking-[0.2em]">${t('site.recent')}</h4>
             <div class="flex-1 flex items-center justify-center text-neutral-500 italic">No matches available</div>
           `;
           matchListRow.appendChild(trisListWrapper);
