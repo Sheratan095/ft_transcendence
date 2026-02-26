@@ -309,8 +309,6 @@ class	PongConnectionManager
 	{
 		const	socket = this._connections.get(userId);
 
-		console.log(bracket);
-
 		if (socket)
 			this.#dispatchEventToSocket(socket, 'pong.tournamentBracketUpdate', bracket);
 	}

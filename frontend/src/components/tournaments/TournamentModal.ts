@@ -135,9 +135,6 @@ export async function removePartecipantFromModal(tournamentId: string, player: a
 export async function updateBracketInModal(tournamentId: string, bracketInfo: BracketInfo) {
 	if (String(tournamentId) !== String(currentTournamentId)) return;
 
-	console.log('[TournamentModal] Updating bracket for tournament:', tournamentId);
-	console.log('[TournamentModal] Raw bracket info:', bracketInfo);
-
 	if (!bracketInfo) {
 		console.error('[TournamentModal] bracketInfo is undefined');
 		return;
@@ -431,11 +428,11 @@ function _createMatchBox(match: Match): HTMLElement {
 
 	box.innerHTML = `
 		<div class="flex justify-between items-center px-3 py-2 text-sm border-b border-gray-200 dark:border-gray-700 ${leftWon  ? winnerBg : normalBgL}">
-			<span class="flex-1 truncate font-bold ${leftWon  ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${match.playerLeftUsername  || '—'}</span>
+			<span class="flex-1 truncate font-bold ${leftWon  ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${leftWon ? '👑 ' : ''}${match.playerLeftUsername  || '—'}</span>
 			<span class="ml-3 font-black min-w-5 text-right ${leftWon  ? 'text-black' : 'text-gray-400 dark:text-gray-500'}">${leftScore}</span>
 		</div>
 		<div class="flex justify-between items-center px-3 py-2 text-sm ${rightWon ? winnerBg : normalBgR}">
-			<span class="flex-1 truncate font-bold ${rightWon ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${match.playerRightUsername || '—'}</span>
+			<span class="flex-1 truncate font-bold ${rightWon ? 'text-black' : 'text-gray-800 dark:text-gray-100'}">${rightWon ? '👑 ' : ''}${match.playerRightUsername || '—'}</span>
 			<span class="ml-3 font-black min-w-5 text-right ${rightWon ? 'text-black' : 'text-gray-400 dark:text-gray-500'}">${rightScore}</span>
 		</div>
 		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">✓ Finished</div>` : ''}
