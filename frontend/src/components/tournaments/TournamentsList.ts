@@ -25,6 +25,9 @@ interface ApiError {
 // ==============================
 
 let tournamentList: HTMLElement;
+let tournamentRefreshInterval: number | null = null;
+let previousTournaments: Tournament[] = [];
+let hasInitialLoad = false;
 
 // ==============================
 // Load Tournaments (GET)
@@ -37,12 +40,6 @@ export async function loadTournaments() {
     throw new Error("Tournament list element not found");
 
   try {
-    tournamentList.innerHTML = `
-      <div class="text-sm text-gray-500 dark:text-neutral-400 py-2">
-        Loading tournaments...
-      </div>
-    `;
-
     const response = await fetch("/api/pong/get-all-tournaments", {
       method: "GET",
       credentials: "include",
@@ -54,7 +51,13 @@ export async function loadTournaments() {
     }
 
     const tournaments: Tournament[] = await response.json();
-    renderTournaments(tournaments);
+
+    // Render on first load or if tournaments have changed
+    if (!hasInitialLoad || JSON.stringify(tournaments) !== JSON.stringify(previousTournaments)) {
+      hasInitialLoad = true;
+      previousTournaments = tournaments;
+      renderTournaments(tournaments);
+    }
 
   } catch (err) {
     renderError((err as Error).message);
@@ -226,10 +229,33 @@ async function handleCreateConfirm(): Promise<void> {
 }
 
 // ==============================
+// Auto-refresh helpers
+// ==============================
+
+export function startTournamentAutoRefresh(intervalMs = 500): void {
+  stopTournamentAutoRefresh();
+  tournamentRefreshInterval = window.setInterval(() => {
+    // Fire-and-forget; loadTournaments handles its own errors
+    void loadTournaments();
+  }, intervalMs);
+}
+
+export function stopTournamentAutoRefresh(): void {
+  if (tournamentRefreshInterval !== null) {
+    clearInterval(tournamentRefreshInterval);
+    tournamentRefreshInterval = null;
+  }
+}
+
+// ==============================
 // Auto Load & Event Wiring
 // ==============================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Load once immediately, then start periodic refresh
   loadTournaments();
+  startTournamentAutoRefresh(500);
+  // Ensure we stop the interval when navigating away / unloading
+  window.addEventListener('beforeunload', () => stopTournamentAutoRefresh());
   // Listeners will be set up when modal is first opened
 });
