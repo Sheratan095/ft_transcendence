@@ -10,10 +10,11 @@ import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
 
-type PongModeType = 'online' | 'offline-1v1' | 'offline-ai';
+type PongModeType = 'online' | 'offline-1v1' | 'offline-ai' | 'custom' | 'tournament';
 
 let currentGameInstance: PongGame | null = null;
-let currentGameMode: 'online' | 'offline-1v1' | 'offline-ai' = 'online';
+let currentGameMode: 'online' | 'offline-1v1' | 'offline-ai' | 'custom' | 'tournament' = 'online';
+let isCustomGame: boolean = false;
 
 // Export game instance for external control
 export function getCurrentGameInstance(): PongGame | null {
@@ -38,6 +39,8 @@ export function handleCustomGameCreated(data: any)
 	// Explicitly set the game ID
 	if (gameId)
 		setCurrentGameId(gameId);
+	
+	isCustomGame = true;
 
 	updatePongStatus(`Game created! Waiting for ${opponentUsername}...`);
 	
@@ -49,9 +52,15 @@ export function handleCustomGameCreated(data: any)
 		currentGameInstance.updateScorebarNames();
 	}
 	
-	// Reset ready indicators
+	// Update button to "Cancel" for custom game
 	const modal = document.getElementById('pong-modal');
 	if (modal) {
+		const btn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		if (btn) {
+			btn.textContent = 'Cancel';
+			btn.classList.remove('hidden');
+		}
+		
 		const leftReady = modal.querySelector('#pong-left-ready') as HTMLElement | null;
 		const rightReady = modal.querySelector('#pong-right-ready') as HTMLElement | null;
 		if (leftReady)
@@ -66,6 +75,9 @@ export function handleCustomGameCreated(data: any)
 export async function handleCustomGameJoinSuccess(data: any)
 {
 	const { creatorUsername, gameId } = data;
+	
+	isCustomGame = true;
+	
 	updatePongStatus(`Joined game! Playing against ${creatorUsername}`);
 	
 	// Explicitly set the game ID
@@ -73,7 +85,7 @@ export async function handleCustomGameJoinSuccess(data: any)
 		setCurrentGameId(gameId);
 	
 	// Open the modal to display the game with opponent username
-	await openPongModal('online');
+	await openPongModal('custom');
 	
 	// Update player names on the scorebar
 	if (currentGameInstance && creatorUsername) {
@@ -92,7 +104,15 @@ export async function handleCustomGameJoinSuccess(data: any)
 		const rightReady = modal.querySelector('#pong-right-ready') as HTMLElement | null;
 		
 		if (readyBtn)
+		{
 			readyBtn.classList.remove('hidden');
+			// Ensure joiner defaults to NOT READY
+			readyBtn.textContent = '✗ Not Ready';
+			readyBtn.classList.remove('dark:bg-accent-orange','bg-accent-orange');
+			readyBtn.classList.add('dark:bg-red-600','bg-red-600');
+			if (gameId)
+				setReady(gameId, false);
+		}
 		if (mainBtn)
 			mainBtn.classList.add('hidden');
 		
@@ -109,6 +129,9 @@ export async function handleCustomGameJoinSuccess(data: any)
 export function handlePlayerJoinedCustomGame(data: any)
 {
 	const { joiningPlayerUsername } = data;
+	
+	isCustomGame = true;
+	
 	updatePongStatus('Opponent joined! Ready to start');
 	
 	// Update scorebar with usernames (creator is left, opponent is right)
@@ -236,12 +259,17 @@ export function handleGameEnded(data: any)
 	// 	showErrorToast(message);
 	// }
 
-	// Update start button to 'Play Again'
+	// Update start button to 'Play Again' (only for non-custom games)
 	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
 	if (startBtn)
 	{
 		startBtn.disabled = false;
-		startBtn.textContent = 'Play Again';
+		
+		// For custom games, only show Quit button (keep it as is)
+		// For regular online games, show Play Again
+		if (!isCustomGame)
+			startBtn.textContent = 'Play Again';
+
 		// Reset colors if needed (online mode doesn't switch to STOP normally but better safe)
 		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
@@ -258,6 +286,8 @@ export function handleMatchedInRandomGame(data: any)
 {
 	const { yourSide, opponentUsername } = data;
 	const sideText = yourSide || 'a paddle';
+
+	isCustomGame = false;
 
 	updatePongStatus(`Matched with ${opponentUsername}. You are ${sideText}`);
 	
@@ -348,9 +378,9 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 		newCloseBtn.addEventListener('click', closePongModal);
 	}
 
-	// Ready Button (online mode only)
-	const readyBtn = container.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
-	if (readyBtn && mode === 'online')
+	// Ready Button (online and custom/tournament modes)
+		const readyBtn = container.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+		if (readyBtn && (mode === 'online' || mode === 'custom' || mode === 'tournament'))
 	{
 		const newReadyBtn = readyBtn.cloneNode(true) as HTMLButtonElement;
 		readyBtn.parentNode?.replaceChild(newReadyBtn, readyBtn);
@@ -403,16 +433,31 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				return;
 			}
 
+			// Cancel custom game during lobby
+			if (newStartBtn.textContent === 'Cancel')
+			{
+				const gameId = getCurrentGameId();
+				if (gameId && (mode === 'custom' || mode === 'tournament'))
+				{
+					// Send cancel message to server
+					sendPongMessage('pong.cancelCustomGame', { gameId });
+					closePongModal();
+				}
+				return;
+			}
+
 			// Quit during active game
 			if (newStartBtn.textContent === 'Quit')
 			{
-				const gameId = getCurrentGameId();
-				if (gameId)
+				// For custom/tournament games, just close modal. For online, send quit to server
+				if (mode !== 'custom' && mode !== 'tournament')
 				{
-					quitGame(gameId);
-					closePongModal();
-					// showSuccessToast('You quit the game');
+					const gameId = getCurrentGameId();
+					if (gameId)
+						quitGame(gameId);
 				}
+				closePongModal();
+				// showSuccessToast('You quit the game');
 				return;
 			}
 
@@ -437,6 +482,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				}
 				else
 				{
+					isCustomGame = false;
 					startMatchmaking();
 					updatePongStatus('Looking for match...');
 	
@@ -509,7 +555,8 @@ export async function openPongModal(mode: PongModeType = 'online')
 		const scoreEl = document.getElementById('pong-center-score');
 		if (scoreEl) scoreEl.textContent = '0 - 0';
 		const statusEl = document.getElementById('pong-status');
-		if (statusEl) statusEl.textContent = 'Loading...';
+		// Don't reset status for custom/tournament games - their handlers set it
+		if (statusEl && mode !== 'custom' && mode !== 'tournament') statusEl.textContent = 'Loading...';
 		const leftNameEl = document.getElementById('pong-left-name');
 		if (leftNameEl) {
 			const textSpan = leftNameEl.querySelector('span:first-child');
@@ -571,7 +618,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 				aiDifficulty: 'medium'
 			};
 
-			if (mode === 'online')
+			if (mode === 'online' || mode === 'custom' || mode === 'tournament')
 			{
 				gameConfig.sendFn = (direction: string) =>
 				{
@@ -596,9 +643,13 @@ export async function openPongModal(mode: PongModeType = 'online')
 			const modeNames: Record<string, string> = {
 				'online': 'Online - Not in matchmaking',
 				'offline-1v1': 'Offline 1v1',
-				'offline-ai': 'Offline vs Ai'
+				'offline-ai': 'Offline vs Ai',
+				'custom': 'Custom Game',
+				'tournament': 'Tournament'
 			};
-			status.textContent = modeNames[mode] || 'Pong Game';
+			// Only update status if not a custom/tournament game (those set their own status)
+			if (mode !== 'custom' && mode !== 'tournament')
+				status.textContent = modeNames[mode] || 'Pong Game';
 		}
 
 		// Reset start button for new game
@@ -608,6 +659,8 @@ export async function openPongModal(mode: PongModeType = 'online')
 			startBtn.disabled = false;
 			if (mode === 'online')
 				startBtn.textContent = 'Start Matchmaking';
+			else if (mode === 'custom' || mode === 'tournament')
+				startBtn.classList.add('hidden'); // Hide button for custom/tournament games
 			else
 				startBtn.textContent = 'Start';
 			// Ensure we reset to starting colors
@@ -674,7 +727,7 @@ export function closePongModal()
 		currentGameInstance = null;
 	}
 
-	if (currentGameMode === 'online')
+	if (currentGameMode === 'online' || currentGameMode === 'custom' || currentGameMode === 'tournament')
 	{
 		const gameId = getCurrentGameId();
 		if (gameId)
