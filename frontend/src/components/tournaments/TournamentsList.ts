@@ -36,11 +36,8 @@ let hasInitialLoad = false;
 export async function loadTournaments() {
   tournamentList = document.getElementById("tournament-list") as HTMLElement | null;
 
-  if (!tournamentList) {
-    // Container not present on this page/route; skip silently.
-    console.warn('Tournament list element not found, skipping load.');
+  if (!tournamentList)
     return;
-  }
 
   try {
     const response = await fetch("/api/pong/get-all-tournaments", {

@@ -148,13 +148,38 @@ export class GameManager {
 		break;
 
 	  case 'tris.moveMade':
-		this.renderer.updateCell(data.position, data.symbol);
-		if (data.removedPosition !== null && data.removedPosition !== undefined) {
-		  this.renderer.updateCell(data.removedPosition, '');
-		}
-		this.isUserTurn = (data.moveMakerId !== this.userId);
-		this.renderer.toggleInteraction(this.isUserTurn);
-		this.updateNetworkStatus();
+    // Apply server move to local game state so client stays in sync
+    const pos: number = data.position;
+    const sym: string = data.symbol;
+    const removed: number | null = data.removedPosition !== undefined ? data.removedPosition : null;
+
+    // Update board array
+    this.gameState.board[pos] = sym;
+    if (removed !== null) {
+      this.gameState.board[removed] = null;
+    }
+
+    // Update move history conservatively
+    this.gameState.moveHistory = [...this.gameState.moveHistory, pos];
+    if (removed !== null) {
+      const idx = this.gameState.moveHistory.indexOf(removed);
+      if (idx !== -1) this.gameState.moveHistory.splice(idx, 1);
+    }
+
+    // Recompute winner / game over state locally
+    this.gameState.winner = Physics.checkWinner(this.gameState.board);
+    this.gameState.isGameOver = !!this.gameState.winner || this.gameState.board.every(cell => cell !== null);
+
+    // Update UI from authoritative gameState
+    this.renderer.updateBoard(this.gameState.board);
+
+    this.isUserTurn = (data.moveMakerId !== this.userId);
+    this.renderer.toggleInteraction(this.isUserTurn);
+    this.updateNetworkStatus();
+
+    if (this.gameState.isGameOver) {
+      this.handleGameOver();
+    }
 		break;
 
 	  case 'tris.gameEnded':

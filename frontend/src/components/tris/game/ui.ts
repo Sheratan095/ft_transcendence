@@ -63,9 +63,14 @@ export class BoardRenderer {
         cell.classList.add('cursor-not-allowed');
       } else {
 	// Empty cell
-	cell.classList.remove('text-[#0dff66]', 'text-[#ff009d]', 'opacity-50');
-	cell.textContent = '';
-	return;
+  // Empty cell — fully reset visual state so toggleInteraction works reliably
+  cell.classList.remove('text-[#0dff66]', 'text-[#ff009d]', 'opacity-50');
+  cell.textContent = '';
+  cell.disabled = false;
+  cell.classList.remove('cursor-not-allowed');
+  cell.classList.add('cursor-pointer');
+  cell.removeAttribute('aria-pressed');
+  return;
       }
       cell.classList.add('opacity-50');
     }
