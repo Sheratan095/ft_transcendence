@@ -471,7 +471,7 @@ function handleSurrenderClick() {
 /**
  * Route WebSocket events to current GameManager
  */
-function handleTrisEvent(event: string, data: any) {
+async function handleTrisEvent(event: string, data: any) {
   console.log('[TRIS MODAL] Event:', event, data);
   
   if (event === 'tris.playerReadyStatus') {
@@ -492,6 +492,8 @@ function handleTrisEvent(event: string, data: any) {
   if (event === 'tris.customGameCreated') {
     const { gameId, otherUsername } = data;
     customGameOpponentUsername = otherUsername;
+    
+    if (gameId) setCurrentGameId(gameId);
     
     updateTrisStatus(`Waiting for ${otherUsername}...`);
     
@@ -551,6 +553,14 @@ function handleTrisEvent(event: string, data: any) {
     const { creatorUsername, gameId } = data;
     closeGameInviteModal();
     
+    // Set custom mode and gameId before opening modal - like Pong
+    currentMode = 'online';
+    if (gameId) setCurrentGameId(gameId);
+    customGameOpponentUsername = creatorUsername;
+    
+    // Open the modal to display the game with opponent username - like Pong
+    await openTrisModal();
+    
     updateTrisStatus(`Joined game! Playing against ${creatorUsername}`);
     
     // Update scorebar with creator (left/X) and joiner (right/O - You)
@@ -568,7 +578,7 @@ function handleTrisEvent(event: string, data: any) {
       if (readyBtn) {
         readyBtn.classList.remove('hidden');
         readyBtn.textContent = '✗ Not Ready';
-        readyBtn.classList.remove('dark:bg-Fnt-orange', 'bg-accent-orange');
+        readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
         readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
         // Joiner defaults to NOT READY - like Pong
         userReady = false;
@@ -582,6 +592,13 @@ function handleTrisEvent(event: string, data: any) {
       if (leftReady) leftReady.classList.add('hidden');
       if (rightReady) rightReady.classList.add('hidden');
     }
+  }
+
+  // Handle custom game cancellation - like Pong
+  if (event === 'tris.customGameCanceled') {
+    updateTrisStatus('Game was canceled');
+    showErrorToast('Game was canceled');
+    closeTrisModal();
   }
 
   if (event === 'tris.matchedInRandomGame') {
