@@ -47,8 +47,7 @@ export async function loadTournaments() {
     });
 
     if (!response.ok) {
-      const error: ApiError = await response.json();
-      throw new Error(error.message || "Failed to load tournaments");
+      return ;
     }
 
     const tournaments: Tournament[] = await response.json();
