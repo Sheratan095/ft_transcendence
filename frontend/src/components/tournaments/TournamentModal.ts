@@ -217,19 +217,21 @@ function _setTournamentName(name: string) {
 function _setStatusBadge(status: string) {
 	const el = document.getElementById('tm-tournament-status');
 	if (!el) return;
-	el.textContent = status;
 	el.className   = 'text-[10px] font-black uppercase px-2 py-0.5 rounded';
 	switch (status.toUpperCase()) {
 		case 'OPEN':
 		case 'WAITING':
 			el.classList.add('bg-green-500', 'text-white');
+			el.textContent = "Waiting for players";
 			break;
 		case 'IN_PROGRESS':
 		case 'STARTED':
 			el.classList.add('bg-yellow-400', 'text-black');
+			el.textContent = "Tournament in progress";
 			break;
 		case 'FINISHED':
 			el.classList.add('bg-gray-400', 'text-white');
+			el.textContent = "Tournament finished";
 			break;
 		default:
 			el.classList.add('bg-black', 'text-white');
