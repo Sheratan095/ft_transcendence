@@ -259,6 +259,15 @@ export function handleGameEnded(data: any)
 	// 	showErrorToast(message);
 	// }
 
+	// Auto-close pong modal after 3 seconds for tournament games
+	if (currentGameMode === 'tournament') {
+		updatePongStatus(message + ' - Returning to tournament in 3 seconds...');
+		setTimeout(() => {
+			closePongModal();
+		}, 3000);
+		return;
+	}
+
 	// Update start button to 'Play Again' (only for non-custom games)
 	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
 	if (startBtn)
@@ -341,6 +350,69 @@ export function handlePlayerReadyStatus(data: any)
 		
 		// Update the player's ready status in GameManager
 		currentGameInstance.gameManager.setPlayerReadyStatus(playerSide as 'left' | 'right', readyStatus);
+	}
+}
+
+/**
+ * Handle tournament round info - opens game modal with opponent info
+ * Called when a new round starts and user has to play against someone
+ */
+export async function handleTournamentRoundInfo(data: any)
+{
+	const { gameId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername } = data;
+	const userId = getUserId();
+	
+	console.log('[Pong] Tournament round info received:', data);
+	
+	// Set the game ID for ready state
+	if (gameId)
+		setCurrentGameId(gameId);
+	
+	// Determine which side we are and who our opponent is
+	const isLeftPlayer = userId === playerLeftId;
+	const opponentUsername = isLeftPlayer ? playerRightUsername : playerLeftUsername;
+	const yourSide = isLeftPlayer ? 'left' : 'right';
+	
+	// Open the pong modal in tournament mode (overlays the tournament modal)
+	await openPongModal('tournament');
+	
+	// Update status with opponent info
+	updatePongStatus(`Round starting! Playing against ${opponentUsername}`);
+	
+	// Update player names in the game UI
+	if (currentGameInstance) {
+		currentGameInstance.gameManager.setPlayerNames(playerLeftUsername, playerRightUsername);
+		currentGameInstance.updateScorebarNames();
+	}
+	
+	// Show the ready button and hide main button
+	const modal = document.getElementById('pong-modal');
+	if (modal)
+	{
+		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+		const mainBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		const leftReady = modal.querySelector('#pong-left-ready') as HTMLElement | null;
+		const rightReady = modal.querySelector('#pong-right-ready') as HTMLElement | null;
+		
+		if (readyBtn)
+		{
+			readyBtn.classList.remove('hidden');
+			// Default to not ready state
+			readyBtn.textContent = '✗ Not Ready';
+			readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+			readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+		}
+		if (mainBtn)
+			mainBtn.classList.add('hidden');
+		
+		// Reset ready indicators
+		if (leftReady)
+			leftReady.classList.add('hidden');
+		if (rightReady)
+			rightReady.classList.add('hidden');
+		
+		// Re-attach button handlers to ensure ready button works
+		attachButtonHandlers(modal, 'tournament');
 	}
 }
 

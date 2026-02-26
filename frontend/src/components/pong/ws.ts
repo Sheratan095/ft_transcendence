@@ -196,14 +196,8 @@ function routeEvent(event: string, data: any)
 		case 'pong.invalidMove':
 			modalHandlers.handleInvalidMove(data);
 			break;
-		case 'pong.tournamentMatchStarted':
-			// TODO: Handle tournament match started
-			break;
-		case 'pong.tournamentPlayerReady':
-			// TODO: Handle tournament player ready
-			break;
-		case 'pong.tournamentMatchEnded':
-			// TODO: Handle tournament match ended
+		case 'pong.tournamentRoundInfo':
+			modalHandlers.handleTournamentRoundInfo(data);
 			break;
 		case 'pong.tournamentBracketUpdate':
 			bracketUpdate(data.tournamentId, data);
