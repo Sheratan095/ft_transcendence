@@ -123,5 +123,19 @@
   "toast.chat.notification": "{{ sender }}: {{ preview }}",
   "toast.notification.generic": "Notification: {{ event }}",
   "toast.success.friendAccepted": "{{ user }} accepted your friend request!",
-  "toast.success.nowFriends": "You are now friends with {{ user }}!"
+  "toast.success.nowFriends": "You are now friends with {{ user }}!",
+  "tris.play": "Play Tris",
+  "pong.play": "Play Pong",
+  "game.online": "Play Online",
+  "tris.online_desc": "Match with players in real time and climb the leaderboard.",
+  "game.matchmaking": "Start matchmaking",
+  "game.cancel": "Cancel",
+  "game.offline": "Offline modes",
+  "game.local": "👥 Local 1v1",
+  "game.ai": "🤖 Play vs AI",
+  "game.see-matches": "Log in to see your matches!",
+  "game.stats": "Your stats",
+  "game.wins": "Wins: {{ wins }}",
+  "game.losses": "Losses: {{ losses }}",
+  "game.inviteFriend": "👥 Invite Friend"
 }

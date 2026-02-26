@@ -891,8 +891,7 @@
 						<button id="tris-card-btn" class="p-8 sm:p-10 w-full
 						dark:border-neutral-700 border-neutral-300 overflow-hidden transition-all duration-300 cursor-pointer block text-left
 						slideshow-slide rounded">
-							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
-								Play tris
+							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300" data-i18n="tris.play">				
 							</h3>
 							<div class="relative w-full aspect-square border-4 border-double dark:border-white border-black mx-auto overflow-hidden pointer-events-none">
 								<!-- Vertical grid lines -->
@@ -971,63 +970,55 @@
 
 			<!-- LEFT LARGE (row-span-2) -->
 			<div class="lg:row-span-2 h-full border border-gray-300 dark:border-neutral-800 rounded-3xl rounded-tr-lg rounded-br-lg p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Play Online
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="game.online">
 				</h2>
-				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-				Match with players in real time and climb the leaderboard.
+				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400" data-i18n="tris.online_desc">
 				</p>
 
 				<div class="mt-auto pt-20">
 				<button id="tris-play-online"
-					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition">
-						 Start Matchmaking
+					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition" data-i18n="game.matchmaking">
 				</button>
 				</div>
 			</div>
 
 			<!-- TOP MIDDLE -->
 			<div class="border border-gray-300 dark:border-neutral-800 rounded-lg p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Offline Modes
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="game.offline">
 				</h3>
 
 				<div class="mt-4 flex flex-col gap-3">
 				<button id="tris-play-offline-1v1"
-					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
-					👥 Local 1v1
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition" data-i18n="game.local">
 				</button>
 
 				<button id="tris-play-offline-ai"
-					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
-					🤖 Play vs AI
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition" data-i18n="game.ai">
 				</button>
 				</div>
 			</div>
 
 			<!-- RIGHT LARGE -->
 			<div class="lg:row-span-2 h-full border border-gray-300 dark:border-neutral-800 rounded-3xl rounded-tl-lg rounded-bl-lg p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Recent Matches	
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white"	data-i18n="site.recent">
 				</h2>
 
 				<div class="mt-4 pt-4 gap-3"
-				id="tris-win-list">
+				id="tris-win-list"
+				data-i18n="game.see-matches">
 					<!-- Dynamically populated list of tournaments will go here -->
-					 Log in to see your matches!
 				</div>
 			</div>
 
 			<!-- BOTTOM MIDDLE -->
 			<div class="lg:row-span-2 border border-gray-300 dark:border-neutral-800 rounded-lg rounded-b-3xl p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Your Stats
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="game.stats">
 				</h2>
 
 				<div class="mt-4 flex items-center justify-between">
 				<div class="text-gray-600 dark:text-neutral-400 space-y-1 text-sm">
-					<div id="tris-user-wins">Wins: 0</div>
-					<div id="tris-user-losses">Losses: 0</div>
+					<div id="tris-user-wins" data-i18n="game.wins"></div>
+					<div id="tris-user-losses" data-i18n="game.losses"></div>
 				</div>
 
 				<div id="tris-user-chart" class="w-16 h-16">
@@ -1037,10 +1028,8 @@
 
 				<div class="mt-5 border-t border-gray-300 dark:border-neutral-800 pt-4 flex flex-col gap-3">
 				<button id="tris-invite-friend"
-					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
-					👥 Invite Friend
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition" data-i18n="game.inviteFriend">
 				</button>
-
 				</div>
 			</div>
 
