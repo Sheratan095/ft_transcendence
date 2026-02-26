@@ -21,11 +21,11 @@ interface Match {
 	playerLeftUsername: string;
 	playerRightId: string;
 	playerRightUsername: string;
-	playerLeftScore: number;
-	playerRightScore: number;
-	status: string;
-	winnerId: string;
-	isBye: boolean;
+	playerLeftScore?: number;
+	playerRightScore?: number;
+	status?: string;
+	winnerId?: string;
+	isBye?: boolean;
 }
 
 interface Round {
@@ -38,6 +38,9 @@ interface BracketInfo {
 	name?: string;
 	status?: string;
 	totalRounds?: number;
+	currentRound?: number;
+	participantCount?: number;
+	tournamentId?: string;
 }
 
 // -------------------- State --------------------
@@ -132,10 +135,30 @@ export async function removePartecipantFromModal(tournamentId: string, player: a
 export async function updateBracketInModal(tournamentId: string, bracketInfo: BracketInfo) {
 	if (String(tournamentId) !== String(currentTournamentId)) return;
 
+	console.log('[TournamentModal] Updating bracket for tournament:', tournamentId);
+	console.log('[TournamentModal] Raw bracket info:', bracketInfo);
+
+	if (!bracketInfo) {
+		console.error('[TournamentModal] bracketInfo is undefined');
+		return;
+	}
+
 	if (bracketInfo.status)
 		_setStatusBadge(bracketInfo.status);
 
-	_renderBracket(bracketInfo);
+	try {
+		_renderBracket(bracketInfo);
+	} catch (error) {
+		console.error('[TournamentModal] Failed to render bracket:', error);
+		const container = document.getElementById('tm-bracket-container');
+		if (container) {
+			const errorEl = document.createElement('p');
+			errorEl.className = 'text-red-500 font-bold italic uppercase text-sm m-auto select-none p-4';
+			errorEl.textContent = 'Error rendering bracket. Check console.';
+			container.innerHTML = '';
+			container.appendChild(errorEl);
+		}
+	}
 }
 
 export async function updateCooldownInModal(tournamentId: string, cooldownInfo: any) {
@@ -308,13 +331,44 @@ function _createParticipantCard(player: any): HTMLElement {
 
 // -------------------- Bracket rendering --------------------
 
+/**
+ * Normalize bracket data to ensure all required fields have defaults
+ */
+function _normalizeBracket(tournament: BracketInfo): BracketInfo {
+	if (!tournament.rounds) return tournament;
+
+	const normalizedRounds = tournament.rounds.map(round => ({
+		...round,
+		matches: (round.matches || []).map(match => ({
+			id: match.id || `match-${Math.random()}`,
+			playerLeftId: match.playerLeftId || '',
+			playerLeftUsername: match.playerLeftUsername || 'Unknown',
+			playerRightId: match.playerRightId || '',
+			playerRightUsername: match.playerRightUsername || 'Unknown',
+			playerLeftScore: match.playerLeftScore ?? 0,
+			playerRightScore: match.playerRightScore ?? 0,
+			status: match.status || 'PENDING',
+			winnerId: match.winnerId || undefined,
+			isBye: match.isBye || false,
+		}))
+	}));
+
+	return {
+		...tournament,
+		rounds: normalizedRounds
+	};
+}
+
 function _renderBracket(tournament: BracketInfo) {
 	const container = document.getElementById('tm-bracket-container');
 	if (!container) return;
 
 	container.innerHTML = '';
 
-	if (!tournament.rounds?.length) {
+	// Normalize bracket data
+	const normalizedTournament = _normalizeBracket(tournament);
+
+	if (!normalizedTournament.rounds?.length) {
 		const p = document.createElement('p');
 		p.className   = 'text-gray-400 font-bold italic uppercase text-sm m-auto select-none';
 		p.textContent = 'No bracket data yet.';
@@ -324,7 +378,7 @@ function _renderBracket(tournament: BracketInfo) {
 
 	const matchElements: Record<string, HTMLElement> = {};
 
-	tournament.rounds.forEach((round, roundIndex) => {
+	normalizedTournament.rounds.forEach((round, roundIndex) => {
 		const col       = document.createElement('div');
 		col.className   = 'flex flex-col justify-around min-w-[220px] flex-shrink-0 relative z-10 gap-4';
 		col.dataset.round = String(roundIndex);
@@ -349,7 +403,7 @@ function _renderBracket(tournament: BracketInfo) {
 	});
 
 	// Draw connector lines after layout settles
-	setTimeout(() => _drawConnectorLines(tournament, matchElements), 50);
+	setTimeout(() => _drawConnectorLines(normalizedTournament, matchElements), 50);
 }
 
 function _createMatchBox(match: Match): HTMLElement {
@@ -402,10 +456,15 @@ function _drawConnectorLines(tournament: BracketInfo, matchElements: Record<stri
 		const next = tournament.rounds[ri + 1];
 
 		curr.matches.forEach((cm) => {
-			if (!cm.winnerId) return;
+			// Only draw lines from matches that have a winner
+			const winnerId = cm.winnerId;
+			if (!winnerId) return;
 
 			next.matches.forEach((nm) => {
-				if (nm.playerLeftId !== cm.winnerId && nm.playerRightId !== cm.winnerId) return;
+				// Check if winner goes to left or right position
+				const goesLeft  = nm.playerLeftId === winnerId;
+				const goesRight = nm.playerRightId === winnerId;
+				if (!goesLeft && !goesRight) return;
 
 				const fromEl = matchElements[cm.id];
 				const toEl   = matchElements[nm.id];

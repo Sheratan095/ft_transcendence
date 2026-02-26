@@ -206,7 +206,8 @@ function routeEvent(event: string, data: any)
 			// TODO: Handle tournament match ended
 			break;
 		case 'pong.tournamentBracketUpdate':
-			bracketUpdate(data.tournamentId, data.bracketInfo);
+			console.log('[PONG WS] Bracket update received for tournament:', data);
+			bracketUpdate(data.tournamentId, data);
 			break;
 		case 'pong.tournamentStarted':
 			tournamentMatchStarted(data.tournamentId, data.matchInfo);
