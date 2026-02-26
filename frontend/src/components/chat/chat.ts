@@ -163,7 +163,7 @@ export function renderChatList() {
     const chatType = document.createElement('div');
     chatType.className = 'chat-item-type text-accent-blue dark:text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
     if (chat.chatType === 'dm')
-      chatType.textContent = 'Direct Message';
+      chatType.textContent = t('chat.directMessage');
     else
       chatType.textContent = t('chat.group');
 
@@ -373,7 +373,7 @@ export function renderMemberList() {
           const day = String(since.getDate()).padStart(2, '0');
           const month = String(since.getMonth() + 1).padStart(2, '0');
           const year = since.getFullYear();
-          container.textContent = `Friends since: ${day}/${month}/${year}`;
+          container.textContent = t('friend.since', { date: `${day}/${month}/${year}` });
         } else {
           container.textContent = '';
         }
@@ -440,7 +440,7 @@ export async function renderMessages() {
   if (!messagesContainer) return;
 
   if (!currentChatId) {
-    messagesContainer.innerHTML = '<div class="placeholder">Select a chat to start messaging</div>';
+    messagesContainer.innerHTML = `<div class="placeholder">${t('chat.no-chat-selected')}</div>`;
     return;
   }
 
@@ -450,7 +450,7 @@ export async function renderMessages() {
   const isDmChat = currentChat && currentChat.chatType === 'dm';
 
   if (chatMessages.length === 0) {
-    messagesContainer.innerHTML = '<div class="placeholder">No messages yet</div>';
+    messagesContainer.innerHTML = `<div class="placeholder">${t('chat.no-messages')}</div>`;
     return;
   }
 

@@ -156,5 +156,9 @@
   "win": "Vittoria",
   "loss": "Sconfitta",
   "draw": "Pareggio",
-  "game.no_recent_matches": "Nessuna partita disponibile"
+  "game.no_recent_matches": "Nessuna partita disponibile",
+  "friend.since": "Amico da {{ date }}",
+  "you": "Tu",
+  "chat.directMessage": "Messaggio privato",
+  "chat.no-messages": "Nessun messaggio per ora"
 }

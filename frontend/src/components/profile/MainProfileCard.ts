@@ -620,7 +620,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
                 <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
                 <div class="text-center">
                   <span class="font-semibold">(${yourScore})</span>
-                  <span class="text-neutral-700 dark:text-white">you vs <span class="font-semibold text-neutral-700 dark:text-white">${opponent}</span>
+                  <span class="text-neutral-700 dark:text-white">${t('you')} vs <span class="font-semibold text-neutral-700 dark:text-white">${opponent}</span>
                   <span class="font-semibold">(${opponentScore})</span></span>
                 </div>
                 <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
@@ -638,7 +638,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
               return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
                 <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
                 <div class="text-center">
-                  <span class="text-black dark:text-white">you vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
+                  <span class="text-black dark:text-white">${t('you')} vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
                 </div>
                 <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
                   ${dateStr} ${timeStr}

@@ -156,5 +156,9 @@
   "win": "Victoire",
   "loss": "Défaite",
   "draw": "Égalité",
-  "game.no_recent_matches": "Aucune partie disponible"
+  "game.no_recent_matches": "Aucune partie disponible",
+  "friend.since": "Amis depuis {{ date }}",
+  "you": "Vous",
+  "chat.directMessage": "Message privé",
+  "chat.no-messages": "Aucun message pour le moment"
 }

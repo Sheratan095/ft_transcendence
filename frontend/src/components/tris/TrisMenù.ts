@@ -149,7 +149,7 @@ async function insertTrisMatchHistory(userId: string) {
             </div>
 
             <div class="flex-1 sm:text-center text-neutral-800 dark:text-white truncate">
-              you vs <span class="font-semibold">${opponent}</span>
+              ${t('you')} vs <span class="font-semibold">${opponent}</span>
             </div>
 
             <div class="shrink-0 sm:text-right text-neutral-500 dark:text-neutral-400">
