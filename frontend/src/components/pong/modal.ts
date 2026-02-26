@@ -367,7 +367,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 			const isReady = newReadyBtn.textContent?.includes('✓');
 			console.log('[Pong] Ready button clicked, current state:', isReady, 'gameId:', gameId);
 			
-			// Toggle ready status
+			// Toggle ready status - only update button UI, server will update game state
 			if (isReady)
 			{
 				// Set not ready
@@ -376,14 +376,6 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				newReadyBtn.textContent = '✗ Not Ready';
 				newReadyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
 				newReadyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
-				
-				// Update GameManager
-				if (currentGameInstance)
-				{
-					const playerSide = getPlayerSide();
-					if (playerSide)
-						currentGameInstance.gameManager.setPlayerReadyStatus(playerSide as 'left' | 'right', false);
-				}
 			}
 			else
 			{
@@ -393,14 +385,6 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				newReadyBtn.textContent = '✓ Ready';
 				newReadyBtn.classList.remove('dark:bg-red-600', 'bg-red-600');
 				newReadyBtn.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
-				
-				// Update GameManager
-				if (currentGameInstance)
-				{
-					const playerSide = getPlayerSide();
-					if (playerSide)
-						currentGameInstance.gameManager.setPlayerReadyStatus(playerSide as 'left' | 'right', true);
-				}
 			}
 		});
 	}
