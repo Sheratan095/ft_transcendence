@@ -657,12 +657,16 @@ export async function openPongModal(mode: PongModeType = 'online')
 		if (startBtn)
 		{
 			startBtn.disabled = false;
-			if (mode === 'online')
-				startBtn.textContent = 'Start Matchmaking';
-			else if (mode === 'custom' || mode === 'tournament')
-				startBtn.classList.add('hidden'); // Hide button for custom/tournament games
-			else
-				startBtn.textContent = 'Start';
+			// Ensure we remove any leftover hidden state for non-custom modes
+			if (mode === 'custom' || mode === 'tournament') {
+				startBtn.classList.add('hidden');
+			} else {
+				startBtn.classList.remove('hidden');
+				if (mode === 'online')
+					startBtn.textContent = 'Start Matchmaking';
+				else
+					startBtn.textContent = 'Start';
+			}
 			// Ensure we reset to starting colors
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
