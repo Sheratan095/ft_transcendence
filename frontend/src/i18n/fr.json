@@ -28,6 +28,7 @@
   "chat.create": "Créer une discussion de groupe",
   "chat.selected-count": "Sélectionné : ",
   "chat.add": "Ajouter des utilisateurs à la discussion",
+  "chat.group": "Chat de groupe",
   "chat.no-friends": "Aucun ami disponible à ajouter",
   "chat.selector-placeholder": "Sélectionnez une discussion pour commencer à chatter",
   "chat.add-selected": "Ajouter les utilisateurs sélectionnés",

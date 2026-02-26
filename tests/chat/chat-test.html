@@ -710,7 +710,7 @@
 
                 chatItem.innerHTML = `
                     <div class="chat-item-name">${chatName}</div>
-                    <div class="chat-item-type">${chat.chatType === 'dm' ? 'Direct Message' : 'Group Chat'}</div>
+                    <div class="chat-item-type">${chat.chatType === 'dm' ? 'Direct Message' : t('chat.group')}</div>
                 `;
 
                 chatItem.onclick = () => selectChat(chat.id);

@@ -30,6 +30,7 @@
   "chat.add-selected": "Add selected",
   "chat.select": "Select a chat",
   "chat.no-chat": "No chats yet",
+  "chat.group": "Group Chat",
   "chat.selected-count": "Selected: ",
   "chat.selector-placeholder": "Select a chat to start messaging",
   "chat.group-name": "Group Name",

@@ -165,7 +165,7 @@ export function renderChatList() {
     if (chat.chatType === 'dm')
       chatType.textContent = 'Direct Message';
     else
-      chatType.textContent = 'Group Chat';
+      chatType.textContent = t('chat.group');
 
     const unreadCount = unreadCounts.get(chat.id) || 0;
     if (unreadCount > 0) {
