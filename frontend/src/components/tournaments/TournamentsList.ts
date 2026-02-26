@@ -24,7 +24,7 @@ interface ApiError {
 // Static Element
 // ==============================
 
-let tournamentList: HTMLElement;
+let tournamentList: HTMLElement | null = null;
 let tournamentRefreshInterval: number | null = null;
 let previousTournaments: Tournament[] = [];
 let hasInitialLoad = false;
@@ -34,10 +34,13 @@ let hasInitialLoad = false;
 // ==============================
 
 export async function loadTournaments() {
-  tournamentList = document.getElementById("tournament-list") as HTMLElement;
+  tournamentList = document.getElementById("tournament-list") as HTMLElement | null;
 
-  if (!tournamentList)
-    throw new Error("Tournament list element not found");
+  if (!tournamentList) {
+    // Container not present on this page/route; skip silently.
+    console.warn('Tournament list element not found, skipping load.');
+    return;
+  }
 
   try {
     const response = await fetch("/api/pong/get-all-tournaments", {
@@ -69,6 +72,11 @@ export async function loadTournaments() {
 // ==============================
 
 function renderTournaments(tournaments: Tournament[]): void {
+  if (!tournamentList) {
+    tournamentList = document.getElementById("tournament-list") as HTMLElement | null;
+    if (!tournamentList) return; // nothing to render to
+  }
+
   tournamentList.innerHTML = "";
 
   if (tournaments.length === 0) {
@@ -110,7 +118,7 @@ function renderTournaments(tournaments: Tournament[]): void {
       });
     }
 
-    tournamentList.appendChild(card);
+    tournamentList?.appendChild(card);
   });
 }
 
@@ -119,6 +127,11 @@ function renderTournaments(tournaments: Tournament[]): void {
 // ==============================
 
 function renderError(message: string): void {
+  if (!tournamentList) {
+    tournamentList = document.getElementById("tournament-list") as HTMLElement | null;
+    if (!tournamentList) return;
+  }
+
   tournamentList.innerHTML = `<div class="text-sm text-red-500 py-2">${message}</div>`;
 }
 
