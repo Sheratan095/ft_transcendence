@@ -375,7 +375,6 @@ export async function sendGameInvite(targetId: string, gameId: string | null = n
 		} else {
 			sendPongMessage('pong.sendGameInvite', { targetId, gameId });
 		}
-		showSuccessToast(`Game invite sent to user ${targetId}`);
 		return true;
 	} catch (err) {
 		console.error('[WS] Failed to send game invite:', err);

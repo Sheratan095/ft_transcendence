@@ -356,12 +356,6 @@ function handleNotificationEvent(data: any) {
 							style: 'secondary',
 							onClick: async () => {
 								try {
-									// If it's a tris game, cancel via WebSocket
-									if (gameType === 'tris' && gameId) {
-										showInfoToast(t('toast.info.rejectedGameInvite', { user: username }), { duration: 3000 });
-									} else if (gameType === 'pong' && gameId) {
-										showInfoToast(t('toast.info.rejectedPongInvite', { user: username }), { duration: 3000 });
-									}
 								} catch (err) {
 									console.error('Error rejecting game invite:', err);
 									showErrorToast(t('toast.error.rejectInviteFailed'), { duration: 3000 });
