@@ -767,24 +767,21 @@
 					<!-- Bracket area (relative so cooldown overlay can be absolute) -->
 					<div class="flex-1 relative overflow-hidden">
 
-						<!-- Cooldown overlay -->
-						<div id="tm-cooldown-overlay" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
-							<p id="tm-cooldown-round" class="text-white font-black uppercase text-sm tracking-widest mb-3">Next round starting in</p>
-							<p id="tm-cooldown-timer" class="text-7xl font-black text-accent-orange dark:text-accent-green tabular-nums">5</p>
-						</div>
-
-						<!-- Scrollable bracket -->
-						<div id="tm-bracket-scroll" class="absolute inset-0 overflow-auto">
-							<div id="tm-bracket-svg-wrapper" class="relative p-6 pt-8 inline-flex items-stretch min-h-full min-w-full">
-								<svg id="tm-connector-svg" class="absolute top-0 left-0 pointer-events-none z-0" style="width:100%;height:100%;overflow:visible;"></svg>
-								<div id="tm-bracket-container" class="flex gap-8 relative z-10 items-center">
-									<p class="text-gray-400 font-bold italic uppercase text-sm m-auto select-none">Waiting for tournament to start…</p>
-								</div>
+					<!-- Scrollable bracket -->
+					<div id="tm-bracket-scroll" class="absolute inset-0 overflow-auto">
+						<div id="tm-bracket-svg-wrapper" class="relative p-6 pt-8 inline-flex items-stretch min-h-full min-w-full">
+							<svg id="tm-connector-svg" class="absolute top-0 left-0 pointer-events-none z-0" style="width:100%;height:100%;overflow:visible;"></svg>
+							<div id="tm-bracket-container" class="flex gap-8 relative z-10 items-center">
+								<p class="text-gray-400 font-bold italic uppercase text-sm m-auto select-none">Waiting for tournament to start…</p>
 							</div>
 						</div>
-
 					</div>
-				</div>
+
+					<!-- Cooldown overlay (bottom right) -->
+					<div id="tm-cooldown-overlay" class="hidden absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm rounded-xl border-2 border-gray-800 dark:border-gray-600 p-3 shadow-lg" style="z-index: 999;">
+						<p id="tm-cooldown-round" class="text-white font-black uppercase text-xs tracking-widest mb-1">Next round in</p>
+						<p id="tm-cooldown-timer" class="text-3xl font-black text-accent-orange dark:text-accent-green tabular-nums">5</p>
+					</div>
 
 			</div>
 		</div>

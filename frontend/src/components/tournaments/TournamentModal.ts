@@ -178,7 +178,8 @@ export async function updateCooldownInModal(tournamentId: string, cooldownInfo: 
 		return;
 	}
 
-	if (roundEl) roundEl.textContent = `Round ${cooldownInfo.round ?? ''} starting in`;
+	const roundNum = cooldownInfo.round ?? '';
+	if (roundEl) roundEl.textContent = roundNum ? `Round ${roundNum} in` : 'Next round in';
 	let seconds = Math.ceil(cooldownInfo.secondsLeft);
 	if (timerEl) timerEl.textContent = String(seconds);
 	overlay.classList.remove('hidden');
