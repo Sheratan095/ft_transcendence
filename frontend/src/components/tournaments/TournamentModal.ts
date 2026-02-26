@@ -232,11 +232,11 @@ function _setStatusBadge(status: string) {
 		case 'IN_PROGRESS':
 		case 'STARTED':
 			el.classList.add('bg-yellow-400', 'text-black');
-			el.textContent = "Tournament in progress";
+			el.textContent = "In progress";
 			break;
 		case 'FINISHED':
 			el.classList.add('bg-gray-400', 'text-white');
-			el.textContent = "Tournament finished";
+			el.textContent = "Finished";
 			break;
 		default:
 			el.classList.add('bg-black', 'text-white');

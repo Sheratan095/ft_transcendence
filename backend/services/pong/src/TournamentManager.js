@@ -531,7 +531,7 @@ class	TournamentManager
 			);
 		}
 
-		_broadcastBracketUpdate(tournament.id);
+		this._broadcastBracketUpdate(tournament.id);
 
 		// Clean up
 		this._cleanupTournament(tournament.id);
