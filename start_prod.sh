@@ -83,7 +83,6 @@ populate_env()
 
 # Run population
 populate_env
-exit 0 # TO DO REMOVE
 
 FRONTEND_CERT_DIR="$ROOT_DIR/frontend/certs/certs"
 BACKEND_CERT_DIR="$ROOT_DIR/backend/certs"
