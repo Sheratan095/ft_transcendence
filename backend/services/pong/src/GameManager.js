@@ -156,7 +156,8 @@ class	GameManager
 
 		// Notify the other player that the invited player has joined
 		const	otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
-		pongConnectionManager.sendPlayerJoinedCustomGame(otherPlayerId, gameId);
+		const joiningPlayerUsername = (gameInstance.playerLeftId === playerId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+		pongConnectionManager.sendPlayerJoinedCustomGame(otherPlayerId, gameId, joiningPlayerUsername);
 
 		// Reply to joining player with gameId and creatorUsername (X player)
 		pongConnectionManager.replyCustomGameJoined(playerId, gameId, gameInstance.playerLeftUsername);
@@ -187,12 +188,28 @@ class	GameManager
 			return ;
 		}
 
-		// Can't quit a game in waiting status, in this case just the owner is present and must cancel it
+		// Handle WAITING status for custom games - only creator can cancel
 		if (gameInstance.gameStatus === GameStatus.WAITING)
 		{
-			console.error(`[PONG] ${playerId} tried to quit game ${gameId} which is still waiting for an opponent`);
-			pongConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that hasn\'t started yet');
-			return ;
+			// For custom games in WAITING, allow the creator to cancel
+			if (gameInstance.gameType === GameType.CUSTOM && gameInstance.playerLeftId === playerId)
+			{
+				console.log(`[PONG] Creator ${playerId} canceled custom game ${gameId} in WAITING status`);
+				// Notify other player that the game was canceled
+				const otherPlayerId = gameInstance.playerRightId;
+				pongConnectionManager.sendCustomGameCanceled(otherPlayerId, gameId);
+				
+				// Clean up the game instance
+				gameInstance.destroy();
+				this._games.delete(gameId);
+				return ;
+			}
+			else
+			{
+				console.error(`[PONG] ${playerId} tried to quit game ${gameId} which is still waiting for an opponent`);
+				pongConnectionManager.sendErrorMessage(playerId, 'Cannot quit a game that hasn\'t started yet');
+				return ;
+			}
 		}
 
 		// Immediately set status to FINISHED and stop the game loop
@@ -293,15 +310,18 @@ class	GameManager
 
 		// Change the ready status of the player
 		let	otherPlayerId;
+		let playerSide;
 		if (playerId === gameInstance.playerLeftId)
 		{
 			gameInstance.playerLeftReady = readyStatus;
 			otherPlayerId = gameInstance.playerRightId;
+			playerSide = 'left';
 		}
 		else if (playerId === gameInstance.playerRightId)
 		{
 			gameInstance.playerRightReady = readyStatus;
 			otherPlayerId = gameInstance.playerLeftId;
+			playerSide = 'right';
 		}
 
 		// For tournament matches, use tournament-specific notification
@@ -312,8 +332,8 @@ class	GameManager
 		}
 		else
 		{
-			// For normal games, use standard ready status notification
-			pongConnectionManager.sendPlayerReadyStatus(otherPlayerId, gameId, readyStatus);
+			// For normal games, send ready status to BOTH players with info about which player changed
+			pongConnectionManager.sendPlayerReadyStatusBoth(playerId, otherPlayerId, gameId, readyStatus, playerSide);
 		}
 
 		// If both players are ready, start the game

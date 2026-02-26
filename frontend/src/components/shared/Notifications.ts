@@ -2,7 +2,6 @@ import { showSuccessToast, showInfoToast, showWarningToast, showErrorToast } fro
 import { t } from '../../lib/intlayer';
 import { FriendsManager } from '../profile/FriendsManager';
 import { openTrisModalAndJoinGame } from '../tris/modal';
-import { openPongModal } from '../pong/modal';
 import { joinCustomGame } from '../pong/ws';
 import { goToRoute } from '../../spa';
 
@@ -342,10 +341,8 @@ function handleNotificationEvent(data: any) {
 										await openTrisModalAndJoinGame(gameId);
 										// Note: Success feedback will come from handleCustomGameJoinSuccess event
 									} else if (gameType === 'pong' && gameId) {
-										// For pong, open the pong modal and join the custom game
-										await openPongModal();
+										// For pong, join custom game (modal will open on customGameJoinSuccess event)
 										joinCustomGame(gameId);
-										showSuccessToast(t('toast.info.joinedPongGame'), { duration: 2000 });
 									}
 								} catch (err) {
 									console.error('Error accepting game invite:', err);

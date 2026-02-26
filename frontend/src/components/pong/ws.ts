@@ -264,6 +264,13 @@ export function getCurrentGameId() {
 }
 
 /**
+ * Set current game ID (for manual game state management)
+ */
+export function setCurrentGameId(gameId: string | null) {
+	currentGameId = gameId;
+}
+
+/**
  * Get current player side
  */
 export function getPlayerSide() {

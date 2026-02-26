@@ -39,18 +39,18 @@ class	PongConnectionManager
 
 		const	data = {
 			gameId,
-			otherUsername,
+			opponentUsername: otherUsername,
 		};
 
 		if (socket)
 			this.#dispatchEventToSocket(socket, 'pong.customGameCreated', data);
 	}
 
-	async	sendPlayerJoinedCustomGame(otherPlayerId, gameId)
+	async	sendPlayerJoinedCustomGame(otherPlayerId, gameId, joiningPlayerUsername)
 	{
 		const	socket = this._connections.get(otherPlayerId);
 		if (socket)
-			this.#dispatchEventToSocket(socket, 'pong.playerJoinedCustomGame', { gameId });
+			this.#dispatchEventToSocket(socket, 'pong.playerJoinedCustomGame', { gameId, joiningPlayerUsername });
 	}
 
 	async	replyCustomGameJoined(playerId, gameId, creatorUsername)
@@ -72,6 +72,22 @@ class	PongConnectionManager
 		const	socket = this._connections.get(otherPlayerId);
 		if (socket)
 			this.#dispatchEventToSocket(socket, 'pong.playerReadyStatus', { gameId, readyStatus });
+	}
+
+	// Send ready status to both players with information about which player changed
+	async	sendPlayerReadyStatusBoth(playerId, otherPlayerId, gameId, readyStatus, playerSide)
+	{
+		const data = { gameId, readyStatus, playerSide };
+		
+		// Send to the player who just changed their ready status
+		const socket1 = this._connections.get(playerId);
+		if (socket1)
+			this.#dispatchEventToSocket(socket1, 'pong.playerReadyStatus', data);
+		
+		// Send to the other player
+		const socket2 = this._connections.get(otherPlayerId);
+		if (socket2)
+			this.#dispatchEventToSocket(socket2, 'pong.playerReadyStatus', data);
 	}
 
 	async	sendCustomGameCanceled(playerId, gameId)

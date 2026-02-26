@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { goToRoute } from '../../spa';
-import { closePong, initPong, startMatchmaking, leaveMatchmaking, setReady, getCurrentGameId, getPlayerSide, quitGame, sendPongMessage } from './ws';
+import { closePong, initPong, startMatchmaking, leaveMatchmaking, setReady, getCurrentGameId, setCurrentGameId, getPlayerSide, quitGame, sendPongMessage } from './ws';
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
@@ -33,17 +33,54 @@ function updatePongStatus(statusText: string)
 
 export function handleCustomGameCreated(data: any)
 {
-	const { opponentUsername } = data;
+	const { opponentUsername, gameId } = data;
+	
+	// Explicitly set the game ID
+	if (gameId)
+		setCurrentGameId(gameId);
 
 	updatePongStatus(`Game created! Waiting for ${opponentUsername}...`);
+	
+	// Update scorebar with usernames (creator is left, opponent is right)
+	if (currentGameInstance) {
+		const user = getUser();
+		const creatorUsername = user?.username || 'You';
+		currentGameInstance.gameManager.setPlayerNames(creatorUsername, opponentUsername);
+		currentGameInstance.updateScorebarNames();
+	}
+	
+	// Reset ready indicators
+	const modal = document.getElementById('pong-modal');
+	if (modal) {
+		const leftReady = modal.querySelector('#pong-left-ready') as HTMLElement | null;
+		const rightReady = modal.querySelector('#pong-right-ready') as HTMLElement | null;
+		if (leftReady)
+			leftReady.classList.add('hidden');
+		if (rightReady)
+			rightReady.classList.add('hidden');
+	}
 	// showSuccessToast('Game created!');
 }
 
 /* YOU JOINED A CUSTOM GAME*/
-export function handleCustomGameJoinSuccess(data: any)
+export async function handleCustomGameJoinSuccess(data: any)
 {
-	const { creatorUsername } = data;
+	const { creatorUsername, gameId } = data;
 	updatePongStatus(`Joined game! Playing against ${creatorUsername}`);
+	
+	// Explicitly set the game ID
+	if (gameId)
+		setCurrentGameId(gameId);
+	
+	// Open the modal to display the game with opponent username
+	await openPongModal('online');
+	
+	// Update player names on the scorebar
+	if (currentGameInstance && creatorUsername) {
+		// Creator is left player (X), we are right player (O)
+		currentGameInstance.gameManager.setPlayerNames(creatorUsername, 'You');
+		currentGameInstance.updateScorebarNames();
+	}
 	
 	// Show the ready button and hide main button for custom games
 	const modal = document.getElementById('pong-modal');
@@ -51,19 +88,36 @@ export function handleCustomGameJoinSuccess(data: any)
 	{
 		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
 		const mainBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		const leftReady = modal.querySelector('#pong-left-ready') as HTMLElement | null;
+		const rightReady = modal.querySelector('#pong-right-ready') as HTMLElement | null;
 		
 		if (readyBtn)
 			readyBtn.classList.remove('hidden');
 		if (mainBtn)
 			mainBtn.classList.add('hidden');
+		
+		// Reset ready indicators to hidden
+		if (leftReady)
+			leftReady.classList.add('hidden');
+		if (rightReady)
+			rightReady.classList.add('hidden');
 	}
 	// showSuccessToast(`Joined game with ${creatorUsername}!`);
 }
 
 /* INVITED PLAYER JOINED YOUR GAME */
-export function handlePlayerJoinedCustomGame(_data: any)
+export function handlePlayerJoinedCustomGame(data: any)
 {
+	const { joiningPlayerUsername } = data;
 	updatePongStatus('Opponent joined! Ready to start');
+	
+	// Update scorebar with usernames (creator is left, opponent is right)
+	if (currentGameInstance) {
+		const user = getUser();
+		const creatorUsername = user?.username || 'You';
+		currentGameInstance.gameManager.setPlayerNames(creatorUsername, joiningPlayerUsername);
+		currentGameInstance.updateScorebarNames();
+	}
 	
 	// Show the ready button and hide main button
 	const modal = document.getElementById('pong-modal');
@@ -71,11 +125,19 @@ export function handlePlayerJoinedCustomGame(_data: any)
 	{
 		const readyBtn = modal.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
 		const mainBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
+		const leftReady = modal.querySelector('#pong-left-ready') as HTMLElement | null;
+		const rightReady = modal.querySelector('#pong-right-ready') as HTMLElement | null;
 		
 		if (readyBtn)
 			readyBtn.classList.remove('hidden');
 		if (mainBtn)
 			mainBtn.classList.add('hidden');
+		
+		// Reset ready indicators to hidden
+		if (leftReady)
+			leftReady.classList.add('hidden');
+		if (rightReady)
+			rightReady.classList.add('hidden');
 	}
 	// showSuccessToast('Opponent joined!');
 }
@@ -159,7 +221,7 @@ export function handleGameEnded(data: any)
 		message = reason;
 	}
 	else {
-		message = 'Game ended';
+		message = 'You lost!';
 	}
 
 	updatePongStatus(message);
@@ -239,21 +301,16 @@ export function handleError(data: any)
 
 export function handlePlayerReadyStatus(data: any)
 {
-	const { readyStatus } = data;
-	console.log('[Pong] Opponent ready status changed:', readyStatus);
+	const { readyStatus, playerSide } = data;
+	console.log('[Pong] Player ready status changed:', playerSide, readyStatus);
 	
-	// Update scorebar to show opponent's ready status
-	if (currentGameInstance)
+	// Update the ready status for the player who changed (could be current or opponent)
+	if (currentGameInstance && playerSide)
 	{
-		// The opponent changed their ready status
-		// Determine which side is the opponent
-		const playerSide = getPlayerSide();
-		const opponentSide = playerSide === 'left' ? 'right' : 'left';
+		console.log('[Pong] Updating ready status for:', playerSide, 'Ready:', readyStatus);
 		
-		console.log('[Pong] Player side:', playerSide, 'Opponent side:', opponentSide, 'Ready:', readyStatus);
-		
-		// Update opponent's ready status in GameManager
-		currentGameInstance.gameManager.setPlayerReadyStatus(opponentSide as 'left' | 'right', readyStatus);
+		// Update the player's ready status in GameManager
+		currentGameInstance.gameManager.setPlayerReadyStatus(playerSide as 'left' | 'right', readyStatus);
 	}
 }
 
