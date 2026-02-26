@@ -4,6 +4,7 @@ import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { openGameInviteModal } from '../../lib/game-invite';
 import { FriendsManager } from '../profile/FriendsManager';
 import { createCustomGame } from './ws';
+import { t } from '../../lib/intlayer';
 
 export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean = true) {
   const template = document.getElementById('tris-template') as HTMLTemplateElement | null;
@@ -186,11 +187,11 @@ async function renderTrisStats(container: HTMLElement)
     // Still update the win/loss text
     const winsEl = document.getElementById('tris-user-wins');
     if (winsEl)
-      winsEl.textContent = `Wins: --`;
+      winsEl.textContent = t("game.wins", { wins: "--" });
 
     const lossesEl = document.getElementById('tris-user-losses');
     if (lossesEl)
-      lossesEl.textContent = `Losses: --`;
+      lossesEl.textContent = t("game.losses", { losses: "--" });
     return;
   }
   
@@ -221,9 +222,9 @@ async function renderTrisStats(container: HTMLElement)
       const winsEl = document.getElementById('tris-user-wins');
       const lossesEl = document.getElementById('tris-user-losses');
       if (winsEl)
-        winsEl.textContent = `Wins: ${gameStats.trisWins || 0}`;
+        winsEl.textContent = t("game.wins", { wins: gameStats.trisWins || 0 });
       if (lossesEl)
-        lossesEl.textContent = `Losses: ${gameStats.trisLosses || 0}`;
+        lossesEl.textContent = t("game.losses", { losses: gameStats.trisLosses || 0 });
     }
   }
   catch (err)
