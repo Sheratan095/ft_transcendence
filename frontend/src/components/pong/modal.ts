@@ -541,12 +541,9 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 			if (newStartBtn.textContent === 'Cancel')
 			{
 				const gameId = getCurrentGameId();
-				if (gameId && (mode === 'custom' || mode === 'tournament'))
-				{
-					// Send cancel message to server
+				if (gameId)
 					sendPongMessage('pong.cancelCustomGame', { gameId });
-					closePongModal();
-				}
+				closePongModal();
 				return;
 			}
 

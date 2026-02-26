@@ -208,7 +208,6 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 						const sent = await sendGameInvite(friendId);
 						if (!sent)
 							throw new Error('Invite send failed');
-						showSuccessToast('Game invite sent!');
 					}
 					catch (err) {
 						console.error('Failed to send game invite:', err);

@@ -337,12 +337,11 @@ function handleNotificationEvent(data: any) {
 								try {
 									// If it's a tris game invite, open modal and join via WebSocket
 									if (gameType === 'tris' && gameId) {
-										// Import and call function to open tris modal and join game
-										await openTrisModalAndJoinGame(gameId);
-										// Note: Success feedback will come from handleCustomGameJoinSuccess event
-									} else if (gameType === 'pong' && gameId) {
-										// For pong, join custom game (modal will open on customGameJoinSuccess event)
-										joinCustomGame(gameId);
+									// openTrisModalAndJoinGame handles WS init + join + modal open
+									await openTrisModalAndJoinGame(gameId);
+								} else if (gameType === 'pong' && gameId) {
+									// joinCustomGame auto-connects if needed; modal opens on customGameJoinSuccess
+									await joinCustomGame(gameId);
 									}
 								} catch (err) {
 									console.error('Error accepting game invite:', err);
@@ -355,12 +354,6 @@ function handleNotificationEvent(data: any) {
 							style: 'secondary',
 							onClick: async () => {
 								try {
-									// If it's a tris game, cancel via WebSocket
-									if (gameType === 'tris' && gameId) {
-										showInfoToast(t('toast.info.rejectedGameInvite', { user: username }), { duration: 3000 });
-									} else if (gameType === 'pong' && gameId) {
-										showInfoToast(t('toast.info.rejectedPongInvite', { user: username }), { duration: 3000 });
-									}
 								} catch (err) {
 									console.error('Error rejecting game invite:', err);
 									showErrorToast(t('toast.error.rejectInviteFailed'), { duration: 3000 });

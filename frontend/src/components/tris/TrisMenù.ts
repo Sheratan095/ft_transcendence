@@ -87,7 +87,6 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
             await openTrisModal();
             initializeModeSpecificBehaviors('online');
             await createCustomGame(otherId);
-            showSuccessToast('Game invite sent!');
           }
           catch (err) {
             console.error('Failed to send game invite:', err);

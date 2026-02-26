@@ -5,7 +5,7 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { t } from '../../lib/intlayer';
-import { getUserId } from '../../lib/auth';
+import { getUserId, getUser } from '../../lib/auth';
 import { goToRoute } from '../../spa';
 import { 
 initTris, 
@@ -26,7 +26,7 @@ import { GameManager, TRIS_MODES } from './GameManager';
 import { openGameInviteModal, closeGameInviteModal } from '../../lib/game-invite';
 import type { FriendsManager } from '../profile/FriendsManager';
 
-export type TrisModeType = 'online' | 'offline-1v1' | 'offline-ai';
+export type TrisModeType = 'online' | 'offline-1v1' | 'offline-ai' | 'custom';
 
 let currentGameManager: GameManager | null = null;
 let currentFriendsManager: FriendsManager | null = null;
@@ -34,6 +34,7 @@ let currentMode: TrisModeType | null = null;
 let trisInitialized = false;
 let userReady = false;
 let pendingGameJoin: string | null = null;
+let customGameOpponentUsername: string | null = null;
 
 /**
  * Set the friends manager instance (called from main.ts)
@@ -127,6 +128,10 @@ export async function openTrisModal() {
   }
 
   renderAndAttachButtons();
+  // Ensure GameManager is initialized for the selected mode (needed when opening modal from invite)
+  if (currentMode === 'online' && !currentGameManager) {
+    initializeModeSpecificBehaviors('online');
+  }
   
   // Explicitly ensure start button is visible after rendering
   const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
@@ -134,7 +139,7 @@ export async function openTrisModal() {
     startBtn.classList.remove('hidden');
     startBtn.disabled = false;
   }
-  
+
   if (currentMode) {
     updateScoreboardNames(currentMode);
     updateTrisStatus(currentMode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
@@ -167,6 +172,14 @@ export function closeTrisModal() {
   if (currentGameManager) {
     currentGameManager.destroy();
     currentGameManager = null;
+  }
+
+  // Handle quitting custom/online games like Pong does
+  if (currentMode === 'online') {
+    const gameId = getCurrentGameId();
+    if (gameId) {
+      quitGame();
+    }
   }
 
   if (trisInitialized) {
@@ -358,6 +371,7 @@ function updateStartBtnText(btn: HTMLButtonElement) {
       if (btn.textContent === 'Quit') return; // Game is running!
       // In online mode with game, show the ready button instead of using main button for ready state
       btn.textContent = 'Quit';
+      try { (btn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
       btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
       btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
     } else {
@@ -378,8 +392,10 @@ function updateStartBtnText(btn: HTMLButtonElement) {
 function handleStartClick() {
   const btn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
   if (!btn) return;
+  const btnText = btn.textContent?.trim().toLowerCase() || '';
 
-  if (btn.textContent === 'Restart' || btn.textContent === 'Play Again') {
+  // Restart / Play Again
+  if (btnText === 'restart' || btnText === 'play again') {
     if (currentGameManager) currentGameManager.reset();
     btn.textContent = currentMode === 'online' ? 'Start Matchmaking' : 'Start';
     btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
@@ -387,7 +403,18 @@ function handleStartClick() {
     return;
   }
 
-  if (btn.textContent === 'Quit') {
+  // Cancel custom game during lobby - detect via data attribute or trimmed text
+  if (btn.dataset.action === 'cancel' || btnText === 'cancel') {
+    const gameId = getCurrentGameId();
+    if (gameId && currentMode === 'online') {
+      cancelCustomGame(gameId);
+      closeTrisModal();
+    }
+    return;
+  }
+
+  // Quit
+  if (btnText === 'quit') {
     quitGame();
     closeTrisModal();
     return;
@@ -400,7 +427,7 @@ function handleStartClick() {
       quitGame();
       closeTrisModal();
     } else {
-      if (btn.textContent === 'Start Matchmaking') {
+      if (btnText === 'start matchmaking') {
         startMatchmaking();
         updateTrisStatus('Looking for match...');
         btn.textContent = 'Quit matchmaking';
@@ -418,7 +445,7 @@ function handleStartClick() {
     // Offline / AI
     if (!currentGameManager) return;
     
-    if (btn.textContent === 'Start' || btn.textContent === 'Continue') {
+    if (btnText === 'start' || btnText === 'continue') {
       currentGameManager.resumeGame();
       currentGameManager.updateStatusText();
       btn.textContent = 'STOP';
@@ -448,7 +475,7 @@ function handleSurrenderClick() {
 /**
  * Route WebSocket events to current GameManager
  */
-function handleTrisEvent(event: string, data: any) {
+async function handleTrisEvent(event: string, data: any) {
   console.log('[TRIS MODAL] Event:', event, data);
   
   if (event === 'tris.playerReadyStatus') {
@@ -465,23 +492,122 @@ function handleTrisEvent(event: string, data: any) {
     }
   }
 
-  if (event === 'tris.customGameJoinSuccess') {
-      closeGameInviteModal();
-      const modal = document.getElementById('tris-modal');
-      if (modal) {
-        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
-        const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
-        if (readyBtn) readyBtn.classList.remove('hidden');
-        if (mainBtn) mainBtn.classList.add('hidden');
+  // CREATOR: Custom game created, waiting for opponent to join
+  if (event === 'tris.customGameCreated') {
+    const { gameId, otherUsername } = data;
+    customGameOpponentUsername = otherUsername;
+    
+    if (gameId) setCurrentGameId(gameId);
+    
+    updateTrisStatus(`Waiting for ${otherUsername}...`);
+    
+    // Update scorebar with creator (You/X) and opponent (their name/O)
+    const creatorUsername = 'You';
+    updateScoreboardNames('online', `${creatorUsername} (X)`, `${otherUsername} (O)`);
+    
+    // Update button to "Cancel" and hide ready button
+    const modal = document.getElementById('tris-modal');
+    if (modal) {
+      const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+      const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+      
+      if (mainBtn) {
+        mainBtn.textContent = 'Cancel';
+        try { (mainBtn as HTMLButtonElement).dataset.action = 'cancel'; } catch (e) {}
+        mainBtn.classList.remove('hidden');
       }
+      if (readyBtn) {
+        readyBtn.classList.add('hidden');
+      }
+      
+      const leftReady  = modal.querySelector('#tris-left-ready') as HTMLElement | null;
+      const rightReady = modal.querySelector('#tris-right-ready') as HTMLElement | null;
+      if (leftReady) leftReady.classList.add('hidden');
+      if (rightReady) rightReady.classList.add('hidden');
+    }
   }
 
-  if (event === 'tris.customGameCreated') {
-      const modal = document.getElementById('tris-modal');
-      if (modal) {
-        const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
-        if (readyBtn) readyBtn.classList.remove('hidden');
+  // CREATOR: Opponent joined the custom game
+  if (event === 'tris.playerJoinedCustomGame') {
+    const { gameId } = data;
+    
+    updateTrisStatus('Opponent joined! Ready to start');
+    
+    // Show ready buttons for both players
+    const modal = document.getElementById('tris-modal');
+    if (modal) {
+      const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+      const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+      
+      if (readyBtn) {
+        readyBtn.classList.remove('hidden');
       }
+      // Hide the main button (cancel should disappear once opponent joined) - like Pong
+      if (mainBtn) mainBtn.classList.add('hidden');
+
+      // Reset ready indicators to hidden - like Pong
+      const leftReady = modal.querySelector('#tris-left-ready') as HTMLElement | null;
+      const rightReady = modal.querySelector('#tris-right-ready') as HTMLElement | null;
+      if (leftReady) leftReady.classList.add('hidden');
+      if (rightReady) rightReady.classList.add('hidden');
+    }
+  }
+
+  // JOINER: Successfully joined a custom game
+  if (event === 'tris.customGameJoinSuccess') {
+    const { creatorUsername, gameId } = data;
+    closeGameInviteModal();
+    
+    // Set custom mode and gameId before opening modal - like Pong
+    currentMode = 'online';
+    if (gameId) setCurrentGameId(gameId);
+    customGameOpponentUsername = creatorUsername;
+    
+    // Only open modal if not already open
+    const modal = document.getElementById('tris-modal');
+    if (!modal || modal.classList.contains('hidden')) {
+      await openTrisModal();
+    }
+    
+    updateTrisStatus(`Joined game! Playing against ${creatorUsername}`);
+    
+    // Update scorebar with creator (left/X) and joiner (right/O - You)
+    const joinerUsername = 'You';
+    updateScoreboardNames('online', `${creatorUsername} (X)`, `${joinerUsername} (O)`);
+    
+    const modalEl = document.getElementById('tris-modal');
+    if (modalEl) {
+      // Ensure a GameManager exists so board is rendered for the joiner
+      if (!currentGameManager) initializeModeSpecificBehaviors('online');
+
+      const readyBtn = modalEl.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
+      const mainBtn = modalEl.querySelector('#tris-start-btn') as HTMLButtonElement | null;
+      
+      if (readyBtn) {
+        readyBtn.classList.remove('hidden');
+        readyBtn.textContent = '✗ Not Ready';
+        readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
+        readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+        // Joiner defaults to NOT READY - like Pong
+        userReady = false;
+        setUserReady(false);
+      }
+      if (mainBtn) mainBtn.classList.add('hidden');
+      
+      // Hide ready indicators until someone toggles ready - like Pong
+      const leftReady  = modalEl.querySelector('#tris-left-ready') as HTMLElement | null;
+      const rightReady = modalEl.querySelector('#tris-right-ready') as HTMLElement | null;
+      if (leftReady) leftReady.classList.add('hidden');
+      if (rightReady) rightReady.classList.add('hidden');
+    }
+  }
+
+  // Handle custom game cancellation - like Pong
+  if (event === 'tris.customGameCanceled') {
+    console.log('Custom game was canceled');
+    updateTrisStatus('Game was canceled');
+    showErrorToast('Game was canceled');
+    closeTrisModal();
   }
 
   if (event === 'tris.matchedInRandomGame') {
@@ -524,6 +650,7 @@ function handleTrisEvent(event: string, data: any) {
       if (readyBtn) readyBtn.classList.add('hidden');
       if (mainBtn) {
         mainBtn.textContent = 'Quit';
+        try { (mainBtn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
         mainBtn.classList.remove('hidden', 'dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
         mainBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       }
@@ -543,10 +670,15 @@ function handleTrisEvent(event: string, data: any) {
       const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
       if (readyBtn) readyBtn.classList.add('hidden');
       if (mainBtn) {
-        mainBtn.textContent = 'Play Again';
+        // If this was a custom game (we have an opponent name), show 'Quit' like Pong
+        const wasCustom = !!customGameOpponentUsername;
+        mainBtn.textContent = wasCustom ? 'Quit' : 'Play Again';
+        try { (mainBtn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
         mainBtn.classList.remove('hidden');
         mainBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
         mainBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
+        // For custom games we keep the start/quit semantics; clear opponent name so next open is fresh
+        if (wasCustom) customGameOpponentUsername = null;
       }
     }
   }
