@@ -137,5 +137,9 @@
   "game.stats": "Your stats",
   "game.wins": "Wins: {{ wins }}",
   "game.losses": "Losses: {{ losses }}",
-  "game.inviteFriend": "👥 Invite Friend"
+  "game.inviteFriend": "👥 Invite Friend",
+  "game.tournaments": "Play in a Tournament",
+  "tournament.desc": "Rise to the top by competing in ranked matches and tournaments against players worldwide.",
+  "tournament.create": "Create tournament",
+  "tournament.no-tournaments": "No tournaments available"
 }
