@@ -197,6 +197,9 @@ function routeEvent(event: string, data: any)
 			modalHandlers.handleInvalidMove(data);
 			break;
 		case 'pong.tournamentRoundInfo':
+			// save side info so UI/ready handlers know which side is the local player
+			if (data && data.yourSide)
+				playerSide = data.yourSide;
 			modalHandlers.handleTournamentRoundInfo(data);
 			break;
 		case 'pong.tournamentBracketUpdate':

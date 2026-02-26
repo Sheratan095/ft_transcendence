@@ -369,29 +369,41 @@ export function handlePlayerReadyStatus(data: any)
  */
 export async function handleTournamentRoundInfo(data: any)
 {
-	const { matchId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername } = data;
+	const { matchId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername, yourSide } = data;
 	const userId = getUserId();
-	
+
 	console.log('[Pong] Tournament round info received:', data);
-	
+
 	// Set the game ID to match ID for ready state
 	if (matchId)
 		setCurrentGameId(matchId);
-	
-	// Determine which side we are and who our opponent is
+
+	// Determine opponent username (fallback if yourSide isn't provided)
 	const isLeftPlayer = userId === playerLeftId;
 	const opponentUsername = isLeftPlayer ? playerRightUsername : playerLeftUsername;
-	const yourSide = isLeftPlayer ? 'left' : 'right';
-	
+
 	// Open the pong modal in tournament mode (overlays the tournament modal)
 	await openPongModal('tournament');
-	
+
 	// Update status with opponent info
 	updatePongStatus(`Round starting! Playing against ${opponentUsername}`);
-	
-	// Update player names in the game UI
-	if (currentGameInstance) {
-		currentGameInstance.gameManager.setPlayerNames(playerLeftUsername, playerRightUsername);
+
+	// Update player names in the game UI, showing 'You' for the local player when yourSide is provided
+	if (currentGameInstance)
+	{
+		let leftName = playerLeftUsername;
+		let rightName = playerRightUsername;
+
+		if (yourSide && typeof yourSide === 'string')
+		{
+			const side = yourSide.toLowerCase();
+			if (side === 'left')
+				leftName = 'You';
+			else if (side === 'right')
+				rightName = 'You';
+		}
+
+		currentGameInstance.gameManager.setPlayerNames(leftName, rightName);
 		currentGameInstance.updateScorebarNames();
 	}
 	

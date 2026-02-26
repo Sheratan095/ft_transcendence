@@ -354,7 +354,8 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
     "playerLeftId": "user1",
     "playerLeftUsername": "player1",
     "playerRightId": "user2",
-    "playerRightUsername": "player2"
+    "playerRightUsername": "player2",
+    "yourSide": "left"
   }
 }
 \`\`\`

@@ -236,6 +236,7 @@ class	PongConnectionManager
 			playerLeftUsername,
 			playerRightId,
 			playerRightUsername,
+			yourSide: participantId === playerLeftId ? 'left' : 'right',
 		};
 
 		if (socket)
