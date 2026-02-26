@@ -116,7 +116,7 @@ async function insertTrisMatchHistory(userId: string) {
     if (!matches || matches.length === 0) {
       container.innerHTML = `
         <div class="w-full text-center text-sm text-neutral-500 dark:text-neutral-400 italic py-4">
-          No matches available
+          t('game.no_recent_matches')
         </div>
       `;
       return;
@@ -144,7 +144,7 @@ async function insertTrisMatchHistory(userId: string) {
                       bg-white dark:bg-neutral-900">
 
             <div class="font-black shrink-0 ${isWin ? 'text-green-600' : 'text-red-600'}">
-              ${isWin ? 'WIN' : 'LOSS'}
+              ${isWin ? t('win') : t('loss')}
             </div>
 
             <div class="flex-1 sm:text-center text-neutral-800 dark:text-white truncate">

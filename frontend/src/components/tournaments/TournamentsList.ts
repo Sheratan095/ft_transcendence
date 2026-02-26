@@ -1,4 +1,5 @@
 import { joinTournament, createTournament } from './Tournament';
+import { t } from '../../lib/intlayer';
 
 // ==============================
 // Types
@@ -79,7 +80,7 @@ function renderTournaments(tournaments: Tournament[]): void {
   if (tournaments.length === 0) {
     tournamentList.innerHTML = `
       <div class="text-sm text-gray-500 dark:text-neutral-400 py-2">
-        No tournaments available.
+        ${t('tournament.no-tournaments')}
       </div>
     `;
     return;

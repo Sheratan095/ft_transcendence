@@ -411,14 +411,11 @@
 
 							<!-- Action buttons -->
 							<div class="flex flex-wrap gap-2 sm:gap-3 items-center">
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-chat bg-accent-blue dark:bg-accent-blue text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									💬 Send Message
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-chat bg-accent-blue dark:bg-accent-blue text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100" data-i18n="friend.send">			
 								</button>
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-gray-500 dark:bg-accent-green text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									👥 Add Friend
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-add bg-gray-500 dark:bg-accent-green text-white dark:text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100"data-i18n="friend.add">
 								</button>
-								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100">
-									🔒 Block
+								<button class="h-10 flex items-center justify-center px-3 sm:px-6 text-xs sm:text-sm md:text-base font-extrabold uppercase tracking-tight whitespace-nowrap rounded transition-all duration-200 spc-block bg-red-600 dark:bg-red-700 text-white hover:brightness-90 dark:hover:brightness-110 active:brightness-75 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:brightness-100 dark:disabled:hover:brightness-100" data-i18n="friend.block">
 								</button>
 							</div>
 						</div>
@@ -595,47 +592,39 @@
 
 			<!-- LEFT LARGE (row-span-2) -->
 			<div class="lg:row-span-2 h-full border border-gray-300 dark:border-neutral-800 rounded-3xl rounded-tr-lg rounded-br-lg p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Play Online
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="game.online">
 				</h2>
-				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-				Match with players in real time and climb the leaderboard.
+				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400" data-i18n="tris.online_desc">
 				</p>
 
 				<div class="mt-auto pt-20">
 				<button id="pong-play-online"
-					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition">
-						 Start Matchmaking
+					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition" data-i18n="game.matchmaking">
 				</button>
 				</div>
 			</div>
 
 			<!-- TOP MIDDLE -->
 			<div class="border border-gray-300 dark:border-neutral-800 rounded-lg p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Offline Modes
+				<h3 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="game.offline">
 				</h3>
 
 				<div class="mt-4 flex flex-col gap-3">
 				<button id="pong-play-offline-1v1"
-					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
-					👥 Local 1v1
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition" data-i18n="game.local">
 				</button>
 
 				<button id="pong-play-offline-ai"
-					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
-					🤖 Play vs AI
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition" data-i18n="game.ai">
 				</button>
 				</div>
 			</div>
 
 			<!-- RIGHT LARGE -->
 			<div class="lg:row-span-2 h-full border border-gray-300 dark:border-neutral-800 rounded-3xl rounded-tl-lg rounded-bl-lg p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Play in a Tournament
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="game.tournaments">
 				</h2>
-				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400">
-				Rise to the top by competing in ranked matches and tournaments against players worldwide.
+				<p class="mt-2 text-sm text-gray-600 dark:text-neutral-400" data-i18n="tournament.desc">
 				</p>
 
 				<div class="mt-4 flex flex-col gap-3 overflow-y-auto max-h-64"
@@ -645,22 +634,20 @@
 
 				<div class="mt-auto pt-20">
 				<button id="tournament-btn"
-					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition">
-						 Create tournament
+					class="capitalize tracking-wider font-bold w-full rounded-xl bg-black text-white dark:bg-white dark:text-black py-2 text-5 hover:bg-opacity-90 dark:hover:bg-neutral-200 transition" data-i18n="tournament.create">
 				</button>
 				</div>
 			</div>
 
 			<!-- BOTTOM MIDDLE -->
 			<div class="lg:row-span-2 border border-gray-300 dark:border-neutral-800 rounded-lg rounded-b-3xl p-6 flex flex-col bg-gray-100 dark:bg-neutral-800 bg-opacity-50 dark:bg-opacity-40">
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-				Your Stats
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white" data-i18n="game.stats">
 				</h2>
 
 				<div class="mt-4 flex items-center justify-between">
 				<div class="text-gray-600 dark:text-neutral-400 space-y-1 text-sm">
-					<div id="pong-user-wins">Wins: 0</div>
-					<div id="pong-user-losses">Losses: 0</div>
+					<div id="pong-user-wins" data-i18n="game.wins"></div>
+					<div id="pong-user-losses" data-i18n="game.losses"></div>
 				</div>
 
 				<div id="pong-user-chart" class="w-16 h-16">
@@ -670,8 +657,7 @@
 
 				<div class="mt-5 border-t border-gray-300 dark:border-neutral-800 pt-4 flex flex-col gap-3">
 				<button id="pong-invite-friend"
-					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition">
-					👥 Invite Friend
+					class="rounded-lg bg-gray-200 dark:bg-neutral-800 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-neutral-700 transition" data-i18n="game.inviteFriend">
 				</button>
 
 				</div>
@@ -696,8 +682,7 @@
 				class="w-full px-4 py-3 rounded-xl border-2 border-gray-800 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white font-bold placeholder-gray-400 focus:outline-none focus:border-accent-orange dark:focus:border-accent-green transition mb-5" />
 			<p id="tournament-create-error" class="hidden text-xs text-red-500 font-bold mb-3 -mt-3"></p>
 			<button id="tournament-create-confirm" type="button"
-				class="w-full py-3 bg-accent-orange dark:bg-white text-white dark:text-black font-black uppercase tracking-tighter rounded-xl border-2 hover:brightness-110 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all">
-				Create
+				class="w-full py-3 bg-accent-orange dark:bg-white text-white dark:text-black font-black uppercase tracking-tighter rounded-xl border-2 hover:brightness-110 active:shadow-none active:translate-x-1 active:translate-y-1 transition-all" data-i18n="create">
 			</button>
 		</div>
 	</div>
@@ -713,14 +698,12 @@
 						<button type="button" id="tm-btn-start" class="px-4 py-2 bg-accent-blue dark:bg-green-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Start tournament">
 							Start
 						</button>
-						<button type="button" id="tm-btn-cancel" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Cancel tournament">
-							Cancel tournament
+						<button type="button" id="tm-btn-cancel" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Cancel tournament" data-i18n="tournament.cancel">
 						</button>
 					</div>
 					<!-- Participant button -->
 					<div id="tm-participant-buttons" class="hidden">
-						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament">
-							Quit
+						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament" data-i18n="quit">
 						</button>
 					</div>
 				</div>
@@ -874,8 +857,7 @@
 						border-neutral-300 accent-accent-blue overflow-hidden
 						transition-all duration-300 cursor-pointer block text-left
 						slideshow-slide rounded">
-							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300">
-								Play pong
+							<h3 class="text-3xl font-extrabold mb-6 uppercase tracking-tight text-accent-orange dark:text-accent-pink text-center hover:underline scale-105 duration-300" data-i18n="site.play-pong">
 							</h3>
 							<div class="w-full aspect-square relative border-4 border-double dark:border-white border-black mx-auto">
 								<div class="absolute top-0 left-1/2 -translate-x-1/2 w-0 h-full border-dotted border-r-2 dark:border-white border-black"></div>
