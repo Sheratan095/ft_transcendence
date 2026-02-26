@@ -419,7 +419,7 @@ function _createMatchBox(match: Match): HTMLElement {
 		return box;
 	}
 
-	const winnerBg  = 'bg-accent-orange dark:bg-accent-green';
+	const winnerBg  = 'bg-accent-blue dark:bg-accent-green';
 	const normalBgL = 'bg-white dark:bg-gray-900';
 	const normalBgR = 'bg-gray-50 dark:bg-gray-800';
 

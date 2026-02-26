@@ -96,7 +96,7 @@ function renderTournaments(tournaments: Tournament[]): void {
       </span>
       ${isJoinable ? `
         <button data-join-id="${tournament.id}" data-join-creator="${tournament.creatorUsername}"
-          class="flex-shrink-0 text-xs font-black uppercase px-3 py-1.5 rounded-lg border-2 border-gray-800 dark:border-gray-500 bg-black dark:bg-white text-white dark:text-black shadow-[2px_2px_0_0_#ff6b35] dark:shadow-[2px_2px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all">
+          class="flex-shrink-0 text-xs font-black uppercase px-3 py-1.5 rounded-lg border-2 dark:border-gray-500 bg-accent-orange dark:bg-white text-white dark:text-black hover:brightness-110">
           Join
         </button>` : ''}
     `;
