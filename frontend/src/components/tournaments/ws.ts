@@ -5,6 +5,7 @@
 
 import { showErrorToast, showInfoToast, showSuccessToast } from '../shared/Toast';
 import { getUserId, isLoggedInClient } from '../../lib/auth';
+import { newRoundStarted } from './Tournament';
 
 let tournamentWs: WebSocket | null = null;
 let currentUserId: string | null = null;
@@ -207,7 +208,7 @@ function routeEvent(event: string, data: any) {
 			showSuccessToast(`Tournament "${data.tournamentName}" started!`, { duration: 2000 });
 			break;
 		case 'pong.tournamentRoundInfo':
-			showInfoToast(`Round ${data.roundNumber}/${data.totalMatches}`, { duration: 1500 });
+			newRoundStarted(data);
 			break;
 		case 'pong.tournamentRoundCooldown':
 			showInfoToast(`Next round in ${Math.ceil(data.cooldownMs / 1000)}s`, { duration: 1500 });

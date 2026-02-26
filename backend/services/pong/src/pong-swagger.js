@@ -345,21 +345,15 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 }
 \`\`\`
 
-- **pong.tournamentRoundInfo** - Information about current tournament round and your match
+- **pong.tournamentRoundInfo** - Notification that your game is starting with opponent info
 \`\`\`json
 {
   "event": "pong.tournamentRoundInfo",
   "data": {
-    "roundNumber": 1,
-    "totalMatches": 4,
-    "playerMatch": {
-      "id": "match123",
-      "playerLeftId": "user1",
-      "playerLeftUsername": "player1",
-      "playerRightId": "user2",
-      "playerRightUsername": "player2",
-      "gameStatus": "WAITING"
-    }
+    "playerLeftId": "user1",
+    "playerLeftUsername": "player1",
+    "playerRightId": "user2",
+    "playerRightUsername": "player2"
   }
 }
 \`\`\`

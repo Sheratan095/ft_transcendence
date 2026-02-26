@@ -406,19 +406,28 @@ class	TournamentManager
 				this._startMatchTimer(tournament, match);
 		}
 
-		// Notify all participants about their match info
-		for (let participant of tournament.participants)
+		// Notify only active participants about their match
+		for (let match of currentMatches)
 		{
-			const	playerMatch = currentMatches.find(m => 
-				m.playerLeftId === participant.userId || m.playerRightId === participant.userId
-			);
+			if (!match.isBye)
+			{
+				// Notify both players in the match
+				pongConnectionManager.sendTournamentRoundInfo(
+					match.playerLeftId,
+					match.playerLeftId,
+					match.playerLeftUsername,
+					match.playerRightId,
+					match.playerRightUsername
+				);
 
-			pongConnectionManager.sendTournamentRoundInfo(
-				participant.userId,
-				tournament.currentRound,
-				currentMatches.length,
-				playerMatch || null
-			);
+				pongConnectionManager.sendTournamentRoundInfo(
+					match.playerRightId,
+					match.playerLeftId,
+					match.playerLeftUsername,
+					match.playerRightId,
+					match.playerRightUsername
+				);
+			}
 		}
 
 		// Broadcast bracket update

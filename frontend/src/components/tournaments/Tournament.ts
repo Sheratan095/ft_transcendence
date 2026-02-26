@@ -180,3 +180,9 @@ export async function createTournament(name: string): Promise<void>
 		throw err; // re-throw so caller can react (e.g. show error in mini modal)
 	}
 }
+
+export async function newRoundStarted(roundInfo: any)
+{
+	// Update the tournament modal with the new round information
+	console.log('[newRoundStarted] Round info:', roundInfo);
+}

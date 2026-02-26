@@ -210,14 +210,15 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentStarted', data);
 	}
 
-	async	sendTournamentRoundInfo(participantId, roundNumber, totalMatches, playerMatch)
+	async	sendTournamentRoundInfo(participantId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername)
 	{
 		const	socket = this._connections.get(participantId);
 
 		const	data = {
-			roundNumber,
-			totalMatches,
-			playerMatch, // null if player has a bye or is not in this round
+			playerLeftId,
+			playerLeftUsername,
+			playerRightId,
+			playerRightUsername,
 		};
 
 		if (socket)
