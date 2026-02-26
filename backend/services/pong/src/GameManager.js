@@ -324,11 +324,11 @@ class	GameManager
 			playerSide = 'right';
 		}
 
-		// For tournament matches, use tournament-specific notification
+		// For tournament matches, send ready status to both players
 		if (gameInstance.tournamentId)
 		{
-			if (otherPlayerId)
-				pongConnectionManager.notifyTournamentPlayerReady(otherPlayerId, playerId, gameId);
+			// Send to both players with info about which player changed
+			pongConnectionManager.sendPlayerReadyStatusBoth(playerId, otherPlayerId, gameId, readyStatus, playerSide);
 		}
 		else
 		{

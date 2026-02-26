@@ -226,11 +226,12 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentStarted', data);
 	}
 
-	async	sendTournamentRoundInfo(participantId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername)
+	async	sendTournamentRoundInfo(participantId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername, matchId)
 	{
 		const	socket = this._connections.get(participantId);
 
 		const	data = {
+			matchId,
 			playerLeftId,
 			playerLeftUsername,
 			playerRightId,

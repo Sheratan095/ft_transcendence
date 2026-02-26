@@ -350,6 +350,7 @@ The connection will be rejected (closed with code 1008) if JWT isn't provided in
 {
   "event": "pong.tournamentRoundInfo",
   "data": {
+    "matchId": "match123",
     "playerLeftId": "user1",
     "playerLeftUsername": "player1",
     "playerRightId": "user2",

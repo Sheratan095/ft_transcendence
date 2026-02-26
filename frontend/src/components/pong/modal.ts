@@ -351,6 +351,16 @@ export function handlePlayerReadyStatus(data: any)
 		// Update the player's ready status in GameManager
 		currentGameInstance.gameManager.setPlayerReadyStatus(playerSide as 'left' | 'right', readyStatus);
 	}
+	
+	// Update the visual flag indicator
+	const flagEl = playerSide === 'left' ? document.getElementById('pong-left-ready') : document.getElementById('pong-right-ready');
+	if (flagEl)
+	{
+		if (readyStatus)
+			flagEl.classList.remove('hidden');
+		else
+			flagEl.classList.add('hidden');
+	}
 }
 
 /**
@@ -359,14 +369,14 @@ export function handlePlayerReadyStatus(data: any)
  */
 export async function handleTournamentRoundInfo(data: any)
 {
-	const { gameId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername } = data;
+	const { matchId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername } = data;
 	const userId = getUserId();
 	
 	console.log('[Pong] Tournament round info received:', data);
 	
-	// Set the game ID for ready state
-	if (gameId)
-		setCurrentGameId(gameId);
+	// Set the game ID to match ID for ready state
+	if (matchId)
+		setCurrentGameId(matchId);
 	
 	// Determine which side we are and who our opponent is
 	const isLeftPlayer = userId === playerLeftId;
@@ -478,6 +488,11 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				newReadyBtn.textContent = '✗ Not Ready';
 				newReadyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
 				newReadyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
+				// Hide own ready flag
+				const playerSide = getPlayerSide();
+				const flagEl = playerSide === 'left' ? container.querySelector('#pong-left-ready') : container.querySelector('#pong-right-ready');
+				if (flagEl)
+					flagEl.classList.add('hidden');
 			}
 			else
 			{
@@ -487,6 +502,11 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				newReadyBtn.textContent = '✓ Ready';
 				newReadyBtn.classList.remove('dark:bg-red-600', 'bg-red-600');
 				newReadyBtn.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
+				// Show own ready flag
+				const playerSide = getPlayerSide();
+				const flagEl = playerSide === 'left' ? container.querySelector('#pong-left-ready') : container.querySelector('#pong-right-ready');
+				if (flagEl)
+					flagEl.classList.remove('hidden');
 			}
 		});
 	}

@@ -417,7 +417,8 @@ class	TournamentManager
 					match.playerLeftId,
 					match.playerLeftUsername,
 					match.playerRightId,
-					match.playerRightUsername
+					match.playerRightUsername,
+					match.id
 				);
 
 				pongConnectionManager.sendTournamentRoundInfo(
@@ -425,7 +426,8 @@ class	TournamentManager
 					match.playerLeftId,
 					match.playerLeftUsername,
 					match.playerRightId,
-					match.playerRightUsername
+					match.playerRightUsername,
+					match.id
 				);
 			}
 		}
