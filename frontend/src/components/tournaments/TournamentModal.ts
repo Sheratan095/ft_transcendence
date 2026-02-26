@@ -421,15 +421,24 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 	box.className   = 'rounded-xl border-2 border-gray-800 dark:border-gray-600 overflow-hidden shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#444]';
 
 	if (match.isBye) {
+		const normalBgL = 'bg-white dark:bg-gray-900';
+		const byeBg = 'bg-gray-50 dark:bg-gray-800';
 		box.innerHTML = `
-			<div class="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-xs font-black uppercase text-center text-gray-500 dark:text-gray-400">
-				${match.playerLeftUsername || '—'} <span class="ml-1 text-green-600 dark:text-green-400">(BYE)</span>
-			</div>`;
+			<div class="flex justify-between items-center px-3 py-2 text-sm border-b border-gray-200 dark:border-gray-700 ${normalBgL}">
+				<span class="flex-1 truncate font-bold text-gray-800 dark:text-gray-100">${match.playerLeftUsername || '—'}</span>
+				<span class="ml-3 font-black min-w-5 text-right text-gray-400 dark:text-gray-500"></span>
+			</div>
+			<div class="flex justify-between items-center px-3 py-2 text-sm ${byeBg}">
+				<span class="flex-1 truncate font-bold text-gray-800 dark:text-gray-100"><span class="text-green-600 dark:text-green-400">(BYE)</span></span>
+				<span class="ml-3 font-black min-w-5 text-right text-gray-400 dark:text-gray-500"></span>
+			</div>
+			<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">✓ Finished</div>
+		`;
 		return box;
 	}
 
 	// Determine winner styling based on tournament state
-	let winnerBg = 'bg-yellow-400 dark:bg-yellow-500';
+	let winnerBg = 'bg-accent-blue dark:bg-accent-green';
 	let disableWinnerStyling = false;
 
 	if (tournamentFinished) {
