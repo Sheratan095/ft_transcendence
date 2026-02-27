@@ -76,12 +76,17 @@ export async function registerSecurityMiddleware(fastify)
 				process.env.FRONTEND_URL,
 				'null', // file:// protocol shows as 'null'
 			];
-			
+
 			// Allow any localhost origin for development
 			if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || allowedOrigins.includes(origin))
+			{
 				cb(null, true);
+			}	
 			else
+			{
+				console.warn(`[GATEWAY] CORS blocked origin: ${origin}`);
 				cb(new Error('Not allowed by CORS'), false);
+			}
 		},
 
 		methods: ['GET', 'POST', 'PUT', 'DELETE'],
