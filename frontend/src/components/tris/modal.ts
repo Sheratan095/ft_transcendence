@@ -26,7 +26,7 @@ import { GameManager, TRIS_MODES } from './GameManager';
 import { openGameInviteModal, closeGameInviteModal } from '../../lib/game-invite';
 import type { FriendsManager } from '../profile/FriendsManager';
 
-export type TrisModeType = 'online' | 'offline-1v1' | 'offline-ai' | 'custom';
+export type TrisModeType = 'online' | 'offline-1v1' | 'offline-ai';
 
 let currentGameManager: GameManager | null = null;
 let currentFriendsManager: FriendsManager | null = null;
@@ -85,7 +85,9 @@ function setupModeSelectionListeners(onModeSelected?: (mode: TrisModeType) => Pr
 
   const closeBtn = document.getElementById('tris-mode-close-btn');
   if (closeBtn) {
-    closeBtn.addEventListener('click', closeTrisModeModal);
+    const newCloseBtn = closeBtn.cloneNode(true) as HTMLButtonElement;
+    closeBtn.replaceWith(newCloseBtn);
+    newCloseBtn.addEventListener('click', closeTrisModeModal);
   }
 }
 
@@ -209,7 +211,7 @@ export function initializeModeSpecificBehaviors(mode: TrisModeType) {
     const btn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
     if (btn) {
       if (mode === 'online') {
-        btn.textContent = 'Play Again';
+        btn.textContent = 'Quit';
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       } else {
         btn.textContent = 'Restart';
@@ -365,6 +367,9 @@ function updateStartBtnText(btn: HTMLButtonElement) {
   const modal = document.getElementById('tris-modal');
   const readyBtn = modal?.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
 
+  if (currentMode === 'online' && gid) {
+  
+  } else
   if (currentMode === 'online') {
     if (btn.textContent === 'Play Again') return; 
     if (gid) {
@@ -393,7 +398,6 @@ function handleStartClick() {
   const btn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
   if (!btn) return;
   const btnText = btn.textContent?.trim().toLowerCase() || '';
-
   // Restart / Play Again
   if (btnText === 'restart' || btnText === 'play again') {
     if (currentGameManager) currentGameManager.reset();

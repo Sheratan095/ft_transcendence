@@ -34,6 +34,7 @@ registerDictionary('it', it);
 document.addEventListener('DOMContentLoaded', () => {
   // hydrate existing DOM and template contents once on load
   hydrateOnce();
+  initModalInfrastructure();
 
   // Expose hydration functions globally for debugging
   (window as any).__hydrateRoot = hydrateRoot;
@@ -290,6 +291,70 @@ function hydrateRoot(root: ParentNode = document)
     } catch (err) {
       el.placeholder = key;
     }
+  });
+}
+
+function initModalInfrastructure() {
+  const modalSelector = '[id$="-modal"]';
+  const modals = Array.from(document.querySelectorAll(modalSelector)) as HTMLElement[];
+
+  modals.forEach((modal) => {
+    try {
+      if (modal.parentElement !== document.body)
+        document.body.appendChild(modal);
+
+      modal.classList.add('fixed');
+      modal.style.position = 'fixed';
+      if (!modal.style.inset) modal.style.inset = '0';
+
+      if (!modal.querySelector(':scope > .__auto_backdrop')) {
+        const backdrop = document.createElement('div');
+        backdrop.className = '__auto_backdrop';
+        backdrop.setAttribute('aria-hidden', 'true');
+        backdrop.style.pointerEvents = 'none';
+        backdrop.style.position = 'absolute';
+        backdrop.style.inset = '0';
+        backdrop.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        backdrop.style.backdropFilter = 'blur(4px)';
+        backdrop.style.zIndex = '-1';
+        modal.insertBefore(backdrop, modal.firstChild);
+      }
+
+      Array.from(modal.children).forEach((child) => {
+        const element = child as HTMLElement;
+        if (element.classList.contains('__auto_backdrop')) return;
+        element.classList.add('modal-content-high');
+      });
+    } catch (error) {
+      console.error('modal helper error', error);
+    }
+  });
+
+  const observer = new MutationObserver((records) => {
+    records.forEach((record) => {
+      if (record.type !== 'attributes' || record.attributeName !== 'class') return;
+
+      const target = record.target as HTMLElement;
+      if (!target.matches(modalSelector)) return;
+
+      if (!target.classList.contains('hidden')) {
+        document.body.classList.add('modal-open');
+        target.setAttribute('aria-modal', 'true');
+        const focusable = target.querySelector(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        ) as HTMLElement | null;
+        focusable?.focus?.();
+      } else {
+        const anyVisible = Array.from(document.querySelectorAll(modalSelector))
+          .some((element) => !(element as HTMLElement).classList.contains('hidden'));
+        if (!anyVisible) document.body.classList.remove('modal-open');
+        target.removeAttribute('aria-modal');
+      }
+    });
+  });
+
+  modals.forEach((modal) => {
+    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
   });
 }
 

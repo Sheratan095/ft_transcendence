@@ -137,7 +137,11 @@ export function cancelCustomGame(gameId: string) {
 }
 
 export function setUserReady(ready: boolean) {
-	sendTrisCommand('tris.userReady', { gameId: currentGameId, ready });
+	if (ready) {
+		sendTrisCommand('tris.userReady', { gameId: currentGameId, ready });
+	} else {
+		sendTrisCommand('tris.userNotReady', { gameId: currentGameId });
+	}
 }
 
 export function quitGame() {

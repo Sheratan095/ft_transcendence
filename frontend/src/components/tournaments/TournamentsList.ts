@@ -172,13 +172,6 @@ function ensureListenersSetUp(): void {
     confirmBtn.onclick = (e) => { e.stopPropagation(); handleCreateConfirm(); };
   }
 
-  // Modal backdrop click
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeCreateModal();
-    });
-  }
-
   // Enter key in input
   if (nameInput) {
     nameInput.addEventListener('keydown', (e) => {

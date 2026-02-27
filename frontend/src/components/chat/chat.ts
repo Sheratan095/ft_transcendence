@@ -929,7 +929,9 @@ export function setupChatEventListeners() {
 
   const closeBtn = document.getElementById('chat-close-btn');
   if (closeBtn) {
-    closeBtn.addEventListener('click', closeChatModal);
+    const newCloseBtn = closeBtn.cloneNode(true) as HTMLButtonElement;
+    closeBtn.replaceWith(newCloseBtn);
+    newCloseBtn.addEventListener('click', closeChatModal);
   }
 
   const sendBtn = document.getElementById('chat-send-btn');
@@ -964,15 +966,6 @@ export function setupChatEventListeners() {
     input.addEventListener('keypress', handleMessageKeyPress);
   }
 
-  const modal = document.getElementById('chat-modal');
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeChatModal();
-      }
-    });
-  }
-
   const loadMoreBtn = document.getElementById('load-more-btn');
   if (loadMoreBtn) {
     loadMoreBtn.addEventListener('click', loadMoreMessages);
@@ -985,7 +978,9 @@ export function setupChatEventListeners() {
 
   const friendModalCloseBtn = document.getElementById('friend-modal-close-btn');
   if (friendModalCloseBtn) {
-    friendModalCloseBtn.addEventListener('click', closeFriendSelectionModal);
+    const newFriendModalCloseBtn = friendModalCloseBtn.cloneNode(true) as HTMLButtonElement;
+    friendModalCloseBtn.replaceWith(newFriendModalCloseBtn);
+    newFriendModalCloseBtn.addEventListener('click', closeFriendSelectionModal);
   }
 
   const friendModalCancelBtn = document.getElementById('friend-modal-cancel-btn');
@@ -996,15 +991,6 @@ export function setupChatEventListeners() {
   const createGroupSubmitBtn = document.getElementById('create-group-submit-btn');
   if (createGroupSubmitBtn) {
     createGroupSubmitBtn.addEventListener('click', handleGroupChatSubmit);
-  }
-
-  const friendModal = document.getElementById('friend-selection-modal');
-  if (friendModal) {
-    friendModal.addEventListener('click', (e) => {
-      if (e.target === friendModal) {
-        closeFriendSelectionModal();
-      }
-    });
   }
 
   (window as any).__chat_listeners_attached = true;

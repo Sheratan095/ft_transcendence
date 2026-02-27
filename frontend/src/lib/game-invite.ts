@@ -72,15 +72,10 @@ export async function openGameInviteModal(
     friendsList.innerHTML = '<div class="text-red-500 text-center py-4">Failed to load friends</div>';
   }
 
-  // Close button handler
-  closeBtn.onclick = closeGameInviteModal;
-
-  // Close on outside click
-  modal.onclick = (e) => {
-    if (e.target === modal) {
-      closeGameInviteModal();
-    }
-  };
+  // Close button handler (replace to avoid stale/multiple listeners)
+  const newCloseBtn = closeBtn.cloneNode(true) as HTMLButtonElement;
+  closeBtn.replaceWith(newCloseBtn);
+  newCloseBtn.addEventListener('click', closeGameInviteModal);
 }
 
 async function selectFriend(friendId: string) {
