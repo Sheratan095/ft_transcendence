@@ -172,7 +172,7 @@
   "game.player-defeat": "You lost!",
   "game.draw": "It's a draw!",
   "game.winner": "Game Over! Winner: {{ winner }}",
-  "game.opponent-left": "Your opponent left the game",
+  "game.opponent-left": "Your opponent left the game, you win!",
   "game.timeout": "Time's up! You lost!",
   "game.quit": "You left the game",
   "game.offline-1v1": "Offline 1v1",
@@ -207,7 +207,7 @@
   "game.started": "Game started",
   "game.vs": "vs {{ opponent }}",
   "game.returningToTournament": "{{ msg }} - Returning to tournament in 3 seconds...",
-  "game.opponentQuit": "Opponent quit",
+  "game.opponentQuit": "Opponent quit, you win !",
   "game.matchedWith": "Matched with {{ opponent }}. You are {{ side }}",
   "game.invalidMove": "Invalid move: {{ message }}",
   "game.error": "Error: {{ message }}",
@@ -219,5 +219,7 @@
   "tris.xVictory": "X wins!",
   "tris.oVictory": "O wins!",
   "tris.aiTurn": "AI's turn",
-  "game.aiVictory": "AI wins!"
+  "game.aiVictory": "AI wins!",
+  "tris.unknown": "--------",
+  "cancel": "Cancel"
 }

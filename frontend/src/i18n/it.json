@@ -172,7 +172,7 @@
   "game.player-defeat": "Hai perso !",
   "game.draw": "Pareggio!",
   "game.winner": "Partita Terminata! Vincitore: {{ winner }}",
-  "game.opponent-left": "L'avversario ha lasciato la partita",
+  "game.opponent-left": "L'avversario ha lasciato la partita, hai vinto !",
   "game.timeout": "Tempo scaduto! Hai perso !",
   "game.quit": "Lascia la partita",
   "game.offline-1v1": "Offline 1v1",
@@ -207,7 +207,7 @@
   "game.started": "Partita iniziata",
   "game.vs": "vs {{ opponent }}",
   "game.returningToTournament": "{{ msg }} - Ritorno al torneo tra 3 secondi...",
-  "game.opponentQuit": "L'avversario ha abbandonato",
+  "game.opponentQuit": "L'avversario ha abbandonato, hai vinto !",
   "game.matchedWith": "Abbinato con {{ opponent }}",
   "game.invalidMove": "Mossa non valida: {{ message }}",
   "game.error": "Errore: {{ message }}",
@@ -219,5 +219,7 @@
   "tris.xVictory": "X vince!",
   "tris.oVictory": "O vince!",
   "tris.aiTurn": "Turno dell'IA",
-  "game.aiVictory": "L'IA vince!"
+  "game.aiVictory": "L'IA vince!",
+  "tris.unknown": "--------",
+  "cancel": "Annulla"
 }
