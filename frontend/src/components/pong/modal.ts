@@ -9,6 +9,7 @@ import { closePong, initPong, startMatchmaking, leaveMatchmaking, setReady, getC
 import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
+import { t } from '../../lib/intlayer';
 
 type PongModeType = 'online' | 'offline-1v1' | 'offline-ai' | 'custom' | 'tournament';
 
@@ -564,13 +565,13 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 
 			if (mode === 'online')
 			{
-				if (newStartBtn.textContent === 'Quit matchmaking')
+				if (newStartBtn.textContent === t('game.matchmaking-quit'))
 				{
 					// Tell server to leave matchmaking queue
 					leaveMatchmaking();
-					updatePongStatus('Online - Not in matchmaking');
+					updatePongStatus(t('game.status-online'));
 					// Reset button to 'Start Matchmaking'
-					newStartBtn.textContent = 'Start Matchmaking';
+					newStartBtn.textContent = t('game.matchmaking');
 
 					// Keep original colors for searching state
 					newStartBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
@@ -585,9 +586,9 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				{
 					isCustomGame = false;
 					startMatchmaking();
-					updatePongStatus('Looking for match...');
+					updatePongStatus(t('game.looking-match'));
 	
-					newStartBtn.textContent = 'Quit matchmaking';
+					newStartBtn.textContent = t('game.matchmaking-quit');
 
 					// Reset colors to original
 					newStartBtn.classList.remove('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
@@ -599,12 +600,14 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				if (!currentGameInstance)
 					return;
 
-				if (newStartBtn.textContent === 'Start' || newStartBtn.textContent === 'Continue') {
+				const isStart = newStartBtn.textContent === 'Start' || newStartBtn.textContent === t('start');
+
+				if (isStart || newStartBtn.textContent === 'Continue') {
 					// Logic for starting or resuming the game
 					currentGameInstance.gameManager.enableOfflineInput();
 					currentGameInstance.gameManager.resumeGame(); // Ensure unpaused
 					
-					if (newStartBtn.textContent === 'Start')
+					if (isStart)
 						currentGameInstance.gameManager.activateBall(); // Start ball on click
 
 					updatePongStatus("Game in progress...");
@@ -742,11 +745,11 @@ export async function openPongModal(mode: PongModeType = 'online')
 		if (status)
 		{
 			const modeNames: Record<string, string> = {
-				'online': 'Online - Not in matchmaking',
-				'offline-1v1': 'Offline 1v1',
-				'offline-ai': 'Offline vs Ai',
-				'custom': 'Custom Game',
-				'tournament': 'Tournament'
+				'online': t('game.status-online'),
+				'offline-1v1': t('game.offline-1v1'),
+				'offline-ai': t('game.offline-ai'),
+				'custom': t('game.custom'),
+				'tournament': t('game.tournament')
 			};
 			// Only update status if not a custom/tournament game (those set their own status)
 			if (mode !== 'custom' && mode !== 'tournament')
@@ -764,9 +767,9 @@ export async function openPongModal(mode: PongModeType = 'online')
 			} else {
 				startBtn.classList.remove('hidden');
 				if (mode === 'online')
-					startBtn.textContent = 'Start Matchmaking';
+					startBtn.textContent = t('game.matchmaking');
 				else
-					startBtn.textContent = 'Start';
+					startBtn.textContent = t('start');
 			}
 			// Ensure we reset to starting colors
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
