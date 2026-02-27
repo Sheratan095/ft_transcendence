@@ -586,7 +586,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				{
 					isCustomGame = false;
 					startMatchmaking();
-					updatePongStatus('Looking for match...');
+					updatePongStatus(t('game.looking-match'));
 	
 					newStartBtn.textContent = t('game.matchmaking-quit');
 
@@ -600,12 +600,14 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				if (!currentGameInstance)
 					return;
 
-				if (newStartBtn.textContent === 'Start' || newStartBtn.textContent === 'Continue') {
+				const isStart = newStartBtn.textContent === 'Start' || newStartBtn.textContent === t('start');
+
+				if (isStart || newStartBtn.textContent === 'Continue') {
 					// Logic for starting or resuming the game
 					currentGameInstance.gameManager.enableOfflineInput();
 					currentGameInstance.gameManager.resumeGame(); // Ensure unpaused
 					
-					if (newStartBtn.textContent === 'Start')
+					if (isStart)
 						currentGameInstance.gameManager.activateBall(); // Start ball on click
 
 					updatePongStatus("Game in progress...");
