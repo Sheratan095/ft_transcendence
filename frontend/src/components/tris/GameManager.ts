@@ -10,6 +10,7 @@ import { BoardRenderer } from './game/ui';
 import { getUserId } from '../../lib/auth';
 import { makeTrisMove } from './ws';
 import type { GameState } from './game/physics';
+import { t } from '../../lib/intlayer';
 
 export const TRIS_MODES = {
   ONLINE: 'online',
@@ -73,7 +74,7 @@ export class GameManager {
       case TRIS_MODES.ONLINE:
         this.networkConnector = new NetworkInputController();
         this.networkConnector.onMove(m => this.handleLocalMove(this.userSymbol === 'X' ? 'O' : 'X', m));
-        this.renderer.updateStatus('Online - Not in matchmaking');
+        this.renderer.updateStatus(t('game.status-online'));
         this.renderer.toggleInteraction(false);
         // Attach click handler for sending moves to the server
         this.onlineBoardClickHandler = (e: MouseEvent) => {
@@ -190,11 +191,11 @@ export class GameManager {
 
   private handleGameOver() {
     this.renderer.toggleInteraction(false);
-    let msg = 'Game Over! Draw';
+    let msg = t('game.draw');
     if (this.gameState.winner) {
-      msg = `Game Over! Winner: ${this.gameState.winner}`;
+      msg = t('game.winner', { winner: this.gameState.winner });
       if (this.mode === TRIS_MODES.OFFLINE_AI) {
-        msg = this.gameState.winner === 'X' ? 'You won!' : 'Bot won!';
+        msg = this.gameState.winner === 'X' ? t('game.player-victory') : t('game.opponent-victory');
       }
     }
     this.renderer.updateStatus(msg);
@@ -208,10 +209,10 @@ export class GameManager {
   private handleOnlineGameOver(data: any) {
 	this.renderer.toggleInteraction(false);
 	let message = '';
-	if (data.quit) message = 'Opponent quit';
-	else if (data.timedOut) message = 'Move timeout';
-	else if (data.winner === this.userId) message = 'You won!';
-	else message = 'You lost!';
+	if (data.quit) message = t('game.quit');
+	else if (data.timedOut) message = t('game.timeout');
+	else if (data.winner === this.userId) message = t('game.player-victory');
+	else message =t('game.player-defeat');
 
 	this.renderer.updateStatus(message);
 
@@ -227,15 +228,15 @@ export class GameManager {
     let text = "";
 
     if (this.mode === TRIS_MODES.OFFLINE_AI) {
-      text = turn === "X" ? "You (X)'s turn" : "Ai (O) is thinking...";
+      text = turn === "X" ? t('game.player-turn') : t('game.opponent-turn');
     } else {
-      text = turn === "X" ? "Player X's turn" : "Player O's turn";
+      text = turn === "X" ? t('game.player-turn') : t('game.opponent-turn');
     }
     this.renderer.updateStatus(text);
   }
 
   private updateNetworkStatus() {
-	const status = this.isUserTurn ? 'Your turn!' : 'Opponent\'s turn';
+	const status = this.isUserTurn ? t('game.player-turn') : t('game.opponent-turn');
 	this.renderer.updateStatus(status);
   }
 

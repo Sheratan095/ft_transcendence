@@ -123,7 +123,7 @@ export async function openTrisModal() {
   // Reset UI each time modal opens: re-render buttons, ensure start text and status are correct
   const startBtnPre = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
   if (startBtnPre) {
-    startBtnPre.textContent = currentMode === 'online' ? 'Start Matchmaking' : 'Start';
+    startBtnPre.textContent = currentMode === 'online' ? t('game.matchmaking') : t('start');
     startBtnPre.disabled = false;
     startBtnPre.classList.remove('hidden', 'bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
     startBtnPre.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
@@ -144,7 +144,7 @@ export async function openTrisModal() {
 
   if (currentMode) {
     updateScoreboardNames(currentMode);
-    updateTrisStatus(currentMode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
+    updateTrisStatus(currentMode === 'online' ? t('game.status-online') : t('game.press-start'));
   } else updateTrisStatus('Select mode');
 
   if (!trisInitialized && userId) {
@@ -227,7 +227,7 @@ export function initializeModeSpecificBehaviors(mode: TrisModeType) {
   }
   
   updateScoreboardNames(mode);
-  updateTrisStatus(mode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
+  updateTrisStatus(mode === 'online' ? t('game.status-online') : t('game.pressStart'));
   userReady = false;
   renderAndAttachButtons();
 }
@@ -375,20 +375,20 @@ function updateStartBtnText(btn: HTMLButtonElement) {
     if (gid) {
       if (btn.textContent === 'Quit') return; // Game is running!
       // In online mode with game, show the ready button instead of using main button for ready state
-      btn.textContent = 'Quit';
+      btn.textContent = t('quit');
       try { (btn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
       btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
       btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
     } else {
-      if (btn.textContent === 'Quit matchmaking') return; 
-      btn.textContent = 'Start Matchmaking';
+      if (btn.textContent === t('game.matchmaking-quit')) return; 
+      btn.textContent = t('game.matchmaking');
       btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
       if (readyBtn) readyBtn.classList.add('hidden');
     }
   } else {
     // Offline / AI
     if (btn.textContent !== 'STOP' && btn.textContent !== 'Continue' && btn.textContent !== 'Restart') {
-      btn.textContent = 'Start';
+      btn.textContent = t('start');
       btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
     }
   }
@@ -401,9 +401,9 @@ function handleStartClick() {
   // Restart / Play Again
   if (btnText === 'restart' || btnText === 'play again') {
     if (currentGameManager) currentGameManager.reset();
-    btn.textContent = currentMode === 'online' ? 'Start Matchmaking' : 'Start';
+    btn.textContent = currentMode === 'online' ? t('game.matchmaking') : t('start');
     btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
-    updateTrisStatus(currentMode === 'online' ? 'Online - Not in matchmaking' : 'Press start to play');
+    updateTrisStatus(currentMode === 'online' ? t('game.status-online') : t('game.pressStart'));
     return;
   }
 
@@ -432,16 +432,16 @@ function handleStartClick() {
       cancelCustomGame(gid);
       closeTrisModal();
     } else {
-      if (btnText === 'start matchmaking') {
+      if (btnText === t('game.matchmaking').toLowerCase()) {
         startMatchmaking();
-        updateTrisStatus('Looking for match...');
-        btn.textContent = 'Quit matchmaking';
+        updateTrisStatus(t('game.looking-match'));
+        btn.textContent = t('game.quit');
         btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
         btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       } else {
         stopMatchmaking();
-        updateTrisStatus('Online - Not in matchmaking');
-        btn.textContent = 'Start Matchmaking';
+        updateTrisStatus(t('game.status-online'));
+        btn.textContent = t('game.matchmaking');
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
         btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
       }
@@ -472,7 +472,7 @@ function handleSurrenderClick() {
     quitGame();
   } else {
     stopMatchmaking();
-    updateTrisStatus('Online - Not in matchmaking');
+    updateTrisStatus(t('game.status-online'));
     renderAndAttachButtons();
   }
 }
