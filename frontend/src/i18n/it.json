@@ -182,5 +182,7 @@
   "game.pressStart": "Premi start per giocare",
   "game.looking-match": "In cerca di una partita...",
   "tournament.name": "Nome del torneo",
-  "tournament.start": "Inizia torneo"
+  "tournament.start": "Inizia torneo",
+  "tournament.create-desc": "Scegli un nome per iniziare",
+  "tournament.new": "Nuovo torneo"
 }

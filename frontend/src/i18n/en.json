@@ -182,5 +182,7 @@
   "game.pressStart": "Press start to play",
   "game.looking-match": "Looking for a match...",
   "tournament.name": "Tournament Name",
-  "tournament.start": "Start Tournament"
+  "tournament.start": "Start Tournament",
+  "tournament.create-desc": "Choose a name to get started",
+  "tournament.new": "New Tournament"
 }
