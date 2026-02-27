@@ -164,5 +164,4 @@ EOF
   echo "Created empty $TAILWIND_OUT"
 fi
 
-echo "Running: docker compose up $*"
-docker compose up "$@"
+docker compose up --build "$@"
