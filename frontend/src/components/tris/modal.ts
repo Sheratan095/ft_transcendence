@@ -36,6 +36,7 @@ let trisInitialized = false;
 let userReady = false;
 let pendingGameJoin: string | null = null;
 let customGameOpponentUsername: string | null = null;
+let lastMatchWasMatchmaking = false;
 
 /**
  * Set the friends manager instance (called from main.ts)
@@ -113,7 +114,7 @@ export async function openTrisModal() {
   // Reset ready button to initial state
   const readyBtn = document.getElementById('tris-ready-btn') as HTMLButtonElement | null;
   if (readyBtn) {
-    readyBtn.textContent = '✗ Not Ready';
+    readyBtn.textContent = t('ready.not');
     readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
     readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
     readyBtn.classList.add('hidden');
@@ -151,7 +152,7 @@ export async function openTrisModal() {
 
   if (currentMode) {
     updateScoreboardNames(currentMode);
-    updateTrisStatus((currentMode === 'online' || currentMode === 'custom') ? t('game.status-online') : t('game.press-start'));
+    updateTrisStatus((currentMode === 'online' || currentMode === 'custom') ? t('game.status-online') : t('game.pressStart'));
   } else updateTrisStatus('Select mode');
 
   if (!trisInitialized && userId) {
@@ -236,10 +237,10 @@ export function initializeModeSpecificBehaviors(mode: TrisModeType) {
     const btn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
     if (btn) {
       if (mode === 'online' || mode === 'custom') {
-        btn.textContent = 'Quit';
+        btn.textContent = t('quit');
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
       } else {
-        btn.textContent = 'Restart';
+        btn.textContent = t('restart');
         btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
         btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
       }
@@ -330,22 +331,22 @@ function renderAndAttachButtons() {
       }
 
       const isReady = newReady.textContent?.includes('✓');
-      if (isReady) {
+        if (isReady) {
         // Set not ready
         userReady = false;
         setUserReady(false);
-        newReady.textContent = '✗ Not Ready';
+          newReady.textContent = t('ready.not');
         newReady.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
         newReady.classList.add('dark:bg-red-600', 'bg-red-600');
         // Hide own ready indicator
         const mySymbol = getCurrentSymbol();
         const myReadyEl = document.getElementById(mySymbol === 'X' ? 'tris-left-ready' : 'tris-right-ready');
         if (myReadyEl) myReadyEl.classList.add('hidden');
-      } else {
+        } else {
         // Set ready
         userReady = true;
         setUserReady(true);
-        newReady.textContent = '✓ Ready';
+          newReady.textContent = t('ready.yes');
         newReady.classList.remove('dark:bg-red-600', 'bg-red-600');
         newReady.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
         // Show own ready indicator
@@ -398,9 +399,9 @@ function updateStartBtnText(btn: HTMLButtonElement) {
   
   } else
   if (currentMode === 'online') {
-    if (btn.textContent === 'Play Again') return; 
+    if (btn.textContent === t('playAgain')) return; 
     if (gid) {
-      if (btn.textContent === 'Quit') return; // Game is running!
+      if (btn.textContent === t('quit')) return; // Game is running!
       // In online mode with game, show the ready button instead of using main button for ready state
       btn.textContent = t('quit');
       try { (btn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
@@ -426,7 +427,7 @@ function handleStartClick() {
   if (!btn) return;
   const btnText = btn.textContent?.trim().toLowerCase() || '';
   // Restart / Play Again
-  if (btnText === 'restart' || btnText === 'play again') {
+    if (btnText === 'restart' || btnText === t('restart').toLowerCase() || btnText === 'play again' || btnText === t('playAgain').toLowerCase()) {
     if (currentGameManager) currentGameManager.reset();
     btn.textContent = currentMode === 'online' ? t('game.matchmaking') : t('start');
     btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
@@ -445,7 +446,7 @@ function handleStartClick() {
   }
 
   // Quit
-  if (btnText === 'quit') {
+  if (btnText === 'quit' || btnText === t('quit').toLowerCase()) {
     closeTrisModal();
     return;
   }
@@ -484,16 +485,16 @@ function handleStartClick() {
     // Offline / AI
     if (!currentGameManager) return;
     
-    if (btnText === 'start' || btnText === 'continue') {
+    if (btnText === 'start' || btnText === t('start').toLowerCase() || btnText === 'continue' || btnText === t('continue').toLowerCase()) {
       currentGameManager.resumeGame();
       currentGameManager.updateStatusText();
-      btn.textContent = 'STOP';
+      btn.textContent = t('stop');
       btn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
       btn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-dark');
     } else {
       currentGameManager.pauseGame();
-      updateTrisStatus('Game paused');
-      btn.textContent = 'Continue';
+      updateTrisStatus(t('game.paused'));
+      btn.textContent = t('continue');
       btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-dark');
       btn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-black');
     }
@@ -538,6 +539,9 @@ async function handleTrisEvent(event: string, data: any) {
     
     if (gameId) setCurrentGameId(gameId);
     
+    // mark this as a custom game (not matchmaking)
+    lastMatchWasMatchmaking = false;
+
     updateTrisStatus(`Waiting for ${otherUsername}...`);
     
     // Update scorebar with creator (You/X) and opponent (their name/O)
@@ -639,6 +643,8 @@ async function handleTrisEvent(event: string, data: any) {
       if (leftReady) leftReady.classList.add('hidden');
       if (rightReady) rightReady.classList.add('hidden');
     }
+    // This is a custom-joined game, not matchmaking
+    lastMatchWasMatchmaking = false;
   }
 
   // Handle custom game cancellation - like Pong
@@ -684,6 +690,10 @@ async function handleTrisEvent(event: string, data: any) {
       updateTrisStatus(`Matched with ${opponentUsername || 'Opponent'}. You are ${yourSymbol}`);
       const leftName  = (yourSymbol === 'X') ? 'You (X)' : `${opponentUsername || 'Opponent'} (X)`;
       const rightName = (yourSymbol === 'O') ? 'You (O)' : `${opponentUsername || 'Opponent'} (O)`;
+      // Mark this match as coming from matchmaking
+      lastMatchWasMatchmaking = true;
+      // Clear any stale custom-opponent info when matched via random matchmaking
+      customGameOpponentUsername = null;
       updateScoreboardNames('online', leftName, rightName);
 
       // Reset ready indicators
@@ -711,6 +721,10 @@ async function handleTrisEvent(event: string, data: any) {
 
     const modal = document.getElementById('tris-modal');
     if (modal) {
+      // When a game starts, it's not a custom lobby anymore
+      customGameOpponentUsername = null;
+      // If this game started from matchmaking, preserve that info in lastMatchWasMatchmaking; otherwise clear it
+      // (server events set matchedInRandomGame before gameStarted for matchmaking flows)
       const readyBtn = modal.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
       const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
       if (readyBtn) readyBtn.classList.add('hidden');
@@ -736,15 +750,28 @@ async function handleTrisEvent(event: string, data: any) {
       const mainBtn = modal.querySelector('#tris-start-btn') as HTMLButtonElement | null;
       if (readyBtn) readyBtn.classList.add('hidden');
       if (mainBtn) {
-        // If this was a custom game (we have an opponent name), show 'Quit' like Pong
+        // Determine whether this was a custom game
         const wasCustom = !!customGameOpponentUsername;
-        mainBtn.textContent = wasCustom ? 'Quit' : 'Play Again';
+
+        // For custom games keep Quit; for matchmaking games show Play Again; otherwise show Quit
+        if (wasCustom) {
+          mainBtn.textContent = t('quit');
+        } else if (lastMatchWasMatchmaking) {
+          mainBtn.textContent = t('playAgain');
+        } else {
+          // Non-matchmaking online/offline ends default to Quit
+          mainBtn.textContent = t('quit');
+        }
+
         try { (mainBtn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
         mainBtn.classList.remove('hidden');
         mainBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
         mainBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
-        // For custom games we keep the start/quit semantics; clear opponent name so next open is fresh
+
+        // Clear stored custom opponent so next open is fresh
         if (wasCustom) customGameOpponentUsername = null;
+        // Reset matchmaking flag after showing Play Again / Quit
+        lastMatchWasMatchmaking = false;
       }
     }
   }

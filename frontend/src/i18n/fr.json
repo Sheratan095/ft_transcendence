@@ -212,5 +212,13 @@
   "game.invalidMove": "Coup invalide : {{ message }}",
   "game.error": "Erreur : {{ message }}",
   "game.roundStarting": "Début du round ! Vous jouez contre {{ opponent }}",
-  "game.overWinner": "Partie terminée ! {{ winner }} a gagné."
+  "game.overWinner": "Partie terminée ! {{ winner }} a gagné.",
+
+  "tris.xTurn": "Tour de X",
+  "tris.oTurn": "Tour de O",
+  "tris.xVictory": "X gagne !",
+  "tris.oVictory": "O gagne !",
+  "tris.aiTurn": "Tour de l'IA",
+  "game.aiVictory": "L'IA gagne !"
+
 }

@@ -199,7 +199,7 @@ export class GameManager {
     if (this.gameState.winner) {
       msg = t('game.winner', { winner: this.gameState.winner });
       if (this.mode === TRIS_MODES.OFFLINE_AI) {
-        msg = this.gameState.winner === 'X' ? t('game.player-victory') : t('game.opponent-victory');
+        msg = this.gameState.winner === 'X' ? t('game.player-victory') : t('game.aiVictory');
       }
     }
     this.renderer.updateStatus(msg);
@@ -230,9 +230,10 @@ export class GameManager {
 
     const turn = this.gameState.currentPlayer;
     let text = "";
-
-    if (this.mode === TRIS_MODES.OFFLINE_AI) {
-      text = turn === "X" ? t('game.player-turn') : t('game.opponent-turn');
+    if (this.mode === TRIS_MODES.OFFLINE_1V1) {
+      text = turn === 'X' ? t('tris.xTurn') : t('tris.oTurn');
+    } else if (this.mode === TRIS_MODES.OFFLINE_AI) {
+      text = turn === "X" ? t('game.player-turn') : t('tris.aiTurn');
     } else {
       text = turn === "X" ? t('game.player-turn') : t('game.opponent-turn');
     }

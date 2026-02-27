@@ -212,5 +212,12 @@
   "game.invalidMove": "Invalid move: {{ message }}",
   "game.error": "Error: {{ message }}",
   "game.roundStarting": "Round starting! Playing against {{ opponent }}",
-  "game.overWinner": "Game Over! {{ winner }} won."
+  "game.overWinner": "Game Over! {{ winner }} won.",
+
+  "tris.xTurn": "X's turn",
+  "tris.oTurn": "O's turn",
+  "tris.xVictory": "X wins!",
+  "tris.oVictory": "O wins!",
+  "tris.aiTurn": "AI's turn",
+  "game.aiVictory": "AI wins!"
 }
