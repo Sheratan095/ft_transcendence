@@ -56,6 +56,9 @@ export function openTrisModeModal(onModeSelected?: (mode: TrisModeType) => Promi
 }
 
 export function closeTrisModeModal() {
+  if (getCurrentGameId()) {
+    quitGame();
+  }
   const modeModal = document.getElementById('tris-mode-modal');
   if (modeModal) modeModal.classList.add('hidden');
 }
@@ -627,6 +630,11 @@ async function handleTrisEvent(event: string, data: any) {
     updateTrisStatus('Game was canceled');
     showErrorToast('Game was canceled');
     closeTrisModal();
+  }
+
+  if (event === 'tris.playerQuitCustomGameInLobby') {
+    console.log('Opponent quit custom game in lobby');
+    updateTrisStatus('Opponent quit');
   }
 
   if (event === 'tris.matchedInRandomGame') {

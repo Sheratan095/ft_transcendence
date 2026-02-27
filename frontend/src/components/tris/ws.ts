@@ -61,7 +61,10 @@ export function initTris(userId: string): Promise<WebSocket> {
 						} else if (eventType === 'tris.customGameJoinSuccess') {
 							currentSymbol = 'O';
 						}
-					} else if (eventType === 'tris.gameEnded' || eventType === 'tris.customGameCanceled') {
+					} else if (
+						eventType === 'tris.gameEnded' ||
+						eventType === 'tris.customGameCanceled'
+					) {
 						currentGameId = null;
 						currentSymbol = null;
 					}
