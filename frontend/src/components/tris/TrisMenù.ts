@@ -85,7 +85,7 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
         {
           try {
             await openTrisModal();
-            initializeModeSpecificBehaviors('online');
+            initializeModeSpecificBehaviors('custom');
             await createCustomGame(otherId);
           }
           catch (err) {

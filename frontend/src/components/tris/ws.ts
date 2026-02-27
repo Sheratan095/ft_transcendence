@@ -154,8 +154,8 @@ export function setUserReady(ready: boolean) {
 	}
 }
 
-export function quitGame() {
-	sendTrisCommand('tris.quitGame', { gameId: currentGameId });
+export function quitGame(gameId: string) {
+	sendTrisCommand('tris.quitGame', { gameId });
 }
 
 export function startMatchmaking() {
