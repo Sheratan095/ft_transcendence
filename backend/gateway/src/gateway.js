@@ -258,7 +258,6 @@ await fastify.register(async function (fastify)
 	fastify.get('/pong/stats', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserStatsHandler })
 	fastify.get('/pong/history', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserMatchHistoryHandler })
 	fastify.post('/pong/create-tournament', { schema: { hide: true }, preHandler: authenticateJwt, handler: createTournamentHandler })
-	fastify.get('/pong/get-all-tournaments', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllTournamentsHandler })
 	fastify.post('/pong/join-tournament', { schema: { hide: true }, preHandler: authenticateJwt, handler: joinTournamentHandler })
 	fastify.get('/pong/user-tournaments-participations', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUserTournamentsParticipationsHandler })
 	fastify.get('/pong/tournaments/bracket', { schema: { hide: true }, preHandler: authenticateJwt, handler: getTournamentBracketHandler })
@@ -272,7 +271,7 @@ await fastify.register(async function (fastify)
 	{
 		await fastify.register(import('@fastify/rate-limit'),
 		{
-			max: 20,					// 20 search attempts
+			max: 30,					// 20 search attempts
 			timeWindow: '10 seconds',	// every 10 seconds
 			keyGenerator: (req) => req.user?.id || req.ip
 		});
@@ -280,6 +279,8 @@ await fastify.register(async function (fastify)
 
 	fastify.get('/users/search',{ schema: { hide: true }, preHandler: authenticateJwt, handler: searchUsers });
 	fastify.get('/users/stats',{ schema: { hide: true }, handler: getUsersStats });
+	fastify.get('/pong/get-all-tournaments', { schema: { hide: true }, preHandler: authenticateJwt, handler: getAllTournamentsHandler })
+
 });
 
 // Server startup function with error handling
