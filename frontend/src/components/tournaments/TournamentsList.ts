@@ -235,7 +235,7 @@ async function handleCreateConfirm(): Promise<void> {
 // Auto-refresh helpers
 // ==============================
 
-export function startTournamentAutoRefresh(intervalMs = 500): void {
+export function startTournamentAutoRefresh(intervalMs = 3000): void {
   stopTournamentAutoRefresh();
   tournamentRefreshInterval = window.setInterval(() => {
     // Fire-and-forget; loadTournaments handles its own errors
@@ -257,7 +257,7 @@ export function stopTournamentAutoRefresh(): void {
 document.addEventListener("DOMContentLoaded", () => {
   // Load once immediately, then start periodic refresh
   loadTournaments();
-  startTournamentAutoRefresh(500);
+  startTournamentAutoRefresh();
   // Ensure we stop the interval when navigating away / unloading
   window.addEventListener('beforeunload', () => stopTournamentAutoRefresh());
   // Listeners will be set up when modal is first opened

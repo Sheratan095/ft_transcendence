@@ -1,3 +1,13 @@
 GET error when fetching past games when there are none
 
 Error with default language when entering without cache
+
+Custom game invite modal
+
+Toast errors in username change
+
+Join/left messages [chatService.ts: 335, chat.ts: 470-473]
+
+Offline games: Pause/continue/restart
+
+QUIT btn
