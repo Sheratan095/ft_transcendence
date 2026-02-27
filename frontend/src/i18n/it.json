@@ -200,7 +200,7 @@
   "game.paused": "Partita in pausa"
   ,
   "pong.custom.created": "Partita creata! In attesa di {{ opponent }}...",
-  "pong.custom.joined": "Partita unita! Giocando contro {{ creator }}",
+  "pong.custom.joined": "Ti sei unito alla partita! Giocando contro {{ creator }}",
   "pong.custom.opponentJoined": "L'avversario si è unito! Pronto a iniziare",
   "game.canceled": "La partita è stata annullata",
   "game.playingAs": "Giocando come {{ side }}",

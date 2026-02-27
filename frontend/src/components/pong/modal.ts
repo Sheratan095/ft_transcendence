@@ -179,12 +179,12 @@ export function handleCustomGameCanceled(_data: any)
 	updatePongStatus(t('game.canceled'));
 	showErrorToast(t('game.canceled'));
 
-	// Offer Play Again to the remaining player so they can restart a new match
+	// For custom games, keep only Quit button (do not show Play Again)
 	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
 	if (startBtn)
 	{
 		startBtn.disabled = false;
-		startBtn.textContent = t('playAgain');
+		startBtn.textContent = t('quit');
 		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
 		startBtn.classList.remove('hidden');
@@ -304,15 +304,20 @@ export function handleGameEnded(data: any)
 	{
 		startBtn.disabled = false;
 
-		// For tournament games we auto-close; for all other modes show Play Again
-		if (currentGameMode === 'online' || currentGameMode === 'offline-1v1' || currentGameMode === 'offline-ai' || currentGameMode === 'custom') {
-			startBtn.textContent = t('playAgain');
-			// Reset colors and ensure it's visible
+		// Prefer Quit when this was a custom game (creator or joiner)
+		if (isCustomGame || currentGameMode === 'custom') {
+			startBtn.textContent = t('quit');
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
 			startBtn.classList.remove('hidden');
-		} else {
-			// Keep tournament behavior (modal will auto-close)
+		}
+		else if (currentGameMode === 'online' || currentGameMode === 'offline-1v1' || currentGameMode === 'offline-ai') {
+			startBtn.textContent = t('playAgain');
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+			startBtn.classList.remove('hidden');
+		}
+		else {
 			startBtn.classList.add('hidden');
 		}
 	}
@@ -323,12 +328,19 @@ export function handlePlayerQuitCustomGameInLobby(_data: any)
 	updatePongStatus(t('game.opponentQuit'));
 	// showErrorToast('Opponent quit');
 
-	// If opponent quit while in lobby/ready phase, allow the remaining player to Play Again
+	// For custom games, keep Quit button; otherwise offer Play Again
 	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
 	if (startBtn)
 	{
 		startBtn.disabled = false;
-		startBtn.textContent = t('playAgain');
+		if (isCustomGame)
+		{
+			startBtn.textContent = t('quit');
+		}
+		else
+		{
+			startBtn.textContent = t('playAgain');
+		}
 		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
 		startBtn.classList.remove('hidden');
