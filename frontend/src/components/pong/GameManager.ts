@@ -50,7 +50,9 @@ export class GameManager
 		this.gameState.playerNames = this.config.playerNames;
 		this.gameState.maxScore = this.config.maxScore;
 		this.gameState.gameOver = false;
-		this.gameState.paused = (this.mode !== GAME_MODES.ONLINE);
+		// Online games should start paused until server starts the match;
+		// offline modes (local multiplayer / vs AI) should NOT be paused by default
+		this.gameState.paused = (this.mode === GAME_MODES.ONLINE);
 		this.gameState.winner = null;
 		this.gameState.isCooldown = false;
 		this.gameState.cooldownTimer = 0;
@@ -396,7 +398,8 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 		this.gameState.playerNames = this.config.playerNames;
 		this.gameState.maxScore = this.config.maxScore;
 		this.gameState.gameOver = false;
-		this.gameState.paused = (this.mode !== GAME_MODES.ONLINE);
+		// Keep same behavior when resetting: only online mode remains paused by default
+		this.gameState.paused = (this.mode === GAME_MODES.ONLINE);
 		this.gameState.winner = null;
 		this.gameState.isCooldown = false;
 		this.gameState.cooldownTimer = 0;

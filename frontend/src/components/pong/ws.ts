@@ -190,6 +190,12 @@ function routeEvent(event: string, data: any)
 		case 'pong.playerQuitCustomGameInLobby':
 			modalHandlers.handlePlayerQuitCustomGameInLobby(data);
 			break;
+		case 'pong.playerQuit':
+		case 'pong.playerLeft':
+		case 'pong.playerQuitLobby':
+			// Some servers/versions may emit different event names for a player leaving before start
+			modalHandlers.handlePlayerQuitCustomGameInLobby(data);
+			break;
 		case 'pong.matchedInRandomGame':
 			modalHandlers.handleMatchedInRandomGame(data);
 			break;

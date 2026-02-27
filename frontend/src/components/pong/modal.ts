@@ -14,7 +14,7 @@ import { t } from '../../lib/intlayer';
 type PongModeType = 'online' | 'offline-1v1' | 'offline-ai' | 'custom' | 'tournament';
 
 let currentGameInstance: PongGame | null = null;
-let currentGameMode: 'online' | 'offline-1v1' | 'offline-ai' | 'custom' | 'tournament' = 'online';
+let currentGameMode: PongModeType = 'online';
 let isCustomGame: boolean = false;
 
 // Export game instance for external control
@@ -33,6 +33,14 @@ function updatePongStatus(statusText: string)
 	statusEl.textContent = statusText;
 }
 
+function translateSideName(side?: string | null): string {
+	if (!side) return '';
+	const s = side.toString().toLowerCase();
+	if (s === 'left') return t('side.left');
+	if (s === 'right') return t('side.right');
+	return side;
+}
+
 export function handleCustomGameCreated(data: any)
 {
 	const { opponentUsername, gameId } = data;
@@ -43,7 +51,7 @@ export function handleCustomGameCreated(data: any)
 	
 	isCustomGame = true;
 
-	updatePongStatus(`Game created! Waiting for ${opponentUsername}...`);
+	updatePongStatus(t('pong.custom.created', { opponent: opponentUsername }));
 	
 	// Update scorebar with usernames (creator is left, opponent is right)
 	if (currentGameInstance) {
@@ -58,7 +66,7 @@ export function handleCustomGameCreated(data: any)
 	if (modal) {
 		const btn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
 		if (btn) {
-			btn.textContent = 'Cancel';
+			btn.textContent = t('game.cancel');
 			btn.classList.remove('hidden');
 		}
 		
@@ -79,7 +87,7 @@ export async function handleCustomGameJoinSuccess(data: any)
 	
 	isCustomGame = true;
 	
-	updatePongStatus(`Joined game! Playing against ${creatorUsername}`);
+	updatePongStatus(t('pong.custom.joined', { creator: creatorUsername }));
 	
 	// Explicitly set the game ID
 	if (gameId)
@@ -108,7 +116,7 @@ export async function handleCustomGameJoinSuccess(data: any)
 		{
 			readyBtn.classList.remove('hidden');
 			// Ensure joiner defaults to NOT READY
-			readyBtn.textContent = '✗ Not Ready';
+			readyBtn.textContent = t('ready.not');
 			readyBtn.classList.remove('dark:bg-accent-orange','bg-accent-orange');
 			readyBtn.classList.add('dark:bg-red-600','bg-red-600');
 			if (gameId)
@@ -133,7 +141,7 @@ export function handlePlayerJoinedCustomGame(data: any)
 	
 	isCustomGame = true;
 	
-	updatePongStatus('Opponent joined! Ready to start');
+	updatePongStatus(t('pong.custom.opponentJoined'));
 	
 	// Update scorebar with usernames (creator is left, opponent is right)
 	if (currentGameInstance) {
@@ -168,15 +176,31 @@ export function handlePlayerJoinedCustomGame(data: any)
 
 export function handleCustomGameCanceled(_data: any)
 {
-	updatePongStatus('Game was canceled');
-	showErrorToast('Game was canceled');
+	updatePongStatus(t('game.canceled'));
+	showErrorToast(t('game.canceled'));
+
+	// Offer Play Again to the remaining player so they can restart a new match
+	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
+	if (startBtn)
+	{
+		startBtn.disabled = false;
+		startBtn.textContent = t('playAgain');
+		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+		startBtn.classList.remove('hidden');
+	}
+
+	// Also hide the ready button if present (opponent canceled during lobby)
+	const readyBtnCancel = document.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+	if (readyBtnCancel)
+		readyBtnCancel.classList.add('hidden');
 }
 
 export function handleGameStarted(data: any)
 {
 	const { yourSide, opponentUsername } = data;
-	const sideText = yourSide ? `Playing as ${yourSide}` : 'Game started';
-	updatePongStatus(`${sideText}. ${opponentUsername ? `vs ${opponentUsername}` : ''}`);
+	// When a match starts, show a simple 'in progress' status instead of side/opponent details
+	updatePongStatus(t('game.inprogress'));
 
 	console.log('[Pong] Game started with data:', data);
 
@@ -206,7 +230,7 @@ export function handleGameStarted(data: any)
 			readyBtn.classList.add('hidden');
 		if (mainBtn)
 		{
-			mainBtn.textContent = 'Quit';
+			mainBtn.textContent = t('quit');
 			mainBtn.classList.remove('hidden');
 		}
 	}
@@ -233,22 +257,27 @@ export function handleGameEnded(data: any)
 	let message = '';
 
 	if (quit) {
-		message = 'Opponent quit, you win!';
+		message = `${t('game.opponent-left')} - ${t('game.player-victory')}`;
 	}
 	else if (timedOut) {
-		message = 'Connection timeout';
+		message = t('game.timeout');
 	}
 	else if (winner === user?.id) {
-		message = 'You won!';
+		message = t('game.player-victory');
 	}
 	else if (reason) {
 		message = reason;
 	}
 	else {
-		message = 'You lost!';
+		message = t('game.player-defeat');
 	}
 
 	updatePongStatus(message);
+
+	// Hide ready button when game ends (quit or otherwise) so UI reflects finished match
+	const readyBtnEnded = document.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+	if (readyBtnEnded)
+		readyBtnEnded.classList.add('hidden');
 
 	// if (quit || timedOut) {
 	// 	showErrorToast(message);
@@ -262,7 +291,7 @@ export function handleGameEnded(data: any)
 
 	// Auto-close pong modal after 3 seconds for tournament games
 	if (currentGameMode === 'tournament') {
-		updatePongStatus(message + ' - Returning to tournament in 3 seconds...');
+		updatePongStatus(t('game.returningToTournament', { msg: message }));
 		setTimeout(() => {
 			closePongModal();
 		}, 3000);
@@ -274,22 +303,41 @@ export function handleGameEnded(data: any)
 	if (startBtn)
 	{
 		startBtn.disabled = false;
-		
-		// For custom games, only show Quit button (keep it as is)
-		// For regular online games, show Play Again
-		if (!isCustomGame)
-			startBtn.textContent = 'Play Again';
 
-		// Reset colors if needed (online mode doesn't switch to STOP normally but better safe)
-		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
-		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+		// For tournament games we auto-close; for all other modes show Play Again
+		if (currentGameMode === 'online' || currentGameMode === 'offline-1v1' || currentGameMode === 'offline-ai' || currentGameMode === 'custom') {
+			startBtn.textContent = t('playAgain');
+			// Reset colors and ensure it's visible
+			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+			startBtn.classList.remove('hidden');
+		} else {
+			// Keep tournament behavior (modal will auto-close)
+			startBtn.classList.add('hidden');
+		}
 	}
 }
 
 export function handlePlayerQuitCustomGameInLobby(_data: any)
 {
-	updatePongStatus('Opponent quit');
+	updatePongStatus(t('game.opponentQuit'));
 	// showErrorToast('Opponent quit');
+
+	// If opponent quit while in lobby/ready phase, allow the remaining player to Play Again
+	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
+	if (startBtn)
+	{
+		startBtn.disabled = false;
+		startBtn.textContent = t('playAgain');
+		startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
+		startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
+		startBtn.classList.remove('hidden');
+	}
+
+	// Hide the ready button so the UI doesn't show stale ready state
+	const readyBtnQuit = document.querySelector('#pong-ready-btn') as HTMLButtonElement | null;
+	if (readyBtnQuit)
+		readyBtnQuit.classList.add('hidden');
 }
 
 export function handleMatchedInRandomGame(data: any)
@@ -299,7 +347,7 @@ export function handleMatchedInRandomGame(data: any)
 
 	isCustomGame = false;
 
-	updatePongStatus(`Matched with ${opponentUsername}. You are ${sideText}`);
+	updatePongStatus(t('game.matchedWith', { opponent: opponentUsername, side: sideText }));
 	
 	// Update player names in the game UI: show "You" for local player (not username)
 	if (currentGameInstance) {
@@ -329,13 +377,13 @@ export function handleMatchedInRandomGame(data: any)
 
 export function handleInvalidMove(data: any)
 {
-	updatePongStatus(`Invalid move: ${data.message}`);
+	updatePongStatus(t('game.invalidMove', { message: data.message }));
 	// showErrorToast(`Invalid move: ${data.message}`);
 }
 
 export function handleError(data: any)
 {
-	updatePongStatus(`Error: ${data.message}`);
+	updatePongStatus(t('game.error', { message: data.message }));
 	// showErrorToast(`Error: ${data.message}`);
 }
 
@@ -387,7 +435,7 @@ export async function handleTournamentRoundInfo(data: any)
 	await openPongModal('tournament');
 
 	// Update status with opponent info
-	updatePongStatus(`Round starting! Playing against ${opponentUsername}`);
+	updatePongStatus(t('game.roundStarting', { opponent: opponentUsername }));
 
 	// Update player names in the game UI, showing 'You' for the local player when yourSide is provided
 	if (currentGameInstance)
@@ -421,7 +469,7 @@ export async function handleTournamentRoundInfo(data: any)
 		{
 			readyBtn.classList.remove('hidden');
 			// Default to not ready state
-			readyBtn.textContent = '✗ Not Ready';
+			readyBtn.textContent = t('ready.not');
 			readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
 			readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
 		}
@@ -447,14 +495,14 @@ if (typeof window !== 'undefined')
 	window.addEventListener('pong.gameLocalEnded', (e: any) =>
 	{
 		const { winnerName } = e.detail;
-		updatePongStatus(`Game Over! ${winnerName} won.`);
+		updatePongStatus(t('game.overWinner', { winner: winnerName }));
 		showSuccessToast(`${winnerName} won!`);
 
 		const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
 		if (startBtn)
 		{
 			startBtn.disabled = false;
-			startBtn.textContent = 'Restart';
+			startBtn.textContent = t('restart');
 			// Reset to original colors
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
@@ -498,7 +546,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				// Set not ready
 				console.log('[Pong] Setting not ready');
 				setReady(gameId, false);
-				newReadyBtn.textContent = '✗ Not Ready';
+				newReadyBtn.textContent = t('ready.not');
 				newReadyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
 				newReadyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
 				// Hide own ready flag
@@ -512,7 +560,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 				// Set ready
 				console.log('[Pong] Setting ready');
 				setReady(gameId, true);
-				newReadyBtn.textContent = '✓ Ready';
+				newReadyBtn.textContent = t('ready.yes');
 				newReadyBtn.classList.remove('dark:bg-red-600', 'bg-red-600');
 				newReadyBtn.classList.add('dark:bg-accent-orange', 'bg-accent-orange');
 				// Show own ready flag
@@ -533,13 +581,14 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 
 		newStartBtn.addEventListener('click', () =>
 		{
-			if (newStartBtn.textContent === 'Restart' || newStartBtn.textContent === 'Play Again') {
+			console.log('[Pong] Start button clicked - text:', newStartBtn.textContent, 'currentGameInstance:', currentGameInstance);
+			if (newStartBtn.textContent === 'Restart' || newStartBtn.textContent === 'Play Again' || newStartBtn.textContent === t('restart') || newStartBtn.textContent === t('playAgain')) {
 				openPongModal(mode);
 				return;
 			}
 
 			// Cancel custom game during lobby
-			if (newStartBtn.textContent === 'Cancel')
+			if (newStartBtn.textContent === 'Cancel' || newStartBtn.textContent === t('game.cancel'))
 			{
 				const gameId = getCurrentGameId();
 				if (gameId)
@@ -549,7 +598,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 			}
 
 			// Quit during active game
-			if (newStartBtn.textContent === 'Quit')
+			if (newStartBtn.textContent === 'Quit' || newStartBtn.textContent === t('quit'))
 			{
 				// For custom/tournament games, just close modal. For online, send quit to server
 				if (mode !== 'custom' && mode !== 'tournament')
@@ -602,29 +651,31 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 
 				const isStart = newStartBtn.textContent === 'Start' || newStartBtn.textContent === t('start');
 
-				if (isStart || newStartBtn.textContent === 'Continue') {
+				if (isStart || newStartBtn.textContent === 'Continue' || newStartBtn.textContent === t('continue')) {
 					// Logic for starting or resuming the game
+					console.log('[Pong] isStart detected:', isStart, 'paused before:', currentGameInstance?.gameManager.gameState.paused);
 					currentGameInstance.gameManager.enableOfflineInput();
 					currentGameInstance.gameManager.resumeGame(); // Ensure unpaused
+					console.log('[Pong] paused after resume:', currentGameInstance?.gameManager.gameState.paused);
 					
 					if (isStart)
 						currentGameInstance.gameManager.activateBall(); // Start ball on click
 
-					updatePongStatus("Game in progress...");
+					updatePongStatus(t('game.inprogress'));
 
 					// Update button to 'STOP' and red
-						newStartBtn.textContent = 'STOP';
+						newStartBtn.textContent = t('stop');
 						newStartBtn.classList.remove('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
 						newStartBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 				}
-				else if (newStartBtn.textContent === 'STOP') {
+				else if (newStartBtn.textContent === 'STOP' || newStartBtn.textContent === t('stop')) {
 					// STOP / PAUSE logic
 					currentGameInstance.gameManager.disableOfflineInput();
 					currentGameInstance.gameManager.pauseGame();
-					updatePongStatus('Game paused');
+					updatePongStatus(t('game.paused'));
 
 					// Update button back to 'Continue' and primary colors
-					newStartBtn.textContent = 'Continue';
+					newStartBtn.textContent = t('continue');
 						newStartBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 						newStartBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue','dark:text-black');
 				}
@@ -660,7 +711,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 		if (scoreEl) scoreEl.textContent = '0 - 0';
 		const statusEl = document.getElementById('pong-status');
 		// Don't reset status for custom/tournament games - their handlers set it
-		if (statusEl && mode !== 'custom' && mode !== 'tournament') statusEl.textContent = 'Loading...';
+		if (statusEl && mode !== 'custom' && mode !== 'tournament') statusEl.textContent = t('loading');
 		const leftNameEl = document.getElementById('pong-left-name');
 		if (leftNameEl) {
 			const textSpan = leftNameEl.querySelector('span:first-child');
@@ -718,7 +769,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 					left: mode === 'offline-1v1' ? 'Player left' : (mode === 'offline-ai' ? 'You' : '--------'),
 					right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Ai' : '--------')
 				},
-				maxScore: 5,
+				maxScore: 1, // to do back to 11
 				aiDifficulty: 'medium'
 			};
 
@@ -746,14 +797,14 @@ export async function openPongModal(mode: PongModeType = 'online')
 		{
 			const modeNames: Record<string, string> = {
 				'online': t('game.status-online'),
-				'offline-1v1': t('game.offline-1v1'),
-				'offline-ai': t('game.offline-ai'),
+				'offline-1v1': t('game.offline-status'),
+				'offline-ai': t('game.ai-status'),
 				'custom': t('game.custom'),
 				'tournament': t('game.tournament')
 			};
 			// Only update status if not a custom/tournament game (those set their own status)
 			if (mode !== 'custom' && mode !== 'tournament')
-				status.textContent = modeNames[mode] || 'Pong Game';
+				status.textContent = modeNames[mode] || t('pong.game');
 		}
 
 		// Reset start button for new game
@@ -782,7 +833,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 		{
 			if (mode === 'online')
 			{
-				readyBtn.textContent = '✗ Not Ready';
+				readyBtn.textContent = t('ready.not');
 				readyBtn.classList.remove('dark:bg-accent-orange', 'bg-accent-orange');
 				readyBtn.classList.add('dark:bg-red-600', 'bg-red-600');
 				readyBtn.classList.add('hidden'); // Hidden until game is created
@@ -822,7 +873,7 @@ export function closePongModal()
 		// Reset button state on close for next time
 		const startBtn = modal.querySelector('#pong-btn') as HTMLButtonElement | null;
 		if (startBtn) {
-			startBtn.textContent = 'Start';
+			startBtn.textContent = t('start');
 			startBtn.disabled = false;
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
