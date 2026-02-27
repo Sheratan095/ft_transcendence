@@ -102,6 +102,17 @@ Response:
 }
 \`\`\`
 
+- **tris.userNotReady** - Set user not ready status
+\`\`\`json
+{
+  "event": "tris.userNotReady",
+  "data": {
+	"gameId": "some-game-id",
+	"readyStatus": false
+  }
+}
+\`\`\`
+
 - **tris.joinMatchmaking** - Join the matchmaking queue
 \`\`\`json
 {

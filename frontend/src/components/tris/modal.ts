@@ -5,11 +5,12 @@
 
 import { showErrorToast, showSuccessToast } from '../shared/Toast';
 import { t } from '../../lib/intlayer';
-import { getUserId, getUser } from '../../lib/auth';
+import { getUserId, getUser, isLoggedInClient } from '../../lib/auth';
 import { goToRoute } from '../../spa';
 import { 
 initTris, 
 closeTris, 
+isTrisConnected,
 setCurrentGameId, 
 getCurrentGameId, 
 joinCustomGame, 
@@ -192,8 +193,21 @@ export function closeTrisModal() {
 
 export async function openTrisModalAndJoinGame(gameId: string) {
   currentMode = 'online';
-  pendingGameJoin = gameId;
-  await openTrisModal();
+  if (!isTrisConnected()) {
+    if (!isLoggedInClient())
+      throw new Error('Not logged in');
+    try {
+      await initTris(getUserId() as string);
+    } catch (err) {
+      console.error('[TRIS WS] Failed to connect before joining custom game:', err);
+      throw err;
+    }
+  }
+
+  setTrisEventCallback(handleTrisEvent);
+  trisInitialized = true;
+  pendingGameJoin = null;
+  joinCustomGame(gameId);
 }
 
 /**
