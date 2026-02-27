@@ -14,12 +14,15 @@ import { t } from '../../lib/intlayer';
 
 export const TRIS_MODES = {
   ONLINE: 'online',
+  CUSTOM: 'custom',
   OFFLINE_1V1: 'offline-1v1',
   OFFLINE_AI: 'offline-ai'
 };
 
+export type TrisGameMode = typeof TRIS_MODES[keyof typeof TRIS_MODES];
+
 export class GameManager {
-  private mode: string;
+  private mode: TrisGameMode;
   private gameState: GameState;
   private renderer: BoardRenderer;
   private playerXController: InputController | null = null;
@@ -35,7 +38,7 @@ export class GameManager {
 
   private onGameEndedCallback?: (result: string) => void;
 
-  constructor(mode: string) {
+  constructor(mode: TrisGameMode) {
     this.mode = mode;
     this.userId = getUserId();
     this.gameState = Physics.initGameState();
@@ -72,6 +75,7 @@ export class GameManager {
         break;
 
       case TRIS_MODES.ONLINE:
+      case TRIS_MODES.CUSTOM:
         this.networkConnector = new NetworkInputController();
         this.networkConnector.onMove(m => this.handleLocalMove(this.userSymbol === 'X' ? 'O' : 'X', m));
         this.renderer.updateStatus(t('game.status-online'));
@@ -97,7 +101,7 @@ export class GameManager {
    * Main incoming move handler for local/offline modes
    */
   private async handleLocalMove(player: string, position: number) {
-    if (this.mode === TRIS_MODES.ONLINE) {
+    if (this.mode === TRIS_MODES.ONLINE || this.mode === TRIS_MODES.CUSTOM) {
       // Logic handled via WebSocket in handleNetworkEvent
       return;
     }
@@ -137,7 +141,7 @@ export class GameManager {
    * External event router for Online mode (connected from modal/ws)
    */
   public handleNetworkEvent(event: string, data: any) {
-	if (this.mode !== TRIS_MODES.ONLINE) return;
+  if (this.mode !== TRIS_MODES.ONLINE && this.mode !== TRIS_MODES.CUSTOM) return;
 
 	switch (event) {
 	  case 'tris.gameStarted':
