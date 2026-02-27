@@ -129,6 +129,7 @@ export async function openTrisModal() {
   const startBtnPre = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
   if (startBtnPre) {
     startBtnPre.textContent = currentMode === 'online' ? t('game.matchmaking') : t('start');
+    try { (startBtnPre as HTMLButtonElement).dataset.action = ''; } catch (e) {}
     startBtnPre.disabled = false;
     startBtnPre.classList.remove('hidden', 'bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
     startBtnPre.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black', 'text-white');
@@ -143,6 +144,7 @@ export async function openTrisModal() {
   // Explicitly ensure start button is visible after rendering
   const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
   if (startBtn) {
+    try { (startBtn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
     startBtn.classList.remove('hidden');
     startBtn.disabled = false;
   }
@@ -173,6 +175,11 @@ export async function openTrisModal() {
 export function closeTrisModal() {
   const modal = document.getElementById('tris-modal');
   if (modal) modal.classList.add('hidden');
+
+  const startBtn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
+  if (startBtn) {
+    try { (startBtn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
+  }
   
   setCurrentGameId(null);
 
@@ -385,6 +392,8 @@ function updateStartBtnText(btn: HTMLButtonElement) {
   const modal = document.getElementById('tris-modal');
   const readyBtn = modal?.querySelector('#tris-ready-btn') as HTMLButtonElement | null;
 
+  try { (btn as HTMLButtonElement).dataset.action = ''; } catch (e) {}
+
   if ((currentMode === 'online' || currentMode === 'custom') && gid) {
   
   } else
@@ -442,6 +451,7 @@ function handleStartClick() {
   }
 
   if (currentMode === 'online') {
+    console.log('[Tris Modal] Start matchmaking clicked');
     const gid = getCurrentGameId();
     if (gid) {
       // Game is active, quit
