@@ -163,7 +163,7 @@ export const	addUserToChat = async (req, reply) =>
 		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
 
 		// Add system message to chat and notify chat
-		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, userId, fromUsername, chatDb, timestamp);
+		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, userId, fromUsername, chatDb, timestamp, await chatDb.getChatName(chatId));
 
 		// Add the user to the chat
 		await chatDb.addUserToChat(chatId, toUserId, timestamp);
@@ -289,7 +289,7 @@ export const	leaveGroupChat = async (req, reply) =>
 		// Add system message to chat and notify chat
 		const	username = await chatConnectionManager.getUsernameFromCache(userId, true);
 
-		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb, timestamp);
+		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb, timestamp, await chatDb.getChatName(chatId));
 
 		console.log(`[CHAT] User ${userId} left group chat ${chatId}`);
 

@@ -172,6 +172,7 @@ Response (acknowledgment to sender):
     "userId": "user456", // Empty for system messages
     "username": "jane_smith", // Empty for system messages
     "messageId": "msg123",
+    "chatName": "Wonderful Chat",
     "message": "User jane_smith has been added to the chat by Alice9023.",
     "timestamp": "2025-11-19T10:30:00.000Z",
   }
