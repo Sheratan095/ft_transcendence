@@ -89,9 +89,9 @@ class	ChatConnectionManager
 		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage', timestamp);
 	}
 
-	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb, timestamp)
+	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb, timestamp, chatName)
 	{
-		const	message = `User ${leftUsername} has left the chat.`;
+		const	message = `${leftUsername}`;
 
 		const	messageId = await chatDb.addMessageToChat(chatId, null, message, timestamp, 'user_leave');
 
@@ -103,6 +103,7 @@ class	ChatConnectionManager
 			messageId: messageId,
 			message: message,
 			timestamp: timestamp,
+			chatName: chatName,
 		};
 
 		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage');

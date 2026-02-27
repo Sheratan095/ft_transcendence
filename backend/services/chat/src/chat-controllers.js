@@ -289,7 +289,7 @@ export const	leaveGroupChat = async (req, reply) =>
 		// Add system message to chat and notify chat
 		const	username = await chatConnectionManager.getUsernameFromCache(userId, true);
 
-		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb, timestamp);
+		await chatConnectionManager.sendUserLeaveToChat(chatId, userId, username, chatDb, timestamp, await chatDb.getChatName(chatId));
 
 		console.log(`[CHAT] User ${userId} left group chat ${chatId}`);
 
