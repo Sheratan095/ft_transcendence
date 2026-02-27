@@ -283,7 +283,7 @@ function handleSystemMessage(data: any) {
   const ev = messageData.event || messageData.type || null;
   if (ev === 'userJoin' || ev === 'userLeave') {
     const members = chatMembers.get(chatId) || [];
-    //USER LEFT
+    // message.data is now just the username of the new user 
 
     if (ev === 'userJoin' && messageData.userId) {
       const exists = members.find((m: any) => String(m.userId) === String(messageData.userId));
@@ -330,9 +330,10 @@ function handleSystemMessage(data: any) {
     // If not viewing this chat, show a toast
     if (currentChatId !== chatId) {
       const chat = chats.find(c => c.id === chatId);
-      const chatName = chat ? getChatDisplayName(chat) : t('toast.chat.aChat');
+      const chatName = messageData.chatName || (chat ? getChatDisplayName(chat) : t('toast.chat.aChat'));
       const emoji = ev === 'userJoin' ? '➕' : '➖';
-      showToast(t('toast.chat.systemEvent', { emoji, chat: chatName, message: messageData.message }), 'info', {
+      const newMessage = ev === 'userJoin' ? `${messageData.username} joined.` : `${messageData.username} left the chat.`;
+      showToast(t('toast.chat.systemEvent', { emoji, chat: chatName, message: newMessage }), 'info', {
         duration: 4000,
         position: 'top-right',
         onClick: () => {

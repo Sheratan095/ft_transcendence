@@ -163,7 +163,7 @@ export const	addUserToChat = async (req, reply) =>
 		const	fromUsername = await chatConnectionManager.getUsernameFromCache(userId, true);
 
 		// Add system message to chat and notify chat
-		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, userId, fromUsername, chatDb, timestamp);
+		await chatConnectionManager.sendUserJoinToChat(chatId, toUserId, toUsername, userId, fromUsername, chatDb, timestamp, await chatDb.getChatName(chatId));
 
 		// Add the user to the chat
 		await chatDb.addUserToChat(chatId, toUserId, timestamp);

@@ -68,9 +68,10 @@ class	ChatConnectionManager
 
 	// Send system message to chat members
 	// excludeUserId: optional user to exclude from receiving the message (e.g., newly added user)
-	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedById, invitedByUsername, chatDb, timestamp)
+	async	sendUserJoinToChat(chatId, newUserId, newUsername, invitedById, invitedByUsername, chatDb, timestamp, chatName)
 	{
-		const	message = `User ${newUsername} has been added to the chat by ${invitedByUsername}.`;
+		// It's just the new username, the inviter is excluded for better traduction
+		const	message = `${newUsername}`;
 
 		const	messageId = await chatDb.addMessageToChat(chatId, null, message, timestamp, 'user_join');
 
@@ -79,13 +80,13 @@ class	ChatConnectionManager
 			chatId: chatId,
 			userId: newUserId,
 			username: newUsername,
+			chatName: chatName,
 			messageId: messageId,
 			message: message,
 			timestamp: timestamp,
 		};
 
 		await this.#dispatchEventToChat(chatId, data, chatDb, false, 'chat.systemMessage', timestamp);
-	
 	}
 
 	async	sendUserLeaveToChat(chatId, leftUserId, leftUsername, chatDb, timestamp)
