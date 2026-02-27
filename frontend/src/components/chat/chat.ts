@@ -463,9 +463,15 @@ export async function renderMessages() {
     const isPrivate = msg.isPrivate || false;
     const isSystem = msg.isSystem || senderId === 'system' || senderId === null;
 
-    if (isSystem) {
+    if (isSystem)
+    {
+      let translatedContent = msg.content;
+      if (msg.type === 'user_join')
+        translatedContent += ' joined the chat';
+      if (msg.type === 'user_leave')
+        translatedContent += ' left the chat';
       messageDiv.className = 'message message-system text-center mx-auto bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
-      messageDiv.innerHTML = `<div class="message-content">${escapeHtml(msg.content)}</div>`;
+      messageDiv.innerHTML = `<div class="message-content">${escapeHtml(translatedContent)}</div>`;
       messagesContainer.appendChild(messageDiv);
       return;
     }
