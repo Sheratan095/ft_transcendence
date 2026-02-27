@@ -275,7 +275,8 @@ function handleSystemMessage(data: any) {
     senderId: 'system',
     content: messageData.message,
     createdAt: messageData.timestamp,
-    isSystem: true
+    isSystem: true,
+    type: messageData.event || messageData.type || null
   });
 
   refreshCurrentChat(chatId);

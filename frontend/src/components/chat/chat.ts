@@ -466,9 +466,9 @@ export async function renderMessages() {
     if (isSystem)
     {
       let translatedContent = msg.content;
-      if (msg.type === 'user_join')
+      if (msg.type === 'user_join' || msg.type === 'userJoin')
         translatedContent += ' joined the chat';
-      if (msg.type === 'user_leave')
+      if (msg.type === 'user_leave' || msg.type === 'userLeave')
         translatedContent += ' left the chat';
       messageDiv.className = 'message message-system text-center mx-auto bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
       messageDiv.innerHTML = `<div class="message-content">${escapeHtml(translatedContent)}</div>`;
