@@ -176,7 +176,7 @@
   "game.timeout": "Temps écoulé ! Vous avez perdu !",
   "game.quit": "Vous avez quitté la partie",
   "game.offline-1v1": "Offline 1v1",
-  "game.offline-ai": "Offline vs Ai",
+  "game.offline-ai": "Offline vs IA",
   "game.custom": "Partie personnalisée",
   "game.tournament": "Partie de tournoi",
   "game.pressStart": "Appuyez sur commencer pour jouer",
@@ -194,8 +194,8 @@
   "loading": "Chargement...",
   "pong.game": "Jeu Pong"
   ,
-  "game.offline-status": "Player X/O Tourn",
-  "game.ai-status": "Your / ai'tourn.",
+  "game.offline-status": "hors ligne 1vs1",
+  "game.ai-status": "hors ligne vs IA",
   "game.inprogress": "Partie en cours...",
   "game.paused": "Partie en pause"
   ,

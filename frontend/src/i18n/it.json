@@ -194,8 +194,8 @@
   "loading": "Caricamento...",
   "pong.game": "Gioco Pong"
   ,
-  "game.offline-status": "Player X/O Tourn",
-  "game.ai-status": "Your / ai'tourn.",
+  "game.offline-status": "offline 1vs1",
+  "game.ai-status": "offline vs IA",
   "game.inprogress": "Partita in corso...",
   "game.paused": "Partita in pausa"
   ,
