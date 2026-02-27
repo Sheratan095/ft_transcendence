@@ -153,7 +153,9 @@ export async function openTrisModal() {
   if (currentMode) {
     updateScoreboardNames(currentMode);
     updateTrisStatus((currentMode === 'online' || currentMode === 'custom') ? t('game.status-online') : t('game.pressStart'));
-  } else updateTrisStatus(t('game.status-offline'));
+  } else {
+    updateTrisStatus(t('game.status-offline'));
+  }
 
   if (!trisInitialized && userId) {
     try {
@@ -425,13 +427,20 @@ function updateStartBtnText(btn: HTMLButtonElement) {
 function handleStartClick() {
   const btn = document.getElementById('tris-start-btn') as HTMLButtonElement | null;
   if (!btn) return;
+
+  if (!currentMode) {
+    console.warn('[Tris Modal] No mode selected');
+    return;
+  }
+
   const btnText = btn.textContent?.trim().toLowerCase() || '';
   // Restart / Play Again
-    if (btnText === t('restart').toLowerCase() || btnText === t('playAgain').toLowerCase()) {
+  if (btnText === t('restart').toLowerCase() || btnText === t('playAgain').toLowerCase()) {
     if (currentGameManager) currentGameManager.reset();
     btn.textContent = currentMode === 'online' ? t('game.matchmaking') : t('start');
     btn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white', 'bg-accent-orange', 'dark:bg-accent-orange');
     updateTrisStatus((currentMode === 'online' || currentMode === 'custom') ? t('game.status-online') : t('game.pressStart'));
+    updateScoreboardNames(currentMode);
     return;
   }
 
@@ -738,6 +747,11 @@ async function handleTrisEvent(event: string, data: any) {
   }
 
   if (event === 'tris.gameEnded') {
+    // Process GameManager event first so state is updated
+    if (currentGameManager) {
+      currentGameManager.handleNetworkEvent(event, data);
+    }
+
     // Hide ready indicators
     const leftReady  = document.getElementById('tris-left-ready');
     const rightReady = document.getElementById('tris-right-ready');
@@ -776,7 +790,7 @@ async function handleTrisEvent(event: string, data: any) {
     }
   }
 
-  if (currentGameManager) {
+  if (event !== 'tris.gameEnded' && currentGameManager) {
     currentGameManager.handleNetworkEvent(event, data);
   }
 }
