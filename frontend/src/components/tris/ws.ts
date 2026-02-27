@@ -53,7 +53,14 @@ export function initTris(userId: string): Promise<WebSocket> {
 					if (eventType === 'tris.matchedInRandomGame' || eventType === 'tris.gameStarted' || 
 						eventType === 'tris.customGameCreated' || eventType === 'tris.customGameJoinSuccess') {
 						if (data.gameId) currentGameId = data.gameId;
-						if (data.yourSymbol) currentSymbol = data.yourSymbol;
+
+						if (data.yourSymbol) {
+							currentSymbol = data.yourSymbol;
+						} else if (eventType === 'tris.customGameCreated') {
+							currentSymbol = 'X';
+						} else if (eventType === 'tris.customGameJoinSuccess') {
+							currentSymbol = 'O';
+						}
 					} else if (eventType === 'tris.gameEnded' || eventType === 'tris.customGameCanceled') {
 						currentGameId = null;
 						currentSymbol = null;

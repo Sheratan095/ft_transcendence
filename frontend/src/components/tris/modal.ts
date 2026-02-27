@@ -429,6 +429,7 @@ function handleStartClick() {
     if (gid) {
       // Game is active, quit
       quitGame();
+      cancelCustomGame(gid);
       closeTrisModal();
     } else {
       if (btnText === 'start matchmaking') {
