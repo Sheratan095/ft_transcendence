@@ -7,7 +7,3 @@ Custom game invite modal
 Toast errors in username change
 
 Join/left messages [chatService.ts: 335, chat.ts: 470-473]
-
-Offline games: Pause/continue/restart
-
-QUIT btn

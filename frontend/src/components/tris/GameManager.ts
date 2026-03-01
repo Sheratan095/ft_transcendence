@@ -52,7 +52,7 @@ export class GameManager {
   }
 
   private initializeMode(): void {
-    this.renderer.updateStatus('Initializing mode...');
+    this.renderer.updateStatus(t('game.inprogress'));
     
     switch (this.mode) {
       case TRIS_MODES.OFFLINE_1V1:
@@ -60,7 +60,7 @@ export class GameManager {
         this.playerOController = new LocalInputController();
         this.playerXController.onMove(m => this.handleLocalMove('X', m));
         this.playerOController.onMove(m => this.handleLocalMove('O', m));
-        this.renderer.updateStatus('Press Start to play');
+        this.renderer.updateStatus(t('game.pressStart'));
         this.renderer.toggleInteraction(false);
         break;
 
@@ -69,7 +69,7 @@ export class GameManager {
         this.playerOController = new AIController(this.gameState, 'O');
         this.playerXController.onMove(m => this.handleLocalMove('X', m));
         this.playerOController.onMove(m => this.handleLocalMove('O', m));
-        this.renderer.updateStatus('Press Start to play');
+        this.renderer.updateStatus(t('game.pressStart'));
 		
         this.renderer.toggleInteraction(false);
         break;
@@ -199,7 +199,7 @@ export class GameManager {
     if (this.gameState.winner) {
       msg = t('game.winner', { winner: this.gameState.winner });
       if (this.mode === TRIS_MODES.OFFLINE_AI) {
-        msg = this.gameState.winner === 'X' ? t('game.player-victory') : t('game.opponent-victory');
+        msg = this.gameState.winner === 'X' ? t('game.player-victory') : t('game.aiVictory');
       }
     }
     this.renderer.updateStatus(msg);
@@ -211,14 +211,15 @@ export class GameManager {
   }
 
   private handleOnlineGameOver(data: any) {
-	this.renderer.toggleInteraction(false);
-	let message = '';
-	if (data.quit) message = t('game.quit');
-	else if (data.timedOut) message = t('game.timeout');
-	else if (data.winner === this.userId) message = t('game.player-victory');
-	else message =t('game.player-defeat');
+  this.renderer.toggleInteraction(false);
+  let message = '';
+  // If the server reports a quit, that means the opponent left the match
+  if (data.quit) message = t('game.opponent-left');
+  else if (data.timedOut) message = t('game.timeout');
+  else if (data.winner === this.userId) message = t('game.player-victory');
+  else message = t('game.player-defeat');
 
-	this.renderer.updateStatus(message);
+  this.renderer.updateStatus(message);
 
     if (this.onGameEndedCallback) {
       this.onGameEndedCallback(message);
@@ -230,9 +231,10 @@ export class GameManager {
 
     const turn = this.gameState.currentPlayer;
     let text = "";
-
-    if (this.mode === TRIS_MODES.OFFLINE_AI) {
-      text = turn === "X" ? t('game.player-turn') : t('game.opponent-turn');
+    if (this.mode === TRIS_MODES.OFFLINE_1V1) {
+      text = turn === 'X' ? t('tris.xTurn') : t('tris.oTurn');
+    } else if (this.mode === TRIS_MODES.OFFLINE_AI) {
+      text = turn === "X" ? t('game.player-turn') : t('tris.aiTurn');
     } else {
       text = turn === "X" ? t('game.player-turn') : t('game.opponent-turn');
     }
