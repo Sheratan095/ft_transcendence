@@ -27,7 +27,9 @@ import {
 import { t } from '../../lib/intlayer';
 import { showSuccessToast, showErrorToast } from '../shared/Toast';
 import { sendGameInvite as sendPongInvite } from '../pong/ws';
+import { openPongModal } from '../pong/modal';
 import { createCustomGame as createTrisCustomGame } from '../tris/ws';
+import { openTrisModal, initializeModeSpecificBehaviors } from '../tris/modal';
 
 // Re-export for backward compatibility
 export { sendChatInvite } from './chatService';
@@ -282,6 +284,8 @@ async function selectChat(chatId: string) {
           pongBtn.addEventListener('click', async () => {
             if (!chat.otherUserId) return;
             try {
+              closeChatModal();
+              await openPongModal('online');
               const ok = await sendPongInvite(chat.otherUserId);
                   if (ok) showSuccessToast(t('toast.pongInviteSent', { user: chat.otherUserId }));
                   else showErrorToast(t('toast.pongInviteFailed'));
@@ -305,10 +309,13 @@ async function selectChat(chatId: string) {
             <img src="/assets/tris.svg" alt="Tris" class="w-5 h-5 object-contain" />
             <span class="sr-only">Tris</span>
           `;
-          trisBtn.addEventListener('click', () => {
+          trisBtn.addEventListener('click', async () => {
             if (!chat.otherUserId) return;
                 try {
-                  createTrisCustomGame(chat.otherUserId);
+                  closeChatModal();
+                  initializeModeSpecificBehaviors('custom');
+                  await openTrisModal();
+                  await createTrisCustomGame(chat.otherUserId);
                   showSuccessToast(t('toast.trisInviteSent', { user: chat.otherUserId }));
                 } catch (err) {
                   console.error('Tris invite error', err);
