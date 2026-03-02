@@ -276,5 +276,6 @@
   "profile.usernameReserved": "Le nom d'utilisateur ne peut pas contenir de mots réservés.",
   "profile.usernameUpdateFailed": "La mise à jour du nom d'utilisateur a échoué.",
   "profile.usernameTaken": "Nom d'utilisateur déjà pris.",
-  "profile.usernameUpdateError": "La mise à jour du nom d'utilisateur a échoué. Veuillez réessayer."
+  "profile.usernameUpdateError": "La mise à jour du nom d'utilisateur a échoué. Veuillez réessayer.",
+  "profile.usernameInvalid": "Nom d'utilisateur invalide. Veuillez réessayer."
 }

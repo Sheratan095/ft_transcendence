@@ -277,5 +277,6 @@
   "profile.usernameReserved": "Username cannot contain reserved words.",
   "profile.usernameUpdateFailed": "Failed to update username.",
   "profile.usernameTaken": "Username already taken.",
-  "profile.usernameUpdateError": "Failed to update username. Please try again."
+  "profile.usernameUpdateError": "Failed to update username. Please try again.",
+  "profile.usernameInvalid": "Invalid username. Please try again."
 }

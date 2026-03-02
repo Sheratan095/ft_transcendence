@@ -276,5 +276,6 @@
   "profile.usernameReserved": "Il nome utente non può contenere parole riservate.",
   "profile.usernameUpdateFailed": "Aggiornamento del nome utente fallito.",
   "profile.usernameTaken": "Nome utente già in uso.",
-  "profile.usernameUpdateError": "Aggiornamento del nome utente fallito. Riprova."
+  "profile.usernameUpdateError": "Aggiornamento del nome utente fallito. Riprova.",
+  "profile.usernameInvalid": "Nome utente non valido. Riprova."
 }
