@@ -193,7 +193,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
           
           // Validate username format (letters, numbers, _, .)
           if (!/^[a-zA-Z0-9_.]+$/.test(newUsername)) {
-            showErrorToast('Username can only contain letters, numbers, underscores, and periods', { duration: 4000, position: 'top-right' });
+            showErrorToast(t('profile.usernameInvalid'), { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);
@@ -219,11 +219,11 @@ export async function renderProfileCard(container: HTMLElement | null) {
             if (!res.ok)
             {
               if (res.status === 429)
-                showErrorToast('Username cannot contain reserved words.', { duration: 4000, position: 'top-right' });
+                showErrorToast(t('profile.usernameReserved'), { duration: 4000, position: 'top-right' });
               else if (res.status === 400)
-                showErrorToast('Failed to update username.', { duration: 4000, position: 'top-right' });
+                showErrorToast(t('profile.usernameUpdateFailed'), { duration: 4000, position: 'top-right' });
               else if (res.status === 409)
-                showErrorToast('Username already taken.', { duration: 4000, position: 'top-right' });
+                showErrorToast(t('profile.usernameTaken'), { duration: 4000, position: 'top-right' });
             }
             
             const responseBody = await res.json();
@@ -241,7 +241,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
             }
           } catch (err) {
             console.error('Failed to update username:', err);
-            alert(t('profile.usernameUpdateError'));
+            showErrorToast(t('profile.usernameUpdateError'), { duration: 4000, position: 'top-right' });
           }
           
           input.replaceWith(username);
