@@ -46,12 +46,26 @@ export function attachRegister(callbacks?: RegisterFormCallbacks): void {
     ev.preventDefault();
     hideError(errorEl);
 
-    const username = usernameInput.value.trim();
+    const rawUsername = usernameInput.value.trim();
+    const username = rawUsername.toLocaleLowerCase();
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
     if (!username || !email || !password) {
       showError(errorEl, 'Enter username, email and password.');
+      return;
+    }
+
+    // Enforce same constraints as change-username flow:
+    // - length between 2 and 20
+    // - only letters, numbers, underscores and dots
+    if (username.length < 2 || username.length > 20) {
+      showError(errorEl, 'Username must be between 2 and 20 characters.');
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_.]+$/.test(username)) {
+      showError(errorEl, 'Username may only contain letters, numbers, underscores and dots.');
       return;
     }
 
