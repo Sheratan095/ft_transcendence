@@ -4,6 +4,7 @@
 
 import { loadTournaments } from './TournamentsList';
 import { getUserId } from '../../lib/auth';
+import { t } from '../../lib/intlayer';
 
 // -------------------- Types --------------------
 
@@ -156,7 +157,7 @@ export async function updateBracketInModal(tournamentId: string, bracketInfo: Br
 		if (container) {
 			const errorEl = document.createElement('p');
 			errorEl.className = 'text-red-500 font-bold italic uppercase text-sm m-auto select-none p-4';
-			errorEl.textContent = 'Error rendering bracket. Check console.';
+			errorEl.textContent = t('tournament.bracketError');
 			container.innerHTML = '';
 			container.appendChild(errorEl);
 		}
@@ -179,7 +180,7 @@ export async function updateCooldownInModal(tournamentId: string, cooldownInfo: 
 	}
 
 	const roundNum = cooldownInfo.round ?? '';
-	if (roundEl) roundEl.textContent = roundNum ? `Round ${roundNum} in` : 'Next round in';
+	if (roundEl) roundEl.textContent = roundNum ? t('tournament.roundIn', { n: roundNum }) : t('tournament.nextRoundIn');
 	let seconds = Math.ceil(cooldownInfo.secondsLeft);
 	if (timerEl) timerEl.textContent = String(seconds);
 	overlay.classList.remove('hidden');
@@ -228,16 +229,16 @@ function _setStatusBadge(status: string) {
 		case 'OPEN':
 		case 'WAITING':
 			el.classList.add('bg-green-500', 'text-white');
-			el.textContent = "Waiting for players";
+			el.textContent = t('tournament.statusWaiting');
 			break;
 		case 'IN_PROGRESS':
 		case 'STARTED':
 			el.classList.add('bg-yellow-400', 'text-black');
-			el.textContent = "In progress";
+			el.textContent = t('tournament.statusInProgress');
 			break;
 		case 'FINISHED':
 			el.classList.add('bg-gray-400', 'text-white');
-			el.textContent = "Finished";
+			el.textContent = t('tournament.statusFinished');
 			break;
 		default:
 			el.classList.add('bg-black', 'text-white');
@@ -246,7 +247,7 @@ function _setStatusBadge(status: string) {
 
 function _setCount(n: number) {
 	const el = document.getElementById('tm-participant-count');
-	if (el) el.textContent = `${n} player${n !== 1 ? 's' : ''}`;
+	if (el) el.textContent = n !== 1 ? t('tournament.playerCountPlural', { count: n }) : t('tournament.playerCount', { count: n });
 }
 
 function _incrementCount(delta: number) {
@@ -291,7 +292,7 @@ function _clearBracket() {
 		el.innerHTML = '';
 		const placeholder = document.createElement('p');
 		placeholder.className = 'text-gray-400 font-bold italic uppercase text-sm m-auto select-none';
-		placeholder.textContent = 'Waiting for tournament to start…';
+		placeholder.textContent = t('tournament.waitingToStart');
 		el.appendChild(placeholder);
 	}
 	const svg = document.getElementById('tm-connector-svg');
@@ -376,7 +377,7 @@ function _renderBracket(tournament: BracketInfo) {
 	if (!normalizedTournament.rounds?.length) {
 		const p = document.createElement('p');
 		p.className   = 'text-gray-400 font-bold italic uppercase text-sm m-auto select-none';
-		p.textContent = 'No bracket data yet.';
+		p.textContent = t('tournament.noBracketData');
 		container.appendChild(p);
 		return;
 	}
@@ -393,7 +394,7 @@ function _renderBracket(tournament: BracketInfo) {
 		// Round label
 		const label     = document.createElement('div');
 		label.className = 'text-center font-black text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 absolute -top-6 left-0 right-0';
-		label.textContent = `Round ${round.roundNumber}`;
+		label.textContent = t('tournament.round', { n: round.roundNumber });
 		col.style.position = 'relative';
 		col.style.marginTop = '1.5rem';
 		col.appendChild(label);
@@ -430,10 +431,10 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 				<span class="ml-3 font-black min-w-5 text-right text-gray-400 dark:text-gray-500"></span>
 			</div>
 			<div class="flex justify-between items-center px-3 py-2 text-sm ${byeBg}">
-				<span class="flex-1 truncate font-bold text-gray-800 dark:text-gray-100"><span class="text-green-600 dark:text-green-400">(BYE)</span></span>
+				<span class="flex-1 truncate font-bold text-gray-800 dark:text-gray-100"><span class="text-green-600 dark:text-green-400">${t('tournament.bye')}</span></span>
 				<span class="ml-3 font-black min-w-5 text-right text-gray-400 dark:text-gray-500"></span>
 			</div>
-			<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">✓ Finished</div>
+			<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">${t('tournament.matchFinished')}</div>
 		`;
 		return box;
 	}
@@ -472,7 +473,7 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 			<span class="flex-1 truncate font-bold ${rightWinnerText}">${rightCrown}${match.playerRightUsername || '—'}</span>
 			<span class="ml-3 font-black min-w-5 text-right ${rightWinnerScore}">${rightScore}</span>
 		</div>
-		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">✓ Finished</div>` : ''}
+		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">${t('tournament.matchFinished')}</div>` : ''}
 	`;
 	return box;
 }

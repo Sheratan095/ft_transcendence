@@ -173,7 +173,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
           const newUsername = input.value.trim().toLocaleLowerCase();
           
           if (!newUsername) {
-            showErrorToast(t('toast.profile.usernameEmpty'), { duration: 4000, position: 'top-right' });
+            showErrorToast('Username cannot be empty', { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);
@@ -182,7 +182,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
           
           // Validate username length (2-20 characters)
           if (newUsername.length < 2 || newUsername.length > 20) {
-            showErrorToast(t('toast.profile.usernameLength'), { duration: 4000, position: 'top-right' });
+            showErrorToast('Username must be between 2 and 20 characters long', { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);
@@ -191,7 +191,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
           
           // Validate username format (letters, numbers, _, .)
           if (!/^[a-zA-Z0-9_.]+$/.test(newUsername)) {
-            showErrorToast(t('toast.profile.usernameInvalidChars'), { duration: 4000, position: 'top-right' });
+            showErrorToast('Username can only contain letters, numbers, underscores, and periods', { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);
@@ -217,11 +217,11 @@ export async function renderProfileCard(container: HTMLElement | null) {
             if (!res.ok)
             {
               if (res.status === 429)
-                showErrorToast(t('toast.profile.usernameReservedWords'), { duration: 4000, position: 'top-right' });
+                showErrorToast('Username cannot contain reserved words.', { duration: 4000, position: 'top-right' });
               else if (res.status === 400)
-                showErrorToast(t('toast.profile.usernameUpdateFailed'), { duration: 4000, position: 'top-right' });
+                showErrorToast('Failed to update username.', { duration: 4000, position: 'top-right' });
               else if (res.status === 409)
-                showErrorToast(t('toast.profile.usernameTaken'), { duration: 4000, position: 'top-right' });
+                showErrorToast('Username already taken.', { duration: 4000, position: 'top-right' });
             }
             
             const responseBody = await res.json();
@@ -239,7 +239,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
             }
           } catch (err) {
             console.error('Failed to update username:', err);
-            alert('Failed to update username. Please try again.');
+            alert(t('profile.usernameUpdateError'));
           }
           
           input.replaceWith(username);

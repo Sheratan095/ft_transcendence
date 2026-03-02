@@ -333,7 +333,7 @@ function handleSystemMessage(data: any) {
       const chat = chats.find(c => c.id === chatId);
       const chatName = messageData.chatName || (chat ? getChatDisplayName(chat) : t('toast.chat.aChat'));
       const emoji = ev === 'userJoin' ? '➕' : '➖';
-      const newMessage = ev === 'userJoin' ? `${messageData.username} joined.` : `${messageData.username} left the chat.`;
+      const newMessage = ev === 'userJoin' ? t('chat.userJoined', { username: messageData.username }) : t('chat.userLeft', { username: messageData.username });
       showToast(t('toast.chat.systemEvent', { emoji, chat: chatName, message: newMessage }), 'info', {
         duration: 4000,
         position: 'top-right',
