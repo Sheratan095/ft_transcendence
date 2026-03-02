@@ -16,6 +16,7 @@ type PongModeType = 'online' | 'offline-1v1' | 'offline-ai' | 'custom' | 'tourna
 let currentGameInstance: PongGame | null = null;
 let currentGameMode: PongModeType = 'online';
 let isCustomGame: boolean = false;
+let tournamentAutoCloseTimer: number | null = null;
 
 // Export game instance for external control
 export function getCurrentGameInstance(): PongGame | null {
@@ -273,15 +274,29 @@ export function handleGameState(data: any)
 
 export function handleGameEnded(data: any)
 {
-	const { winner, quit, timedOut, reason } = data;
+	const { gameId: endedGameId, winner, quit, timedOut, reason } = data;
+	const activeGameId = getCurrentGameId();
+	if (endedGameId && activeGameId && String(endedGameId) !== String(activeGameId)) {
+		console.log('[Pong] Ignoring stale gameEnded event for game', endedGameId, 'active:', activeGameId);
+		return;
+	}
+
 	const user = getUser();
 	let message = '';
 
 	if (quit) {
-		message = `${t('game.opponent-left')} - ${t('game.player-victory')}`;
+		if (winner && user?.id && String(winner) === String(user.id))
+			message = `${t('game.opponent-left')} - ${t('game.player-victory')}`;
+		else if (winner)
+			message = t('game.player-defeat');
+		else
+			message = t('game.opponent-left');
 	}
 	else if (timedOut) {
-		message = t('game.timeout');
+		if (winner && user?.id)
+			message = String(winner) === String(user.id) ? t('game.player-victory') : t('game.player-defeat');
+		else
+			message = t('game.timeout');
 	}
 	else if (winner === user?.id) {
 		message = t('game.player-victory');
@@ -313,9 +328,7 @@ export function handleGameEnded(data: any)
 	// Auto-close pong modal after 3 seconds for tournament games
 	if (currentGameMode === 'tournament') {
 		updatePongStatus(t('game.returningToTournament', { msg: message }));
-		setTimeout(() => {
-			closePongModal();
-		}, 3000);
+		_scheduleTournamentAutoClose(3000);
 		return;
 	}
 
@@ -342,6 +355,29 @@ export function handleGameEnded(data: any)
 			startBtn.classList.add('hidden');
 		}
 	}
+}
+
+export function handleTournamentMatchEnded(data: any)
+{
+	if (currentGameMode !== 'tournament') return;
+
+	const activeGameId = getCurrentGameId();
+	if (activeGameId && data?.matchId && String(data.matchId) !== String(activeGameId)) {
+		return;
+	}
+
+	const user = getUser();
+	const winnerId = data?.winnerId;
+	const winnerUsername = data?.winnerUsername;
+
+	if (winnerId && user?.id) {
+		if (String(winnerId) === String(user.id))
+			updatePongStatus(t('game.returningToTournament', { msg: t('game.player-victory') }));
+		else
+			updatePongStatus(t('game.returningToTournament', { msg: winnerUsername ? t('game.overWinner', { winner: winnerUsername }) : t('game.player-defeat') }));
+	}
+
+	_scheduleTournamentAutoClose(1800);
 }
 
 export function handlePlayerQuitCustomGameInLobby(_data: any)
@@ -561,7 +597,7 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 		// Replace to clear listeners
 		const newCloseBtn = closeBtn.cloneNode(true) as HTMLButtonElement;
 		closeBtn.parentNode?.replaceChild(newCloseBtn, closeBtn);
-		newCloseBtn.addEventListener('click', closePongModal);
+		newCloseBtn.addEventListener('click', () => closePongModal());
 	}
 
 	// Ready Button (online and custom/tournament modes)
@@ -643,8 +679,8 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 			// Quit during active game
 			if (newStartBtn.textContent === 'Quit' || newStartBtn.textContent === t('quit'))
 			{
-				// For custom/tournament games, just close modal. For online, send quit to server
-				if (mode !== 'custom' && mode !== 'tournament')
+				// For custom games, just close modal. For online/tournament, send quit to server
+				if (mode !== 'custom')
 				{
 					const gameId = getCurrentGameId();
 					if (gameId)
@@ -734,6 +770,8 @@ export async function openPongModal(mode: PongModeType = 'online')
 {
 	try
 	{
+		_clearTournamentAutoClose();
+
 		if (currentGameInstance)
 		{
 			currentGameInstance.destroy();
@@ -812,7 +850,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 					left: mode === 'offline-1v1' ? 'Player left' : (mode === 'offline-ai' ? 'You' : '--------'),
 					right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Ai' : '--------')
 				},
-				maxScore: 1, // to do back to 11
+				maxScore: 11, // to do back to 11
 				aiDifficulty: 'medium'
 			};
 
@@ -907,8 +945,10 @@ export async function openPongModal(mode: PongModeType = 'online')
 /**
  * Close the pong modal
  */
-export function closePongModal()
+export function closePongModal(options: { suppressQuit?: boolean } = {})
 {
+	_clearTournamentAutoClose();
+
 	const modal = document.getElementById('pong-modal');
 	if (modal) {
 		modal.classList.add('hidden');
@@ -933,9 +973,26 @@ export function closePongModal()
 	if (currentGameMode === 'online' || currentGameMode === 'custom' || currentGameMode === 'tournament')
 	{
 		const gameId = getCurrentGameId();
-		if (gameId)
+		if (gameId && !options.suppressQuit)
 			quitGame(gameId);
 	}
+
+	setCurrentGameId(null);
+	isCustomGame = false;
+}
+
+function _clearTournamentAutoClose() {
+	if (tournamentAutoCloseTimer !== null) {
+		clearTimeout(tournamentAutoCloseTimer);
+		tournamentAutoCloseTimer = null;
+	}
+}
+
+function _scheduleTournamentAutoClose(delayMs: number) {
+	_clearTournamentAutoClose();
+	tournamentAutoCloseTimer = window.setTimeout(() => {
+		closePongModal({ suppressQuit: true });
+	}, delayMs);
 }
 
 /**

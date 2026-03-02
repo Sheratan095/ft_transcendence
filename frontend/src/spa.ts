@@ -14,6 +14,13 @@ import { attachUserOptions } from './components/profile/profile.ts';
 
 // Track current search profile card for cleanup
 let currentSearchProfileCard: HTMLElement | null = null;
+let polygonEl: HTMLElement | null = null;
+let polygonPosition: 'top' | 'bottom' | null = null;
+
+const POLYGON_TOP_CLIP = 'polygon(0% 0%, 100% 0%, 100% 10%, 0% 10%)';
+const POLYGON_BOTTOM_TRANSLATE = 'translate3d(0, 90vh, 0)';
+const POLYGON_TOP_TRANSLATE = 'translate3d(0, 0, 0)';
+const POLYGON_TRANSITION = 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)';
 
 type RouteConfig = { render: () => Promise<void> };
 const routes: Record<string, RouteConfig> = {
@@ -243,25 +250,29 @@ export async function start() {
 }
 
 export function animatePolygonToBottom(): void {
-	const polygon = document.querySelector(
-		'.mix-blend-difference'
-	) as HTMLElement | null;
-
-	if (!polygon) return;
-
-	polygon.style.transition = "clip-path 0.6s ease-in-out";
-	polygon.style.clipPath = "polygon(0% 90%, 100% 90%, 100% 100%, 0% 100%)";
+	_setPolygonPosition('bottom');
 }
 
 export function animatePolygonToTop(): void {
-  const polygon = document.querySelector(
-    '.mix-blend-difference'
-  ) as HTMLElement | null;
+  _setPolygonPosition('top');
+}
 
+function _getPolygonEl(): HTMLElement | null {
+  if (polygonEl && polygonEl.isConnected) return polygonEl;
+  polygonEl = document.querySelector('.mix-blend-difference') as HTMLElement | null;
+  return polygonEl;
+}
+
+function _setPolygonPosition(position: 'top' | 'bottom'): void {
+  const polygon = _getPolygonEl();
   if (!polygon) return;
-   
-  polygon.style.transition = "clip-path 0.6s ease-in-out";
-  polygon.style.clipPath = "polygon(0% 0%, 100% 0%, 100% 10%, 0% 10%)";
+  if (polygonPosition === position) return;
+
+  polygon.style.willChange = 'transform';
+  polygon.style.transition = POLYGON_TRANSITION;
+  polygon.style.clipPath = POLYGON_TOP_CLIP;
+  polygon.style.transform = position === 'top' ? POLYGON_TOP_TRANSLATE : POLYGON_BOTTOM_TRANSLATE;
+  polygonPosition = position;
 }
 
 export { goToRoute };
