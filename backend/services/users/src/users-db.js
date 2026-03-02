@@ -165,7 +165,7 @@ export class	UsersDatabase
 		if (newUsername !== undefined && newUsername !== null && newUsername !== '')
 		{
 			const	query = `UPDATE users SET username = ? WHERE id = ?`;
-			await this.db.run(query, [newUsername.toLowerCase(), userId]);
+			await this.db.run(query, [newUsername.trim().toLowerCase(), userId]);
 		}
 		
 		// Update language if provided
