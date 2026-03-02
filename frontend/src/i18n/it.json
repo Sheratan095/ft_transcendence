@@ -178,7 +178,7 @@
   "game.player-defeat": "Hai perso !",
   "game.draw": "Pareggio!",
   "game.winner": "Partita Terminata! Vincitore: {{ winner }}",
-  "game.opponent-left": "L'avversario ha lasciato la partita, hai vinto !",
+  "game.opponent-left": "L'avversario ha lasciato la partita !",
   "game.timeout": "Tempo scaduto! Hai perso !",
   "game.quit": "Lascia la partita",
   "game.offline-1v1": "Offline 1v1",
@@ -234,6 +234,9 @@
   "gameInvite.loading": "Caricamento amici...",
   "gameInvite.noFriends": "Nessun amico da invitare",
   "gameInvite.loadFailed": "Impossibile caricare gli amici",
+  "game.player-left": "Blu (W-A)",
+  "game.player-right": "Rosso (↑-↓)",
+  "game.player": "Giocatore",
 
   "tournament.participants": "Partecipanti",
   "tournament.creator": "Creatore",
@@ -250,6 +253,11 @@
   "tournament.bye": "(BYE)",
   "tournament.nextRoundIn": "Prossimo round tra",
   "tournament.roundIn": "Round {{ n }} tra",
+  "tournament.status.waiting": "in attesa",
+  "tournament.status.in_progress": "in corso",
+  "tournament.status.inProgress": "in corso",
+  "tournament.status.finished": "terminato",
+  "tournament.join": "partecipa",
 
   "chat.userJoined": "{{ username }} si è unito.",
   "chat.userLeft": "{{ username }} ha lasciato la chat.",
@@ -268,5 +276,6 @@
   "profile.usernameReserved": "Il nome utente non può contenere parole riservate.",
   "profile.usernameUpdateFailed": "Aggiornamento del nome utente fallito.",
   "profile.usernameTaken": "Nome utente già in uso.",
-  "profile.usernameUpdateError": "Aggiornamento del nome utente fallito. Riprova."
+  "profile.usernameUpdateError": "Aggiornamento del nome utente fallito. Riprova.",
+  "profile.usernameInvalid": "Nome utente non valido. Riprova."
 }

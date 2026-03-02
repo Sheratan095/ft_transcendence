@@ -441,12 +441,7 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 
 	// Determine winner styling based on tournament state
 	let winnerBg = 'bg-accent-blue dark:bg-accent-green';
-	let disableWinnerStyling = false;
-
-	if (tournamentFinished) {
-		// Tournament finished: only show styling for final round winner
-		disableWinnerStyling = !isLastRound;
-	}
+	const showFinalWinnerStyling = tournamentFinished && isLastRound && isFinished;
 
 	const normalBgL = 'bg-white dark:bg-gray-900';
 	const normalBgR = 'bg-gray-50 dark:bg-gray-800';
@@ -454,15 +449,15 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 	const leftScore  = isFinished ? String(match.playerLeftScore  ?? 0) : '';
 	const rightScore = isFinished ? String(match.playerRightScore ?? 0) : '';
 
-	const leftWinnerBg = (leftWon && !disableWinnerStyling) ? winnerBg : normalBgL;
-	const rightWinnerBg = (rightWon && !disableWinnerStyling) ? winnerBg : normalBgR;
-	const leftWinnerText = (leftWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-800 dark:text-gray-100';
-	const rightWinnerText = (rightWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-800 dark:text-gray-100';
-	const leftWinnerScore = (leftWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-400 dark:text-gray-500';
-	const rightWinnerScore = (rightWon && !disableWinnerStyling) ? 'text-black' : 'text-gray-400 dark:text-gray-500';
+	const leftWinnerBg = (showFinalWinnerStyling && leftWon) ? winnerBg : normalBgL;
+	const rightWinnerBg = (showFinalWinnerStyling && rightWon) ? winnerBg : normalBgR;
+	const leftWinnerText = (showFinalWinnerStyling && leftWon) ? 'text-black' : 'text-gray-800 dark:text-gray-100';
+	const rightWinnerText = (showFinalWinnerStyling && rightWon) ? 'text-black' : 'text-gray-800 dark:text-gray-100';
+	const leftWinnerScore = (showFinalWinnerStyling && leftWon) ? 'text-black' : 'text-gray-400 dark:text-gray-500';
+	const rightWinnerScore = (showFinalWinnerStyling && rightWon) ? 'text-black' : 'text-gray-400 dark:text-gray-500';
 
-	const leftCrown = (leftWon && !disableWinnerStyling && isLastRound && tournamentFinished) ? '👑 ' : '';
-	const rightCrown = (rightWon && !disableWinnerStyling && isLastRound && tournamentFinished) ? '👑 ' : '';
+	const leftCrown = (showFinalWinnerStyling && leftWon) ? '👑 ' : '';
+	const rightCrown = (showFinalWinnerStyling && rightWon) ? '👑 ' : '';
 
 	box.innerHTML = `
 		<div class="flex justify-between items-center px-3 py-2 text-sm border-b border-gray-200 dark:border-gray-700 ${leftWinnerBg}">

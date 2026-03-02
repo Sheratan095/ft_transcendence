@@ -178,7 +178,7 @@
   "game.player-defeat": "You lost!",
   "game.draw": "It's a draw!",
   "game.winner": "Game Over! Winner: {{ winner }}",
-  "game.opponent-left": "Your opponent left the game, you win!",
+  "game.opponent-left": "Your opponent left the game!",
   "game.timeout": "Time's up! You lost!",
   "game.quit": "You left the game",
   "game.offline-1v1": "Offline 1v1",
@@ -250,6 +250,15 @@
   "tournament.bye": "(BYE)",
   "tournament.nextRoundIn": "Next round in",
   "tournament.roundIn": "Round {{ n }} in",
+  "tournament.status.waiting": "waiting",
+  "tournament.status.in_progress": "in progress",
+  "tournament.status.inProgress": "in progress",
+  "tournament.status.finished": "finished",
+  "tournament.join": "Join",
+  "game.player-left": "Blue (W-A)",
+  "game.player-right": "Red (↑-↓)",
+  "game.player": "Player",
+
 
   "chat.userJoined": "{{ username }} joined.",
   "chat.userLeft": "{{ username }} left the chat.",
@@ -268,5 +277,6 @@
   "profile.usernameReserved": "Username cannot contain reserved words.",
   "profile.usernameUpdateFailed": "Failed to update username.",
   "profile.usernameTaken": "Username already taken.",
-  "profile.usernameUpdateError": "Failed to update username. Please try again."
+  "profile.usernameUpdateError": "Failed to update username. Please try again.",
+  "profile.usernameInvalid": "Invalid username. Please try again."
 }

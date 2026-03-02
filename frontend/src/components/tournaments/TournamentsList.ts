@@ -91,6 +91,7 @@ function renderTournaments(tournaments: Tournament[]): void {
       "border border-gray-300 dark:border-neutral-700 rounded-xl p-3 bg-white dark:bg-neutral-900 flex items-center gap-3";
 
     const isJoinable = tournament.status.toLowerCase() === 'open' || tournament.status.toLowerCase() === 'waiting';
+    const translatedStatus = t(`tournament.status.${tournament.status.toLowerCase()}`) || tournament.status;
 
     card.innerHTML = `
       <div class="flex-1 min-w-0">
@@ -100,12 +101,12 @@ function renderTournaments(tournaments: Tournament[]): void {
         </div>
       </div>
       <span class="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${getStatusColor(tournament.status)}">
-        ${tournament.status}
+        ${translatedStatus}
       </span>
       ${isJoinable ? `
         <button data-join-id="${tournament.id}" data-join-creator="${tournament.creatorUsername}"
           class="flex-shrink-0 text-xs font-black uppercase px-3 py-1.5 rounded-lg border-2 dark:border-gray-500 bg-accent-orange dark:bg-white text-white dark:text-black hover:brightness-110">
-          Join
+          ${t('tournament.join')}
         </button>` : ''}
     `;
 

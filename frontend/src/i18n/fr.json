@@ -178,7 +178,7 @@
   "game.player-defeat": "Vous avez perdu !",
   "game.draw": "Match nul !",
   "game.winner": "Partie terminée ! Vainqueur : {{ winner }}",
-  "game.opponent-left": "L'adversaire a quitté la partie, vous gagnez !",
+  "game.opponent-left": "L'adversaire a quitté la partie !",
   "game.timeout": "Temps écoulé ! Vous avez perdu !",
   "game.quit": "Vous avez quitté la partie",
   "game.offline-1v1": "Offline 1v1",
@@ -250,6 +250,14 @@
   "tournament.bye": "(BYE)",
   "tournament.nextRoundIn": "Prochain round dans",
   "tournament.roundIn": "Round {{ n }} dans",
+  "tournament.status.waiting": "en attente",
+  "tournament.status.in_progress": "en cours",
+  "tournament.status.inProgress": "en cours",
+  "tournament.status.finished": "terminé",
+  "tournament.join": "joindre",
+  "game.player-left": "Bleu (W-A)",
+  "game.player-right": "Rouge (↑-↓)",
+  "game.player": "Joueur",
 
   "chat.userJoined": "{{ username }} a rejoint.",
   "chat.userLeft": "{{ username }} a quitté le chat.",
@@ -268,5 +276,6 @@
   "profile.usernameReserved": "Le nom d'utilisateur ne peut pas contenir de mots réservés.",
   "profile.usernameUpdateFailed": "La mise à jour du nom d'utilisateur a échoué.",
   "profile.usernameTaken": "Nom d'utilisateur déjà pris.",
-  "profile.usernameUpdateError": "La mise à jour du nom d'utilisateur a échoué. Veuillez réessayer."
+  "profile.usernameUpdateError": "La mise à jour du nom d'utilisateur a échoué. Veuillez réessayer.",
+  "profile.usernameInvalid": "Nom d'utilisateur invalide. Veuillez réessayer."
 }

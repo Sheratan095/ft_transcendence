@@ -109,6 +109,11 @@ export async function bracketUpdate(tournamentId: string, bracketInfo: any)
 	updateBracketInModal(tournamentId, bracketInfo);
 }
 
+export async function tournamentEnded(tournamentId: string, bracketInfo: any)
+{
+	updateBracketInModal(tournamentId, { ...bracketInfo, status: 'FINISHED' });
+}
+
 export async function cancelTournament(tournamentId: string)
 {
 	cancelTournamentWs(tournamentId);
