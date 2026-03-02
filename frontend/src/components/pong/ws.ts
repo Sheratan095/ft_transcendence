@@ -96,17 +96,13 @@ export function initPong(uid: string): Promise<WebSocket> {
 						currentGameId = msg.data.gameId;
 					} else if (msg.event === 'pong.gameStarted') {
 						playerSide = msg.data.yourSide;
-					} else if (msg.event === 'pong.gameEnded' || msg.event === 'pong.customGameCanceled') {
+					} else if (msg.event === 'pong.customGameCanceled') {
 						currentGameId = null;
 						playerSide = null;
 					} else if (msg.event === 'pong.tournamentMatchStarted') {
 						currentGameId = msg.data.gameId;
 						currentMatchId = msg.data.matchId;
 						playerSide = msg.data.yourSide;
-					} else if (msg.event === 'pong.tournamentMatchEnded') {
-						currentGameId = null;
-						currentMatchId = null;
-						playerSide = null;
 					}
 					// Route to event-specific handler
 					routeEvent(msg.event, msg.data || {});
@@ -184,6 +180,8 @@ function routeEvent(event: string, data: any)
 			break;
 		case 'pong.gameEnded':
 			modalHandlers.handleGameEnded(data);
+			currentGameId = null;
+			playerSide = null;
 			break;
 		case 'pong.playerReadyStatus':
 			modalHandlers.handlePlayerReadyStatus(data);
@@ -229,6 +227,12 @@ function routeEvent(event: string, data: any)
 			break;
 		case 'pong.tournamentRoundCooldown':
 			tournamentRoundCooldown(data.tournamentId, data.cooldownInfo);
+			break;
+		case 'pong.tournamentMatchEnded':
+			modalHandlers.handleTournamentMatchEnded(data);
+			currentGameId = null;
+			currentMatchId = null;
+			playerSide = null;
 			break;
 		case 'error':
 			modalHandlers.handleError(data);

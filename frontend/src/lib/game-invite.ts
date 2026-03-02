@@ -41,13 +41,25 @@ export async function openGameInviteModal(
 
   modal.classList.remove('hidden');
 
+  // Default modal close behavior
+  (closeBtn as HTMLButtonElement).onclick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeGameInviteModal();
+  };
+  (modal as HTMLElement).onclick = (e) => {
+    if (e.target === modal) {
+      closeGameInviteModal();
+    }
+  };
+
   try {
-    friendsList.innerHTML = `<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">${t('gameInvite.loading')}</div>`;
+    friendsList.innerHTML = `<div class="dark:text-gray-400 text-gray-600 text-center py-4">${t('gameInvite.loading')}</div>`;
 
     const friends = await friendsManager.loadFriends();
 
     if (friends.length === 0) {
-      friendsList.innerHTML = `<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">${t('gameInvite.noFriends')}</div>`;
+      friendsList.innerHTML = `<div class="dark:text-gray-400 text-gray-600 text-center py-4">${t('gameInvite.noFriends')}</div>`;
       return;
     }
 
@@ -58,8 +70,8 @@ export async function openGameInviteModal(
       const friendName = friend.username || friend.id;
 
       const btn = document.createElement('button');
-      btn.className = `w-full p-3 text-left dark:bg-neutral-800 bg-neutral-200 border-2 dark:border-neutral-700 border-neutral-300 rounded-lg 
-        hover:dark:bg-neutral-700 hover:bg-neutral-300 transition dark:text-white text-black font-semibold`;
+      btn.className = `w-full p-3 text-left bg-gray-100 dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-700 rounded-lg 
+        hover:bg-gray-200 dark:hover:bg-gray-700 transition text-black dark:text-white font-semibold`;
       btn.textContent = friendName;
       btn.onclick = async () => {
         await selectFriend(friendId);
@@ -71,11 +83,6 @@ export async function openGameInviteModal(
     console.error('Failed to load friends:', err);
     friendsList.innerHTML = `<div class="text-red-500 text-center py-4">${t('gameInvite.loadFailed')}</div>`;
   }
-
-  // Close button handler (replace to avoid stale/multiple listeners)
-  const newCloseBtn = closeBtn.cloneNode(true) as HTMLButtonElement;
-  closeBtn.replaceWith(newCloseBtn);
-  newCloseBtn.addEventListener('click', closeGameInviteModal);
 }
 
 async function selectFriend(friendId: string) {
