@@ -11,7 +11,8 @@ import { playerJoinedTournament,
 	tournamentMatchStarted,
 	tournamentCancelled, 
 	tournamentRoundCooldown,
-	bracketUpdate } from '../tournaments/Tournament';
+	bracketUpdate,
+	tournamentEnded } from '../tournaments/Tournament';
 
 let pongWs: WebSocket | null = null;
 let currentUserId: string | null = null;
@@ -210,6 +211,9 @@ function routeEvent(event: string, data: any)
 			break;
 		case 'pong.tournamentBracketUpdate':
 			bracketUpdate(data.tournamentId, data);
+			break;
+		case 'pong.tournamentEnded':
+			tournamentEnded(data.tournamentId, data);
 			break;
 		case 'pong.tournamentStarted':
 			tournamentMatchStarted(data.tournamentId, data.matchInfo);

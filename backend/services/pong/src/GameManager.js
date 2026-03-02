@@ -188,6 +188,26 @@ class	GameManager
 			return ;
 		}
 
+		// If the game is part of a tournament, handle tournament quit
+		if (gameInstance.tournamentId)
+		{
+			console.log(`[PONG] ${playerId} quit game ${gameId} which is part of tournament ${gameInstance.tournamentId}, removing from tournament`);
+
+			const otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
+			const winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+			try {
+				await tournamentManager.removeParticipant(gameInstance.tournamentId, playerId);
+			} catch (err) {
+				console.error('[PONG] Error removing participant from tournament on quit:', err);
+			}
+			this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
+
+			// Clean up the game instance
+			gameInstance.destroy();
+			this._games.delete(gameId);
+			return ;
+		}
+
 		// Handle WAITING status for custom games - only creator can cancel
 		if (gameInstance.gameStatus === GameStatus.WAITING)
 		{
@@ -199,25 +219,6 @@ class	GameManager
 				const otherPlayerId = gameInstance.playerRightId;
 				pongConnectionManager.sendCustomGameCanceled(otherPlayerId, gameId);
 				
-				// Clean up the game instance
-				gameInstance.destroy();
-				this._games.delete(gameId);
-				return ;
-			}
-			// If the game is part of a tournament, quit the entire tournament
-			else if (gameInstance.tournamentId)
-			{
-				console.log(`[PONG] ${playerId} quit game ${gameId} which is part of tournament ${gameInstance.tournamentId}, removing from tournament`);
-
-				const	otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
-				const	winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
-				try {
-					await tournamentManager.removeParticipant(gameInstance.tournamentId, playerId);
-				} catch (err) {
-					console.error('[PONG] Error removing participant from tournament on quit:', err);
-				}
-				this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
-
 				// Clean up the game instance
 				gameInstance.destroy();
 				this._games.delete(gameId);
