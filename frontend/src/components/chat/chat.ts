@@ -352,14 +352,14 @@ export function renderMemberList() {
   container.innerHTML = '';
 
   if (!currentChatId) {
-    container.textContent = 'No chat selected';
+    container.textContent = t('chat.noChatSelected');
     return;
   }
   const currentChat = chats.find(c => c.id === currentChatId);
   // If DM, show when you became friends with the other user (friendsSince)
   if (currentChat && currentChat.chatType === 'dm') {
     container.style.display = '';
-    container.textContent = 'Loading...';
+    container.textContent = t('loading');
     const otherUserId = currentChat.otherUserId || (currentChat.members && currentChat.members.find((m: any) => String(m.userId) !== String(currentUserId))?.userId);
     if (!otherUserId) {
       container.textContent = '';
@@ -395,7 +395,7 @@ export function renderMemberList() {
 
   const members = chatMembers.get(currentChatId) || (currentChat?.members || []);
   if (!members || members.length === 0) {
-    container.textContent = 'No members';
+    container.textContent = t('chat.noMembers');
     return;
   }
 
@@ -474,9 +474,9 @@ export async function renderMessages() {
     {
       let translatedContent = msg.content;
       if (msg.type === 'user_join' || msg.type === 'userJoin')
-        translatedContent += ' joined the chat';
+        translatedContent += ' ' + t('chat.joinedChat');
       if (msg.type === 'user_leave' || msg.type === 'userLeave')
-        translatedContent += ' left the chat';
+        translatedContent += ' ' + t('chat.leftChat');
       messageDiv.className = 'message message-system text-center mx-auto bg-blue-600 text-white italic px-3 py-2 rounded-md max-w-[80%]';
       messageDiv.innerHTML = `<div class="message-content">${escapeHtml(translatedContent)}</div>`;
       messagesContainer.appendChild(messageDiv);
@@ -498,7 +498,7 @@ export async function renderMessages() {
     const displayName = msg.from || (matchedMember && matchedMember.username) || (msg.senderName) || senderId;
 
     messageDiv.innerHTML = `
-      ${!isSent && !isDmChat ? `<div class="message-header text-xs opacity-75">from ${escapeHtml(displayName)}</div>` : ''}
+      ${!isSent && !isDmChat ? `<div class="message-header text-xs opacity-75">${t('chat.messageFrom', { name: escapeHtml(displayName) })}</div>` : ''}
       <div class="message-content">${escapeHtml(msg.content)}</div>
       <div class="message-footer text-xs opacity-75">
         <span>${new Date(createdAt).toLocaleTimeString()}</span>
@@ -542,7 +542,7 @@ async function loadMoreMessages() {
 
 function resetChatUI(chatId: string) {
   const chatHeader = document.getElementById('chat-header');
-  if (chatHeader) chatHeader.textContent = 'Select a chat';
+  if (chatHeader) chatHeader.textContent = t('chat.select');
 
   const chatMessages = document.getElementById('chat-messages');
   if (chatMessages) chatMessages.innerHTML = '';
@@ -712,12 +712,12 @@ async function renderFriendsList() {
   const friendsList = document.getElementById('friends-list');
   if (!friendsList) return;
 
-  friendsList.innerHTML = '<div class="text-neutral-400 text-center">Loading friends...</div>';
+  friendsList.innerHTML = `<div class="text-neutral-400 text-center">${t('chat.loadingFriends')}</div>`;
 
   const friends = await fetchFriends();
 
   if (friends.length === 0) {
-    friendsList.innerHTML = '<div class="text-neutral-400 text-center">No friends available</div>';
+    friendsList.innerHTML = `<div class="text-neutral-400 text-center">${t('chat.noFriendsAvailable')}</div>`;
     return;
   }
 

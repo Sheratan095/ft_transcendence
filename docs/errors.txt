@@ -1,9 +1,5 @@
-GET error when fetching past games when there are none
-
-Error with default language when entering without cache
-
-Custom game invite modal
+Custom game invite modal | OK
 
 Toast errors in username change
 
-Join/left messages [chatService.ts: 335, chat.ts: 470-473]
+Join/left messages [chatService.ts: 335, chat.ts: 470-473] | OK
