@@ -221,5 +221,27 @@
   "tris.aiTurn": "Tour de l'IA",
   "game.aiVictory": "L'IA gagne !",
   "tris.unknown": "--------",
-  "cancel": "Annuler"
+  "cancel": "Annuler",
+
+  "gameInvite.title": "Inviter à {{ game }}",
+  "gameInvite.subtitle": "Sélectionnez un ami à inviter à {{ game }}",
+  "gameInvite.loading": "Chargement des amis...",
+  "gameInvite.noFriends": "Aucun ami à inviter",
+  "gameInvite.loadFailed": "Échec du chargement des amis",
+
+  "tournament.participants": "Participants",
+  "tournament.creator": "Créateur",
+  "tournament.playerCount": "{{ count }} joueur",
+  "tournament.playerCountPlural": "{{ count }} joueurs",
+  "tournament.statusWaiting": "En attente de joueurs",
+  "tournament.statusInProgress": "En cours",
+  "tournament.statusFinished": "Terminé",
+  "tournament.waitingToStart": "En attente du début du tournoi…",
+  "tournament.noBracketData": "Pas encore de données de tableau.",
+  "tournament.bracketError": "Erreur de rendu du tableau. Vérifiez la console.",
+  "tournament.round": "Round {{ n }}",
+  "tournament.matchFinished": "✓ Terminé",
+  "tournament.bye": "(BYE)",
+  "tournament.nextRoundIn": "Prochain round dans",
+  "tournament.roundIn": "Round {{ n }} dans"
 }

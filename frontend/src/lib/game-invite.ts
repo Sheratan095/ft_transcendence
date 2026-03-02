@@ -31,8 +31,8 @@ export async function openGameInviteModal(
 
   // Update modal text based on game type
   const gameTitle = gameType === 'tris' ? 'Tris' : 'Pong';
-  title.textContent = `Invite to ${gameTitle}`;
-  subtitle.textContent = `Select a friend to invite to ${gameTitle}`;
+  title.textContent = t('gameInvite.title', { game: gameTitle });
+  subtitle.textContent = t('gameInvite.subtitle', { game: gameTitle });
 
   // Load friends if not already loaded
   if (!friendsManager) {
@@ -42,12 +42,12 @@ export async function openGameInviteModal(
   modal.classList.remove('hidden');
 
   try {
-    friendsList.innerHTML = '<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">Loading friends...</div>';
+    friendsList.innerHTML = `<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">${t('gameInvite.loading')}</div>`;
 
     const friends = await friendsManager.loadFriends();
 
     if (friends.length === 0) {
-      friendsList.innerHTML = '<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">No friends to invite</div>';
+      friendsList.innerHTML = `<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">${t('gameInvite.noFriends')}</div>`;
       return;
     }
 
@@ -69,7 +69,7 @@ export async function openGameInviteModal(
     });
   } catch (err) {
     console.error('Failed to load friends:', err);
-    friendsList.innerHTML = '<div class="text-red-500 text-center py-4">Failed to load friends</div>';
+    friendsList.innerHTML = `<div class="text-red-500 text-center py-4">${t('gameInvite.loadFailed')}</div>`;
   }
 
   // Close button handler (replace to avoid stale/multiple listeners)

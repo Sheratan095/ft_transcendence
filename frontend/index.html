@@ -713,7 +713,7 @@
 
 					<!-- Left header -->
 					<div class="p-5 border-b-4 border-gray-800 dark:border-gray-700 bg-accent-orange dark:bg-accent-green flex-shrink-0">
-						<h3 class="text-xl font-black text-black uppercase tracking-tighter italic">Participants</h3>
+						<h3 class="text-xl font-black text-black uppercase tracking-tighter italic" data-i18n="tournament.participants">Participants</h3>
 						<div class="flex items-center gap-2 mt-1">
 							<span id="tm-participant-count" class="text-xs font-bold uppercase text-black/70">0 players</span>
 							<span id="tm-tournament-status" class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-black text-white">WAITING</span>
@@ -722,7 +722,7 @@
 
 					<!-- Creator section (pinned at top) -->
 					<div class="flex-shrink-0 p-4 border-b-4 border-gray-800 dark:border-gray-700 bg-white dark:bg-gray-900">
-						<p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-widest mb-2">Creator</p>
+						<p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-widest mb-2" data-i18n="tournament.creator">Creator</p>
 						<div id="tm-creator-card" class="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-300 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] rounded-xl">
 							<div id="tm-creator-avatar" class="w-10 h-10 flex-shrink-0 rounded-lg bg-accent-orange dark:bg-accent-green border-2 border-gray-800 flex items-center justify-center font-black text-black text-sm">—</div>
 							<div class="flex-1 min-w-0">
@@ -755,14 +755,14 @@
 						<div id="tm-bracket-svg-wrapper" class="relative p-6 pt-8 inline-flex items-stretch min-h-full min-w-full">
 							<svg id="tm-connector-svg" class="absolute top-0 left-0 pointer-events-none z-0" style="width:100%;height:100%;overflow:visible;"></svg>
 							<div id="tm-bracket-container" class="flex gap-8 relative z-10 items-center">
-								<p class="text-gray-400 font-bold italic uppercase text-sm m-auto select-none">Waiting for tournament to start…</p>
+							<p class="text-gray-400 font-bold italic uppercase text-sm m-auto select-none" data-i18n="tournament.waitingToStart">Waiting for tournament to start…</p>
 							</div>
 						</div>
 					</div>
 
 					<!-- Cooldown overlay (bottom right) -->
 					<div id="tm-cooldown-overlay" class="hidden absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm rounded-xl border-2 border-gray-800 dark:border-gray-600 p-3 shadow-lg" style="z-index: 999;">
-						<p id="tm-cooldown-round" class="text-white font-black uppercase text-xs tracking-widest mb-1">Next round in</p>
+						<p id="tm-cooldown-round" class="text-white font-black uppercase text-xs tracking-widest mb-1" data-i18n="tournament.nextRoundIn">Next round in</p>
 						<p id="tm-cooldown-timer" class="text-3xl font-black text-accent-orange dark:text-accent-green tabular-nums">5</p>
 					</div>
 
@@ -1102,13 +1102,13 @@
 
 		<!-- Header -->
 		<div class="p-6 border-b-2 dark:border-neutral-700 dark:bg-neutral-800 border-neutral-300 bg-neutral-200">
-			<h2 id="game-invite-title" class="text-2xl font-extrabold uppercase tracking-tight dark:text-[#00ffff] text-accent-orange">Invite Friend</h2>
-			<p id="game-invite-subtitle" class="dark:text-neutral-400 text-neutral-600 text-sm mt-2">Select a friend to invite</p>
+			<h2 id="game-invite-title" class="text-2xl font-extrabold uppercase tracking-tight dark:text-[#00ffff] text-accent-orange" data-i18n="gameInvite.title">Invite Friend</h2>
+			<p id="game-invite-subtitle" class="dark:text-neutral-400 text-neutral-600 text-sm mt-2" data-i18n="gameInvite.subtitle">Select a friend to invite</p>
 		</div>
 
 		<!-- Friends list -->
 		<div id="game-invite-friends-list" class="p-6 flex flex-col gap-2 max-h-96 overflow-y-auto">
-			<div class="dark:text-neutral-400 text-neutral-600 text-center py-4">Loading friends...</div>
+			<div class="dark:text-neutral-400 text-neutral-600 text-center py-4" data-i18n="gameInvite.loading">Loading friends...</div>
 		</div>
 		</div>
 	</div>

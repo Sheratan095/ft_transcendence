@@ -221,5 +221,27 @@
   "tris.aiTurn": "AI's turn",
   "game.aiVictory": "AI wins!",
   "tris.unknown": "--------",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+
+  "gameInvite.title": "Invite to {{ game }}",
+  "gameInvite.subtitle": "Select a friend to invite to {{ game }}",
+  "gameInvite.loading": "Loading friends...",
+  "gameInvite.noFriends": "No friends to invite",
+  "gameInvite.loadFailed": "Failed to load friends",
+
+  "tournament.participants": "Participants",
+  "tournament.creator": "Creator",
+  "tournament.playerCount": "{{ count }} player",
+  "tournament.playerCountPlural": "{{ count }} players",
+  "tournament.statusWaiting": "Waiting for players",
+  "tournament.statusInProgress": "In progress",
+  "tournament.statusFinished": "Finished",
+  "tournament.waitingToStart": "Waiting for tournament to start…",
+  "tournament.noBracketData": "No bracket data yet.",
+  "tournament.bracketError": "Error rendering bracket. Check console.",
+  "tournament.round": "Round {{ n }}",
+  "tournament.matchFinished": "✓ Finished",
+  "tournament.bye": "(BYE)",
+  "tournament.nextRoundIn": "Next round in",
+  "tournament.roundIn": "Round {{ n }} in"
 }
