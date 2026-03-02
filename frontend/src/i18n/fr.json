@@ -243,5 +243,16 @@
   "tournament.matchFinished": "✓ Terminé",
   "tournament.bye": "(BYE)",
   "tournament.nextRoundIn": "Prochain round dans",
-  "tournament.roundIn": "Round {{ n }} dans"
+  "tournament.roundIn": "Round {{ n }} dans",
+
+  "chat.userJoined": "{{ username }} a rejoint.",
+  "chat.userLeft": "{{ username }} a quitté le chat.",
+  "chat.noChatSelected": "Aucun chat sélectionné",
+  "chat.no-chat-selected": "Aucun chat sélectionné",
+  "chat.noMembers": "Aucun membre",
+  "chat.joinedChat": "a rejoint le chat",
+  "chat.leftChat": "a quitté le chat",
+  "chat.messageFrom": "de {{ name }}",
+  "chat.loadingFriends": "Chargement des amis...",
+  "chat.noFriendsAvailable": "Aucun ami disponible"
 }

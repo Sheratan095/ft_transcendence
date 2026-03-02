@@ -243,5 +243,16 @@
   "tournament.matchFinished": "✓ Finished",
   "tournament.bye": "(BYE)",
   "tournament.nextRoundIn": "Next round in",
-  "tournament.roundIn": "Round {{ n }} in"
+  "tournament.roundIn": "Round {{ n }} in",
+
+  "chat.userJoined": "{{ username }} joined.",
+  "chat.userLeft": "{{ username }} left the chat.",
+  "chat.noChatSelected": "No chat selected",
+  "chat.no-chat-selected": "No chat selected",
+  "chat.noMembers": "No members",
+  "chat.joinedChat": "joined the chat",
+  "chat.leftChat": "left the chat",
+  "chat.messageFrom": "from {{ name }}",
+  "chat.loadingFriends": "Loading friends...",
+  "chat.noFriendsAvailable": "No friends available"
 }
