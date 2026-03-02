@@ -116,11 +116,11 @@ async function renderPongStats(container: HTMLElement)
 		// Still update the win/loss text
 		const winsEl = document.getElementById('pong-user-wins');
 		if (winsEl)
-			winsEl.textContent = `Wins: --`;
+			winsEl.textContent = t("game.wins", { wins: "--" });
 
 		const lossesEl = document.getElementById('pong-user-losses');
 		if (lossesEl)
-			lossesEl.textContent = `Losses: --`;
+			lossesEl.textContent = t("game.losses", { losses: "--" });
 	}
 }
 

@@ -539,7 +539,7 @@ if (typeof window !== 'undefined')
 	{
 		const { winnerName } = e.detail;
 		updatePongStatus(t('game.overWinner', { winner: winnerName }));
-		showSuccessToast(`${winnerName} won!`);
+		showSuccessToast(t('game.overWinner', { winner: winnerName }));
 
 		const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
 		if (startBtn)

@@ -90,12 +90,14 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
         const body = await res.json();
         if (body && body.avatarUrl) {
-          avatar.src = `/api${body.avatarUrl}`;
+          const avatarPath = `/api${body.avatarUrl}`;
+          const cacheBustedAvatarPath = `${avatarPath}?v=${Date.now()}`;
+          avatar.src = cacheBustedAvatarPath;
           user.avatarUrl = body.avatarUrl;
           await SaveCurrentUserProfile(user.id); // Update localStorage with new avatar URL
           const topbarAvatar = document.getElementById('topbar-avatar');
           if (topbarAvatar)
-            topbarAvatar.setAttribute('src', `/api${body.avatarUrl}`);
+            topbarAvatar.setAttribute('src', cacheBustedAvatarPath);
         }
       } catch (err) {
         console.error('Avatar upload error:', err);
@@ -182,7 +184,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
           
           // Validate username length (2-20 characters)
           if (newUsername.length < 2 || newUsername.length > 20) {
-            showErrorToast('Username must be between 2 and 20 characters long', { duration: 4000, position: 'top-right' });
+            showErrorToast(t('profile.usernameLength'), { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);
