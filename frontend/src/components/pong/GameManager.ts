@@ -161,7 +161,9 @@ export class GameManager
 			this.networkController.sendMovement(localMovement);
 
 			// 2. Only apply state when a NEW server update arrives (no interpolation)
-			if (!this.networkController.hasNewServerState())
+			const hasNewState = this.networkController.hasNewServerState();
+			console.log('[GameManager] ONLINE mode update - hasNewServerState:', hasNewState);
+			if (!hasNewState)
 				return;
 
 			const serverState = this.networkController.getServerGameState();
@@ -523,6 +525,51 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 		
 		// Update UI indicators
 		this.updateReadyIndicators();
+	}
+
+	/**
+	 * Update local player ID for online games (called when match is made)
+	 * @param {string} newSide - 'left' or 'right'
+	 */
+	updateLocalPlayerId(newSide: string): void
+	{
+		const validSide = newSide.toLowerCase() === 'right' ? 'right' : 'left';
+		
+		if (this.mode !== GAME_MODES.ONLINE) {
+			console.log('[GameManager] Cannot update localPlayerId for non-online mode');
+			return;
+		}
+
+		if (this.localPlayerId === validSide) {
+			console.log('[GameManager] localPlayerId already set to', validSide);
+			return;
+		}
+
+		console.log('[GameManager] Updating localPlayerId from', this.localPlayerId, 'to', validSide);
+		this.localPlayerId = validSide;
+
+		// Update input controller enabled states
+		if (validSide === 'left') {
+			// Left is local player
+			if (this.leftInputController && typeof this.leftInputController.enabled !== 'undefined') {
+				this.leftInputController.enabled = true;
+				console.log('[GameManager] Enabled left input controller');
+			}
+			if (this.rightInputController && typeof this.rightInputController.enabled !== 'undefined') {
+				this.rightInputController.enabled = false;
+				console.log('[GameManager] Disabled right input controller');
+			}
+		} else {
+			// Right is local player
+			if (this.leftInputController && typeof this.leftInputController.enabled !== 'undefined') {
+				this.leftInputController.enabled = false;
+				console.log('[GameManager] Disabled left input controller');
+			}
+			if (this.rightInputController && typeof this.rightInputController.enabled !== 'undefined') {
+				this.rightInputController.enabled = true;
+				console.log('[GameManager] Enabled right input controller');
+			}
+		}
 	}
 
 	private updateReadyIndicators(): void

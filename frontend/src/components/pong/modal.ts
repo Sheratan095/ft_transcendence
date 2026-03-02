@@ -57,6 +57,10 @@ export function handleCustomGameCreated(data: any)
 	if (currentGameInstance) {
 		const user = getUser();
 		const creatorUsername = user?.username || 'You';
+		
+		// Creator is always left
+		currentGameInstance.gameManager.updateLocalPlayerId('left');
+		
 		currentGameInstance.gameManager.setPlayerNames(creatorUsername, opponentUsername);
 		currentGameInstance.updateScorebarNames();
 	}
@@ -99,6 +103,9 @@ export async function handleCustomGameJoinSuccess(data: any)
 	// Update player names on the scorebar
 	if (currentGameInstance && creatorUsername) {
 		// Creator is left player (X), we are right player (O)
+		// Joiner is always right
+		currentGameInstance.gameManager.updateLocalPlayerId('right');
+		
 		currentGameInstance.gameManager.setPlayerNames(creatorUsername, 'You');
 		currentGameInstance.updateScorebarNames();
 	}
@@ -203,12 +210,22 @@ export function handleGameStarted(data: any)
 	updatePongStatus(t('game.inprogress'));
 
 	console.log('[Pong] Game started with data:', data);
+	console.log('[Pong] Current game instance:', !!currentGameInstance);
+	if (currentGameInstance) {
+		console.log('[Pong] Game mode:', currentGameInstance.gameManager.mode, 'localPlayerId:', currentGameInstance.gameManager.localPlayerId, 'hasNetworkController:', !!currentGameInstance.gameManager.networkController);
+	}
 
 	// Reset game state and update scoreboard names
 	if (currentGameInstance && yourSide && opponentUsername)
 	{
 		// Reset 3D scene (ball, paddles, score) for the new game
 		currentGameInstance.resetState();
+
+		// UNPAUSE the game for online mode - reset() sets it back to paused, so we need to unpause here
+		if (currentGameInstance.gameManager.mode === GAME_MODES.ONLINE) {
+			currentGameInstance.gameManager.resumeGame();
+			console.log('[Pong] Game unpaused for online mode');
+		}
 
 		// Show "You" as the local player (consistent with matched state)
 		const myName = 'You';
@@ -239,13 +256,17 @@ export function handleGameStarted(data: any)
 export function handleGameState(data: any)
 {
 	// Game state handled by renderer
+	console.log('[Pong Modal] handleGameState called with game:', data.gameId, 'currentGameInstance:', !!currentGameInstance);
 	if (currentGameInstance)
 	{
 		// Ignore stale game states from previous games
 		const currentGame = getCurrentGameId();
-		if (!currentGame || (data.gameId && data.gameId !== currentGame))
+		if (!currentGame || (data.gameId && data.gameId !== currentGame)) {
+			console.log('[Pong Modal] Ignoring stale state. currentGame:', currentGame, 'data.gameId:', data.gameId);
 			return;
+		}
 
+		console.log('[Pong Modal] Updating online state with ball:', {x: data.ball?.x, y: data.ball?.y}, 'paddles:', Object.keys(data.paddles || {}));
 		currentGameInstance.updateOnlineState(data);
 	}
 }
@@ -365,6 +386,12 @@ export function handleMatchedInRandomGame(data: any)
 	if (currentGameInstance) {
 		const myName = 'You';
 		const side = (yourSide || '').toString().toLowerCase();
+		
+		// Update localPlayerId to match the actual side the player is on
+		if (side === 'left' || side === 'right') {
+			currentGameInstance.gameManager.updateLocalPlayerId(side);
+		}
+		
 		if (side === 'left') {
 			currentGameInstance.gameManager.setPlayerNames(myName, opponentUsername);
 		} else {
@@ -458,10 +485,14 @@ export async function handleTournamentRoundInfo(data: any)
 		if (yourSide && typeof yourSide === 'string')
 		{
 			const side = yourSide.toLowerCase();
-			if (side === 'left')
+			if (side === 'left') {
 				leftName = 'You';
-			else if (side === 'right')
+				currentGameInstance.gameManager.updateLocalPlayerId('left');
+			}
+			else if (side === 'right') {
 				rightName = 'You';
+				currentGameInstance.gameManager.updateLocalPlayerId('right');
+			}
 		}
 
 		currentGameInstance.gameManager.setPlayerNames(leftName, rightName);
@@ -804,6 +835,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 		}
 
 		currentGameInstance = game;
+		console.log('[Modal] Game instance created. Mode:', gameMode, 'localPlayerId:', game.gameManager.localPlayerId);
 
 		if (status)
 		{

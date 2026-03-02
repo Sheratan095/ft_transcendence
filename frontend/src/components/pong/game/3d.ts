@@ -315,9 +315,16 @@ export class PongGame {
 	}
 
 	updateOnlineState(serverState: any) {
-		if (this.gameManager.mode !== GAME_MODES.ONLINE) return;
+		console.log('[3D] updateOnlineState called. mode:', this.gameManager.mode, 'hasNetworkController:', !!this.gameManager.networkController);
+		if (this.gameManager.mode !== GAME_MODES.ONLINE) {
+			console.log('[3D] Mode is not ONLINE, returning');
+			return;
+		}
 		if (this.gameManager.networkController) {
+			console.log('[3D] Setting server game state');
 			this.gameManager.networkController.setServerGameState(serverState);
+		} else {
+			console.log('[3D] WARNING - networkController is null!');
 		}
 	}
 

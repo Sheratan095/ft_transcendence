@@ -291,6 +291,7 @@ export class NetworkInputController extends InputController
 	 */
 	setServerGameState(state: any): void
 	{
+		console.log('[NetworkController] setServerGameState called. ball:', {x: state?.ball?.x, y: state?.ball?.y});
 		this.serverGameState = state;
 		this._hasNewState = true;
 	}
