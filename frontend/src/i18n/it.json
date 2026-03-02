@@ -178,7 +178,7 @@
   "game.player-defeat": "Hai perso !",
   "game.draw": "Pareggio!",
   "game.winner": "Partita Terminata! Vincitore: {{ winner }}",
-  "game.opponent-left": "L'avversario ha lasciato la partita, hai vinto !",
+  "game.opponent-left": "L'avversario ha lasciato la partita !",
   "game.timeout": "Tempo scaduto! Hai perso !",
   "game.quit": "Lascia la partita",
   "game.offline-1v1": "Offline 1v1",
