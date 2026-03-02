@@ -254,5 +254,13 @@
   "chat.leftChat": "ha lasciato la chat",
   "chat.messageFrom": "da {{ name }}",
   "chat.loadingFriends": "Caricamento amici...",
-  "chat.noFriendsAvailable": "Nessun amico disponibile"
+  "chat.noFriendsAvailable": "Nessun amico disponibile",
+
+  "profile.usernameEmpty": "Il nome utente non può essere vuoto",
+  "profile.usernameLength": "Il nome utente deve essere tra 2 e 20 caratteri",
+  "profile.usernameFormat": "Il nome utente può contenere solo lettere, numeri, underscore e punti",
+  "profile.usernameReserved": "Il nome utente non può contenere parole riservate.",
+  "profile.usernameUpdateFailed": "Aggiornamento del nome utente fallito.",
+  "profile.usernameTaken": "Nome utente già in uso.",
+  "profile.usernameUpdateError": "Aggiornamento del nome utente fallito. Riprova."
 }

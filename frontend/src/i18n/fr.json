@@ -254,5 +254,13 @@
   "chat.leftChat": "a quitté le chat",
   "chat.messageFrom": "de {{ name }}",
   "chat.loadingFriends": "Chargement des amis...",
-  "chat.noFriendsAvailable": "Aucun ami disponible"
+  "chat.noFriendsAvailable": "Aucun ami disponible",
+
+  "profile.usernameEmpty": "Le nom d'utilisateur ne peut pas être vide",
+  "profile.usernameLength": "Le nom d'utilisateur doit comporter entre 2 et 20 caractères",
+  "profile.usernameFormat": "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres, des underscores et des points",
+  "profile.usernameReserved": "Le nom d'utilisateur ne peut pas contenir de mots réservés.",
+  "profile.usernameUpdateFailed": "La mise à jour du nom d'utilisateur a échoué.",
+  "profile.usernameTaken": "Nom d'utilisateur déjà pris.",
+  "profile.usernameUpdateError": "La mise à jour du nom d'utilisateur a échoué. Veuillez réessayer."
 }
