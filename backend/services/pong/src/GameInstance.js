@@ -64,7 +64,7 @@
 			this.gameLoop = null;
 			this._cooldownTimer = null;
 			this.lastUpdateTime = Date.now();
-			this.frameRate = process.env.FRAME_RATE; // 60 FPS
+			this.frameRate = 60; // 60 updates per second
 			this.frameInterval = 1000 / this.frameRate;
 
 			this.winnerId = null;
