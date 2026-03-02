@@ -250,6 +250,11 @@
   "tournament.bye": "(BYE)",
   "tournament.nextRoundIn": "Prossimo round tra",
   "tournament.roundIn": "Round {{ n }} tra",
+  "tournament.status.waiting": "in attesa",
+  "tournament.status.in_progress": "in corso",
+  "tournament.status.inProgress": "in corso",
+  "tournament.status.finished": "terminato",
+  "tournament.join": "partecipa",
 
   "chat.userJoined": "{{ username }} si è unito.",
   "chat.userLeft": "{{ username }} ha lasciato la chat.",
