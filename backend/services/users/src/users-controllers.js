@@ -144,14 +144,55 @@ export const	updateUser = async (req, reply) =>
 	{
 		const	usersDb = req.server.usersDb;
 
-		const	newUsername = req.body.newUsername;
+		const	rawNewUsername = req.body.newUsername;
 		const	newLanguage = req.body.newLanguage;
+		let	newUsername;
 
 		const	user = extractUserData(req);
 		if (!user)
 		{
 			console.log('[USERS] UpdateUser error: User data missing in request');
 			return (reply.code(401).send({ error: 'Unauthorized' }));
+		}
+
+		// Normalize and validate username strictly on backend
+		if (rawNewUsername !== undefined)
+		{
+			if (typeof rawNewUsername !== 'string')
+			{
+				console.log('[USERS] UpdateUser error: Username must be a string');
+				return (reply.code(400).send({ error: 'Username must be a string' }));
+			}
+
+			newUsername = rawNewUsername.trim().toLowerCase();
+
+			if (newUsername.length < 3 || newUsername.length > 20)
+			{
+				console.log('[USERS] UpdateUser error: Username must be between 3 and 20 characters');
+				return (reply.code(400).send({ error: 'Username must be between 3 and 20 characters' }));
+			}
+
+			if (!/^[a-z][a-z0-9._]{2,19}$/.test(newUsername))
+			{
+				console.log('[USERS] UpdateUser error: Invalid username format');
+				return (reply.code(400).send({ error: 'Username must start with a letter and contain only letters, numbers, dots, or underscores' }));
+			}
+
+			const	reservedWords = ['admin', 'root', 'user', 'null', 'undefined', 'system'];
+			for (const element of reservedWords)
+			{
+				if (newUsername.includes(element))
+				{
+					console.log('[USERS] UpdateUser error: Reserved word in username');
+					return (reply.code(429).send({ error: `Username cannot contain reserved word: ${element}` }));
+				}
+			}
+		}
+
+		if (newUsername === undefined && newLanguage === undefined)
+		{
+			console.log('[USERS] UpdateUser error: No updatable fields provided');
+			return (reply.code(400).send({ error: 'At least one field (newUsername or newLanguage) is required' }));
 		}
 
 		// Check if new username is already taken
@@ -165,20 +206,6 @@ export const	updateUser = async (req, reply) =>
 			}
 		}
 
-		if (newUsername && (newUsername.length < 2 || newUsername.length > 20))
-		{
-			console.log('[USERS] UpdateUser error: Username must be between 2 and 20 characters');
-			return (reply.code(400).send({ error: 'Username must be between 2 and 20 characters' }));
-		}
-
-		// Check for reserved words in username
-		const	reservedWords = ['admin', 'root', 'user', 'null', 'undefined', 'system'];
-		reservedWords.forEach(element =>
-		{
-			if (newUsername && newUsername.toLowerCase().includes(element))
-				return (reply.code(429).send({ error: `Username cannot contain reserved word: ${element}` }));
-		});
-
 		const	updatedUser = await usersDb.updateUser(user.id, newUsername, newLanguage);
 
 		console.log(`[USERS] User ${user.id} updated`);
@@ -187,6 +214,9 @@ export const	updateUser = async (req, reply) =>
 	}
 	catch (err)
 	{
+		if (err && err.message && err.message.includes('UNIQUE constraint failed'))
+			return (reply.code(409).send({ error: 'Username already taken' }));
+
 		console.log('[USERS] UpdateUser error:', err.message);
 
 		return (reply.code(500).send({ error: 'Internal server error' }));
