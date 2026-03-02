@@ -170,7 +170,7 @@ class	GameManager
 	//	for ANY IN_PROGRESS games, the other player wins
 	//	for CUSTOM GAMES in WAITING status, only the creator is present and must cancel it
 	//	for CUSTOM GAMES in LOBBY status, quitting cancels the game for both players
-	quitGame(playerId, gameId)
+	async quitGame(playerId, gameId)
 	{
 		const	gameInstance = this._games.get(gameId);
 		if (!gameInstance) // Check if game exists
@@ -204,6 +204,25 @@ class	GameManager
 				this._games.delete(gameId);
 				return ;
 			}
+			// If the game is part of a tournament, quit the entire tournament
+			else if (gameInstance.tournamentId)
+			{
+				console.log(`[PONG] ${playerId} quit game ${gameId} which is part of tournament ${gameInstance.tournamentId}, removing from tournament`);
+
+				const	otherPlayerId = (gameInstance.playerLeftId === playerId) ? gameInstance.playerRightId : gameInstance.playerLeftId;
+				const	winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+				try {
+					await tournamentManager.removeParticipant(gameInstance.tournamentId, playerId);
+				} catch (err) {
+					console.error('[PONG] Error removing participant from tournament on quit:', err);
+				}
+				this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
+
+				// Clean up the game instance
+				gameInstance.destroy();
+				this._games.delete(gameId);
+				return ;
+			}
 			else
 			{
 				console.error(`[PONG] ${playerId} tried to quit game ${gameId} which is still waiting for an opponent`);
@@ -227,14 +246,32 @@ class	GameManager
 		}
 		else if (originalStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
 		{
-			// If the match is in LOBBY and is a CUSTOM game, quitting cancels the game for both players
-			console.log(`[PONG] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
+			// If the match is in LOBBY and is a CUSTOM game, normally quitting cancels the game for both players.
+			// However, if this game is part of a tournament, treat the quit as a forfeit (other player wins).
+			if (gameInstance.tournamentId || gameInstance.gameType === GameType.TOURNAMENT)
+			{
+				console.log(`[PONG] Player ${playerId} quit tournament game ${gameId} in LOBBY, awarding win to opponent`);
+				// Notify opponent that the game is cancelled/quit
+				pongConnectionManager.sendCustomGameCanceled(otherPlayerId, gameId);
+				// Let TournamentManager handle match completion (bracket progression)
+				try {
+					await tournamentManager.handleGameEnd(gameId, otherPlayerId, playerId);
+				} catch (err) {
+					console.error('[PONG] Error handling tournament game end on lobby-quit:', err);
+				}
+				const winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
+				this._gameEnd(gameInstance, otherPlayerId, playerId, winnerUsername, true);
+			}
+			else
+			{
+				// Non-tournament custom game: cancel and notify opponent
+				console.log(`[PONG] Player ${playerId} quit game custom game ${gameId}, game is canceled`);
+				pongConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
 
-			pongConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
-
-			// Clean up the game instance and remove from active games map
-			gameInstance.destroy();
-			this._games.delete(gameId);
+				// Clean up the game instance and remove from active games map
+				gameInstance.destroy();
+				this._games.delete(gameId);
+			}
 		}
 		else if (originalStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.RANDOM)
 		{
