@@ -276,7 +276,7 @@ function updateScoreboardNames(mode: TrisModeType, leftName?: string, rightName?
     if (mode === 'offline-ai') {
       lName = `${t('you')} (X)`; rName = `${'AI'} (O)`;
     } else if (mode === 'offline-1v1') {
-      lName = `${'Player'} X`; rName = `${'Player'} O`;
+      lName = `${t('game.player')} X`; rName = `${t('game.player')} O`;
     } else {
       lName = '--------'; rName = '--------';
     }

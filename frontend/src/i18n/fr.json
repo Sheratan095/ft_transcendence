@@ -255,6 +255,9 @@
   "tournament.status.inProgress": "en cours",
   "tournament.status.finished": "terminé",
   "tournament.join": "joindre",
+  "game.player-left": "Bleu (W-A)",
+  "game.player-right": "Rouge (↑-↓)",
+  "game.player": "Joueur",
 
   "chat.userJoined": "{{ username }} a rejoint.",
   "chat.userLeft": "{{ username }} a quitté le chat.",

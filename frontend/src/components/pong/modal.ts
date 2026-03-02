@@ -809,8 +809,8 @@ export async function openPongModal(mode: PongModeType = 'online')
 			{
 				playerNames:
 				{
-					left: mode === 'offline-1v1' ? 'Player left' : (mode === 'offline-ai' ? 'You' : '--------'),
-					right: mode === 'offline-1v1' ? 'Player right' : (mode === 'offline-ai' ? 'Ai' : '--------')
+					left: mode === 'offline-1v1' ? t('game.player-left') : (mode === 'offline-ai' ? t('game.you') : '--------'),
+					right: mode === 'offline-1v1' ? t('game.player-right') : (mode === 'offline-ai' ? t('game.ai') : '--------')
 				},
 				maxScore: 1, // to do back to 11
 				aiDifficulty: 'medium'

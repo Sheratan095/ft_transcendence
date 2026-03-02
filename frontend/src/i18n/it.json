@@ -234,6 +234,9 @@
   "gameInvite.loading": "Caricamento amici...",
   "gameInvite.noFriends": "Nessun amico da invitare",
   "gameInvite.loadFailed": "Impossibile caricare gli amici",
+  "game.player-left": "Blu (W-A)",
+  "game.player-right": "Rosso (↑-↓)",
+  "game.player": "Giocatore",
 
   "tournament.participants": "Partecipanti",
   "tournament.creator": "Creatore",
