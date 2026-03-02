@@ -181,12 +181,39 @@ export class GameManager
 			// Directly set paddle positions (mapped by X position)
 			if (serverState.paddles)
 			{
-				for (const paddle of Object.values(serverState.paddles) as any[])
+				console.log('[GameManager] serverState.paddles keys:', Object.keys(serverState.paddles));
+				console.log('[GameManager] current gameState.paddles keys:', Object.keys(this.gameState.paddles));
+				
+				// Reconstruct paddles with left/right keys based on x coordinate
+				const reconstructedPaddles = {
+					left: null as any,
+					right: null as any
+				};
+				
+				for (const [playerId, paddle] of Object.entries(serverState.paddles) as [string, any][])
 				{
-					if (paddle.x === 0 || paddle.x < 0.5)
-						this.gameState.paddles.left.y = paddle.y;
-					else
-						this.gameState.paddles.right.y = paddle.y;
+					if (!paddle || paddle.x === undefined) {
+						console.log('[GameManager] Skipping invalid paddle:', paddle);
+						continue;
+					}
+					
+					const side = paddle.x <= 0.5 ? "left" : "right";
+					reconstructedPaddles[side] = {
+						...paddle,
+						y: paddle.y // Ensure y is current
+					};
+					
+					console.log('[GameManager] Paddle', playerId, '-> side:', side, 'y:', paddle.y, 'x:', paddle.x);
+				}
+				
+				// Update gameState paddles
+				if (reconstructedPaddles.left) {
+					this.gameState.paddles.left = reconstructedPaddles.left;
+					console.log('[GameManager] Updated left paddle:', this.gameState.paddles.left);
+				}
+				if (reconstructedPaddles.right) {
+					this.gameState.paddles.right = reconstructedPaddles.right;
+					console.log('[GameManager] Updated right paddle:', this.gameState.paddles.right);
 				}
 			}
 
@@ -198,9 +225,9 @@ export class GameManager
 				for (const [id, score] of Object.entries(serverState.scores) as [string, number][])
 				{
 					const paddle = serverState.paddles ? serverState.paddles[id] : null;
-					if (paddle)
+					if (paddle && paddle.x !== undefined)
 					{
-						const side = (paddle.x === 0 || paddle.x < 0.5) ? "left" : "right";
+						const side = (paddle.x <= 0.5) ? "left" : "right";
 						if (this.gameState.scores[side] !== score)
 						{
 							this.gameState.scores[side] = score;
@@ -546,29 +573,27 @@ getWorldCoordinates(minX: number, maxX: number, minZ: number, maxZ: number): any
 		}
 
 		console.log('[GameManager] Updating localPlayerId from', this.localPlayerId, 'to', validSide);
+		const oldPlayerId = this.localPlayerId;
 		this.localPlayerId = validSide;
 
-		// Update input controller enabled states
+		// Preserve the existing networkController (it may have queued state)
+		const existingNetworkController = this.networkController;
+		
+		// Re-initialize input controllers for the new side
+		console.log('[GameManager] Re-initializing input controllers for', validSide, 'side');
+		this.initializeMode();
+		
+		// The new networkController was created by initializeMode(), but we want to keep the old one
+		// to preserve any queued server state
+		this.networkController = existingNetworkController;
+		
+		// Update the left/right controller references to use the preserved networkController
 		if (validSide === 'left') {
-			// Left is local player
-			if (this.leftInputController && typeof this.leftInputController.enabled !== 'undefined') {
-				this.leftInputController.enabled = true;
-				console.log('[GameManager] Enabled left input controller');
-			}
-			if (this.rightInputController && typeof this.rightInputController.enabled !== 'undefined') {
-				this.rightInputController.enabled = false;
-				console.log('[GameManager] Disabled right input controller');
-			}
+			this.rightInputController = this.networkController;
+			console.log('[GameManager] Set rightInputController to preserved networkController');
 		} else {
-			// Right is local player
-			if (this.leftInputController && typeof this.leftInputController.enabled !== 'undefined') {
-				this.leftInputController.enabled = false;
-				console.log('[GameManager] Disabled left input controller');
-			}
-			if (this.rightInputController && typeof this.rightInputController.enabled !== 'undefined') {
-				this.rightInputController.enabled = true;
-				console.log('[GameManager] Enabled right input controller');
-			}
+			this.leftInputController = this.networkController;
+			console.log('[GameManager] Set leftInputController to preserved networkController');
 		}
 	}
 
