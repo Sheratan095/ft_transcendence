@@ -51,6 +51,7 @@ let currentCreatorId: string | undefined;
 let currentUserId: string | null = null;
 let currentTournamentStatus: string | null = null;
 let cooldownInterval: number | null = null;
+let lastBracketData: BracketInfo | null = null;
 
 // -------------------- Init (wire up buttons) --------------------
 
@@ -106,6 +107,7 @@ export async function closeTournamentModal() {
 	_hideModal();
 	currentTournamentId = null;
 	currentCreatorId    = undefined;
+	lastBracketData     = null;
 	_stopCooldown();
 	await loadTournaments(); // Refresh the tournament list when modal closes
 }
@@ -142,7 +144,10 @@ export async function updateBracketInModal(tournamentId: string, bracketInfo: Br
 		console.error('[TournamentModal] bracketInfo is undefined');
 		return;
 	}
-
+	// Persist rounds so they can be reused when tournament ends
+	if (bracketInfo.rounds?.length) {
+		lastBracketData = { ...bracketInfo };
+	}
 	if (bracketInfo.status) {
 		currentTournamentStatus = bracketInfo.status;
 		_setStatusBadge(bracketInfo.status);
@@ -161,6 +166,27 @@ export async function updateBracketInModal(tournamentId: string, bracketInfo: Br
 			container.innerHTML = '';
 			container.appendChild(errorEl);
 		}
+	}
+}
+
+/**
+ * Called when pong.tournamentEnded fires. Re-renders the stored bracket with
+ * FINISHED status so the winner row gets the highlighted background and crown.
+ */
+export async function markTournamentFinished(tournamentId: string, winnerId: string, winnerUsername: string) {
+	if (String(tournamentId) !== String(currentTournamentId)) return;
+
+	currentTournamentStatus = 'FINISHED';
+	_setStatusBadge('FINISHED');
+	_setActionButtons(currentUserId === currentCreatorId, 'FINISHED');
+
+	if (!lastBracketData) return;
+
+	const finishedBracket: BracketInfo = { ...lastBracketData, status: 'FINISHED' };
+	try {
+		_renderBracket(finishedBracket);
+	} catch (error) {
+		console.error('[TournamentModal] Failed to re-render bracket on tournament end:', error);
 	}
 }
 

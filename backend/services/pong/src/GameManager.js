@@ -571,8 +571,20 @@ class	GameManager
 		if (gameInstance.gameType === GameType.RANDOM || gameInstance.gameType === GameType.TOURNAMENT)
 		{
 			// Add game to the history
-			const	playerLeftScore = gameInstance.scores[gameInstance.playerLeftId] || 0;
-			const	playerRightScore = gameInstance.scores[gameInstance.playerRightId] || 0;
+			let	playerLeftScore, playerRightScore;
+			
+			// If quit, set score to 11-0 for winner
+			if (quit)
+			{
+				playerLeftScore = winner === gameInstance.playerLeftId ? 11 : 0;
+				playerRightScore = winner === gameInstance.playerRightId ? 11 : 0;
+			}
+			else
+			{
+				playerLeftScore = gameInstance.scores[gameInstance.playerLeftId] || 0;
+				playerRightScore = gameInstance.scores[gameInstance.playerRightId] || 0;
+			}
+			
 			pongDb.saveMatch(gameInstance.playerLeftId, gameInstance.playerRightId, playerLeftScore, playerRightScore, winner, gameInstance.tournamentId);
 
 			// Update player stats

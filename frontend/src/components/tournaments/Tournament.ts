@@ -9,6 +9,7 @@ import {openTournamentModal,
 	removePartecipantFromModal,
 	updateBracketInModal,
 	updateCooldownInModal,
+	markTournamentFinished,
 	closeTournamentModal,
 	} from "./TournamentModal";
 
@@ -109,9 +110,9 @@ export async function bracketUpdate(tournamentId: string, bracketInfo: any)
 	updateBracketInModal(tournamentId, bracketInfo);
 }
 
-export async function tournamentEnded(tournamentId: string, bracketInfo: any)
+export async function tournamentEnded(tournamentId: string, data: any)
 {
-	updateBracketInModal(tournamentId, { ...bracketInfo, status: 'FINISHED' });
+	markTournamentFinished(tournamentId, data.winnerId, data.winnerUsername);
 }
 
 export async function cancelTournament(tournamentId: string)
