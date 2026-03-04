@@ -553,7 +553,7 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 				<span class="ml-3 font-black min-w-5 text-right ${leftScore}"></span>
 			</div>
 			<div class="flex justify-between items-center px-3 py-2 text-sm ${byeBg}">
-				<span class="flex-1 truncate font-bold text-gray-800 dark:text-white"><span class="text-green-600 dark:text-white">${t('tournament.bye')}</span></span>
+				<span class="flex-1 truncate font-bold text-gray-800 dark:text-white"><span class="text-green-600">${t('tournament.bye')}</span></span>
 				<span class="ml-3 font-black min-w-5 text-right text-gray-400 dark:text-white"></span>
 			</div>
 			<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-white tracking-widest">${t('tournament.matchFinished')}</div>
