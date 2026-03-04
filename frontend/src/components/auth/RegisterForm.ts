@@ -137,6 +137,12 @@ function translateRegisterError(rawError: string, status?: number, retryAfter?: 
     return t('auth.rateLimited');
   }
 
+  if (status === 400)
+  {
+    if (rawError.toLowerCase().includes('password'))
+      return t('register.error.passwordRequirements');
+  }
+
   if (status) {
     return t('register.error.failedWithStatus', { status });
   }

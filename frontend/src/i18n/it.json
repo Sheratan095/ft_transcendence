@@ -78,6 +78,7 @@
   "register.error.failed": "Registrazione non riuscita.",
   "register.error.failedWithStatus": "Registrazione non riuscita ({{ status }})",
   "register.error.network": "Errore di rete.",
+  "register.error.passwordRequirements": "La password deve contenere tra 8 e 24 caratteri e includere lettere maiuscole, lettere minuscole, numeri e caratteri speciali.",
   "tfa.title": "Autenticazione a due fattori",
   "tfa.desc": "Inserisci il codice a 6 cifre dalla tua app di autenticazione.",
   "tfa.submit": "Accedi",

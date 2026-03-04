@@ -70,6 +70,7 @@
   "register.error.passwordTooCommon": "Password is too common.",
   "register.error.passwordTooSimilar": "Password is too similar to username or email.",
   "register.error.passwordTooShort": "Password must be between 8 and 24 characters long.",
+  "register.error.passwordRequirements": "Password must be 8-24 characters and include uppercase, lowercase, number, and special character.",
   "register.error.emailExists": "Email already exists.",
   "register.error.usernameExists": "Username already exists.",
   "register.error.unexpected": "An unexpected error occurred during registration.",

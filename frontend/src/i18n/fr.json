@@ -78,6 +78,7 @@
   "register.error.failed": "Échec de l'inscription.",
   "register.error.failedWithStatus": "Échec de l'inscription ({{ status }})",
   "register.error.network": "Erreur réseau.",
+  "register.error.passwordRequirements": "Le mot de passe doit contenir entre 8 et 24 caractères et inclure des majuscules, des minuscules, un chiffre et un caractère spécial.",
   "tfa.title": "Authentification à deux facteurs",
   "tfa.desc": "Entrez le code à 6 chiffres de votre application d'authentification.",
   "tfa.submit": "Se connecter",
