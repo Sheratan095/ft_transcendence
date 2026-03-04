@@ -170,17 +170,21 @@ class	TournamentManager
 				// Update top placement for forfeiting player
 				this._updateTopForEliminatedPlayer(tournament, userId);
 
-				// Notify all participants about the forfeit
-				for (let participant of tournament.participants)
-				{
-					pongConnectionManager.notifyTournamentMatchEnded(
-						participant.userId, 
-						match.id, 
-						opponentId, 
-						opponentUsername,
-						true // forfeit flag
-					);
-				}
+				// Notify all participants of the match
+				pongConnectionManager.notifyTournamentMatchEnded(
+					opponentId, // Notify the opponent that they won by forfeit
+					match.id,
+					opponentId,
+					opponentUsername,
+					true // forfeit flag
+				);
+				pongConnectionManager.notifyTournamentMatchEnded(
+					userId, // Notify the forfeiting player that they lost by forfeit
+					match.id,
+					opponentId,
+					opponentUsername,
+					true // forfeit flag
+				);
 
 				console.log(`[PONG] User ${userId} forfeited match ${match.id}, opponent ${opponentId} wins`);
 
@@ -354,12 +358,10 @@ class	TournamentManager
 		// Update top placement for losing player
 		this._updateTopForEliminatedPlayer(tournament, loserId);
 
-		// Notify all participants about match result
+		// Notify just the players involved in the match about the result
 		const	winnerUsername = match.playerLeftId === winnerId ? match.playerLeftUsername : match.playerRightUsername;
-		for (let participant of tournament.participants)
-		{
-			pongConnectionManager.notifyTournamentMatchEnded(participant.userId, match.id, winnerId, winnerUsername);
-		}
+		pongConnectionManager.notifyTournamentMatchEnded(winnerId, gameId, winnerId, winnerUsername, false); // Notify winner
+		pongConnectionManager.notifyTournamentMatchEnded(loserId, gameId, winnerId, winnerUsername, false); // Notify loser
 
 		// Broadcast bracket update
 		this._broadcastBracketUpdate(tournament.id);
@@ -369,11 +371,16 @@ class	TournamentManager
 		{
 			await this._endTournament(tournament);
 		}
-		// Check if round is complete and new round started
-		else if (tournament.currentRound <= tournament.rounds.length)
+		// Check if round is complete and schedule next round
+		else if (tournament.isRoundComplete())
 		{
-			// New round was created, schedule it after cooldown
+			// All matches in current round are done, schedule next round
+			console.log(`[PONG] Round ${tournament.currentRound} complete in tournament ${tournament.id}, scheduling next round`);
 			this._scheduleNextRound(tournament.id);
+		}
+		else
+		{
+			console.log(`[PONG] Match ${gameId} ended in tournament ${tournament.id}, round ${tournament.currentRound} still in progress`);
 		}
 
 		console.log(`[PONG] Tournament match ${match.id} ended, winner: ${winnerId}`);
