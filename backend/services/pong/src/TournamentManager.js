@@ -14,6 +14,7 @@ class	TournamentManager
 		this._matchTimers = new Map(); // matchId -> timer
 		this._roundTransitionTimers = new Map(); // tournamentId -> timer
 
+		// BUG FIX: the env file doesnt seem to be properly loaded so the value is always 2.
 		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START) || 2;
 		this.ROUND_TRANSITION_COOLDOWN_MS = parseInt(process.env.ROUND_TRANSITION_COOLDOWN_MS) || 20000;
 		this.READY_COOLDOWN_MS = parseInt(process.env.READY_COOLDOWN_MS) || 15000;
