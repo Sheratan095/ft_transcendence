@@ -213,7 +213,7 @@ async function handleCreateConfirm(): Promise<void> {
 
   const name = input?.value.trim() ?? '';
   if (!name) {
-    if (errEl) { errEl.textContent = 'Please enter a tournament name.'; errEl.classList.remove('hidden'); }
+    if (errEl) { errEl.textContent = t('tournament.name-required'); errEl.classList.remove('hidden'); }
     input?.focus();
     return;
   }
@@ -226,7 +226,7 @@ async function handleCreateConfirm(): Promise<void> {
     closeCreateModal();
     await loadTournaments(); // refresh list in background
   } catch (err) {
-    if (errEl) { errEl.textContent = 'Failed to create tournament. Try again.'; errEl.classList.remove('hidden'); }
+    if (errEl) { errEl.textContent = t('tournament.create-failed'); errEl.classList.remove('hidden'); }
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Create & Join'; }
   }

@@ -12,6 +12,7 @@ import {openTournamentModal,
 	markTournamentFinished,
 	closeTournamentModal,
 	} from "./TournamentModal";
+import { t } from "../../lib/intlayer";
 
 let partecipants: any[] = [];
 let tournamentId : string= ""; // This should be set when opening the tournament modal
@@ -32,7 +33,7 @@ export async function joinTournament(tournamentId: string, tournamentCreator: st
 
 		if (!response.ok)
 		{
-			showErrorToast('Failed to join tournament. Please try again later.');
+			showErrorToast(t('tournament.join-failed'));
 			return ;
 		}
 
@@ -61,7 +62,6 @@ export async function joinTournament(tournamentId: string, tournamentCreator: st
 
 	} catch (err) {
 		console.error('Error joining tournament:', err);
-		showErrorToast((err as Error).message || 'An error occurred while joining the tournament');
 	}
 }
 
@@ -92,7 +92,7 @@ export async function tournamentCancelled(tournamentId: string)
 {
 	closeTournamentModal();
 
-	showInfoToast('The tournament has been cancelled.');
+	showInfoToast(t('tournament.cancelled-notification')); // "The tournament has been cancelled."
 }
 
 export async function tournamentRoundCooldown(tournamentId: string, cooldownInfo: any)
@@ -178,12 +178,8 @@ export async function createTournament(name: string): Promise<void>
 			creatorUsername: creatorUsername,
 			creatorAvatar: creatorAvatar,
 		}, data.participants ?? []);
-
-		showInfoToast('Tournament created successfully!');
-
 	} catch (err) {
 		console.error('Error creating tournament:', err);
-		showErrorToast((err as Error).message || 'An error occurred while creating the tournament');
 		throw err; // re-throw so caller can react (e.g. show error in mini modal)
 	}
 }
