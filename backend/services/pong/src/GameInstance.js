@@ -33,7 +33,7 @@ export class GameInstance {
 		this.playerRightReady = false;
 
 		// CUSTOM GAMES start in WAITING, TOURNAMENT starts in WAITING (for ready-up), RANDOM GAMES start in LOBBY
-		if (type === GameType.CUSTOM || type === GameType.TOURNAMENT)
+		if (type === GameType.CUSTOM)
 			this.gameStatus = GameStatus.WAITING;
 		else
 			this.gameStatus = GameStatus.IN_LOBBY;

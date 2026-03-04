@@ -92,7 +92,7 @@ export class	TournamentInstance
 				);
 
 				gameInstance.tournamentId = this.id;
-				gameInstance.gameStatus = GameStatus.WAITING;
+				gameInstance.gameStatus = GameStatus.IN_LOBBY;
 
 				matches.push(gameInstance);
 			}

@@ -125,8 +125,10 @@ class	TournamentManager
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
 		{
-			console.log(`[PONG] User ${userId} tried to leave non-existent tournament ${tournamentId}`);
-			pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
+			// NOT LOGGED BECAUSE, AFTER THE TOURNAMENT IN FINISHED, THE USER TRIES TO CLOSE
+			//	THE MODAL AND SENDS A LEAVE REQUEST TO A NON-EXISTENT TOURNAMENT
+			// console.log(`[PONG] User ${userId} tried to leave non-existent tournament ${tournamentId}`);
+			// pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
 			return ;
 		}
 
@@ -388,14 +390,17 @@ class	TournamentManager
 		// Register all tournament matches with GameManager for normal game processing
 		for (let match of currentMatches)
 		{
-			if (!match.isBye && match.gameStatus === GameStatus.WAITING)
+			if (!match.isBye && match.gameStatus === GameStatus.IN_LOBBY)
+			{
 				gameManager._games.set(match.id, match);
+				console.log(`[PONG] Registered tournament match ${match.id} for players ${match.playerLeftId} vs ${match.playerRightId}`);
+			}
 		}
 		
 		// Start ready timers for all matches in this round
 		for (let match of currentMatches)
 		{
-			if (!match.isBye && match.gameStatus === GameStatus.WAITING)
+			if (!match.isBye && match.gameStatus === GameStatus.IN_LOBBY)
 				this._startMatchTimer(tournament, match);
 		}
 
@@ -436,8 +441,8 @@ class	TournamentManager
 
 		// Set timer to auto-start the game after cooldown
 		const timer = setTimeout(() => {
-			// Verify match is still in waiting state
-			if (match.gameStatus === GameStatus.WAITING)
+			// Verify match is still in lobby state
+			if (match.gameStatus === GameStatus.IN_LOBBY)
 			{
 				console.log(`[PONG] Ready timer expired for match ${match.id}, auto-starting...`);
 				this._matchTimers.delete(match.id);
