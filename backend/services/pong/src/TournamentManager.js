@@ -16,6 +16,7 @@ class	TournamentManager
 
 		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START) || 2;
 		this.ROUND_TRANSITION_COOLDOWN_MS = parseInt(process.env.ROUND_TRANSITION_COOLDOWN_MS) || 20000;
+		this.READY_COOLDOWN_MS = parseInt(process.env.READY_COOLDOWN_MS) || 15000;
 	}
 	
 	createTournament(name, creatorId, creatorUsername)
@@ -320,9 +321,9 @@ class	TournamentManager
 			return ;
 		}
 
-		// Notify both players that the match is starting
-		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerLeftId, gameInstance.id, gameInstance.id, gameInstance.playerRightUsername, 'LEFT');
-		pongConnectionManager.sendTournamentMatchStarted(gameInstance.playerRightId, gameInstance.id, gameInstance.id, gameInstance.playerLeftUsername, 'RIGHT');
+		// Notify both players that the match has started with gameStarted event (for proper UI initialization)
+		pongConnectionManager.notifyGameStart(gameInstance.playerLeftId, gameInstance.id, 'LEFT', gameInstance.playerRightUsername);
+		pongConnectionManager.notifyGameStart(gameInstance.playerRightId, gameInstance.id, 'RIGHT', gameInstance.playerLeftUsername);
 
 		console.log(`[PONG] Tournament match ${gameInstance.id} started`);
 	}
@@ -478,7 +479,7 @@ class	TournamentManager
 				this._matchTimers.delete(match.id);
 				this._startMatch(tournament, match);
 			}
-		}, process.env.READY_COOLDOWN_MS || 15000);
+		}, this.READY_COOLDOWN_MS);
 
 		this._matchTimers.set(match.id, timer);
 	}

@@ -295,7 +295,14 @@ class	PongConnectionManager
 		};
 
 		if (socket)
+		{
+			console.log(`[PONG] Sending tournament match started for ${userId}: match ${matchId}, opponent ${opponentUsername}, your side ${yourSide}`);
 			this.#dispatchEventToSocket(socket, 'pong.tournamentMatchStarted', data);
+		}
+		else
+		{
+			console.log(`[PONG] Socket not found for user ${userId}, cannot send tournament match started`);
+		}
 	}
 
 	async	notifyTournamentMatchEnded(userId, matchId, winnerId, winnerUsername)
