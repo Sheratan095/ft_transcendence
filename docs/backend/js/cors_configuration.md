@@ -175,5 +175,5 @@ await fastify.register(cors, corsOptions);
 ## Additional Resources
 
 - [Fastify CORS Plugin](https://github.com/fastify/fastify-cors)
-- [MDN: CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)
+- [MDN: CORS](https://developer.mozilla.org/t('date.utc')/docs/Web/HTTP/CORS)
 - [OWASP: CORS Security](https://owasp.org/www-community/attacks/CORS_OriginHeaderScrutiny)

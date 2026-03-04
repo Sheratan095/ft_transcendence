@@ -10,6 +10,7 @@ import {openTournamentModal,
 	updateBracketInModal,
 	updateCooldownInModal,
 	markTournamentFinished,
+	hideCooldownIfOpen,
 	closeTournamentModal,
 	} from "./TournamentModal";
 import { t } from "../../lib/intlayer";
@@ -113,6 +114,12 @@ export async function bracketUpdate(tournamentId: string, bracketInfo: any)
 
 export async function tournamentEnded(tournamentId: string, data: any)
 {
+	// If a cooldown overlay is active for this tournament, hide it before showing finished UI
+	try {
+		hideCooldownIfOpen(tournamentId);
+	} catch (err) {
+		console.warn('Failed to hide cooldown overlay:', err);
+	}
 	markTournamentFinished(tournamentId, data.winnerId, data.winnerUsername);
 }
 
