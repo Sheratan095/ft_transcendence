@@ -12,7 +12,7 @@ gateway:
     DOC_PASSWORD=admin
     USE_HTTPS=true
     HTTPS_CERTS_PATH=/usr/src/certs/
-    RATE_LIMIT_ACTIVE=true
+    RATE_LIMIT_ACTIVE=false
     HOST=0.0.0.0
 
 services/auth:
@@ -62,8 +62,8 @@ services/pong:
     NOTIFICATION_SERVICE_URL=http://notification:3003
     USERS_SERVICE_URL=http://users:3002
     TRIS_SERVICE_URL=http://tris:3006
-    READY_COOLDOWN_MS = 30000
-    ROUND_TRANSITION_COOLDOWN_MS = 10000
+    READY_COOLDOWN_MS = 15000
+    ROUND_TRANSITION_COOLDOWN_MS = 20000
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     WINNING_SCORE=11
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
@@ -87,7 +87,7 @@ services/tris:
     USERS_SERVICE_URL=http://users:3002
     PONG_SERVICE_URL=http://pong:3005
     MAX_MARKS_PER_PLAYER=3
-    READY_COOLDOWN_MS = 30000
+    READY_COOLDOWN_MS = 15000
     MOVE_TIMEOUT_MS = 60000
     MATCHMAKING_IGNORE_BLOCKS=true # Specify if two player blocked can find each other in matchmaking
     EARNED_WIN_POINTS=100 # Points awarded for winning a game
