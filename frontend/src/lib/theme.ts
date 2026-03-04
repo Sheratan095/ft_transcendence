@@ -10,8 +10,12 @@ const THEME_STORAGE_KEY = 'theme-preference';
  * Initialize theme system
  */
 export function initTheme() {
-  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-  const preferredTheme = savedTheme || getSystemTheme();
+  let savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+  if (!savedTheme) {
+    savedTheme = getSystemTheme();
+    localStorage.setItem(THEME_STORAGE_KEY, savedTheme);
+  }
+  const preferredTheme = savedTheme;
   
   applyTheme(preferredTheme);
   setupThemeToggle();

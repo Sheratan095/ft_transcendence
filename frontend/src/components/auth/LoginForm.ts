@@ -26,7 +26,7 @@ export function attachLogin(): void {
 	form.dataset.attached = 'true';
 	const usernameInput = document.getElementById('email_log') as HTMLInputElement | null;
 	const passwordInput = document.getElementById('password_log') as HTMLInputElement | null;
-	const authErrorEl = document.getElementById('auth-error') as HTMLElement | null;
+	const authErrorEl = document.getElementById('login-error') as HTMLElement | null;
 	const registerLink = document.getElementById('to-register') as HTMLAnchorElement | null;
 
 	if (registerLink) {

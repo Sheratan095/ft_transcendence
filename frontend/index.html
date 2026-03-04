@@ -157,6 +157,10 @@
 									focus:ring-2 focus:ring-[accent-orange] dark:focus:ring-[accent-green]" />
 					</div>
 
+
+					<!-- Error container -->
+					<div id="login-error" class="hidden text-red-400 text-sm"></div>
+
 					<!-- Submit -->
 					<button
 						type="submit"
@@ -698,7 +702,7 @@
 					</div>
 					<!-- Participant button -->
 					<div id="tm-participant-buttons" class="hidden">
-						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-orange-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament" data-i18n="quit">
+						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-green-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament" data-i18n="quit">
 						</button>
 					</div>
 				</div>
@@ -718,7 +722,7 @@
 					<!-- Creator section (pinned at top) -->
 					<div class="flex-shrink-0 p-4 border-b-4 border-gray-800 dark:border-gray-700 bg-white dark:bg-gray-900">
 						<p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-widest mb-2" data-i18n="tournament.creator">Creator</p>
-						<div id="tm-creator-card" class="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-300 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] rounded-xl">
+						<div id="tm-creator-card" class="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 border-2 border-gray-800 dark:border-gray-300 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#ffffff] rounded-xl">
 							<div id="tm-creator-avatar" class="w-10 h-10 flex-shrink-0 rounded-lg bg-accent-orange dark:bg-accent-green border-2 border-gray-800 flex items-center justify-center font-black text-black text-sm">—</div>
 							<div class="flex-1 min-w-0">
 								<div id="tm-creator-name" class="font-black text-black dark:text-white text-sm truncate uppercase">—</div>
