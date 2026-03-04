@@ -615,8 +615,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
               const yourScore = match.playerLeftId === user.id ? match.playerLeftScore : match.playerRightScore;
               const opponentScore = match.playerLeftId === user.id ? match.playerRightScore : match.playerLeftScore;
               const matchDate = new Date(match.endedAt);
-              const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-              const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              const dateStr = matchDate.toLocaleDateString('it-EU', { month: 'short', day: 'numeric' });
               
               return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
                 <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
@@ -626,7 +625,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
                   <span class="font-semibold">(${opponentScore})</span></span>
                 </div>
                 <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
-                  ${dateStr} ${timeStr}
+                  ${dateStr}
                 </div>
               </div>`;
             }
@@ -634,8 +633,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
               // For Tris: W/L on left, centered names, date on right
               const opponent = match.playerOId === user.id ? match.playerXUsername  : match.playerOUsername;
               const matchDate = new Date(match.endedAt);
-              const dateStr = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-              const timeStr = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+              const dateStr = matchDate.toLocaleDateString('it-EU', { month: 'short', day: 'numeric' });
               
               return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
                 <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
@@ -643,7 +641,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
                   <span class="text-black dark:text-white">${t('you')} vs <span class="font-semibold text-neutral-800 dark:text-white">${opponent}</span></span>
                 </div>
                 <div class="text-right text-neutral-500 dark:text-white whitespace-nowrap pr-4">
-                  ${dateStr} ${timeStr}
+                  ${dateStr}
                 </div>
               </div>`;
             }

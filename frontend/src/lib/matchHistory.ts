@@ -148,7 +148,7 @@ export function groupMatchesByDay(
   const categories = days.map(([dayKey]) => {
     const [year, month, day] = dayKey.split('-');
     const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString('it-EU', { month: 'short', day: 'numeric' });
   });
 
   const winsData = days.map(([, counts]) => counts.wins);
