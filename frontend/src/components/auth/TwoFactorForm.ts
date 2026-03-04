@@ -1,6 +1,7 @@
 import { SaveCurrentUserProfile } from '../../lib/auth';
 import { createErrorContainer, showError, showSuccess, showLoading, hideError } from '../shared/ErrorMessage';
 import { goToRoute } from '../../spa';
+import { t } from '../../lib/intlayer';
 
 export interface TwoFactorFormCallbacks
 {
@@ -111,11 +112,11 @@ export function attach2FA(userId, callbacks?: TwoFactorFormCallbacks): void
 		const	otpCode = otpInputs.map(i => i.value.trim()).join('');
 		if (!otpCode || otpCode.length !== otpInputs.length)
 		{
-			showError(errorEl, 'Enter a complete verification code.');
+			showError(errorEl, t('auth.2fa.enterCompleteCode'));
 			return;
 		}
 
-		showLoading(errorEl, 'Verifying...');
+		showLoading(errorEl, t('auth.2fa.verifying'));
 
 		try
 		{
@@ -133,7 +134,7 @@ export function attach2FA(userId, callbacks?: TwoFactorFormCallbacks): void
 	
 			if (res.ok)
 			{
-				showSuccess(errorEl, '2FA verified successfully!');
+				showSuccess(errorEl, t('auth.2fa.verifiedSuccess'));
 				if (body && body.user.id)
 					localStorage.setItem('userId', body.user.id);
 				if (body && body.user && body.user.id)
@@ -141,12 +142,22 @@ export function attach2FA(userId, callbacks?: TwoFactorFormCallbacks): void
 			goToRoute('/profile');
 				return;
 			}
-			else
-					showError(errorEl, (body && (body.message || body.error)) || `Verification failed (${res.status})`);
+			else {
+				const rawError = (body && (body.message || body.error)) || t('auth.2fa.failedWithStatus', { status: res.status });
+				if (res.status === 429 || String(rawError).toLowerCase().includes('rate limit') || String(rawError).toLowerCase().includes('too many requests')) {
+					const retryAfter = Number(body?.retryAfter);
+					const rateLimitMsg = Number.isFinite(retryAfter) && retryAfter > 0
+						? t('auth.rateLimitedRetry', { seconds: retryAfter })
+						: t('auth.rateLimited');
+					showError(errorEl, rateLimitMsg);
+				} else {
+					showError(errorEl, rawError);
+				}
+			}
 		}
 		catch (err)
 		{
-			showError(errorEl, (err as Error).message || 'Network error');
+			showError(errorEl, (err as Error).message || t('register.error.network'));
 		}
 	});
 }

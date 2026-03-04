@@ -63,6 +63,9 @@ export function	validator(username, password, email)
 			throw (Object.assign(new Error('Password is too common.'), { statusCode: 442 }));
 	});
 
+	if (password.length < 8 || password.length > 24)
+		throw (Object.assign(new Error('Password must be between 8 and 24 characters long.'), { statusCode: 442 }));
+
 	if (psw_lower.includes(username_lower) || psw_lower.includes(email_lower))
 		throw (Object.assign(new Error('Password is too similar to username or email.'), { statusCode: 442 }));
 }

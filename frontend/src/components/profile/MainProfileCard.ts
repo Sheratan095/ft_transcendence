@@ -219,7 +219,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
             if (!res.ok)
             {
               if (res.status === 429)
-                showErrorToast(t('profile.usernameReserved'), { duration: 4000, position: 'top-right' });
+                showErrorToast(t('profile.rateLimited'), { duration: 4000, position: 'top-right' });
               else if (res.status === 400)
                 showErrorToast(t('profile.usernameUpdateFailed'), { duration: 4000, position: 'top-right' });
               else if (res.status === 409)

@@ -110,6 +110,13 @@ export async function loginRequest(email: string, password: string): Promise<any
 			return body;
 		} else {
 			const rawError = body && (body.message || body.error) ? (body.message || body.error) : t('auth.loginFailedWithStatus', { status: res.status });
+			if (res.status === 429 || String(rawError).toLowerCase().includes('rate limit') || String(rawError).toLowerCase().includes('too many requests')) {
+				const retryAfter = Number(body?.retryAfter);
+				const rateLimitMsg = Number.isFinite(retryAfter) && retryAfter > 0
+					? t('auth.rateLimitedRetry', { seconds: retryAfter })
+					: t('auth.rateLimited');
+				throw new Error(rateLimitMsg);
+			}
 			// Translate known backend error messages
 			const errorMsg = rawError === 'Invalid credentials' ? t('auth.invalidCredentials') : rawError;
 			throw new Error(errorMsg);
