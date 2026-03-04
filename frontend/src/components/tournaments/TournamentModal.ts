@@ -217,8 +217,7 @@ export async function updateCooldownInModal(tournamentId: string, cooldownInfo: 
 		return;
 	}
 
-	const roundNum = cooldownInfo.round ?? '';
-	if (roundEl) roundEl.textContent = roundNum ? t('tournament.roundIn', { n: roundNum }) : t('tournament.nextRoundIn');
+	if (roundEl) roundEl.textContent = t('tournament.nextRoundIn');
 	let seconds = Math.ceil(cooldownInfo.secondsLeft);
 	if (timerEl) timerEl.textContent = String(seconds);
 	overlay.classList.remove('hidden');
@@ -234,6 +233,19 @@ export async function updateCooldownInModal(tournamentId: string, cooldownInfo: 
 			_hideCooldown();
 		}
 	}, 1000);
+}
+
+// Exported helper: hide cooldown overlay if it's currently visible for this tournament
+export function hideCooldownIfOpen(tournamentId: string) {
+	if (String(tournamentId) !== String(currentTournamentId)) return;
+	const overlay = document.getElementById('tm-cooldown-overlay');
+	if (!overlay) return;
+	if (!overlay.classList.contains('hidden')) {
+		// stop interval and hide overlay
+		_stopCooldown();
+		_hideCooldown();
+		console.log('[TournamentModal] Hid cooldown overlay due to tournament end');
+	}
 }
 
 export function showErrorInModal(tournamentId: string, errorMessage: string) {
