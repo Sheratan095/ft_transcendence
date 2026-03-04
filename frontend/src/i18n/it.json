@@ -217,7 +217,7 @@
   "game.matchedWith": "Abbinato con {{ opponent }}",
   "game.invalidMove": "Mossa non valida: {{ message }}",
   "game.error": "Errore: {{ message }}",
-  "game.roundStarting": "Round inizio! Giocando contro {{ opponent }}",
+  "game.roundStarting": "Round iniziato! Giocando contro {{ opponent }}",
   "game.overWinner": "Partita finita! {{ winner }} ha vinto.",
 
   "tris.xTurn": "Turno di X",
