@@ -892,7 +892,7 @@ export async function openPongModal(mode: PongModeType = 'online')
 			const modeNames: Record<string, string> = {
 				'online': t('game.status-online'),
 				'offline-1v1': t('game.offline-status'),
-				'offline-ai': t('game.ai-status'),
+				'offline-ai': t('game.vsai-status'),
 				'custom': t('game.custom'),
 				'tournament': t('game.tournament')
 			};

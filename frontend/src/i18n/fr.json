@@ -138,7 +138,9 @@
   "game.cancel": "Annuler",
   "game.offline": "Modes hors ligne",
   "game.local": "👥 1v1 local",
-  "game.ai": "🤖 Jouer contre l'IA",
+  "game.vsai": "🤖 Jouer contre l'IA",
+  "game.ai": "🤖 IA",
+  "game.you": "Vous",
   "game.see-matches": "Connectez-vous pour voir vos parties !",
   "game.stats": "Vos statistiques",
   "game.wins": "Victoires: {{ wins }}",
@@ -201,7 +203,7 @@
   "pong.game": "Jeu Pong"
   ,
   "game.offline-status": "hors ligne 1vs1",
-  "game.ai-status": "hors ligne vs IA",
+  "game.vsai-status": "hors ligne vs IA",
   "game.inprogress": "Partie en cours...",
   "game.paused": "Partie en pause"
   ,

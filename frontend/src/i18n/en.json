@@ -138,7 +138,9 @@
   "game.cancel": "Cancel",
   "game.offline": "Offline modes",
   "game.local": "👥 Local 1v1",
-  "game.ai": "🤖 Play vs AI",
+  "game.vsai": "🤖 Play vs AI",
+  "game.ai": "🤖 AI",
+  "game.you": "You",
   "game.see-matches": "Log in to see your matches!",
   "game.stats": "Your stats",
   "game.wins": "Wins: {{ wins }}",
@@ -182,7 +184,7 @@
   "game.timeout": "Time's up! You lost!",
   "game.quit": "You left the game",
   "game.offline-1v1": "Offline 1v1",
-  "game.offline-ai": "Offline vs Ai",
+  "game.offline-ai": "Offline vs AI",
   "game.custom": "Custom Game",
   "game.tournament": "Tournament Game",
   "game.pressStart": "Press start to play",
@@ -201,7 +203,7 @@
   "pong.game": "Pong Game"
   ,
   "game.offline-status": "1vs1 offline",
-  "game.ai-status": "1vs1 vs AI",
+  "game.vsai-status": "1vs1 vs AI",
   "game.inprogress": "Game in progress...",
   "game.paused": "Game paused"
   ,
