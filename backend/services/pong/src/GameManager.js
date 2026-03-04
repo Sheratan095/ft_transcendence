@@ -217,14 +217,14 @@ class	GameManager
 
 		// ========== IN_LOBBY or IN_PROGRESS STATUS ==========
 		// Immediately set status to FINISHED and stop the game loop
-		const originalStatus = gameInstance.gameStatus;
+		// const originalStatus = gameInstance.gameStatus;
 		gameInstance.gameStatus = GameStatus.FINISHED;
 		gameInstance.stopGameLoop();
 
 		const winnerUsername = (otherPlayerId === gameInstance.playerLeftId) ? gameInstance.playerLeftUsername : gameInstance.playerRightUsername;
 
-		// ========== CUSTOM GAMES IN LOBBY ==========
-		if (originalStatus === GameStatus.IN_LOBBY && gameInstance.gameType === GameType.CUSTOM)
+		// ========== CUSTOM GAMES==========
+		if (gameInstance.gameType === GameType.CUSTOM)
 		{
 			console.log(`[PONG] Player ${playerId} quit custom game ${gameId} from LOBBY, game canceled`);
 			pongConnectionManager.sendPlayerQuitCustomGameInLobby(otherPlayerId, gameId);
@@ -233,6 +233,7 @@ class	GameManager
 			this._games.delete(gameId);
 			return ;
 		}
+
 
 		// ========== RANDOM OR TOURNAMENT GAMES (any status, including IN_LOBBY or IN_PROGRESS) ==========
 		// For these, the other player wins and gets recorded
