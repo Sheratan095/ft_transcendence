@@ -478,7 +478,7 @@ class	TournamentManager
 				this._matchTimers.delete(match.id);
 				this._startMatch(tournament, match);
 			}
-		}, process.env.READY_COOLDOWN_MS || 5000);
+		}, process.env.READY_COOLDOWN_MS || 15000);
 
 		this._matchTimers.set(match.id, timer);
 	}

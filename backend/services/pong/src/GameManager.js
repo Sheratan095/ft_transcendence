@@ -512,7 +512,7 @@ class	GameManager
 				console.log(`[PONG] Cooldown for game ${gameId} ended, starting game automatically`);
 				this._gameStart(gameInstance); // Start the game automatically after cooldown
 			}
-		}, process.env.READY_COOLDOWN_MS); // Default cooldown is 30 seconds
+		}, process.env.READY_COOLDOWN_MS || 15000); // Default cooldown is 15 seconds
 
 		this._randomGameCooldowns.set(gameId, timerId);
 	}
