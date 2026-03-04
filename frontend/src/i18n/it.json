@@ -148,6 +148,8 @@
   "tournament.desc": "Raggiungi la vetta competendo in partite classificate e tornei contro giocatori di tutto il mondo.",
   "tournament.create": "Crea torneo",
   "tournament.no-tournaments": "Nessun torneo disponibile al momento",
+  "tournament.name-required": "Per favore inserisci un nome per il torneo.",
+  "tournament.create-failed": "Impossibile creare il torneo. Riprova.",
   "create": "Crea",
   "tournament.cancel": "Annulla torneo",
   "quit": "Esci",
@@ -259,6 +261,8 @@
   "tournament.status.inProgress": "in corso",
   "tournament.status.finished": "terminato",
   "tournament.join": "partecipa",
+  "tournament.join-failed": "Impossibile partecipare al torneo. Riprova più tardi.",
+  "tournament.cancelled-notification": "Il torneo è stato annullato.",
 
   "chat.userJoined": "{{ username }} si è unito.",
   "chat.userLeft": "{{ username }} ha lasciato la chat.",
