@@ -358,7 +358,7 @@ function _avatarColor(seed: string): string {
 function _createParticipantCard(player: any): HTMLElement {
 	const card     = document.createElement('div');
 	card.id        = `tm-player-${player.id}`;
-	card.className = 'flex items-center gap-3 p-3 bg-white dark:bg-gray-700 border-2 border-gray-800 dark:border-gray-300 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] rounded-xl';
+	card.className = 'flex items-center gap-3 p-3 bg-white dark:bg-gray-700 border-2 border-gray-800 dark:border-gray-300 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#ffffff] rounded-xl';
 
 	const initials = (player.username ?? '?').slice(0, 2).toUpperCase();
 	const color    = _avatarColor(player.id ?? player.username ?? '?');
