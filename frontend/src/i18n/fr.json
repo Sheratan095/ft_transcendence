@@ -152,6 +152,7 @@
   "tournament.no-tournaments": "Aucun tournoi disponible pour le moment.",
   "tournament.name-required": "Veuillez entrer un nom pour le tournoi.",
   "tournament.create-failed": "Échec de la création du tournoi. Veuillez réessayer.",
+  "tournament.insufficientPlayers": "Pas assez de participants. Au moins {{ min }} joueurs sont nécessaires pour démarrer le tournoi.",
   "create": "Créer",
   "tournament.cancel": "Annuler le tournoi",
   "quit": "Quitter",

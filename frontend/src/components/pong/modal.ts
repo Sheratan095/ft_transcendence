@@ -10,6 +10,7 @@ import { getUserId, getUser } from '../../lib/auth';
 import { PongGame, GAME_MODES } from './game/3d';
 import { isLoggedInClient } from '../../lib/token';
 import { t } from '../../lib/intlayer';
+import { showErrorInCurrentTournament } from '../tournaments/TournamentModal';
 
 type PongModeType = 'online' | 'offline-1v1' | 'offline-ai' | 'custom' | 'tournament';
 
@@ -32,6 +33,27 @@ function updatePongStatus(statusText: string)
 		return;
 
 	statusEl.textContent = statusText;
+}
+
+function showPongErrorAlert(errorText: string)
+{
+	const errorAlert = document.getElementById('pong-error-alert');
+	const errorTextEl = document.getElementById('pong-error-text');
+	
+	if (!errorAlert || !errorTextEl)
+		return;
+	
+	errorTextEl.textContent = errorText;
+	errorAlert.classList.remove('hidden');
+}
+
+function hidePongErrorAlert()
+{
+	const errorAlert = document.getElementById('pong-error-alert');
+	if (!errorAlert)
+		return;
+	
+	errorAlert.classList.add('hidden');
 }
 
 function translateSideName(side?: string | null): string {
@@ -458,8 +480,28 @@ export function handleInvalidMove(data: any)
 
 export function handleError(data: any)
 {
-	updatePongStatus(t('game.error', { message: data.message }));
-	// showErrorToast(`Error: ${data.message}`);
+	const errorMessage = data.message || '';
+	
+	// Check if this is a tournament insufficient players error
+	if (errorMessage.includes('participants are required'))
+	{
+		// Extract the minimum number of players from the error message
+		// Expected format: "At least X participants are required..."
+		const match = errorMessage.match(/At least (\d+) participants/);
+		const minPlayers = match ? parseInt(match[1]) : 2;
+		
+		// Show translated error 
+		const translatedError = t('tournament.insufficientPlayers', { min: minPlayers });
+		
+		// Try to show in tournament modal first (if one is open)
+		showErrorInCurrentTournament(translatedError);
+	}
+	else
+	{
+		// For other errors, show the generic error message
+		updatePongStatus(t('game.error', { message: errorMessage }));
+		showPongErrorAlert(errorMessage);
+	}
 }
 
 export function handlePlayerReadyStatus(data: any)
@@ -519,6 +561,10 @@ export async function handleTournamentRoundInfo(data: any)
 
 	// Open the pong modal in tournament mode (overlays the tournament modal)
 	await openPongModal('tournament');
+	
+	// Clear any leftover error alerts from previous tournament operations
+	hidePongErrorAlert();
+	
 	console.log('[Pong] Game modal opened for user', userId);
 
 	// Update status with opponent info
@@ -610,6 +656,16 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 		const newCloseBtn = closeBtn.cloneNode(true) as HTMLButtonElement;
 		closeBtn.parentNode?.replaceChild(newCloseBtn, closeBtn);
 		newCloseBtn.addEventListener('click', () => closePongModal());
+	}
+
+	// Error Alert Close Button
+	const errorCloseBtn = container.querySelector('#pong-error-close') as HTMLButtonElement | null;
+	if (errorCloseBtn)
+	{
+		// Replace to clear listeners
+		const newErrorCloseBtn = errorCloseBtn.cloneNode(true) as HTMLButtonElement;
+		errorCloseBtn.parentNode?.replaceChild(newErrorCloseBtn, errorCloseBtn);
+		newErrorCloseBtn.addEventListener('click', () => hidePongErrorAlert());
 	}
 
 	// Ready Button (online and custom/tournament modes)
@@ -946,6 +1002,9 @@ export async function openPongModal(mode: PongModeType = 'online')
 		if (rightReady)
 			rightReady.classList.add('hidden');
 
+		// Clear any error alerts
+		hidePongErrorAlert();
+
 		attachButtonHandlers(modal, mode);
 	}
 	catch (err) {
@@ -974,6 +1033,9 @@ export function closePongModal(options: { suppressQuit?: boolean } = {})
 			startBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'text-white', 'dark:text-white');
 			startBtn.classList.add('dark:bg-accent-green', 'bg-accent-blue', 'dark:text-black');
 		}
+		
+		// Clear error alert on close
+		hidePongErrorAlert();
 	}
 
 	if (currentGameInstance)

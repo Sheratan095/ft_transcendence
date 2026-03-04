@@ -152,6 +152,7 @@
   "tournament.no-tournaments": "No tournaments available",
   "tournament.name-required": "Please enter a name for the tournament.",
   "tournament.create-failed": "Failed to create tournament. Try again.",
+  "tournament.insufficientPlayers": "Not enough participants. At least {{ min }} players are required to start the tournament.",
   "create": "Create",
   "tournament.cancel": "Cancel tournament",
   "quit": "Quit",

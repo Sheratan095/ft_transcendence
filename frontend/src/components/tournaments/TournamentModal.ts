@@ -51,6 +51,7 @@ let currentCreatorId: string | undefined;
 let currentUserId: string | null = null;
 let currentTournamentStatus: string | null = null;
 let cooldownInterval: number | null = null;
+let errorTimeoutId: number | null = null;
 let lastBracketData: BracketInfo | null = null;
 
 // -------------------- Init (wire up buttons) --------------------
@@ -59,10 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	const startBtn   = document.getElementById('tm-btn-start');
 	const cancelBtn  = document.getElementById('tm-btn-cancel');
 	const quitBtn    = document.getElementById('tm-btn-quit');
+	const errorCloseBtn = document.getElementById('tm-error-close');
 
 	if (startBtn)  startBtn.addEventListener('click', _handleStart);
 	if (cancelBtn) cancelBtn.addEventListener('click', _handleCancel);
 	if (quitBtn)   quitBtn.addEventListener('click', _handleQuit);
+	if (errorCloseBtn) errorCloseBtn.addEventListener('click', _hideError);
 });
 
 // -------------------- Public API --------------------
@@ -105,6 +108,7 @@ export async function openTournamentModal(
 
 export async function closeTournamentModal() {
 	_hideModal();
+	_hideError();
 	currentTournamentId = null;
 	currentCreatorId    = undefined;
 	lastBracketData     = null;
@@ -232,6 +236,32 @@ export async function updateCooldownInModal(tournamentId: string, cooldownInfo: 
 	}, 1000);
 }
 
+export function showErrorInModal(tournamentId: string, errorMessage: string) {
+	if (String(tournamentId) !== String(currentTournamentId)) return;
+	_showError(errorMessage);
+}
+
+export function hideErrorInModal(tournamentId: string) {
+	if (String(tournamentId) !== String(currentTournamentId)) return;
+	_hideError();
+}
+
+/**
+ * Show error in the currently open tournament modal (if any)
+ * Used by error handlers that don't have the tournament ID
+ */
+export function showErrorInCurrentTournament(errorMessage: string) {
+	if (!currentTournamentId) return; // No tournament modal open
+	_showError(errorMessage);
+}
+
+/**
+ * Hide error in the currently open tournament modal (if any)
+ */
+export function hideErrorInCurrentTournament() {
+	_hideError();
+}
+
 // -------------------- Private helpers --------------------
 
 function _showModal() {
@@ -250,6 +280,40 @@ function _stopCooldown() {
 	if (cooldownInterval !== null) {
 		clearInterval(cooldownInterval);
 		cooldownInterval = null;
+	}
+}
+
+function _showError(errorMessage: string) {
+	// Clear any existing timeout
+	if (errorTimeoutId !== null) {
+		clearTimeout(errorTimeoutId);
+		errorTimeoutId = null;
+	}
+
+	const alert = document.getElementById('tm-error-alert');
+	const text = document.getElementById('tm-error-text');
+	if (alert && text) {
+		text.textContent = errorMessage;
+		alert.classList.remove('hidden');
+
+		// Auto-hide after 4 seconds
+		errorTimeoutId = window.setTimeout(() => {
+			_hideError();
+			errorTimeoutId = null;
+		}, 4000);
+	}
+}
+
+function _hideError() {
+	// Clear any existing timeout
+	if (errorTimeoutId !== null) {
+		clearTimeout(errorTimeoutId);
+		errorTimeoutId = null;
+	}
+
+	const alert = document.getElementById('tm-error-alert');
+	if (alert) {
+		alert.classList.add('hidden');
 	}
 }
 
