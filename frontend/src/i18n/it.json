@@ -288,7 +288,7 @@
   "tournament.status.waiting": "in attesa",
   "tournament.status.in_progress": "in corso",
   "tournament.status.inProgress": "in corso",
-  "tournament.status.finished": "terminato",
+  "tournament.status.finished": "✓ terminato",
   "tournament.join": "partecipa",
   "tournament.join-failed": "Impossibile partecipare al torneo. Riprova più tardi.",
   "tournament.cancelled-notification": "Il torneo è stato annullato.",

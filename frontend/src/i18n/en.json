@@ -284,7 +284,7 @@
   "tournament.status.waiting": "waiting",
   "tournament.status.in_progress": "in progress",
   "tournament.status.inProgress": "in progress",
-  "tournament.status.finished": "finished",
+  "tournament.status.finished": "✓ finished",
   "tournament.join": "Join",
   "tournament.cancelled-notification": "The tournament has been cancelled.",
   "tournament.join-failed": "Failed to join tournament. Please try again later.",
