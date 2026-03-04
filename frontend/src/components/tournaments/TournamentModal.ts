@@ -587,12 +587,10 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 	console.log(match.status);
 
 	let matchStatus;
-	if (match.status === 'IN_LOBBY')
-		matchStatus = t('tournament.status.inProgress');
 	if (match.status === 'FINISHED')
 		matchStatus = t('tournament.status.finished');
 	else
-		matchStatus = t('tournament.status.waiting');
+		matchStatus = t('tournament.status.inProgress');
 
 	const leftCrown = (showFinalWinnerStyling && leftWon) ? '👑 ' : '';
 	const rightCrown = (showFinalWinnerStyling && rightWon) ? '👑 ' : '';
