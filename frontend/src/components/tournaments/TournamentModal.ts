@@ -5,6 +5,7 @@
 import { loadTournaments } from './TournamentsList';
 import { getUserId } from '../../lib/auth';
 import { t } from '../../lib/intlayer';
+import { initPong, isPongConnected } from '../pong/ws';
 
 // -------------------- Types --------------------
 
@@ -79,6 +80,8 @@ export async function openTournamentModal(
 	currentCreatorId    = tournamentInfo.creatorId;
 	currentUserId       = getUserId();
 
+	if (!isPongConnected())
+		await initPong(currentUserId as string);
 	const isCreator = currentUserId === currentCreatorId;
 
 	console.log('[TournamentModal] Opening modal for tournament:', tournamentId);

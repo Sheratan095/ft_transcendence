@@ -689,20 +689,22 @@
 
 	<div id="tournament-modal" tabindex="-1" class="hidden flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 rounded-xl justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50 backdrop-blur-sm">
 		<div class="relative p-4 w-full max-w-6xl max-h-full">
-			<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] border-4 border-gray-800 dark:border-gray-700 transition-all duration-300 h-[85vh] flex flex-col md:flex-row">
+			<div class="relative bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-[10px_10px_0_0_#ff6b35] dark:shadow-[10px_10px_0_0_#0dff66] border-4 border-gray-800 dark:border-gray-200 transition-all duration-300 h-[85vh] flex flex-col md:flex-row">
 
 				<!-- Action buttons area (creator or participant) -->
 				<div class="absolute top-4 right-4 z-50 flex gap-2">
 					<!-- Creator buttons -->
 					<div id="tm-creator-buttons" class="hidden flex gap-2">
-						<button type="button" id="tm-btn-start" class="px-4 py-2 bg-accent-blue dark:bg-green-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Start tournament" data-i18n="start">
+						<button type="button" id="tm-btn-start" class="px-4 py-2 bg-accent-blue dark:bg-green-600
+						 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 dark:border-gray-200 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#ffffff]
+						  hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Start tournament" data-i18n="start">
 						</button>
-						<button type="button" id="tm-btn-cancel" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Cancel tournament" data-i18n="tournament.cancel">
+						<button type="button" id="tm-btn-cancel" class="px-4 py-2 bg-red-500 dark:bg-red-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 dark:border-gray-200	 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#ffffff] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Cancel tournament" data-i18n="tournament.cancel">
 						</button>
 					</div>
 					<!-- Participant button -->
 					<div id="tm-participant-buttons" class="hidden">
-						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-green-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#0dff66] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament" data-i18n="quit">
+						<button type="button" id="tm-btn-quit" class="px-4 py-2 bg-orange-500 dark:bg-green-600 text-white font-black uppercase text-xs rounded-lg border-2 border-gray-800 dark:border-gray-200 shadow-[3px_3px_0_0_#000] dark:shadow-[3px_3px_0_0_#ffffff] hover:brightness-110 active:shadow-none active:translate-x-0.5 active:translate-y-0.5 transition-all" title="Quit tournament" data-i18n="quit">
 						</button>
 					</div>
 				</div>

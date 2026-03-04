@@ -1,9 +1,6 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 const	fastify = Fastify({ logger: false });
-
-// Load environment variables from .env file
-import dotenv from 'dotenv';
-dotenv.config();
 
 // Register WebSocket plugin
 import fastifyWebsocket from '@fastify/websocket';

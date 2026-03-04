@@ -3,6 +3,7 @@ import { attachRegister } from './RegisterForm';
 import { SaveCurrentUserProfile } from '../../lib/auth';
 import { attach2FA } from './TwoFactorForm';
 import { goToRoute } from '../../spa';
+import { t } from '../../lib/intlayer';
 
 export interface LoginFormCallbacks {
 	onRegisterClick?: () => void;
@@ -58,11 +59,11 @@ export function attachLogin(): void {
 		const password = passwordInput.value;
 
 		if (!username || !password) {
-			showError(errorEl, 'Please enter username and password.');
+			showError(errorEl, t('auth.enterCredentials'));
 			return;
 		}
 
-		showLoading(errorEl, 'Signing in...');
+		showLoading(errorEl, t('auth.signingIn'));
 
 		try {
 			const body = await loginRequest(username, password);
@@ -78,11 +79,11 @@ export function attachLogin(): void {
 			if (body && body.user && body.user.id)
 				await SaveCurrentUserProfile(body.user.id);
 
-			showSuccess(errorEl, 'Signed in successfully.');
+			showSuccess(errorEl, t('auth.signedInSuccess'));
 			goToRoute('/profile');
 		}
 		catch (err) {
-			showError(errorEl, (err as Error).message || 'Login failed');
+			showError(errorEl, (err as Error).message || t('auth.loginFailed'));
 		}
 	});
 }
@@ -108,11 +109,13 @@ export async function loginRequest(email: string, password: string): Promise<any
 		if (res.ok) {
 			return body;
 		} else {
-			const errorMsg = body && (body.message || body.error) ? (body.message || body.error) : `Login failed (${res.status})`;
+			const rawError = body && (body.message || body.error) ? (body.message || body.error) : t('auth.loginFailedWithStatus', { status: res.status });
+			// Translate known backend error messages
+			const errorMsg = rawError === 'Invalid credentials' ? t('auth.invalidCredentials') : rawError;
 			throw new Error(errorMsg);
 		}
 	} catch (err) {
-		const message = (err as Error).message || 'Login request failed';
+		const message = (err as Error).message || t('auth.loginRequestFailed');
 		throw new Error(message);
 	}
 }
