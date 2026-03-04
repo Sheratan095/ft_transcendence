@@ -203,9 +203,9 @@ export class	TournamentInstance
 		else if (match.playerRightId === winnerId)
 			match.winner = { userId: match.playerRightId, username: match.playerRightUsername };
 
-		// // Check if this round is complete
-		// if (this.isRoundComplete())
-		// 	this._advanceToNextRound();
+		// Check if this round is complete
+		if (this.isRoundComplete())
+			this._advanceToNextRound();
 	}
 
 	isRoundComplete()
@@ -219,6 +219,7 @@ export class	TournamentInstance
 
 	_advanceToNextRound()
 	{
+		console.log(`[PONG] Advancing tournament ${this.id} from round ${this.currentRound} to round ${this.currentRound + 1}`);
 		const	currentMatches = this.rounds[this.currentRound - 1];
 		// Filter out both null and undefined winners to avoid passing invalid entries
 		const	winners = currentMatches.map(match => match.winner).filter(w => w != null);
@@ -228,12 +229,14 @@ export class	TournamentInstance
 		{
 			this.status = TournamentStatus.FINISHED;
 			this.winner = winners[0];
+			console.log(`[PONG] Tournament ${this.id} finished, winner: ${winners[0].username}`);
 			return ;
 		}
 
 		// Create next round with winners
 		this._createRound(winners);
 		this.currentRound++;
+		console.log(`[PONG] Tournament ${this.id} advanced to round ${this.currentRound}`);
 	}
 
 	_findMatchByGameId(gameId)

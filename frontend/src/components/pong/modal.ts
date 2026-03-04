@@ -496,7 +496,18 @@ export async function handleTournamentRoundInfo(data: any)
 	const { matchId, playerLeftId, playerLeftUsername, playerRightId, playerRightUsername, yourSide } = data;
 	const userId = getUserId();
 
-	console.log('[Pong] Tournament round info received:', data);
+	console.log('[Pong] Tournament round info received for match', matchId);
+	console.log('[Pong] Players in match:', playerLeftId, 'vs', playerRightId);
+	console.log('[Pong] Current user ID:', userId);
+	console.log('[Pong] Your side:', yourSide);
+
+	// Check if current user is actually in this match
+	const userInMatch = userId === playerLeftId || userId === playerRightId;
+	if (!userInMatch) {
+		console.warn('[Pong] WARNING: User', userId, 'received tournamentRoundInfo but is NOT in match', matchId);
+		console.warn('[Pong] Match is between', playerLeftId, 'and', playerRightId);
+		return; // Don't open modal if not in match
+	}
 
 	// Set the game ID to match ID for ready state
 	if (matchId)
@@ -508,6 +519,7 @@ export async function handleTournamentRoundInfo(data: any)
 
 	// Open the pong modal in tournament mode (overlays the tournament modal)
 	await openPongModal('tournament');
+	console.log('[Pong] Game modal opened for user', userId);
 
 	// Update status with opponent info
 	updatePongStatus(t('game.roundStarting', { opponent: opponentUsername }));

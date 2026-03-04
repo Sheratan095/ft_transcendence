@@ -352,6 +352,9 @@ class	TournamentManager
 			return ;
 		}
 
+		// Store current round before match winner is set (to detect round advancement)
+		const	roundBefore = tournament.currentRound;
+
 		// Set match winner
 		tournament.setMatchWinner(gameId, winnerId);
 
@@ -371,11 +374,11 @@ class	TournamentManager
 		{
 			await this._endTournament(tournament);
 		}
-		// Check if round is complete and schedule next round
-		else if (tournament.isRoundComplete())
+		// Check if round was advanced and schedule next round
+		else if (tournament.currentRound > roundBefore)
 		{
-			// All matches in current round are done, schedule next round
-			console.log(`[PONG] Round ${tournament.currentRound} complete in tournament ${tournament.id}, scheduling next round`);
+			// Round was advanced to the next one, schedule next round after cooldown
+			console.log(`[PONG] Round ${roundBefore} complete in tournament ${tournament.id}, scheduling next round`);
 			this._scheduleNextRound(tournament.id);
 		}
 		else
@@ -393,6 +396,25 @@ class	TournamentManager
 			return ;
 
 		const	currentMatches = tournament.getCurrentMatches();
+		console.log(`[PONG] Starting round ${tournament.currentRound}, found ${currentMatches.length} matches`);
+		
+		// Clean up old matches from GameManager from previous round
+		const	previousRound = tournament.currentRound - 1;
+		if (previousRound > 0)
+		{
+			const	previousMatches = tournament.rounds[previousRound - 1];
+			if (previousMatches)
+			{
+				for (let match of previousMatches)
+				{
+					if (gameManager._games.has(match.id))
+					{
+						gameManager._games.delete(match.id);
+						console.log(`[PONG] Cleaned up old match ${match.id} from previous round`);
+					}
+				}
+			}
+		}
 		
 		// Register all tournament matches with GameManager for normal game processing
 		for (let match of currentMatches)
@@ -416,6 +438,7 @@ class	TournamentManager
 		{
 			if (!match.isBye)
 			{
+				console.log(`[PONG] Sending tournamentRoundInfo for match ${match.id} to players ${match.playerLeftId} and ${match.playerRightId}`);
 				// Notify both players in the match
 				pongConnectionManager.sendTournamentRoundInfo(
 					match.playerLeftId,

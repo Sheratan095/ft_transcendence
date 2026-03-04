@@ -203,6 +203,7 @@ function routeEvent(event: string, data: any)
 			break;
 		case 'pong.tournamentRoundInfo':
 			// save side info so UI/ready handlers know which side is the local player
+			console.log('[WS] Received pong.tournamentRoundInfo, opening game modal:', data);
 			if (data && data.yourSide)
 				playerSide = data.yourSide;
 			modalHandlers.handleTournamentRoundInfo(data);
