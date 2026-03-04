@@ -115,32 +115,25 @@ class	TournamentManager
 			if (tournament.hasParticipant(userId))
 			{
 				console.log(`[PONG] User ${userId} disconnected from tournament ${tournament.id}`);
-				await this.removeParticipant(tournament.id, userId, true);
+				await this.removeParticipant(tournament.id, userId);
 			}
 		}
 	}
 
-	async removeParticipant(tournamentId, userId, isDisconnect = false)
+	async removeParticipant(tournamentId, userId)
 	{
 		const	tournament = this._tournaments.get(tournamentId);
 		if (!tournament)
 		{
-			if (!isDisconnect)
-			{
-				console.log(`[PONG] User ${userId} tried to leave non-existent tournament ${tournamentId}`);
-				pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
-			}
-
+			console.log(`[PONG] User ${userId} tried to leave non-existent tournament ${tournamentId}`);
+			pongConnectionManager.sendErrorMessage(userId, 'Tournament not found');
 			return ;
 		}
 
 		if (!tournament.hasParticipant(userId))
 		{
-			if (!isDisconnect)
-			{
-				console.log(`[PONG] User ${userId} tried to leave tournament ${tournamentId} but is not a participant`);
-				pongConnectionManager.sendErrorMessage(userId, 'You are not a participant of this tournament');
-			}
+			console.log(`[PONG] User ${userId} tried to leave tournament ${tournamentId} but is not a participant`);
+			pongConnectionManager.sendErrorMessage(userId, 'You are not a participant of this tournament');
 			return ;
 		}
 
