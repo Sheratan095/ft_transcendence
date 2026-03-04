@@ -265,7 +265,7 @@
   "tournament.status.waiting": "en attente",
   "tournament.status.in_progress": "en cours",
   "tournament.status.inProgress": "en cours",
-  "tournament.status.finished": "terminé",
+  "tournament.status.finished": "✓ terminé",
   "tournament.join": "joindre",
   "tournament.join-failed": "Impossible de rejoindre le tournoi. Veuillez réessayer plus tard.",
   "tournament.cancelled-notification": "Le tournoi a été annulé.",

@@ -584,6 +584,16 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 	const leftWinnerScore = (leftWon) ? 'text-black dark:text-white' : 'text-gray-800 dark:text-white';
 	const rightWinnerScore = (rightWon) ? 'text-black dark:text-white' : 'text-gray-800 dark:text-white';
 
+	console.log(match.status);
+
+	let matchStatus;
+	if (match.status === 'IN_LOBBY')
+		matchStatus = t('tournament.status.inProgress');
+	if (match.status === 'FINISHED')
+		matchStatus = t('tournament.status.finished');
+	else
+		matchStatus = t('tournament.status.waiting');
+
 	const leftCrown = (showFinalWinnerStyling && leftWon) ? '👑 ' : '';
 	const rightCrown = (showFinalWinnerStyling && rightWon) ? '👑 ' : '';
 
@@ -596,7 +606,7 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 			<span class="flex-1 truncate font-bold ${rightWinnerText}">${rightCrown}${match.playerRightUsername || '—'}</span>
 			<span class="ml-3 font-black min-w-5 text-right ${rightWinnerScore}">${rightScore}</span>
 		</div>
-		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-white tracking-widest">${t('tournament.matchFinished')}</div>` : ''}
+		<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-white tracking-widest">${matchStatus}</div>
 	`;
 	return box;
 }
