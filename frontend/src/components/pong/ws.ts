@@ -226,6 +226,7 @@ function routeEvent(event: string, data: any)
 			tournamentCancelled(data.tournamentId);
 			break;
 		case 'pong.tournamentRoundCooldown':
+			console.log('[WS] Received pong.tournamentRoundCooldown:', data);
 			tournamentRoundCooldown(data.tournamentId, data.cooldownInfo);
 			break;
 		case 'pong.tournamentMatchEnded':

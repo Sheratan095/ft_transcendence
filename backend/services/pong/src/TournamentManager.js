@@ -14,8 +14,8 @@ class	TournamentManager
 		this._matchTimers = new Map(); // matchId -> timer
 		this._roundTransitionTimers = new Map(); // tournamentId -> timer
 
-		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START);
-		this.ROUND_TRANSITION_COOLDOWN_MS = parseInt(process.env.ROUND_TRANSITION_COOLDOWN_MS) || 5000;
+		this.MIN_PLAYERS = parseInt(process.env.MIN_PLAYERS_FOR_TOURNAMENT_START) || 2;
+		this.ROUND_TRANSITION_COOLDOWN_MS = parseInt(process.env.ROUND_TRANSITION_COOLDOWN_MS) || 10000;
 	}
 	
 	createTournament(name, creatorId, creatorUsername)
@@ -484,8 +484,10 @@ class	TournamentManager
 		// Notify all participants about the cooldown
 		for (let participant of tournament.participants)
 		{
+			console.log(`[PONG] Sending cooldown to ${participant.userId}: ${this.ROUND_TRANSITION_COOLDOWN_MS}ms, round ${tournament.currentRound + 1}`);
 			pongConnectionManager.notifyTournamentRoundCooldown(
 				participant.userId,
+				tournamentId,
 				this.ROUND_TRANSITION_COOLDOWN_MS,
 				tournament.currentRound + 1 // Next round number
 			);
@@ -493,6 +495,7 @@ class	TournamentManager
 
 		// Schedule the next round after cooldown
 		const	timer = setTimeout(() => {
+			console.log(`[PONG] Starting next round for tournament ${tournamentId}`);
 			this._roundTransitionTimers.delete(tournamentId);
 			this._startNewRound(tournamentId);
 		}, this.ROUND_TRANSITION_COOLDOWN_MS);

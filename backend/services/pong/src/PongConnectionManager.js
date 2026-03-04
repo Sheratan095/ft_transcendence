@@ -243,17 +243,31 @@ class	PongConnectionManager
 			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundInfo', data);
 	}
 
-	async	notifyTournamentRoundCooldown(participantId, cooldownMs, nextRoundNumber)
+	async	notifyTournamentRoundCooldown(participantId, tournamentId, cooldownMs, nextRoundNumber)
 	{
 		const	socket = this._connections.get(participantId);
 
-		const	data = {
-			cooldownMs,
-			nextRoundNumber,
+		const	cooldownInfo = {
+			secondsLeft: Math.ceil(cooldownMs / 1000),
+			round: nextRoundNumber,
 		};
 
+		const	data = {
+			tournamentId,
+			cooldownInfo,
+		};
+
+		console.log(`[PONG] Sending cooldown to participant ${participantId}:`, data);
+
 		if (socket)
+		{
+			console.log(`[PONG] Socket found, sending event`);
 			this.#dispatchEventToSocket(socket, 'pong.tournamentRoundCooldown', data);
+		}
+		else
+		{
+			console.log(`[PONG] Socket NOT found for participant ${participantId}`);
+		}
 	}
 
 	async	notifyTournamentPlayerReady(userId, readyUserId, matchId)

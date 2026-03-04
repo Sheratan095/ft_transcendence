@@ -191,16 +191,24 @@ export async function markTournamentFinished(tournamentId: string, winnerId: str
 }
 
 export async function updateCooldownInModal(tournamentId: string, cooldownInfo: any) {
-	if (String(tournamentId) !== String(currentTournamentId)) return;
+	console.log('[TournamentModal] updateCooldownInModal called:', { tournamentId, currentTournamentId, cooldownInfo });
+	if (String(tournamentId) !== String(currentTournamentId)) {
+		console.log('[TournamentModal] Tournament ID mismatch, skipping');
+		return;
+	}
 
 	const overlay  = document.getElementById('tm-cooldown-overlay');
 	const roundEl  = document.getElementById('tm-cooldown-round');
 	const timerEl  = document.getElementById('tm-cooldown-timer');
-	if (!overlay) return;
+	if (!overlay) {
+		console.log('[TournamentModal] Cooldown overlay not found');
+		return;
+	}
 
 	_stopCooldown();
 
 	if (!cooldownInfo || cooldownInfo.secondsLeft <= 0) {
+		console.log('[TournamentModal] No cooldown info or already expired');
 		_hideCooldown();
 		return;
 	}
@@ -210,11 +218,14 @@ export async function updateCooldownInModal(tournamentId: string, cooldownInfo: 
 	let seconds = Math.ceil(cooldownInfo.secondsLeft);
 	if (timerEl) timerEl.textContent = String(seconds);
 	overlay.classList.remove('hidden');
+	console.log('[TournamentModal] Cooldown started, initial seconds:', seconds);
 
 	cooldownInterval = window.setInterval(() => {
 		seconds -= 1;
 		if (timerEl) timerEl.textContent = String(seconds);
+		console.log('[TournamentModal] Cooldown tick:', seconds);
 		if (seconds <= 0) {
+			console.log('[TournamentModal] Cooldown finished');
 			_stopCooldown();
 			_hideCooldown();
 		}

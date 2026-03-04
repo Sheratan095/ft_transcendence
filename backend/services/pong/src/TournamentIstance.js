@@ -203,16 +203,16 @@ export class	TournamentInstance
 		else if (match.playerRightId === winnerId)
 			match.winner = { userId: match.playerRightId, username: match.playerRightUsername };
 
-		// Check if this round is complete
-		if (this.isRoundComplete())
-			this._advanceToNextRound();
+		// // Check if this round is complete
+		// if (this.isRoundComplete())
+		// 	this._advanceToNextRound();
 	}
 
 	isRoundComplete()
 	{
 		const	currentMatches = this.rounds[this.currentRound - 1];
 		if (!currentMatches)
-			return (false);
+			return (true); // No matches means round is effectively complete
 
 		return (currentMatches.every(match => match.gameStatus === GameStatus.FINISHED));
 	}

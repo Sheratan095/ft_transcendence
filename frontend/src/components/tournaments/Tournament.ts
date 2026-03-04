@@ -97,6 +97,7 @@ export async function tournamentCancelled(tournamentId: string)
 
 export async function tournamentRoundCooldown(tournamentId: string, cooldownInfo: any)
 {
+	console.log('[Tournament] Received cooldown event:', { tournamentId, cooldownInfo });
 	updateCooldownInModal(tournamentId, cooldownInfo);
 }
 
