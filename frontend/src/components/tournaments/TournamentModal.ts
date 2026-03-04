@@ -505,7 +505,7 @@ function _renderBracket(tournament: BracketInfo) {
 
 		// Round label
 		const label     = document.createElement('div');
-		label.className = 'text-center font-black text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 absolute -top-6 left-0 right-0';
+		label.className = 'text-center font-black text-[10px] uppercase tracking-widest text-gray-500 dark:text-white absolute -top-6 left-0 right-0';
 		label.textContent = t('tournament.round', { n: round.roundNumber });
 		col.style.position = 'relative';
 		col.style.marginTop = '1.5rem';
@@ -544,8 +544,8 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 		const leftWon = isFinished && match.winnerId === match.playerLeftId;
 
 		const leftBg = (tournamentFinished && isLastRound && leftWon) ? specialWinnerBg : (leftWon ? regularWinnerBg : normalBgL);
-		const leftText = leftWon ? 'text-gray-800 dark:text-white' : 'text-gray-800 dark:text-gray-100';
-		const leftScore = leftWon ? 'text-gray-800 dark:text-white' : 'text-gray-800 dark:text-gray-500';
+		const leftText = leftWon ? 'text-gray-800 dark:text-white' : 'text-gray-800 dark:text-white';
+		const leftScore = leftWon ? 'text-gray-800 dark:text-white' : 'text-gray-800 dark:text-white';
 
 		box.innerHTML = `
 			<div class="flex justify-between items-center px-3 py-2 text-sm border-b border-gray-200 dark:border-gray-700 ${leftBg}">
@@ -553,10 +553,10 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 				<span class="ml-3 font-black min-w-5 text-right ${leftScore}"></span>
 			</div>
 			<div class="flex justify-between items-center px-3 py-2 text-sm ${byeBg}">
-				<span class="flex-1 truncate font-bold text-gray-800 dark:text-gray-100"><span class="text-green-600 dark:text-green-600">${t('tournament.bye')}</span></span>
-				<span class="ml-3 font-black min-w-5 text-right text-gray-400 dark:text-gray-500"></span>
+				<span class="flex-1 truncate font-bold text-gray-800 dark:text-white"><span class="text-green-600 dark:text-white">${t('tournament.bye')}</span></span>
+				<span class="ml-3 font-black min-w-5 text-right text-gray-400 dark:text-white"></span>
 			</div>
-			<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">${t('tournament.matchFinished')}</div>
+			<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-white tracking-widest">${t('tournament.matchFinished')}</div>
 		`;
 		return box;
 	}
@@ -578,12 +578,11 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 	const leftWinnerBg = (showFinalWinnerStyling && leftWon) ? specialWinnerBg : (leftWon ? regularWinnerBg : normalBgL);
 	const rightWinnerBg = (showFinalWinnerStyling && rightWon) ? specialWinnerBg : (rightWon ? regularWinnerBg : normalBgR);
 
-	// Text colors: black on special winner (accent) for contrast; use white for red backgrounds in dark/light as appropriate
-	// Username and score should be black in both light and dark modes for winners
-	const leftWinnerText = (leftWon) ? 'text-gray-800' : 'text-gray-800 dark:text-white';
-	const rightWinnerText = (rightWon) ? 'text-gray-800' : 'text-gray-800 dark:text-white';
-	const leftWinnerScore = (leftWon) ? 'text-black' : 'text-gray-800 dark:text-white';
-	const rightWinnerScore = (rightWon) ? 'text-black' : 'text-gray-800 dark:text-white';
+	// Text colors: ensure all texts use white in dark mode for contrast
+	const leftWinnerText = 'text-gray-800 dark:text-white';
+	const rightWinnerText = 'text-gray-800 dark:text-white';
+	const leftWinnerScore = (leftWon) ? 'text-black dark:text-white' : 'text-gray-800 dark:text-white';
+	const rightWinnerScore = (rightWon) ? 'text-black dark:text-white' : 'text-gray-800 dark:text-white';
 
 	const leftCrown = (showFinalWinnerStyling && leftWon) ? '👑 ' : '';
 	const rightCrown = (showFinalWinnerStyling && rightWon) ? '👑 ' : '';
@@ -597,7 +596,7 @@ function _createMatchBox(match: Match, isLastRound: boolean, tournamentFinished:
 			<span class="flex-1 truncate font-bold ${rightWinnerText}">${rightCrown}${match.playerRightUsername || '—'}</span>
 			<span class="ml-3 font-black min-w-5 text-right ${rightWinnerScore}">${rightScore}</span>
 		</div>
-		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 tracking-widest">${t('tournament.matchFinished')}</div>` : ''}
+		${isFinished ? `<div class="text-[10px] font-black uppercase text-center px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-white tracking-widest">${t('tournament.matchFinished')}</div>` : ''}
 	`;
 	return box;
 }
