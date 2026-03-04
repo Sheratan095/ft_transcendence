@@ -132,7 +132,7 @@ async function insertTrisMatchHistory(userId: string) {
           : match.playerOUsername;
 
       const matchDate = new Date(match.endedAt);
-      const dateStr = matchDate.toLocaleDateString('it-EU', {
+      const dateStr = matchDate.toLocaleDateString(t('date.utc'), {
         month: 'short',
         day: 'numeric'
       });

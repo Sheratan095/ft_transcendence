@@ -485,7 +485,7 @@ export async function renderSearchProfileCard(
               const yourScore = match.playerLeftId === user.id ? match.playerLeftScore : match.playerRightScore;
               const opponentScore = match.playerLeftId === user.id ? match.playerRightScore : match.playerLeftScore;
               const matchDate = new Date(match.endedAt);
-              const dateStr = matchDate.toLocaleDateString('it-EU', { month: 'short', day: 'numeric' });
+              const dateStr = matchDate.toLocaleDateString(t('date.utc'), { month: 'short', day: 'numeric' });
               
               return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
                 <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>
@@ -501,7 +501,7 @@ export async function renderSearchProfileCard(
             } else {
               const opponent = match.playerOId === user.id ? match.playerXUsername : match.playerOUsername;
               const matchDate = new Date(match.endedAt);
-              const dateStr = matchDate.toLocaleDateString('it-EU', { month: 'short', day: 'numeric' });
+              const dateStr = matchDate.toLocaleDateString(t('date.utc'), { month: 'short', day: 'numeric' });
               
              return `<div class="grid grid-cols-3 py-2 items-center px-4 text-xs rounded-md border ${isWin ? 'border-2 border-green-400' : 'border-2 border-red-400'} mb-2">
                 <div class="font-black pl-4 ${isWin ? 'text-green-600' : 'text-red-600'}">${isWin ? t('win') : t('loss')}</div>

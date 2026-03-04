@@ -1,3 +1,5 @@
+import { t } from '../../lib/intlayer';
+
 /**
  * UserCardCharts - Chart utilities for user profile cards
  * Displays win/loss statistics with ApexCharts
@@ -198,7 +200,7 @@ export async function createMatchHistoryChart(
   const categories = days.map(([dayKey]) => {
     const [year, month, day] = dayKey.split('-');
     const d = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-    return d.toLocaleDateString('it-EU', { month: 'short', day: 'numeric' });
+    return d.toLocaleDateString(t('date.utc'), { month: 'short', day: 'numeric' });
   });
   const winsData = days.map(([, counts]) => counts.wins);
   const lossesData = days.map(([, counts]) => counts.losses);

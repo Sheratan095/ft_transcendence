@@ -284,5 +284,7 @@
   "profile.usernameUpdateFailed": "Failed to update username.",
   "profile.usernameTaken": "Username already taken.",
   "profile.usernameUpdateError": "Failed to update username. Please try again.",
-  "profile.usernameInvalid": "Invalid username. Please try again."
+  "profile.usernameInvalid": "Invalid username. Please try again.",
+
+  "date.utc": "en-US"
 }
