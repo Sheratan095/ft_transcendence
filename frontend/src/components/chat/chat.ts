@@ -161,6 +161,22 @@ export function renderChatList() {
     const fullName = getChatDisplayName(chat);
     chatName.textContent = truncateText(fullName, 30);
     chatName.title = fullName;
+    // If this is a direct message (DM), make the displayed name clickable
+    // and navigate to the other user's profile. Stop propagation so the
+    // outer chatItem click (which opens the chat) does not fire.
+    if (chat.chatType === 'dm') {
+      chatName.style.cursor = 'pointer';
+      chatName.style.textDecoration = 'underline';
+      chatName.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const otherUserId = chat.otherUserId || (chat.members && chat.members.find((m: any) => String(m.userId) !== String(currentUserId))?.userId);
+        if (otherUserId) {
+          window.location.href = `/profile?id=${otherUserId}`;
+        } else {
+          console.warn('Other user id not found for DM chat', chat.id);
+        }
+      });
+    }
 
     const chatType = document.createElement('div');
     chatType.className = 'chat-item-type text-accent-blue dark:text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
