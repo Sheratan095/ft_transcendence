@@ -8,7 +8,8 @@ import {
 	sendChatUserAdded,
 	sendGameInvite,
 	sendNowFriends,
-	removeWsConnection
+	removeWsConnection,
+	isUserOnline
 } from './notification-controllers.js';
 
 import {
@@ -331,6 +332,35 @@ const	sendGameInviteOpts =
 
 //-----------------------------EXPORT ROUTES-----------------------------
 
+const	isUserOnlineOpts = 
+{
+	schema:
+	{
+		summary: 'Check if a user is online',
+
+		...withInternalAuth,
+		...withCookieAuth,
+
+		querystring:
+		{
+			type: 'object',
+			required: ['userId'],
+			properties: { userId: { type: 'string' } }
+		},
+		
+
+		response:
+		{
+			200 : {},
+			500: ErrorResponse
+		}
+	},
+
+	preHandler: validateInternalApiKey,
+	handler: isUserOnline
+}
+
+
 export function	notificationRoutes(fastify)
 {
 	// Actual WebSocket endpoint
@@ -349,6 +379,7 @@ export function	notificationRoutes(fastify)
 	});
 
 	fastify.get('/active-users-count', getActiveUsersCountOpts);
+	fastify.get('/is-user-online', isUserOnlineOpts);
 
 	fastify.post('/send-friend-request', sendFriendRequestOpts);
 	// fastify.post('/send-friend-accept', sendFriendAcceptOpts);

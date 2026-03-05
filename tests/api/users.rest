@@ -44,3 +44,6 @@ GET https://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_17301234
 
 # OR view it in browser:
 # https://localhost:3000/avatars/6a1535bd-deb6-4af2-87ed-e027283aad5c_1730123456789.jpg
+
+### ====== USER ONLINE STATUS ======
+GET https://localhost:3000/is-user-online?userId=2
