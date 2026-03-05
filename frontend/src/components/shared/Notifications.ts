@@ -15,6 +15,9 @@ const RECONNECT_DELAY = 3000; // 3 seconds
 type RelationshipEventCallback = (event: { type: string; userId: string; status: string }) => void;
 const relationshipEventCallbacks: Set<RelationshipEventCallback> = new Set();
 
+type PresenceEventCallback = (event: { type: 'friend.online' | 'friend.offline'; userId: string }) => void;
+const presenceEventCallbacks: Set<PresenceEventCallback> = new Set();
+
 export function setFriendsManager(manager: FriendsManager) {
   friendsManager = manager;
 }
@@ -27,6 +30,13 @@ export function onRelationshipEvent(callback: RelationshipEventCallback): () => 
   };
 }
 
+export function onPresenceEvent(callback: PresenceEventCallback): () => void {
+	presenceEventCallbacks.add(callback);
+	return () => {
+		presenceEventCallbacks.delete(callback);
+	};
+}
+
 function notifyRelationshipEvent(type: string, userId: string, status: string) {
   relationshipEventCallbacks.forEach(callback => {
     try {
@@ -35,6 +45,16 @@ function notifyRelationshipEvent(type: string, userId: string, status: string) {
       console.error('Error in relationship event callback:', err);
     }
   });
+}
+
+function notifyPresenceEvent(type: 'friend.online' | 'friend.offline', userId: string) {
+	presenceEventCallbacks.forEach(callback => {
+		try {
+			callback({ type, userId });
+		} catch (err) {
+			console.error('Error in presence event callback:', err);
+		}
+	});
 }
 
 export function connectNotificationsWebSocket() {
@@ -119,6 +139,10 @@ function handleNotificationEvent(data: any) {
 
 		case 'friend.online':
 			{
+							const userId = data.data?.userId;
+							if (userId) {
+								notifyPresenceEvent('friend.online', userId);
+							}
 								const username = data.data?.username || t('toast.friend.someone');
 								showInfoToast(t('toast.friend.online', { user: username }), { duration: 3000 });
 			}
@@ -126,6 +150,10 @@ function handleNotificationEvent(data: any) {
 
 		case 'friend.offline':
 			{
+							const userId = data.data?.userId;
+							if (userId) {
+								notifyPresenceEvent('friend.offline', userId);
+							}
 								const username = data.data?.username || t('toast.friend.someone');
 								showInfoToast(t('toast.friend.offline', { user: username }), { duration: 3000 });
 			}

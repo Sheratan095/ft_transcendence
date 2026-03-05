@@ -395,16 +395,20 @@
 					<div class="flex flex-col md:flex-row items-start gap-4 sm:gap-6 md:gap-8 mb-8">
 						<!-- Avatar -->
 						<div class="relative flex-shrink-0 z-30">
-							<div class="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 aspect-square rounded-md overflow-hidden border-4 border-gray-400 dark:border-neutral-400 flex items-center justify-center bg-gray-200 dark:bg-neutral-800">
+							<div class="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 aspect-square rounded-md border-4 border-gray-500 dark:border-neutral-300 flex items-center justify-center bg-gray-200 dark:bg-neutral-800">
+								
 								<img class="spc-avatar w-full h-full object-cover" src="/assets/placeholder-avatar.jpg" alt="User avatar" />
+								<span class="spc-online-dot absolute -top-2 -right-4 z-40 inline-block w-7 h-7 rounded-full border-4 border-gray-500 dark:border-gray-300 bg-red-500 shadow-sm" title="Offline" aria-label="offline"></span>
 							</div>
+							
 						</div>
-
+						
 						<!-- User info section -->
 						<div class="flex-1 w-full z-30 min-w-0">
 							<!-- Username -->
-							<h1 class="spc-username text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green mb-4 sm:mb-6">Username</h1>
-							
+							<div class="flex items-center gap-3 mb-4 sm:mb-6">
+								<h1 class="spc-username text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-accent-orange dark:text-accent-green">Username</h1>
+							</div>
 							<!-- Email -->
 							<div class="flex flex-wrap gap-x-8 gap-y-2 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg">
 								<div class="flex items-center gap-2">
