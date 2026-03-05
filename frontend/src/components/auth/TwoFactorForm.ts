@@ -3,6 +3,33 @@ import { createErrorContainer, showError, showSuccess, showLoading, hideError } 
 import { goToRoute } from '../../spa';
 import { t } from '../../lib/intlayer';
 
+function translateTwoFactorError(rawError: string, status?: number): string {
+	const normalized = (rawError || '').toLowerCase();
+
+	if (
+		normalized.includes('invalid 2fa code') ||
+		normalized.includes('invalid otp') ||
+		normalized.includes('invalid code') ||
+		status === 401
+	) {
+		return t('auth.2fa.invalid');
+	}
+
+	if (
+		normalized.includes('no 2fa token found') ||
+		normalized.includes('token has expired') ||
+		normalized.includes('expired')
+	) {
+		return t('auth.2fa.expired');
+	}
+
+	if (status) {
+		return t('auth.2fa.failedWithStatus', { status });
+	}
+
+	return t('auth.2fa.failedWithStatus', { status: 'unknown' });
+}
+
 export interface TwoFactorFormCallbacks
 {
 	onBackClick?: () => void;
@@ -151,13 +178,13 @@ export function attach2FA(userId, callbacks?: TwoFactorFormCallbacks): void
 						: t('auth.rateLimited');
 					showError(errorEl, rateLimitMsg);
 				} else {
-					showError(errorEl, rawError);
+					showError(errorEl, translateTwoFactorError(String(rawError), res.status));
 				}
 			}
 		}
 		catch (err)
 		{
-			showError(errorEl, (err as Error).message || t('register.error.network'));
+			showError(errorEl, (err as Error).message || t('auth.2fa.network'));
 		}
 	});
 }

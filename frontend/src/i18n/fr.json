@@ -89,6 +89,8 @@
   "auth.2fa.enterCompleteCode": "Veuillez saisir un code de vérification complet.",
   "auth.2fa.verifying": "Vérification en cours...",
   "auth.2fa.verifiedSuccess": "2FA vérifiée avec succès !",
+  "auth.2fa.expired": "Votre code de vérification a expiré. Veuillez vous reconnecter.",
+  "auth.2fa.network": "Erreur réseau pendant la vérification.",
   "auth.2fa.failedWithStatus": "Échec de la vérification ({{ status }})",
   "auth.2fa.submit": "Se connecter",
   "profile.username": "Utilisateur",
