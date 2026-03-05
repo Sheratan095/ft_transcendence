@@ -139,7 +139,6 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 					await openCreateModal();
 				} catch (err) {
 					console.error('Failed to open tournament creation modal:', err);
-					showErrorToast('Failed to open tournament creation modal');
 				}
 			});
 		}
@@ -160,7 +159,6 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 				}
 				catch (err) {
 					console.error(err);
-					showErrorToast('Failed to start online pong');
 				}
 			});
 		}
@@ -174,7 +172,6 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 		}
 		catch (err) {
 			console.error(err);
-			showErrorToast('Failed to start offline 1v1 pong');
 		}
 	});
 
@@ -187,7 +184,6 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 		}
 		catch (err) {
 			console.error(err);
-			showErrorToast('Failed to start pong AI mode');
 		}
 	});
 
@@ -211,7 +207,6 @@ async function attachBtnHandlers(container: HTMLElement, isLoggedIn: boolean = t
 					}
 					catch (err) {
 						console.error('Failed to send game invite:', err);
-						showErrorToast('Failed to send game invite');
 					}
 				});
 			});

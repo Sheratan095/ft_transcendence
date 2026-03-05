@@ -161,6 +161,8 @@
   "toast.profile.usernameReservedWords": "Il nome utente non può contenere parole riservate.",
   "toast.profile.usernameUpdateFailed": "Impossibile aggiornare il nome utente.",
   "toast.profile.usernameTaken": "Nome utente già in uso.",
+  "toast.profile.unsupportedImageType": "Tipo di immagine non supportato. Consentiti: JPEG, PNG, GIF, WEBP.",
+  "toast.profile.avatarUploadFailed": "Impossibile caricare l'avatar.",
   "tris.play": "Gioca a Tris",
   "pong.play": "Gioca a Pong",
   "game.online": "Gioca Online",

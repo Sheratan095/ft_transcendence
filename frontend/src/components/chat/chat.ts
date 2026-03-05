@@ -335,7 +335,6 @@ async function selectChat(chatId: string) {
                   showSuccessToast(t('toast.trisInviteSent', { user: chat.otherUserId }));
                 } catch (err) {
                   console.error('Tris invite error', err);
-                  showErrorToast(t('toast.trisInviteFailed'));
                 }
           });
         } else {
@@ -877,7 +876,6 @@ async function handleGroupChatSubmit() {
   if (addToChatId) {
     // Add users to existing chat
     if (selectedFriendsForGroup.size < 1) {
-      showErrorToast('Please select at least one friend to add');
       return;
     }
 
@@ -888,7 +886,6 @@ async function handleGroupChatSubmit() {
           await addUserToChat(addToChatId, memberId);
         } catch (err) {
           console.error(`Error adding user ${memberId} to chat:`, err);
-          showErrorToast(`Failed to add user ${memberId}`);
         }
       }
 
@@ -898,19 +895,16 @@ async function handleGroupChatSubmit() {
       addToChatId = null;
     } catch (err) {
       console.error('Error adding users to chat:', err);
-      showErrorToast(`Failed to add users: ${(err as Error).message}`);
     }
     return;
   }
 
   // Create new group chat
   if (!groupName) {
-    showErrorToast('Please enter a group name');
     return;
   }
 
   if (selectedFriendsForGroup.size < 1) {
-    showErrorToast('Please select at least one friend');
     return;
   }
 
@@ -925,7 +919,6 @@ async function handleGroupChatSubmit() {
     // group created
   } catch (err) {
     console.error('Error creating group chat:', err);
-    showErrorToast(`Failed to create group chat: ${(err as Error).message}`);
   }
 }
 
@@ -985,7 +978,6 @@ export function setupChatEventListeners() {
       try {
         await leaveGroupChat(currentChatId);
       } catch (err) {
-        showErrorToast(`Failed to leave group: ${(err as Error).message}`);
       }
     });
   }

@@ -49,7 +49,6 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
           // Matchmaking should be started via the Tris modal controls (Start button)
         } catch (err) {
           console.error(err);
-          showErrorToast('Failed to start online mode');
         }
       });
     }
@@ -60,7 +59,6 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
       initializeModeSpecificBehaviors('offline-1v1');
     } catch (err) {
       console.error(err);
-      showErrorToast('Failed to start offline 1v1');
     }
   });
   if (btnOfflineAI) btnOfflineAI.addEventListener('click', async () => {
@@ -69,7 +67,6 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
       initializeModeSpecificBehaviors('offline-ai');
     } catch (err) {
       console.error(err);
-      showErrorToast('Failed to start AI mode');
     }
   });
   if (btnInviteFriend) {
@@ -90,7 +87,6 @@ export async function renderTrisPage(container: HTMLElement, isLoggedIn: boolean
           }
           catch (err) {
             console.error('Failed to send game invite:', err);
-            showErrorToast('Failed to send game invite');
           }
         });
       });
