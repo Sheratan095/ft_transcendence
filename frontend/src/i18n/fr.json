@@ -159,6 +159,8 @@
   "toast.profile.usernameReservedWords": "Le nom d'utilisateur ne peut pas contenir de mots réservés.",
   "toast.profile.usernameUpdateFailed": "Échec de la mise à jour du nom d'utilisateur.",
   "toast.profile.usernameTaken": "Nom d'utilisateur déjà pris.",
+  "toast.profile.unsupportedImageType": "Type d'image non supporté. Autorisé: JPEG, PNG, GIF, WEBP.",
+  "toast.profile.avatarUploadFailed": "Échec du téléchargement de l'avatar.",
   "tris.play": "Jouer au Tris",
   "pong.play": "Jouer au Pong",
   "game.online": "Jouer en ligne",

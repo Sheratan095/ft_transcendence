@@ -157,6 +157,8 @@
   "toast.profile.usernameReservedWords": "Username cannot contain reserved words.",
   "toast.profile.usernameUpdateFailed": "Failed to update username.",
   "toast.profile.usernameTaken": "Username already taken.",
+  "toast.profile.unsupportedImageType": "Unsupported image type. Allowed: JPEG, PNG, GIF, WEBP.",
+  "toast.profile.avatarUploadFailed": "Avatar upload failed.",
   "tris.play": "Play Tris",
   "pong.play": "Play Pong",
   "game.online": "Play Online",
