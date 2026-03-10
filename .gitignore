@@ -66,3 +66,6 @@ data/
 
 frontend/package-lock.json
 frontend/tailwind.css
+
+FrontendRequiredEnv.txt
+BackendRequiredEnv.txt
