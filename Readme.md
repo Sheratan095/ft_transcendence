@@ -1,10 +1,23 @@
-# ft_transcendence
+# FT_TRANSCENDENCE
 
-![42 Logo](docs/readme/42_Logo.svg)
+<img src="docs/readme/42_Logo.svg" alt="42 Logo" width="150" />
 
 ## 🎮 Project Overview
 
 **ft_transcendence** is a full-stack web application featuring a competitive multiplayer gaming platform with user authentication, real-time chat, and tournament management. The project implements a scalable microservices architecture using Node.js with Fastify on the backend and a modern TypeScript + Tailwind CSS frontend.
+
+---
+
+## 👥 Contributors
+
+Meet the talented team behind ft_transcendence:
+
+| Name | Role | Responsibilities |
+|------|------|------------------|
+| 🎯 **Marco Ceccarelli** | Project Manager, Backend Lead, DevOps | Overall project coordination, backend architecture design, CI/CD pipeline, and system infrastructure |
+| 🎨 **Leonardo Bartolini** | UI/UX Designer, Frontend Lead | User interface design, user experience optimization, responsive design, and accessibility features |
+| 🎮 **Marcho Picheca** | Game Developer, 3D Graphics Specialist | Game logic implementation, BabylonJS 3D graphics, game physics, and visual effects |
+| 🌍 **Adam Natan Passaretti** | Translations Lead, DevOps Engineer | Multi-language support (i18n), localization, deployment automation, and global support |
 
 ---
 
@@ -161,7 +174,7 @@ ft_transcendence/
 ## 🌍 Frontend Features
 
 ### Multi-Language Support
-- ✅ **Multiple Languages**: Support for 3+ languages
+- ✅ **Multiple Languages**: Support for 3 languages using i18n
 - ✅ **Language Switcher**: Easy language selection from user interface
 - ✅ **Intlayer Integration**: Localization library for seamless translations
 - ✅ **User Preferences**: Default language persisted across sessions
@@ -182,7 +195,7 @@ ft_transcendence/
 
 ---
 
-## 🔐 GDPR Compliance
+## 🗎 GDPR Compliance
 
 ### User Data Privacy Rights
 - ✅ **User Anonymization**: Request anonymization of personal data with game history preserved
@@ -202,7 +215,7 @@ ft_transcendence/
 For more information, visit the [official GDPR website](https://commission.europa.eu/law/law-topic/data-protection/data-protection-eu_en).
 
 ---
-## �📚 Tech Stack
+## 📚 Tech Stack
 
 ### Backend
 - **Framework**: Fastify (Node.js)
@@ -232,7 +245,7 @@ For more information, visit the [official GDPR website](https://commission.europ
 
 ## 🎯 Features Implementation Matrix
 
-### Major Modules ✅
+### Major Modules
 | Feature | Status | Details |
 |---------|--------|---------|
 | **Backend Framework** | ✅ | Fastify with Node.js microservices |
@@ -244,7 +257,7 @@ For more information, visit the [official GDPR website](https://commission.europ
 | **AI Opponent** | ✅ | Intelligent AI with human-like behavior |
 | **3D Graphics** | ✅ | BabylonJS for immersive Pong experience |
 
-### Minor Modules ✅
+### Minor Modules
 | Feature | Status | Details |
 |---------|--------|---------|
 | **Frontend Framework** | ✅ | TypeScript + Tailwind CSS with Vite |
@@ -260,9 +273,6 @@ For more information, visit the [official GDPR website](https://commission.europ
 
 - [Architecture Documentation](docs/backend/architecture.drawio)
 - [Database Design](docs/backend/db_logical_design.drawio)
-- [HTTP Status Codes](docs/backend/http_status_codes.md)
 - [Swagger API Documentation](docs/backend/swagger_implementation.md)
 - [Security Guidelines](docs/Security/sql_injection_prevention.md)
 - [XSS Attack Prevention](docs/Security/xss_attack.txt)
-- [Game Documentation](docs/Games/ELO.md)
-- [GDPR Compliance](docs/gdpr.txt)
