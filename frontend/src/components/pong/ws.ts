@@ -78,7 +78,6 @@ export function initPong(uid: string): Promise<WebSocket> {
 			pongWs = socket;
 
 			socket.onopen = () => {
-				showInfoToast('Connected to Pong', { duration: 1200 } as any);
 				isConnecting = false;
 				reconnectAttempts = 0; // Reset on successful connection
 				connectionPromise = null;
@@ -113,14 +112,12 @@ export function initPong(uid: string): Promise<WebSocket> {
 			};
 
 			socket.onerror = (event) => {
-				showErrorToast('Pong WebSocket error', { duration: 4000, position: 'top-right' });
 				isConnecting = false;
 				connectionPromise = null;
 				reject(event);
 			};
 
 			socket.onclose = () => {
-				showErrorToast('⚠️ Pong disconnected', { duration: 4000, position: 'top-right' });
 				isConnecting = false;
 				connectionPromise = null;
 				pongWs = null;
@@ -138,7 +135,6 @@ export function initPong(uid: string): Promise<WebSocket> {
 					}, delayMs);
 				} else {
 					console.error('[PONG WS] Max reconnection attempts reached');
-					showErrorToast('❌ Pong disconnected (could not reconnect)', { duration: 5000, position: 'top-right' });
 				}
 			};
 		} catch (error) {
@@ -408,7 +404,6 @@ export async function sendGameInvite(targetId: string, gameId: string | null = n
 		return true;
 	} catch (err) {
 		console.error('[WS] Failed to send game invite:', err);
-		showErrorToast('Failed to send game invite');
 		return false;
 	}
 }

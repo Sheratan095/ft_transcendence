@@ -161,6 +161,22 @@ export function renderChatList() {
     const fullName = getChatDisplayName(chat);
     chatName.textContent = truncateText(fullName, 30);
     chatName.title = fullName;
+    // If this is a direct message (DM), make the displayed name clickable
+    // and navigate to the other user's profile. Stop propagation so the
+    // outer chatItem click (which opens the chat) does not fire.
+    if (chat.chatType === 'dm') {
+      chatName.style.cursor = 'pointer';
+      chatName.style.textDecoration = 'underline';
+      chatName.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const otherUserId = chat.otherUserId || (chat.members && chat.members.find((m: any) => String(m.userId) !== String(currentUserId))?.userId);
+        if (otherUserId) {
+          window.location.href = `/profile?id=${otherUserId}`;
+        } else {
+          console.warn('Other user id not found for DM chat', chat.id);
+        }
+      });
+    }
 
     const chatType = document.createElement('div');
     chatType.className = 'chat-item-type text-accent-blue dark:text-dark-green inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold';
@@ -319,7 +335,6 @@ async function selectChat(chatId: string) {
                   showSuccessToast(t('toast.trisInviteSent', { user: chat.otherUserId }));
                 } catch (err) {
                   console.error('Tris invite error', err);
-                  showErrorToast(t('toast.trisInviteFailed'));
                 }
           });
         } else {
@@ -861,7 +876,6 @@ async function handleGroupChatSubmit() {
   if (addToChatId) {
     // Add users to existing chat
     if (selectedFriendsForGroup.size < 1) {
-      showErrorToast('Please select at least one friend to add');
       return;
     }
 
@@ -872,7 +886,6 @@ async function handleGroupChatSubmit() {
           await addUserToChat(addToChatId, memberId);
         } catch (err) {
           console.error(`Error adding user ${memberId} to chat:`, err);
-          showErrorToast(`Failed to add user ${memberId}`);
         }
       }
 
@@ -882,19 +895,16 @@ async function handleGroupChatSubmit() {
       addToChatId = null;
     } catch (err) {
       console.error('Error adding users to chat:', err);
-      showErrorToast(`Failed to add users: ${(err as Error).message}`);
     }
     return;
   }
 
   // Create new group chat
   if (!groupName) {
-    showErrorToast('Please enter a group name');
     return;
   }
 
   if (selectedFriendsForGroup.size < 1) {
-    showErrorToast('Please select at least one friend');
     return;
   }
 
@@ -909,7 +919,6 @@ async function handleGroupChatSubmit() {
     // group created
   } catch (err) {
     console.error('Error creating group chat:', err);
-    showErrorToast(`Failed to create group chat: ${(err as Error).message}`);
   }
 }
 
@@ -969,7 +978,6 @@ export function setupChatEventListeners() {
       try {
         await leaveGroupChat(currentChatId);
       } catch (err) {
-        showErrorToast(`Failed to leave group: ${(err as Error).message}`);
       }
     });
   }

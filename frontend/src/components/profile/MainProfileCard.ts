@@ -66,7 +66,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
 
       // Validate MIME type on the frontend before uploading
       if (!allowedTypes.includes(file.type)) {
-        showErrorToast('Unsupported image type. Allowed: JPEG, PNG, GIF, WEBP.', { duration: 4000, position: 'top-right' });
+        showErrorToast(t('toast.profile.unsupportedImageType'), { duration: 4000, position: 'top-right' });
         // Clear the invalid selection so the user can pick again
         try { avatarInput.value = ''; } catch (e) { /* ignore */ }
         return;
@@ -84,7 +84,7 @@ export async function renderProfileCard(container: HTMLElement | null) {
         if (!res.ok)
         {
           if (res.status === 400)
-            showErrorToast('Avatar upload failed.', { duration: 4000, position: 'top-right' });
+            showErrorToast(t('toast.profile.avatarUploadFailed'), { duration: 4000, position: 'top-right' });
           return; 
         }
 
@@ -175,7 +175,6 @@ export async function renderProfileCard(container: HTMLElement | null) {
           const newUsername = input.value.trim().toLocaleLowerCase();
           
           if (!newUsername) {
-            showErrorToast('Username cannot be empty', { duration: 4000, position: 'top-right' });
             input.replaceWith(username);
             input.removeEventListener('keydown', handleKeyDown);
             input.removeEventListener('blur', handleBlur);

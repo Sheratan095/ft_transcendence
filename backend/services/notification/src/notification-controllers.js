@@ -125,6 +125,23 @@ export const	removeWsConnection = async (req, reply) =>
 	}
 }
 
+export const	isUserOnline = async (req, reply) =>
+{
+	try
+	{
+		const { userId } = req.query;
+
+		const	isOnline = notificationConnectionManager.isUserOnline(userId);
+
+		return (reply.code(200).send({ isOnline }));
+	}
+	catch (err)
+	{
+		console.error('[NOTIFICATION] Error in isUserOnline handler:', err);
+		return (reply.code(500).send({error: 'Internal server error' }));
+	}
+}
+
 //-----------------------------GAME NOTIFICATIONS-----------------------------
 
 export const	sendGameInvite = async (req, reply) =>

@@ -103,7 +103,6 @@ function setupModeSelectionListeners(onModeSelected?: (mode: TrisModeType) => Pr
 export async function openTrisModal() {
   const modal = document.getElementById('tris-modal');
   if (!modal) {
-    showErrorToast('Error opening modal');
     return;
   }
 

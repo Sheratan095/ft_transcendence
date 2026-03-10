@@ -39,6 +39,11 @@ class	NotificationConnectionManager
 		return (this._connections.get(userId));
 	}
 
+	isUserOnline(userId)
+	{
+		return (this._connections.has(userId));
+	}
+
 	count()
 	{
 		return (this._connections.size);

@@ -104,7 +104,6 @@ export function handleCustomGameCreated(data: any)
 		if (rightReady)
 			rightReady.classList.add('hidden');
 	}
-	// showSuccessToast('Game created!');
 }
 
 /* YOU JOINED A CUSTOM GAME*/
@@ -161,7 +160,6 @@ export async function handleCustomGameJoinSuccess(data: any)
 		if (rightReady)
 			rightReady.classList.add('hidden');
 	}
-	// showSuccessToast(`Joined game with ${creatorUsername}!`);
 }
 
 /* INVITED PLAYER JOINED YOUR GAME */
@@ -201,7 +199,6 @@ export function handlePlayerJoinedCustomGame(data: any)
 		if (rightReady)
 			rightReady.classList.add('hidden');
 	}
-	// showSuccessToast('Opponent joined!');
 }
 
 export function handleCustomGameCanceled(_data: any)
@@ -337,15 +334,6 @@ export function handleGameEnded(data: any)
 	if (readyBtnEnded)
 		readyBtnEnded.classList.add('hidden');
 
-	// if (quit || timedOut) {
-	// 	showErrorToast(message);
-	// }
-	// else if (winner === user?.id) {
-	// 	showSuccessToast(message);
-	// }
-	// else {
-	// 	showErrorToast(message);
-	// }
 
 	// Auto-close pong modal after 3 seconds for tournament games
 	if (currentGameMode === 'tournament') {
@@ -405,7 +393,6 @@ export function handleTournamentMatchEnded(data: any)
 export function handlePlayerQuitCustomGameInLobby(_data: any)
 {
 	updatePongStatus(t('game.opponentQuit'));
-	// showErrorToast('Opponent quit');
 
 	// For custom games, keep Quit button; otherwise offer Play Again
 	const startBtn = document.querySelector('#pong-btn') as HTMLButtonElement | null;
@@ -475,7 +462,6 @@ export function handleMatchedInRandomGame(data: any)
 export function handleInvalidMove(data: any)
 {
 	updatePongStatus(t('game.invalidMove', { message: data.message }));
-	// showErrorToast(`Invalid move: ${data.message}`);
 }
 
 export function handleError(data: any)
@@ -755,7 +741,6 @@ function attachButtonHandlers(container: HTMLElement, mode: PongModeType)
 						quitGame(gameId);
 				}
 				closePongModal();
-				// showSuccessToast('You quit the game');
 				return;
 			}
 
@@ -882,7 +867,6 @@ export async function openPongModal(mode: PongModeType = 'online')
 		{
 			if (!userId)
 			{
-				showErrorToast('You must be logged in');
 				return;
 			}
 
@@ -894,7 +878,6 @@ export async function openPongModal(mode: PongModeType = 'online')
 
 		if (!canvas)
 		{
-			showErrorToast('Canvas not found');
 			return;
 		}
 
@@ -935,7 +918,6 @@ export async function openPongModal(mode: PongModeType = 'online')
 			game = new PongGame(canvas.id, gameMode, gameConfig);
 		} catch (err) {
 			console.error('[Modal] Failed to initialize PongGame:', err);
-			showErrorToast('Failed to initialize game renderer');
 			modal.classList.add('hidden');
 			return;
 		}
@@ -1009,7 +991,6 @@ export async function openPongModal(mode: PongModeType = 'online')
 	}
 	catch (err) {
 		console.error('[Modal] Failed to open:', err);
-		showErrorToast('Failed to start Pong');
 	}
 }
 
@@ -1093,7 +1074,6 @@ function attachPongCardListener()
 	{
 		if (!isLoggedInClient())
 		{
-			showErrorToast('You must be logged in');
 			return;
 		}
 		e.preventDefault();

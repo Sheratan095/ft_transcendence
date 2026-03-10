@@ -360,6 +360,25 @@ class	TournamentManager
 		// Set match winner
 		tournament.setMatchWinner(gameId, winnerId);
 
+		try {
+			pongDb.saveMatch(
+				match.playerLeftId,
+
+				match.playerRightId,
+				match.scores[match.playerLeftId] || 0,
+				match.scores[match.playerRightId] || 0,
+				winnerId,
+				tournament.id);
+
+			pongDb.updateUserStats(winnerId, 1, 0, 0, 0); // Increment wins for winner
+			pongDb.updateUserStats(loserId, 0, 1, 0, 0); // Increment losses for loser
+		}
+		catch(err) {
+			console.error(`[PONG] Failed to save match result to database for match ${match.id}:`, err.message);
+		};
+
+
+
 		// Update top placement for losing player
 		this._updateTopForEliminatedPlayer(tournament, loserId);
 

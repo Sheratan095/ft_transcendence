@@ -5,6 +5,15 @@ import { getAllMatchHistories } from '../../lib/matchHistory';
 import { initCardHoverEffect } from '../../lib/card';
 import { onRelationshipEvent } from '../shared/Notifications';
 import { t } from '../../lib/intlayer';
+import { isUserOnline } from '../../lib/auth';
+
+async function updateOnlineDot(dotEl: HTMLElement, userId: string) {
+  const online = await isUserOnline(userId);
+  dotEl.classList.remove('bg-green-500', 'bg-red-500');
+  dotEl.classList.add(online ? 'bg-green-500' : 'bg-red-500');
+  dotEl.title = online ? 'Online' : 'Offline';
+  dotEl.setAttribute('aria-label', online ? 'online' : 'offline');
+}
 
 export async function renderSearchProfileCard(
   userId: string,
@@ -71,6 +80,11 @@ export async function renderSearchProfileCard(
   // ===== Username, Email, ID =====
   const nameEl = cardEl.querySelector('.spc-username') as HTMLElement | null;
   if (nameEl) nameEl.textContent = user.username || user.email || 'Unknown User';
+
+  const onlineDotEl = cardEl.querySelector('.spc-online-dot') as HTMLElement | null;
+  if (onlineDotEl) {
+    updateOnlineDot(onlineDotEl, user.id);
+  }
 
   const emailEl = cardEl.querySelector('.spc-email') as HTMLElement | null;
   if (emailEl) emailEl.textContent = user.email || 'No email';
@@ -297,10 +311,6 @@ export async function renderSearchProfileCard(
       updateActionButtons();
     }
   });
-
-  // Clean up subscription when navigating away
-  // Store the unsubscribe function on the card element
-  (cardEl as any).__unsubscribeRelationship = unsubscribe;
 
   // ===== Fetch Stats and Match History asynchronously =====
   (async () => {
@@ -607,5 +617,11 @@ export function cleanupSearchProfileCard(cardEl: HTMLElement | null) {
     unsubscribe();
     delete (cardEl as any).__unsubscribeRelationship;
     console.log('[SearchProfileCard] Cleaned up relationship event subscription');
+  }
+
+  const onlineStatusInterval = (cardEl as any).__onlineStatusInterval;
+  if (typeof onlineStatusInterval === 'number') {
+    window.clearInterval(onlineStatusInterval);
+    delete (cardEl as any).__onlineStatusInterval;
   }
 }

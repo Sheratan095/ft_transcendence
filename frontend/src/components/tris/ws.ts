@@ -37,7 +37,6 @@ export function initTris(userId: string): Promise<WebSocket> {
 			trisWs = socket;
 
 			socket.onopen = () => {
-				showInfoToast('Connected to Tris', { duration: 1200 } as any);
 				isConnecting = false;
 				connectionPromise = null;
 				resolve(socket);

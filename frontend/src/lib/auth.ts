@@ -76,6 +76,31 @@ export async function fetchUserProfile(userId: string): Promise<User | null> {
   }
 }
 
+export async function isUserOnline(userId: string): Promise<boolean> {
+  if (!userId) return false;
+
+  try {
+    const response = await fetch(`/api/is-user-online?userId=${encodeURIComponent(userId)}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+
+    if (!response.ok) {
+      console.error('isUserOnline fetch failed', response.status);
+      return false;
+    }
+
+    const data = await response.json();
+    return Boolean(data?.isOnline);
+  } catch (error) {
+    console.error('Error fetching user online status:', error);
+    return false;
+  }
+}
+
 /**
  * Fetch and save the current user's profile to localStorage
  * Used during login/auth flow to persist user data

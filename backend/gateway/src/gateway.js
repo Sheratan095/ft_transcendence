@@ -146,6 +146,10 @@ import {
 	testGetTournament as testGetTournamentHandler
 } from './routes/pong-routes.js'
 
+import { 
+	isUserOnline
+} from './routes/notification-routes.js'
+
 // 🔴 STRICT RATE LIMITING: Authentication routes (high security risk)
 await fastify.register(async function (fastify)
 {
@@ -223,6 +227,8 @@ await fastify.register(async function (fastify)
 			keyGenerator: (req) => req.user?.id || req.ip // Rate limit by user ID if authenticated
 		});
 	}
+
+	fastify.get('/is-user-online', { schema: { hide: true }, preHandler: authenticateJwt, handler: isUserOnline })
 
 	// USERS routes PROTECTED => require valid token - exclude from swagger docs
 	fastify.get('/users/', { schema: { hide: true }, preHandler: authenticateJwt, handler: getUsers })
