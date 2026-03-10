@@ -1,15 +1,9 @@
 <mxfile host="65bd71144e">
     <diagram id="IeR1D-B6Rv1Ts3FO9XRu" name="Page-1">
-        <mxGraphModel dx="866" dy="559" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
+        <mxGraphModel dx="1580" dy="799" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="94" value="&lt;font style=&quot;font-size: 22px;&quot;&gt;API GATEWAY PATTERN&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=#006EAF;fillColor=#1ba1e2;fontColor=#ffffff;" parent="1" vertex="1">
-                    <mxGeometry x="451.5" y="6" width="271" height="38" as="geometry"/>
-                </mxCell>
-                <mxCell id="96" value="&lt;font&gt;SQLite inside each container&lt;/font&gt;&lt;div style=&quot;&quot;&gt;It mout a dedicated volume for peristance (service_name)/data&lt;/div&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="23" y="205" width="351" height="41" as="geometry"/>
-                </mxCell>
                 <mxCell id="sOjMeHYnSULZ-k9DHEGr-96" value="" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=16;fontColor=default;labelBackgroundColor=default;arcSize=4;" parent="1" vertex="1">
                     <mxGeometry x="466" y="271" width="581" height="493" as="geometry"/>
                 </mxCell>
